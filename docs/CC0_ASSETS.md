@@ -143,8 +143,9 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   2026-11-10).
 - **Surfaces (MQ1, owner 2026-11-12: "made out of metal (steel/aluminium), polymer, wood").** A material's name says
   which paint colour a face takes, not what it is made of, so every face of the hands' meshes also says its surface
-  kind: `polymer`, `steel`, `aluminium`, `wood`, `rubber`, `bare` (bright unpainted steel) or `coated` (metal under
-  a thick baked coat that keeps its colour in any light: the Cyber Pistol's white shell), in that order
+  kind: `polymer`, `steel`, `aluminium`, `wood`, `rubber`, `bare` (bright unpainted steel), `coated` (metal under
+  a thick baked coat that keeps its colour in any light: the Cyber Pistol's white shell) or `polished` (bright metal
+  in its own colour: a brass or stainless barrel's crown, MQ2), in that order
   (`game/config/replica_surfaces.gd` KINDS and `tools/blender/replicas/surface.py` KINDS, never reordered). It rides
   in the vertex colours (glTF COLOR_0): white, the kind in the alpha as `index / 16`; alpha 1 is "none", which a face
   of a material the game doesn't paint keeps (rubber, a lens) and a file with no colours reads everywhere (then a
@@ -156,6 +157,15 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   stain the paint tints. Only `bare` metal is brushed along the bore. The grain is one
   shared tiling texture, `assets/textures/replica/replica_grain.png` (`tools/textures/replica_grain.py`), read on the
   model's own space, so no model needs texture coordinates for it.
+  **A part** (an attachment, a magazine, a barrel in `replicaParts/`; MQ2) is one kind a material, so its meshes carry
+  no colours (a colour a vertex is 8 bytes, and the parts files sit near their cap) but a table, material name to
+  kind's name, as the mesh's glTF extras: `"extras": {"surfaces": {"Detail": "aluminium", "Rubber": "rubber"}}`
+  (`surface.name` in the build script from its `SURFACES` table; `hardsurface.export` writes extras; Godot keeps them
+  as the mesh's `extras` metadata, read by `ReplicaSurfaces.named`). A paint's material is drawn on the kind the table
+  names, and a material of the part's own that the table names (rubber pads, a brass crown) goes on its surface in
+  its own colour; glass, reflectors and lit parts are not named and draw as the file has them. Optic bodies, the
+  silencer and the torch are aluminium, grips and the laser's housing polymer, screws and clamps steel, the hi-cap
+  magazine steel, the low-cap polymer. The figures' copies (`*_Figure`) carry no table.
 - **Parts.** `replicaParts/<id>.glb`: one top-level object per part named `<kind>_<id>` (`optic_redDot`,
   `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits, with its figures' copy `<name>_Figure`
   (cut down from it by `tools/blender/parts/figure_parts.py`, run last). Two child empties are read (RM8): an optic's

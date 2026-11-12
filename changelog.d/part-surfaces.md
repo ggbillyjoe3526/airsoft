@@ -1,0 +1,13 @@
+### Attachments and magazines look like what they're made of
+- Red dots, scopes, silencers and the Weapon Torch look like anodised aluminium, in any colour scheme, in your hands and on Customise.
+- Lasers and grips look like matte polymer with rubber pads.
+- The Hi-Cap Magazine looks like a pressed steel shell. Low-Cap and Extended magazines look like polymer.
+- The Long Barrel and Tight Bore crowns look like polished brass and steel.
+- Silencers have wrench flats and spanner holes.
+- The Weapon Torch has cooling grooves, a ridged bezel and a battery door.
+- The laser has a window, screws and a battery cap.
+- The Hi-Cap Magazine has narrow ribs, a welded seam and steel feed lips. The Low-Cap has wide ribs and a mould line.
+- Barrel crowns are recessed. The Angled Grip has grip ridges.
+- Magazines show rounder BBs at the top.
+- The Vertical Grip is a little longer.
+- How the parts play is unchanged. Bots' parts look as before.

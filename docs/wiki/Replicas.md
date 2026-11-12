@@ -78,7 +78,8 @@ almost no kick (the table above has its numbers). Against that it carries the fe
 two seconds with the trigger held, and there are three. It is a pistol to stop and shoot with: running, sprinting or jumping adds
 twice the spread it adds to the rifle, so plant your feet or walk. Its battery is built in, so
 no power source fits it, and only the Weapon Torch fits it.
-It is the same size in your hand as the GBB Pistol. It wears its own white, cyan and magenta colours, with
+It is the same size in your hand as the GBB Pistol, with the same rounded grip and a straight back (its power cell
+shows through a slanted window in each side). It wears its own white, cyan and magenta colours, with
 glowing slashes, a pink core behind bars in its slide, a finned rear cap and three fire-mode lights; with
 **Realistic colours** on it turns plain grey with no glow. It has its own shot and magazine sounds.
 
@@ -135,6 +136,8 @@ In your hands a replica is made of what the real thing would be, under whatever 
 slide is coated steel with a satin sheen, the AEG Rifle's receiver and rail are anodised aluminium, the
 barrels and the Sniper Rifle's action are dark steel, and the grips, stocks and the pistol's frame are matte polymer with a
 moulded grain. The metal catches the light; the polymer does not.
+The parts you fit are made of something too: scopes, the red dot, the silencer and the torch are anodised aluminium,
+grips are polymer, their pads and caps rubber, the Hi-Cap Magazine a steel shell and the Low-Cap polymer.
 
 The AEG Rifle and the GBB Pistol look lightly used in your hands: faint scratches, rubbed edges and a little dirt in
 the recesses, in whatever colours they wear. Their swappable magazines (Hi-Cap, Low-Cap and Extended) look used the same way.

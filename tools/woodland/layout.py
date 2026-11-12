@@ -290,6 +290,10 @@ rect("log", -55.0, -31.0, 6.0, 0.7, -20)
 # Ridge top: open tall pines, long east-west view; cover = fallen trunks and a root plate, nothing tall in the middle
 rect("log", -40.0, -44.5, 8.0, 0.8, 8)
 rect("logpile", -31.0, -37.5, 4.0, 1.2, -10)
+# MB1: the Ridge's top is the west end's staging ground, not a skyline: a hazel hedge along its east brow (BUSHES)
+# hides the top from the Tower's side, 40 m off. Leaves are walked through, so the squad comes over the brow on a
+# broad front, not one at a time through a gap (a first pass built the screen of root plates with one gap: whoever
+# held the far bank shot the gap, 103 knock-outs to 33).
 rect("windthrow", -22.0, -46.5, 5.0, 1.4, 70, top=2.4)       # root plate: the ridge's one tall cover
 rect("log", -12.0, -40.0, 7.0, 0.8, -25)
 rect("log", -24.0, -33.0, 6.0, 0.7, 15)
@@ -298,6 +302,11 @@ NB = (-1.0, -41.5)
 # Tower (defenders' side): 4 x 4 m platform at 3.4 m, 1.1 m parapet, roof, ladder on the east side
 TOWER = (19.0, -43.0)
 rect("tyrestack", 14.5, -38.0, 1.8, 1.8)
+# MB1: hard cover at each end of the North bridge, under the brow's and the Tower's overwatch: a root plate on the
+# west bank by the bridge's end, and cordwood on the east bank's rim 10 m from it. The far one is the first cover for
+# whoever crosses, the near one the last for whoever holds the bridge.
+rect("windthrow", -5.5, -44.5, 4.0, 1.8, 90, top=2.2)        # the bridge's west head
+rect("logstack", 9.6, -40.0, 1.6, 3.0, 0)                    # the bridge's east head
 rect("lowcrates", 23.5, -46.5, 2.2, 1.0, 0)
 rect("log", 10.0, -48.5, 6.0, 0.7, 70)
 # Fern hollow: low ground before A, open, ferns (no cover value), two logs and a crate stack
@@ -308,32 +317,50 @@ rect("logpile", 27.0, -49.0, 4.0, 1.0, 0)
 # ------------------------------------------------------------------ A SITE: the Fort (plywood walls on the rise)
 FORT = [(46.0, -46.0), (64.0, -46.0), (64.0, -24.5)]
 walls("fortwall", FORT, [(0, 6.0, 9.5, "window"), (1, 7.0, 10.5, "gap")], tag="fort")  # north window, east gate
-walls("lowwall", [(46.0, -46.0), (46.0, -40.0)], tag="fort")                          # west low wall, open south of it
+# MB1: the Fort has a west wall (it stood open to the Tower 40 m off, and its defenders were shot on the flag from
+# there): a window to watch Fern hollow from, a 3 m gate, and the south-west corner left open. The flag is seen from
+# inside the walls and across the open corner, no farther.
+walls("fortwall", [(46.0, -46.0), (46.0, -31.0)], [(0, 2.5, 5.0, "window"), (0, 8.5, 11.5, "gap")], tag="fort")
 walls("lowwall", [(52.0, -27.0), (60.0, -27.0)], tag="fort")                          # south low wall
 hut(59.5, -41.5, 5.0, 4.0, 0, [(1, 1.2, 2.8, "door"), (3, 1.0, 2.6, "door"), (0, 1.2, 3.2, "window"),
                               (2, 1.0, 2.6, "window")], tag="box")           # the Box (hut on the site)
-rect("crates", 50.5, -33.5, 2.4, 1.6, 0)
+rect("crates", 49.8, -36.2, 1.6, 2.4, 0)                     # MB1: inside the west gate: no line through it to the flag, the gate's post to hold
 rect("tyrestack", 53.0, -43.0, 1.8, 1.8)
 rect("lowcrates", 58.0, -31.5, 2.0, 1.0, 0)
-rect("tyre", 47.5, -36.0, 1.7, 1.7)
+rect("tyre", 49.0, -29.5, 1.7, 1.7)                          # MB1: the open corner's first cover for whoever comes in by it
+rect("windthrow", 41.5, -25.0, 6.0, 2.0, 0, top=2.2)         # MB1: 16 m out from the open corner: the last cover before it, and it ends the 45 m line up the Hollow way onto the pole
+rect("lowcrates", 52.6, -38.6, 1.0, 2.0, 0)                  # MB1: crouch cover at the pole on the gate's side: a raise is seen from the corner and the east gate
 
 # ------------------------------------------------------------------ MID LANE: Cabin > Woodpile > Birch stand > Clearing > Ford > Hut row
 hut(-52.0, 9.0, 6.0, 4.5, 0, [(0, 1.5, 3.0, "door"), (1, 1.4, 3.0, "door"), (2, 2.0, 4.0, "window"),
                               (3, 1.4, 3.0, "window")], tag="cabin")
 rect("logstack", -34.5, 8.0, 1.8, 12.0, 0)          # the Woodpile: a 12 m cordwood wall across the lane
 rect("logpile", -40.0, 13.0, 4.0, 1.2, 0)
-rect("lowcrates", -26.0, 3.0, 2.0, 1.0, 20)
+# MB1: the Clearing is the open middle, and now it has edges. A cordwood stack in the Birch stand hides the walk up
+# from the Woodpile; hazels north and south of it (BUSHES) leave three ways out into the open.
+rect("logstack", -23.5, 2.5, 1.6, 6.0, 0)                    # was a low crate at (-26, 3)
+# The way out between that stack and the hazels north of it looked 50 m back down the lane to the Woodpile: two more
+# hazels stand in it (BUSHES), so the lane leaves the Birch stand through leaves.
 # Clearing (centre, overtime flag): open moss floor, three islands of cover, two hero oaks
 rect("crates", -10.0, 6.5, 2.6, 2.6, 10, top=2.6)            # ammo-crate stack, double height
 rect("tyrestack", -1.0, -5.0, 1.8, 1.8)
 rect("log", -4.0, 9.5, 6.5, 0.8, -8)
 rect("crates", -1.0, 12.0, 2.4, 1.6, 0, top=2.4)            # south crate stack: cover for the Tyre wall exit
 rect("tyre", -15.0, -4.0, 1.7, 1.7)
+# MB1: the west's sweep ended in the open under the Hut rise, 20 m from the head of the Ford's ramp: a fallen tree lies
+# just past the field's middle, between that stop (LANES) and the ramp. It lies north of the straight way from the
+# Ford to the overtime flag (across that way it cost the east 1.1 s to the flag: test_woodland_layout), clear of the
+# stream's bank and 1.3 m off the tyre stack, so the ground north of it is no pocket.
+rect("windthrow", 1.6, -1.3, 3.4, 2.0, 90, top=2.4)
 # Hut row (defenders' mid): two huts with doors and windows, a crate yard between
 hut(27.0, -0.5, 6.0, 4.0, 0, [(3, 1.3, 2.7, "door"), (1, 1.3, 2.7, "door"), (0, 1.5, 4.5, "window"),
                               (2, 1.5, 4.5, "window")], tag="hut1")
 hut(38.5, 8.0, 5.0, 4.0, 90, [(0, 1.0, 2.6, "door"), (2, 1.0, 2.6, "door"), (1, 1.2, 3.0, "window")], tag="hut2")
-rect("crates", 33.0, 3.5, 2.0, 1.6, 0)
+# MB1: the Back yard looked down a 1.2 m slit between these crates and hut 2, 35 m to hut 1's end, and past hut 1's
+# north side 43 m to the Ford: the crates are deeper (they reach hut 2's line) and a cordwood stack stands across the
+# yard's mouth, so the yard is held at its own length and the middle defenders' forward post is behind that stack.
+rect("crates", 33.0, 4.0, 2.0, 2.8, 0, top=2.6)              # was 1.6 m deep at (33, 3.5); double height, the Hut rise is over it
+rect("logstack", 40.5, -0.2, 1.6, 6.2, 0)
 rect("lowcrates", 20.5, 6.0, 2.0, 1.0, 70)
 rect("log", 26.0, -3.6, 5.0, 0.8, 0)  # game build: on the Hut rise crest, north of hut 1: breaks a 98 m Birch stand to Back yard line
 rect("logpile", 46.0, -4.0, 4.0, 1.0, 90)
@@ -343,10 +370,26 @@ rect("logpile", -57.5, 34.6, 5.0, 1.0, 18)                  # v3: off the road, 
 rect("tyre", -46.0, 39.0, 1.7, 1.7)
 rect("truck", -34.4, 46.7, 5.4, 2.1, 30)                      # the pickup, parked on the verge at the Truck bend
 rect("tyrestack", -26.0, 41.0, 1.8, 1.8)
-rect("log", -12.0, 46.0, 6.0, 0.8, 5)
 rect("logpile", -4.0, 55.0, 5.0, 1.0, 0)
-rect("lowcrates", 1.0, 45.5, 2.0, 1.0, 0)
+# MB1: the Long road was one 60 m line from the Truck bend to B, and the Road hump, 2.5 m over the road east of the
+# stream, was a skyline to all of it. Three trees are down across it. The first lies on the hump's top (was a log
+# there), the only place a 2.2 m root plate stands over a line from the low road to someone on the hump: it is the
+# west end's hard cover, and the way past is its south end. The second, 4 m on, lies across the south half and shuts
+# the lines round that end, so the way turns north between the two. The third, in the dip, lies across the north
+# half and turns the way back south to the culvert. Nobody sees both ends of the road at once.
+rect("windthrow", -11.5, 44.0, 8.5, 2.0, 90, top=2.2, tag="roadblock")
+rect("windthrow", -6.0, 50.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")
+rect("windthrow", 1.6, 44.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")   # was a low crate at (1, 45.5)
+rect("logstack", -24.0, 54.0, 5.0, 1.6, 0)
 rect("logstack", 25.0, 47.6, 6.0, 1.6, -20)          # Log stacks (on the verge: breaks the Truck bend to B line)
+# MB1: cordwood across the road where the lane leaves the culvert: the east end's hard cover over the dip, as the
+# fallen tree on the hump is the west end's, 30 m apart. A gate screen's 2.8 m (the woodpiles' 1.8 m is the owner's,
+# 2026-11-09): the hump stands 2.1 m over the dip, and at 1.8 m a standing eye on the road west of the Culvert sees
+# over it a chest in the ring round flag B's pole, 60 m off (the game's ray: 1,531 of 55,625 lines, none at 2.8 m;
+# test_mb1_layouts holds it). Before flag B's forward post went behind the crates that line was 88 of Attack /
+# Defend's 142 knock-outs from over 38 m. 3.5 m further east 2.8 m hides a head as well, but there the stack is the
+# attackers' cover 25 m from the flag, and they won 71 % of 126 rounds.
+rect("logstack", 20.5, 42.0, 1.6, 6.0, 0, top=2.8, tag="roadblock")
 rect("logstack", 29.7, 35.9, 5.0, 1.6, -25)
 rect("tyre", 19.0, 39.0, 1.7, 1.7)
 rect("logstack", 36.5, 42.3, 5.0, 1.6, -30)          # v3: along the verge, off the road
@@ -360,6 +403,7 @@ rect("crates", 42.5, 29.4, 2.0, 2.0, 15)                      # v3: off the road
 rect("logstack", 43.0, 39.0, 5.0, 1.6, -30)          # v3: B's road mouth, south verge: the Truck bend can't see through the Sawmill
 rect("tyre", 49.5, 44.8, 1.7, 1.7)
 rect("crates", 52.5, 40.95, 2.4, 2.6, 10)                     # yard crates: the road can't see deep into B
+rect("logstack", 46.4, 37.2, 1.6, 3.0, 0)                    # MB1: shuts the gap the pole was seen through from the Long road, 60 m off
 rect("lowcrates", 64.0, 30.0, 2.0, 1.0, 90)
 rect("logstack", 53.0, 34.0, 6.4, 1.0, 0, top=2.0, tag="boards")  # v3: sawn boards stacked along the shed's north side: no road line through B
 rect("logstack", 51.6, 30.6, 4.4, 1.4, 63)          # v3: where the road ends: it can't look on into B's back yard
@@ -410,6 +454,14 @@ THICKETS = [  # polygons (x, z)
     [(34, -57), (40, -57), (39, -52), (35, -52)],
     [(-66, 36), (-60, 38), (-62, 46), (-70, 44)],
     [(28, 56), (36, 54), (34, 49), (29, 50)],
+    # MB1: the Ford thickets, two stands of young spruce joined corner to corner on the east bank. The Hut rise looked
+    # over anything lower across the whole Clearing, 50 m to the Woodpile. The stands shut that view but for the head
+    # of the bank's gentle ramp north of them, 5 m wide, where hazels stand on the crest (BUSHES, "Hut hazel"): that is
+    # the way up from the Ford, walked on a broad front, and from its head the way on is the 4.6 m between the north
+    # stand and hut 1, or through the hut. (A 2 m door left between the stands was a trap: a squad sent through it
+    # queued there and was shot. Nothing is walked north of hut 1: the rise's north-east face is too steep.)
+    [(15.0, 2.0), (17.2, 2.0), (17.4, 8.6), (15.2, 8.6)],
+    [(17.4, -3.2), (19.4, -3.2), (19.4, 2.8), (17.4, 2.8)],
     [(-90, 30), (-80, 32), (-82, 40), (-90, 40)],
 ]
 WINDTHROW = [
@@ -446,6 +498,26 @@ BUSHES = [
     (12.5, -44.5, 1.2, "Tower bush"),   # under the Tower's west side
     (-19.0, 41.0, 1.3, "Hump bush"),    # top of the Road hump
     (39.0, 31.0, 1.2, "Sawmill bush"),
+    # MB1: hazel screens. Leaves hide and stop BBs but are walked through, so each is a soft wall with a way through it.
+    (-16.5, -52.6, 1.3, "Brow hazel"),        # the Ridge's brow: a front row with two ways through,
+    (-16.3, -50.1, 1.3, "Brow hazel"),
+    (-16.3, -47.5, 1.3, "Brow hazel"),
+    (-16.3, -40.5, 1.3, "Brow hazel"),
+    (-16.3, -36.0, 1.3, "Brow hazel"),
+    (-20.4, -45.2, 1.3, "Brow hazel"),        # and a back row 4 m behind, across each of them from the Tower's side
+    (-20.4, -42.8, 1.3, "Brow hazel"),
+    (-20.4, -38.2, 1.3, "Brow hazel"),
+    (-19.4, -7.6, 1.3, "Birch hazel"),        # the Clearing's west edge, north of the Birch stand's stack
+    (-19.0, -5.2, 1.2, "Birch hazel"),
+    (-20.6, -3.3, 1.2, "Birch hazel"),        # the lane's way out, between those and the stack
+    (-21.6, -1.5, 1.3, "Birch hazel"),
+    (-18.6, 7.4, 1.3, "Birch hazel"),         # and south of it
+    (-18.9, 9.8, 1.2, "Birch hazel"),
+    (16.5, -6.0, 1.3, "Ford hazel"),          # the Clearing's east edge, north of the Ford thickets (THICKETS)
+    (22.2, -4.9, 1.2, "Hut hazel"),           # the Hut rise's crest at the head of the Ford's ramp: on the rise, so they
+    (22.0, -7.2, 1.2, "Hut hazel"),           # hide who stands behind them from the Clearing below
+    (21.4, -9.4, 1.2, "Hut hazel"),
+    (1.6, 39.4, 1.1, "Verge hazel"),          # between the thicket and the fallen tree on the Long road's north verge
 ]
 for (x, z, r, _) in BUSHES:
     circ("bush", x, z, r, top=1.7)
@@ -501,9 +573,28 @@ LINKS = [  # number, name, kind, where (label point), lanes joined
     (9, "Back track", "open", (69.0, 22.0), "A and B, behind the defenders' camp"),
 ]
 LANE_PATHS = {
-    "n": [(-76, -10), (-65, -24.5), (-50, -34), (-36, -42), (-16, -43), (-1, -41.5), (19, -40), (32, -38), (48, -38), (56, -38)],
-    "m": [(-74, 4), (-52, 4), (-36, 8), (-22, 2), (-6, 2), (9.5, 0.5), (24, 3), (44, 2), (74, -1)],
-    "s": [(-77, 21), (-66, 27), (-48, 33), (-34, 42), (-18, 49), (-3, 51), (2, 48.3), (14, 48.3), (22, 43.6), (32, 40), (44, 35), (49, 37)],
+    # MB1: each lane has a point either side of the field's middle and none on it. A squad sweeps its lane to the first
+    # point past the middle (RoundPlanner): with one point at the middle the west end stopped on it and the east end
+    # walked on to the next, 15 m into the west's ground. The field's middle crosses the north lane at the North
+    # bridge's west end, not at its middle: the west's point is on the deck's first metres and the east's 2 m off its
+    # end, by the root plate. With the west's at the deck's east end both squads crossed the bridge, 1.8 m wide, and
+    # the west lost the lane 133 to 187.
+    "n": [(-76, -10), (-65, -24.5), (-50, -34), (-36, -42), (-22.5, -40.5), (-18.4, -41.4), (-15.2, -43.8),
+          (-6.4, -41.6), (-2.8, -41.5), (1.8, -41.3), (12, -40.3), (19, -40), (32, -38), (48, -38), (56, -38)],
+    # MB1: the middle lane goes round the Woodpile's north end and the Birch stand's stack, up the Ford's ramp north
+    # of its thickets and between them and hut 1, and ends in the Back yard, where Attack / Defend's middle
+    # defenders hold between the two sites (it ended in their camp).
+    "m": [(-74, 4), (-52, 4), (-38, 0.5), (-26, -2.5), (-19, -2.0), (-6, 2), (-0.6, -1.6), (1.6, 1.7),
+          (9.5, 0.5), (15.5, -3.6), (20.6, -5.0), (22.4, 0.4), (22.6, 3.4), (31.2, 2.2), (36.5, 2.4), (40.5, 4.2),
+          (43.2, 1.0), (58, 4.5)],
+    # MB1: the south lane leaves the road for its north verge at the fallen tree and comes back onto it past the stack.
+    # Its last two points are flag B's defenders: one behind the crates north of the road mouth, off the road's line
+    # with a view of the pole, one behind the stack beside it. In the road mouth, at (44, 35), the forward defender
+    # was shot from the Culvert's stack, 25 m off, before a fight reached the flag: 80 of the 175 knock-outs the
+    # attackers scored round the pole, and they won 64 % of the rounds (55 % with him behind the crates).
+    "s": [(-77, 21), (-66, 27), (-48, 33), (-34, 42), (-18, 49), (-11.5, 49.8), (-8.8, 47.2), (-6.2, 45.3),
+          (-2.2, 45.4), (2, 49.4), (14, 48.3),
+          (20.6, 46.4), (24.5, 43.8), (32, 40), (44.6, 29.8), (49, 37)],
 }
 
 

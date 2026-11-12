@@ -75,7 +75,7 @@ Every replica needs one, picked on its Customise screen from the ones you have u
   too.
 - **Springs.** Each spring is its own asset (an M100 spring, an M110 spring …), not a slider on one spring: swapping
   springs is how a spring replica is tuned. The first in the table that fits is the one a replica comes with (the M130
-  Spring on the Sniper Rifle).
+  Spring on the Sniper Rifle and the Pump Shotgun).
 
 ### Levels
 
@@ -101,10 +101,10 @@ config; owner, 2026-10-04).
 To add a higher spec battery for every electric replica, take the next free ID and add a row to Power sources:
 
 ```
-| 000027 | High Output Battery | battery | electric | dev |
+| 000028 | High Output Battery | battery | electric | dev |
 ```
 
-Then add a row to stats.md's Power sources table saying what it does (`| 000027 | High Output Battery | 0 | 25 | 0 |`
+Then add a row to stats.md's Power sources table saying what it does (`| 000028 | High Output Battery | 0 | 25 | 0 |`
 gives 25 % more rate of fire), and its Name to a level's Unlocks in levels.md (say level 11, raising the cap). Its
 Access says `dev`, so it shows only with Dev content on while you try it out. Change it to `public` and it is
 everyone's at its level; once unlocked it shows in the Power row of every replica tagged `electric`.
@@ -150,6 +150,7 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 | 000019 | Cyber Pistol | cyber | pistol, built-in-power | | public |
 | 000021 | Sniper Rifle | sniper | rifle, spring, top-rail, under-rail, muzzle-thread | 2x Scope | public |
 | 000026 | Compact SMG | smg | rifle, electric, top-rail, side-rail, muzzle-thread | | dev |
+| 000027 | Pump Shotgun | shotgun | rifle, spring, top-rail | | dev |
 
 ### Power sources
 
@@ -168,7 +169,8 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 
 The springs are in Power sources above, with Type `spring` and Fits `spring`, set out as the gases are (owner,
 2026-11-02): the M130 the Sniper Rifle comes with, the medium M140 and the high-performance M150, each its own trade
-(stats.md › Which spring: the quick and quiet one, the middle one and the long shot).
+(stats.md › Which spring: the quick and quiet one, the middle one and the long shot). The Pump Shotgun shares them
+(owner, 2026-11-12, SH1): it comes with the M130 and takes the M140 and the M150 once they are unlocked.
 
 ### Optics
 

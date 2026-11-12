@@ -623,6 +623,12 @@ a cross-passage between the running tunnels, and they swap at half time. Turn on
 - [ ] **The ticket gates' paddle doors (SM3).** Walk up to a lane: its two paddles swing open towards the platforms in
   about a third of a second and shut behind you; the next lane's stay shut. Bots walk the lanes without snagging, and
   BBs and bodies pass a lane as before (the paddles are look only). The paddles sit in the gates' baked light.
+- [ ] **The station's small fittings (SD2).** Walk the ticket hall, booking hall, concourse, passages, lower hall and
+  plant rooms on High: a dark skirting, a green tile band at about 0.7 m and a frieze just over the posters run round
+  the walls and columns; conduit and pipes under the ceilings, vents high on the tall rooms' walls, access hatches in
+  the ceilings (none over a lamp), drains along the halls' walls, a service door in each plant room, and a yellow
+  tactile strip at each escalator's and stair's head. Nothing covers a poster or sign, floats, flickers into a wall
+  or stops a BB or a body (look only).
 
 ## Bots
 
@@ -1474,6 +1480,22 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   line map's ringed stop and the information panel; the departure boards hang on two rods from the curved ceiling.
 - [ ] **Frame rate.** F3 on Low looking along a platform: 60 FPS.
 
+## Subway's running tunnels arched like the trains (TB2)
+
+Subway is Dev content: tick Settings › Dev › Dev content.
+
+- [ ] **The arch.** Walk both running tunnels east of the platforms: straight sides up to about head height over a car,
+  then a smooth round arch over the track, with a ring every 6 m; where each meets its platform tunnel the arch opens
+  onto the platform's vault with no gap or seam. On High and Ultra the wall lamps light the curve above them; on Low and Medium it stays dark over the walls.
+- [ ] **The standing car.** The south train's east car stands under the arch: its roof steps down at both edges to
+  clear the curve, nothing of it pokes through the lining, and inside it the roof is closed (crouch and look up at the
+  sides: no gap). The cab steps down to the track and the ways round them each side still work.
+- [ ] **BBs and bombs.** Shoot up into the arch from the track and from a car's roof: each BB stops on the curve where
+  you see it. A smoke or flash thrown over a car in the tunnel lands on its roof or comes back down.
+- [ ] **As before below.** The wagons, the cross passage, the detrainment steps at the south cab and the climb out of
+  the track play exactly as before; bots get through both tunnels.
+- [ ] **Frame rate.** F3 on Low looking along a running tunnel: 60 FPS.
+
 ## Subway's echo on the shots (EC1)
 
 - [ ] **Subway** (Dev content): fire every replica, then fit a silencer and fire again. Each shot is a little louder
@@ -1499,6 +1521,57 @@ Subway is Dev content: tick Settings › Dev › Dev content. On a real graphics
   hall on Ultra looks as before, and no light pumps or ghosts near a flickering lamp. In the concourse, is there a
   dark patch on the ceiling over the kiosk? Frame rate on Ultra in the
   ticket hall: as before.
+
+## What the parts are made of (MQ2)
+
+Customise's turntable and the replica in your hands, in black and in a bold colour.
+
+- [ ] **Metal, polymer, rubber.** Scopes, the red dot, the silencer and the torch catch the light as dark anodised
+  aluminium; grips and the laser stay matte polymer; pads and caps are dull rubber. Lenses, the torch's reflector and
+  the laser's emitter look as before.
+- [ ] **The silencer.** Six wrench flats behind its back seam, a chamfered front, four small holes in its front face.
+- [ ] **The torch and the laser.** The torch has two grooves round its head, a ridged bezel and a hinged battery door
+  at the back; the laser a window round its emitter, four screws in its front and a battery cap with a coin slot behind.
+- [ ] **Magazines.** The Hi-Cap is a pressed steel shell: four narrow ribs a side, a welded seam with spot welds down
+  its back, steel feed lips. The Low-Cap is moulded polymer: five wide ribs and a fine mould line down its front and
+  back. Can you tell them apart at a glance in the hands? On a reload the BBs at each magazine's top (the Extended's
+  too) are round, with no flats or lumps along their edges.
+- [ ] **Barrels.** The Tight-Bore's and the Long Barrel's crowns (the Loadout's pictures, and the muzzle up close on
+  the turntable) are polished steel and brass with one clean highlight, a chamfered edge and a recessed face, their
+  rims round with no corners along them.
+- [ ] **The vertical grip** is a little longer (64 mm) on the AEG Rifle and the Sniper Rifle. Long enough? Your left
+  hand still holds it where the short one was until the first-person arms are refitted (known issue).
+
+## The Pump Shotgun (SH1)
+
+Dev content: tick Settings › Dev › Dev content (level 12; Dev unlocks it at any level). It wears the Sniper Rifle's
+model until its own is built, and the pump, shot and shell sounds are stand-ins cut from other recordings.
+
+- [ ] **Three BBs a pull.** On the Range pick the Pump Shotgun and fire at a wall from 10 m: three BBs leave together
+  as an even triangle about a hand and a half apart (one on top), and the triangle is twice as wide at 20 m. The
+  magazine count drops by three.
+- [ ] **The pump.** Each pull is followed by a pump you hear; a second click before it ends does nothing. Holding the
+  trigger fires once. About five pulls in three seconds.
+- [ ] **Ten pulls a shell.** A 30 BB shell is ten pulls; R swaps the shell like a magazine (a little over a second).
+  Five shells are carried.
+- [ ] **Close and wide.** Against bots inside 10 m a pull nearly always lands, also from the hip on the move; past 25 m
+  it mostly misses and the BBs drop short of the rifles'. Does the first pull win a doorway? Does a miss cost you the
+  fight against an SMG?
+- [ ] **A careful aim.** From 10 to 20 m, aimed at the middle of a standing bot and of a crouched one: does a pull feel
+  fair, or do the three BBs land round a body a rifle's one BB would hit? (Nothing flies the middle of the triangle.)
+- [ ] **One hit is one hit.** A pull that lands two or three BBs on a bot is one hit: one tick, one "HIT!".
+- [ ] **Springs.** The Armoury offers it the Sniper Rifle's M140 and M150 springs (the M130 is the one it comes with):
+  each reaches a little further, pumps slower and kicks more; the M150 is louder. No batteries or gas fit.
+- [ ] **Parts.** Every optic fits the top rail and the Weapon Torch fits (drawn where the Sniper Rifle carries it for
+  now). No grip, silencer, barrel or magazine part fits. The Red Laser waits for its own model's side rail.
+- [ ] **The Loadout sheet** shows "1.7 × 3" for its rate and a Pattern row (1.2°) no other replica has.
+- [ ] **Bots.** With Dev content on, some bots carry it (the Clearer kit, a Red Dot and two flashes): they push and
+  flank, fire one pull at a time and hold their fire at long range.
+- [ ] **Cold and indoors.** On a cold map it fires as hard as anywhere (a spring); indoors it starts as it always is,
+  one pull a click.
+- [ ] **Frame rate.** A 6v6 with Dev content on, when several Clearer bots fire at once (three BBs and three puffs a
+  pull each): does the frame rate hold as it does without them? (The performance review's note: only your PC can
+  show it.)
 
 ## Reporting what you find
 

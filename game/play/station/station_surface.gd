@@ -79,6 +79,11 @@ static func mesh(m: MapData, style: MapStyle, look: StationLook, props: PropDres
 		_add_track(st, look, t)
 	for v in dress.vaults:
 		add_vault(st, look, v)
+		if v.open_west:
+			# The wider tunnel's end round the arch, in that tunnel's walls.
+			var c := v.circle()
+			var wider := dress.style_at(Vector3(v.area.position.x - 0.5, v.y + v.rise * 0.5, c.x))
+			_add_mouth(st, look, v, look.style_walls.get(wider, look.outside))
 	st.generate_tangents()
 	return st.commit()
 
@@ -108,7 +113,7 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 	var c := v.circle()
 	var x0 := v.area.position.x
 	var x1 := v.area.end.x
-	var finish := look.vault_finish
+	var finish := v.finish if v.finish != &"" else look.vault_finish
 	var tint := look.tint_of(finish, null)
 	var pbr := look.pbr_of(finish)
 	var size := look.scale_of(finish)
@@ -134,7 +139,10 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 			st.set_uv(uvs[i] / size)
 			st.add_vertex(quad[i])
 	_add_ribs(st, look, v)
-	for end: float in [x0 + look.vault_proud, x1 - look.vault_proud]:
+	var ends: Array[float] = [x1 - look.vault_proud]
+	if not v.open_west:
+		ends.append(x0 + look.vault_proud)
+	for end: float in ends:
 		var cap := PackedVector3Array()
 		for k in steps + 1:
 			var p := v.point(-half + 2.0 * half * float(k) / float(steps))
@@ -143,6 +151,27 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 		if (GreyboxFaces.face_normal(cap).x > 0.0) != (end < v.area.get_center().x):
 			cap.reverse()
 		add_face(st, look, cap, finish, tint, NO_FLOOR)
+
+
+## Open vault `v`'s mouth: the wider tunnel's end round its arch, the two corners between the arc and its crown's
+## height over each springing, `vault_proud` m in front of the end, facing out of the arch, in `finish`.
+static func _add_mouth(st: SurfaceTool, look: StationLook, v: StationDressing.TunnelVault, finish: StringName) -> void:
+	var steps := maxi(look.vault_steps, 2)
+	var half := v.half_angle()
+	var x := v.area.position.x - look.vault_proud
+	var top := v.y + v.rise
+	var tint := look.tint_of(finish, null)
+	for side: float in [-1.0, 1.0]:
+		# A fan from the corner over the springing (add_face fans from the first point) along the arc between the
+		# crown and the springing, turned to face -x.
+		var arc := PackedVector3Array()
+		for k in steps / 2 + 1:
+			var p := v.point(side * half * float(k) / float(steps / 2))
+			arc.append(Vector3(x, p.y, p.x))
+		var corner := PackedVector3Array([Vector3(x, top, v.area.get_center().y + side * v.area.size.y * 0.5)])
+		if GreyboxFaces.face_normal(corner + arc).x > 0.0:
+			arc.reverse()
+		add_face(st, look, corner + arc, finish, tint, NO_FLOOR)
 
 
 ## Vault `v`'s ribs: a band `vault_rib_width` m wide round the arc every `vault_rib_every` m along it, standing
@@ -249,7 +278,7 @@ static func _middle(f: PackedVector3Array) -> Vector3:
 	return sum / float(f.size())
 
 
-## A stretch of track: sleepers every `sleeper_pitch` m on the ballast and two rails along them, end to end.
+## A stretch of track: two rails end to end on the ballast (on sleepers every `sleeper_pitch` m if the look has them).
 static func _add_track(st: SurfaceTool, look: StationLook, t: StationDressing.Track) -> void:
 	var along := t.to - t.from
 	var length := along.length()
@@ -257,17 +286,20 @@ static func _add_track(st: SurfaceTool, look: StationLook, t: StationDressing.Tr
 		return
 	var x := Vector3(along.x, 0.0, along.y) / length
 	var frame := Transform3D(Basis(x, Vector3.UP, x.cross(Vector3.UP)), Vector3(t.from.x, t.y, t.from.y))
-	var sl := look.sleeper_size
-	var count := maxi(1, floori(length / look.sleeper_pitch))
-	var start := (length - float(count - 1) * look.sleeper_pitch) * 0.5
-	for i in count:
-		var at := start + float(i) * look.sleeper_pitch
-		_add_box(st, look, frame, Vector3(at - sl.z * 0.5, 0.0, -sl.x * 0.5), Vector3(at + sl.z * 0.5, sl.y, sl.x * 0.5),
-				&"sleeper")
+	var base := 0.0
+	if look.sleepers:
+		var sl := look.sleeper_size
+		base = sl.y
+		var count := maxi(1, floori(length / look.sleeper_pitch))
+		var start := (length - float(count - 1) * look.sleeper_pitch) * 0.5
+		for i in count:
+			var at := start + float(i) * look.sleeper_pitch
+			_add_box(st, look, frame, Vector3(at - sl.z * 0.5, 0.0, -sl.x * 0.5),
+					Vector3(at + sl.z * 0.5, sl.y, sl.x * 0.5), &"sleeper")
 	var r := look.rail_size
 	for side: float in [-0.5, 0.5]:
 		var z := side * look.gauge
-		_add_box(st, look, frame, Vector3(0.0, sl.y, z - r.x * 0.5), Vector3(length, sl.y + r.y, z + r.x * 0.5), &"rail")
+		_add_box(st, look, frame, Vector3(0.0, base, z - r.x * 0.5), Vector3(length, base + r.y, z + r.x * 0.5), &"rail")
 
 
 static func _add_box(st: SurfaceTool, look: StationLook, frame: Transform3D, lo: Vector3, hi: Vector3,

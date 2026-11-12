@@ -181,6 +181,11 @@ MAG_HW = 0.0112
 # The base plate's two tiers' half widths: the slab and the foot under it.
 PLATE_HW = (MAG_HW + 0.0022, MAG_HW + 0.0014)
 MAG_HD = 0.0158
+# The extended magazine part's BBs (6 mm): balls of this radius, this many sides round and bands of latitude (15
+# degrees a step each way, far under the bevel's angle, so nothing on them is bevelled and they shade round).
+BB_R = 0.003
+BB_ROUND = 24
+BB_BANDS = 12
 
 MAG_TOP = (0.0, Y(MAG_TOP_PX[0]), Z(MAG_TOP_PX[1]))
 # Under the dust cover's rail, where the parts file's laser and light sit (photo about x 100, py 152).
@@ -443,6 +448,12 @@ def _at(table: list, py: float) -> float:
         if a <= py <= b:
             return xa + (xb - xa) * (py - a) / max(1e-9, b - a)
     return table[0][1] if py < table[0][0] else table[-1][1]
+
+
+def at(table: list, py: float) -> float:
+    """A traced strap's place (photo px) at photo height py: FRONT_STRAP's or BACK_STRAP's (the Cyber Pistol's grip
+    reads them too, cyber.py)."""
+    return _at(table, py)
 
 
 def grip_section(py: float) -> tuple:
@@ -965,9 +976,11 @@ def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detai
     # The follower and two BBs at the lips; a small accent tab on the follower.
     c = top + down * 0.002
     b.box((-0.0040, c.y - 0.012, c.z - 0.002), (0.0040, c.y + 0.010, c.z + 0.0005), "Detail")
+    # The replica's own magazine keeps its six-band BBs (its budget is the pistol's); a part's are true balls.
+    ball = ([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026), (0.0026, 0.0015),
+             (0.003, 0.0)] if fine == 1 else hs.ball(BB_R, BB_BANDS))
     for i in range(2):
-        b.lathe([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026),
-                 (0.0026, 0.0015), (0.003, 0.0)], "BB", 10 if fine == 1 else 16, centre=(0.0, c.y + 0.006 - i * 0.0062,
+        b.lathe(ball, "BB", 10 if fine == 1 else BB_ROUND, centre=(0.0, c.y + 0.006 - i * 0.0062,
                  c.z + 0.0032 - i * 0.0008), axis="z")
     b.box((-0.0015, c.y - 0.011, c.z + 0.0005), (0.0015, c.y - 0.007, c.z + 0.0012), "Accent")
     return hs.join(name, [hs.finish(b.build(), 0.0005, 1 if fine == 1 else 2), plate])

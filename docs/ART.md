@@ -175,6 +175,12 @@ metalness; the light does the rest.
   beside it and white polymer an off-white (owner, 2026-11-12). Wood is a kind too (a walnut stain the paint only
   tints), on no replica: the owner kept the sniper's stock polymer. A coated part (the Cyber Pistol's white
   shell) keeps its colour in any light. Bots' copies keep the flat paints.
+- **So are their parts (MQ2, owner 2026-11-12).** An optic's body, a silencer and a torch are anodised aluminium like
+  the rifle's receiver; grips and the laser's housing are polymer; clamps and screws steel; pads, caps and eyecups
+  rubber, in their own dark colour whatever the paint; a hi-cap magazine is a steel shell and a low-cap polymer; a
+  barrel's brass or stainless crown is polished metal. Glass, reflectors and lit parts draw as they did. A part
+  shows how it is made: a turned part its chamfers, grooves and wrench flats, a pressed steel shell its narrow ribs,
+  lapped seam and spot welds, a moulded one its parting line, anything with a battery its door or cap.
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.
 

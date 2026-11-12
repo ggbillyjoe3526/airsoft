@@ -5,11 +5,16 @@ extends RefCounted
 ## the part wears (game/play/replica_surface.gdshaderinc). A paint picks the colour, the surface says how that colour
 ## behaves in the light: a steel slide and an anodised receiver reflect, a polymer frame is matte with a moulded grain,
 ## a wood stock shows its figure in a walnut stain the paint tints. Presentation only: nothing in the simulation
-## reads it. A model says each face's kind in its vertex colour's alpha, `index / SLOTS`
+## reads it. A replica says each face's kind in its vertex colour's alpha, `index / SLOTS`
 ## (tools/blender/replicas/surface.py writes them, in this order: never reorder KINDS, the model files hold the index).
+## A part or an accessory (MQ2: an attachment, a magazine, a barrel) is one kind a material, so its mesh carries a small
+## table instead, material name to kind's name (the glb's mesh extras, kept by Godot as the mesh's `extras` metadata;
+## `named` reads it): no colour a vertex in files that sit near their size cap.
 
 ## The kinds, by index.
-const KINDS: Array[StringName] = [&"polymer", &"steel", &"aluminium", &"wood", &"rubber", &"bare", &"coated"]
+const KINDS: Array[StringName] = [
+	&"polymer", &"steel", &"aluminium", &"wood", &"rubber", &"bare", &"coated", &"polished",
+]
 ## How many kinds the shader's tables hold (the vertex colour's step is 1 / SLOTS).
 const SLOTS := 16
 ## The kind a face with no vertex colours is drawn as, by the paint's part: the metal part steel, the rest polymer.
@@ -19,6 +24,9 @@ const DEFAULT_KIND := &"polymer"
 ## the rest: a wood stock is wood in any paint.
 const WOOD_STAIN := Color("7a4a26")
 const WOOD_STAIN_SHARE := 0.8
+## The metadata Godot keeps a glb mesh's extras in, and the key of a part's table of kinds there (surface.py EXTRA).
+const EXTRAS_META := &"extras"
+const NAMED_KEY := "surfaces"
 ## The shared grain texture (tools/textures/replica_grain.py).
 const GRAIN := preload("res://assets/textures/replica/replica_grain.png")
 
@@ -80,6 +88,15 @@ const LOOKS: Dictionary[StringName, Dictionary] = {
 		"cloud": 0.15, "dark": 1.0, "light": 1.0, "gain": 0.78,
 		"specular": 1.0, "light_keeps": 1.0, "floor": 0.0, "bold_keeps": 0.0,
 	},
+	# Bright metal in its own colour (a brass or polished steel barrel's crown): smooth, unbrushed, all metal, with no
+	# grain or clouding at all, so its highlight is one clean band; its colour lifted (gain) as bare metal's is, or all
+	# metal reads dark wherever the sky it mirrors is dull.
+	&"polished": {
+		"metallic": 1.0, "roughness": 0.22, "sheen": 0.05, "bares": 1.0,
+		"tile": 0.02, "stretch": 1.0, "relief": 0.0, "figure": 0.0,
+		"cloud": 0.0, "dark": 1.0, "light": 1.0, "gain": 1.8,
+		"specular": 0.5, "light_keeps": 1.0, "floor": 0.0, "bold_keeps": 0.0,
+	},
 }
 
 ## The shader's tables, built once: the kinds' finish, grain, tone and shine rows (SLOTS each).
@@ -98,6 +115,22 @@ static func index(kind: StringName) -> int:
 ## The kind a face with no vertex colours is drawn as on the paint's `part`.
 static func part_index(part: StringName) -> int:
 	return index(PART_KIND.get(part, DEFAULT_KIND))
+
+
+## The kinds `mesh` names for its materials (MQ2: a part's table, see the top), material name to kind's index; empty
+## for a mesh that names none (a replica: its faces say theirs). A kind this build doesn't know is left out.
+static func named(mesh: Mesh) -> Dictionary[StringName, int]:
+	var out: Dictionary[StringName, int] = {}
+	if mesh == null or not mesh.has_meta(EXTRAS_META):
+		return out
+	var extras: Variant = mesh.get_meta(EXTRAS_META)
+	var table: Variant = (extras as Dictionary).get(NAMED_KEY) if extras is Dictionary else null
+	if table is Dictionary:
+		for material_name: Variant in table as Dictionary:
+			var at := KINDS.find(StringName(str((table as Dictionary)[material_name])))
+			if at >= 0:
+				out[StringName(str(material_name))] = at
+	return out
 
 
 ## Sets the kinds' tables and the grain on `material` (one drawn by replica_surface.gdshader).

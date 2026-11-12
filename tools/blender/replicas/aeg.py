@@ -180,6 +180,16 @@ MAG_BOTTOM = -0.1585
 
 # A magazine part's ribs slope into the body over this much at each end (tools/blender/parts/magazines.py).
 RIB_END = 0.0025
+# The rifle's own magazine's ribs down each side: each one's place along the side from the middle (m, +y toward the
+# muzzle) and its half width.
+MAG_RIB_HALF = 0.0032
+MAG_RIBS = tuple((yo, MAG_RIB_HALF) for yo in (-0.0228, -0.0114, 0.0, 0.0114, 0.0228))
+# A magazine part's rib crown, from its side to its flat face: how far each point stands out of the body's side and
+# how far it is from the rib's middle (m, on a rib MAG_RIB_HALF wide).
+MAG_RIB_CROWN = ((0.00015, 0.00305), (0.00036, 0.0029), (0.0006, 0.0026), (0.0008, 0.0019))
+# A magazine part's BBs (6 mm): balls of this radius, half as many bands of latitude as they have sides, so every step
+# is far under the bevel's angle: nothing on them is bevelled or split and they shade round.
+BB_R = 0.003
 
 # Bones: name -> head (each points +Y, 0.0313 long, roll 0, as the old file's).
 BONES = {
@@ -551,11 +561,111 @@ def mag_stations(zs: list, fine: int) -> list:
     return out
 
 
+def mag_place(x: float, y: float, z: float, s: float = 1.0) -> tuple:
+    """A point of the magazine's section (x across, y along it from its spine, scaled by `s`) at height `z`
+    (first-pass heights), on its curve."""
+    cy, tilt = mag_spine(z)
+    p = Matrix.Rotation(tilt, 3, "X") @ Vector((x * s, y * s, 0.0))
+    return (p.x, cy + p.y, mz(z) + p.z)
+
+
+def mag_rib_stations(bottom: float, fine: int) -> list:
+    """The heights the magazine's ribs run through, from under the well's flare to just over the base plate."""
+    return mag_stations([-0.084] + [mag_z(z, bottom) for z in (-0.100, -0.130, -0.160, -0.190, -0.212)], fine)
+
+
+def mag_seams(name: str, bottom: float, fine: int, seams: tuple, welds: int = 0, step: int = 1) -> object:
+    """Seams down a magazine part's front or back (tools/blender/parts/magazines.py), from under the well's flare to
+    the base plate, their ends sloped in. Each: 1 front or -1 back, its half width, its height, and its crown's
+    share of the width (0: a ridge, a moulded parting line; more: a flat lap, a pressed shell's welded spine).
+    `welds` spot welds stand in a row down each flat one; a seam runs through every `step`-th of the body's rings."""
+    b = hs.Builder(name, ["Detail"])
+    zs = mag_rib_stations(bottom, fine)[fine:]
+    zs = zs[(len(zs) - 1) % step::step]
+    for sy, half, height, crown in seams:
+        face = sy * MAG_HD
+        xs = [-half, 0.0, half] if crown <= 0.0 else [-half, -half * crown, half * crown, half]
+        rect = [(-sy * x, face + sy * (height if abs(x) < half else -0.0003)) for x in xs]
+        flat = [(x, face - sy * 0.0003) for x, y in rect]
+        b.loft([[mag_place(x, y, zs[0] + RIB_END) for x, y in flat]]
+               + [[mag_place(x, y, z) for x, y in rect] for z in zs]
+               + [[mag_place(x, y, zs[-1] - RIB_END) for x, y in flat]], "Detail")
+        for i in range(welds if crown > 0.0 else 0):
+            z = zs[0] + (zs[-1] - zs[0]) * (i + 0.5) / welds
+            cy, tilt = mag_spine(z)
+            spot = b.lathe([(0.0, 0.0011), (height + 0.00012, 0.0011), (height + 0.00022, 0.0007),
+                            (height + 0.00022, 0.0)], "Detail", 10, axis="z")
+            b.transform(spot, Matrix.Translation((0.0, cy, mz(z))) @ Matrix.Rotation(tilt, 4, "X")
+                        @ Matrix.Translation((0.0, face, 0.0)) @ Matrix.Rotation(-sy * math.pi / 2, 4, "X"))
+    return hs.finish(b.build(), 0.0)
+
+
+def mag_rib_shells(b: object, bottom: float, fine: int, ribs: tuple = MAG_RIBS) -> None:
+    """Adds to `b` the wide ribs down each side of the magazine below the well (five on the rifle's own), the flutes
+    between them running its whole length. Each of `ribs`: its place along the side and its half width (m)."""
+    place = mag_place
+    rib_zs = mag_rib_stations(bottom, fine)
+    for sx in (-1, 1):
+        for yo, half in ribs:
+            k = half / MAG_RIB_HALF
+            rect = [(sx * (MAG_HW - 0.0006), yo - 0.0032 * k), (sx * (MAG_HW + 0.0008), yo - 0.0027 * k),
+                    (sx * (MAG_HW + 0.0008), yo + 0.0027 * k), (sx * (MAG_HW - 0.0006), yo + 0.0032 * k)]
+            if fine > 1:
+                # Rounded crowns: the rib's face eased into its sides in steps under the bevel's angle, so a part's
+                # ribs need no bevel (mag_ribs).
+                rect[1:3] = ([(sx * (MAG_HW + out), yo - along * k) for out, along in MAG_RIB_CROWN]
+                             + [(sx * (MAG_HW + out), yo + along * k) for out, along in reversed(MAG_RIB_CROWN)])
+            rings = [[place(x, y, z) for x, y in rect] for z in rib_zs]
+            if fine > 1:
+                # The rib's ends sloped down into the body, not cut off square.
+                flat = [(sx * min(abs(x), MAG_HW - 0.0002), y) for x, y in rect]
+                rings = ([[place(x, y, rib_zs[0] + RIB_END) for x, y in flat]] + rings
+                         + [[place(x, y, rib_zs[-1] - RIB_END) for x, y in flat]])
+            b.loft(rings, "Detail")
+
+
+def mag_ribs(name: str, bottom: float, fine: int, ribs: tuple = MAG_RIBS) -> object:
+    """A magazine part's ribs as an object of their own (tools/blender/parts/magazines.py joins them after its cuts,
+    as its seams): unbevelled, since a bevel spent most of its triangles on each rib's two edges sunk inside the body.
+    They pay for round BBs instead."""
+    b = hs.Builder(name, ["Detail"])
+    mag_rib_shells(b, bottom, fine, ribs)
+    return hs.finish(b.build(), 0.0)
+
+
+def mag_top_shells(b: object, fine: int, lips: bool = False, round_bb: int = 16) -> None:
+    """Adds to `b` the magazine's feed tower and the three BBs on it. A part's tower has folded steel `lips` along its
+    sides if asked, and its BBs are true balls `round_bb` sides round."""
+    b.box((-0.0045, MAG_TOP[1] + 0.012, mz(-0.012)), (0.0045, MAG_TOP[1] + 0.030, mz(-0.012) + 0.006), "Rubber")
+    if lips:
+        # Folded steel lips along the feed tower's sides, standing just over it, their top edges broken.
+        for sx in (-1, 1):
+            b.prism([(sx * 0.0049, mz(-0.012) + 0.0004), (sx * 0.0049, mz(-0.012) + 0.0062),
+                     (sx * 0.0044, mz(-0.012) + 0.0067), (sx * 0.0030, mz(-0.012) + 0.0067),
+                     (sx * 0.0030, mz(-0.012) + 0.0061), (sx * 0.0042, mz(-0.012) + 0.0061),
+                     (sx * 0.0042, mz(-0.012) + 0.0004)], "y", MAG_TOP[1] + 0.0115, MAG_TOP[1] + 0.0305, "Detail")
+    # The replica's own magazine keeps its six-band BBs (its budget is the rifle's); a part's are true balls.
+    ball = ([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026), (0.0026, 0.0015),
+             (0.003, 0.0)] if fine == 1 else hs.ball(BB_R, round_bb // 2))
+    for i in range(3):
+        b.lathe(ball, "BB", 10 if fine == 1 else round_bb,
+                centre=(0.0, MAG_TOP[1] + 0.024 - i * 0.0062, mz(-0.012) + 0.0090 - i * 0.0007), axis="z")
+
+
+def mag_top(name: str, fine: int, lips: bool = False, round_bb: int = 16) -> object:
+    """A magazine part's feed tower and BBs as an object of their own, finished as the part's body is
+    (tools/blender/parts/magazines.py joins them after its cuts: nothing is cut from them)."""
+    b = hs.Builder(name, ["Detail", "Rubber", "BB"])
+    mag_top_shells(b, fine, lips, round_bb)
+    return hs.finish(b.build(), 0.0006, 2)
+
+
 def magazine(name: str = "Magazine", bottom: float = MAG_BOTTOM, fine: int = 1) -> object:
     """A polymer magazine, curved forward toward the base, with raised ribs down each side and a square base plate.
     A magazine part (tools/blender/parts/magazines.py) is this one with its own `name` and base height `bottom`, and
-    `fine` times the rings down its curve, rounder corners, ribs and BBs, the flare at the well's foot eased, sloped
-    rib ends and a finer bevel (the parts' own budget)."""
+    `fine` times the rings down its curve, rounder corners, the flare at the well's foot eased and a finer bevel (the
+    parts' own budget). A part's is the body and base plate alone, the shell its cuts are made in: its ribs
+    (mag_ribs) and its feed tower and BBs (mag_top) are joined after."""
     b = hs.Builder(name, ["Detail", "Rubber", "BB"])
     sec = hs.rounded_rect(MAG_HW, MAG_HD, 0.0055, 2 if fine == 1 else 2 + 2 * fine)
     zs = [-0.012, -0.070, -0.071, -0.075, -0.076] + mag_stations(
@@ -566,39 +676,18 @@ def magazine(name: str = "Magazine", bottom: float = MAG_BOTTOM, fine: int = 1) 
         zs[2:4] = [-0.071, -0.072, -0.073, -0.074, -0.075]
         scale.update({-0.072: 1.008, -0.073: 1.022, -0.074: 1.036})
 
-    def place(x: float, y: float, z: float, s: float = 1.0) -> tuple:
-        cy, tilt = mag_spine(z)
-        p = Matrix.Rotation(tilt, 3, "X") @ Vector((x * s, y * s, 0.0))
-        return (p.x, cy + p.y, mz(z) + p.z)
-
+    place = mag_place
     b.loft([[place(x, y, z, scale.get(z, 1.0)) for x, y in sec] for z in zs], "Detail")
-    # Five wide ribs down each side below the well, the flutes between them running its whole length.
-    rib_zs = mag_stations([-0.084] + [mag_z(z, bottom) for z in (-0.100, -0.130, -0.160, -0.190, -0.212)], fine)
-    for sx in (-1, 1):
-        for yo in (-0.0228, -0.0114, 0.0, 0.0114, 0.0228):
-            rect = [(sx * (MAG_HW - 0.0006), yo - 0.0032), (sx * (MAG_HW + 0.0008), yo - 0.0027),
-                    (sx * (MAG_HW + 0.0008), yo + 0.0027), (sx * (MAG_HW - 0.0006), yo + 0.0032)]
-            if fine > 1:
-                # Rounded crowns: the rib's face eased into its sides.
-                rect[1:3] = [(sx * (MAG_HW + 0.0003), yo - 0.0030), (sx * (MAG_HW + 0.0006), yo - 0.0026),
-                             (sx * (MAG_HW + 0.0008), yo - 0.0019), (sx * (MAG_HW + 0.0008), yo + 0.0019),
-                             (sx * (MAG_HW + 0.0006), yo + 0.0026), (sx * (MAG_HW + 0.0003), yo + 0.0030)]
-            rings = [[place(x, y, z) for x, y in rect] for z in rib_zs]
-            if fine > 1:
-                # The rib's ends sloped down into the body, not cut off square.
-                flat = [(sx * min(abs(x), MAG_HW - 0.0002), y) for x, y in rect]
-                rings = ([[place(x, y, rib_zs[0] + RIB_END) for x, y in flat]] + rings
-                         + [[place(x, y, rib_zs[-1] - RIB_END) for x, y in flat]])
-            b.loft(rings, "Detail")
+    # The rifle's own magazine carries its ribs in its one shell's finish; a part's are built apart (mag_ribs) and
+    # joined after its cuts.
+    if fine == 1:
+        mag_rib_shells(b, bottom, fine)
     # Base plate, square-cornered, its top on the body's last section (no gap) and barely proud of the body's faces.
     plate = b.prism(hs.rounded_rect(MAG_HW + 0.0009, MAG_HD + 0.0004, 0.0030, 2 * fine), "z", -0.0075, 0.0, "Rubber")
     b.transform(plate, mag_plate(bottom))
     # Feed lips and the top BBs.
-    b.box((-0.0045, MAG_TOP[1] + 0.012, mz(-0.012)), (0.0045, MAG_TOP[1] + 0.030, mz(-0.012) + 0.006), "Rubber")
-    for i in range(3):
-        b.lathe([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026),
-                 (0.0026, 0.0015), (0.003, 0.0)], "BB", 10 if fine == 1 else 16,
-                 centre=(0.0, MAG_TOP[1] + 0.024 - i * 0.0062, mz(-0.012) + 0.0090 - i * 0.0007), axis="z")
+    if fine == 1:
+        mag_top_shells(b, fine)
     return hs.finish(b.build(), 0.0006, 1 if fine == 1 else 2)
 
 

@@ -173,6 +173,8 @@ var _doors: DoorView = null
 var _lifts: LiftView = null
 ## The ticket gates' paddle doors, or null on a field without (GatePaddles, SM3).
 var _paddles: GatePaddles = null
+## A station's small fittings, or null on a field without a station (StationDetail, SD2).
+var _detail: StationDetail = null
 ## A wood's crowns and dressing, or null on a map with neither (WoodsView, WL4).
 var _woods: WoodsView = null
 ## The map's streams (WS1), or null on a map with none.
@@ -444,6 +446,9 @@ func _dress_part(part: int) -> void:
 			_paddles = GatePaddles.build(_map, _play.gate_paddles)
 			if _paddles != null:
 				add_child(_paddles)
+			_detail = StationDetail.build(_map, _play.station_detail)
+			if _detail != null:
+				add_child(_detail)
 			_pools = LightPools.build(_map, _light)
 			if _pools != null:
 				add_child(_pools)
@@ -946,6 +951,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_lifts.materials())
 	if _paddles != null:
 		first_use.append_array(_paddles.materials())
+	if _detail != null:
+		first_use.append_array(_detail.materials())
 	if _pools != null:
 		first_use.append_array(_pools.materials())
 	if _fixtures != null:
@@ -2086,6 +2093,8 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 	if _lifts != null:
 		_lifts.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
 		_lifts.set_probes(values.reflections != GraphicsQuality.Reflections.OFF)
+	if _station_fixtures != null:
+		_station_fixtures.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
 	if _level != null:
 		_level.set_detail(values.mesh_detail)
 		if _level.baked_light_builds() != _relit:

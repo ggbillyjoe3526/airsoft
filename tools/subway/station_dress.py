@@ -9,7 +9,8 @@ here adds, moves or cuts a block.
   coping stone, MIND THE GAP painted on it every few metres, and the yellow line behind it.
 - words: the painted words, along each platform's coping, reading from the platform.
 - tracks: each line's centre through the track and tunnel rooms on the track bed.
-- vaults: each platform tunnel's barrel vault (layout.VAULTS), drawn curved over its colliders' boxes.
+- vaults: each platform tunnel's barrel vault and each running tunnel's arch (layout.VAULTS), drawn curved over its
+  colliders' boxes; a vault's own finish (the running tunnels' lining) and the end that opens onto a wider tunnel.
 - trims: look-only boxes in a finish laid on the platform tunnels' walls (TB1, owner: "more detail ... too empty and
   blocky"): a dark tiled frieze under each vault's springing, cable runs along the trackside walls and the platform
   edge's dark face over each track.
@@ -39,6 +40,11 @@ GAP_LINE = 0.1
 WORDS = "MIND THE GAP"
 WORDS_HEIGHT = 0.24
 WORDS_EVERY = 12.0
+# The stairs' and escalators' heads and feet (SD2): a tactile strip across the floor just off each end, this deep and
+# this far from the end (m).
+HEADS = ["esc_up", "esc_low", "stair1", "stair2"]
+HEAD_DEPTH = 0.4
+HEAD_GAP = 0.2
 # The tracks' centre lines (z) and the areas whose rooms on the track bed carry them.
 LINES = [(-10.75, ("North track", "North tunnel")), (10.75, ("South track", "South tunnel"))]
 
@@ -73,11 +79,12 @@ def zones(L, floor_at, ceil_at, lift: float, thick: float) -> list[dict]:
                 z["owns"] = True
             out.append(z)
     out.sort(key=lambda z: 0 if z.get("owns") else 1)
-    # Each platform tunnel's vault, after the rooms (a room under it wins up to its springing): the air over a car's
-    # roof and under the arc is the track's, so the trackside wall over a car and the roof wear its tiles (TB1).
+    # Each tunnel's vault, after the rooms (a room under it wins up to its springing): the air over a car's roof and
+    # under the arc is the track's or the running tunnel's, so the trackside wall over a car and the roof wear its
+    # finish (TB1).
     for v in L.VAULTS:
-        out.append({"style": "track", "box": [v["x0"], v["x1"], r(v["low"] + thick + lift),
-                                              r(v["y"] + L.VAULT_RISE + lift), v["z0"], v["z1"]]})
+        out.append({"style": v["style"], "box": [v["x0"], v["x1"], r(min(v["low"] + thick, v["y"]) + lift),
+                                                 r(v["y"] + v["rise"] + lift), v["z0"], v["z1"]]})
     return out
 
 
@@ -92,6 +99,18 @@ def strips(L, lift: float) -> list[dict]:
         for finish, a, b in (("coping", 0.0, COPING), ("gap_line", COPING, COPING + GAP_LINE)):
             z0, z1 = sorted((edge + inward * a, edge + inward * b))
             out.append({"finish": finish, "x0": rm["x0"], "x1": rm["x1"], "z0": r(z0), "z1": r(z1), "y": y})
+    return out
+
+
+def heads(L, lift: float) -> list[dict]:
+    """A tactile strip on the floor off each end of each flight in HEADS, across its width."""
+    out = []
+    by_name = {rm["name"]: rm for rm in L.rooms}
+    for name in HEADS:
+        rm = by_name[name]
+        for x, y, way in ((rm["x0"], rm["ya"], -1), (rm["x1"], rm["yb"], 1)):
+            a, b = sorted((x + way * HEAD_GAP, x + way * (HEAD_GAP + HEAD_DEPTH)))
+            out.append({"finish": "tactile", "x0": r(a), "x1": r(b), "z0": rm["z0"], "z1": rm["z1"], "y": r(y + lift)})
     return out
 
 
@@ -140,6 +159,8 @@ TRACK_AREAS = ("North track", "South track")
 def trims(L, lift: float) -> list[dict]:
     out = []
     for v in L.VAULTS:
+        if v["style"] != "track":
+            continue        # a running tunnel's arch: no frieze
         top = v["y"] - FRIEZE_GAP
         bottom = top - FRIEZE[0]
         for wall, inward in ((v["z0"], 1), (v["z1"], -1)):
@@ -163,10 +184,17 @@ def trims(L, lift: float) -> list[dict]:
 
 
 def vaults(L, lift: float, thick: float) -> list[dict]:
-    return [{"x0": v["x0"], "x1": v["x1"], "z0": v["z0"], "z1": v["z1"], "y": r(v["y"] + lift), "rise": L.VAULT_RISE,
-             "thick": thick} for v in L.VAULTS]
+    out = []
+    for v in L.VAULTS:
+        d = {"x0": v["x0"], "x1": v["x1"], "z0": v["z0"], "z1": v["z1"], "y": r(v["y"] + lift), "rise": r(v["rise"]),
+             "thick": thick}
+        for k in ("finish", "mouth"):
+            if k in v:
+                d[k] = v[k]
+        out.append(d)
+    return out
 
 
 def dress(L, floor_at, ceil_at, lift: float, thick: float) -> dict:
-    return {"zones": zones(L, floor_at, ceil_at, lift, thick), "strips": strips(L, lift), "words": words(L, lift),
-            "tracks": tracks(L, lift), "vaults": vaults(L, lift, thick), "trims": trims(L, lift)}
+    return {"zones": zones(L, floor_at, ceil_at, lift, thick), "strips": strips(L, lift) + heads(L, lift),
+            "words": words(L, lift), "tracks": tracks(L, lift), "vaults": vaults(L, lift, thick), "trims": trims(L, lift)}

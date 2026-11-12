@@ -64,7 +64,7 @@ func test_subway_names_its_station_and_the_other_maps_none() -> void:
 	var m := _map("subway")
 	assert_not_null(m.station, "Subway is station-dressed")
 	assert_gt(m.station.zones.size(), 60, "its rooms' air")
-	assert_eq(m.station.strips.size(), 4, "two strips on each platform's edge")
+	assert_eq(m.station.strips.size(), 12, "two strips on each platform's edge, one off each end of four flights (SD2)")
 	assert_eq(m.station.tracks.size(), 4, "both lines, either side of the trains")
 	assert_eq(m.warnings.filter(func(w: String) -> bool: return w.contains("station")), [], "no warnings")
 	for id: String in ["depot", "woodland", "range"]:
@@ -94,7 +94,7 @@ func test_every_style_the_map_names_is_one_the_look_knows() -> void:
 
 func test_each_face_takes_its_room_s_finish() -> void:
 	var m := _map("subway")
-	assert_eq(_finish_at(m, Vector3(-45.0, 18.9, 5.0), Vector3.UP), &"terrazzo", "the ticket hall's floor")
+	assert_eq(_finish_at(m, Vector3(-45.0, 18.9, 5.0), Vector3.UP), &"hall_floor", "the ticket hall's floor, plain")
 	assert_eq(_finish_at(m, Vector3(-62.0, 20.0, 0.0), Vector3.RIGHT), &"wall_tile", "the ticket hall's west wall")
 	assert_eq(_finish_at(m, Vector3(-50.0, 24.9, 0.0), Vector3.DOWN), &"plaster", "the ticket hall's ceiling")
 	assert_eq(_finish_at(m, Vector3(0.0, 0.9, -7.0), Vector3.UP), &"platform_floor", "the north platform")
@@ -247,15 +247,54 @@ func test_strips_lie_on_the_platforms_and_the_rails_low_on_the_track_bed() -> vo
 	var m := _map("subway")
 	for s in m.station.strips:
 		var mid := Vector3(s.area.get_center().x, s.y + look.strip_lift, s.area.get_center().y)
-		assert_eq(m.station.style_at(mid + Vector3.UP * 0.05), &"platform", "a %s strip on a platform" % s.finish)
+		var style := m.station.style_at(mid + Vector3.UP * 0.05)
+		# a platform's edge strips, or a flight's head and foot (SD2: in the room it opens onto)
+		assert_true(style == &"platform" or (s.finish == &"tactile" and style in [&"hall", &"passage"]),
+				"a %s strip on a platform or off a flight's end (%s)" % [s.finish, style])
 		assert_almost_eq(m.floor_under(mid.x, mid.z, s.y + 0.5), s.y, 0.01, "on its floor")
 	for t in m.station.tracks:
 		assert_almost_eq(t.y, 0.0, 0.001, "on the track bed")
 		var mid := (t.from + t.to) * 0.5
 		var style := m.station.style_at(Vector3(mid.x, t.y + 0.05, mid.y))
 		assert_true(style == &"track" or style == &"tunnel", "a track in a track or a tunnel (%s)" % style)
-	var top := look.sleeper_size.y + look.rail_size.y
+	var top := (look.sleeper_size.y if look.sleepers else 0.0) + look.rail_size.y
 	assert_lt(top, tuning.body.max_step, "a rail stands lower than a step")
+	assert_false(look.sleepers, "the owner's track: rails on the ballast, no sleepers")
+	assert_gte(look.rail_size.y, 0.1, "rails high enough to see against the dark")
+
+
+func _track_mesh(with_sleepers: bool) -> ArrayMesh:
+	var l := look.duplicate() as StationLook
+	l.sleepers = with_sleepers
+	var t := StationDressing.Track.new()
+	t.from = Vector2(0.0, 0.0)
+	t.to = Vector2(10.0, 0.0)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_custom_format(0, SurfaceTool.CUSTOM_RGBA_FLOAT)
+	StationSurface._add_track(st, l, t)
+	return st.commit()
+
+
+func _vertex_array(mesh: ArrayMesh) -> PackedVector3Array:
+	return mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array
+
+
+func test_track_rails_lie_on_the_ballast_without_sleepers_and_on_them_with() -> void:
+	var bare := _vertex_array(_track_mesh(false))
+	var lo := INF
+	var hi := -INF
+	for v in bare:
+		lo = minf(lo, v.y)
+		hi = maxf(hi, v.y)
+	assert_almost_eq(lo, 0.0, 0.0001, "no sleepers: the rails start on the ballast")
+	assert_almost_eq(hi, look.rail_size.y, 0.0001, "no sleepers: only the rail height")
+	var laid := _vertex_array(_track_mesh(true))
+	hi = -INF
+	for v in laid:
+		hi = maxf(hi, v.y)
+	assert_almost_eq(hi, look.sleeper_size.y + look.rail_size.y, 0.0001, "sleepers on: rails ride on them")
+	assert_gt(laid.size(), bare.size(), "sleepers add geometry")
 
 
 func test_low_drops_the_relief() -> void:
@@ -278,7 +317,7 @@ func test_no_tint_reads_as_a_team() -> void:
 
 func test_each_platform_tunnel_is_vaulted_and_its_colliders_hug_the_drawn_arc() -> void:
 	var m := _map("subway")
-	assert_eq(m.station.vaults.size(), 2, "both platform tunnels")
+	assert_eq(m.station.vaults.size(), 4, "both platform tunnels and both running tunnels")
 	for v in m.station.vaults:
 		var c := v.circle()
 		assert_almost_eq(v.point(0.0).y, v.y + v.rise, 0.001, "the crown")
@@ -376,6 +415,8 @@ func test_the_trackside_wall_over_the_cars_is_tiled_like_the_track() -> void:
 	# TB1 attempt 1: the wall over a standing car faced no room and drew as the dark outside, a black wedge.
 	var m := _map("subway")
 	for v in m.station.vaults:
+		if v.finish != &"":
+			continue  # a running tunnel's arch: its own lining, no platform
 		var wall := v.area.position.y if v.area.get_center().y < 0.0 else v.area.end.y
 		var n := Vector3.BACK if v.area.get_center().y < 0.0 else Vector3.FORWARD
 		var tiled := 0
@@ -562,3 +603,25 @@ func test_vault_ribs_stand_under_the_arc_inside_the_vault_and_off_turns_them_off
 	huge.vault_rib_every = 1000.0
 	huge.vault_rib_width = 1000.0
 	assert_eq(_vault_vertices(v, huge).size(), plain.size(), "a rib wider than the vault is left out")
+
+
+func test_a_malformed_finish_or_mouth_leaves_the_vault_out_and_a_good_one_is_read() -> void:
+	var base := {"x0": 0, "x1": 9, "z0": 0, "z1": 7, "y": 4, "rise": 2, "thick": 0.3}
+	var cases: Array = [
+		[{"finish": 5}, false], [{"finish": null}, false], [{"mouth": "east"}, false], [{"mouth": 1}, false],
+		[{"mouth": null}, false], [{"finish": "lining", "mouth": "west"}, true], [{"mouth": "west"}, true], [{}, true]]
+	for case: Array in cases:
+		var raw: Dictionary = base.duplicate()
+		raw.merge(case[0] as Dictionary, true)
+		var warnings: Array[String] = []
+		var d := StationDressing.read({"station": {"vaults": [raw]}}, warnings)
+		var kept := d != null and d.vaults.size() == 1
+		assert_eq(kept, case[1], "vault with %s" % [case[0]])
+		if not kept:
+			assert_eq(warnings.size(), 1, "a bad one warns once: %s" % [case[0]])
+	var good := StationDressing.read({"station": {"vaults": [base.merged({"finish": "lining", "mouth": "west"})]}}, [] as Array[String])
+	assert_eq(good.vaults[0].finish, &"lining")
+	assert_true(good.vaults[0].open_west)
+	var plain := StationDressing.read({"station": {"vaults": [base]}}, [] as Array[String])
+	assert_eq(plain.vaults[0].finish, &"", "no finish: the look's own")
+	assert_false(plain.vaults[0].open_west)

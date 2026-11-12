@@ -122,6 +122,10 @@ func _run() -> void:
 	var paddles := GatePaddles.build(map, play.gate_paddles)
 	if paddles != null:
 		port.add_child(paddles)
+	# Its small fittings along the walls, floors and ceilings (SD2).
+	var detail := StationDetail.build(map, play.station_detail)
+	if detail != null:
+		port.add_child(detail)
 	var teams := TeamColours.resolve(TeamColours.Set.STANDARD, false, null, play.teams).figures
 	var poles: Array[FlagView] = []
 	for i in map.poles.size():

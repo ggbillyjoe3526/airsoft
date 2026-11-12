@@ -304,6 +304,13 @@ def cut(ob: bpy.types.Object, cutters: list, op: str = "DIFFERENCE", keep_materi
     bpy.data.meshes.remove(me)
 
 
+def ball(radius: float, bands: int) -> list:
+    """A ball's lathe profile, pole to pole, in `bands` equal steps of latitude. Eight bands or more keep every step
+    under the bevel's angle (BEVEL_ANGLE), so `finish` leaves the ball whole and shades it round."""
+    return [(-radius * math.cos(math.pi * i / bands), radius * math.sin(math.pi * i / bands))
+            for i in range(bands + 1)]
+
+
 def finish(ob: bpy.types.Object, bevel: float = 0.0007, segments: int = 2, weighted: bool = True,
            angle: float = BEVEL_ANGLE) -> bpy.types.Object:
     """Rounds the hard edges, smooths the shading split by angle and weights the normals to the big faces."""
@@ -463,14 +470,16 @@ def fold_material(base: str, extra: str) -> None:
 
 
 def export(path: str, animated: bool, webp: int = 0) -> None:
-    """Writes the scene to `path` as a glb, each mesh's surface kinds (surface.py, MQ1) as its vertex colours. With
+    """Writes the scene to `path` as a glb, each mesh's surface kinds (surface.py) as its vertex colours (MQ1: a
+    replica) or as its extras (MQ2: a part's table, a mesh custom property; no other custom property is written). With
     `webp` (a quality, 1..100), its images are stored as WebP at that quality (EXT_texture_webp, which Godot reads):
     a 2K painted set a fraction of its PNG size."""
     surface.adopt()
+    surface.only_tables()
     images = {"export_image_format": "WEBP", "export_image_quality": webp} if webp else {}
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
                               export_animations=animated, export_animation_mode="NLA_TRACKS", export_yup=True,
-                              export_draco_mesh_compression_enable=False, export_extras=False,
+                              export_draco_mesh_compression_enable=False, export_extras=True,
                               export_cameras=False, export_lights=False, export_vertex_color="NAME",
                               export_vertex_color_name=surface.ATTR, export_all_vertex_colors=False,
                               export_active_vertex_color_when_no_material=False, **images)

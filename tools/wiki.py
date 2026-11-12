@@ -239,13 +239,20 @@ def gen_replicas(_arg: str) -> str:
         value = num(s["Spread (°)"]) * num(s.get("Hip spread (×)", "1") or "1")
         return f"{value:.2f}".rstrip("0").rstrip(".")
 
+    def fire_rate(_i: dict, s: dict) -> str:
+        """BBs a second, or shots a second and the BBs each sends (the Pump Shotgun's three barrels, SH1)."""
+        per_shot = int(num(s.get("BBs per shot", "1") or "1"))
+        if per_shot > 1:
+            return f"{s['Fire rate (BBs/s)']} shots/s, {per_shot} BBs each"
+        return f"{s['Fire rate (BBs/s)']} BBs/s"
+
     rows = [
         ("Class", lambda i, s: s["Class"]),
         ("Unlocks", lambda i, s: level_label(levels.get(i["Name"]))),
         ("Muzzle energy", lambda i, s: f"{s['Energy (J)']} J"),
         ("Factory BB weight", lambda i, s: f"{s['BB (g)']} g"),
         ("Muzzle speed", lambda i, s: speed(s)),
-        ("Fire rate", lambda i, s: f"{s['Fire rate (BBs/s)']} BBs/s"),
+        ("Fire rate", fire_rate),
         ("Magazine", lambda i, s: f"{s['Magazine (BBs)']} BBs"),
         ("Magazines carried", lambda i, s: s["Magazines"]),
         ("Reload", lambda i, s: f"{s['Reload (s)']} s"),

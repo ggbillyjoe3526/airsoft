@@ -811,6 +811,45 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   block's box and its crown starts over `WoodsConfig.crown_clear` (2.6 m); a thicket's spruces stay inside its box.
   Asked whether young pines and spruces should match his photos instead (branches to the ground, spruces spilling past
   the thicket's edge), he kept the boxes: what you see is what stops BBs and sight.
+- **A field's layout is judged on its play record (owner, 2026-11-12, MB1).** He asked for every field to be analysed
+  like a Counter-Strike or Valorant map (sight lines, chokes, heat maps, cover, every piece placed on purpose) and
+  changed, with one rule: no new model or sound; a field may be resized or cut if balance wants it ("Balance and
+  gameplay is most important"). `tools/map_heat.gd` (where bots stood, every knock-out, every round's end),
+  `tools/map_survey.gd` (every stand point's exposure, longest line and walk from each end) and `tools/maps/plan.py`
+  (pictures and a report by area) are the measure; a layout change quotes them before and after in its record. No
+  field was resized: the first knock-out comes 15 to 24 s into a round on all three.
+- **A lane is laid for the planner (2026-11-12, MB1).** Its last two points are Attack / Defend's defender posts and
+  stand on the site behind cover, never at a spawn's mouth or a stair's foot. Either side of the field's middle it
+  has one point, about equally deep, and none between: a squad sweeps to the first point past the middle
+  (`RoundPlanner._points_to_middle`), and the end sent deeper loses (Depot's west won 44 % of Elimination's rounds
+  walking 6 m deeper down the Chrono hall, 55 % dead even, 50 % with the middle lane's pair 0.8 m east of even, before
+  RP1's replicas; Woodland's west 40 to 44 % sent over the North bridge, 50 % stopped at its head). No
+  lane takes a way a bot is slow on (Subway's spiral stair, about 40 s against a lift's 10), and none goes through a
+  gap a squad can't pass abreast.
+- **Each of Depot's flags stands between two crate stacks (2026-11-12, MB1).** One hides the pole from the site's
+  doors, the other from the A stairs or the B ramp; the two corner stacks behind the poles are gone. The defenders'
+  posts are behind them and the Garage's behind its dog-leg stacks, so Attack / Defend is fought on the sites (the
+  knock-outs there went from 70 to 203 against the attackers to 148 to 208, at 10 m, not 16, and a flag goes up in
+  45 % of rounds, not 27 %).
+- **Woodland's lanes are broken by pieces on the high ground and by leaves (2026-11-12, MB1).** A hazel hedge on the
+  Ridge's brow, a fallen tree and a log stack at the North bridge's heads, a west wall with a window and a doorway on
+  the Fort, three fallen trees across the Long road (the first on the hump's top) and a log stack across it east of the
+  Culvert, a fallen tree in the Clearing where the west's sweep ends, two spruce thickets on the Ford's east bank with
+  hazels on the crest at the head of its ramp, and a log stack beside flag B, whose forward defender waits behind the
+  crates north of the road mouth (in the mouth he was shot from 25 m before a fight reached the flag). A piece in a dip
+  hides nobody on a rise behind it (the road's stack is a gate screen's 2.8 m where the lane leaves the Culvert: at
+  1.8 m the road west of it looks over it at a chest by flag B's pole, 60 m off, and 3.5 m further east it was the
+  attackers' cover onto the site), and a screen with one gap is a trap for whoever must come through: bushes are walked through on a broad front.
+  A pole walled on two sides hides whoever raises it as well as whoever holds it: a pen of two stacks round flag B,
+  with the defenders' posts inside it, gave the attackers 78 % of 120 rounds, and came out. The north lane's two stops
+  are at the North bridge's west head (the field's middle crosses there, and the bridge is a footbridge 1.8 m wide:
+  sent over it to its east end, the west lost that lane 133 to 187). The lanes' ranges now differ (Elimination's median
+  knock-out: the road 14 m, the Clearing 19 m, the north 26 m; each was about 40 m). The Ridge's 86 m overlook of the
+  WR1 decision is gone; the 170 m exception stays for the pinholes between trunks.
+- **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
+  and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
+  the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the
+  north lane has one stop 4.45 m either side of the field's middle. No block moved.
 
 ## Replicas, Loadout and levels
 
@@ -820,6 +859,16 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   should be less bright. I don't like the wooden sniper rifle so remove that and keep polymer." So black metal is
   the darkest, black polymer a shade lighter, white polymer an off-white, and the sniper's stock stays polymer; no
   replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
+- **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
+  handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
+  sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip
+  area should be slightly smaller and angled in the same direction as the handle." Its grip is the GBB's rounded
+  sections where the GBB's sit (front strap, finger grooves, width) with a back strap that runs straight from under
+  the tang to the heel, and the power cell shows through a smaller window in each side that leans with the handle.
+  He approved that version ("Perfect"); it is not reshaped again without him (docs/records/MQ1B.md).
+- **The Vertical Grip is a little longer (owner, 2026-11-12, MQ2).** "When modelling the vertical grip can you make it
+  a little longer?" Its body reaches 64 mm under the rail, from 53 (`VG_K` in `tools/blender/parts/attachments.py`);
+  its stats are unchanged.
 - **The next replica is a spring sniper rifle, and the owner is asked how to build it and its specs before work starts
   (owner, 2026-10-06).** The SMG and shotgun come after it.
 - **The Cyber Pistol is the owner's own design and the level cap's reward (owner, 2026-10-04; level 10 since
@@ -924,6 +973,22 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the Variable Scope so the level isn't empty with Dev content off (LV15, owner 2026-11-10; level 7 at first). A
   Breacher bot kit (red dot, rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor
   until he records one.
+- **The Pump Shotgun (owner, 2026-11-12, SH1).** "I want to add a shotgun replica to the game... find specs for this
+  replica to make it feel and play unique compared to other replicas. Ask me questions about how I want to build it."
+  His answers to the seven questions: **spring** driven; **three BBs a pull**; its shell **swapped like a magazine**
+  (a 30 BB box, ten pulls; not shells pushed in one at a time, which the roadmap had pencilled in); it **shares the
+  Sniper Rifle's springs** (the M130 as it comes, the M140 and M150 fit); the default parts (**any optic on a top
+  rail, the Red Laser and the Weapon Torch on a side rail; no grips, since the pump is the grip, no silencer, since it
+  has three barrels, no barrel or magazine parts**, and no shotgun-only parts for now); a **full stock**; **level 12**.
+  Defaults taken (he may change any): the name; a rifle-class replica, **0.65 J** with 0.20 g, **1.7 pulls a second**
+  with a pump after each (single shots only), **30 × 5** BBs, 1.2 s reload, 0.5 s draw, 0.5° spread, 0.45° kick, hip
+  spread 0.7; two new stats.md columns, **BBs per shot 3** and **Pattern 1.2°** (each BB that far off the shot's line,
+  an even triangle with the first straight up, each with its own scatter; one hit is still one hit). A Clearer bot
+  kit (red dot, rushers and flankers); bots hold their pull past about 29 m, where the pattern is wider than a body.
+  Its own sound profile `shotgun`, stand-ins from his sniper and magazine recordings until he records them. Until its
+  own model (his photos came the same day: no sights from the photos, the other replicas' quality, the steel,
+  aluminium and polymer surfaces of MQ1) it is drawn, held and pictured as the Sniper Rifle, whose bolt is worked
+  where the pump will be, and its side rail (the Red Laser) comes with that model.
 - **The GBB Pistol shoots 0.70 J and the Compact SMG 0.85 J (owner, 2026-11-12, PH2).** "Increase gbb pistol to 0.7J
   and SMG to 0.85J", after PH1's audit found the pistol's 0.52 J below a real green-gas pistol's. This replaces CS1's
   0.75 J and the pistol's 0.52 J. **Each keeps its job through its hop-up, not its energy** (the default taken to his
