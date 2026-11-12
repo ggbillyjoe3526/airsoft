@@ -170,7 +170,20 @@ GROOVE_ROWS = ((84.0, 95.0), (99.5, 110.5), (115.0, 124.0))
 GROOVE_PX = 1152.0
 GROOVE_PITCH = 64.0
 GROOVE_LEN = 57.0
-GROOVE_DEPTH = 0.0016
+GROOVE_DEPTH = 0.0058
+# The grooves open into the stock's hollow, as the photos' do (they read as black slots): chambers each side of a
+# middle web (front, back px; each chamber's top and foot py, a shelf between the lower two rows; the web's half
+# thickness, the side wall's thickness and how far in from the side wall the lower chamber's leaning back wall
+# starts at its top, m).
+HOLLOW_PX = (1146.0, 1458.0)
+HOLLOW_PY = ((81.0, 111.8), (113.6, 127.0))
+HOLLOW_WEB = 0.0020
+HOLLOW_WALL = 0.0022
+HOLLOW_LEAN = 0.0020
+# The sling loop hanging at the fin's toe (the photos' left side): its lug on the fin's front edge and the wire loop
+# through it (centre px, py; half width and height, m; the wire's radius).
+TOE_LOOP = (1437.5, 289.0, 0.0034, 0.0128, 0.0011)
+TOE_LUG = ((1432.0, 259.0), (1449.0, 259.0), (1451.0, 273.0), (1434.0, 273.0))
 
 TORCH_Y = Y(sum(SIDE_RAIL_PX) / 2.0)
 SIDE_RAIL_X = COVER_HW - 0.0006
@@ -384,12 +397,12 @@ def barrel() -> list:
     b.lathe([(0.0, 0.0), (0.0, 0.0034), (-0.0050, 0.0034), (-0.0062, 0.0026), (-0.0062, 0.0)], "Metal", 16,
             centre=(0.0, yc, zc + 0.001), axis="z")
     loop = []
-    for i in range(20):
-        a = 2.0 * math.pi * i / 20
+    for i in range(12):
+        a = 2.0 * math.pi * i / 12
         c = Vector((0.0, yc + 0.0052 * math.cos(a) * 0.55, zc - 0.0105 + 0.0085 * math.sin(a)))
         ring = []
-        for k in range(8):
-            t = 2.0 * math.pi * k / 8
+        for k in range(5):
+            t = 2.0 * math.pi * k / 5
             n2 = Vector((0.0, math.cos(a) * 0.55, math.sin(a))).normalized()
             ring.append(tuple(c + n2 * (0.0012 * math.cos(t)) + Vector((0.0012 * math.sin(t), 0.0, 0.0))))
         loop.append(ring)
@@ -592,11 +605,11 @@ def selector() -> object:
     b = hs.Builder("Selector", ["Detail", "Accent"])
     x = GUARD_HW + 0.0010
     b.lathe([(-x - 0.0030, 0.0), (-x - 0.0030, SAFETY_R - 0.0008), (-x - 0.0022, SAFETY_R), (x + 0.0004, SAFETY_R),
-             (x + 0.0012, SAFETY_R - 0.0008), (x + 0.0012, 0.0)], "Detail", 16,
+             (x + 0.0012, SAFETY_R - 0.0008), (x + 0.0012, 0.0)], "Detail", 12,
             centre=(0.0, Y(SAFETY[0]), Z(SAFETY[1])), axis="x")
     # The band that shows on the left while it is safe.
     b.tube([(-x - 0.0019, SAFETY_R + 0.0001), (-x - 0.0006, SAFETY_R + 0.0001)],
-           [(-x - 0.0019, SAFETY_R - 0.0004), (-x - 0.0006, SAFETY_R - 0.0004)], "Accent", 16,
+           [(-x - 0.0019, SAFETY_R - 0.0004), (-x - 0.0006, SAFETY_R - 0.0004)], "Accent", 12,
            centre=(0.0, Y(SAFETY[0]), Z(SAFETY[1])), axis="x")
     return hs.finish(b.build(), 0.0003, 1)
 
@@ -697,8 +710,18 @@ def stock() -> list:
         for py0, py1 in GROOVE_ROWS:
             for k in range(5):
                 px = GROOVE_PX + GROOVE_PITCH * k
-                cutters.append(slot_cutter("c_gr", px, px + GROOVE_LEN, py0, py1, sx * (STOCK_HW - GROOVE_DEPTH),
-                                           sx * (STOCK_HW + 0.01), 0.0012, 2))
+                # Square-cornered (the body's bevel softens them): rounded corners cost 400 triangles over 30 slots.
+                cutters.append(box_cutter("c_gr", (sx * (STOCK_HW - GROOVE_DEPTH), Y(px + GROOVE_LEN), Z(py1)),
+                                          (sx * (STOCK_HW + 0.01), Y(px), Z(py0))))
+        # The hollow behind the slots. The upper two rows open onto the extension's underside; the lowest row's
+        # chamber has a back wall leaning out over it (facing down, as the extension's underside does), so no light
+        # falls on what the slot shows and it reads as dark as the two above.
+        x_web, x_wall = sx * HOLLOW_WEB, sx * (STOCK_HW - HOLLOW_WALL)
+        (top0, foot0), (top1, foot1) = HOLLOW_PY
+        cutters.append(box_cutter("c_hollow", (x_web, Y(HOLLOW_PX[1]), Z(foot0)), (x_wall, Y(HOLLOW_PX[0]), Z(top0))))
+        wedge = [(x_wall, Z(foot1)), (x_wall, Z(top1)), (x_wall - sx * HOLLOW_LEAN, Z(top1)), (x_web, Z(foot1))]
+        cutters.append(section_prism("c_hollow", wedge if sx > 0 else wedge[::-1], Y(HOLLOW_PX[1]), Y(HOLLOW_PX[0]),
+                                     "Furniture"))
     hs.cut(ob, cutters)
     out.append(hs.finish(ob, 0.0011, 1))
 
@@ -709,6 +732,23 @@ def stock() -> list:
     b.lathe([(-0.0086, 0.0), (-0.0086, 0.0024), (-0.0078, 0.0030), (0.0078, 0.0030), (0.0086, 0.0024), (0.0086, 0.0)],
             "Metal", 14, centre=(0.0, Y(1228), Z(168)), axis="x")
     out.append(hs.finish(b.build(), 0.0010, 2))
+
+    # The sling loop at the toe: a lug on the fin's front edge, a steel wire loop hanging through it.
+    b = hs.Builder("ToeLoop", ["Furniture", "Metal"])
+    side_prism(b, [(px, py, 2) for px, py in TOE_LUG], 0.0034, "Furniture", 2)
+    lx, lz, hw, hh, wire = Y(TOE_LOOP[0]), Z(TOE_LOOP[1]), TOE_LOOP[2], TOE_LOOP[3], TOE_LOOP[4]
+    loop = []
+    for i in range(12):
+        a = 2.0 * math.pi * i / 12
+        # A stadium: straight sides, round ends.
+        cy, cz = hw * math.cos(a), (hh - hw) * (1.0 if math.sin(a) > 0.0 else -1.0) + hw * math.sin(a)
+        c = Vector((0.0, lx + cy, lz + cz))
+        n2 = Vector((0.0, math.cos(a), math.sin(a)))
+        loop.append([tuple(c + n2 * (wire * math.cos(2.0 * math.pi * k / 5))
+                           + Vector((wire * math.sin(2.0 * math.pi * k / 5), 0.0, 0.0))) for k in range(5)])
+    loop.append(loop[0])
+    b.loft(loop, "Metal", cap0=False, cap1=False)
+    out.append(hs.finish(b.build(), 0.0, 1))
 
     # The butt pad, finely ribbed across its back.
     b = hs.Builder("ButtPad", ["Rubber"])
