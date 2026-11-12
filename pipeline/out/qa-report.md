@@ -1,18 +1,15 @@
-Task: none (MQ1) · QA commit this commit · Verdict: Pass
+Task: UL2 · QA commit (see git log, "UL2 QA") · Verdict: Pass
 
-Attempt 2 review (git diff 370f289 HEAD, the 16-slot change).
-Blocking: none. Advisory: none new.
+Blocking: none.
+Advisory:
+- game/play/field_lighting.gd:305 doc comment line is 159 chars (gdlint passes; tidy when next touched).
+- A flicker lamp (BAKE_DYNAMIC) contributes no baked SDFGI bounce, so flicker lamps on Subway add less ceiling light than the working ones; by design (roof_lamps.gd comment), only visible on Ultra.
+Interplay checked by reading: set_underground is the only writer of sdfgi_energy/bounce after build (_grade runs once in build, field_lighting.gd:346; set_gi_quality in graphics_apply.gd:111 only sets RenderingServer ray/frame counts; set_effects only toggles sdfgi_enabled). So GraphicsApply re-apply and preset change keep the underground values. OpticGlass duplicates the env after set_underground (play_session order), so aimed/hip envs carry them. Lift car lamps and Subway lamps go through RoofLamps.build (roof_view.gd:79); Depot is not plain, keeps 1.0 (pinned).
 
-Checked by reading and by test:
-- No code path still assumes 8 slots: grep of game/, tests/, tools/ finds no `* 8`, no old names (worn_materials, MAX_WORN, OWN_GLOW) left; renamed callers (play_session, tests) use surface_materials / surfaced.
-- ReplicaSurfaces._build pads to SLOTS (16) for indices past the 7 kinds with the polymer row, so kind_finish/grain/tone/shine are all 16 long; KINDS = 16 and hint_range(0, 15) in the shader match. Alpha 1.0 (no colours) reads 16 -> default_kind (never indexes a table).
-- Chroma maths: divisor is max(top, CHROMA_FLOOR), so pure black is safe; a paint above 1 (bare gain 2.2) only raises chroma, mix stays finite.
-- Part and attachment/magazine files (not rebuilt) carry no kinds or only valid sixteenths: scan test below passes, so they draw as default polymer / steel by part.
-- Shader compile: tests that build and dress the material (test_replica_surfaces, test_replica_wear, test_mq1_qa) run without script errors headless; a Compatibility-renderer compile needs a display (owner's list).
-
-Tests added (tests/unit/test_mq1_qa.gd):
-- test_every_replica_and_part_file_names_kinds_in_sixteenths_or_none · scans every vertex-colour alpha in assets/models/replicas and replicaParts for a whole slot below KINDS or 16 · fails on a file still cut for 8 slots (alpha 1/8 would be 2 sixteenths... checked by reasoning, not by a stale file; no stale glb exists to stub).
-- test_all_four_kind_tables_are_the_shaders_length · dress() sets four tables of SLOTS entries and the include's KINDS equals SLOTS · fails if either side is changed alone (old value 8 vs 16).
-
-Runs: test_mq1_qa 8/8, test_replica_surfaces 14/14, test_replica_wear 15/15; gdlint clean. Full suite, smoke and check.sh not run (background suite ran per instruction).
-Not testable here: Compatibility/Forward+ shader look, turntable and menu pictures on screen, bots' figure copies visually (display needed).
+Tests (tests/unit/test_ul2_underground_bounce.gd):
+- :13,:22 underground/above-ground/restore bounce values; fail if set_underground did not set sdfgi_* (old code leaves 1.0/0.5).
+- :34,:42 plain lamps get plain_lamp_indirect, hall lamps stay 1.0; fail without the roof_lamps.gd line (default 1.0).
+- :49 Subway plain, Depot not.
+- added: dim/flicker/dead plain lamps keep indirect energy after set_flicker and flicker stays dynamic (fails if the indirect line were only on working lamps).
+Result: 6 pass, 0.5 s. Raw output pipeline/out/qa/ul2.txt. Full suite not run (running elsewhere).
+Not testable headless: the actual Ultra render (needs a display/GPU); owner to look at Subway on Ultra, incl. flicker lamps and the lift.

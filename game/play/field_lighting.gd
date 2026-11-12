@@ -301,13 +301,16 @@ func set_key_share(share: float) -> void:
 
 ## An underground field (`on`, MapData.roof_underground, UL1): no sky reaches it, so its ambient light is the preset's
 ## fill alone (none of the sky's blue in it) and the sky is in no reflection (the area probes and screen reflections
-## still draw theirs); GraphicsApply.sun_shadows then keeps the sun's shadow off. Off: the preset's own. Set once as the
-## field is built.
+## still draw theirs); GraphicsApply.sun_shadows then keeps the sun's shadow off. Ultra's bounce light (SDFGI) is
+## stronger and fed on further there (LookConfig.sdfgi_*_underground, UL2), as the lamps' bounce alone lights the
+## shade. Off: the preset's own. Set once as the field is built.
 func set_underground(on: bool) -> void:
 	_underground = on
 	environment.ambient_light_sky_contribution = 0.0 if on else _sky_share
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED if on \
 			else Environment.REFLECTION_SOURCE_SKY
+	environment.sdfgi_energy = _look.sdfgi_energy_underground if on else _look.sdfgi_energy
+	environment.sdfgi_bounce_feedback = _look.sdfgi_bounce_underground if on else _look.sdfgi_bounce
 
 
 func underground() -> bool:
