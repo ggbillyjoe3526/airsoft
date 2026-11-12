@@ -163,3 +163,78 @@ func test_a_silencers_dark_rubber_cap_details_keep_their_own_colour_in_every_pai
 					if own.resource_name == "Rubber":
 						assert_eq(ReplicaPaint.plain_of(mi.get_surface_override_material(i)), own,
 								"%s %s: rubber not painted over (%s)" % [id, mi.name, paint])
+
+
+func _surface_extent(mesh: Mesh, material_name: String) -> AABB:
+	var box := AABB()
+	var first := true
+	for i in mesh.get_surface_count():
+		if mesh.surface_get_material(i).resource_name != material_name:
+			continue
+		for v in (mesh.surface_get_arrays(i)[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+			box = AABB(v, Vector3.ZERO) if first else box.expand(v)
+			first = false
+	return box
+
+
+func _tris_of(mesh: Mesh, material_name: String) -> int:
+	var tris := 0
+	for i in mesh.get_surface_count():
+		if mesh.surface_get_material(i).resource_name == material_name:
+			tris += (mesh.surface_get_arrays(i)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+	return tris
+
+
+func test_no_parts_file_carries_a_duplicate_suffixed_material_and_every_file_is_within_its_cap() -> void:
+	var paths: Array[String] = ["res://assets/models/replicaParts/inside/aeg.glb"]
+	for id in FILES:
+		paths.append(PARTS % id)
+	for path in paths:
+		assert_lt(FileAccess.get_file_as_bytes(path).size(), 4 * 1024 * 1024, "%s within the 4 MiB cap" % path)
+		for mi in _meshes(_file(path)):
+			for i in mi.mesh.get_surface_count():
+				var material_name := mi.mesh.surface_get_material(i).resource_name
+				assert_false(material_name.contains("."), "%s %s: material '%s' is a duplicate" % [path, mi.name, material_name])
+
+
+func test_each_magazine_part_keeps_every_material_slot_and_its_balls() -> void:
+	var expected := {
+		"aeg/magazine_hiCap": ["Detail", "Rubber", "BB", "Metal"],
+		"aeg/magazine_lowCap": ["Detail", "Rubber", "BB"],
+		"pistol/magazine_extended": ["Detail", "Metal", "BB", "Accent", "Furniture", "Rubber"],
+	}
+	for key: String in expected:
+		var parts := key.split("/")
+		var found := false
+		for mi in _meshes(_file(PARTS % parts[0])):
+			if mi.name != StringName(parts[1]):
+				continue
+			found = true
+			for material_name: String in expected[key]:
+				assert_gt(_tris_of(mi.mesh, material_name), 0, "%s keeps its %s slot" % [key, material_name])
+			assert_gt(_tris_of(mi.mesh, "BB"), 1000, "%s keeps all of its BBs" % key)
+		assert_true(found, "%s exists" % key)
+
+
+func test_the_long_barrels_open_backed_crown_is_buried_in_the_barrel_and_sealed_by_the_inner_barrel() -> void:
+	var outside: MeshInstance3D
+	var inside: MeshInstance3D
+	for mi in _meshes(_file(PARTS % "aeg")):
+		if mi.name == &"barrel_long":
+			outside = mi
+	for mi in _meshes(_file("res://assets/models/replicaParts/inside/aeg.glb")):
+		if mi.name == &"barrel_long_Inside":
+			inside = mi
+	assert_not_null(outside)
+	assert_not_null(inside)
+	var crown := _surface_extent(outside.mesh, "Brass")
+	var body := _surface_extent(outside.mesh, "Metal")
+	var inner := _surface_extent(inside.mesh, "Brass")
+	assert_eq(outside.position, inside.position, "the inside sits on the barrel")
+	# The crown's back edge (its highest z) lies inside the body's length and within its radius, so no back face shows.
+	assert_gt(crown.end.z, body.position.z, "crown's back edge is behind the body's front")
+	assert_lt(crown.end.z, body.end.z, "crown's back edge is inside the body")
+	assert_lt(maxf(crown.end.x, crown.end.y), minf(body.end.x, body.end.y), "crown narrower than the body")
+	# The inner barrel starts where the crown ends, so the Loadout picture has no gap behind it.
+	assert_lte(inner.position.z, crown.end.z + 0.0002, "inner barrel meets the crown's back edge")
+	assert_gte(inner.end.x, crown.end.x - 0.0002, "inner barrel is as wide as the crown")
