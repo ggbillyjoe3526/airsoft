@@ -73,7 +73,7 @@ SIGN_OVER = 0.35   # a wall sign's middle over an escalator's or a stair's mouth
 # walls, ESC_STEP apart, their middles this far over the stairs' pitch line, clear of the first and last 2 m.
 ESC_SCALE = 0.6
 ESC_STEP = 2.0
-ESC_ROWS = [("esc_up", -35.0, -21.0, 2.1), ("esc_low", -3.0, 7.0, 1.7)]
+ESC_ROWS = [("esc_up", -35.0, -21.0, 2.1), ("esc_low", -3.5, 6.5, 1.9)]
 
 # The spots: (model, room, wall, along, height over the floor) for a wall model; (model, room, x, z) hung or on the
 # floor; a hung sign's yaw 90 puts "Way out" facing east, read by those heading west towards the street, and

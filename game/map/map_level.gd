@@ -323,8 +323,16 @@ func _add_rest() -> void:
 			_query.set_railing_bodies(bar_rids, bar_surfaces, sight, _level_ray("PastRailingsRay"))
 			_railings = MeshInstance3D.new()
 			_railings.name = "Railings"
-			_railings.mesh = _railing_mesh(m, style, _query.railings)
-			_railings.material_override = _material
+			# The modelled pieces (SM2), or the plain boxes when they can't be read.
+			var look := style.railing_look
+			var modelled: ArrayMesh = RailingMesh.build(_query.railings, look) if look != null else null
+			if modelled != null:
+				_railings.mesh = modelled
+				_railings.material_override = LookMaterials.vertex_colour(look.roughness, look.metallic,
+						Color.WHITE, false, look.wear)
+			else:
+				_railings.mesh = _railing_mesh(m, style, _query.railings)
+				_railings.material_override = _material
 			add_child(_railings)
 	_clear_bodies.clear()
 	_railing_bodies.clear()

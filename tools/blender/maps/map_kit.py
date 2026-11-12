@@ -13,7 +13,7 @@ the model's bounds to the box (or to a cell of it). So every model here is:
   in and out across a face with no edge to it;
 - perforated where a part is marked `perforated`: its vertices carry UVs (x 2 plus metres across the row's middle, y
   metres along it) that look_vertex.gdshader punches a row of holes into, so a steel profile's dense holes cost no
-  triangles;
+  triangles; or ribbed (`ribbed`: x -2, y metres across the ribs), grooved finely the same way (an escalator's steps);
 - written as one glb of positions, normals and colours (and UVs when a part is perforated), glTF's +Y up (Blender's
   +Z), +Z toward the viewer (Blender's -Y), with no textures.
 
@@ -37,6 +37,8 @@ FOOT_SHADE = 0.12
 # perforation_pitch and perforation_radius keep the same.
 PERF_PITCH = 0.045
 PERF_RADIUS = 0.0045
+# A ribbed part's ribs (`ribbed`): their pitch, metres; look_vertex.gdshader's rib_pitch keeps the same.
+RIB_PITCH = 0.0085
 # Who made the files, written into each glb.
 COPYRIGHT = "airsoft project; made by tools/blender/maps"
 
@@ -90,6 +92,23 @@ def toned(ob: bpy.types.Object, tones: list) -> bpy.types.Object:
     layer = ob.data.attributes.new("tone", "FLOAT", "POINT")
     for i, t in enumerate(tones):
         layer.data[i].value = t
+    return ob
+
+
+def ribbed(ob: bpy.types.Object, across: int) -> bpy.types.Object:
+    """Marks `ob` for fine ribs running square to its axis `across` (0 x, 1 y, 2 z), RIB_PITCH apart:
+    look_vertex.gdshader grooves them from the UVs `_gather` writes (x -2, y metres along `across`), an escalator
+    step's cleats for no triangles."""
+    ob["ribs"] = int(across)
+    return ob
+
+
+def smoothed(ob: bpy.types.Object, sharp_deg: float = 40.0) -> bpy.types.Object:
+    """Draws `ob` with rounded normals: Blender's corner normals, sharp only across edges bent more than `sharp_deg`
+    (a handrail's round back smooth, its lips crisp). Every other part is flat-shaded, each face its own normal."""
+    ob.data.shade_smooth()
+    ob.data.set_sharp_from_angle(angle=math.radians(sharp_deg))
+    ob["smooth"] = True
     return ob
 
 
@@ -244,14 +263,17 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
         span = max(z1 - z0, 1e-6)
         tone = me.attributes.get("tone")
         perf = (int(ob["perf_axes"][0]), int(ob["perf_axes"][1]), ob["perf_middle"]) if "perf" in ob else None
+        ribs = int(ob["ribs"]) if "ribs" in ob else None
+        smooth = bool(ob.get("smooth", False))
         me.calc_loop_triangles()
         for tri in me.loop_triangles:
             mat = me.materials[me.polygons[tri.polygon_index].material_index]
             base = mat.diffuse_color
-            n = tri.normal
-            if unit is not None:
-                n = Vector((n.x * unit[0], n.y * unit[1], n.z * unit[2])).normalized()
-            for vi in tri.vertices:
+            for corner, vi in enumerate(tri.vertices):
+                # A smooth part (`smoothed`) keeps Blender's corner normals (round where its edges aren't sharp).
+                n = Vector(tri.split_normals[corner]) if smooth else tri.normal
+                if unit is not None:
+                    n = Vector((n.x * unit[0], n.y * unit[1], n.z * unit[2])).normalized()
                 co = me.vertices[vi].co
                 if unit is not None:
                     co = Vector([(co[i] - mid[i]) / unit[i] for i in range(3)])
@@ -259,6 +281,8 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
                 k = shade * foot * (tone.data[vi].value if tone is not None else 1.0)
                 own = me.vertices[vi].co
                 uv = (round(2.0 + own[perf[0]] - perf[2], 5), round(own[perf[1]], 5)) if perf else (0.0, 0.0)
+                if ribs is not None:
+                    uv = (-2.0, round(own[ribs], 5))
                 row = ((round(co.x, 5), round(co.z, 5), round(-co.y, 5)), (round(n.x, 4), round(n.z, 4),
                        round(-n.y, 4)), (round(base[0] * k, 4), round(base[1] * k, 4), round(base[2] * k, 4), alpha),
                        uv)
@@ -274,9 +298,9 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
 
 def export(path: str, name: str, objects: list, unit: tuple = None, middle: tuple = None) -> int:
     """Writes `objects` as one vertex-coloured mesh `name` to the glb at `path` (in a 1 m cube with `unit`, _gather);
-    returns its triangle count. The UVs (TEXCOORD_0) are written only when a part is perforated."""
+    returns its triangle count. The UVs (TEXCOORD_0) are written only when a part is perforated or ribbed."""
     positions, normals, colours, uvs, indices = _gather(objects, unit, middle)
-    with_uv = any("perf" in ob for ob in objects)
+    with_uv = any("perf" in ob or "ribs" in ob for ob in objects)
 
     def pack(fmt: str, rows: list) -> bytes:
         return b"".join(struct.pack("<" + fmt, *r) for r in rows)
