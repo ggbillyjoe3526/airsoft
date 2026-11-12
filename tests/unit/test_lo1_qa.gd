@@ -152,10 +152,10 @@ func test_equip_swaps_when_the_other_slot_holds_it() -> void:
 
 func test_bb_weight_and_dial_snap_and_clamp() -> void:
 	var l := rules.default_loadout("x")
-	assert_eq(rules.set_bb_weight(l, AEG, 5.0), 0.3)
+	assert_eq(rules.set_bb_weight(l, AEG, 5.0), 0.4)
 	assert_eq(rules.set_bb_weight(l, AEG, -1.0), 0.2)
 	assert_almost_eq(rules.set_bb_weight(l, AEG, 0.234), 0.23, 0.0001)
-	assert_eq(rules.set_bb_weight(l, AEG, INF), 0.3)
+	assert_eq(rules.set_bb_weight(l, AEG, INF), 0.4)
 	assert_eq(rules.set_hop_up(l, AEG, 9.0), 1.0)
 	assert_almost_eq(rules.set_hop_up(l, AEG, 0.33), 0.35, 0.0001)
 

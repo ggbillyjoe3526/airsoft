@@ -22,11 +22,12 @@ static func still(cfg: WindConfig) -> Wind:
 	return w
 
 
-## Draws this match's breeze for `seed_value`: a strength between the config's least and most, from any direction.
-func draw(seed_value: int, cfg: WindConfig) -> void:
+## Draws this match's breeze for `seed_value`: a strength between the config's least and most, from any direction,
+## and `share` of it (the field's exposure, GameState.wind_share: 0 indoors, where the air stands still, PH1).
+func draw(seed_value: int, cfg: WindConfig, share: float = 1.0) -> void:
 	_cfg = cfg
 	var rng := Seeds.stream((seed_value ^ SALT) & Seeds.MASK_32)
-	speed = lerpf(cfg.min_speed, cfg.max_speed, rng.randf())
+	speed = lerpf(cfg.min_speed, cfg.max_speed, rng.randf()) * maxf(share, 0.0)
 	yaw = rng.randf() * TAU
 	phases = Vector3(rng.randf() * TAU, rng.randf() * TAU, rng.randf() * TAU)
 

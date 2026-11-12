@@ -377,6 +377,20 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   sprinting to fight.
 - **Walk is Shift (slow, quiet) and sprint is Left Alt (owner, 2026-09-30);** running, sprinting and landing make noise
   bots hear, walking does not. Wind is one breeze per match from the seed, 0.3 to 1.8 m/s, moving BBs only (2026-10-04).
+- **Each field has its own weather (PH1, 2026-11-12; the owner's physics audit, defaults taken).** `data/maps.md`
+  gives a field the share of the match's breeze that reaches it (Wind: 0 indoors, so Depot's and Subway's BBs fly
+  straight) and its air by day (Air, °C; a night in the open is 8 °C colder). Replicas are rated at 20 °C, as on a
+  chrono; the field's air sets its density for every BB (a few per cent), and a gas replica's energy follows it at
+  1.2 % a °C (about 1 fps a °F), never past its site limit. Depot and the Range stay at 20 °C, so what the Loadout
+  says is what they shoot. The pause menu and the field cards' tooltips say the weather. Left out on purpose, fun over
+  simulation: a BB taking its shooter's own speed, a canted hop-up curving shots, gas cooling down in rapid fire, rain
+  and humidity (`docs/records/PH1.md`).
+- **The site limit is read with the BBs loaded (PH1, 2026-11-12),** as a real chrono reads joules with your own BBs:
+  a heavier BB's extra energy (`bb_energy_exponent`) stops at the limit too. The Loadout loads 0.20 to 0.40 g (was
+  0.30 g); each hop-up lifts only so much, so each replica has a best weight.
+- **A BB meets a moving body where both were at the same moment of the tick (PH1, 2026-11-12).** `BBStep` tests the
+  BB's path less the body's own step, which is also what the interpolated figure and BB show; before, the body stood
+  at its tick's end for the whole of the BB's travel (up to 11 cm out on a sprinter).
 - **Crouch and aim are both held by default (owner, 2026-10-18, replacing crouch toggled from 2026-10-03).** Each has a
   toggle setting; a toggled crouch stands up on a sprint or jump press. Lean and sprint are held.
 - **Hold Q / E to lean around cover (owner, 2026-10-01); replicas switch with 1, 2 and the mouse wheel (owner,

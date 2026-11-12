@@ -18,6 +18,13 @@ const ROUND_COLUMN := "Round"
 ## The start mode column, optional: the selector setting a replica that comes on full auto starts every round on there
 ## ("no full auto indoors", owner 2026-11-02). Blank or `auto` for none.
 const START_COLUMN := "Start mode"
+## The weather columns, optional (PH1): the share of the match's breeze that reaches the field (0 indoors, where the
+## air stands still) and its air's temperature by day (°C; a night match is WeatherConfig.night_drop colder). Blank
+## keeps the built-in: the whole breeze, in the air replicas are rated in.
+const WIND_COLUMN := "Wind (×)"
+const AIR_COLUMN := "Air (°C)"
+const WIND_RANGE := Vector2(0.0, 2.0)
+const AIR_RANGE := Vector2(-10.0, 40.0)
 const START_MODES: Dictionary[String, ReplicaConfig.FireMode] = {
 	"": ReplicaConfig.FireMode.AUTO,
 	"auto": ReplicaConfig.FireMode.AUTO,
@@ -44,6 +51,14 @@ class Entry:
 	## The most a selector starts each round on here (RoundState.start_mode, Armament.start_mode): SEMI or BURST and a
 	## replica that comes on full auto starts below it; AUTO (no rule) and every replica starts as it comes.
 	var start_mode: ReplicaConfig.FireMode = ReplicaConfig.FireMode.AUTO
+	## The share of the match's breeze that reaches the field (Simulation.set_weather; 0: still air, indoors), and its
+	## air's temperature by day (°C; NAN: the air replicas are rated in, BallisticsConfig.air_temperature).
+	var wind: float = 1.0
+	var air: float = NAN
+
+	## The field's air (°C) by day: its own, else `rated`.
+	func air_or(rated: float) -> float:
+		return rated if is_nan(air) else air
 
 	## Whether a match of `team_size` a side can be played here.
 	func allows(team_size: int) -> bool:
@@ -111,6 +126,8 @@ static func parse(text: String) -> MapCatalog:
 			_read_sizes(e, row, at, m.problems, table)
 			_read_round(e, row, at, m.problems, table)
 			_read_start_mode(e, row, at, m.problems, table)
+			e.wind = _read_number(row, WIND_COLUMN, WIND_RANGE, e.wind, at, m.problems, table)
+			e.air = _read_number(row, AIR_COLUMN, AIR_RANGE, e.air, at, m.problems, table)
 			m.entries.append(e)
 	for column in SIZE_COLUMNS:
 		if not table.has_column(column):
@@ -173,6 +190,22 @@ static func _read_start_mode(e: MapCatalog.Entry, row: DataTable.Row, at: String
 				% [at, raw, e.id])
 		return
 	e.start_mode = START_MODES[raw]
+
+
+## `row`'s `column` cell as a number within `limits` (x to y): `built_in` for a blank cell or a table without the
+## column, and for anything else that isn't such a number, with a problem.
+static func _read_number(row: DataTable.Row, column: String, limits: Vector2, built_in: float, at: String,
+		problems: Array[String], table: DataTable) -> float:
+	if not table.has_column(column):
+		return built_in
+	var raw := row.cell(column)
+	if raw.is_empty():
+		return built_in
+	if not raw.is_valid_float() or raw.to_float() < limits.x or raw.to_float() > limits.y:
+		problems.append("%s: %s \"%s\" is not a number from %s to %s: %s keeps its built-in value"
+				% [at, column, raw, limits.x, limits.y, row.key])
+		return built_in
+	return raw.to_float()
 
 
 ## The entry for `map_id`, or null.

@@ -295,7 +295,9 @@ func carried(loadout: Loadout) -> Kit:
 		var p := stats.power(power_id)
 		var fitted := _fitted(it, t)
 		var energy := base.muzzle_energy * (1.0 + p.energy) * _apply_parts(r, fitted)
-		var limit := stats.energy_limit(base.site_class)
+		# The site's chrono reads the BBs you load (PH1): a heavier BB leaves with a little more energy
+		# (bb_energy_exponent), so the rated energy that keeps it under the limit is that much lower.
+		var limit := stats.energy_limit(base.site_class) / Ballistics.weight_energy_share(base, rules, t.bb_weight)
 		r.muzzle_energy = minf(energy, limit)
 		r.fire_rate = base.fire_rate * (1.0 + p.fire_rate)
 		r.recoil_deg = base.recoil_deg * (1.0 + p.recoil)
@@ -320,6 +322,8 @@ func carried(loadout: Loadout) -> Kit:
 		kit.parts.append(keys)
 		kit.lights.append(light)
 		kit.capped.append(energy > limit)
+		kit.energies.append(energy)
+		kit.limits.append(limit)
 		kit.dev = kit.dev or it.is_dev() or (pw != null and pw.is_dev())
 	return kit
 

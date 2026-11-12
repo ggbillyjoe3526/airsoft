@@ -28,7 +28,9 @@ extends Resource
 @export_range(0.01, 0.5, 0.01) var hop_up_dial_step: float = 0.05
 ## A variable optic's zoom step (×) per notch of the mouse wheel while aimed through it (SN2, owner default: 1×).
 @export_range(0.25, 2.0, 0.25) var zoom_step: float = 1.0
-## The BB weights a player can load (g) and the Loadout's step (the browser game's BB_WEIGHT): 0.20 to 0.30 g.
+## The BB weights a player can load (g) and the Loadout's step (the browser game's BB_WEIGHT, 0.20 to 0.30 g; to 0.40 g
+## since PH1, the heaviest most sites' players load: a heavy BB holds its speed and shrugs off the wind, but a replica's
+## hop-up lifts only so much, so each has a heaviest BB it still flies flat).
 @export var bb_weight_min: float = 0.2
-@export var bb_weight_max: float = 0.3
+@export var bb_weight_max: float = 0.4
 @export_range(0.001, 0.05, 0.001) var bb_weight_step: float = 0.01

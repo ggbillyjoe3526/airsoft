@@ -146,8 +146,9 @@ The rifle comes with iron sights; a red dot or a 2× scope is a part you fit in 
 ### Hop-up, flight and wind
 
 Hop-up puts backspin on the BB, which lifts it so it flies flat for longer; each replica has a dial in Loadout ›
-Customise. BBs fly by real air physics, and each match has a light breeze (calm to about 2 m/s) that pushes BBs,
-never players.
+Customise. BBs fly by real air physics. Out of doors (Woodland, the Range) each match has a light breeze (calm to
+about 2 m/s) that pushes BBs, never players; indoors (Depot, Subway) the air stands still (PH1). Each field has its
+own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a gas replica shoots softer in the cold.
 
 - [ ] **Factory hop (rifle 65 %, pistol 55 %), at a target 30 m or more away.** Rifle BBs rise about a hand's width
   near 20 m and stay on target to about 39 m, taking about half a second; the pistol's drop from about 27 m.
@@ -156,6 +157,15 @@ never players.
 - [ ] **Turn the dial in a match (4 less, 5 more).** The panel shows the setting and how far a level shot stays
   flat; past the best setting it says the BB climbs. Each replica keeps its own dial until the match ends.
 - [ ] **Watch the dust (Medium or up).** It drifts one way, the wind, which changes from match to match.
+- [ ] **Depot, a long shot down the Chrono hall (PH1).** BBs fly dead straight left to right, every match; the pause
+  menu reads "Air 20 °C · still air". On Woodland it reads the match's breeze and 16 °C, or 8 °C at night.
+- [ ] **The GBB Pistol on Woodland at night against Depot (PH1).** At night its BBs drop about 3 m sooner (24 m
+  against 27 m); Red or Black Gas wins the reach back. The AEG Rifle and the Sniper Rifle shoot the same on both.
+- [ ] **A bot sprinting across your line at 10 to 20 m (PH1).** A BB you see strike its trailing edge counts, and one
+  you see pass just ahead of it doesn't.
+- [ ] **BB weight to 0.40 g in Customise (PH1).** The flight picture shows the Sniper Rifle flying flattest with the
+  heaviest BBs and the pistols dropping short with them.
+- [ ] **Lob a rifle shot at about 25° on Woodland (PH1).** The BB comes down and lands (a puff), however far.
 - [ ] **Practice range, every target to 60 m.** Each can be hit: from 40 m aim high (or turn the hop up) and a little
   upwind; a level shot at the 60 m plate lands short.
 
