@@ -6,6 +6,8 @@
 // With `perforations` (PropDress's), a part whose UV x is over 1 (kit.perforated: x 2 plus metres across its row's
 // middle, y metres along it) has a row of round holes punched down it, a crate's edge profiles' dense holes for no
 // triangles; from far off, where a hole is under a pixel, they fade to the row's average shade so they never shimmer.
+// A part whose UV x is under -1 (kit.ribbed: y metres across its ribs) is ribbed instead, fine grooves along it (an
+// escalator step's cleats), fading to their average shade where a rib is under a pixel.
 // With `wear` (SL2, docs/ART.md › Surfaces), times the look's `look_wear`, the model is worn in world space: grime up
 // its foot (from its floor, `wear_floor` m up its own y: PropDress sets its box's bottom, where PropLayout stands it),
 // streaks down its sides, broad stains, and dust settled on its tops, so no two props wear alike. Edge scuffs are the
@@ -31,6 +33,10 @@ uniform bool perforations = false;
 uniform float perforation_pitch = 0.045;
 uniform float perforation_radius = 0.0045;
 uniform float perforation_shade : hint_range(0.0, 1.0) = 0.22;
+// kit.RIB_PITCH keeps the same; the share of each rib that is groove, and the groove's shade.
+uniform float rib_pitch = 0.0085;
+uniform float rib_groove : hint_range(0.0, 1.0) = 0.45;
+uniform float rib_shade : hint_range(0.0, 1.0) = 0.42;
 uniform float wear : hint_range(0.0, 1.0) = 0.0;
 // Whether Dev › Retro filter wobbles its corners (RF1): not the level's blocks and ground, whose big faces would tilt
 // through the floors and cladding laid a few cm over them (LookMaterials.vertex_colour's `wobble`).
@@ -88,6 +94,12 @@ void fragment() {
 				* 1.5708 * perforation_radius / perforation_pitch;
 		hole = mix(hole, row, smoothstep(0.5, 1.0, pixel / perforation_radius));
 		own *= mix(1.0, perforation_shade, hole);
+	} else if (perforation.x < -1.0) {
+		float edge = pixel / rib_pitch;
+		float t = fract(perforation.y / rib_pitch);
+		float groove = 1.0 - smoothstep(rib_groove - edge, rib_groove + edge, t);
+		groove = mix(groove, rib_groove, smoothstep(0.25, 0.6, edge));
+		own *= mix(1.0, rib_shade, groove);
 	}
 	vec3 col = own * paint * tint.rgb;
 	float rough = roughness;

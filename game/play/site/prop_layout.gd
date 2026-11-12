@@ -78,8 +78,9 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 				if not sets_laid.has(model):
 					sets_laid[model] = true
 					var box := PropDressConfig.set_box(map, model)
+					var size := box.size + Vector3(0.0, cfg.set_heads.get(model, 0.0), 0.0)
 					_placed(out, model).add(fit(boxes[model], box.get_center() - Vector3(0.0, box.size.y * 0.5, 0.0),
-							box.size, 0.0), 1.0)
+							size, 0.0), 1.0)
 			PropDressConfig.Lay.GROUND:
 				_ground(out, model, boxes, b, map, cfg, rng)
 			PropDressConfig.Lay.TREE:

@@ -14,8 +14,8 @@ extends Resource
 ## Each door leaf's thickness and the gap left at its edges (m), so the two read as two.
 @export var leaf_thickness: float = 0.04
 @export var leaf_gap: float = 0.01
-## A button's size (m: wide, high, deep).
-@export var button_size: Vector3 = Vector3(0.09, 0.09, 0.03)
+## A button's size (m: wide, high, deep): a real lift's push button, as its model is built (SM2).
+@export var button_size: Vector3 = Vector3(0.052, 0.052, 0.016)
 ## The panel's stop names: beside their buttons by label_beside, off the wall by label_off (m), in this size.
 @export var label_beside: float = 0.08
 @export var label_off: float = 0.01
@@ -32,3 +32,19 @@ extends Resource
 ## probe).
 @export var probe_ambient: Color = Color(0.42, 0.4, 0.37)
 @export var probe_ambient_energy: float = 1.0
+## The modelled car, landing doorway, door leaf and push button (SM2, tools/blender/maps/lift.py), drawn in their own
+## (linear) colours. The leaf and button are built in a 1 m cube and scaled to each use. The car and the landing are
+## built for one well, door and wall (model_well: along the door's face and out from it; model_door: wide and high;
+## model_depth: the shaft wall; model_car_height), its door in the face's middle, the call and panel buttons where
+## LiftConfig puts them, beside the door's far jamb: a lift that differs, or whose far jamb lies on the model's left
+## (a door facing s or w), keeps the plain boxes. An empty path, or one that can't be read, keeps them too.
+@export var car_model: String = "res://assets/models/props/lift_car.glb"
+@export var landing_model: String = "res://assets/models/props/lift_landing.glb"
+@export var leaf_model: String = "res://assets/models/props/lift_leaf.glb"
+@export var button_model: String = "res://assets/models/props/lift_button.glb"
+@export var model_well: Vector2 = Vector2(2.3, 1.8)
+@export var model_door: Vector2 = Vector2(1.1, 2.1)
+@export var model_depth: float = 0.3
+@export var model_car_height: float = 2.4
+## How near a lift's measurements must come to the model's (m) for it to be drawn.
+@export var model_fit: float = 0.02

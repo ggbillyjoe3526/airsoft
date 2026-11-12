@@ -27,6 +27,13 @@ var _buttons: MultiMeshInstance3D = null
 var _leaf_material: ShaderMaterial = null
 var _car_material: ShaderMaterial = null
 var _button_material: StandardMaterial3D = null
+## The models' material (SM2): their own linear colours, with the sills' ribs and the displays' dots.
+var _model_material: ShaderMaterial = null
+## The car and landing models, null when unread (LiftViewConfig.car_model); whether each lift is drawn in them.
+var _car_mesh: Mesh = null
+var _landing_mesh: Mesh = null
+var _modelled: Array[bool] = []
+var _landings: MultiMeshInstance3D = null
 ## Per lift: its first leaf's instance (each stop's two landing leaves, then the car's two) and its first button's
 ## (each stop's call button, then its panel's); what was last drawn: the car's height, the doors' opening, the stop
 ## they open at and the calls.
@@ -56,8 +63,14 @@ static func build(map: MapData, style: MapStyle, lifts: LiftConfig, cfg: LiftVie
 	view._specs = map.lifts
 	view._unlit = style.colour_of(BUTTON_KIND, 0)
 	view._lit = style.colour_of(LIT_KIND, 0)
-	view._leaf_material = LookMaterials.paint(style.colour_of(DOOR_KIND, 0), cfg.roughness, cfg.metallic)
+	view._model_material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic)
+	view._model_material.set_shader_parameter(&"perforations", true)
+	var leaf_mesh := PropDressConfig.load_mesh(cfg.leaf_model)
+	view._leaf_material = view._model_material if leaf_mesh != null else LookMaterials.paint(
+			style.colour_of(DOOR_KIND, 0), cfg.roughness, cfg.metallic)
 	view._car_material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic, Color.WHITE, true)
+	view._car_mesh = PropDressConfig.load_mesh(cfg.car_model)
+	view._landing_mesh = PropDressConfig.load_mesh(cfg.landing_model)
 	view._button_material = StandardMaterial3D.new()
 	view._button_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	view._button_material.vertex_color_use_as_albedo = true
@@ -68,12 +81,33 @@ static func build(map: MapData, style: MapStyle, lifts: LiftConfig, cfg: LiftVie
 		view._first_button.append(buttons)
 		leaves += spec.stop_count() * 2 + 2
 		buttons += spec.stop_count() * 2
-	view._leaves = view._multimesh("Leaves", BoxMesh.new(), leaves, false, view._leaf_material)
+	view._leaves = view._multimesh("Leaves", leaf_mesh if leaf_mesh != null else BoxMesh.new(), leaves, false,
+			view._leaf_material)
 	view._leaf_xforms.resize(leaves)
 	view._button_colours.resize(buttons)
-	var knob := BoxMesh.new()
-	knob.size = cfg.button_size
+	var knob := _scaled(PropDressConfig.load_mesh(cfg.button_model), cfg.button_size)
+	if knob == null:
+		var box := BoxMesh.new()
+		box.size = cfg.button_size
+		knob = box
 	view._buttons = view._multimesh("Buttons", knob, buttons, true, view._button_material)
+	var landings := 0
+	for spec in map.lifts:
+		var fits := view._fits(spec)
+		view._modelled.append(fits)
+		landings += spec.stop_count() if fits and view._landing_mesh != null else 0
+	if landings > 0:
+		view._landings = view._multimesh("Landings", view._landing_mesh, landings, false, view._model_material)
+		var j := 0
+		for i in map.lifts.size():
+			if not view._modelled[i]:
+				continue
+			var spec := map.lifts[i]
+			var mid := (spec.door_from + spec.door_to) * 0.5
+			for k in spec.stop_count():
+				view._landings.multimesh.set_instance_transform(j, Transform3D(_turn(spec.out),
+						spec.on_face(mid, spec.door_depth, spec.stops[k])))
+				j += 1
 	for i in map.lifts.size():
 		view._add_car(i, style)
 	var n := map.lifts.size()
@@ -129,7 +163,50 @@ func button_colour(j: int) -> Color:
 
 ## The materials drawn, to warm their shaders before play.
 func materials() -> Array[Material]:
-	return [_leaf_material, _car_material, _button_material]
+	return [_leaf_material, _car_material, _button_material, _model_material]
+
+
+## Whether lift `spec` is drawn in the car and landing models: its well, door and wall as they were built for, its door
+## in the face's middle and its far jamb on the model's right (LiftViewConfig.model_well).
+func _fits(spec: LiftSpec) -> bool:
+	if _car_mesh == null:
+		return false
+	var tol := _cfg.model_fit
+	var along := spec.well.size.x if spec.along_x() else spec.well.size.y
+	var out := spec.well.size.y if spec.along_x() else spec.well.size.x
+	var middle := spec.well.get_center().x if spec.along_x() else spec.well.get_center().y
+	var right := _turn(spec.out) * Vector3.RIGHT
+	return (absf(along - _cfg.model_well.x) <= tol and absf(out - _cfg.model_well.y) <= tol
+			and absf(spec.door_to - spec.door_from - _cfg.model_door.x) <= tol
+			and absf(spec.door_height - _cfg.model_door.y) <= tol
+			and absf((spec.door_from + spec.door_to) * 0.5 - middle) <= tol
+			and absf(spec.door_depth - _cfg.model_depth) <= tol
+			and absf(_lift_cfg.car_height - _cfg.model_car_height) <= tol
+			and right.is_equal_approx(_side_of(spec)))
+
+
+## The turn about the upright that brings a model built facing -z (its landing, or its car's door) to face `out`.
+static func _turn(out: Vector2) -> Basis:
+	return Basis(Vector3.UP, atan2(-out.x, -out.y))
+
+
+## A copy of `mesh` (built in a 1 m cube round its middle) scaled to `size`; null without one.
+static func _scaled(mesh: Mesh, size: Vector3) -> Mesh:
+	if mesh == null or mesh.get_surface_count() == 0:
+		return null
+	var arrays := mesh.surface_get_arrays(0)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	for i in verts.size():
+		verts[i] *= size
+	var inv := Vector3(1.0 / size.x, 1.0 / size.y, 1.0 / size.z)
+	for i in normals.size():
+		normals[i] = (normals[i] * inv).normalized()
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	var out := ArrayMesh.new()
+	out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return out
 
 
 func _multimesh(node_name: String, mesh: Mesh, count: int, colours: bool, material: Material) -> MultiMeshInstance3D:
@@ -146,13 +223,33 @@ func _multimesh(node_name: String, mesh: Mesh, count: int, colours: bool, materi
 	return mi
 
 
-## Car `i`'s node: its walls, floor, roof and ceiling strip one mesh, its panel's stop names, its lamp and its probe.
+## Car `i`'s node: its body (the car model, SM2, turned to its door; or plain boxes), its panel's stop names, its lamp
+## and its probe.
 func _add_car(i: int, style: MapStyle) -> void:
 	var spec := _specs[i]
 	var car := Node3D.new()
 	car.name = "Car%d" % i
 	add_child(car)
 	_cars.append(car)
+	var w := spec.well.size
+	var h := _lift_cfg.car_height
+	var face := spec.out
+	var strip := _cfg.strip_size
+	var mi := MeshInstance3D.new()
+	mi.name = "Body"
+	if _modelled[i]:
+		mi.mesh = _car_mesh
+		mi.basis = _turn(face)
+		mi.material_override = _model_material
+	else:
+		mi.mesh = _box_body(spec, style)
+		mi.material_override = _car_material
+	car.add_child(mi)
+	_add_fittings(car, spec, w, h, face, strip)
+
+
+## A car's plain body: its walls, floor, roof and ceiling strip one mesh, in `style`'s colours.
+func _box_body(spec: LiftSpec, style: MapStyle) -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var steel := style.colour_of(CAR_KIND, 0)
@@ -180,11 +277,11 @@ func _add_car(i: int, style: MapStyle) -> void:
 	var strip := _cfg.strip_size
 	_box(st, Vector3(0.0, h - strip.y * 0.5, 0.0), Vector3(strip.x, strip.y, strip.z), style.colour_of(STRIP_KIND, 0))
 	st.generate_normals()
-	var mi := MeshInstance3D.new()
-	mi.name = "Body"
-	mi.mesh = st.commit()
-	mi.material_override = _car_material
-	car.add_child(mi)
+	return st.commit()
+
+
+## A car's panel stop names, lamp and probe, on `car`.
+func _add_fittings(car: Node3D, spec: LiftSpec, w: Vector2, h: float, face: Vector2, strip: Vector3) -> void:
 	for k in spec.stop_count():
 		var label := Label3D.new()
 		label.name = "Stop%d" % k
@@ -323,8 +420,8 @@ func _leaf(spec: LiftSpec, s: float, open: float, w: float, off: float, y: float
 	var h := spec.door_height
 	var at := spec.on_face(along, off, y + h * 0.5)
 	var leaf := w * 0.5 - _cfg.leaf_gap
-	var size := Vector3(leaf, h, t) if spec.along_x() else Vector3(t, h, leaf)
-	return Transform3D(Basis.from_scale(size), at)
+	# Built wide along x and thin along z (the model's, or a box): turned to lie along the door's face.
+	return Transform3D(_turn(spec.out) * Basis.from_scale(Vector3(leaf, h, t)), at)
 
 
 ## Lift `i`'s buttons: its panel's in the car at `y`, and with `recolour` (the calls changed) each stop's call button on
@@ -341,14 +438,9 @@ func _place_buttons(i: int, y: float, calls: int, recolour: bool) -> void:
 			var colour := _lit if (calls >> k) & 1 != 0 else _unlit
 			_button_colours[j] = colour
 			_button_colours[j + n] = colour
-			mm.set_instance_transform(j, Transform3D(_facing(spec), spec.call_button(k, _lift_cfg) + out * depth))
+			mm.set_instance_transform(j, Transform3D(_turn(spec.out), spec.call_button(k, _lift_cfg) + out * depth))
 			mm.set_instance_color(j, colour)
 			mm.set_instance_color(j + n, colour)
-		mm.set_instance_transform(j + n, Transform3D(_facing(spec),
+		mm.set_instance_transform(j + n, Transform3D(_turn(-spec.out),
 				spec.panel_button(k, y, _lift_cfg) - out * (_cfg.wall_thickness + depth)))
 		j += 1
-
-
-## A button's turn: its thin side (z) along the door's face's out.
-static func _facing(spec: LiftSpec) -> Basis:
-	return Basis.IDENTITY if spec.along_x() else Basis(Vector3.UP, PI * 0.5)

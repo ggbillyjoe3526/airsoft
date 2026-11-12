@@ -39,7 +39,7 @@ extends Resource
 ## box's long side and lays its rails along the side towards the field's middle (`stake_pitch`, `stake_rails`: WG3,
 ## Woodland's palisade). SET fits one model, unturned, to the box round every block that names it (`set_box`: WG3, a
 ## structure built over its blocks, each part filling its own: Woodland's watch tower, its footbridge and the Sawmill's
-## shed); a ramp may be one of them.
+## shed); a ramp may be one of them, and a model may stand `set_heads` over its box.
 enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, TREE, STAKES, SET }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
@@ -83,6 +83,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"footbridge": "res://assets/models/props/footbridge.glb",
 	&"sawmill_shed": "res://assets/models/props/sawmill_shed.glb",
 	&"hut_roof": "res://assets/models/props/hut_roof.glb",
+	# Subway's stairs and escalators (Dev 3 SM2, tools/blender/maps/), each laid over its ramps and their barriers
+	# (SET): the two escalator banks, the spiral stair round its core and the stair down to the platforms.
+	&"escalator_upper": "res://assets/models/props/escalator_upper.glb",
+	&"escalator_lower": "res://assets/models/props/escalator_lower.glb",
+	&"spiral_stair": "res://assets/models/props/spiral_stair.glb",
+	&"platform_stair": "res://assets/models/props/platform_stair.glb",
 	&"hut_roof_long": "res://assets/models/props/hut_roof_long.glb",
 	# Woodland's undergrowth and logs (Dev 3 WG2, tools/blender/maps/): the fallen logs at three lengths, the
 	# wind-thrown root plates, cordwood and B's sawn boards and sawbench, and the earth bank under them on slopes.
@@ -184,11 +190,16 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"pine_young": Lay.TREE, &"pine_grown": Lay.TREE, &"pine_old": Lay.TREE, &"oak": Lay.TREE, &"birch": Lay.TREE,
 	&"plywood_header": Lay.RUN,
 	&"palisade": Lay.STAKES, &"watch_tower": Lay.SET, &"footbridge": Lay.SET, &"sawmill_shed": Lay.SET,
+	&"escalator_upper": Lay.SET, &"escalator_lower": Lay.SET, &"spiral_stair": Lay.SET, &"platform_stair": Lay.SET,
 	&"cordwood": Lay.GRID, &"fallen_log_5": Lay.GROUND, &"fallen_log_6": Lay.GROUND, &"fallen_log_8": Lay.GROUND,
 	&"root_plate": Lay.GROUND, &"sawbench": Lay.GROUND, &"boards": Lay.GROUND,
 	&"log_tunnel_side": Lay.SIDE, &"log_tunnel_roof": Lay.LINED,
 	&"range_wall": Lay.GRID, &"range_backstop": Lay.GRID, &"sandbags": Lay.GRID,
 }
+## How far (m) a SET model stands over the top of its box: thin parts drawn for the look only, which stop no one and
+## no BB (SM2: the platform stair's handrails, over its ramps, as the ceiling's lamps hang under the roof). The model is
+## fitted to its box grown up by this much.
+@export var set_heads: Dictionary[StringName, float] = {&"platform_stair": 0.922}
 ## SIDE looks this far (m) across a tunnel wall for the wall across from it.
 @export var side_reach: float = 3.0
 ## LINED's caps: the model laid over the rest of a box above a lined model, stretched to it from `lined_cap_from` m

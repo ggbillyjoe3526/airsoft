@@ -40,6 +40,16 @@ blocks read from `data/maps/woodland.json` (rerun a structure's script after `to
 | `birch.py` | `birch.glb`, `birch_crown.glb` | Woodland's birches (TREE) |
 | `spruce.py` | `spruce.glb` | Woodland's thickets, a spruce a 1.5 m cell (GRID) |
 | `far_tree.py` | `forest_tree.glb`, `skyline/treeline.glb` | The wood past Woodland's fence (`WoodsConfig.forest_model`) and the skyline's treeline band (`SkylineConfig.treeline_model`) |
+| `escalator.py` | `escalator_upper.glb`, `escalator_lower.glb` | Subway's escalator banks, each over its ramp and middle barriers (`Lay.SET`) |
+| `lift.py` | `lift_car.glb`, `lift_landing.glb`, `lift_leaf.glb`, `lift_button.glb` | Subway's lifts (`LiftView`: the car turned to its door, a doorway at each stop, the leaves and buttons scaled to each) |
+| `spiral_stair.py` | `spiral_stair.glb` | Subway's spiral stair over its ramps and landings (`Lay.SET`; the core stays the station's pillar) |
+| `platform_stair.py` | `platform_stair.glb` | Subway's stair to the platforms over its two flights (`Lay.SET`, its handrails `set_heads` over the box) |
+| `railing.py` | `railing_bar.glb`, `railing_top.glb`, `railing_foot.glb`, `railing_post.glb` | Every bar railing's pieces (`RailingMesh`, `MapStyle.railing_look`), fitted to the bars and rails a BB meets |
+
+Subway's stairs, escalators, lifts and railing (SM2) share `transit_kit.py`: their paints, a mesh builder with boxes,
+sweeps, lathes, tubes round filleted paths, knobs and rings, and `report`, which writes the model and fails it over its
+budget or off its box by more than 5 mm. The steps' cleats and nosings are drawn by the props' shader (`map_kit.ribbed`:
+UV.x under -1 draws ribs 8.5 mm apart).
 
 The trees share `treekit.py`: stems, limbs, foliage clumps and spruce tiers with crown-lit normals, and the build gates
 (budget, no team hue, the trunk inside its foot radius, the crown only over the clearance outside it). A tree's trunk
@@ -51,5 +61,5 @@ root>`, then `godot --headless --path . --import`. Pictures for review: `tools/p
 `tools/hall_pictures.gd` (Depot) and `tools/woodland_pictures.gd` (Woodland), all under xvfb; `tools/eye_pictures.gd`
 for a field (`night` lights its fires and lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's
 scripts run as `python3 tools/blender/maps/<script>.py`), `docs/records/WG2.md`, `docs/records/WG3.md`,
-`docs/records/WG4.md` (`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`. Dev only: tools/ never
+`docs/records/WG4.md` (`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`, `docs/records/SM2.md`. Dev only: tools/ never
 ships.
