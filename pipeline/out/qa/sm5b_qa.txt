@@ -1,0 +1,23 @@
+Task: SM5B · QA on 640241d (uncommitted, as told) · Verdict: Pass
+
+Blocking: none. Advisory: none found.
+
+Tests added (tests/unit/test_sm5b_qa.gd, new file; 10 tests, 121 asserts, 1.45 s, all pass; raw run in pipeline/out/qa/sm5b_run.txt):
+- test_a_fixture_with_no_scale_has_scale_1_and_a_valid_one_is_kept: missing gives 1.0, 0.6 and 2 kept, no warnings. Without the field Fixture.scale does not exist, so the file does not parse.
+- test_a_zero_negative_or_non_number_scale_leaves_the_fixture_out_with_a_warning: 0, 0.0, -1, -0.5, "0.6", null, true, [1] each dropped with exactly one warning. Without the check they would be kept, or would crash on float().
+- test_placings_scale_the_instance_basis_and_leave_its_turn_and_place: basis axes 0.6 long, origin and facing unchanged, unscaled fixture 1.0. Without .scaled(...) in placings the length is 1.
+- test_a_scaled_fixture_in_the_view_is_one_multimesh_instance_placed_at_its_size: StationFixtures.build, views()/placed() carry 0.5. (A MultiMesh's instance transform reads back as identity headless, so the test reads placed() instead.)
+- test_there_are_28_small_posters_all_of_the_poster_models_at_0_6: 28 fixtures with scale 0.6, all plain poster models.
+- test_every_escalator_poster_stands_on_its_shaft_wall_centred_clear_of_the_decks_and_under_the_ceiling: each is on a shaft wall (esc_up z +-3.5, esc_low z +-3.0), faces into the shaft, 2 m clear of the ends, bottom at least 1.0 m over MapData.floor_under at both edges and the centre, top under the stair plus the room height (3.2 / 2.8), all 4 wall rows present. Mutation (deck set to 1.9) failed it, so the check bites.
+- test_the_new_printed_models_sign_uvs_stay_inside_their_own_cells: the 7 new cells (line_map, departures_n/s, info_panel, 3 notices), taken from station_cells.py. The existing test_sm5_qa cell test skips these models (its _cell returns an empty rect), so they were untested before.
+- test_the_wall_signs_print_the_hanging_signs_cells_not_new_ones: wall_sign_out / wall_sign_platforms UVs stay in the way_sign cell.
+- test_the_departure_boards_hang_under_the_ceiling_and_touch_no_strip_lamp: 4 boards, no intersection with any roof lamp box (lamp mesh x RoofView.lamp_place), with 2 cm margin. Mutation (lamp box grown 3 m) failed it.
+- test_no_two_wall_fixtures_on_one_wall_overlap: same facing, plane within 0.15 m, overlap along the wall and in height of more than 1 cm; none. Mutation (threshold -3 m) failed it, so it is not vacuous.
+
+Mutations were run on a scratch copy of the test file, since deleted. Production code was not touched, so "fails without the feature" is shown by the parse and placings assertions on the new field (absent before) and the mutation checks.
+
+Existing coverage that now covers SM5B: test_station_fixtures (budgets, each fixture in its room and on a wall, every listed model used). I did not rerun tools/check.sh or the smoke test: the instruction was single GUT files only.
+
+Not tested: how the signs and boards read in play (legibility, glare, the escalator posters seen from the stair), which needs a display and the owner. The text drawn on the sheet is not pixel-checked, by rule.
+
+Files touched: tests/unit/test_sm5b_qa.gd (new, uncommitted), pipeline/out/qa/sm5b_qa.txt, pipeline/out/qa/sm5b_run.txt. pipeline/out/performance.md shows modified in git status, but I did not touch it.
