@@ -1,21 +1,16 @@
-Task: PB1 · QA commit (see git log, Agent: qa) · Verdict: Fail
+Task: PB1 · QA commit 0a8cdea (no new commit this run) · Verdict: Pass
 
-Blocking
-- game/sim/plant.gd:154-155 (checkpoint test `ps.defusing >= cfg.defuse_checkpoint`): defusing is summed tick by tick in
-  floats, so a hold of exactly half of defuse_time (120 ticks of 1/60 at 4 s) ends a hair under 0.5 and the checkpoint is
-  lost (defusing falls to 0). plant plant/arm code uses SLACK for this; the checkpoint compare does not. Fix: compare
-  against checkpoint - SLACK. Test: test_a_defuse_let_go_at_exactly_the_checkpoint_keeps_it (left failing).
-Advisory: none found.
+Run 2 on head 77f8f4f.
 
-Tests added (tests/unit/test_pb1_qa.gd, 11 tests, 10 pass, 1 fails on the bug above)
-- checkpoint at exactly 0.5 (fails: the bug); defuse and fuse ending in one tick (decided once, one point);
-  two attackers pressing Use in one tick (one carrier); an attacker in reach cannot disarm; a round ended on an armed
-  bomb with a defuse under way leaves a clean bomb next round and swaps sides at half time; round ended mid-plant
-  leaves planting/planter/carrier/using reset; one-site map arms; zero/negative site radius falls back to the config;
-  no-site map never arms or crashes; letting go at the buzzer mid-plant (overtime) gives the round to the defenders;
-  Elimination ignores Use and the bomb.
-- Each asserts behaviour that would fail if the feature were stubbed (e.g. nothing arms, no overtime, no reset).
+Blocking findings: none. The run-1 blocker (defuse checkpoint compared without SLACK in game/sim/plant.gd) is fixed in 77f8f4f; test_pb1_qa.gd pins it and passes.
+Advisory findings: none new.
 
-Not tested: bot latches across rounds (plant_go, plant_fell_far) and may_defuse with the player out (covered in part by
-test_bots_plant), SimAudio loop cuts, Use-key rebinding prompt, window modes, real focus loss: need a display/scene runs.
-Full suite not run (check.sh busy); guards not run as instructed.
+Checked this run:
+- tests/unit/test_pb1_qa.gd alone: 11 passing, 0 failing.
+- Bot latches across rounds (plant_go, plant_go_for, plant_hold_since in game/ai/bot_world.gd:42-44; plant_fell_far at :46). BotPlant.plan runs every tick in PTB (game/ai/bot_controller.gd:136). PlantState.reset (game/sim/plant_state.gd:37) clears status and carrier, so the first plan tick of a new round sees no carrier and _hold_carrier (game/ai/bot_plant.gd:133-136) clears the go latch and hold timer. plant_fell_far is cleared on ROUND_START and ROUND_GO (bot_plant.gd:88-90). No stale latch reaches a new round, so no failing test was possible.
+- BotPlant.may_defuse with the defending player out: player_on returns null, so bots may defuse at once (bot_plant.gd:224-226). Already pinned by tests/unit/test_bots_plant.gd:288-290.
+
+Tests added or changed this run: none (the cap was 3; nothing reproducible to pin).
+
+Not run (as instructed): full suite and match guards; the lead reported tools/check.sh passed on 77f8f4f.
+Not tested: anything needing a display or real window (HUD layout of the plant prompt, mouse capture on pause).

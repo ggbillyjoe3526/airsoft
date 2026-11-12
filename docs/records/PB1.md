@@ -80,7 +80,25 @@ Claude's, each the owner's to change (`docs/DECISIONS.md` › Maps and modes):
 
 Bots only, Normal, 6v6, `tests/support/match_runner.gd`.
 
-@MEASURES@
+Sixteen seeds a field (seeds 1 to 16), on the layouts of main at aad915f:
+
+| Field | Rounds | Attackers win | Armed | Made safe | Gone off | Defenders wiped | Attackers wiped | Held up |
+|---|---|---|---|---|---|---|---|---|
+| Depot | 125 | 42 % | 67 % (A 54 %) | 33 | 0 | 53 | 39 | 0 |
+| Woodland | 115 | 46 % | 64 % (A 41 %) | 31 | 1 | 52 | 30 | 0 |
+| Subway | 113 | 27 % | 59 % (A 13 %) | 53 | 0 | 31 | 29 | 152 |
+
+- The bomb is taken up in every round, 0.2 to 0.3 s after the whistle with no player to wait for.
+- The first key goes in a mean 46 s (Depot), 69 s (Woodland) and 59 s (Subway) into the round.
+- A defuse ends 6 to 23 s after the plant, nearly always 6 to 9 s after the last attacker is out (Depot 32 of 33 with
+  no attacker left, Woodland 25 of 31, Subway 25 of 53): the bots win the fight first, then work on the bomb. A bomb
+  seldom goes off because the attackers still standing at the plant (2.6 to 3.7 a round) are few against the
+  defenders coming back (2.4 to 3.9).
+- Before the carrier went in last and a bomb taken up in the defenders' half was carried straight on, the attackers
+  took 20 % on Depot, 36 % on Woodland and 22 % on Subway.
+- Subway: its bots queue at the ticket gates on this layout in every mode (9 held up in a 7 round Attack / Defend
+  match on main), and Site A is armed in few rounds. Its guard carries its own limits until the map rework (MB1)
+  lands (`SUBWAY_HELD_UP_MAX`, `SUBWAY_ATTACK_BAND`; `docs/KNOWN_ISSUES.md` › Bots).
 
 ## Checks
 
