@@ -1,6 +1,6 @@
 # SM5 · Subway's lamps and extras
 
-**Review:** pending (attempt 10: the trackside posters 6 x 3 m)
+**Review:** passed (critic 8/8 at attempt 10, QA Pass, performance Pass)
 
 Models 31 to 33 of `art/subway-model-list.md` (William's go, 2026-11-12: "Begin work on subway models now"), from his
 photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33-extras/<kind>/`.
@@ -18,7 +18,7 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 | 2026-11-12 | 7 | build thread | ✓ | 8/8 Accept | |
 | 2026-11-12 | 8 | build thread | ✓ | 7/8 Retry | (William's ask: more posters, large trackside ones) the jazz club's name was a real London bar's |
 | 2026-11-12 | 9 | build thread | ✓ | 8/8 Accept | |
-| 2026-11-12 | 10 | build thread | | | (William: trackside posters much larger, 6 x 3 m) |
+| 2026-11-12 | 10 | build thread | ✓ | 8/8 Accept | (William: trackside posters much larger, 6 x 3 m) |
 
 ## What it adds
 
