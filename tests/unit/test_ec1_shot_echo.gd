@@ -151,3 +151,15 @@ func test_setting_the_echo_twice_and_leaving_twice_stays_clean() -> void:
 	SimAudio.set_echo(null)
 	assert_false(_echo_on())
 	assert_eq(AudioServer.get_bus_effect_count(_shots()), 1, "no effect added or lost")
+
+
+## A match's audio freed after the next one's setup (a restart that frees late) leaves the new match's echo on.
+func test_an_old_match_leaving_after_a_new_setup_leaves_the_echo_on() -> void:
+	var old := _audio_on("subway")
+	var now := _audio_on("subway")
+	remove_child(old)
+	assert_true(_echo_on(), "the new match keeps its echo")
+	add_child(old)
+	remove_child(now)
+	assert_false(_echo_on(), "the match that set it puts it back")
+	add_child(now)

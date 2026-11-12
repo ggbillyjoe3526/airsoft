@@ -119,6 +119,8 @@ var _played_own: bool = false
 var _bounced_at: PackedFloat64Array = PackedFloat64Array()
 ## Cue names worked out once: by power source, by surface, by surface and pace.
 var _shot: Dictionary[StringName, StringName] = {}
+## The SimAudio (its instance id) whose setup last set the Shots bus's echo (set_echo): the bus is global, one a match.
+static var _echo_set_by: int = 0
 var _power: Dictionary[StringName, StringName] = {}
 ## By power source: its power part's level (SoundConfig.power_gains).
 var _power_gain: Dictionary[StringName, float] = {}
@@ -208,6 +210,7 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 		_load(String(cue))
 	_set_muffle(cfg.muffled_cutoff_hz)
 	set_echo(cfg.shot_echoes.get(StringName(map.id)) if map != null else null)
+	_echo_set_by = get_instance_id()
 	for i in cfg.field_voices:
 		var v := AudioStreamPlayer3D.new()
 		v.unit_size = cfg.unit_size
@@ -518,7 +521,9 @@ func _exit_tree() -> void:
 		v.stop()
 	if _whistle != null:
 		_whistle.stop()
-	set_echo(null)
+	# Only the match that last set the echo puts it back, so an old match freed after a new one's setup leaves it be.
+	if _echo_set_by == get_instance_id():
+		set_echo(null)
 
 
 ## A teammate `c`'s callout click on the next radio voice: from where they stand, unattenuated, so it is panned toward
