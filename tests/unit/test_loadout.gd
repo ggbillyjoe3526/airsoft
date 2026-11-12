@@ -116,7 +116,7 @@ func test_carrying_the_other_slots_replica_swaps_the_two() -> void:
 func test_bb_weight_and_hop_up_stay_in_range_on_their_steps() -> void:
 	var l := rules.default_loadout("L")
 	assert_almost_eq(rules.set_bb_weight(l, AEG, 0.284), 0.28, 1e-9)
-	assert_almost_eq(rules.set_bb_weight(l, AEG, 0.9), 0.3, 1e-9)
+	assert_almost_eq(rules.set_bb_weight(l, AEG, 0.9), 0.4, 1e-9)
 	assert_almost_eq(rules.set_bb_weight(l, AEG, 0.1), 0.2, 1e-9)
 	assert_almost_eq(rules.set_hop_up(l, AEG, 0.81), 0.8, 1e-9)
 	assert_almost_eq(rules.set_hop_up(l, AEG, -1.0), 0.0, 1e-9)
@@ -152,7 +152,9 @@ func test_a_battery_sets_the_rate_and_gas_the_energy_and_kick() -> void:
 	assert_almost_eq(kit.replicas[0].fire_rate, plain.replicas[0].fire_rate * 1.15, 1e-6)
 	assert_almost_eq(kit.replicas[0].muzzle_energy, plain.replicas[0].muzzle_energy, 1e-9)
 	assert_almost_eq(kit.replicas[1].muzzle_energy, plain.replicas[1].muzzle_energy * 1.2, 1e-6)
-	assert_almost_eq(kit.replicas[1].recoil_deg, plain.replicas[1].recoil_deg * 1.2, 1e-6)
+	# RP1: Black Gas kicks 40 % harder and cycles the slide a tenth slower (20 % and no slower before).
+	assert_almost_eq(kit.replicas[1].recoil_deg, plain.replicas[1].recoil_deg * 1.4, 1e-6)
+	assert_almost_eq(kit.replicas[1].fire_rate, plain.replicas[1].fire_rate * 0.9, 1e-6)
 	assert_eq(kit.capped, [false, false] as Array[bool])
 	assert_false(kit.dev)
 

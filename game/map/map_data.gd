@@ -41,6 +41,9 @@ class Block:
 	## pickup, a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet
 	## (a round prop's, MapStyle.round_steps, as its stepped boxes).
 	var dress: StringName = &""
+	## The world direction its prop's front faces (`facing` in the file: +x, -x, +z or -z; SM3), or empty for the lay's
+	## own rule (FIT: towards the field's middle). A bench's seat to the track, its back to the wall. Look only.
+	var facing: StringName = &""
 	## Its own colour (sRGB; `colour` in the file, 0xRRGGBB, ST1: a map's palette paint, each building its own), or
 	## clear (alpha 0) to take its kind's (MapStyle.block_colour).
 	var colour: Color = Color(0, 0, 0, 0)
@@ -193,6 +196,10 @@ var roof_lamp_turns: PackedFloat32Array = PackedFloat32Array()
 ## A plain roof (`roof.plain` in the file, MT1): its ceiling alone, no bays or trusses under it, and its lamps a
 ## station's strip lights (RoofConfig.plain_lamp_model, SM5) rather than the hall's high-bay model.
 var roof_plain: bool = false
+## An underground roof (`roof.underground` in the file, UL1: Subway): no sky reaches the field, so its light carries
+## none (FieldLighting.set_underground) and the sun that stands in for the lamps on Low and Medium casts no shadow
+## (GraphicsApply.sun_shadows), as the storeys above would shut it out of every floor below. Look only.
+var roof_underground: bool = false
 ## The hinged doors (DO1), in file order: the simulation, the level and the view number them alike.
 var doors: Array[Door] = []
 ## The lifts (MT2), in file order: the simulation, the level and the view number them alike.
@@ -385,6 +392,11 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 		b.surface = SURFACES.get(str(bd["surface"]), style.surface_of(b.kind)) if bd.has("surface") \
 				else style.surface_of(b.kind)
 		b.dress = StringName(str(bd.get("dress", "")))
+		if bd.has("facing"):
+			b.facing = StringName(str(bd["facing"]))
+			if not RISES.has(String(b.facing)):
+				warnings.append("block %d's facing %s is not +x, -x, +z or -z; the lay's own kept" % [i, bd["facing"]])
+				b.facing = &""
 		if bd.has("colour"):
 			var paint: Variant = bd["colour"]
 			if (paint is float or paint is int) and float(paint) >= 0.0 and float(paint) <= 0xffffff \
@@ -626,7 +638,7 @@ static func _override(d: Dictionary) -> LightingConfig.Override:
 	return o
 
 
-## `roof`: {height over 0, plain (optional), lamps: [{x, z, y (optional: the ceiling it hangs from, over 0 and at most
+## `roof`: {height over 0, plain (optional), underground (optional), lamps: [{x, z, y (optional: the ceiling it hangs from, over 0 and at most
 ## the roof's height), state (optional: "dim", "flicker" or "dead")}, ...]}; anything else is no roof, with a warning. A
 ## lamp without both x and z is left out, a y out of range hangs from the roof, and an unknown state is a working lamp,
 ## each with a warning.
@@ -643,6 +655,10 @@ func _read_roof(raw: Variant) -> void:
 	if not plain is bool:
 		warnings.append("roof.plain is not true or false; not plain")
 	roof_plain = plain is bool and plain
+	var underground: Variant = d.get("underground", false)
+	if not underground is bool:
+		warnings.append("roof.underground is not true or false; above ground")
+	roof_underground = underground is bool and underground
 	var lamps: Variant = d.get("lamps", [])
 	for raw_lamp: Variant in (lamps as Array if lamps is Array else []):
 		var at: Dictionary = raw_lamp if raw_lamp is Dictionary else {}

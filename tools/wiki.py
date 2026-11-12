@@ -252,6 +252,7 @@ def gen_replicas(_arg: str) -> str:
         ("Draw", lambda i, s: f"{s['Draw (s)']} s"),
         ("Spread from the hip", lambda i, s: f"{hip_spread(s)}°"),
         ("Recoil per shot", lambda i, s: f"{s['Recoil (°)']}°"),
+        ("Pace", lambda i, s: part_value("Pace (×)", s.get("Pace (×)", "1") or "1")),
         ("Site limit", lambda i, s: f"{limits.get(s['Class'], '–')} J"),
     ]
     try:

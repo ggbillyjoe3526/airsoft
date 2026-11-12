@@ -148,7 +148,9 @@ func test_the_far_version_keeps_each_paint_s_finish_and_the_session_prewarms_its
 	var far_paints: Array[BaseMaterial3D] = []
 	for s in fars[0].mesh.get_surface_count():
 		var m := fars[0].mesh.surface_get_material(s) as BaseMaterial3D
-		if m != null and m.vertex_color_use_as_albedo:
+		# a far paint, not a model's own material that happens to multiply by vertex colours (MQ1: the importer sets
+		# that on any material a mesh with surface kinds shares)
+		if m != null and m.vertex_color_use_as_albedo and m.resource_name.begins_with(HeldMerge.FAR_PAINT_PREFIX):
 			far_paints.append(m)
 			assert_true(warm.has(m), "%s handed to ShaderPrewarm" % m.resource_name)
 	assert_gt(far_paints.size(), 1, "more than one finish on the rifle")

@@ -117,6 +117,9 @@ The rifle comes with iron sights; a red dot or a 2× scope is a part you fit in 
   crosshair goes: the front post sits in the rear ring.
 - [ ] **Fit the red dot and aim.** It sits on the rifle with the iron sights gone; the crosshair gives way
   to the dot and you move at a quiet walk (no sprint while aiming). Let go and it all goes back.
+- [ ] **An optic is weight on the rail** (RP1). Switch to the rifle with iron sights, then with the red dot: the dot
+  is the quicker to your eye (0.13 s against 0.15 s) but the rifle is a touch slower to bring up after a switch (0.50 s
+  against 0.45 s; the Variable Scope the slowest). Is either worth leaving the sights on for?
 - [ ] **Shoot while aiming.** BBs go where the dot (or post) is. Aiming halves the spread: at 25 to 35 m it should be
   clearly tighter, and the hip up close should still feel fine.
 - [ ] **Hold Shift while aiming.** You creep slower than the aiming walk (1.4 m/s against 2.3). Steady, not stuck?
@@ -143,8 +146,9 @@ The rifle comes with iron sights; a red dot or a 2× scope is a part you fit in 
 ### Hop-up, flight and wind
 
 Hop-up puts backspin on the BB, which lifts it so it flies flat for longer; each replica has a dial in Loadout ›
-Customise. BBs fly by real air physics, and each match has a light breeze (calm to about 2 m/s) that pushes BBs,
-never players.
+Customise. BBs fly by real air physics. Out of doors (Woodland, the Range) each match has a light breeze (calm to
+about 2 m/s) that pushes BBs, never players; indoors (Depot, Subway) the air stands still (PH1). Each field has its
+own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a gas replica shoots softer in the cold.
 
 - [ ] **Factory hop (rifle 65 %, pistol 55 %), at a target 30 m or more away.** Rifle BBs rise about a hand's width
   near 20 m and stay on target to about 39 m, taking about half a second; the pistol's drop from about 27 m.
@@ -153,6 +157,15 @@ never players.
 - [ ] **Turn the dial in a match (4 less, 5 more).** The panel shows the setting and how far a level shot stays
   flat; past the best setting it says the BB climbs. Each replica keeps its own dial until the match ends.
 - [ ] **Watch the dust (Medium or up).** It drifts one way, the wind, which changes from match to match.
+- [ ] **Depot, a long shot down the Chrono hall (PH1).** BBs fly dead straight left to right, every match; the pause
+  menu reads "Air 20 °C · still air". On Woodland it reads the match's breeze and 16 °C, or 8 °C at night.
+- [ ] **The GBB Pistol on Woodland at night against Depot (PH1).** At night its BBs drop about 3 m sooner (24 m
+  against 27 m); Red or Black Gas wins the reach back. The AEG Rifle and the Sniper Rifle shoot the same on both.
+- [ ] **A bot sprinting across your line at 10 to 20 m (PH1).** A BB you see strike its trailing edge counts, and one
+  you see pass just ahead of it doesn't.
+- [ ] **BB weight to 0.40 g in Customise (PH1).** The flight picture shows the Sniper Rifle flying flattest with the
+  heaviest BBs and the pistols dropping short with them.
+- [ ] **Lob a rifle shot at about 25° on Woodland (PH1).** The BB comes down and lands (a puff), however far.
 - [ ] **Practice range, every target to 60 m.** Each can be hit: from 40 m aim high (or turn the hop up) and a little
   upwind; a level shot at the 60 m plate lands short.
 
@@ -234,16 +247,18 @@ parts. To try every part before you have levelled, turn on Settings › Dev › 
   "Level N", and can't be picked; "Level up to unlock more" goes once a row is fully unlocked.
 - [ ] **BB weight.** 0.25 g on the rifle and 0.20 g on the pistol as they come. 0.28 g on the rifle needs more hop (at
   about 75 % it stays on target to about 41 m); 0.20 g at 65 % hop floats, about 50 % flies flat.
-- [ ] **Grips.** Vertical: after a sprint the crosshair closes sooner; switching is a touch slower. Angled: switching
-  and raising the sight are quicker; after a sprint the crosshair stays wide a moment longer.
+- [ ] **Grips.** Vertical: after a sprint the crosshair closes sooner, and on the run it is a fifth less wide (RP1);
+  switching is a touch slower. Angled: switching and raising the sight are quicker; after a sprint the crosshair stays
+  wide a moment longer.
 - [ ] **Magazines.** Hi-cap: 120 BBs and one spare; a bot facing away hears its rattle within about 7 m. Low-cap: 30
-  BBs, five spares, quicker change and draw. The pistol's extended magazine: 27 BBs, slower to draw.
-- [ ] **Barrels and the silencer.** Tight-Bore: spread −15 %. Long Barrel: energy +10 %, spread −10 %, slower to draw
-  and raise. Silencer: energy −5 %, a slower draw, shots heard from 22 m become 11 m, duller and quieter; a bot facing
+  BBs, five spares, the quickest change (1.26 s) and draw. The hi-cap is the slowest to change (2.25 s, RP1). The pistol's extended magazine: 27 BBs, slower to draw.
+- [ ] **Barrels and the silencer.** Tight-Bore: spread −20 %, energy −5 %. Long Barrel: energy +10 %, no tighter,
+  a little slower to draw and raise (RP1). Silencer: energy −5 %, a slower draw, shots heard from 22 m become 11 m, duller and quieter; a bot facing
   away 15 m off doesn't turn at a silenced shot.
 - [ ] **Performance panel.** Energy, muzzle speed, BB weight, rate of fire, on-target range, time to 20 m, spread,
   recoil, magazines, reload, draw, aim raise, shots heard from.
-- [ ] **The 11.1 V LiPo battery** on the rifle: rate of fire +15 %, energy unchanged; it empties faster.
+- [ ] **The 11.1 V LiPo battery** on the rifle: rate of fire +15 %, energy unchanged; it empties faster and kicks
+  30 % harder, so a held trigger climbs sooner (RP1).
 - [ ] **Glowing BBs (WL8)** (per replica): Customise › BBs, under BB weight: At Night (the default), Always or Off,
   each replica its own; quit and start again: still picked. With Always on Depot by day your BBs are green, a little
   larger at range, with a green streak; the bots' stay white. Do they read against the sky, the walls and the ground?
@@ -265,10 +280,11 @@ Settings › Dev › Level up until 15.
 - [ ] **Equip it.** Below level 15 it is greyed with a lock and "Level 15"; once unlocked it goes in either slot.
 - [ ] **Its look.** A white slab with glowing cyan lines and a magenta core, the same on either team; with Realistic
   colours plain grey and unlit. Does it read as rare and special?
-- [ ] **Customise.** Power source reads Built-in battery, the magazine "Its own, 50 BBs"; optic, grip, laser, barrel
+- [ ] **Customise.** Power source reads Built-in battery, the magazine "Its own, 30 BBs" (RP1; 50 before); optic, grip, laser, barrel
   and muzzle rows are greyed; BB weight and hop-up still turn.
 - [ ] **On the range.** It starts on Semi and the selector steps Burst and Auto; even on Auto the sight barely climbs.
-  It stays on target to about 33 m.
+  It stays on target to about 33 m. A magazine is 30 BBs and you carry three; standing or walking its crosshair is the
+  tightest of the automatics, and on the run it opens wider than the AEG Rifle's (RP1).
 - [ ] **Its sound.** A quiet electronic chirp and a soft pop, no motor whine; an empty trigger blips; a reload ends in
   a two-note chime. Futuristic but still a toy?
 - [ ] **The Armory and the summary.** Level 15's row holds it; reaching it the summary says "Level 15!" and "Unlocked:
@@ -289,7 +305,10 @@ Public since 2026-11-05 (SN1): turn on Settings › Dev settings › Disable lev
 - [ ] **Customise.** The optic row has the 2x Scope on; take it off (iron sights) and put it back; the Red Dot, the
   AEG's grips, the Silencer and the torch fit; no barrels, no AEG magazines. Power lists the M130, M140 and M150
   Springs (pictures: a coil with a violet, crimson or black band).
-- [ ] **Springs.** The M140 and M150 shoot harder (Energy up 10 % and 20 %) and cock a little slower. Can you feel it?
+- [ ] **Springs** (RP1). The M130 is the quick, quiet one (a shot every 1.25 s, heard from 15 % less far). The M140
+  shoots 10 % harder for a 1.32 s bolt and a fifth more kick. The M150 shoots 20 % harder for a 1.39 s bolt, half as
+  much kick again and a shot heard a fifth further. Can you feel each, and does the M150's bolt still look right
+  slowed down?
 - [ ] **Levels.** In the Armory level 5 holds the Sniper Rifle, the M130 Spring and the 2x Scope; the M140 is at 9 and
   the M150 at 14 (LV15). They show with Dev content off too (public since 2026-11-05).
 - [ ] **Bots with it.** About 1 opponent in 12 on Hard (fewer on Normal and Easy) carries it: they raise the scope to
@@ -585,6 +604,13 @@ a cross-passage between the running tunnels, and they swap at half time. Turn on
   landing, both on short poles that fit under the roof; Elimination's overtime flag rises in the lower hall.
 - [ ] **The lift shafts stand shut (MT1).** The two lifts come in their own step (MT2); until then their shafts are
   solid in the ticket hall.
+- [ ] **The ticket hall and concourse models (SM3).** The ticket gates (14 slim pedestals, a 1 m lane between each
+  two, a black paddle door each side of every lane), the row of ticket machines, both kiosks and the ticket office (shuttered), the booking counter, the help points, the benches and the
+  crowd barriers stand in their boxes: nothing floats, sticks out of its box or blocks where the box didn't. The
+  platform benches sit with their backs to the wall, seats to the track. No word, logo or team colour on any of them.
+- [ ] **The ticket gates' paddle doors (SM3).** Walk up to a lane: its two paddles swing open towards the platforms in
+  about a third of a second and shut behind you; the next lane's stay shut. Bots walk the lanes without snagging, and
+  BBs and bodies pass a lane as before (the paddles are look only). The paddles sit in the gates' baked light.
 
 ## Bots
 
@@ -1458,6 +1484,20 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   than in Woodland and rings off the tiles lightly, fading in under a second; a silenced one is still muffled, with the room round it.
 - [ ] **Bots' shots** on Subway echo too, behind a wall as well; steps, impacts and grenades don't (shots only).
 - [ ] **Every other map** (Depot, Woodland, the Range): shots sound exactly as before, also after a Subway match.
+
+## Subway lit as underground (UL1)
+
+Subway is Dev content: tick Settings › Dev › Dev content. On a real graphics card, play Subway once on each preset.
+
+- [ ] **No blue cast.** On Low and High, the ticket hall's terrazzo, the platform walls and the concourse read warm
+  grey and white like Depot's hall, never a cold blue. Ultra looks as it did.
+- [ ] **Medium is lit.** On Medium the platforms, concourse and ticket hall are lit from above, not one flat grey
+  shade; other players have a soft dark disc under their feet.
+- [ ] **Grey footstep dust.** From Medium up, running on the floors kicks up grey puffs, not white ones.
+- [ ] **Shiny things underground.** On Low, metal and polymer (your replica, the lift car, the rails) look matte but
+  never black; from Medium up they keep their sheen.
+- [ ] **Frame rate** on Low and Medium looking down the north platform: at least as good as before.
+- [ ] **Other maps unchanged:** Depot, Woodland and the Range look as before on every preset.
 
 ## Reporting what you find
 

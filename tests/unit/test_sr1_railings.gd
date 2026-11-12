@@ -236,7 +236,11 @@ func test_a_built_levels_railing_is_solid_to_its_ray_and_its_bars_are_drawn() ->
 	if bars != null:
 		var boxes: Array[AABB] = []
 		r.parts(0, boxes)
-		assert_eq(bars.mesh.surface_get_array_len(0), boxes.size() * 36, "every bar and rail, six faces each")
+		var run := AABB(r.mins[0], r.maxs[0] - r.mins[0])
+		var drawn := bars.mesh.get_aabb()
+		assert_almost_eq(drawn.position, run.position, Vector3.ONE * 0.001, "the bars and rails drawn fill the run")
+		assert_almost_eq(drawn.end, run.end, Vector3.ONE * 0.001, "and never go past it")
+		assert_gt(boxes.size(), 2, "of its bars and rails")
 
 
 func test_a_level_with_no_railings_has_no_rays_or_mesh_for_them() -> void:

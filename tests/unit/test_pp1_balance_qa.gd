@@ -34,14 +34,14 @@ func test_the_changed_rows_read_as_written_a_negative_energy_too() -> void:
 	assert_eq(stats.problems.size(), 0, "stats.md reads clean: %s" % [stats.problems])
 	var bore := stats.parts.part(&"barrel", &"tightBore")
 	assert_almost_eq(bore.energy, -0.05, 1e-6, "the tight bore's -5 %")
-	assert_almost_eq(bore.spread, 0.85, 1e-6)
-	assert_almost_eq(stats.power(LIPO).recoil, 0.10, 1e-6, "the LiPo's recoil")
+	assert_almost_eq(bore.spread, 0.8, 1e-6, "RP1: a fifth tighter (0.85 in PP1)")
+	assert_almost_eq(stats.power(LIPO).recoil, 0.30, 1e-6, "the LiPo's recoil (RP1: 30 %; 10 % in PP1)")
 	assert_almost_eq(stats.power(LIPO).fire_rate, 0.15, 1e-6)
 	assert_almost_eq(stats.parts.part(&"optic", &"redDot").raise, 0.85, 1e-6, "the red dot's quick raise")
 	assert_almost_eq(stats.replica_config(&"sniper").hip_spread, 10.0, 1e-6)
 
 
-func test_a_tight_bore_carries_five_percent_less_energy_and_a_lipo_ten_percent_more_recoil() -> void:
+func test_a_tight_bore_carries_five_percent_less_energy_and_a_lipo_more_recoil() -> void:
 	var bare := rules.default_loadout("A")
 	assert_true(rules.equip(bare, Loadout.Slot.PRIMARY, AEG))
 	var plain := rules.carried(bare).replicas[0]
@@ -51,7 +51,9 @@ func test_a_tight_bore_carries_five_percent_less_energy_and_a_lipo_ten_percent_m
 	assert_true(rules.set_power(fitted, AEG, LIPO))
 	var r := rules.carried(fitted).replicas[0]
 	assert_almost_eq(r.muzzle_energy, plain.muzzle_energy * 0.95, 1e-4, "less energy for the tighter groups")
-	assert_almost_eq(r.recoil_deg, plain.recoil_deg * 1.10, 1e-5, "the LiPo's recoil on top")
+	assert_almost_eq(r.recoil_deg, plain.recoil_deg * (1.0 + rules.stats.power(LIPO).recoil), 1e-5,
+			"the LiPo's recoil on top")
+	assert_gt(r.recoil_deg, plain.recoil_deg)
 	assert_almost_eq(r.fire_rate, plain.fire_rate * 1.15, 1e-4)
 
 

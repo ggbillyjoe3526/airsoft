@@ -31,75 +31,92 @@ blocks: list[dict] = []
 
 def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: float, yb: float | None = None,
          h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False,
-         vault: bool = False) -> None:
+         dress: str = "", vault: bool = False) -> None:
     """A room; a ramp room's ceiling follows its floor down in steps, or with `flat` stays level, `h` over its higher
-    end (a short flight of steps under a tunnel's roof). A `vault` room has no ceiling of its own: its walls stop `h`
-    over its floor, where its platform tunnel's vault (VAULTS) springs."""
+    end (a short flight of steps under a tunnel's roof). A ramp room's `dress` names the model laid over its ramps
+    (PropDressConfig, SET; SM2: an escalator bank or a stair), build_map.py writing it on each. A `vault` room has no
+    ceiling of its own: its walls stop `h` over its floor, where its platform tunnel's vault (VAULTS) springs."""
     rooms.append(dict(name=name, area=area, x0=x0, x1=x1, z0=z0, z1=z1, ya=y, yb=y if yb is None else yb, h=h,
-                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat, vault=vault))
+                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat, dress=dress, vault=vault))
 
 
 def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0,
-          dress: str = "") -> None:
+          dress: str = "", facing: str = "") -> None:
     """A cover block; `dress` names the model drawn in its box (PropDressConfig.models; SD1), else its box is drawn
-    in its room's finish. Look only: the box stays what BBs, bodies and the bots meet."""
-    blocks.append(dict(kind=kind, y=y, x0=x0, x1=x1, z0=z0, z1=z1, h=h, colour=colour, dress=dress))
+    in its room's finish; `facing` (+x, -x, +z or -z) the world direction its model's front faces, else the field's
+    middle (SM3: a bench's seat to the track). Look only: the box stays what BBs, bodies and the bots meet."""
+    blocks.append(dict(kind=kind, y=y, x0=x0, x1=x1, z0=z0, z1=z1, h=h, colour=colour, dress=dress, facing=facing))
 
 
 # ---------------- Street level, 0 m: the ticket hall (Street team's start) ----------------
 room("hall", "Ticket hall", -62, -38, -10, 10, G, h=6.0)
-block("wall", G, -62, -56, -10, -6.5, 3.0)                # closed ticket office
-block("container", G, -48, -45, 7.4, 10, 2.5, 0x8a8478)   # shuttered kiosk
-for z0, z1 in [(-9.5, -8), (-7, -6), (-5, -4), (-3, -2), (2, 3), (4, 5), (6, 7), (8, 9.5)]:
-    block("cabinet", G, -51, -50.4, z0, z1, 1.0)           # ticket gates
-block("cabinet", G, -55.0, -54.4, 2.5, 8.0, 2.0)           # ticket machines
+block("wall", G, -62, -56, -10, -6.5, 3.0, dress="ticket_office")  # closed ticket office
+block("container", G, -48, -45, 7.4, 10, 2.5, 0x8a8478, dress="kiosk")  # shuttered kiosk
+# Ticket gates (the owner: lanes one person wide, paddle doors each side): a slim pedestal 0.49 m wide and 1.4 m along
+# the lane, its reader at the street end, seven a side from the hall column to the wall with a 1 m lane between
+# each two (the paddles across it are GatePaddles', look only: they swing open as anyone walks up).
+GATE_W, GATE_LANE = 0.49, 1.0
+for zs in (-1, 1):
+    for k in range(7):
+        near = 0.5 + k * (GATE_W + GATE_LANE)
+        block("cabinet", G, -51.4, -50.0, *sorted((zs * near, zs * (near + GATE_W))), 1.0, dress="ticket_gate",
+              facing="+x")
+block("cabinet", G, -55.0, -54.4, 2.5, 8.0, 2.0, dress="ticket_machine")
 block("pillar", G, -50.2, -49.2, -0.5, 0.5, 6.0)           # hall column in the gate line
 
 # The spiral stair's well: 5 x 5 m in the hall's north-east corner, down to the lower booking hall. Its flights are
 # built by build_map.py (SPIRAL); its rail round the hole in the hall floor here.
-SPIRAL = dict(x0=-43.0, x1=-38.0, z0=-10.0, z1=-5.0, flight=1.3, y0=C, y1=G, sides=10, top=6.0)
+SPIRAL = dict(x0=-43.0, x1=-38.0, z0=-10.0, z1=-5.0, flight=1.3, y0=C, y1=G, sides=10, top=6.0,
+              dress="spiral_stair")  # the model over its flights and landings, not the core (SM2)
 room("spiral", "Spiral stair", -43, -38, -10, -5, C, h=G - C + 0.01, ceil=False,
      seal={"n": [], "e": [], "w": [], "s": [(-39.4, -38.0)]})
 block("railing", G, -43.0, -38.0, -5.0, -4.88, 1.1)
 block("railing", G, -43.12, -43.0, -8.6, -4.88, 1.1)
 
-# Upper escalators: 10 m down at 1:2, a balustrade between the two.
-room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2)
-block("barrier", None, -38, -18, -0.2, 0.2, 1.0)           # on the ramp: build_map.py follows its slope
+# Upper escalators: 10 m down at 1:2. Two escalators, each 1.2 m between its balustrades (two abreast, the owner
+# 2026-11-12), a wide deck between them with its uplighters and a deck from each to the wall. The decks are blocks on
+# the ramp: build_map.py follows its slope.
+ESC_LANE = 1.2
+ESC_MID = 0.6     # the middle deck's half width: as wide as an escalator, as in the photos
+room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2, dress="escalator_upper")
+for z0, z1 in ((-3.5, -ESC_MID - ESC_LANE), (-ESC_MID, ESC_MID), (ESC_MID + ESC_LANE, 3.5)):
+    block("barrier", None, -38, -18, z0, z1, 1.0, dress="escalator_upper")
 
 # ---------------- Concourse, -10 m: close quarters ----------------
 room("bk_w", "Booking hall", -52, -43, -9.5, -1.2, C, h=4.0)
 room("bk_s", "Booking hall", -43, -36, -5, -1.2, C, h=4.0)
 room("bk_e", "Booking hall", -38, -36, -9.5, -5, C, h=4.0)
-block("furniture", C, -50, -44, -9.5, -8.6, 1.1)           # old ticket counter, waist high
-block("crate", C, -48.5, -47, -5.5, -4, 1.4)
-block("cabinet", C, -36.9, -36.0, -4.2, -1.2, 2.0)         # lockers: screen the spiral foot from the passage
+block("furniture", C, -50, -44, -9.5, -8.6, 1.1, dress="booking_counter")  # old ticket counter, waist high
+block("crate", C, -48.5, -47, -5.5, -4, 1.4, dress="crate")
+block("cabinet", C, -36.9, -36.0, -4.2, -1.2, 2.0, dress="locker")  # lockers: screen the spiral foot from the passage
 room("wpass", "West passage", -36, -18, -9.5, -7, C, h=3.0)
 block("crate", C, -31, -29, -9.5, -8.1, 1.8)               # cable drums staggered: no line down the passage
 block("crate", C, -25, -23, -8.4, -7.0, 1.8)
 room("upper", "Concourse", -18, -6, -9.5, 9.5, C, h=4.0)
-block("barrier", C, -14.0, -13.4, -5.6, -3.6, 1.1)
-block("barrier", C, -14.0, -13.4, 3.6, 5.6, 1.1)
-block("cabinet", C, -9.0, -7.6, -8.4, -7.0, 2.2)           # help points / map boards
-block("cabinet", C, -9.0, -7.6, 7.0, 8.4, 2.2)
-block("furniture", C, -17.4, -16.8, 5.5, 8.5, 0.8)         # bench
+block("barrier", C, -14.0, -13.4, -5.6, -3.6, 1.1, dress="crowd_barrier")
+block("barrier", C, -14.0, -13.4, 3.6, 5.6, 1.1, dress="crowd_barrier")
+block("cabinet", C, -9.0, -7.6, -8.4, -7.0, 2.2, dress="help_point")  # help points / map boards
+block("cabinet", C, -9.0, -7.6, 7.0, 8.4, 2.2, dress="help_point")
+block("furniture", C, -17.4, -16.8, 5.5, 8.5, 0.8, dress="station_bench_long", facing="+x")  # bench
 block("wall", C, -12.6, -11.4, -9.5, -6.9, 4.0)            # piers: break the passage-to-passage line
 block("wall", C, -12.6, -11.4, 6.9, 9.5, 4.0)
-block("container", C, -12.4, -10.4, -2.6, 2.6, 2.8, 0x8a8478)  # shut newsagent's kiosk between the escalator banks:
+block("container", C, -12.4, -10.4, -2.6, 2.6, 2.8, 0x8a8478, dress="kiosk_long")  # shut newsagent's kiosk between the
+#                                                                escalator banks:
 #                                                                no line from the lower hall up both flights
 # Lower escalators: 8 m down to the lower hall between the platform tunnels.
-room("esc_low", "Low escalators", -6, 10, -3, 3, C, P, h=2.8)
-block("barrier", None, -6, 10, -0.2, 0.2, 1.0)
+room("esc_low", "Low escalators", -6, 10, -3, 3, C, P, h=2.8, dress="escalator_lower")
+for z0, z1 in ((-3.0, -ESC_MID - ESC_LANE), (-ESC_MID, ESC_MID), (ESC_MID + ESC_LANE, 3.0)):
+    block("barrier", None, -6, 10, z0, z1, 1.0, dress="escalator_lower")
 room("npass", "North passage", -6, 20, -9.5, -6.5, C, h=3.0)
 room("spass", "South passage", -6, 20, 6.5, 9.5, C, h=3.0)
 for zs in (-1, 1):
     a, b = sorted((zs * 9.5, zs * 7.7))
     c, d = sorted((zs * 8.3, zs * 6.5))
-    block("cabinet", C, 1, 2.2, a, b, 2.0)                 # lockers, a chicane down each passage
-    block("cabinet", C, 7, 8.2, c, d, 2.0)
-    block("cabinet", C, 13, 14.2, a, b, 2.0)
-    block("crate", C, 16.5, 18, c, d, 1.2)
-    block("cabinet", C, -4, -2.8, c, d, 2.0)               # at the passage mouth
+    block("cabinet", C, 1, 2.2, a, b, 2.0, dress="locker")  # lockers, a chicane down each passage
+    block("cabinet", C, 7, 8.2, c, d, 2.0, dress="locker")
+    block("cabinet", C, 13, 14.2, a, b, 2.0, dress="locker")
+    block("crate", C, 16.5, 18, c, d, 1.2, dress="crate")
+    block("cabinet", C, -4, -2.8, c, d, 2.0, dress="locker")  # at the passage mouth
 room("plant", "Plant room", 4, 18, -4, 4, C, h=3.5)
 room("pdoor_n", "Plant room", 9.5, 11.5, -6.5, -4, C, h=2.2)
 room("pdoor_s", "Plant room", 9.5, 11.5, 4, 6.5, C, h=2.2)
@@ -107,14 +124,14 @@ block("generator", C, 6, 8.5, -2.5, 0.5, 2.2)             # fan housings
 block("generator", C, 13, 15.5, -0.5, 2.5, 2.2)
 block("cabinet", C, 17.2, 18, -4, -2, 2.0)
 room("east", "Stair top", 20, 27, -9.5, 9.5, C, h=4.0)
-block("crate", C, 22, 23.4, -4.8, -3.4, 1.4)
-block("crate", C, 22, 23.4, 3.4, 4.8, 1.4)
-block("barrier", C, 24.6, 25.2, -9.5, -7.5, 1.1)
-block("barrier", C, 24.6, 25.2, 7.5, 9.5, 1.1)
+block("crate", C, 22, 23.4, -4.8, -3.4, 1.4, dress="crate")
+block("crate", C, 22, 23.4, 3.4, 4.8, 1.4, dress="crate")
+block("barrier", C, 24.6, 25.2, -9.5, -7.5, 1.1, dress="crowd_barrier")
+block("barrier", C, 24.6, 25.2, 7.5, 9.5, 1.1, dress="crowd_barrier")
 # The stair: one ordinary staircase, -10 to -18, two flights and a half landing.
-room("stair1", "Stair", 27, 35, -1.6, 1.6, C, LANDING, h=3.0)
+room("stair1", "Stair", 27, 35, -1.6, 1.6, C, LANDING, h=3.0, dress="platform_stair")
 room("landing", "Stair landing", 35, 37.5, -1.6, 1.6, LANDING, h=3.0)
-room("stair2", "Stair", 37.5, 45.5, -1.6, 1.6, LANDING, P, h=3.0)
+room("stair2", "Stair", 37.5, 45.5, -1.6, 1.6, LANDING, P, h=3.0, dress="platform_stair")
 
 # ---------------- Platforms, -18 m, and the track bed, -18.9 m ----------------
 # Each platform shares one deep-level tunnel with its track, London style (owner, 2026-11-12: "curved ceilings for the
@@ -167,7 +184,7 @@ room("lowc", "Lower hall", 10, 22, -4, 4, P, h=3.5)
 for x in (11.5, 18.5):
     room("lcdoor", "Lower hall", x, x + 2.5, -5.5, -4, P, h=2.4)
     room("lcdoor", "Lower hall", x, x + 2.5, 4, 5.5, P, h=2.4)
-block("furniture", P, 15, 17, -0.4, 0.4, 0.8)
+block("furniture", P, 15, 17, -0.4, 0.4, 0.8, dress="station_bench")
 block("cabinet", P, 21.2, 22, -1, 1, 2.0)
 room("midp", "Mid passage", -22, -19, -5.5, 5.5, P, h=3.0)
 room("ecross", "East passage", 45.5, 48.5, -5.5, 5.5, P, h=3.0)
@@ -181,14 +198,15 @@ for zs in (-1, 1):
     wall = sorted((zs * 6.1, zs * 5.5))
     block("hoarding", P, -4, -1, *edge, 2.4)               # works chicane at the platform middle
     block("shed", P, 4, 6, *back, 2.6)                      # booth
-    block("crate", P, 28, 29.4, *sorted((zs * 9, zs * 7.8)), 1.4)
-    block("crate", P, -30, -28.6, *back, 1.4)
+    block("crate", P, 28, 29.4, *sorted((zs * 9, zs * 7.8)), 1.4, dress="crate")
+    block("crate", P, -30, -28.6, *back, 1.4, dress="crate")
     block("hoarding", P, -34, -32, *edge, 2.4)
     block("shed", P, -27, -25.4, *back, 2.6)
     block("hoarding", P, 30, 32, *sorted((zs * 9, zs * 6.6)), 2.4)
     block("shed", P, 34, 35.6, *sorted((zs * 6.5, zs * 5.5)), 2.6)
     for x in (-40, -10, 24):
-        block("furniture", P, x - 1, x + 1, *wall, 0.8)    # benches
+        block("furniture", P, x - 1, x + 1, *wall, 0.8,    # benches, backs to the wall, seats to the track
+              dress="station_bench", facing="+z" if zs > 0 else "-z")
 block("barrier", P, 38, 40, -7.4, -5.5, 1.3)                # stacked tunnel lining segments
 block("cabinet", P, 48.6, 49.4, -7.5, -6.6, 2.2)            # signal cabinet at the tunnel mouth
 block("skip", T, -18, -16, 9.0, 11.2, 2.7)                  # spoil skips on wagons, staggered wall to edge
@@ -254,10 +272,10 @@ LANES = {
           (-38.5, -3.5, C), (-37.0, -8.2, C), (-27, -7.7, C), (-15, -8.0, C), (-5, -8.0, C), (4, -7.2, C),
           (11, -7.8, C), (19, -7.5, C), (23.5, -6.5, C), (26, -0.0, C), (31, 0, -12.0), (36.2, 1.0, LANDING),
           (41.5, 0, -16.0)],
-    "m": [(-56, 0, G), (-44, 2.5, G), (-37, 2, G - 0.5), (-28, 2, -5.5), (-19, 2, C), (-10, 0, C),
-          (-5, 1.5, C), (2, 1.5, -14.0), (9, 1.5, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P),
+    "m": [(-56, 0, G), (-44, 2.5, G), (-37, 1.2, G - 0.5), (-28, 1.2, -5.5), (-19, 1.2, C), (-10, 0, C),
+          (-5, 1.2, C), (2, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P),
           (46.5, 7.0, P)],
-    "s": [(-56, 3, G), (-44, 4, G), (-37, -2, G - 0.5), (-28, -2, -5.5), (-19, -2, C), (-10, 6, C), (-5, 8, C),
+    "s": [(-56, 3, G), (-44, 4, G), (-37, -1.2, G - 0.5), (-28, -1.2, -5.5), (-19, -1.2, C), (-10, 6, C), (-5, 8, C),
           (4, 7.2, C), (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (31, -0.5, -12.0),
           (36.2, -1.0, LANDING), (41.5, 0, -16.0), (47, 0, P), (47, 4.5, P), (40, 7.3, P), (35.7, 7.3, P),
           (35.7, 10.75, P), (46, 10.75, P)],

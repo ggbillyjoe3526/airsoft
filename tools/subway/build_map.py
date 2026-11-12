@@ -244,7 +244,7 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
                     fa, fb = floor_at(rm, a), floor_at(rm, b)
                     for z0, z1 in z_pieces(rm):
                         ramps.append(dict(x0=a, x1=b, z0=z0, z1=z1, y0=min(fa, fb), y1=max(fa, fb),
-                                          rise="+x" if fb > fa else "-x"))
+                                          rise="+x" if fb > fa else "-x", dress=rm.get("dress", "")))
             else:
                 boxes.append(([rm["x0"], rm["x1"], low - FT, rm["ya"], rm["z0"], rm["z1"]], -1, "floor"))
         # The ceiling, a ramp's stepped down with it (each step closing the riser to the one above); a vault room's
@@ -341,7 +341,7 @@ def spiral() -> tuple[list[dict], list[list[float]]]:
     for k in range(s["sides"]):
         _, (a, b, c, d), way, corner = sides[k % 4]
         y = s["y0"] + rise * k
-        ramps.append(dict(x0=a, x1=b, z0=c, z1=d, y0=y, y1=y + rise, rise=way))
+        ramps.append(dict(x0=a, x1=b, z0=c, z1=d, y0=y, y1=y + rise, rise=way, dress=s.get("dress", "")))
         ca, cb, cc, cd = corners[corner]
         top = y + rise
         boxes.append([ca, cb, top - FT, top, cc, cd])
@@ -584,7 +584,7 @@ def lifts() -> list[dict]:
 
 # ---------------- Writing ----------------
 
-def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "") -> dict:
+def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "", facing: str = "") -> dict:
     x0, x1, y0, y1, z0, z1 = bx
     if kind in ("floor", "ramp"):
         # Floors drawn edge to edge are grown a centimetre a side to meet (as Depot's): an edge on a grid cell's middle
@@ -598,6 +598,8 @@ def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress:
         b["colour"] = colour
     if dress:
         b["dress"] = dress
+    if facing:
+        b["facing"] = facing
     return b
 
 
@@ -627,23 +629,25 @@ def build() -> dict:
     # The ramps first (never cut), then the cover, then the shell cut out of every room's air and of what stands.
     for rp in ramps:
         bx = [rp["x0"], rp["x1"], rp["y0"], rp["y1"], rp["z0"], rp["z1"]]
-        blocks.append(as_block("ramp", bx, rp["rise"]))
+        blocks.append(as_block("ramp", bx, rp["rise"], dress=rp.get("dress", "")))
         solid.append(bx)
     for bx in sp_boxes:
+        # The landings take the spiral's model (SM2); the core stays the station's tiled pillar.
         kind = "pillar" if bx[3] - bx[2] > 3 else "floor"
-        blocks.append(as_block(kind, bx))
+        blocks.append(as_block(kind, bx, dress=L.SPIRAL.get("dress", "") if kind == "floor" else ""))
         solid.append(bx)
     for bl in L.blocks:
         if bl["y"] is None:
             for bx, rise in ramp_barrier(bl):
-                blocks.append(as_block(bl["kind"], bx, rise, colour=bl["colour"], dress=bl["dress"]))
+                blocks.append(as_block(bl["kind"], bx, rise, colour=bl["colour"], dress=bl["dress"],
+                                       facing=bl["facing"]))
                 solid.append(bx)
             continue
         bx = [bl["x0"], bl["x1"], bl["y"], bl["y"] + bl["h"], bl["z0"], bl["z1"]]
         for other in solid:
             if overlap(bx, other, SLACK):
                 print("warning: cover", bl["kind"], bx, "overlaps", other)
-        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"]))
+        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"], facing=bl["facing"]))
         solid.append(bx)
     # A car's air keeps a roof's thickness under its shoulders (car_shoulders) where it stands under an arch.
     air = [(i, p) for i, rm in enumerate(L.rooms) for a in air_boxes(rm)
@@ -699,12 +703,18 @@ def build() -> dict:
                                                                       "ground": HEMI_GROUND},
                                                              "exposureScale": 0.85}}},
         "roof": {"height": r(max(ceil_at(rm, max(rm["ya"], rm["yb"])) for rm in L.rooms if rm["ceil"]) + FT + ROOF_OVER
-                             + LIFT), "plain": True, "lamps": lamps()},
+                             + LIFT), "plain": True,
+                 # UL1: no sky down here; the sun standing in for the lamps (Low, Medium) casts no shadow.
+                 "underground": True, "lamps": lamps()},
         "areas": areas(),
         "lifts": lifts(),
-        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT)},
+        # UL1: the grey puff feet kick up off the station's dusty floors (white without a tint).
+        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT),
+                     "kickedDust": {"tint": 0xB0AEA8, "scale": 0.9}},
     }
-    m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, [shaft_hole()])
+    # nothing in the shafts, nor in a balustrade down an escalator (its pieces' whole boxes, as the game's tests take them)
+    holes = [shaft_hole()] + [box for bl in L.blocks if bl["y"] is None for box, _ in ramp_barrier(bl)]
+    m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, holes)
     m["dressing"]["station"]["trims"] += drop_rods(m["dressing"]["station"]["fixtures"])
     del sx
     return m

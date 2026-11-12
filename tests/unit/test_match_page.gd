@@ -59,7 +59,8 @@ func test_the_page_shows_the_chips_the_summary_and_play() -> void:
 	for expected: String in ["FIELD", "MODE", "YOUR TEAM", "BOTS", "RULES", "DEPOT"]:
 		assert_true(words.has(expected), expected)
 	# the map's line is its card's tooltip (UI1)
-	assert_eq(page.map_card("depot").tooltip_text, "An indoor airsoft hall: three lanes, two dark tunnels.")
+	assert_eq(page.map_card("depot").tooltip_text,
+			"An indoor airsoft hall: three lanes, two dark tunnels.\nStill air, 20 °C.")
 
 
 # --- modes ---

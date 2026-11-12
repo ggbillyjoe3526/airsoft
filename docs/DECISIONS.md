@@ -377,6 +377,20 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   sprinting to fight.
 - **Walk is Shift (slow, quiet) and sprint is Left Alt (owner, 2026-09-30);** running, sprinting and landing make noise
   bots hear, walking does not. Wind is one breeze per match from the seed, 0.3 to 1.8 m/s, moving BBs only (2026-10-04).
+- **Each field has its own weather (PH1, 2026-11-12; the owner's physics audit, defaults taken).** `data/maps.md`
+  gives a field the share of the match's breeze that reaches it (Wind: 0 indoors, so Depot's and Subway's BBs fly
+  straight) and its air by day (Air, °C; a night in the open is 8 °C colder). Replicas are rated at 20 °C, as on a
+  chrono; the field's air sets its density for every BB (a few per cent), and a gas replica's energy follows it at
+  1.2 % a °C (about 1 fps a °F), never past its site limit. Depot and the Range stay at 20 °C, so what the Loadout
+  says is what they shoot. The pause menu and the field cards' tooltips say the weather. Left out on purpose, fun over
+  simulation: a BB taking its shooter's own speed, a canted hop-up curving shots, gas cooling down in rapid fire, rain
+  and humidity (`docs/records/PH1.md`).
+- **The site limit is read with the BBs loaded (PH1, 2026-11-12),** as a real chrono reads joules with your own BBs:
+  a heavier BB's extra energy (`bb_energy_exponent`) stops at the limit too. The Loadout loads 0.20 to 0.40 g (was
+  0.30 g); each hop-up lifts only so much, so each replica has a best weight.
+- **A BB meets a moving body where both were at the same moment of the tick (PH1, 2026-11-12).** `BBStep` tests the
+  BB's path less the body's own step, which is also what the interpolated figure and BB show; before, the body stood
+  at its tick's end for the whole of the BB's travel (up to 11 cm out on a sprinter).
 - **Crouch and aim are both held by default (owner, 2026-10-18, replacing crouch toggled from 2026-10-03).** Each has a
   toggle setting; a toggled crouch stands up on a sprint or jump press. Lean and sprint are held.
 - **Hold Q / E to lean around cover (owner, 2026-10-01); replicas switch with 1, 2 and the mouse wheel (owner,
@@ -784,6 +798,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Replicas, Loadout and levels
 
+- **Replicas are made of steel, aluminium and polymer under any paint (owner, 2026-11-12, MQ1).** "Pistol slides
+  are metal and body's made of polymer/plastic. Rifles should be mostly metal and sniper rifle barrel is metal." On
+  the first pictures: "Black polymer should be darker but not as dark as the black metals. Also, the white polymer
+  should be less bright. I don't like the wooden sniper rifle so remove that and keep polymer." So black metal is
+  the darkest, black polymer a shade lighter, white polymer an off-white, and the sniper's stock stays polymer; no
+  replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
 - **The next replica is a spring sniper rifle, and the owner is asked how to build it and its specs before work starts
   (owner, 2026-10-06).** The SMG and shotgun come after it.
 - **The Cyber Pistol is the owner's own design and the level cap's reward (owner, 2026-10-04; level 10 since
@@ -888,6 +908,19 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the Variable Scope so the level isn't empty with Dev content off (LV15, owner 2026-11-10; level 7 at first). A
   Breacher bot kit (red dot, rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor
   until he records one.
+- **Every replica and part has a job of its own (owner, 2026-11-12, RP1).** "Make sure each weapon has its own
+  strengths and weaknesses. Each weapon should feel unique and attachments should offer incentives to use while also
+  feeling unique from each other. Feel free to make any changes to the specs." Defaults taken (the owner may change
+  any; the numbers are `data/stats.md`'s, the reasons `docs/records/RP1.md`): the AEG Rifle the all-rounder; the GBB
+  Pistol the quickest to hand; the Cyber Pistol keeps his design above (rifle power, the tightest automatic, almost
+  no kick) and pays for it in BBs (30 × 3) and on the run; the Sniper Rifle slow on its feet; the Compact SMG as
+  approved. The Vertical Grip steadies the spread on the move, the Red Laser tightens only shots from the hip and
+  costs handling, the long barrel is reach alone, the hi-cap changes slower, the LiPo and the stronger gases kick
+  harder; every optic is a little slower to bring up than the iron sights (the Red Dot too: no part is
+  free). **The springs differ (owner, 2026-11-12: "Springs should have differences")**: the M130 quick and quiet,
+  the M140 the middle one, the M150 the long shot with the slowest bolt, the hardest kick and the loudest crack (a
+  Heard from column on the power sources). The numbers above this entry (the Long Barrel's 10 % tighter groups, the
+  gases' and springs' +10 % and +20 % recoil, the scopes' 1.9 and 1.6) are as ruled then; stats.md has today's.
 
 ## Menus, HUD, settings and accessibility
 
