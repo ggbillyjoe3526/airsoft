@@ -1,6 +1,6 @@
 # TB2 · Subway's running tunnels arched like the trains
 
-**Review:** 3 attempts · critic pending · qa pending · performance pending
+**Review:** 3 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 Owner's ask (2026-11-12): "Subway tunnel should be curved/arched to closely math the shape of the trains." A second
 pull request after TB1 (#318), which vaulted the platform tunnels.
@@ -11,7 +11,7 @@ pull request after TB1 (#318), which vaulted the platform tunnels.
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Opus 5.5 (build thread) | ✓ | 6/8 Retry | the box car standing in the south running tunnel poked through the arch (its roof cut away, its sides through the lining); the arch unseen in the dark tunnel; an always-true test assert, a stale rib comment |
 | 2026-11-12 | 2 | Opus 5.5 (build thread) | ✓ | – | performance Fail: the tunnel lamps' lights shone on every preset, past the Lamp lights row (Low and Medium stay cheap) |
-| 2026-11-12 | 3 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-12 | 3 | Opus 5.5 (build thread) | ✓ | 7/8 Accept | – (the two known issues added to KNOWN_ISSUES in the records commit) |
 
 ## Decisions
 
