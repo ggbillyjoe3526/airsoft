@@ -68,8 +68,8 @@ the start.
 A futuristic electric pistol, unlocked at level 15, the top of the [levels](Levels-and-Unlocks). It fires **single
 shots, bursts or full auto**, faster than the rifle and as hard, with the tightest groups of the automatics and
 almost no kick (the table above has its numbers). Against that it carries the fewest BBs of them: a magazine lasts
-two seconds with the trigger held, and there are three. Held in one hand it swings: running, sprinting or jumping adds
-twice the spread it adds to any other replica, so stop or walk to shoot. Its battery is built in, so
+two seconds with the trigger held, and there are three. It is a pistol to stop and shoot with: running, sprinting or jumping adds
+twice the spread it adds to the rifle, so plant your feet or walk. Its battery is built in, so
 no power source fits it, and only the Weapon Torch fits it.
 It is the same size in your hand as the GBB Pistol. It wears its own white, cyan and magenta colours, with
 glowing slashes, a pink core behind bars in its slide, a finned rear cap and three fire-mode lights; with

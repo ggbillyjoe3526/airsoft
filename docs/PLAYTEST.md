@@ -117,6 +117,9 @@ The rifle comes with iron sights; a red dot or a 2× scope is a part you fit in 
   crosshair goes: the front post sits in the rear ring.
 - [ ] **Fit the red dot and aim.** It sits on the rifle with the iron sights gone; the crosshair gives way
   to the dot and you move at a quiet walk (no sprint while aiming). Let go and it all goes back.
+- [ ] **An optic is weight on the rail** (RP1). Switch to the rifle with iron sights, then with the red dot: the dot
+  is the quicker to your eye (0.13 s against 0.15 s) but the rifle is a touch slower to bring up after a switch (0.50 s
+  against 0.45 s; the Variable Scope the slowest). Is either worth leaving the sights on for?
 - [ ] **Shoot while aiming.** BBs go where the dot (or post) is. Aiming halves the spread: at 25 to 35 m it should be
   clearly tighter, and the hip up close should still feel fine.
 - [ ] **Hold Shift while aiming.** You creep slower than the aiming walk (1.4 m/s against 2.3). Steady, not stuck?
@@ -293,7 +296,7 @@ Public since 2026-11-05 (SN1): turn on Settings › Dev settings › Disable lev
   AEG's grips, the Silencer and the torch fit; no barrels, no AEG magazines. Power lists the M130, M140 and M150
   Springs (pictures: a coil with a violet, crimson or black band).
 - [ ] **Springs** (RP1). The M130 is the quick, quiet one (a shot every 1.25 s, heard from 15 % less far). The M140
-  shoots 10 % harder for a 1.33 s bolt and a fifth more kick. The M150 shoots 20 % harder for a 1.52 s bolt, half as
+  shoots 10 % harder for a 1.32 s bolt and a fifth more kick. The M150 shoots 20 % harder for a 1.39 s bolt, half as
   much kick again and a shot heard a fifth further. Can you feel each, and does the M150's bolt still look right
   slowed down?
 - [ ] **Levels.** In the Armory level 5 holds the Sniper Rifle, the M130 Spring and the 2x Scope; the M140 is at 9 and

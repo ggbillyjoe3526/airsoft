@@ -1660,7 +1660,7 @@ msgid "PART_NONE_BLURB_MAGAZINE"
 msgstr "As it comes."
 
 msgid "PART_BLURB_REDDOT"
-msgstr "A red dot on clear glass, quick at any range."
+msgstr "The quickest sight to your eye; like any optic, a touch slower to bring up."
 
 msgid "PART_BLURB_SCOPE2X"
 msgstr "The quick scope: reach for long lanes, slower to raise than a red dot."

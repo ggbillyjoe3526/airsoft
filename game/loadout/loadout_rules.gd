@@ -335,7 +335,7 @@ func _fitted(it: Pool.Item, t: ReplicaTune) -> Dictionary[StringName, Pool.Item]
 
 
 ## Lays `fitted` over `r` (the browser game's handlingOf and kit): the magazine's capacity, count, reload and draw; the
-## handling of the grip, laser, barrel and muzzle part on the draw and the sight's raise; the optic's zoom and raise; the
+## handling of the grip, laser, barrel and muzzle part on the draw and the sight's raise; the optic's zoom, raise and draw; the
 ## grip's shake and its share of the spread moving adds; the barrel's spread and the laser's from the hip (RP1: a laser
 ## helps only with the sight down); rattles; how far shots are heard. Returns what the barrel and muzzle part multiply
 ## the energy by (before the site limit).
@@ -352,7 +352,8 @@ func _apply_parts(r: ReplicaConfig, fitted: Dictionary[StringName, Pool.Item]) -
 	r.mag_size = maxi(1, roundi(r.mag_size * mag.capacity))
 	r.mags = maxi(1, r.mags + mag.carried)
 	r.reload_time *= mag.reload
-	r.draw_time *= mag.draw * handling
+	# An optic's housing is weight on the rail: the iron sights are the quickest to hand (RP1).
+	r.draw_time *= mag.draw * optic.draw * handling
 	r.raise_scale = handling * optic.raise
 	# An optic with no stats.md row has no zoom of its own: the iron sights' stays.
 	r.aim_zoom = optic.zoom if fitted.has(&"optic") and stats.parts.has(&"optic", fitted[&"optic"].key) else 0.0

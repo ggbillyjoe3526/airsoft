@@ -19,6 +19,7 @@ const TABLES: Array[Dictionary] = [
 		{"header": "Raise time (×)", "field": &"raise", "kind": Kind.SCALE, "min": 0.2, "max": 5.0},
 		{"header": "In the glass", "field": &"in_glass", "kind": Kind.YES_NO},
 		{"header": "Zoom to (×)", "field": &"zoom_to", "kind": Kind.SCALE, "min": 1.0, "max": 8.0},
+		{"header": "Draw (×)", "field": &"draw", "kind": Kind.SCALE, "min": 0.2, "max": 5.0},
 	]},
 	{"heading": "Grips", "slot": &"grip", "columns": [
 		{"header": "Handling (×)", "field": &"handling", "kind": Kind.SCALE, "min": 0.2, "max": 5.0},
@@ -72,7 +73,8 @@ class Part:
 	var spread: float = 1.0
 	var hip: float = 1.0
 	var move_spread: float = 1.0
-	## A magazine's capacity, magazines added to those carried, and its reload and draw times.
+	## A magazine's capacity, magazines added to those carried, and its reload and draw times (an optic has a draw
+	## time too, RP1).
 	var capacity: float = 1.0
 	var carried: int = 0
 	var reload: float = 1.0

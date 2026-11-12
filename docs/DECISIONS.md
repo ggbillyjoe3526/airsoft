@@ -896,11 +896,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   no kick) and pays for it in BBs (30 × 3) and on the run; the Sniper Rifle slow on its feet; the Compact SMG as
   approved. The Vertical Grip steadies the spread on the move, the Red Laser tightens only shots from the hip and
   costs handling, the long barrel is reach alone, the hi-cap changes slower, the LiPo and the stronger gases kick
-  harder. **The springs differ (owner, 2026-11-12: "Springs should have differences")**: the M130 quick and quiet,
+  harder; every optic is a little slower to bring up than the iron sights (the Red Dot too: no part is
+  free). **The springs differ (owner, 2026-11-12: "Springs should have differences")**: the M130 quick and quiet,
   the M140 the middle one, the M150 the long shot with the slowest bolt, the hardest kick and the loudest crack (a
   Heard from column on the power sources). The numbers above this entry (the Long Barrel's 10 % tighter groups, the
-  gases' +10 % and +20 % recoil, the springs' 5 % and 10 % slower cocking, the scopes' 1.9 and 1.6) are as ruled
-  then; stats.md has today's.
+  gases' and springs' +10 % and +20 % recoil, the scopes' 1.9 and 1.6) are as ruled then; stats.md has today's.
 
 ## Menus, HUD, settings and accessibility
 

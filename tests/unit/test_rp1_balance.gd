@@ -21,8 +21,6 @@ const SILENCER := "000018"
 const SPRINGS: Array[String] = ["000022", "000023", "000024"]
 ## The power sources a replica comes with: the lines the others are judged against.
 const STANDARD_POWER: Array[String] = ["000003", "000004", "000022"]
-## Parts that only give (the Red Dot is the first unlock, a help straight away, PP1).
-const NO_COST: Array[String] = [RED_DOT]
 ## Hop-up readout band and range (HudConfig's), for a replica's reach.
 const BAND := 0.15
 const RANGE := 80.0
@@ -225,8 +223,7 @@ func test_every_part_gives_something_and_costs_something() -> void:
 				var with := _part_scores(_carried(id, {slot: part.id}))
 				var name := "%s on the %s" % [part.display_name, it.display_name]
 				assert_gt(_better(with, bare).size(), 0, "%s gives something" % name)
-				if not NO_COST.has(part.id):
-					assert_gt(_better(bare, with).size(), 0, "%s costs something" % name)
+				assert_gt(_better(bare, with).size(), 0, "%s costs something" % name)
 		for power: Pool.Item in rules.pool.powers_for(it, true):
 			if STANDARD_POWER.has(power.id):
 				continue
@@ -263,6 +260,43 @@ func test_no_two_parts_of_a_slot_do_the_same_job() -> void:
 				var sa := _part_scores(_carried(AEG, {slot: a.id}))
 				var sb := _part_scores(_carried(AEG, {slot: b.id}))
 				assert_gt(_better(sa, sb).size(), 0, "%s does something the %s doesn't" % [a.display_name, b.display_name])
+
+
+func test_every_optic_is_slower_to_bring_up_than_the_iron_sights() -> void:
+	# No part is free (the critic, RP1): the Red Dot is the quickest sight to the eye and pays in the draw.
+	var irons := _bare(AEG, &"optic")
+	var dot := _carried(AEG, {&"optic": RED_DOT})
+	assert_lt(dot.raise_scale, irons.raise_scale, "the quick sight")
+	assert_gt(dot.draw_time, irons.draw_time, "weight on the rail")
+	var optics := rules.stats.parts
+	assert_almost_eq(dot.draw_time, irons.draw_time * optics.part(&"optic", &"redDot").draw, 1e-6)
+	assert_gte(optics.part(&"optic", &"scope2x").draw, optics.part(&"optic", &"redDot").draw,
+			"a scope is no lighter than a red dot")
+	assert_gt(optics.part(&"optic", &"scopeVar").draw, optics.part(&"optic", &"scope2x").draw, "the long one the most")
+	# It stacks with a magazine's draw and the handling of the rest.
+	var both := _carried(AEG, {&"optic": RED_DOT, &"grip": VERTICAL})
+	var grip := _carried(AEG, {&"grip": VERTICAL})
+	assert_almost_eq(both.draw_time, grip.draw_time * optics.part(&"optic", &"redDot").draw, 1e-6)
+
+
+func test_an_optics_table_without_the_draw_column_changes_no_draw_and_says_so() -> void:
+	var text := "## Optics\n\n| Key | Name | Zoom (×) | Raise time (×) | In the glass | Zoom to (×) |\n" \
+			+ "|---|---|---|---|---|---|\n| redDot | Red Dot | 1.25 | 0.85 | no | 1.25 |\n"
+	var stats := ReplicaStats.parse(text)
+	var dot := stats.parts.part(&"optic", &"redDot")
+	assert_almost_eq(dot.draw, 1.0, 1e-6)
+	assert_almost_eq(dot.raise, 0.85, 1e-6, "the rest still reads")
+	assert_string_contains("\n".join(stats.problems), "Draw (×)")
+
+
+func test_the_red_dot_card_shows_its_slower_draw() -> void:
+	var cards := _options(Loadout.Slot.PRIMARY, AEG, &"optic")
+	var none := cards[0]
+	var dot := cards[1]
+	assert_false(none.figures_plain.contains("draw"), "no draw piece on the iron sights: %s" % none.figures_plain)
+	assert_string_contains(dot.figures_plain, "draw")
+	assert_true(dot.better.has(tr("PART_BETTER_AIM")), "better: %s" % [dot.better])
+	assert_true(dot.worse.has(tr("PART_WORSE_DRAW")), "worse: %s" % [dot.worse])
 
 
 func test_the_red_laser_tightens_only_the_hip_and_costs_handling() -> void:
@@ -332,8 +366,8 @@ func test_each_spring_is_its_own_trade() -> void:
 	assert_gt(hard.recoil_deg, middle.recoil_deg)
 	assert_lt(hard.fire_rate, middle.fire_rate)
 	assert_false(soft.muffled, "quieter, not muffled: that is a silencer's")
-	# The steps are uneven on purpose: the last 10 % of energy costs more of the cycle than the first.
-	assert_gt(middle.fire_rate - hard.fire_rate, soft.fire_rate - middle.fire_rate)
+	# The steps are uneven on purpose: the last 10 % of energy costs more kick than the first, and the crack on top.
+	assert_gt(hard.recoil_deg - middle.recoil_deg, middle.recoil_deg - soft.recoil_deg)
 
 
 func test_a_springs_loudness_stacks_with_a_silencers() -> void:

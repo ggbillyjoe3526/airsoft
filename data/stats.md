@@ -81,7 +81,7 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   a hard kick and 18 BBs. The Cyber Pistol keeps the owner's design (docs/DECISIONS.md: rifle power with pistol
   handling, the tightest spread of the automatics and almost no kick); against that, 30 BBs a magazine and 90 a round
   (two seconds of trigger a magazine; 50 and 150 until RP1), twice the usual extra spread running, sprinting or
-  jumping (one hand swings; standing, crouched or at a walk it is as tight as ever) and no parts. Until RP1 it had no
+  jumping (standing, crouched or at a walk it is as tight as ever) and no parts. Until RP1 it had no
   weakness: it out-shot the AEG Rifle standing and the Compact SMG on the move. The Sniper Rifle is reach and
   precision, one shot at a time, slow on its feet and a guess from the hip. The Compact SMG is the one for shooting on
   the move.
@@ -111,27 +111,32 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 | 000008 | Red Gas | 10 | 0 | 20 | 0 |
 | 000009 | Black Gas | 20 | -10 | 40 | 0 |
 | 000022 | M130 Spring | 0 | 0 | 0 | -15 |
-| 000023 | M140 Spring | 10 | -6 | 20 | 0 |
-| 000024 | M150 Spring | 20 | -18 | 50 | 20 |
+| 000023 | M140 Spring | 10 | -5 | 20 | 0 |
+| 000024 | M150 Spring | 20 | -10 | 50 | 20 |
 
 - **Heard from.** How much further its shots are heard, by bots, on the minimap and in the sound cues, on top of a
   muzzle part's (−15: 15 % less far).
 - **Which spring** (RP1, owner 2026-11-12: "Springs should have differences"; until then they were one ladder, 10 %
   energy and kick and 5 % of the cycle a step). The M130 is the quick, quiet spring: a shot every 1.25 s, heard from
-  15 % less far. The M140 is the middle one: 2.09 J (on target to about 50 m), a shot every 1.33 s, a fifth more
+  15 % less far. The M140 is the middle one: 2.09 J (on target to about 50 m), a shot every 1.32 s, a fifth more
   kick. The M150 is the long shot: 2.28 J, under the sniper limit (about 53 m, and 0.52 s to 40 m against the M130's
-  0.57 s), paid for with a shot every 1.52 s, half as much kick again (through a scope the view jumps, so you see less
-  of where the shot went) and a crack heard a fifth further.
+  0.57 s), paid for with a shot every 1.39 s, half as much kick again (through a scope the view jumps, so you see less
+  of where the shot went) and a crack heard a fifth further. The cocking stays 5 % and 10 % slower: the bolt's
+  recording is cut for the M130's cycle (`docs/KNOWN_ISSUES.md`), and a slower M150 would leave its last knock further
+  ahead of the handle.
 
 ## Optics
 
-| Key | Name | Zoom (×) | Raise time (×) | In the glass | Zoom to (×) |
-|---|---|---|---|---|---|
-| redDot | Red Dot | 1.25 | 0.85 | no | 1.25 |
-| scope2x | 2x Scope | 2 | 1.45 | yes | 2 |
-| scopeVar | Variable Scope | 2 | 2 | yes | 6 |
+| Key | Name | Zoom (×) | Raise time (×) | In the glass | Zoom to (×) | Draw (×) |
+|---|---|---|---|---|---|---|
+| redDot | Red Dot | 1.25 | 0.85 | no | 1.25 | 1.1 |
+| scope2x | 2x Scope | 2 | 1.45 | yes | 2 | 1.1 |
+| scopeVar | Variable Scope | 2 | 2 | yes | 6 | 1.15 |
 
 - **Zoom.** How much aiming through it narrows the view (1 is none).
+- **Draw.** The time to bring the replica up with it fitted (× the iron sights', RP1): a housing on the top rail is
+  weight, so the iron sights are the quickest to hand and no optic is free. The Red Dot pays a tenth of the draw for
+  the quickest sight and a clear dot; the long Variable Scope pays the most.
 - **Raise time.** The time to bring it to your eye (× the iron sights'). The Red Dot is the quick sight, 0.85 (PP1:
   at 1 its slight zoom was all it gave).
 - **In the glass.** yes: only the view inside its glass is zoomed (a scope); the view round it stays as the iron sights'

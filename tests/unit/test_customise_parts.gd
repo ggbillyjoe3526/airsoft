@@ -155,7 +155,7 @@ func test_the_numbers_are_better_and_worse_in_colour_with_the_words_under_them()
 	var optic := page.customise().part_page(OPTIC)
 	assert_true(optic.card_text(2).contains("Zoom 2×"))
 	assert_true(optic.card(2).is_picked())
-	assert_eq(optic.words_text(), "Better: more zoom. Worse: slower aim in.")
+	assert_eq(optic.words_text(), "Better: more zoom. Worse: slower aim in, slower draw.")
 	var markup := page.customise().part_page(OPTIC).find_children("*", "RichTextLabel", true, false)
 	var scope_text := markup[2] as RichTextLabel
 	assert_true(scope_text.text.contains("[color=#%s]2[/color]" % GameTheme.GOOD.to_html(false)), "zoom in the good colour")

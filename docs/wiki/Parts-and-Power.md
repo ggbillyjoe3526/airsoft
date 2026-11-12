@@ -35,7 +35,8 @@ the springs a painted rifle spring in each spring's colour.
 ## Optics
 
 An optic on the top rail. With one fitted the iron sights come off completely, so nothing stands in its way, and
-aiming looks through it. The red dot is a compact sight on a low riser: a lit dot on clear glass, with the view open
+aiming looks through it. Every optic is weight on the rail, so the replica is a little slower to bring up after a
+switch than on its iron sights: no sight is free. The red dot is a compact sight on a low riser: a lit dot on clear glass, with the view open
 round it, and the quickest sight to raise. The 2x scope is a magnifier on a low hinged mount, the quicker of the two
 scopes to raise; it magnifies only inside its glass: the view round it
 stays as it is, with nothing dark round the edge. At the hip a scope's glass is clear glass showing what the scope points at (on Low graphics, tinted glass); the
@@ -46,7 +47,8 @@ time (the HUD shows it), and it keeps that zoom through the match. It is the slo
 
 <!-- wiki:parts optics -->
 
-- **Zoom** is how much aiming narrows the view. **Raise time** is the time to bring it to your eye.
+- **Zoom** is how much aiming narrows the view. **Raise time** is the time to bring it to your eye. **Draw** is the
+  time to bring the replica up with it fitted.
 
 ## Grips
 

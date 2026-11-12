@@ -50,6 +50,7 @@ const SLOT_PIECES: Dictionary[StringName, Array] = {
 	&"light": [&"reach", &"spill"],
 }
 const SLOT_EXTRA_PIECES: Dictionary[StringName, Array] = {
+	&"optic": [&"draw"],
 	&"grip": [&"move"],
 	&"laser": [&"aim"],
 	&"magazine": [&"draw"],
