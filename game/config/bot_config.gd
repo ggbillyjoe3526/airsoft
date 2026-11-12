@@ -115,6 +115,10 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## through a sniper's raised scope its aim error is this much of the hand's (BotCombat.scoped).
 @export var bolt_settle_share: float = 1.0
 @export var scoped_error_scale: float = 0.5
+## With a replica that sends several BBs a pull (the Pump Shotgun, SH1), holds its pull while its target is so far that
+## each BB would land further than this off the line (m; BotCombat.pattern_too_wide): 0.6 is 29 m at a 1.2° pattern,
+## past where the shotgun stays on target.
+@export var pattern_hold_radius: float = 0.6
 ## Swaps a magazine below this share of a full one when nobody is in sight.
 @export var tactical_reload_fraction: float = 0.35
 ## Never fires with a teammate this close to the line of fire (m, beyond their hit volume), widened by this many of the

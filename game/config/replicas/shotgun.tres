@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ReplicaConfig" format=3]
+
+[ext_resource type="Script" path="res://game/config/replica_config.gd" id="1_sg1pm"]
+
+[resource]
+script = ExtResource("1_sg1pm")
+id = &"shotgun"
+display_name = "Pump Shotgun"
+power = &"spring"
+sound = &"shotgun"
+fire_modes = Array[int]([0])
+fire_rate = 1.7
+mag_size = 30
+mags = 5
+reload_time = 1.2
+draw_time = 0.5
+muzzle_energy = 0.65
+bb_weight = 0.2
+hop_up_max = 0.15
+hop_up_dial = 0.8
+spread_deg = 0.5
+recoil_deg = 0.45
+hip_spread = 0.7
+bolt_action = true
+shot_bbs = 3
+pattern_deg = 1.2
+model = &"sniper"

@@ -66,7 +66,7 @@ NAME_Y = 2.25
 CLOCK_Y = 2.9      # its bracket's top: the clock hangs under it
 CCTV_Y = 2.75
 EXTINGUISHER_Y = 0.4
-LAMP_Y = 2.6       # a tunnel lamp over the track bed, clear of the wagons' tops
+LAMP_Y = 2.45      # a tunnel lamp over the track bed: clear of the wagons' tops, under the arch's springing (TB2)
 NOTICE_Y = 1.6
 SIGN_OVER = 0.35   # a wall sign's middle over an escalator's or a stair's mouth, from the mouth's ceiling
 # The escalator shafts' posters, Tube style: rows of small ones (ESC_SCALE of a poster: 0.6 x 0.9 m) on both side

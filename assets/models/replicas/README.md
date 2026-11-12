@@ -5,7 +5,8 @@ A replica's model as `<replica id>.glb` (glTF binary): the AEG's (BL1, reworked 
 replica from its file in the hands, on the menus' pictures and on the figures, and so does the Godot game. The Cyber
 Pistol's `RearSight` and `FrontSight` empties were added to its file for CP1 (2026-10-19), at the browser game's
 `ironSight` marks. A replica with no model yet can name a stand-in in its config (`ReplicaConfig.model`), as the Compact SMG
-named the AEG until its own `smg.glb` (CS1, CS2). Objects, materials, space and budget:
+named the AEG until its own `smg.glb` (CS1, CS2). The Pump Shotgun names the Sniper Rifle until its own
+`shotgun.glb` (SH1, SH2). Objects, materials, space and budget:
 [docs/CC0_ASSETS.md](../../../docs/CC0_ASSETS.md) › Replica models. Record every model in
 [docs/ASSETS.md](../../../docs/ASSETS.md).
 

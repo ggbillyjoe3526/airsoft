@@ -29,6 +29,10 @@ const SHOTS: Array[Array] = [
 	["south-platform-across", Vector3(-47.0, 2.5, 5.9), Vector3(-38.0, 3.9, 12.5)],
 	["north-platform-east-end", Vector3(24.0, 2.5, -6.2), Vector3(50.0, 3.4, -9.5)],
 	["departures-on-rods", Vector3(-17.0, 2.4, -6.2), Vector3(-10.75, 4.2, -7.25)],
+	# TB2: the running tunnels' arches, from the track at a mouth, inside, and over the south train's roof.
+	["north-tunnel-mouth", Vector3(42.0, 1.7, -10.8), Vector3(60.0, 2.6, -10.8)],
+	["north-tunnel-arch", Vector3(56.0, 1.7, -10.4), Vector3(78.0, 2.6, -10.8)],
+	["south-tunnel-arch", Vector3(70.0, 2.2, 9.6), Vector3(56.0, 3.0, 11.2)],
 ]
 
 ## SM5's: the strip lamps, the tunnel lamps, the signs, posters, clocks, bins, extinguishers, cameras, edge warnings.
