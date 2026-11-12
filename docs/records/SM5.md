@@ -1,6 +1,6 @@
 # SM5 · Subway's lamps and extras
 
-**Review:** pending
+**Review:** passed (critic 8/8 at attempt 7, QA Pass, performance Pass)
 
 Models 31 to 33 of `art/subway-model-list.md` (William's go, 2026-11-12: "Begin work on subway models now"), from his
 photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33-extras/<kind>/`.
@@ -15,7 +15,7 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 | 2026-11-12 | 4 | build thread | ✓ | 7/8 Retry | tunnel lamp's glass folded on one crease, its edges past the outer bars; strip lamp's lip flush with the body's ends |
 | 2026-11-12 | 5 | build thread | ✓ | 7/8 Retry | (past four attempts: the review-cap ruling) tunnel lamp's lugs pointed, its glass still one hard corner |
 | 2026-11-12 | 6 | build thread | ✓ | 7/8 Retry | wedge holes under the tunnel lamp's raised spine, top and bottom |
-| 2026-11-12 | 7 | build thread | | | |
+| 2026-11-12 | 7 | build thread | ✓ | 8/8 Accept | |
 
 ## What it adds
 
@@ -64,4 +64,7 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 
 ## Known issues left
 
-- None yet.
+- **The tunnel lamp at close range** (document; the budget is the owner's, model list #32): within 150 triangles its
+  front reads as a ridged panel with chevron bars, not the barrel of his photo 121940; from below, the flat black lips
+  under the glass show as hard facets beside the smooth dome and the bars' cut ends as light slivers past the rim. On
+  the Dev 3 checklist whether the budget should rise.
