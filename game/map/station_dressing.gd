@@ -2,9 +2,10 @@ class_name StationDressing
 extends RefCounted
 ## A map's station dress (MT3, Subway; `dressing.station` in its file, written by tools/subway/build_map.py): the
 ## rooms' air as boxes, each with its style (StationLook's floors, walls and ceilings), the platforms' edge strips and
-## painted words, the track's centre lines and the platform tunnels' vaults. Plain data, look only: no collider, no nav
-## cell (a vault's colliders are the map's blocks). A map without `dressing.station` has none (null); a malformed zone,
-## strip, words, track or vault is left out with a warning.
+## painted words, the track's centre lines, the platform tunnels' vaults and trims, and its lamps and extras (SM5:
+## `fixtures`, drawn by StationFixtures). Plain data, look only: no collider, no nav cell (a vault's colliders are
+## the map's blocks). A map without `dressing.station` has none (null); a malformed zone, strip, words, track,
+## vault, trim or fixture is left out with a warning.
 
 ## The zones are looked up in columns this many metres wide (x).
 const COLUMN := 8.0
@@ -89,6 +90,14 @@ class Trim:
 	var finish: StringName = &""
 	var box: AABB = AABB()
 
+## A look-only model (SM5: a tunnel lamp, a sign, a poster, a clock, a bin): its model's name (a file in
+## StationFixturesConfig.folder), its spot and its turn about up (radians; 0 its front facing +z).
+class Fixture:
+	extends RefCounted
+	var model: StringName = &""
+	var position: Vector3 = Vector3.ZERO
+	var yaw: float = 0.0
+
 
 var zones: Array[Zone] = []
 var trims: Array[Trim] = []
@@ -96,6 +105,7 @@ var words: Array[Words] = []
 var vaults: Array[TunnelVault] = []
 var strips: Array[Strip] = []
 var tracks: Array[Track] = []
+var fixtures: Array[Fixture] = []
 ## Zone indices by column (floor(x / COLUMN)), in the file's order; built by `read`.
 var _columns: Dictionary[int, PackedInt32Array] = {}
 
@@ -152,6 +162,13 @@ static func read(dressing: Variant, warnings: Array[String]) -> StationDressing:
 			warnings.append("dressing.station.trims %d needs a finish and a box [x0, x1, y0, y1, z0, z1]; left out" % i)
 			continue
 		out.trims.append(t)
+	var fixtures: Variant = d.get("fixtures", [])
+	for i in (fixtures as Array).size() if fixtures is Array else 0:
+		var f := _fixture((fixtures as Array)[i])
+		if f == null:
+			warnings.append("dressing.station.fixtures %d needs a model, x, y, z and yaw (degrees); left out" % i)
+			continue
+		out.fixtures.append(f)
 	out._index()
 	return out
 
@@ -314,6 +331,22 @@ static func _numbers(d: Dictionary, keys: Array[String]) -> bool:
 		if not (d.get(k) is float or d.get(k) is int):
 			return false
 	return true
+
+static func _fixture(raw: Variant) -> Fixture:
+	if not raw is Dictionary:
+		return null
+	var d: Dictionary = raw
+	var model: Variant = d.get("model")
+	if not model is String or (model as String).is_empty():
+		return null
+	for k: String in ["x", "y", "z", "yaw"]:
+		if not (d.get(k) is float or d.get(k) is int):
+			return null
+	var f := Fixture.new()
+	f.model = StringName(model)
+	f.position = Vector3(float(d["x"]), float(d["y"]), float(d["z"]))
+	f.yaw = deg_to_rad(float(d["yaw"]))
+	return f
 
 
 ## x0, x1, z0, z1 as a rectangle (x, z) with a y beside it; an empty one when malformed.

@@ -1,6 +1,6 @@
 # TB1 · Subway's platforms like the Tube
 
-**Review:** 1 attempt · critic pending · qa Pass · performance pending
+**Review:** 3 attempts · critic pending · qa Pass · performance pending
 
 Owner's ask (2026-11-12): "curved ceilings for the platforms. The yellow mind the gap line should only be on platform
 edges. The wall opposite a platform should be back (same as in the tunnel). I want the map to look more realistic like
@@ -14,7 +14,8 @@ more detail and make more realistic. It looks too empty and blocky."
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Opus 5.5 (build thread) | ✓ | 6/8 Retry | a black wedge over the north car's west end; the vault and far wall still brown-grey; posters, known issue and README rows untracked |
-| 2026-11-12 | 2 | Opus 5.5 (build thread) | ✓ | – | – |
+| 2026-11-12 | 2 | Opus 5.5 (build thread) | ✓ | 5/8 Retry | no longer merged with SM5 (#315), the frieze sharing a plane with the wide posters' tops; no test for the attempt-1 wedge; the ribs called pale but drawn dark |
+| 2026-11-12 | 3 | Opus 5.5 (build thread) | ✓ | – | – |
 
 ## Decisions
 
@@ -39,9 +40,10 @@ more detail and make more realistic. It looks too empty and blocky."
   (style `track`) wears the same tiles. The first pictures read "back" as "black" and gave it the tunnels' lining:
   the owner turned that down, and a dark wall also darkened its area's reflection probe, blacking out the vault's track
   half.
-- **Posters** on the trackside walls ("larger posters", owner) are built by the lamps and extras task (SM5, its own
-  pull request from branch claude/project-thread-bihuvo, in progress as this merges): three 3 x 1.5 m on the north
-  wall, four on the south, centred 2.3 m up, its "Stay behind the yellow line" decals moved behind this yellow line.
+- **Posters** on the trackside walls ("larger posters", owner) are SM5's lamps and extras (merged, #315): two 6 x 3.1 m
+  on the north trackside wall, four on the south, centred 2.4 m over the track bed (tops 3.95 m), its "Stay behind
+  the yellow line" decals behind this yellow line. The frieze's foot stands over their tops (attempt 3), so the two
+  never share a plane.
 - **A cool white fill** (attempt 2): the vault and the trackside wall still read brown-grey under the day preset's
   warm fill (critic: vault 76, 70, 62). Subway's lighting now names its fill colours (`build_map.HEMI_SKY`,
   `HEMI_GROUND`: a cool white, as fluorescent tubes on white tiles), and the whole station reads grey-white: vault
@@ -54,8 +56,9 @@ more detail and make more realistic. It looks too empty and blocky."
   (Concrete034 at 4 m a copy; the plant and service rooms keep the stained `platform` concrete), and the track bed's
   ballast is a near-black grey (owner's ask in the lamps and extras thread; the track bed is this task's shell).
 - **Detail** (owner, "too empty and blocky"): the shell's own Tube details, look only, no collider moved. Ribs across
-  each vault every 6 m (`StationLook.vault_rib_*`, 0.3 m wide, 5 cm deep, pale concrete), a dark green-grey tiled
-  frieze 0.2 m deep just under the springing on both walls, three cable runs on the trackside wall over the track bed
+  each vault every 6 m (`StationLook.vault_rib_*`, 0.3 m wide, 5 cm deep, concrete; facing down, they read as dark
+  rings against the vault, like a deep tunnel's iron segments), a dark green-grey tiled frieze 0.12 m deep just under
+  the springing on both walls, three cable runs on the trackside wall over the track bed
   and a dark face on each platform edge over the track (`dressing.station.trims`, drawn by StationSurface in each
   trim's finish). The frieze stays over the car roofs and the openings; cables and edge stay under the platform. The
   benches, signs, posters, booths and trains come from the model threads (SM1 to SM5).

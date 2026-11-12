@@ -392,7 +392,7 @@ func test_an_occluded_shot_is_capped_at_its_occluded_level_not_the_open_one() ->
 	assert_eq(heard.size(), 2, "shot and power part behind the wall")
 	for v in heard:
 		assert_almost_eq(v.max_db, maxf(v.volume_db, cfg.field_max_db), 1e-4, "capped where it was set, wall included")
-	assert_eq(StringName(_voices("shot_")[0].bus), SoundMix.BUS_EFFECTS_FULL, "and the wall's bus took its share")
+	assert_eq(StringName(_voices("shot_")[0].bus), SoundMix.BUS_SHOTS_FULL, "and the wall's bus took its share")
 
 
 func test_a_silenced_shot_up_close_is_no_quieter_than_before() -> void:

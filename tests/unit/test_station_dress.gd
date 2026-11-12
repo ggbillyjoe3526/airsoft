@@ -360,6 +360,36 @@ func test_trims_lie_flat_on_the_tunnel_walls_out_of_the_way() -> void:
 	assert_true(look.finish_sets.has(look.vault_rib_finish), "drawn in a finish the look knows")
 
 
+func test_the_trackside_wall_over_the_cars_is_tiled_like_the_track() -> void:
+	# TB1 attempt 1: the wall over a standing car faced no room and drew as the dark outside, a black wedge.
+	var m := _map("subway")
+	for v in m.station.vaults:
+		var wall := v.area.position.y if v.area.get_center().y < 0.0 else v.area.end.y
+		var n := Vector3.BACK if v.area.get_center().y < 0.0 else Vector3.FORWARD
+		var tiled := 0
+		for i in 101:
+			var p := Vector3(v.area.position.x + 0.5 + float(i), v.y - 0.3, wall)
+			if _face_at(m, p, n).is_empty():
+				continue
+			tiled += 1
+			assert_eq(_finish_at(m, p, n), &"wall_tile", "the trackside wall at %s" % p)
+			assert_eq(m.station.style_at(p + n * 0.5), &"track", "the air over the car at %s is the track's" % p)
+		assert_gt(tiled, 50, "the trackside wall runs over the cars")
+
+
+func test_the_frieze_clears_the_wide_posters() -> void:
+	var m := _map("subway")
+	var wide := m.station.fixtures.filter(func(f: StationDressing.Fixture) -> bool:
+		return String(f.model).begins_with("poster_wide"))
+	assert_gt(wide.size(), 0, "the trackside posters (SM5)")
+	for t in m.station.trims:
+		if t.finish != &"frieze":
+			continue
+		for f: StationDressing.Fixture in wide:
+			# a wide poster is 3.1 m tall about its spot (tools/subway/fixtures.py)
+			assert_gt(t.box.position.y, f.position.y + 1.55, "the frieze over %s's top" % f.model)
+
+
 func test_a_malformed_station_dress_is_warned_about_and_left_out() -> void:
 	var warnings: Array[String] = []
 	assert_null(StationDressing.read({}, warnings), "none named: none")

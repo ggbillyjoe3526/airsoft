@@ -126,9 +126,10 @@ def words(L, lift: float) -> list[dict]:
     return out
 
 
-# The trims (m): the frieze's band under the springing and how far it stands off its wall; the cables' heights over the
-# track bed, each this thick, standing off the trackside wall; the edge face's stand-off over the track.
-FRIEZE = (0.2, 0.02)
+# The trims (m): the frieze's band under the springing (its foot clear of SM5's wide posters' tops, 3.95 m) and how
+# far it stands off its wall; the cables' heights over the track bed, each this thick, standing off the trackside wall;
+# the edge face's stand-off over the track.
+FRIEZE = (0.12, 0.02)
 FRIEZE_GAP = 0.02
 CABLES = (0.45, 0.57, 0.69)
 CABLE = 0.06

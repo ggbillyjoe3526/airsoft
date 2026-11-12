@@ -1429,10 +1429,17 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   the platform, and a narrow yellow line behind it; no yellow anywhere but the platforms' edges.
 - [ ] **White tiles.** The walls are white and grey tiles, the wall across the track too; nothing looks cream or
   brown. Climbing out of the track and the cover, sight lines and bots on the platforms play as before.
-- [ ] **Detail.** Pale ribs cross each vault every few metres, a dark tiled band runs under the curve on both walls,
+- [ ] **Detail.** Concrete ribs cross each vault every few metres (dark rings against the vault), a dark tiled band runs under the curve on both walls,
   three cables run along the wall across the track and each platform edge has a dark face over the track. None of it
   flickers or blocks a BB or a step.
 - [ ] **Frame rate.** F3 on Low looking along a platform: 60 FPS.
+
+## Subway's echo on the shots (EC1)
+
+- [ ] **Subway** (Dev content): fire every replica, then fit a silencer and fire again. Each shot is a little louder
+  than in Woodland and rings off the tiles lightly, fading in under a second; a silenced one is still muffled, with the room round it.
+- [ ] **Bots' shots** on Subway echo too, behind a wall as well; steps, impacts and grenades don't (shots only).
+- [ ] **Every other map** (Depot, Woodland, the Range): shots sound exactly as before, also after a Subway match.
 
 ## Reporting what you find
 

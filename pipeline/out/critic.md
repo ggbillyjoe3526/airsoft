@@ -1,34 +1,33 @@
-Task: TB1 · Subway's platforms like the Tube
-Attempt: 1 of 4
-Head: c992ec3 (checks passed on 5ece2f4; later commits are QA tests, reports and the record, no game code)
-Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 6/8 → Retry (near miss, judgment: fixing check 1 alone gives Accept)
-Failed checks, with evidence (file:line, one or two lines each, each marked measured or judgment):
-1. [judgment] Construction: /mnt/project-files/concepts/metro/pt1/v2/2-north-platform.jpg (AFTER, about px 1140-1230 x 245-270)
-   shows a black wedge above the standing car's west end, where the tiled parapet (the 0.15 m wall at z -9.075, cut to
-   the car roof by vault_air, tools/subway/build_map.py +370) meets the vault. Either a hole into the void or an unlit
-   or wrong-finish face over the opened car-roof air (vault_boxes side walls, build_map.py +405-410). It is visible in
-   the owner's own first-person shot from the platform end.
-1. [judgment, pixel means measured] The owner asked for the trackside wall to be "white and almost match the rest of the
-   station". In 1-south-platform-across.jpg AFTER, the platform back wall averages RGB 110,108,104, the trackside wall
-   88,83,77 and the vault 76,70,62 (warm taupe, R-B +14; BEFORE's cream trackside was 79,67,51). The vault and the far
-   wall still read brown-grey, not white. The record notes the warm cast as a known issue instead of fixing it
-   (station_look.gd +50 vault_tile tint alone doesn't fix it).
-8. [judgment] The record (docs/records/TB1.md, Decisions › Posters) says the owner's "larger posters" belong to SM5's
-   thread, but SM5 and posters appear nowhere in docs/, game/ or git history: the ask isn't tracked. No KNOWN_ISSUES row
-   for the vault's warm cast. The new game/play/station/platform_words.gd has no folder README row (game/play/README.md).
-Advisory: MIND THE GAP orientation reads correctly from each platform (platform_words.gd +62-76, run = -up). The
-   words are 0.24 m tall on a 0.45 m coping with a 0.1 m yellow line; the Tube's line is much bolder, so check it reads.
-   The springing has a hard 19° crease where the vertical wall meets the arc (visible in render 4).
-Must-fix for the next attempt: find and close the black wedge over the north car's west end (and check every car end
-   on both tunnels from the platform and the track). Make the vault and the trackside wall read white under the
-   station's light (tint, probe or lamp fill), close to the back wall's value; re-render the four shots and compare.
-   Track the posters ask in docs/TASKS.md (or build them) and correct the record. Add the KNOWN_ISSUES row and the
-   README row.
-Owner should test in the game (at most 6, one line each):
-- Stand at the north platform's west end and look east: no black gap above the car next to the platform.
-- Are the vault and the wall across the track as white as the platform's back wall, on High and on Medium?
-- Shoot up into the vault from the platform and the track: BBs stop on the curve, never short in the air or inside it.
-- Throw a smoke over a standing car: it lands on the roof or falls back, never sticks; BBs over a car roof feel fair.
-- Read MIND THE GAP from both platforms, standing and crouched: legible, and the right way up.
-- F3 on Low, looking along a platform: 60 FPS.
+Task: SM5 · Subway's lamps and extras
+Attempt: 10 (past 4; review-cap ruling: keep fixing until the critic passes), William's "Make the far trackside
+   posters much larger"
+Head: 21ad054 (= HEAD). Full tools/check.sh started on 21ad054 and NOT finished when judged (its output was empty);
+   test_station_fixtures 8/8 and test_sm5_qa 13/13 ran on it. The diff touches no runtime script.
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept (merge only once tools/check.sh ends green; the verdict lapses if it fails)
+Failed checks, with evidence: none.
+Checked this attempt (git diff HEAD~1 HEAD, sm5-4 shots 1, 13, 14, sm5-6):
+1. station_extras.py:+292 builds poster(cell, 3.0, 1.5, 0.05), a 6 x 3 m face in a 50 mm frame; fixtures.py:+40-42
+   bounds of +-3.05 x +-1.55 match it; WIDE_Y 2.4 (+55) puts it at 0.85 to 3.95 with the frame, under the 4.1 vault.
+   Clearances, worked from fixtures.py:+89-90 and subway.json: north 28 and 38 clear the boards at 22 and 44 by 1.49
+   and 1.49 m and each other by 3.9 m; south -35, -17, 4 and 23 clear the boards at -44, -26, -8 and 14 by at least
+   1.41 m. test_sm5_qa.gd:+182-192 now asserts 6, y 2.4, board gap 3.05 + 1.46, poster gap 6.1.
+1. Readability at 112 px/m: in sm5-6 the smallest line ("Bikes by the hour ...") is about 0.15 m tall, about 17
+   texels; the titles are about 0.33 m, about 37 texels. From 4 to 8 m on a 1080p screen at a 75° FOV, a metre is
+   about 235 to 117 screen px, so texels are shown at 1 to 2x. The titles stay crisp; the small line is soft at 4 m
+   but still legible. Shots 13 and 14 match a 6 x 3 m poster when measured against the 2.9 m board (shot 14: about
+   1.6x the board's width at its distance ratio).
+6. station_signs.py:+260 the lamp's glow is now a neutral, greenish grey, off the team hues; the fixture hue gate
+   passes. It still reads as a warm lamp beside the butter moon in sm5-6.
+8. The record (+21, +51-54, +83-84), ASSETS (+85) and the changelog note (+7) say 6 x 3 m. The dark track bed is left
+   to the platforms thread, under Known issues.
+Advisory (non-blocking): sm5-4 shot 13's caption still says "3 x 1.5 m" (the contact sheet's label, not repo text).
+   The sheet's frame and fixture art keep the same 38 triangles, so they cost nothing more.
+Must-fix for the next attempt: none. Merge once tools/check.sh on 21ad054 ends green.
+Owner should test in the game:
+- From each platform at 4 to 8 m, read every line of the three trackside posters, the small bottom line included.
+- Are 6 x 3 m posters the size you wanted, or too dominant next to the name boards?
+- From the track bed, does a poster's top edge sit clear of the vault's curve, with no clipping?
+- Do the two north and four south posters spread evenly between the boards, with no wall looking empty?
+- Does the Lamplight Room's grey-green glow still read as a warm lamp?
+- At a shallow angle along the platform, does the text shimmer or smear (mipmaps)?

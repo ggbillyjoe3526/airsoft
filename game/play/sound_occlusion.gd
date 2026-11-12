@@ -126,8 +126,9 @@ static func closed_far(cfg: SoundConfig, share: float, beyond: float) -> float:
 
 
 ## The bus a sound meant for `bus` plays on when `share` of it is blocked, at the nearest of open, half and full:
-## Effects and Footsteps on EffectsHalf or EffectsFull, Power on PowerHalf or PowerFull; a silenced shot (Muffled) on
-## whichever low-pass is lower, its own or the share's. Open, or any other bus: as it is.
+## Effects and Footsteps on EffectsHalf or EffectsFull, Shots on ShotsHalf or ShotsFull, Power on PowerHalf or
+## PowerFull; a silenced shot (Muffled) on whichever low-pass is lower, its own or the share's (ShotsHalf or ShotsFull,
+## so a map's echo still answers it). Open, or any other bus: as it is.
 static func bus_for(bus: StringName, share: float, cfg: SoundConfig) -> StringName:
 	var step := roundi(clampf(share, 0.0, 1.0) * 2.0)
 	if step == 0:
@@ -136,12 +137,14 @@ static func bus_for(bus: StringName, share: float, cfg: SoundConfig) -> StringNa
 	match bus:
 		SimAudio.BUS_EFFECTS, SimAudio.BUS_FOOTSTEPS:
 			return SoundMix.BUS_EFFECTS_HALF if half else SoundMix.BUS_EFFECTS_FULL
+		SimAudio.BUS_SHOTS:
+			return SoundMix.BUS_SHOTS_HALF if half else SoundMix.BUS_SHOTS_FULL
 		SimAudio.BUS_POWER:
 			return SoundMix.BUS_POWER_HALF if half else SoundMix.BUS_POWER_FULL
 		SimAudio.BUS_MUFFLED:
 			var bus_share := SoundMix.HALF_SHARE if half else SoundMix.FULL_SHARE
 			if SoundMix.share_cutoff_hz(cfg, bus_share) < cfg.muffled_cutoff_hz:
-				return SoundMix.BUS_EFFECTS_HALF if half else SoundMix.BUS_EFFECTS_FULL
+				return SoundMix.BUS_SHOTS_HALF if half else SoundMix.BUS_SHOTS_FULL
 	return bus
 
 
@@ -150,9 +153,9 @@ static func bus_for(bus: StringName, share: float, cfg: SoundConfig) -> StringNa
 static func level_for(bus: StringName, share: float, cfg: SoundConfig) -> float:
 	var given := 1.0
 	match bus_for(bus, share, cfg):
-		SoundMix.BUS_EFFECTS_HALF, SoundMix.BUS_POWER_HALF:
+		SoundMix.BUS_EFFECTS_HALF, SoundMix.BUS_POWER_HALF, SoundMix.BUS_SHOTS_HALF:
 			given = SoundMix.share_gain(cfg, SoundMix.HALF_SHARE)
-		SoundMix.BUS_EFFECTS_FULL, SoundMix.BUS_POWER_FULL:
+		SoundMix.BUS_EFFECTS_FULL, SoundMix.BUS_POWER_FULL, SoundMix.BUS_SHOTS_FULL:
 			given = SoundMix.share_gain(cfg, SoundMix.FULL_SHARE)
 	if given <= 0.0: # a bus muffled to silence already gives all of it
 		return 1.0
