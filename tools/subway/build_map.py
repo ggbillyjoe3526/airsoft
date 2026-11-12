@@ -244,7 +244,7 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
                     fa, fb = floor_at(rm, a), floor_at(rm, b)
                     for z0, z1 in z_pieces(rm):
                         ramps.append(dict(x0=a, x1=b, z0=z0, z1=z1, y0=min(fa, fb), y1=max(fa, fb),
-                                          rise="+x" if fb > fa else "-x"))
+                                          rise="+x" if fb > fa else "-x", dress=rm.get("dress", "")))
             else:
                 boxes.append(([rm["x0"], rm["x1"], low - FT, rm["ya"], rm["z0"], rm["z1"]], -1, "floor"))
         # The ceiling, a ramp's stepped down with it (each step closing the riser to the one above); a vault room's
@@ -338,7 +338,7 @@ def spiral() -> tuple[list[dict], list[list[float]]]:
     for k in range(s["sides"]):
         _, (a, b, c, d), way, corner = sides[k % 4]
         y = s["y0"] + rise * k
-        ramps.append(dict(x0=a, x1=b, z0=c, z1=d, y0=y, y1=y + rise, rise=way))
+        ramps.append(dict(x0=a, x1=b, z0=c, z1=d, y0=y, y1=y + rise, rise=way, dress=s.get("dress", "")))
         ca, cb, cc, cd = corners[corner]
         top = y + rise
         boxes.append([ca, cb, top - FT, top, cc, cd])
@@ -526,11 +526,12 @@ def build() -> dict:
     # The ramps first (never cut), then the cover, then the shell cut out of every room's air and of what stands.
     for rp in ramps:
         bx = [rp["x0"], rp["x1"], rp["y0"], rp["y1"], rp["z0"], rp["z1"]]
-        blocks.append(as_block("ramp", bx, rp["rise"]))
+        blocks.append(as_block("ramp", bx, rp["rise"], dress=rp.get("dress", "")))
         solid.append(bx)
     for bx in sp_boxes:
+        # The landings take the spiral's model (SM2); the core stays the station's tiled pillar.
         kind = "pillar" if bx[3] - bx[2] > 3 else "floor"
-        blocks.append(as_block(kind, bx))
+        blocks.append(as_block(kind, bx, dress=L.SPIRAL.get("dress", "") if kind == "floor" else ""))
         solid.append(bx)
     for bl in L.blocks:
         if bl["y"] is None:
@@ -596,7 +597,9 @@ def build() -> dict:
         "lifts": lifts(),
         "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT)},
     }
-    m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, [shaft_hole()])
+    # nothing in the shafts, nor in a balustrade down an escalator (its pieces' whole boxes, as the game's tests take them)
+    holes = [shaft_hole()] + [box for bl in L.blocks if bl["y"] is None for box, _ in ramp_barrier(bl)]
+    m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, holes)
     m["dressing"]["station"]["trims"] += drop_rods(m["dressing"]["station"]["fixtures"])
     del sx
     return m

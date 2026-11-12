@@ -124,6 +124,8 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 - **Paint is weathered.** The light draws every paint at `paint_saturation` (0.6) of its colour, toward its own
   grey, so the hexes above are the paint as bought and the screen shows it weathered (SL1). Sloping ground's grass is
   `grass`, a darker natural green (`#5f8a3a`), so it stays green once muted.
+  Two exceptions keep their whole colour: the far treeline's greens (FT1) and Subway's escalators' and stairs' safety
+  yellow (`PropDressConfig.full_colour`, SM2), which muted read cream.
 - **Spread the six evenly.** No site colour covers much more of a map than another; big repeated props (racking,
   walls) take a neutral (steel, plywood, cream) so they never make one colour dominate.
 - **Team colours** (Alpha blue, Beta orange) appear **only** on players and the flag, never on props. No palette colour
