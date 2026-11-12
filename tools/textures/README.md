@@ -7,8 +7,11 @@ Seeded scripts (numpy and Pillow) that write tiling textures to `assets/textures
   which goes in `SiteLook.slab_luma`.
 
 - `replica_grain.py`: the replicas' surface grain, `assets/textures/replica/replica_grain.png` (MQ1): one 512 px
-  tiling texture every replica and part shares (a moulded pebble's slope, a slow sheen cloud, wood figure), read by
-  `game/play/replica_surface.gdshaderinc`.
+  tiling texture every replica and part shares (a moulded pebble's slope, a slow sheen cloud, wood figure with
+  arched, unevenly spaced rings), read by `game/play/replica_surface.gdshaderinc`. It is imported Lossless with
+  mipmaps, not VRAM compressed: its four channels are unrelated data (two slopes, a cloud, the figure), and block
+  compression ties a block's channels together and bands the slopes into visible steps on a smooth slide. It is one
+  512 px texture for the whole game (about 1.4 MB of video memory with its mipmaps).
 
 Run: `python3 -I tools/textures/<script>.py <repo root>`, then `godot --headless --path . --import`. Dev only.
 

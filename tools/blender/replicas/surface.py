@@ -30,7 +30,7 @@ import bpy
 
 # The kinds, by index: game/config/replica_surfaces.gd KINDS, in the same order (the files hold the index).
 KINDS = ("polymer", "steel", "aluminium", "wood", "rubber", "bare", "coated")
-SLOTS = 8
+SLOTS = 16
 DEFAULT = "polymer"
 ATTR = "Surface"
 SEP = "@"

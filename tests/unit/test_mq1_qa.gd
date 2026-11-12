@@ -62,16 +62,16 @@ func test_repainting_back_and_forth_gives_the_same_shared_materials() -> void:
 	assert_ne(first, second)
 	ReplicaPaint.apply(mi, &"cobalt", false)
 	assert_eq(mi.get_surface_override_material(0), first, "no new material per repaint")
-	assert_eq(ReplicaPaint.worn_materials().size(), 2, "two paints, two materials kept")
+	assert_eq(ReplicaPaint.surface_materials().size(), 2, "two paints, two materials kept")
 
 
 func test_a_cap_overflow_keeps_every_drawn_material_working() -> void:
 	var mi := _bare_mesh(_own("Body"))
 	ReplicaPaint.apply(mi, &"cobalt", false)
-	for n in ReplicaPaint.MAX_WORN + 5:
+	for n in ReplicaPaint.MAX_SURFACED + 5:
 		var tex := PlaceholderTexture2D.new()
 		ReplicaPaint._surface_of(ReplicaPaint.materials(&"tan", false)[0], tex, n % 8)
-	assert_lte(ReplicaPaint.worn_materials().size(), ReplicaPaint.MAX_WORN, "capped")
+	assert_lte(ReplicaPaint.surface_materials().size(), ReplicaPaint.MAX_SURFACED, "capped")
 	var held := mi.get_surface_override_material(0)
 	assert_true(ReplicaPaint.is_surface(held), "a material already on a mesh stays a surface after the cache clears")
 	assert_not_null(ReplicaPaint.plain_of(held))
@@ -108,9 +108,9 @@ func test_painting_and_freeing_a_replica_leaves_no_orphans() -> void:
 		ReplicaPaint.apply(model, &"tan", true)
 		model.free()
 	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before)
-	var cached := ReplicaPaint.worn_materials().size()
+	var cached := ReplicaPaint.surface_materials().size()
 	for i in 3:
 		var model := (load(MODEL % "aeg") as PackedScene).instantiate()
 		ReplicaPaint.apply(model, &"cobalt", false)
 		model.free()
-	assert_eq(ReplicaPaint.worn_materials().size(), cached, "more copies add no cached materials")
+	assert_eq(ReplicaPaint.surface_materials().size(), cached, "more copies add no cached materials")

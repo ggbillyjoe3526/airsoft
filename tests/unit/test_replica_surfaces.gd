@@ -106,6 +106,36 @@ func test_every_kind_has_a_look() -> void:
 	assert_gt(float(ReplicaSurfaces.LOOKS[&"wood"]["figure"]), 0.0, "wood shows its figure")
 
 
+func test_metal_keeps_a_light_paints_colour_and_only_bare_metal_is_brushed() -> void:
+	for kind in ReplicaSurfaces.KINDS:
+		var look: Dictionary = ReplicaSurfaces.LOOKS[kind]
+		for field: String in ["specular", "light_keeps", "floor", "bold_keeps"]:
+			assert_true(look.has(field), "%s says its %s" % [kind, field])
+		assert_between(float(look["light_keeps"]), 0.0, 1.0, "%s: a share of its metal" % kind)
+	for kind: StringName in [&"steel", &"aluminium"]:
+		var look: Dictionary = ReplicaSurfaces.LOOKS[kind]
+		assert_lt(float(look["light_keeps"]), 1.0, "%s: a white paint stays white, not silver" % kind)
+		assert_gt(float(look["floor"]), 0.0, "%s: a black paint still has something to reflect with" % kind)
+		assert_lt(float(look["gain"]), float(ReplicaSurfaces.LOOKS[&"polymer"]["gain"]),
+				"%s reads a shade deeper than the polymer beside it" % kind)
+		assert_lt(float(look["roughness"]), float(ReplicaSurfaces.LOOKS[&"polymer"]["roughness"]),
+				"%s is the smoother of the two" % kind)
+		assert_eq(float(look["stretch"]), 1.0, "%s: a coated part is not brushed (the pistol's serrations)" % kind)
+	assert_gt(float(ReplicaSurfaces.LOOKS[&"bare"]["stretch"]), 1.0, "a bare bolt is")
+	var polymer: Dictionary = ReplicaSurfaces.LOOKS[&"polymer"]
+	assert_lt(float(polymer["gain"]), 1.0, "black polymer is darker and white polymer less bright (owner)")
+	assert_gt(float(polymer["bold_keeps"]), 0.0, "and a bold paint stays bold on it")
+	var dressed := ShaderMaterial.new()
+	dressed.shader = ReplicaPaint.SURFACE_SHADER
+	ReplicaSurfaces.dress(dressed)
+	var shine: Variant = dressed.get_shader_parameter(&"kind_shine")
+	assert_not_null(shine, "the shine table goes to the shader")
+	if shine != null:
+		assert_eq(len(shine), ReplicaSurfaces.SLOTS, "a row per slot")
+	assert_eq(dressed.get_shader_parameter(&"wood_stain_share"), ReplicaSurfaces.WOOD_STAIN_SHARE,
+			"wood is stained, the paint only tints it")
+
+
 func test_an_unknown_kind_and_part_fall_back() -> void:
 	assert_eq(ReplicaSurfaces.index(&"cheese"), ReplicaSurfaces.index(ReplicaSurfaces.DEFAULT_KIND))
 	assert_eq(ReplicaSurfaces.part_index(&"Metal"), ReplicaSurfaces.index(&"steel"), "a metal part is steel")

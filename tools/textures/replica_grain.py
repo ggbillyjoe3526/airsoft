@@ -11,8 +11,8 @@ writes assets/textures/replica/replica_grain.png (512 px, the same file every ru
         is for polymer and blasted aluminium; stretched along the bore it becomes a steel part's brushed finish;
 - B     a slow cloud (0.5 mid): the uneven sheen of a handled surface (oil, a palm's polish);
 - A     wood figure (0.5 mid, low is the dark late wood): long streaks along the texture's u, with a slow drift and
-        the odd wide band, to be stretched along the stock, under thin dark growth rings
-        that wander.
+        the odd wide band, to be stretched along the stock, under thin dark growth rings unevenly spaced, swept
+        into the long arches of a plain-sawn board.
 
 Everything tiles in both directions (the noise is filtered in the frequency domain).
 """
@@ -37,13 +37,19 @@ BAND_PX = (512.0, 22.0)
 BAND_SHARE = 0.45
 PORE_PX = (26.0, 1.1)
 PORE_SHARE = 0.25
-# The growth rings: this many dark lines up the tile, bent by a slow drift of this many ring widths, each line this
-# thin (the power its wave is raised to), and the share of the figure they are.
-RINGS = 9
-RING_DRIFT = 1.4
-RING_THIN = 3.0
+# The growth rings, as a plain-sawn board shows them: this many dark lines up the tile, their spacing uneven (each
+# (waves up the tile, share of a turn) squeezes and opens them), swept into long arches by a slow drift of ARCH ring
+# widths and wandered by a quicker one of RING_DRIFT, each line thin (the power its wave is raised to, between the
+# two given, slowly varying), and the share of the figure they are.
+RINGS = 7
+RING_SPACING = ((2.0, 0.03, 1.3), (3.0, 0.015, 0.4))
+ARCH = 1.5
+ARCH_PX = (512.0, 256.0)
+RING_DRIFT = 0.35
+DRIFT_PX = (150.0, 34.0)
+RING_THIN = (3.0, 7.0)
+THIN_PX = (360.0, 120.0)
 RING_SHARE = 0.5
-DRIFT_PX = (300.0, 60.0)
 
 
 def _band(rng: np.random.Generator, along: float, across: float, low_cut: float = 0.0) -> np.ndarray:
@@ -78,9 +84,13 @@ def build() -> np.ndarray:
     pore = _band(rng, *PORE_PX, 3.0)
     fibre = _unit(streak * (1.0 - BAND_SHARE - PORE_SHARE) + band * BAND_SHARE + pore * PORE_SHARE, 2.2)
     drift = _band(rng, *DRIFT_PX)
+    arch = _band(rng, *ARCH_PX)
+    thin = _unit(_band(rng, *THIN_PX), 2.0)
     v = np.arange(SIZE)[:, None] / SIZE
-    wave = 0.5 + 0.5 * np.sin(2.0 * np.pi * (v * RINGS + drift * RING_DRIFT / (2.0 * np.pi)))
-    rings = 1.0 - wave ** RING_THIN
+    # Uneven spacing: the way up the tile bent by whole waves, so it still tiles and never turns back.
+    up = v + sum(share * np.sin(2.0 * np.pi * (waves * v) + phase) for waves, share, phase in RING_SPACING)
+    wave = 0.5 + 0.5 * np.sin(2.0 * np.pi * (up * RINGS + arch * ARCH + drift * RING_DRIFT))
+    rings = 1.0 - wave ** (RING_THIN[0] + (RING_THIN[1] - RING_THIN[0]) * thin)
     wood = np.clip(fibre * (1.0 - RING_SHARE) + rings * RING_SHARE + 0.5 * RING_SHARE * (1.0 - 0.72), 0.0, 1.0)
     return np.stack([nx, ny, cloud, wood], axis=-1)
 

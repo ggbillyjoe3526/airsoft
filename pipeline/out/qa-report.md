@@ -1,4 +1,4 @@
-Task: none (MQ1) · QA commit PENDING · Verdict: Pass
+Task: none (MQ1) · QA commit 33d207b · Verdict: Pass
 
 Blocking: none. Advisory: (1) ReplicaPaint.apply with OWN, worn=false, on a mesh already surfaced leaves the surface material for names outside OWN_REALISTIC (replica_paint.gd ~L111-116); no caller does this today. (2) _worn keys use plain.get_instance_id(); a freed own material could in theory reuse an id (only after ReplicaPaint.clear is skipped); not reproducible.
 Tests added: tests/unit/test_mq1_qa.gd (6 tests), checked against the old code, which lacks is_surface/default_kind/_surface_of (they cannot pass without the feature):

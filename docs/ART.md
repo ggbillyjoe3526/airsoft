@@ -169,8 +169,11 @@ metalness; the light does the rest.
   that colour takes the light (`ReplicaSurfaces`, docs/CC0_ASSETS.md › Replica models › Surfaces). Steel (a slide, a
   barrel, a stamped receiver) and aluminium (forged receivers, a rail, a magazine) are metal under the paint, as a
   blued or anodised part is: they reflect the map, the sky and, on the menus' pictures, a small studio
-  (`StudioSky`). Polymer (a frame, a stock, a grip) is matte with a fine moulded grain. Wood shows its figure in
-  a walnut stain the paint only tints, so a wood stock is wood in any paint. A coated part (the Cyber Pistol's white
+  (`StudioSky`), and read a shade deeper than the polymer beside them in the same paint. A light paint (white, tan)
+  stays its colour on metal, as a baked coat does, and takes a satin shine instead of a mirror's. A sniper's barrel is
+  dark steel in any paint. Polymer (a frame, a stock, a grip) is matte with a fine moulded grain. Black polymer is a shade lighter than the black metal
+  beside it and white polymer an off-white (owner, 2026-11-12). Wood is a kind too (a walnut stain the paint only
+  tints), on no replica: the owner kept the sniper's stock polymer. A coated part (the Cyber Pistol's white
   shell) keeps its colour in any light. Bots' copies keep the flat paints.
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.

@@ -1,33 +1,40 @@
-Task: SM5B · Subway's signs and posters in every room
-Attempt: 2 of 4
-Head: bc5bcf4 (= HEAD). Full tools/check.sh NOT run on this head (CI runs it on the PR); test_station_fixtures 9/9,
-   test_sm5_qa 13/13, test_sm5b_qa 10/10, gdlint clean. QA and performance reviewed 640241d (both Pass);
-   1567446..bc5bcf4 changes only two box heights, bounds, a test and the record. This verdict lapses if CI fails.
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks, with evidence: none.
-Checked (what changed and what it could break):
-1. [measured] Read from the glbs: departures_n Sign quad x ±0.77, y -0.715..-0.330 = 1.54 x 0.385 = 4.00:1, the same
-   as its 512 x 128 cell. way_sign Sign 1.256 x 0.275 = 4.567:1 against 512 x 112 = 4.571:1 (was 4.906, 7.3 % off).
-   Prop bounds -0.745 and -0.599 match fixtures.py +22, +51-52. Tris unchanged (84 of 90), so budgets hold.
-   No reference photos or renders are named for these flat sign boxes; I judged them from geometry, as in attempt 1.
-2/3/5. No contract, runtime script or hot path touched. The only change in code is a test.
-4. test_station_fixtures.gd +99: the per-triangle ratio of world edge to sheet px. On the old departures it gives
-   (1.54/512)/(0.34/128) = 1.13, a 13 % stretch, so it fails at the 2 % limit; it caught way_sign on its own.
-6. Headroom: the lowest hung sign's underside is now 2.40 m (way_sign in 3.0 m passages, 3.0 - 0.599), and the boards'
-   is about 2.46 m over the platforms (ceiling 4.1, floor 0.9 by lowc, 3.2 - 0.745). Both are well over a standing or
-   jumping head, and they are look-only with no collision. The builder's clear() kept every spot (subway.json unchanged;
-   only the 4 earlier edge_sign spots are still left out). Lamp clearance is retested against the new mesh boxes
-   (test_sm5b_qa +215, which passes).
-7. Docstrings are updated (station_extras.py +100, +295). Advisory: the test's `for s in ...`, `for t`, `for e` loop
-   variables are untyped.
-8. way_sign is an SM5 model, fixed because the new test covers every printed model. The record's Decisions says so.
-   No player-facing change needs a wiki edit beyond the existing note.
-Must-fix for the next attempt: none.
+Task: MQ1 · Replicas made of steel, aluminium, polymer and wood
+Attempt: 1 of 4
+Head: 4ae2546 (checks passed on it; matches `git rev-parse HEAD`)
+Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✓
+Score: 6/8 → Retry (judgment; not a near miss, blocking check 1 fails)
+
+Failed checks, with evidence (each one judgment):
+
+1. [judgment] The models rule applies because all five .glb files changed. Parts (a) and (c) pass. Parts (b) and (d) fail on the renders.
+   - (a) I measured before and after on the same angle: overall length, handguard, magazine drop, stock and slide. All are within 1 % (AEG 904/906 px, handguard 218/220 px). No owner reference photo was in the brief, so proportions are only checked against the approved shapes.
+   - (d) bar, AEG/SMG/Sniper/Cyber: in 01, 03, 04 and 05 the BEFORE and AFTER pictures are almost the same. The Cobalt AEG handguard and the sniper rail are tagged aluminium, but they read as the same flat blue plastic. There is no sharp highlight on the rail edges or the barrel and no anodised sheen. The Tan AEG handguard and stock read as cream plastic. The SMG's "steel receiver" is the old flat black. This is not AAA work and does not meet "more realistic detail and surfaces". Cause: metallic 0.7–0.75 with roughness 0.44–0.52 and relief 0.07–0.16 is too soft to show (game/config/replica_surfaces.gd:42-50). The paint is the metal's albedo, so a coated part shines like coloured chrome or not at all, never like a clear coat over metal (game/play/replica_surface.gdshaderinc:+442-445).
+   - (b) GBB slide (02): stretch 10 on the side projection smears the brushed grain over the serrations. The close-up shows streaked, stretched texels and scratch lines that cut through the serration faces (replica_surface.gdshaderinc:+413-414, replica_surfaces.gd:44).
+   - (d) GBB realism: a real coated slide is matte nitride or cerakote, not brushed stainless. The Ghost (white) slide turns silver, so the paint's colour is lost on the part players see most. In Tan, slide and frame read as one material.
+   - (d) Sniper: in Tan the barrel is tan-painted metal. The owner said "barrel is metal", which should read as dark steel in any paint. The wood option (not shipped) is evenly spaced straight stripes, like a decal: no cathedral figure, no pores, no varying ring width. The cheek insert keeps the paint's colour on the wood.
+
+7. [judgment] Names that no longer read:
+   - `_worn`, `worn_materials()` and `apply(..., worn)` now mean "surfaced", worn or not (game/play/replica_paint.gd:+186, +198, +298).
+   - `OWN_GLOW := 1.0` multiplies by one and does nothing (replica_paint.gd:+177).
+   - `z_clip_scale` is declared in the middle of the kind tables (replica_surface.gdshaderinc:+349).
+   - The grain texture is imported Lossless, not VRAM compressed (replica_grain.png.import:18). That needs a written reason.
+
+Other items:
+- The committed pipeline/out/performance.md at head is SM5B's. MQ1's report exists only as an uncommitted edit, so commit it with the records.
+- qa-report.md still says "QA commit PENDING".
+- The wiki line "The AEG Rifle and the GBB Pistol look lightly used" (docs/wiki/Replicas.md, the hunk at +114) contradicts CC0_ASSETS.md, which now says the Compact SMG wears too.
+
+Must-fix for the next attempt:
+- Make the metal read as metal. Draw coated steel and aluminium as a clear coat over metal: dielectric paint colour plus a tight metal specular lobe, a lower roughness (about 0.25–0.35), and a strong highlight on edges and rails. Hit a visible difference in every BEFORE/AFTER pair.
+- Give the Glock-style slide a matte coated finish in the paint's colour instead of brushed silver. Keep brushing for bare parts only, and kill the stretch smear on faces across the bore.
+- Keep steel barrels dark steel in any paint.
+- Give the wood real figure: irregular ring spacing, pores, a cathedral pattern on the flats. Leave the cheek insert unpainted or make it wood.
+- Re-render the same six sheets and judge each pair side by side. Then rename `_worn` and its family and fix the import and the stale wiki line.
+
 Owner should test in the game:
-- From the platform edge, read both departure boards' rows and the bottom line. Is the text undistorted?
-- Walk under a "Way out" sign in a 3 m passage. Does it hang low or crowd the view?
-- Walk up to a line map: are the stop names readable at about 2 m?
-- Ride both escalators: do the level posters look right on the sloped walls, and do any clip the decks?
-- Are the no-smoking and handrail pictograms clear at a glance?
-- Are there too many or too few notices per room (hall, concourse, lift landing, plant room)?
+1. AEG (Cobalt, Tan) at inspect in the Depot and Subway: do the receiver and handguard read as metal and the grip as plastic?
+2. GBB Ghost and Tan: is a silver or brushed slide what you want, or a coated slide in the paint's colour?
+3. Close to a wall and aiming down sights: any grain shimmer or crawling on the slide and handguard?
+4. Sniper in Tan: is a tan barrel acceptable? Is wood or polymer the stock you want?
+5. Customise pictures and turntable: do the metal reflections look like a studio or like grey plastic?
+6. First equip of each replica: any hitch (shader prewarm)?

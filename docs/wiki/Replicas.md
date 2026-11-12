@@ -107,8 +107,8 @@ in their team's colours. **Realistic colours** shows every bold scheme as its pl
 the next match.
 
 In your hands a replica is made of what the real thing would be, under whatever colours it wears: the GBB Pistol's
-slide is brushed steel, the AEG Rifle's receiver and rail are anodised aluminium, the
-barrels and the Sniper Rifle's action are steel, and the grips, stocks and the pistol's frame are matte polymer with a
+slide is coated steel with a satin sheen, the AEG Rifle's receiver and rail are anodised aluminium, the
+barrels and the Sniper Rifle's action are dark steel, and the grips, stocks and the pistol's frame are matte polymer with a
 moulded grain. The metal catches the light; the polymer does not.
 
 The AEG Rifle and the GBB Pistol look lightly used in your hands: faint scratches, rubbed edges and a little dirt in

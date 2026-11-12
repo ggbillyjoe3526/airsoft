@@ -1,5 +1,5 @@
 // A replica part's surface (MQ1, 2026-11-12): ReplicaPaint's paint on what the part is made of. Each face of a replica,
-// a part or an accessory says its surface kind in its vertex colour's alpha (tools/blender/replicas/surface.py: kind / 8,
+// a part or an accessory says its surface kind in its vertex colour's alpha (tools/blender/replicas/surface.py: kind / 16,
 // the colour itself white so the model's own materials draw as they did; a mesh with no colours reads 1 and draws as
 // `default_kind`), and ReplicaSurfaces' table gives each kind its finish:
 // steel and aluminium are metal under the paint (a blued slide, an anodised receiver), polymer is matte, wood shows
@@ -12,20 +12,26 @@
 
 global uniform float look_wear;
 
-const int KINDS = 8;
+const int KINDS = 16;
 
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform vec3 emission : source_color = vec3(0.0);
 uniform float emission_energy = 0.0;
 // The kind a mesh with no vertex colours is drawn as.
-uniform int default_kind : hint_range(0, 7) = 0;
+uniform int default_kind : hint_range(0, 15) = 0;
+// The hands' depth scale (ReplicaView presses its copy's).
+uniform float z_clip_scale = 1.0;
 // Per kind: metallic, roughness, how far the slow cloud moves the roughness, and 1 where wear bares metal.
 uniform vec4 kind_finish[KINDS];
-uniform float z_clip_scale = 1.0;
 // Per kind: the grain's tile (m), its stretch along the bore, its relief, and how much wood figure the colour takes.
 uniform vec4 kind_grain[KINDS];
 // Per kind: the cloud's tile (m), the figure's dark and light gains on the colour, and the colour's own gain.
 uniform vec4 kind_tone[KINDS];
+// Per kind: its specular (a coat over metal shines harder than a moulding), the share of its metallic a light
+// paint keeps (a dark finish is an oxide or an anodise, metal to look at; a light one a baked coat, the paint's own
+// colour), the least a metal face reflects (linear: gunmetal, never the black of plastic), and how far a bold
+// paint escapes the kind's gain (a moulding is darker in black and duller in white, as bold in blue).
+uniform vec4 kind_shine[KINDS];
 uniform sampler2D grain : hint_default_white, filter_linear_mipmap_anisotropic, repeat_enable;
 // The stain a wood part's colour is drawn towards, and how far at a full figure (the paint tints the rest).
 uniform vec3 wood_stain : source_color = vec3(0.48, 0.29, 0.15);
@@ -53,6 +59,11 @@ const float SIDE_SHARPNESS = 4.0;
 // The grain texture's size (px), and the texels a pixel between which its relief fades to nothing.
 const float GRAIN_PX = 512.0;
 const vec2 GRAIN_FADE = vec2(1.5, 4.0);
+// The paint's brightness (linear) between which a metal part's finish goes from metal to a baked coat.
+const vec2 LIGHT_PAINT = vec2(0.16, 0.55);
+const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
+// The least a colour's brightest channel counts as when its chroma is taken (black has none).
+const float CHROMA_FLOOR = 0.001;
 
 varying vec3 model_position;
 varying vec3 model_normal;
@@ -60,7 +71,7 @@ varying flat int kind;
 
 void vertex() {
 	Z_CLIP_SCALE = z_clip_scale;
-	// kind / 8 in the colour's alpha; 1 (no colours) is the material's own default.
+	// kind / 16 in the colour's alpha; 1 (no colours) is the material's own default.
 	int marked = int(COLOR.a * float(KINDS) + 0.5);
 	kind = marked >= KINDS ? default_kind : marked;
 	model_position = VERTEX;
@@ -80,6 +91,7 @@ void fragment() {
 	float rough = finish.y;
 	vec4 fine = kind_grain[kind];
 	vec4 tone = kind_tone[kind];
+	vec4 shine = kind_shine[kind];
 	vec3 n = normalize(model_normal);
 	vec3 side = pow(abs(n), vec3(SIDE_SHARPNESS));
 	side /= side.x + side.y + side.z;
@@ -101,7 +113,14 @@ void fragment() {
 	float cloud = side.x * texture(grain, q.zy).b + side.y * texture(grain, q.zx).b + side.z * texture(grain, q.xy).b;
 	float figure = side.x * gx.a + side.y * gy.a + side.z * gz.a;
 	paint = mix(paint, wood_stain, fine.w * wood_stain_share);
-	paint *= tone.w * mix(1.0, mix(tone.y, tone.z, figure), fine.w);
+	// The kind's gain, whole on a grey paint (black, white); a bold paint keeps `shine.w` of its own brightness.
+	float top = max(paint.r, max(paint.g, paint.b));
+	float chroma = (top - min(paint.r, min(paint.g, paint.b))) / max(top, CHROMA_FLOOR);
+	paint *= mix(tone.w, 1.0, chroma * shine.w) * mix(1.0, mix(tone.y, tone.z, figure), fine.w);
+	// How metal the finish is: all of the kind's on a dark paint, `shine.y` of it on a light one; a metal face reflects
+	// at least `shine.z`, so a black receiver is gunmetal where a black grip is black.
+	float metal = finish.x * mix(1.0, shine.y, smoothstep(LIGHT_PAINT.x, LIGHT_PAINT.y, dot(paint, LUMA)));
+	paint = mix(paint, max(paint, vec3(shine.z)), metal);
 	rough += (cloud - 0.5) * 2.0 * finish.z;
 	vec3 mask = texture(wear_mask, UV).rgb;
 	float grime = (1.0 - mask.r) * look_wear * wear;
@@ -114,7 +133,8 @@ void fragment() {
 	worn = mix(worn, worn * grime_tint * (1.0 - grime_shade), grime);
 	paint = worn;
 	float bare = finish.w * max(rub * rub, scratch);
-	METALLIC = mix(finish.x, bare_metallic, bare);
+	METALLIC = mix(metal, bare_metallic, bare);
+	SPECULAR = shine.x;
 	rough += -edge_polish * rub + scratch_matte * scratch + grime_matte * grime;
 	ALBEDO = paint;
 	ROUGHNESS = clamp(rough, 0.05, 1.0);

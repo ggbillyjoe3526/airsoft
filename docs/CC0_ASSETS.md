@@ -146,12 +146,14 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   kind: `polymer`, `steel`, `aluminium`, `wood`, `rubber`, `bare` (bright unpainted steel) or `coated` (metal under
   a thick baked coat that keeps its colour in any light: the Cyber Pistol's white shell), in that order
   (`game/config/replica_surfaces.gd` KINDS and `tools/blender/replicas/surface.py` KINDS, never reordered). It rides
-  in the vertex colours (glTF COLOR_0): white, the kind in the alpha as `index / 8`; alpha 1 is "none", which a face
+  in the vertex colours (glTF COLOR_0): white, the kind in the alpha as `index / 16`; alpha 1 is "none", which a face
   of a material the game doesn't paint keeps (rubber, a lens) and a file with no colours reads everywhere (then a
   `Metal` face draws as steel, the rest as polymer). A build script names the kinds through alias materials
   (`Body@polymer`), `surface.tag` or its `SURFACES` table, and `surface.resolve` writes them before the figures' copy
   is made; the figures' copies carry none. ReplicaPaint draws each paint on its surface: metal reflects under the
-  paint, polymer is matte with a moulded grain, wood shows its figure through the paint's colour. The grain is one
+  paint (a dark paint as blued or anodised metal, a light one as a baked coat that keeps its colour: `light_keeps`,
+  `floor`, `gain` and `specular` per kind), polymer is matte with a moulded grain, wood shows its figure in a walnut
+  stain the paint tints. Only `bare` metal is brushed along the bore. The grain is one
   shared tiling texture, `assets/textures/replica/replica_grain.png` (`tools/textures/replica_grain.py`), read on the
   model's own space, so no model needs texture coordinates for it.
 - **Parts.** `replicaParts/<id>.glb`: one top-level object per part named `<kind>_<id>` (`optic_redDot`,

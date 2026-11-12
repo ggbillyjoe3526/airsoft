@@ -28,11 +28,9 @@ const MAX_SETS := 32
 ## The paint on its surface (MQ1; worn where the model carries a mask, RW1), and the most such materials kept (a
 ## paint's part on one model's mask); cleared past it.
 const SURFACE_SHADER := preload("res://game/play/replica_surface.gdshader")
-const MAX_WORN := 160
+const MAX_SURFACED := 160
 ## The meta a surfaced paint keeps its plain one in (plain_of).
 const PLAIN_META := &"plain"
-## The own colours' materials that glow keep their glow on their surface at this share of the model's own energy.
-const OWN_GLOW := 1.0
 
 ## The materials per paint (PARTS' order), keyed "<paint>" or "<paint>/realistic".
 static var _sets: Dictionary[String, Array] = {}
@@ -40,7 +38,7 @@ static var _sets: Dictionary[String, Array] = {}
 static var _own_realistic: Dictionary[StringName, StandardMaterial3D] = {}
 ## The surfaced materials (MQ1, RW1), keyed by the plain one, the mask (0: none) and the default kind:
 ## "<plain's id>/<mask's id>/<kind>".
-static var _worn: Dictionary[String, ShaderMaterial] = {}
+static var _surfaced: Dictionary[String, ShaderMaterial] = {}
 
 
 ## The paint a bot on `team` carries on `replica`: its team's for the replica's class, or its own colours.
@@ -66,7 +64,7 @@ static func materials(paint: StringName, realistic: bool) -> Array[StandardMater
 			return []
 		if _sets.size() >= MAX_SETS:
 			_sets.clear()
-			_worn.clear()
+			_surfaced.clear()
 		var built: Array = []
 		for i in colours.size():
 			var m := StandardMaterial3D.new()
@@ -83,8 +81,8 @@ static func materials(paint: StringName, realistic: bool) -> Array[StandardMater
 
 
 ## Puts `paint` on every surface of `model` and below it whose material is one of the five parts: on its surface (MQ1),
-## worn where the model carries a wear mask (RW1), unless `worn` is false (a figure's copy: the plain paint).
-static func apply(model: Node, paint: StringName, realistic: bool, worn: bool = true) -> void:
+## worn where the model carries a wear mask (RW1), unless `surfaced` is false (a figure's copy: the plain paint).
+static func apply(model: Node, paint: StringName, realistic: bool, surfaced: bool = true) -> void:
 	var painted := materials(paint, realistic)
 	var own_colours := paint == ReplicaSchemes.OWN
 	if painted.is_empty() and not own_colours:
@@ -108,19 +106,19 @@ static func apply(model: Node, paint: StringName, realistic: bool, worn: bool = 
 				if realistic and ReplicaSchemes.OWN_REALISTIC.has(material_name):
 					grey = _realistic_own(material_name)
 				var shown: StandardMaterial3D = grey if grey != null else own as StandardMaterial3D
-				if worn and shown != null and plain_colour(shown):
+				if surfaced and shown != null and plain_colour(shown):
 					mesh_node.set_surface_override_material(i,
 							_surface_of(shown, null, ReplicaSurfaces.part_index(material_name)))
 				elif ReplicaSchemes.OWN_REALISTIC.has(material_name) \
 						or is_surface(mesh_node.get_surface_override_material(i)):
-					# plain again: the realistic grey, or the model's own (a surface a worn apply left is taken off)
+					# plain again: the realistic grey, or the model's own (a surface an earlier apply left is taken off)
 					mesh_node.set_surface_override_material(i, grey)
 				continue
 			var part := ReplicaSchemes.PARTS.find(material_name)
 			if part >= 0 and part < painted.size():
-				var mask := wear_mask(mesh_node.mesh, i) if worn else null
+				var mask := wear_mask(mesh_node.mesh, i) if surfaced else null
 				mesh_node.set_surface_override_material(i, _surface_of(painted[part], mask,
-						ReplicaSurfaces.part_index(material_name)) if worn else painted[part])
+						ReplicaSurfaces.part_index(material_name)) if surfaced else painted[part])
 
 
 ## Whether `material` is one plain colour (opaque, no texture): the kind the surface shader can stand in for.
@@ -142,9 +140,9 @@ static func wear_mask(mesh: Mesh, i: int) -> Texture2D:
 ## (RW1), its faces with no kind of their own drawn as `default_kind`: built once and shared by every surface alike.
 static func _surface_of(plain: StandardMaterial3D, mask: Texture2D, default_kind: int) -> ShaderMaterial:
 	var key := "%d/%d/%d" % [plain.get_instance_id(), mask.get_instance_id() if mask != null else 0, default_kind]
-	if not _worn.has(key):
-		if _worn.size() >= MAX_WORN:
-			_worn.clear()
+	if not _surfaced.has(key):
+		if _surfaced.size() >= MAX_SURFACED:
+			_surfaced.clear()
 		var m := ShaderMaterial.new()
 		m.resource_name = plain.resource_name + ("/worn" if mask != null else "/surface")
 		m.shader = SURFACE_SHADER
@@ -153,13 +151,13 @@ static func _surface_of(plain: StandardMaterial3D, mask: Texture2D, default_kind
 		m.set_shader_parameter(&"default_kind", default_kind)
 		m.set_shader_parameter(&"emission", plain.emission if plain.emission_enabled else Color.BLACK)
 		m.set_shader_parameter(&"emission_energy",
-				plain.emission_energy_multiplier * OWN_GLOW if plain.emission_enabled else 0.0)
+				plain.emission_energy_multiplier if plain.emission_enabled else 0.0)
 		m.set_shader_parameter(&"wear", 1.0 if mask != null else 0.0)
 		if mask != null:
 			m.set_shader_parameter(&"wear_mask", mask)
 		m.set_meta(PLAIN_META, plain)
-		_worn[key] = m
-	return _worn[key]
+		_surfaced[key] = m
+	return _surfaced[key]
 
 
 ## The plain paint `material` was surfaced from (MQ1), or `material` itself where it is a plain one.
@@ -182,9 +180,9 @@ static func is_worn(material: Material) -> bool:
 
 
 ## The surfaced materials built so far (MQ1, RW1), for ShaderPrewarm.
-static func worn_materials() -> Array[Material]:
+static func surface_materials() -> Array[Material]:
 	var out: Array[Material] = []
-	out.assign(_worn.values())
+	out.assign(_surfaced.values())
 	return out
 
 
@@ -222,4 +220,4 @@ static func paint_saturation() -> float:
 static func clear() -> void:
 	_sets.clear()
 	_own_realistic.clear()
-	_worn.clear()
+	_surfaced.clear()
