@@ -23,8 +23,8 @@ Pistol's rounded grip with a straight back: `tools/blender/replicas/cyber.py` lo
 strap, the finger grooves and the width are the GBB's to within 1.5 mm down the grip.
 
 - **The back strap** (`back_strap`, `BACK_NOTCH`, `BACK_HEEL`): a straight line from the hollow under the tang (filled
-  4 mm) to the heel (drawn in 1.5 mm), the tang's curve blended in above it. The GBB's swells 1.8 mm off that line;
-  the Cyber's is on it, and within 5 mm of the GBB's everywhere, so a hand still holds both alike.
+  2.5 mm) to the heel (drawn in 2.5 mm), the tang's curve blended in above it. The GBB's swells 1.8 mm off that line;
+  the Cyber's is on it, within 4.2 mm of the GBB's everywhere (the grip is 0.94 to 1.08 times as deep), so a hand still holds both alike.
 - **The window** (`grip_window`, `WINDOW_Z`, `WINDOW_HALF`): a parallelogram on the handle's middle line, so it leans
   as the handle does; 27 mm wide and 66 tall as drawn, smaller than the first version's. The power cell behind it
   (`cell_outline`) is raked on the same line and stays inside the rounded walls all the way down; the reload clip
@@ -38,7 +38,7 @@ strap, the finger grooves and the width are the GBB's to within 1.5 mm down the 
   still fits.
 - **Gone:** the slab's front serrations, its ring groove, the back grooves, the two grip screws and the pin through
   the tang.
-- **Triangles:** 38,658 in the hands (budget 40,000; was 37,824), the figures' copy 3,000 (decimated from the new
+- **Triangles:** 38,646 in the hands (budget 40,000; was 37,824), the figures' copy 3,000 (decimated from the new
   shape, so a bot's Cyber Pistol has the grip too).
 - **Tests** (`tests/unit/test_cyber_grip.gd`): the Cyber's front strap and half width match the GBB's at four heights
   down the grip, its back strap is a straight line where the GBB's swells, and its sides draw in toward both straps

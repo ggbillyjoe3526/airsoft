@@ -163,8 +163,8 @@ GRIP_RING = 36
 # hollows under the tang and swells out again at the palm; this one runs straight from the hollow, filled BACK_NOTCH's
 # metres at its photo height, to the heel, drawn in BACK_HEEL's metres at its height, with the tang's curve above
 # blended in over BACK_BLEND metres and the foot's chamfer below as the GBB's.
-BACK_NOTCH = (178.0, 0.004)
-BACK_HEEL = (400.0, 0.0015)
+BACK_NOTCH = (178.0, 0.0025)
+BACK_HEEL = (400.0, 0.0025)
 BACK_BLEND = 0.003
 # The trigger guard's opening and the slot the trigger hangs from.
 # The old model's shape (owner, 2026-11-05: "more like the original trigger and guard"): a narrow loop in front, a
@@ -172,7 +172,7 @@ BACK_BLEND = 0.003
 # nearer the grip than the old model's (owner, 2026-11-05: "the player would need to stretch their finger"); the loop's
 # front slants up to the front block's foot, so no notch opens under it. CZ1 sets the trigger TRIGGER_BACK further
 # back, nearer the GBB's reach from the back strap (BL6's was 19 mm longer, CZ1's 5 mm; the back strap has been within
-# 4 mm of the GBB's since the grip took its shape, see GRIP_TOP_PX and BACK_NOTCH), and the opening's back wall
+# 5 mm of the GBB's since the grip took its shape, see GRIP_TOP_PX and BACK_NOTCH), and the opening's back wall
 # with it, 4 mm behind the blade and 4 mm ahead of the grip's front; the guard's front (the opening's front wall and
 # the loop's lower front) moves 7.5 mm back, so the opening stays 4.5 mm longer than BL6's behind the trigger and the
 # Weapon Torch's back end clears the loop (at the moved TorchMount it sank 2 mm into it).
