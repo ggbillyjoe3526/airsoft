@@ -53,7 +53,8 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
   slightly grey so they are easy to see against the dark"): the station's track has no sleepers now
   (`StationLook.sleepers`, off), its rails are 0.09 x 0.12 m (were 0.07 x 0.08) in light grey painted steel. The works
   vehicles now stand on these rails.
-- **Facing** (shared with SM3's benches): a block may name `facing` (`+x`, `-x`, `+z` or `-z`), the world direction its
+- **Facing** (shared with SM3's benches; SM3 merged first, so SM4 uses its `PropLayout.facing_yaw` and
+  `facing_size`): a block may name `facing` (`+x`, `-x`, `+z` or `-z`), the world direction its
   model's front points. FIT then turns the model that way, its width across the front, instead of toward the field's
   middle (`MapData.Block.facing`, `PropLayout._fit_facing`, `tests/unit/test_sm4_facing.gd`). The booths face the
   platform's edge, and the buffer stops face their track.
