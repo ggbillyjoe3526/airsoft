@@ -7,6 +7,8 @@ extends Resource
 ## its blocks (a train) takes that room's. Look only: the blocks, colliders, nav and sight lines are the greybox's.
 ## Every paint is muted (look_paint) and kept off both team hues, yellow the only safety colour.
 
+## Its trains' models (SM1, TrainDressing): a block a train holds is drawn by them when they all load.
+@export var trains: TrainLook = TrainLook.new()
 ## The texture sets, ambientCG ids in the texture arrays' layer order: tools/textures/station_textures.gd bakes each
 ## set's colour, normal and roughness into `colour_array` and `surface_array` in this order.
 @export var sets: Array[StringName] = [

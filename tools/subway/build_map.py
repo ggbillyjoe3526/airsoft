@@ -300,7 +300,7 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
                 o_sealed = o_gaps is not None and not in_gap(o_gaps, pa, pb)
                 open_lo, open_hi = max(f_hi, of_hi), min(c_lo, oc_lo)
                 thick = SEAL_T if o_gaps is not None else FT
-                if open_hi - open_lo < OPEN and not o_sealed:
+                if open_hi - open_lo < OPEN and not o_sealed and not (rm.get("opens") or other.get("opens")):
                     if open_hi - open_lo > 0.05:
                         warnings.append(f"{rm['name']} and {other['name']} overlap {open_hi - open_lo:.2f} m at "
                                         f"{edge} {pa:.1f}..{pb:.1f}: walled")
@@ -557,6 +557,9 @@ def build() -> dict:
         blocks.append(as_block(kind, bx, colour=SHAFT_COLOUR))
         solid.append(bx)
     vaults = [vault_air(v) for v in L.VAULTS]
+    for bx in train_glass():
+        blocks.append(as_block("glass", bx))
+        solid.append(bx)
     for bx, owner, kind in shell_boxes:
         holes = [a for i, a in air if i != owner] + [shaft] + vaults
         parts = cut([bx], holes)
@@ -601,7 +604,7 @@ def build() -> dict:
         "areas": areas(),
         "lifts": lifts(),
         # UL1: the grey puff feet kick up off the station's dusty floors (white without a tint).
-        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT),
+        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT), "trains": trains(),
                      "kickedDust": {"tint": 0xB0AEA8, "scale": 0.9}},
     }
     # nothing in the shafts, nor in a balustrade down an escalator (its pieces' whole boxes, as the game's tests take them)
@@ -610,6 +613,64 @@ def build() -> dict:
     m["dressing"]["station"]["trims"] += drop_rods(m["dressing"]["station"]["fixtures"])
     del sx
     return m
+
+
+def train_glass() -> list[list[float]]:
+    """The see-through glass in each train's platform side (layout.WIN_Y, layout.car_windows, layout.DOOR_WIN): a box a
+    window through the side's wall, which the shell is cut round. The open doors' holes have none; a train's windows
+    are symmetric about each car's and door's middle, so a turned car's stand where an unturned one's would."""
+    out = []
+    for tr in L.TRAINS:
+        rm = next(r for r in L.rooms if r["name"] == tr["room"])
+        z0, z1 = (rm["z1"] - SEAL_T, rm["z1"]) if tr["platform"] == "s" else (rm["z0"], rm["z0"] + SEAL_T)
+        floor = rm["ya"]
+        for k in range(round((rm["x1"] - rm["x0"]) / L.CAR)):
+            x0 = rm["x0"] + k * L.CAR
+            mid = x0 + L.CAR / 2
+            for a, b in L.car_windows():
+                out.append([r(mid + a), r(mid + b), r(floor + L.WIN_Y[0]), r(floor + L.WIN_Y[1]), z0, z1])
+            for d in L.DOOR_AT:
+                if any(abs(x0 + d - o) < EPS for o in tr["doors"]):
+                    continue
+                for a, b in L.DOOR_WIN:
+                    out.append([r(x0 + d + a), r(x0 + d + b), r(floor + L.DOOR_WIN_Y[0]), r(floor + L.DOOR_WIN_Y[1]),
+                                z0, z1])
+    return out
+
+
+def trains() -> list[dict]:
+    """Each train's cars for TrainView (SM1): the box its walls, slabs and car ends fill (StationSurface leaves them to
+    the models), each car's middle on its floor, whether it is turned (a train whose platform is to its north: the
+    models' platform side is +z), its open door holes (by slot, in the model's own order along it) and the models at
+    its ends (its own -x end, then +x), and the open gangways' joints."""
+    out = []
+    for tr in L.TRAINS:
+        rm = next(r for r in L.rooms if r["name"] == tr["room"])
+        n = round((rm["x1"] - rm["x0"]) / L.CAR)
+        if abs(n * L.CAR - (rm["x1"] - rm["x0"])) > EPS or len(tr["joints"]) != n + 1:
+            raise SystemExit(f"{tr['room']}: {rm['x1'] - rm['x0']} m is not {len(tr['joints']) - 1} cars")
+        turn = tr["platform"] == "n"
+        y, zc = rm["ya"] + LIFT, (rm["z0"] + rm["z1"]) / 2
+        cars, joints = [], []
+        for k in range(n):
+            x0 = rm["x0"] + k * L.CAR
+            slots = []
+            for d in tr["doors"]:
+                if x0 < d < x0 + L.CAR:
+                    i = min(range(len(L.DOOR_AT)), key=lambda j: abs(x0 + L.DOOR_AT[j] - d))
+                    if abs(x0 + L.DOOR_AT[i] - d) > EPS:
+                        raise SystemExit(f"{tr['room']}: the door at {d} is at no door slot")
+                    slots.append(len(L.DOOR_AT) - 1 - i if turn else i)
+            west, east = tr["joints"][k], tr["joints"][k + 1]
+            ends = [east, west] if turn else [west, east]
+            cars.append({"x": r(x0 + L.CAR / 2), "y": r(y), "z": r(zc), "turn": 1 if turn else 0,
+                         "open": sorted(slots), "ends": ends})
+        for k, kind in enumerate(tr["joints"]):
+            if kind == "gangway":
+                joints.append({"x": r(rm["x0"] + k * L.CAR), "y": r(y), "z": r(zc)})
+        box = [rm["x0"], rm["x1"], r(L.T - FT + LIFT), r(rm["ya"] + rm["h"] + FT + LIFT), rm["z0"], rm["z1"]]
+        out.append({"box": box, "cars": cars, "gangways": joints})
+    return out
 
 
 LAMP_STEP = 8.0      # m between a room's ceiling lamps along it
@@ -681,6 +742,8 @@ def lamps() -> list[dict]:
                 lamp = {"x": r(x), "z": r(z), "y": r(y + LIFT)}
                 if not along_x:
                     lamp["turn"] = 90   # the strip lamp (SM5) runs along its room
+                if len(rows) == 1 and i in L.FLICKER.get(rm["name"], ()):
+                    lamp["state"] = "flicker"
                 out.append(lamp)
     return out
 

@@ -30,13 +30,15 @@ blocks: list[dict] = []
 
 def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: float, yb: float | None = None,
          h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False,
-         dress: str = "", vault: bool = False) -> None:
+         dress: str = "", vault: bool = False, opens: bool = False) -> None:
     """A room; a ramp room's ceiling follows its floor down in steps, or with `flat` stays level, `h` over its higher
     end (a short flight of steps under a tunnel's roof). A ramp room's `dress` names the model laid over its ramps
     (PropDressConfig, SET; SM2: an escalator bank or a stair), build_map.py writing it on each. A `vault` room has no
-    ceiling of its own: its walls stop `h` over its floor, where its platform tunnel's vault (VAULTS) springs."""
+    ceiling of its own: its walls stop `h` over its floor, where its platform tunnel's vault (VAULTS) springs. One that
+    `opens` (a space under a train's end) opens into its neighbours however low it is, where other rooms are walled off
+    from those they overlap by less than a door."""
     rooms.append(dict(name=name, area=area, x0=x0, x1=x1, z0=z0, z1=z1, ya=y, yb=y if yb is None else yb, h=h,
-                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat, dress=dress, vault=vault))
+                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat, dress=dress, vault=vault, opens=opens))
 
 
 def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0,
@@ -159,23 +161,118 @@ def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: flo
 track("track_n_w", "North track", -52, -44, -9, -12.5)
 track("track_n_e", "North track", 16, 50, -9, -12.5)
 track("trench", "South track", -52, 30, 9, 12.5)
+# A car's door holes' half width (train.py DOOR_HW): wide doors, as the owner's photos (1.6 m).
+DOOR_HW = 0.8
 # North train: four cars standing at the north platform, five doors open; the middle pair not coupled through.
 NDOORS = [-38.3, -19.7, -11.8, -1.2, 10.3]
 room("train_n", "North train", -44, 16, -12.5, -9, P, h=TRAIN_IN,
-     seal={"n": [], "e": [], "w": [], "s": [(x - 0.7, x + 0.7) for x in NDOORS]})
+     seal={"n": [], "e": [], "w": [], "s": [(x - DOOR_HW, x + DOOR_HW) for x in NDOORS]})
 TRAIN = 0x8c8e8a
+GANGWAY = 1.2    # the open gangway between coupled cars, on the train's middle line (as wide as the cab's door)
 for x in (-29, 1):
-    block("container", P, x - 0.15, x + 0.15, -12.5, -11.3, TRAIN_IN, TRAIN)   # car ends, a gangway between
-    block("container", P, x - 0.15, x + 0.15, -10.2, -9.0, TRAIN_IN, TRAIN)
+    block("container", P, x - 0.15, x + 0.15, -12.5, -10.75 - GANGWAY / 2, TRAIN_IN, TRAIN)   # car ends, a gangway
+    block("container", P, x - 0.15, x + 0.15, -10.75 + GANGWAY / 2, -9.0, TRAIN_IN, TRAIN)
 block("container", P, -14.15, -13.85, -12.5, -9.0, TRAIN_IN, TRAIN)             # not coupled through
 # South train: two cars standing half in the south running tunnel; its east cab door is the way through.
 SDOORS = [35.7, 47.2]
 room("train_s", "South train", 30, 60, 9, 12.5, P, h=TRAIN_IN,
-     seal={"n": [(x - 0.7, x + 0.7) for x in SDOORS], "s": [], "w": [], "e": [(10.15, 11.35)]})
+     seal={"n": [(x - DOOR_HW, x + DOOR_HW) for x in SDOORS], "s": [], "w": [], "e": [(10.15, 11.35)]})
 block("container", P, 44.85, 45.15, 9.0, 10.15, TRAIN_IN, TRAIN)
 block("container", P, 44.85, 45.15, 11.35, 12.5, TRAIN_IN, TRAIN)
-block("cabinet", P, 39, 40.5, 10.15, 11.35, 1.7)           # tool carts in the aisle
-block("cabinet", P, 52, 53.5, 10.15, 11.35, 1.7)
+block("cabinet", P, 39, 40.5, 10.15, 11.35, 1.7, dress="tool_cart")   # tool carts in the aisle
+block("cabinet", P, 52, 53.5, 10.15, 11.35, 1.7, dress="tool_cart")
+
+# The trains' cars (SM1, tools/blender/maps/train.py): each train's room in 15 m cars from its west end, its platform
+# side, and what stands at each joint from west to east: a cab front ("cab", "cab_open": its door the way out), an open
+# gangway, a blank car end ("blank") or, where a train stands uncoupled, a blank end with its outside drawn ("outer").
+# Each car's doors stand DOOR_AT along it, those in NDOORS and SDOORS open; the rest are shut.
+CAR = 15.0
+DOOR_AT = (2.2, 5.7, 9.3, 12.8)
+TRAINS = [
+    dict(room="train_n", platform="s", doors=NDOORS, joints=("cab", "gangway", "blank", "gangway", "cab")),
+    dict(room="train_s", platform="n", doors=SDOORS, joints=("outer", "gangway", "cab_open")),
+]
+# The trains' worn ceiling lamps that flicker (the owner, 2026-11-12: "some of the lights flicker"), by their order
+# along each train's room (build_map.py lamps(): one over each half car): the north train's second car's west half and
+# third car's east half, the south train's first car's east half. Their cars' strips flicker with them (TrainView).
+FLICKER = {"train_n": (2, 5), "train_s": (1,)}
+# The platform side's windows are see-through glass (the owner, 2026-11-12: "can the player see through them?"): a
+# `glass` block in each window's hole in the side (build_map.py cuts it from the wall), which stops BBs and bodies but
+# not the eye, so bots see through it too; the far side's stay dark, the cars standing against the tunnel wall. As
+# train.py draws them, along a car from its middle: a window a bay between the doors (WIN_Y over the floor), and in
+# each shut door a window a leaf (DOOR_WIN_Y), DOOR_WIN from its door's middle.
+WIN_Y = (0.85, 1.95)
+DOOR_WIN_Y = (0.95, 2.0)
+DOOR_WIN = ((-0.67, -0.096), (0.096, 0.67))
+
+
+def car_windows() -> list[tuple[float, float]]:
+    """The windows between a car's doors, (x0, x1) from its middle (train.py windows())."""
+    half = CAR / 2 - 0.15
+    edges = [-half] + [e for d in DOOR_AT for e in (d - CAR / 2 - DOOR_HW, d - CAR / 2 + DOOR_HW)] + [half]
+    out = []
+    for a, b in zip(edges[::2], edges[1::2]):
+        inset = 0.22 if b - a > 1.8 else 0.18
+        out.append((round(a + inset, 3), round(b - inset, 3)))
+    return out
+
+# Longitudinal seats under each side's windows, a block a bay (the stretches between the doors), as low cover: what
+# you see is what you hit. A bay with a tool cart in it has none (the cars are being worked on), so the aisle past the
+# cart stays a metre wide each side.
+SEAT_H = 0.45
+SEAT_D = 0.52   # deeper seats, the backrest the same (the owner, 2026-11-12: "slightly longer")
+SEAT_IN = 0.06       # a seat's ends stand this far in from its bay's (the screens and poles by the doors)
+CART_CLEAR = 0.3     # no seats in a bay a cart stands within this of
+
+
+def seat_bays() -> list[tuple[float, float]]:
+    """The stretches of a car's sides between its door holes and its ends (from its west end)."""
+    edges = [0.15] + [e for d in DOOR_AT for e in (d - DOOR_HW, d + DOOR_HW)] + [CAR - 0.15]
+    return [(edges[i], edges[i + 1]) for i in range(0, len(edges), 2)]
+
+
+def _seats() -> None:
+    carts = [b for b in blocks if b["dress"] == "tool_cart"]
+    for tr in TRAINS:
+        rm = next(r for r in rooms if r["name"] == tr["room"])
+        n = round((rm["x1"] - rm["x0"]) / CAR)
+        for k in range(n):
+            x0 = rm["x0"] + k * CAR
+            for a, b in seat_bays():
+                xa, xb = x0 + a + SEAT_IN, x0 + b - SEAT_IN
+                if any(c["x0"] < xb + CART_CLEAR and c["x1"] > xa - CART_CLEAR and rm["z0"] < c["z0"] < rm["z1"]
+                       for c in carts):
+                    continue
+                for z_wall, inward in ((rm["z0"] + 0.15, 1), (rm["z1"] - 0.15, -1)):
+                    za, zb = sorted((z_wall, z_wall + inward * SEAT_D))
+                    dress = "train_seat" if xb - xa > 1.6 else "train_seat_short"
+                    block("furniture", P, round(xa, 3), round(xb, 3), round(za, 3), round(zb, 3), SEAT_H,
+                          dress=dress)
+
+
+_seats()
+# Under each end of a train (owner, 2026-11-12: "model the wheels"): the car's floor stands on its underframe, a space
+# UNDER_H tall over the track runs in under it to the first bogie, which stands on the rails as a block of its own
+# (low cover nobody walks into; BBs fly in under the coupler); the floor slab goes on past it. The space is a track
+# room of its own, no ceiling (the car's floor is its roof), its area the track's beyond the end.
+UNDER_H = 0.75       # the underframe's foot over the track bed (a 0.6 m wheel on its rail stands under it)
+COUPLER_ZONE = 0.9   # from the train's end in to its bogie: the coupler's
+BOGIE_L = 2.7        # a bogie's length (its 1.9 m wheelbase and its wheels) and width
+BOGIE_W = 2.4
+BOGIE_FOOT = 0.11    # its wheels' flanges, 3 cm under the rails' top (station_dress: rails 0.14 over the bed)
+UNDER_D = COUPLER_ZONE + BOGIE_L + 0.25
+UNDER_ENDS = [("train_n", "w", "North track"), ("train_n", "e", "North track"), ("train_s", "w", "South track"),
+              ("train_s", "e", "South tunnel")]
+for name, side, area in UNDER_ENDS:
+    rm = next(r for r in rooms if r["name"] == name)
+    zc = (rm["z0"] + rm["z1"]) * 0.5
+    s = 1 if side == "w" else -1
+    end = rm["x0"] if side == "w" else rm["x1"]
+    room(name + "_under_" + side, area, *sorted((end, end + s * UNDER_D)), rm["z0"], rm["z1"], T, h=UNDER_H,
+         ceil=False, opens=True)
+    bx0, bx1 = sorted((end + s * COUPLER_ZONE, end + s * (COUPLER_ZONE + BOGIE_L)))
+    block("cabinet", T + BOGIE_FOOT, bx0, bx1, zc - BOGIE_W / 2, zc + BOGIE_W / 2, UNDER_H - BOGIE_FOOT,
+          dress="train_bogie")
 # Between the platform tunnels.
 room("lowc", "Lower hall", 10, 22, -4, 4, P, h=3.5)
 for x in (11.5, 18.5):
@@ -216,11 +313,9 @@ block("barrier", T, -52, -51.5, 10.2, 12.5, 1.2)
 
 # ---------------- Running tunnels east, -18.9 m (Tunnel team's start) ----------------
 room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=TUNNEL_H + 0.9)
-# Detrainment steps down from the south train's cab door to the track, a way round them each side.
-room("cab_steps", "South tunnel", 60, 62, 10.15, 11.35, P, T, h=TUNNEL_H, flat=True)
-room("cab_n", "South tunnel", 60, 62, 9, 10.15, T, h=TUNNEL_H + 0.9)
-room("cab_s", "South tunnel", 60, 62, 11.35, 12.6, T, h=TUNNEL_H + 0.9)
-room("run_s", "South tunnel", 62, 82, 9, 12.6, T, h=TUNNEL_H + 0.9)
+# The south train's open cab door stands 0.9 m over the track: no steps, a body climbs up into it from the track
+# (VaultConfig climb_depth: the car's floor runs on behind the doorway) and drops back down (owner, 2026-11-12).
+room("run_s", "South tunnel", 60, 82, 9, 12.6, T, h=TUNNEL_H + 0.9)
 room("xpass", "Cross passage", 74, 77, -9, 9, T, h=2.6)
 block("cabinet", T, 60.5, 62, -12.4, -11.4, 1.2)    # platelayers' trolley
 block("crate", T, 69.5, 70.9, -10.4, -9.0, 1.4)   # cable drum

@@ -2,10 +2,11 @@ extends SceneTree
 ## Pictures of Subway's station dress for review (MT3): a whole PlaySession on Subway, the play frozen, the HUD,
 ## arms and players hidden, the camera at eye height at fixed spots (SHOTS), one picture each (`<n>-<name>.png`).
 ## At the graphics preset named (High unless one is given). For a before picture, run it in a checkout from before
-## MT3. `fixtures` after the preset takes FIXTURE_SHOTS instead (SM5: the lamps and extras up close). Needs a display
+## MT3. `fixtures` after the preset takes FIXTURE_SHOTS instead (SM5: the lamps and extras up close), `trains`
+## TRAIN_SHOTS (SM1: the trains' models). Needs a display
 ## (the cloud's lavapipe Vulkan draws Forward+):
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver vulkan -s \
-##       res://tools/subway/station_pictures.gd -- <folder> [low|medium|high|ultra] [fixtures]
+##       res://tools/subway/station_pictures.gd -- <folder> [low|medium|high|ultra] [fixtures|trains]
 ## Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
@@ -54,6 +55,32 @@ const FIXTURE_SHOTS: Array[Array] = [
 	["hall-notices", Vector3(-51.5, 20.5, 6.6), Vector3(-51.5, 20.7, 10.0)],
 	["lower-hall-info", Vector3(16.5, 2.6, -1.0), Vector3(22.0, 2.5, 2.4)],
 ]
+## The trains' pictures (SM1), with `trains` as the third argument instead of the station's.
+const TRAIN_SHOTS: Array[Array] = [
+	["north-train-from-platform", Vector3(-19.0, 2.6, -6.2), Vector3(-30.0, 1.9, -9.3)],
+	["north-train-along-platform", Vector3(-41.0, 2.6, -6.6), Vector3(0.0, 2.0, -9.4)],
+	["north-train-inside", Vector3(-42.6, 2.6, -10.75), Vector3(-30.0, 1.9, -10.75)],
+	["north-gangway", Vector3(-23.0, 2.6, -10.2), Vector3(-34.0, 1.8, -10.9)],
+	["north-blank-end", Vector3(-5.0, 2.6, -11.2), Vector3(-14.0, 1.7, -10.6)],
+	["north-cab-front", Vector3(-48.6, 1.5, -9.9), Vector3(-44.0, 1.3, -10.75)],
+	["north-joint-from-platform", Vector3(-27.0, 2.5, -7.4), Vector3(-29.0, 1.9, -9.0)],
+	["south-train-from-platform", Vector3(41.0, 2.6, 6.4), Vector3(36.0, 1.9, 9.2)],
+	["south-train-inside", Vector3(31.0, 2.6, 10.3), Vector3(44.0, 1.9, 10.9)],
+	["south-cab-open", Vector3(65.0, 1.6, 10.0), Vector3(60.0, 1.3, 10.75)],
+	["south-outer-end", Vector3(26.0, 1.5, 10.2), Vector3(30.0, 1.1, 10.75)],
+	["tool-cart", Vector3(37.4, 2.3, 9.7), Vector3(39.9, 1.5, 10.75)],
+	["south-cab-wheels", Vector3(62.6, 0.55, 9.6), Vector3(59.0, 0.4, 10.75)],
+	["north-cab-wheels", Vector3(-44.7, 0.6, -9.4), Vector3(-42.3, 0.35, -10.75)],
+	["south-bogie-close", Vector3(59.7, 0.5, 9.3), Vector3(57.6, 0.35, 10.75)],
+	["south-outer-end-wheels", Vector3(27.4, 0.55, 9.7), Vector3(31.0, 0.4, 10.75)],
+	["north-car-two-inside", Vector3(-15.0, 2.6, -10.75), Vector3(-28.0, 1.9, -10.75)],
+	["north-window-close", Vector3(-35.2, 2.5, -7.4), Vector3(-36.6, 2.1, -11.0)],
+	["south-looking-out", Vector3(46.5, 2.5, 11.9), Vector3(44.0, 2.2, 6.5)],
+	["north-cab-from-platform-end", Vector3(-50.0, 2.6, -7.0), Vector3(-44.0, 1.8, -10.75)],
+	["north-east-cab", Vector3(24.0, 2.0, -11.0), Vector3(16.0, 1.6, -10.75)],
+	["south-cab-down-tunnel", Vector3(72.0, 1.8, 10.75), Vector3(60.0, 1.4, 10.75)],
+	["north-cab-trackside-corner", Vector3(-45.5, 1.4, -12.2), Vector3(-30.0, 1.4, -12.4)],
+]
 
 
 func _initialize() -> void:
@@ -64,7 +91,9 @@ func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var folder := args[0] if not args.is_empty() else "user://station"
 	var preset := StringName(args[1]) if args.size() > 1 else &"high"
-	var shots: Array[Array] = FIXTURE_SHOTS if args.size() > 2 and args[2] == "fixtures" else SHOTS
+	var shots: Array[Array] = SHOTS
+	if args.size() > 2:
+		shots = FIXTURE_SHOTS if args[2] == "fixtures" else TRAIN_SHOTS if args[2] == "trains" else SHOTS
 	DirAccess.make_dir_recursive_absolute(folder)
 	root.size = SIZE
 	var session := PlaySession.new()

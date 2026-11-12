@@ -36,6 +36,7 @@
 [ext_resource type="Script" uid="uid://cwb3ni1un42dn" path="res://game/config/gate_paddles_config.gd" id="53_gp3sm"]
 [ext_resource type="Script" uid="uid://dremqyubntd3e" path="res://game/config/marks_config.gd" id="53_wm1mk"]
 [ext_resource type="Script" uid="uid://crxm155pdir66" path="res://game/config/station_fixtures_config.gd" id="54_sm5fx"]
+[ext_resource type="Script" uid="uid://cc52dhprynifg" path="res://game/config/train_look.gd" id="54_sm1tl"]
 
 [sub_resource type="Resource" id="Resource_01h5l"]
 script = ExtResource("1_ermsw")
@@ -323,8 +324,12 @@ script = ExtResource("16_wd4cf")
 [sub_resource type="Resource" id="Resource_pdc01"]
 script = ExtResource("29_pdc01")
 
+[sub_resource type="Resource" id="Resource_sm1tl"]
+script = ExtResource("54_sm1tl")
+
 [sub_resource type="Resource" id="Resource_stnlk"]
 script = ExtResource("31_stnlk")
+trains = SubResource("Resource_sm1tl")
 
 [sub_resource type="Resource" id="Resource_sm5fx"]
 script = ExtResource("54_sm5fx")

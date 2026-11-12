@@ -173,6 +173,8 @@ var _doors: DoorView = null
 var _lifts: LiftView = null
 ## The ticket gates' paddle doors, or null on a field without (GatePaddles, SM3).
 var _paddles: GatePaddles = null
+## A station's trains (SM1), or null.
+var _trains: TrainView = null
 ## A wood's crowns and dressing, or null on a map with neither (WoodsView, WL4).
 var _woods: WoodsView = null
 ## The map's streams (WS1), or null on a map with none.
@@ -424,6 +426,10 @@ func _dress_part(part: int) -> void:
 				var props := _play.site_look.props
 				if _level.station_material() != null:
 					props = props.named_only()
+					# and its trains in their models (SM1)
+					_trains = TrainView.build(_map, _play.station_look.trains, _play.roof)
+					if _trains != null:
+						add_child(_trains)
 				_props = PropDress.build(_map, props, _play.site_look.prop_paint)
 				if _props != null:
 					add_child(_props)
@@ -435,6 +441,8 @@ func _dress_part(part: int) -> void:
 			_roof = RoofView.build(_map, _play.roof)
 			if _roof != null:
 				add_child(_roof)
+				if _trains != null:
+					_roof.hide_lamps_in(_trains.boxes(), _play.station_look.trains.lamp_colour, StationSurface.LAYER)
 			_doors = DoorView.build(_map, _play.map_style, _tuning.doors.swing_time)
 			if _doors != null:
 				add_child(_doors)
@@ -962,6 +970,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_site.materials())
 	if _props != null:
 		first_use.append_array(_props.materials())
+	if _trains != null:
+		first_use.append_array(_trains.materials())
 	if _torches != null:
 		first_use.append_array(_torches.materials())
 	# whatever the switch: it can be turned on mid-match, and its first beam mustn't hitch

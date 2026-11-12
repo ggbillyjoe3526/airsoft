@@ -153,6 +153,7 @@ func test_the_level_draws_one_station_mesh_with_the_greybox_s_colliders() -> voi
 	var mesh := dressed.get_node("Station") as MeshInstance3D
 	assert_not_null(mesh, "the station's mesh")
 	assert_eq(mesh.material_override, dressed.station_material(), "in the station's material")
+	assert_eq(mesh.layers, StationSurface.LAYER, "on its own layer alone (a car's lamps leave it out, SM1)")
 	assert_eq(mesh.mesh.get_surface_count(), 1, "one draw")
 	assert_null(dressed.get_node_or_null("Greybox"), "no greybox under it")
 	assert_null(plain.station_material(), "no look: greybox")
@@ -220,7 +221,7 @@ func test_a_named_model_that_does_not_load_keeps_its_box_and_other_maps_stay_kin
 	assert_not_null(PropDress.build(_map("depot"), play.site_look.props), "a field map keeps its kind dress")
 
 
-## `m` with no block naming a model.
+## `m` with no block naming a model (Subway's escalators, stairs, seats and tool carts do), for a test naming its own.
 func _undressed(m: MapData) -> MapData:
 	for b in m.blocks:
 		b.dress = &""

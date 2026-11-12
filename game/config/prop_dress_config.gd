@@ -145,6 +145,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"station_bench": "res://assets/models/props/station_bench.glb",
 	&"station_bench_long": "res://assets/models/props/station_bench_long.glb",
 	&"crowd_barrier": "res://assets/models/props/crowd_barrier.glb",
+	# Subway's (Dev 3, SM1, tools/blender/maps/train.py), named by their blocks (SD1): the trains' seats and the tool
+	# carts in the south train's aisle, and the bogie under each train end. The cars themselves are TrainView's.
+	&"train_seat": "res://assets/models/props/train_seat.glb",
+	&"train_seat_short": "res://assets/models/props/train_seat_short.glb",
+	&"tool_cart": "res://assets/models/props/tool_cart.glb",
+	&"train_bogie": "res://assets/models/props/train_bogie.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {

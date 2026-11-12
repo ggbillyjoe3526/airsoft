@@ -35,6 +35,9 @@ extends Resource
 @export var reach_per_speed: float = 0.12
 ## The height over the floor the obstacle's face is looked for at (over any kerb you walk onto).
 @export var face_probe: float = 0.4
+## Where nothing stands at face_probe, the face is looked for again this high over the floor: a ledge over open space,
+## its lip at least this high (SM1: a train's floor over the bogie's space under its end, climbed into the open cab).
+@export var overhang_probe: float = 0.85
 ## The top is flat: every sample of it within this of the first.
 @export var top_tolerance: float = 0.1
 ## Spacing of the samples along the top that find its far side.
