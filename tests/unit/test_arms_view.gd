@@ -8,7 +8,7 @@ extends GutTest
 const DT := 1.0 / 60.0
 const EPS := 1e-4
 const HELD := [&"aeg", &"pistol", &"cyber", &"sniper", &"smg"]
-## Held in both hands (FP1).
+## Held in both hands (HA1).
 const TWO := [&"pistol", &"cyber"]
 
 var cfg: ViewModelConfig = null
@@ -45,7 +45,7 @@ func test_every_replica_has_a_hold() -> void:
 		assert_eq(_model(hands).get_parent(), held.root, "%s: on the replica's node" % held.id)
 		assert_true(_model(hands).visible, "%s: shown" % held.id)
 		var anim := _model(hands).find_child("AnimationPlayer", true, false) as AnimationPlayer
-		# A pistol is held in both hands (FP1): its own clip, the bots keeping `<id>_Hold`.
+		# A pistol is held in both hands (HA1): its own clip, the bots keeping `<id>_Hold`.
 		var both := ArmsView.TWO_HANDS if TWO.has(held.id) else ""
 		assert_eq(anim.assigned_animation, StringName(String(held.id) + both + "_Hold"), "%s: its hold clip" % held.id)
 		assert_true(anim.has_animation(StringName(String(held.id) + "_Hold")), "%s: the hold the bots copy" % held.id)
@@ -209,7 +209,7 @@ func test_every_arms_material_is_offered_to_the_prewarm() -> void:
 		for i in mesh_node.mesh.get_surface_count():
 			own[mesh_node.mesh.surface_get_material(i)] = true
 	assert_eq(own.size(), 4, "the model's four materials (the budget): glove, its armour, sleeve and skin")
-	assert_eq(offered.size(), 4 * own.size(), "each one's human and robot copies, and their fading copies (FP1)")
+	assert_eq(offered.size(), 4 * own.size(), "each one's human and robot copies, and their fading copies (HA1)")
 	_show(hands, 0)
 	var arm := _model(hands).find_child("Arm_R", true, false) as MeshInstance3D
 	for i in arm.mesh.get_surface_count():

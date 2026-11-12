@@ -1,4 +1,4 @@
-"""Quick pictures of a hold as it is solved (FP1): the posed arms and the replica drawn by Cycles from the eye, as the
+"""Quick pictures of a hold as it is solved (HA1): the posed arms and the replica drawn by Cycles from the eye, as the
 game frames them (ViewConfig's field of view, 16:9), and from outside. A build aid: `arms.py` calls `hold` after each
 solve when BL_PREVIEW names a folder, so a hold can be judged in a minute without exporting and importing the model.
 Nothing here reaches the exported file."""

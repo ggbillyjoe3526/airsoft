@@ -1,5 +1,5 @@
 extends SceneTree
-## Pictures of the first-person view (FP1): the replica in hand drawn as a match draws it (ReplicaView with your arms,
+## Pictures of the first-person view (HA1): the replica in hand drawn as a match draws it (ReplicaView with your arms,
 ## the game's eye camera) on the Depot on High, one picture a shot. Each shot is `<name>:<replica id>` followed by any
 ## of `:aim=<0..1>` (the sight's raise), `:skin` (skin-only arms), `:reload=<0..1>` (that share through a reload),
 ## `:fire=<seconds>` (that long after a shot), `:sprint`, `:walk=<seconds>` (that long into a walk), `:grip=<key>`,

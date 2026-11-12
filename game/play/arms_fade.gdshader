@@ -1,4 +1,4 @@
-// Your arms while a pistol's sight comes up (FP1, the owner: aimed, only the tops of the hands under a pistol): an arms
+// Your arms while a pistol's sight comes up (HA1, the owner: aimed, only the tops of the hands under a pistol): an arms
 // material as its StandardMaterial3D draws it (ArmsFade copies its colour, maps and finish), with what lies below the
 // sight line faded out by `hint`, in the eye's space: whole down to `hint_from` m under it, gone by `hint_to`. The
 // depth is drawn first where the arm is still whole (depth_prepass_alpha), so a faded hand never shows its far side

@@ -4,7 +4,7 @@ foregrip's hold, `<id>_<grip>_Reload`) as long as the replica's own Reload clip,
 share of the reload (ArmsView.follow), so the game's reload times and rules don't change.
 
 The replica's Reload clip moves its magazine: down out of the well, away, a fresh one back in partway and seated home.
-The hand leaves its hold (a pistol's: round the right hand, FP1), takes the magazine as it starts down,
+The hand leaves its hold (a pistol's: round the right hand, HA1), takes the magazine as it starts down,
 its fingers and thumb closing on it, pulls it down along the clip's own path, carries it down out of view, comes back
 up with the fresh one in hand to where the clip shows it, pushes it home along its path, lets go as it slides into the
 well, and drops down out of view before coming back up to its hold. The game's
@@ -130,7 +130,7 @@ OUT = Vector((-0.04, 0.0, -0.02))
 # elbow where the hold had it, so the fingers come off the handguard or the grip rather than through it; coming back,
 # the same reversed, over the last RETURN_CLEAR of the way home.
 CLEAR = Vector((0.0, -0.01, -0.06))
-# Off a pistol held in both hands (FP1) it draws out to the left first: straight down, the palm dragged through the
+# Off a pistol held in both hands (HA1) it draws out to the left first: straight down, the palm dragged through the
 # right hand's fingers it lies on.
 CLEAR_BOTH = Vector((-0.035, -0.01, -0.035))
 # And its elbow keeps ARM_CLEAR (m) off the right arm's bones as posed: tucked in under the pistol it would pass through
@@ -202,7 +202,7 @@ class View:
         self.carry = listed(vm["reload_carry"], rid)
         self.pivot = pivot.copy()
         # The game draws the replica at ViewModelConfig.hip, which need not be where its hold is solved (`pivot`: a
-        # rifle's, FP1): the arms ride it there, so the view is that much off.
+        # rifle's, HA1): the arms ride it there, so the view is that much off.
         hip = listed(vm["hip"], rid)
         self.seen = Vector((hip[0], -hip[2], hip[1])) - pivot if hip else Vector((0.0, 0.0, 0.0))
         self.tan_h = math.tan(math.radians(float(vc["horizontal_fov_16x9"])) * 0.5)
@@ -733,7 +733,7 @@ def change_mag(rig: Rig, hand: pose.Hand, rid: str, hold_to_eye: Matrix, objects
     """Keys `<rid>_Reload` and `<rid>_<grip>_Reload` from each of `holds` ("" or the grip -> the rig on that hold:
     its pose, turns, shifts, drops, across and plan, as arms.kept takes them); how many keys pass into the replica in
     all, and the clips keyed. Nothing for a replica without a GRASP or a Reload clip. With `both` (a pistol's hold in
-    both hands, FP1), that hold's alone: `<rid>_<both>_Reload`, the left hand keeping clear of the right arm as posed
+    both hands, HA1), that hold's alone: `<rid>_<both>_Reload`, the left hand keeping clear of the right arm as posed
     as it does of the replica."""
     if rid not in GRASP:
         return 0, []

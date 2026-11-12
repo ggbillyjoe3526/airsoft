@@ -1,6 +1,6 @@
 class_name HandsLifeConfig
 extends Resource
-## The life in the replica in your hands beyond its pose (FP1, the owner: "go over all first person view animations and
+## The life in the replica in your hands beyond its pose (HA1, the owner: "go over all first person view animations and
 ## make them higher quality"): it bobs with your steps, breathes while you stand, leans into a strafe, lags a jump,
 ## dips as you land and crouch, flicks and rolls on a spring with each shot and each draw, and cants as the sight comes
 ## up. Metres, radians, seconds, in the camera's space (x right, y up, -z forward). Read by HandsMotion; ReplicaView

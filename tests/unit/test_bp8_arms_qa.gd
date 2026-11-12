@@ -52,7 +52,7 @@ func test_a_grip_a_replica_cannot_take_leaves_its_hold() -> void:
 			var hands := _hands([id], grip)
 			hands._show(0)
 			assert_eq(_anim(hands).assigned_animation, StringName(String(id) + "_two_Hold"), "%s with a %s grip" % [id, grip])
-			assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "%s stays in both hands (FP1)" % id)
+			assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "%s stays in both hands (HA1)" % id)
 
 
 func test_an_unknown_grip_key_falls_back_to_the_plain_hold() -> void:
@@ -86,7 +86,7 @@ func test_a_reload_ends_on_the_hold_it_began_from() -> void:
 	var anim := _anim(_hands([&"aeg"]))
 	var clips: Array[String] = []
 	for id in HELD:
-		# A pistol's reload is from its hold in both hands (FP1).
+		# A pistol's reload is from its hold in both hands (HA1).
 		clips.append(String(id) + (ArmsView.TWO_HANDS if anim.has_animation(StringName(String(id) + "_two_Hold")) else ""))
 	for id in GRIPPED:
 		for grip in GRIPS:
@@ -141,7 +141,7 @@ func test_a_cut_pistol_reload_puts_both_hands_back_at_once() -> void:
 	assert_eq(_anim(hands).assigned_animation, &"pistol_two_Reload")
 	c.armament.reload_left = 0.0
 	_step(hands, c)
-	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "sprint, grenade or switch cut it: both hands on the hold (FP1)")
+	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "sprint, grenade or switch cut it: both hands on the hold (HA1)")
 	assert_eq(_anim(hands).assigned_animation, &"pistol_two_Hold")
 	assert_false(hands._arms.reloading())
 
@@ -171,7 +171,7 @@ func test_switching_replica_mid_reload_puts_each_hand_right() -> void:
 	_step(hands, c)
 	hands._show(1)
 	assert_false(hands._arms.reloading(), "the new replica is on its hold")
-	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "the pistol is in both hands (FP1)")
+	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "the pistol is in both hands (HA1)")
 	hands._arms.follow(hands._held[1].anim, DT, -1.0)
 	assert_eq(_anim(hands).assigned_animation, &"pistol_two_Hold")
 	hands._show(0)
@@ -229,7 +229,7 @@ func test_skin_switched_mid_reload_on_a_pistol_shows_the_left_nails() -> void:
 	assert_true(_mesh(hands, ArmsView.KIT_PREFIX + "L").visible)
 	assert_false(_mesh(hands, ArmsView.NAILS_PREFIX + "L").visible)
 	hands._arms.follow(held.anim, DT)
-	# Back on the hold in both hands (FP1), gloved.
+	# Back on the hold in both hands (HA1), gloved.
 	for m: String in [ArmsView.LEFT_ARM, ArmsView.KIT_PREFIX + "L"]:
 		assert_true(_mesh(hands, m).visible, "%s shown once the reload is over" % m)
 	assert_false(_mesh(hands, ArmsView.NAILS_PREFIX + "L").visible, "no nails under the glove")
@@ -376,7 +376,7 @@ func test_switching_away_mid_carry_and_back_finds_the_magazine_home() -> void:
 	c.armament.active = 1
 	_step(hands, c)
 	assert_false(hands._arms.reloading(), "the pistol is on its hold")
-	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "the pistol in both hands (FP1)")
+	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "the pistol in both hands (HA1)")
 	c.armament.active = 0
 	_step(hands, c)
 	_same(_mag(hands, 0), home, "the rifle's magazine is in its well when it comes back")
@@ -470,7 +470,7 @@ func test_skin_only_switched_mid_carry_keeps_the_carry_and_the_left_arm() -> voi
 	c.armament.reload_left = 0.0
 	_step(hands, c)
 	_same(_mag(hands, 0), home, "home after")
-	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "both hands on it again (FP1)")
+	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "both hands on it again (HA1)")
 	assert_true(_mesh(hands, "Nails_L").visible, "skin only: the left nails too")
 	hands.skin_arms = false
 	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "gloves back: the left arm stays")

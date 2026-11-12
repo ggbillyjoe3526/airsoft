@@ -1,8 +1,8 @@
 extends GutTest
-## FP1 (the owner: "When aiming down sight no hands should be visible … on a pistol the hand should only be slightly
+## HA1 (the owner: "When aiming down sight no hands should be visible … on a pistol the hand should only be slightly
 ## visible"; then "the hands should not fade out of view. When the animation plays to ADS (except for pistols) the
 ## hands are simply out of view"): a rifle's arms are never faded or hidden, the replica hides them (ArmsTuck draws the
-## left arm in under it: test_fp1_arms_tuck.gd); a pistol's keep the tops of the hands, what lies further under the
+## left arm in under it: test_ha1_arms_tuck.gd); a pistol's keep the tops of the hands, what lies further under the
 ## sight line faded out (ArmsView.aim, ArmsFade, arms_fade.gdshader) through ViewModelConfig.aim_hint_span's span.
 
 const DT := 1.0 / 60.0

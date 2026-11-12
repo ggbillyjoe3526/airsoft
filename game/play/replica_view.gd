@@ -13,7 +13,7 @@ extends Node3D
 ## (`on_hit`), it jolts and drops out of view before it hides, the same with motion reduced. Inspected (IN1, `inspect`),
 ## it is turned over in the hands by its InspectPose while its model's Inspect clip works its parts, the parts' sounds
 ## going out as `inspect_sound`; a shot, a hit, a reload, a draw, a switch, the holster, a sprint or raising the sight
-## ends it (the pose eases back, the parts rest at once). Over all of it the replica has a life of its own (FP1,
+## ends it (the pose eases back, the parts rest at once). Over all of it the replica has a life of its own (HA1,
 ## HandsMotion: a bob with your steps, breathing, a lean into a strafe, a dip on landing, a sprung flick with each shot),
 ## drawn by moving this node, so the arms and an optic's glass go with it. A child of the camera.
 
@@ -97,7 +97,7 @@ var _wall: RayHit = RayHit.new()
 var _glass: OpticGlass = null
 ## How much of the sway, the kick and the reload's cant to draw (Reduced motion).
 var _motion: MotionScale = MotionScale.new()
-## The replica's life over its pose (FP1), which this node's own transform draws.
+## The replica's life over its pose (HA1), which this node's own transform draws.
 var _life: HandsMotion = HandsMotion.new()
 ## Each material the replicas wear and its copy with the depth pressed (ViewModelConfig.depth_scale), made once a view
 ## (shared paints are pressed once), and each copy's own.
@@ -149,7 +149,7 @@ func arms_materials() -> Array[Material]:
 	return _arms.materials() if _arms != null else [] as Array[Material]
 
 
-## The life the hands have now (FP1: HandsMotion, stepped by `update`), for what else your hands hold (GrenadeView).
+## The life the hands have now (HA1: HandsMotion, stepped by `update`), for what else your hands hold (GrenadeView).
 func life() -> HandsMotion:
 	return _life
 
@@ -282,7 +282,7 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	# Up onto a ledge (CL1) it is carried low too: a hand is on the edge.
 	var climbing := c.vault.active and c.vault.climb
 	_carry = move_toward(_carry, 1.0 if (c.sprinting or climbing) and not firing else 0.0, delta / carry_rate)
-	# Eased in and out of the carry (FP1).
+	# Eased in and out of the carry (HA1).
 	var carried := _carry * _carry * (3.0 - 2.0 * _carry)
 	pos.y -= _cfg.sprint_drop * carried
 	rot.y += _cfg.sprint_tilt * 0.5 * carried
@@ -356,7 +356,7 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 
 	held.root.position = pos
 	held.root.rotation = rot
-	# Its life (FP1), turned about the replica's own place: this node carries the replica, the arms and the glass.
+	# Its life (HA1), turned about the replica's own place: this node carries the replica, the arms and the glass.
 	_life.step(_cfg.life, c, look, delta, raise, _motion)
 	var lively := Basis.from_euler(_life.turn)
 	transform = Transform3D(lively, _life.shift + pos - lively * pos)

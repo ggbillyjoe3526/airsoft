@@ -1,4 +1,4 @@
-"""The glove's painted surface (FP1, the owner: "the hands need detailed texture for the gloves and clothes. Make the
+"""The glove's painted surface (HA1, the owner: "the hands need detailed texture for the gloves and clothes. Make the
 models as detailed and high quality as possible"): the glove's cloth over the hand, which is the bare hand's own
 surface (glove.build_left), takes the skin's atlas (skin.unwrap) and its own maps at 2K, painted from where each texel
 lies on the hand as skin.py paints the skin. An original glove, no maker's: nothing is copied from a photo.

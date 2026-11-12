@@ -110,7 +110,7 @@ func test_each_reload_clip_lasts_as_the_replicas_own() -> void:
 	var anim := _anim(hands)
 	for slot in HELD.size():
 		var held: ReplicaView.Held = hands._held[slot]
-		# A pistol's is from its hold in both hands (FP1).
+		# A pistol's is from its hold in both hands (HA1).
 		var clip := StringName(hands._arms.clip_base(held.id, &"") + ArmsView.RELOAD_SUFFIX)
 		assert_true(anim.has_animation(clip), "%s: the left hand changes the magazine" % held.id)
 		assert_almost_eq(anim.get_animation(clip).length, held.anim.get_animation(ReplicaView.RELOAD_CLIP).length,
@@ -122,7 +122,7 @@ func test_a_pistols_left_hand_leaves_its_hold_for_the_reload_and_comes_back() ->
 	hands._show(0)
 	var held: ReplicaView.Held = hands._held[0]
 	var left := _mesh(hands, ArmsView.LEFT_ARM)
-	assert_true(left.visible, "control: held in both hands (FP1)")
+	assert_true(left.visible, "control: held in both hands (HA1)")
 	assert_eq(_anim(hands).assigned_animation, &"pistol_two_Hold")
 	hands._arms.follow(held.anim, DT, 0.5)
 	assert_eq(_anim(hands).assigned_animation, &"pistol_two_Reload", "changing the magazine")
@@ -307,7 +307,7 @@ func test_skin_only_arms_switch_live() -> void:
 	hands.skin_arms = true
 	assert_false(kit.visible, "skin only: the kit hidden")
 	assert_true(nails.visible, "the fingernails shown")
-	# FP1: the hand's surface wears the model's painted skin (the nails' material), the sleeve its own cloth.
+	# HA1: the hand's surface wears the model's painted skin (the nails' material), the sleeve its own cloth.
 	var hand := _mesh(hands, ArmsView.HAND_PREFIX + "R")
 	var skin := nails.mesh.surface_get_material(0) as BaseMaterial3D
 	for i in hand.mesh.get_surface_count():

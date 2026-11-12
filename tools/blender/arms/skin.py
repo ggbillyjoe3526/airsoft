@@ -1,4 +1,4 @@
-"""The bare hands' skin (FP1, the owner: "for the first person arms with no gloves I want you to improve the quality
+"""The bare hands' skin (HA1, the owner: "for the first person arms with no gloves I want you to improve the quality
 and detail of the hand model and its textures", with a photo and a sculpt of the back of a hand): the hand's own
 surface as a mesh of its own, `Skin_<side>`, unwrapped once (cut along the hand's and the fingers' sides, so the back
 and the palm are each one piece) and painted at 2K: colour, a normal map and a roughness map, and the fingernails'

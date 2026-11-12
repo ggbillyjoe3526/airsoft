@@ -1,4 +1,4 @@
-"""The sleeves' painted cloth (FP1, the owner: "the hands need detailed texture for the gloves and clothes"): each
+"""The sleeves' painted cloth (HA1, the owner: "the hands need detailed texture for the gloves and clothes"): each
 sleeve unrolled round the forearm's line into an atlas of its own and painted at 2K from where each texel lies on the
 arm, as skin.py paints the skin. An original field shirt's sleeve, no maker's.
 

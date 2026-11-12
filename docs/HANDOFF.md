@@ -17,7 +17,7 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
   (BL12), pads (BL13) and faces (FA1).
 - **Arms and holds.** The first-person arms hold each replica (BL4), your hands work the bombs and the Sniper Rifle's
   bolt (GT2, GT3, BW1, BW2), and bots hold replicas as the arms do, a pistol in one hand (HG1, owner, 2026-11-06).
-  FP1 (owner, 2026-11-12): your pistol is in both hands, a rifle's hands tuck out of view as the sight comes up, the skin, gloves
+  HA1 (owner, 2026-11-12): your pistol is in both hands, a rifle's hands tuck out of view as the sight comes up, the skin, gloves
   and sleeves are painted at 2K, and the replica has a life of its own in the hands (HandsMotion).
 - **Sound.** The owner's recordings are in (AU2 to AU8).
 - **UI.** The menus and HUD are redesigned (UR1 to UR7), with fixes after (UF1, UF2).

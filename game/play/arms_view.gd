@@ -4,7 +4,7 @@ extends Node3D
 ## tools/blender/arms/arms.py) holding the replica in hand. The model carries one hold per replica: a clip `<id>_Hold`
 ## posing both arms on it and an empty `Hold_<id>` where that replica's origin sits, so the arms ride the replica's
 ## node (ReplicaView's Held.root) and follow its sway, kick, cant and drop. A replica the model has no hold for shows no
-## arms. One-handed replicas (ViewModelConfig.one_hand: a bomb) hide the left arm; a pistol is held in both (FP1). A
+## arms. One-handed replicas (ViewModelConfig.one_hand: a bomb) hide the left arm; a pistol is held in both (HA1). A
 ## robot's arms (FigureMix.ROBOT) wear ViewModelConfig.robot_arms. Holding a bomb, they can throw it (ArmsThrow, GT3:
 ## `ready_throw`, `throw_pose`; cut off,
 ## `cut_throw` and `unwind_throw`). The materials press their depth as the replica's do, cast no shadow, take none (the
@@ -16,11 +16,12 @@ extends Node3D
 ## the left hand changes the magazine (`<id>_Reload`, played at the reload's share, so the left arm shows on a
 ## one-handed replica while it does); and the arms can be shown skin only (Dev › Skin-only arms), a human's arms only:
 ## the glove's kit (GloveKit_<side>) hidden, the fingernails (Nails_<side>) shown and the hand's surface
-## (HandSurface_<side>, the glove's cloth) in the model's painted skin (FP1: the nails' own material, whose maps share
+## (HandSurface_<side>, the glove's cloth) in the model's painted skin (HA1: the nails' own material, whose maps share
 ## the glove's layout).
 ##
-## FP1 (the owner): aimed, a rifle's hands are out of view, never faded: the replica hides them, and as the sight comes
-## up (`aim`) the left arm is drawn in under it (ArmsTuck, ViewModelConfig.aim_tuck) so the forearm lies behind it too.
+## HA1 (the owner): aimed, a rifle's hands are out of view, never faded: the replica hides them, and as the sight comes
+## up (`aim`) the left arm is drawn in under it and its hand slides back behind the receiver (ArmsTuck,
+## ViewModelConfig.aim_tuck and aim_slide), so forearm and hand lie behind it too.
 ## A replica in ViewModelConfig.aim_hands_hint (a pistol) keeps the tops of its hands: what lies further under the
 ## sight line fades (ArmsFade's copies of the materials, worn only while the sight is raised at all).
 
@@ -44,7 +45,7 @@ const NAILS_PREFIX := "Nails_"
 const HAND_PREFIX := "HandSurface_"
 ## A grip part's name in the clips' (ReplicaParts: <slot>_<key>).
 const GRIP_PART := "grip_"
-## A pistol's hold in both hands (FP1: `<id>_two_Hold` and its `_Reload`). Yours alone: the bots copy `<id>_Hold`, the
+## A pistol's hold in both hands (HA1: `<id>_two_Hold` and its `_Reload`). Yours alone: the bots copy `<id>_Hold`, the
 ## right hand's (FigureArmsHold).
 const TWO_HANDS := "_two"
 
@@ -273,9 +274,9 @@ func set_shown(on: bool) -> void:
 
 
 ## Poses and dresses the arms for the sight raised `raise` (0 at the hip, 1 up, as drawn): the left arm drawn in
-## under the replica (ViewModelConfig.aim_tuck); on a replica in aim_hands_hint, what lies below the sight line faded
-## out over aim_hint_span's span of the raise (aim_hint_below), the tops of the hands left. Call each frame, after
-## `follow`.
+## under the replica and its hand slid back behind it (ViewModelConfig.aim_tuck, aim_slide); on a replica in
+## aim_hands_hint, what lies below the sight line faded out over aim_hint_span's span of the raise (aim_hint_below),
+## the tops of the hands left. Call each frame, after `follow`.
 func aim(raise: float) -> void:
 	if _model == null or _on == &"":
 		return
@@ -298,21 +299,25 @@ func hinted() -> float:
 	return _hint
 
 
-## The left arm drawn in under the replica for the sight raised `raise`, over the pose the clip gives: the clip's pose
-## is put back first, since the last frame's is still in the bones.
+## The left arm drawn in under the replica for the sight raised `raise`, its hand slid back over aim_slide_span's
+## span of the raise, over the pose the clip gives: the clip's pose is put back first, since the last frame's is
+## still in the bones.
 func _draw_in(raise: float) -> void:
 	if _tuck == null or _anim == null or _anim.assigned_animation == "":
 		return
 	var shift: Vector3 = _cfg.aim_tuck.get(_on, Vector3.ZERO) * raise
-	if shift.is_zero_approx() and not _tucked:
+	var slide: Vector3 = _cfg.aim_slide.get(_on, Vector3.ZERO) \
+			* smoothstep(_cfg.aim_slide_span.x, _cfg.aim_slide_span.y, raise)
+	var moved := not (shift.is_zero_approx() and slide.is_zero_approx())
+	if not moved and not _tucked:
 		return
 	_tuck.clear(_skeleton)
 	_anim.seek(_anim.current_animation_position, true)
-	_tucked = not shift.is_zero_approx()
+	_tucked = moved
 	if _tucked:
 		# The replica's axes (x right, y up), in the skeleton's.
 		var to_bones := _skeleton.global_basis.inverse() * (_model.get_parent() as Node3D).global_basis
-		_tuck.draw_in(_skeleton, to_bones * shift, to_bones * Vector3.DOWN, raise)
+		_tuck.draw_in(_skeleton, to_bones * shift, to_bones * slide, to_bones * Vector3.DOWN, raise)
 
 
 ## Takes the hold on now as the one a throw starts from, the pin's ring's middle at `ring` (the model's frame: the

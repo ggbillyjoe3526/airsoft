@@ -1,6 +1,6 @@
 class_name ArmsFade
 extends RefCounted
-## Your arms' materials while a pistol's sight comes up (FP1; arms_fade.gdshader): each arms material's copy that can
+## Your arms' materials while a pistol's sight comes up (HA1; arms_fade.gdshader): each arms material's copy that can
 ## fade out below the sight line, drawn otherwise as the StandardMaterial3D it is copied from. ArmsView wears them only
 ## while the sight is raised at all, so at the hip the arms draw as they always have.
 

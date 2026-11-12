@@ -6,7 +6,7 @@ extends Resource
 ## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The
 ## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06); the
 ## rifles sit near and low, so the left hand on the handguard shows and the right hand lies under the view's bottom
-## edge (FP1, the owner); the Compact SMG, a shorter replica, sits lower and further off than they do, which draws it
+## edge (HA1, the owner); the Compact SMG, a shorter replica, sits lower and further off than they do, which draws it
 ## at their size and angle (the owner: "too high. It should be a similar angle and scale to the rifles"). The arms
 ## model (tools/blender/arms/arms.py HOLDS) is built for these places.
 @export var hip: Dictionary[StringName, Vector3] = {
@@ -22,12 +22,19 @@ extends Resource
 @export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.25, &"cyber": -0.25,
 		&"sniper": -0.2, &"smg": -0.15}
 @export var aim_forward_default: float = -0.25
-## Aimed, a rifle's hands are out of the view (FP1, the owner: never faded; "at most a small tip of the players left
+## Aimed, a rifle's hands are out of the view (HA1, the owner: never faded; "at most a small tip of the players left
 ## hand thumb"): the replica hides them. As the sight comes up your left shoulder moves this far (m, the replica's
 ## axes: x right, y up, z back; by replica id) and the elbow turns to hang under the line from it to the wrist
 ## (ArmsTuck), so the forearm lies behind the replica too.
 @export var aim_tuck: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.14, -0.06, 0.0),
 		&"sniper": Vector3(0.14, -0.06, 0.0), &"smg": Vector3(0.14, -0.06, 0.0)}
+## The hand on the handguard would still show past the replica's sides when aimed (most with an optic fitted, which
+## sits the eye higher): it slides this far along the replica as the sight comes up (the same axes; by replica id),
+## back and down toward the receiver, which hides it. It holds the handguard while the sight is raised less than
+## `aim_slide_span`'s first share and has slid by its second, so it lets go only once the replica is in front of it.
+@export var aim_slide_span: Vector2 = Vector2(0.4, 0.9)
+@export var aim_slide: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.0, -0.07, 0.22),
+		&"sniper": Vector3(0.02, -0.09, 0.22), &"smg": Vector3(0.0, -0.07, 0.22)}
 ## A replica in aim_hands_hint (the pistols) keeps the tops of its hands under the slide (the owner's pick of three
 ## pictures): as the sight's raise (as drawn, 0..1) passes from aim_hint_span's x to its y, what lies below the sight
 ## line fades out, whole down to aim_hint_below's x (m under it) and gone by its y.
@@ -67,7 +74,7 @@ extends Resource
 @export var sway_per_radian: float = 0.05
 @export var sway_max: float = 0.035
 @export var return_rate: float = 14.0
-## Lagging, it rolls too, its top trailing the turn (FP1): rad per m of lag across.
+## Lagging, it rolls too, its top trailing the turn (HA1): rad per m of lag across.
 @export var sway_roll: float = 1.3
 ## Each shot's kick: back and up (m), never more than kick_max shots' worth. A lift, not a tilt, so the barrel stays in
 ## line with the BBs leaving it.
@@ -76,7 +83,7 @@ extends Resource
 @export var kick_max: float = 1.5
 ## With the sight raised, the share of sway and kick left.
 @export var aim_steady: float = 0.25
-## Its life over that pose (FP1: the bob, the breathing, the lean, the springs): HandsMotion.
+## Its life over that pose (HA1: the bob, the breathing, the lean, the springs): HandsMotion.
 @export var life: HandsLifeConfig = HandsLifeConfig.new()
 ## Drawing drops it this far and brings it back up; sprinting carries it this far down and this tilted (rad).
 @export var draw_drop: float = 0.22
@@ -158,7 +165,7 @@ extends Resource
 ## Where the selector sits along its clip in each fire mode (semi, burst, auto), as a share of the clip.
 @export var selector_at: PackedFloat32Array = PackedFloat32Array([0.5, 0.75, 1.0])
 ## Your arms (ArmsView): replicas held in the right hand alone, the left arm hidden (a smoke or flash bomb in hand,
-## GT1; a pistol is held in both, FP1: the arms model's `<id>_two_Hold`), and a robot's arms' colours (sRGB) by the
+## GT1; a pistol is held in both, HA1: the arms model's `<id>_two_Hold`), and a robot's arms' colours (sRGB) by the
 ## arms model's material name, with their roughness (satin, as the robot figure's plates).
 @export var one_hand: Array[StringName] = [&"smoke", &"flash"]
 ## A bomb taken in hand comes up into view with your hand from this far below (m) over this long (s), eased as a draw,

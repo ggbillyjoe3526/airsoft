@@ -12,7 +12,7 @@ extends RefCounted
 
 ## The arms model's bones (tools/blender/arms/arms.py, named as the figures' skeleton names them): each arm's upper arm,
 ## forearm and hand, and the left hand's fingers, which curl round the ring (the first joint less, the thumb least).
-## The heel of each thumb (Heel_<side>, FP1: the skin between wrist and thumb) turns as its first joint does.
+## The heel of each thumb (Heel_<side>, HA1: the skin between wrist and thumb) turns as its first joint does.
 const RIGHT_ARM: Array[String] = ["UpperArm_R", "Forearm_R", "Hand_R"]
 const LEFT_ARM: Array[String] = ["UpperArm_L", "Forearm_L", "Hand_L"]
 const LEFT_FINGERS: Array[String] = ["Index1_L", "Index2_L", "Index3_L", "Middle1_L", "Middle2_L", "Middle3_L",

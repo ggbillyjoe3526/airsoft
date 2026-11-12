@@ -35,7 +35,7 @@ STRAP = (-0.016, -0.044, 0.0016)
 # The sleeve: where its cuff ends, how far it stands off the skin at the cuff and at the shoulder, its banded cuff's
 # width and its hem.
 SLEEVE_END = -0.040
-# The wrist, fuller than the source arm's (FP1, the owner: "too thin at the wrist"; it is 50 mm across there, a man's
+# The wrist, fuller than the source arm's (HA1, the owner: "too thin at the wrist"; it is 50 mm across there, a man's
 # about 60): the shares it is widened across and thickened through, whole from WRIST_SPAN's second mark to its third
 # (m along the forearm from the wrist joint) and eased out to nothing at the first, up the forearm, and the last, in
 # the heel of the hand. The sleeve's cuff sits closer to it (SLEEVE_OFF), so hand, wrist and sleeve run on evenly.
@@ -124,7 +124,7 @@ def bone_points(j: dict) -> dict:
     return pts
 
 
-# The heel of the thumb (FP1, the owner: "the wrist to thumb joint doesn't look natural"): a bone lying where the
+# The heel of the thumb (HA1, the owner: "the wrist to thumb joint doesn't look natural"): a bone lying where the
 # thumb's first bone does, which swings with it but turns about its own line only HEEL_TWIST of what that bone does
 # (pose.Rig keeps it so). The skin along the thumb's first bone goes over from it to that bone between HEEL_SPAN
 # (shares of the bone's length), so a thumb turned far round onto a grip winds its skin gradually from the wrist to
@@ -315,12 +315,12 @@ class Mesh:
         # strap and tab), first and past the last (BP8: the skin-only arms hide them); and the fingernails, a mesh of
         # their own that only the skin-only arms show (none until built).
         self.kit = (0, 0)
-        # Each piece's faces by its name, first and past the last (FP1: glove_paint.py and sleeve_paint.py paint each
+        # Each piece's faces by its name, first and past the last (HA1: glove_paint.py and sleeve_paint.py paint each
         # as what it is): "hand" the glove's cloth over the hand, then "guard", "pads", "patch", "cuff", "strap",
         # "tab", and the sleeve's "sleeve", "hem", "sleeve_tab" and "cap".
         self.parts = {}
         self.nails = None
-        # The hand's own surface as a mesh of its own (FP1: the skin-only arms' skin, skin.py paints it); the glove's
+        # The hand's own surface as a mesh of its own (HA1: the skin-only arms' skin, skin.py paints it); the glove's
         # surface is the same one, so the nails laid on that sit on this.
         self.skin = None
 

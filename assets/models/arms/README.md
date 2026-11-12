@@ -7,10 +7,10 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
 - **Space.** Metres, Blender +Y forward from the eye (at the origin), +Z up; exported +Y up, as every model here, so
   in Godot the eye looks along -z.
 - **Skeleton.** `Arms`: each side's `Shoulder`, `UpperArm`, `Forearm`, `Hand`, `Thumb1-3`, `Index1-3`, `Middle1-3`,
-  `Ring1-3`, `Pinky1-3` and `Grip` with `_R` or `_L`, the figures' bone names, and `Heel_R`/`Heel_L` (FP1): a
+  `Ring1-3`, `Pinky1-3` and `Grip` with `_R` or `_L`, the figures' bone names, and `Heel_R`/`Heel_L` (HA1): a
   helper on the thumb's first bone that takes its swing and half its twist, so the skin between the wrist and the
   thumb doesn't wring (`glove.heel_weights`, `pose.Rig.fk`; ArmsThrow turns it with the thumb).
-- **Mesh.** Four objects a side (FP1; 38,900 triangles drawn gloved, 34,500 skin only): `Arm_<side>` the sleeve,
+- **Mesh.** Four objects a side (HA1; 38,900 triangles drawn gloved, 34,500 skin only): `Arm_<side>` the sleeve,
   `HandSurface_<side>` the hand's surface (the glove's cloth; skin only, the game puts the skin's material on it),
   `GloveKit_<side>` the glove's kit (shell, pads, patch, cuff, strap, tab) and `Nails_<side>` the fingernails (skin
   only). The MakeHuman base mesh's arm and hand (CC0,
@@ -21,7 +21,7 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   cuff and wrist strap, and a sleeve rolled over the cuff with a banded hem, ending 13 cm above the elbow (the view
   never shows the shoulder).
 - **Materials.** Four, each painted at 2K (colour, normal, roughness; WebP in the file) from where every texel lies
-  on the hand or arm (FP1, the owner: detailed texture for the hands, gloves and clothes). Original designs, no
+  on the hand or arm (HA1, the owner: detailed texture for the hands, gloves and clothes). Original designs, no
   maker's; the owner's reference pictures set placement and the level of detail only.
   - `Skin` (`skin.py`, maps `ArmsSkin*`): the bare hand unwrapped into an atlas of its own (about 0.19 mm a texel):
     back and palm tones, knuckle folds, the palm's creases, fine lines, veins, pores and hair; the nails in a tile
@@ -42,11 +42,11 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   the arms ride the replica's node with that empty on its origin, so they follow its sway, kick, cant and drop.
   - The AEG Rifle: the right hand high on the pistol grip, the little finger round its foot, index on the trigger,
     thumb wrapped round the grip's left side; the left hand under the handguard's middle, its forearm rising to it from below, fingers closed under
-    its right side out of the eye's sight (FP1, the owner: "only the thumb of the left hand"), thumb along its left side.
+    its right side out of the eye's sight (HA1, the owner: "only the thumb of the left hand"), thumb along its left side.
   - Pistols (`pistol`, `cyber`): held high in the right hand, the web of the hand on the back strap under the
     beavertail, the fingers closed up under the trigger guard with the little finger on the grip, the thumb forward
     along the frame's left side under the slide. `<id>_Hold` lowers the left arm (the bots' one-handed hold);
-    `<id>_two_Hold` and `<id>_two_Reload` (FP1, yours: ArmsView.TWO_HANDS) bring the left hand up to wrap the right
+    `<id>_two_Hold` and `<id>_two_Reload` (HA1, yours: ArmsView.TWO_HANDS) bring the left hand up to wrap the right
     hand's fingers tight, its heel on the grip's bare left side, and lay the right thumb on it (the owner: "the right
     hand thumb should be resting on the left hand").
   - Bombs (`smoke`, `flash`; GT2): each fitted to its own model (`assets/models/grenades/`), held in a fist in the

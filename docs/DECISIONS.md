@@ -175,7 +175,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Art direction and graphics
 
-- **First-person hands (owner, 2026-11-12, FP1).** "When not aiming down sight with a rifle only the player's left
+- **First-person hands (owner, 2026-11-12, HA1).** "When not aiming down sight with a rifle only the player's left
   hand should be visible … When aiming down sight no hands should be visible. For pistols, the player should hold the
   pistol with two hands … When aiming down sight on a pistol the hand should only be slightly visible." So: rifles sit
   nearer and lower at the hip (`ViewModelConfig.hip`), the right hand under the screen's foot, the left hand's

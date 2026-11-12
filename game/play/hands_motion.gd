@@ -1,6 +1,6 @@
 class_name HandsMotion
 extends RefCounted
-## The life in the replica in your hands (FP1; HandsLifeConfig): `step` it each rendered frame from the character's
+## The life in the replica in your hands (HA1; HandsLifeConfig): `step` it each rendered frame from the character's
 ## state, then draw `shift` (m) and `turn` (rad: tip, yaw, roll, turned about the replica's own place) over its pose.
 ## A bob with each step, breathing, a lean into a strafe, a lag through a jump and a dip on landing and through a
 ## crouch (a spring), a flick and a roll from each shot and each draw (another spring), and a cant as the sight comes

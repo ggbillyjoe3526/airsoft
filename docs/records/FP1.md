@@ -1,103 +1,41 @@
-# FP1 · First-person arms and grips, made realistic
+# FP1 · First playable on Depot
 
-**Review:** REVIEW_LINE
-
-Owner's ask (2026-11-12, with reference pictures from other games and photos of a hand): "go over the first person
-arms and their grips on weapons to make them appear more realistic. When not aiming down sight with a rifle only the
-player's left hand should be visible … When aiming down sight no hands should be visible. For pistols, the player
-should hold the pistol with two hands … When aiming down sight on a pistol the hand should only be slightly visible.
-Go over all first person view animations and make them higher quality. For the first person arms with no gloves I
-want you to improve the quality and detail of the hand model and its textures." Then, on the first pictures: the right
-index finger "looks unnatural", "the hands need detailed texture for the gloves and clothes. Make the models as
-detailed and high quality as possible", and "the wrist to thumb joint also doesn't look natural". The ruling is in
-`docs/DECISIONS.md` › First-person hands.
+**Review:** 1 attempt · critic Accept 7/8 (Opus) · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-ATTEMPT_ROWS
+| 2026-10-18 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Accept | – (performance's first run failed on first-use shaders, fixed before the critic; the critic's miss, the config README, fixed in the records push) |
 
 ## Decisions
 
-- **The references are other games'.** They set where the hands sit and how much of them shows; nothing of their art
-  is copied. Skin, glove and sleeve are our own designs, painted by our own scripts.
-- **Rifles at the hip** (`ViewModelConfig.hip`: AEG and Sniper at 0.10, -0.135, -0.19, the Compact SMG at 0.10,
-  -0.165, -0.24; all were 0.12, -0.19, -0.26): nearer and lower, so the rifle is larger, the left hand on the handguard
-  shows and the right hand lies under the screen's foot. The owner's second look: the SMG was "too high. It should be
-  a similar angle and scale to the rifles"; it is a shorter replica, so the same place drew it larger and higher, and
-  its own place draws it at the AEG's size. The holds are still solved at their old place (`arms.py` RIFLE_HIP): the
-  arms ride the replica, so moving the replica moves them as one. `magazine.View` reads the game's hip, so the
-  reload's "down out of view" is measured from where the game draws it, and the build's pictures are taken from there
-  (`GAME_HIP`).
-- **Only the left thumb shows on a rifle** (`GUARD`, `SNIPER_GUARD`, `SMG_GUARD`; the owner: "You can still see the
-  players fingers on the right side of the AEG. They should not be visible: only the thumb of the left hand"): the
-  hand cups the handguard from below, pitched 15 degrees (was 40), its fingertips on the far side 14 to 18 mm lower,
-  under the rail's edge. **This re-solves the holds the owner approved in BL4, BP8 and BW2**, on his word here, and
-  the bots copy the new ones.
-- **A fuller wrist** (`glove.WRIST_FULL`, `wrist_full`; the owner: "too thin at the wrist"): the wrist measured 50 by
-  39 mm against a hand 85 wide; it is widened a fifth and thickened an eighth between the cuff and the heel of the
-  hand, and the sleeve stands 10.5 mm off the arm at its cuff (was 8).
-- **Pistols in both hands** (`<id>_two_Hold`, `<id>_two_Reload`; `ArmsView.TWO_HANDS`, `clip_base`): the left hand
-  wraps the right hand's fingers (`SUPPORT_LEFT`, `CYBER_SUPPORT`), solved against the pistol and the right arm as
-  posed. The owner's second look: "The pistol grip shows the players left hand fingers ... They should be resting on
-  top of the right hand and out of sight. The right hand thumb should be resting on the left hand. The player is
-  gripping the pistol tight." The first solve laid the left hand by its marks and counted how far it was pushed off
-  them; the right thumb, lying where the left hand's heel belongs, pushed it out flat beside the grip, and its fingers
-  closed short of the right hand in a fist. Now (`support_pose`, `lay_right_thumb`) the left hand is placed without
-  the right thumb's outer sections, turned to where its palm lies closest over the pistol and the right fingers; its
-  fingers start open and close round the right hand's (`curl_more`); then the right thumb is laid again on the left
-  hand. The left shoulder sits 7 cm further in, so its forearm comes up beside the right one and the wrist bends
-  less. Through a reload the left hand draws off to the left, changes the magazine and comes back; its elbow keeps
-  9 cm off the right arm's bones (`magazine.ARM_CLEAR`); the right thumb keeps its raised place while the left hand is
-  away. Default taken: **the bots stay one-handed** (HG1; they copy `<id>_Hold`, which is unchanged), and **the
-  pistols keep their hip place** of 2026-11-06 (nearer places cut the hands off at the screen's foot).
-- **Aimed, a rifle's hands are out of view, never faded** (`ArmsTuck`, `ViewModelConfig.aim_tuck`; the owner: "the
-  hands should not fade out of view. When the animation plays to ADS (except for pistols) the hands are simply out of
-  view. At most a small tip of the players left hand thumb can be visible"): the first pass faded them, which he
-  turned down. As the sight comes up the left shoulder is carried in and down by `aim_tuck` times the raise and the
-  elbow found again under the line from shoulder to wrist, so the forearm and sleeve leave the screen behind the
-  replica; the hand stays on the handguard, hidden by it, its bones written after the clip each frame the raise
-  changes. The right hand is under the screen's foot already.
-- **Aimed, a pistol keeps the tops of the hands** (`aim_hands_hint`, `aim_hint_span` 0.3 to 0.8 of the raise,
-  `aim_hint_below` 80 to 120 mm under the sight line; `ArmsFade`, `arms_fade.gdshader`): what lies below fades, so
-  only the top of the hands shows under the slide (the owner picked this from pictures, over whole solid hands and
-  over a fainter edge; at 45 to 75 mm the hands were see-through all over, which read as a fault). The arms wear
-  fading copies of their materials only while the sight is raised at all. The depth is drawn first where the arm is
-  whole, so a fading hand never shows its far side through its near one.
-- **The right index finger** (`PISTOL_RIGHT`): `index_left` was the far a fingertip may pass the trigger's middle, and
-  at 5 mm it held the finger straight across the guard; at 22 mm, with an arch target on the middle joint
-  (`index_arc`), the finger curls through the guard and its pad sits on the trigger (4.5 mm off its mark).
-- **Wrist to thumb** (`Heel_<side>`, `glove.heel_weights`, `pose.Rig.fk`): the skin between them wrung because one
-  bone took all of the thumb's twist. A helper bone takes the thumb's swing and half its twist, and the first bone's
-  weights are shared along it. ArmsThrow turns it with the thumb.
-- **Painted maps, 2K each** (`skin.py`, `glove_paint.py`, `sleeve_paint.py`): the old glove read as a mitten because a
-  flat tiled weave covered good geometry. Each texel is now painted from where it lies on the hand: skin (tones,
-  knuckle folds, creases, veins, pores, hair, nails), glove (knit back, leather palm, fourchettes, seams and stitches,
-  thumb saddle, flex ribs, caps, wear) with its kit in the atlas's clear square (moulded rubber shell with a boss a
-  knuckle, stitched patch, ribbed cuff, webbing strap), and sleeve (ripstop, folds, felled seam, cuff band). One atlas
-  layout serves skin and glove, so the hand's surface is one mesh (`HandSurface_<side>`) that wears either: 38,900
-  triangles drawn gloved, 34,500 skin only, four materials, a 5.4 MB file (WebP inside). Imported VRAM compressed as
-  the project's other models (about 42 MB of texture memory: BC7 colour, RGTC normals, DXT1 roughness).
-- **The AEG's reload lifts 8 cm, was 10** (`reload_move_by`): at the nearer hip the left forearm showed 8 cm past the
-  wrist mid reload, over BP8's 7 cm.
-- **The skin's tones run deep** (`skin.TONE`, `MOTTLE_SHADE` and its neighbours): a map that looked right in Blender
-  read pale and smooth in the game, whose light and muted colours flatten it; the creases shade about twice as far.
-- **A fading copy reads the metal map** (`ArmsFade`, `metallic_map`): a glTF material's metal is 1 times its map's
-  blue, so a copy with the number alone would have drawn the arms as metal through the fade.
-- **Skin-only arms** now show that painted skin (the nails' material on the hand's surface);
-  `ViewModelConfig.skin_arms` and its tint are gone. A robot's arms are plain colours with the painted maps taken off.
-- **Life in the hands** (`HandsMotion`, `HandsLifeConfig`; the amounts are first values for the owner's play): a bob
-  with the ground covered (2.7 m a cycle, 3.4 mm to each side), breathing at rest (3.8 s, 1.4 mm), a lean into a
-  strafe (1.8°), a trail through a jump and a dip on landing, a push through a crouch, a sprung flick (about 0.7°) and
-  roll with each shot, a draw that settles, a cant as the sight comes up, and a roll behind a turn (`sway_roll`).
-  Drawn by moving ReplicaView's own node about the replica's place, so the pose under it (the hip, the sight line
-  through the eye) is untouched and every older test of it holds; aimed, 15% is left; Reduced motion takes its sway
-  and kick shares. The bomb in hand takes the same life (GrenadeView). The sprint carry eases in and out.
-- **Not done, offered:** a narrower field of view for the view model alone (the references' rifles fill more of the
-  screen because of one) would touch every view-model material and the optic glass; it is the owner's call.
+- **Lean and vault moved out of FP1** to keep the first playable small; they are a later Dev task with the bots
+  (`docs/KNOWN_ISSUES.md` › Play).
+- **Four Beta stand-ins stand in for bots:** characters with no controller at the Beta spawns. They can be knocked out
+  and call their hits, so a round ends and the match rematches 8 s after it is over.
+- **Bindings** follow `docs/DECISIONS.md` by physical key: walk Shift, sprint Alt, crouch C or Ctrl, toggled (a sprint
+  or jump press stands you up), aim held, replicas 1, 2 and the mouse wheel. The browser game had ended with crouch
+  held and aim toggled (its `config/controls.ts`); the owner's rulings here win until he says otherwise.
+- **Depot's greybox is one mesh** with vertex colours from `MapStyle` and a world grid, plus one static body per
+  surface, so a BB ray reads its surface from the collider. `BB_IMPACT` now carries that surface in `value2`.
+- **The Jolt mover is a kinematic sweep** (`PhysicsServer3D.body_test_motion` with reused parameters): vertical, then up
+  to four slides, with a step-up tried only when grounded and blocked. It allocates nothing per tick.
+- **The play screen draws the sim by hand-interpolating** between the last two ticks; the scene's own physics
+  interpolation is off, so the 60 Hz state stays the only truth.
+- **Your own BBs start at the muzzle** of the replica in hand and blend onto their true path over 0.12 s, so they read
+  as leaving the barrel though the sim fires them from the eye.
+- **Play tuning is one resource** (`game/config/play_tuning.tres`): controls, view, replica in hand, effects, sound,
+  HUD, map style, lighting and the team names and colours.
+- **Late materials are drawn once at the start** (`ShaderPrewarm`, performance's finding): a fading figure, a BB, a
+  puff and the sign, as specks in front of the camera for three frames, so the first shot or walk-off doesn't hitch.
+- **The title screen and credits strings became translation keys** with the play screen's (`game/ui/text/en.po`).
+
+- **Critic's advisories left as they are:** a few presentation literals (the sprint tilt, HUD spacing) and the
+  mover's named ground and underfoot thresholds move into their configs when those files are next touched.
 
 ## Known issues left
 
-- The skin's atlas has about 530 texels (of 1.46 million) claimed by two places on the hand, at the thumb's web; no
-  seam shows in the pictures.
+- You can't be hit yet: the stand-ins never shoot, so your own hit call and walk-off wait for bots.
+- No lean or vault; stand-ins, not bots; no settings screen; greybox Depot; capsule figures; the replica in hand
+  shares the main camera; no graphics presets or perf baseline (`docs/KNOWN_ISSUES.md` › Play, Art and Graphics).

@@ -19,7 +19,7 @@ hold, as long as that clip (`magazine.py`): the left hand pulls the magazine, ta
 fresh one. The glove's kit is an object of its own (GloveKit_<side>) and the fingernails another (Nails_<side>), so
 the game can show skin-only arms on the same skeleton and clips.
 
-FP1 (the owner): the hand's surface is its own object too (HandSurface_<side>: the glove's cloth, or skin only the
+HA1 (the owner): the hand's surface is its own object too (HandSurface_<side>: the glove's cloth, or skin only the
 skin), and everything is painted at 2K from where it lies on the arm: the bare skin (`skin.py`), the glove and its kit
 over the same atlas (`glove_paint.py`) and the sleeve (`sleeve_paint.py`). A pistol gets a second hold in both hands
 (`<id>_two_Hold`, `<id>_two_Reload`), the player's; `<id>_Hold` stays the bots' one-handed one. A helper bone at each
@@ -69,7 +69,7 @@ MATERIALS = {
     "SleeveTrim": (0x515a41, 0.88, 0.0),
 }
 NAMES = list(MATERIALS)
-# FP1: every surface is painted at 2K. The glove's two materials share one set of maps (glove_paint.py, over the
+# HA1: every surface is painted at 2K. The glove's two materials share one set of maps (glove_paint.py, over the
 # skin's atlas: the cloth over the hand and the cuff are "Glove", the moulded and sewn-on pieces "GloveArmour", two
 # names so a robot's arms can still colour them apart); the sleeve's faces all end on "Sleeve" (sleeve_paint.py).
 GLOVE = ("Glove", "GloveArmour")
@@ -78,7 +78,7 @@ SLEEVE = "Sleeve"
 HAND = "HandSurface_"
 # The painted maps are stored as WebP at this quality (hardsurface.export).
 WEBP = 95
-# The skin-only arms' skin and fingernails (FP1): one material, its colour, roughness and normal maps painted by
+# The skin-only arms' skin and fingernails (HA1): one material, its colour, roughness and normal maps painted by
 # skin.py; this plain tone only until they are.
 SKIN = "Skin"
 SKIN_PLAIN = (0xcc9b82, 0.5, 0.0)
@@ -203,7 +203,7 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # to the right of the handguard's centre line, so the thumb's base sits under its left side and the whole thumb
 # presses on it (the owner, 2026-11-06: "the hand gripping it", not the rifle "just sitting in the hand"). No
 # finger's glove rises above `tips_below` (replica space; the rail's top is 0.0735): the fingers rest on the right side
-# and none stands over the top from the left (the owner's 16:30 note, the critic). FP1 (the owner, 2026-11-12, of the
+# and none stands over the top from the left (the owner's 16:30 note, the critic). HA1 (the owner, 2026-11-12, of the
 # view from the eye: "You can still see the players fingers on the right side of the AEG. They should not be visible:
 # only the thumb of the left hand"): the hand is pitched up 15 degrees, was 40, and the fingertips aim low on the right
 # side (`tip_at`, `tips_below` 2 cm under the rail's top), so the fingers close under the handguard and neither they
@@ -241,7 +241,7 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # drops out of view under the hand; its shoulder moved `shoulder` (eye space), its elbow at least `drop` below it.
 # The hand sits 3 mm lower than the owner approved at 09:41 (his note, 15:39: the trigger finger "looks broken" from
 # behind, bowed up at its knuckle): from there the finger lies nearly straight to the trigger, its base never bent back
-# (`index_from`), its bends limited (`index_bends`). FP1 (the owner, 2026-11-12: "the right hand index finger ... looks
+# (`index_from`), its bends limited (`index_bends`). HA1 (the owner, 2026-11-12: "the right hand index finger ... looks
 # unnatural", of that straight finger): it curls onto the trigger as a finger does, bent most at its middle joint
 # (`index_arc`), its tip passing through the guard past the trigger's far side (`index_left`, m past the trigger's
 # middle), where the pad, not the tip, then lies on the trigger.
@@ -344,7 +344,7 @@ SMOKE_RIGHT = dict(PISTOL_RIGHT, rolls=None, thumb_turn=None, index_left=None, i
                    fingers=BOMB_FINGERS, swing=(0.0, 0.0, 0.0), shoulder=(-0.02, -0.06, 0.10), drop=0.03)
 FLASH_RIGHT = dict(SMOKE_RIGHT, web=(0.012, -0.033, 0.004), index=(0.023, 0.012, 0.016),
                    pinky=(0.021, 0.009, -0.040), thumb_at=(-0.010, -0.022, 0.018))
-# A pistol held in both hands (FP1; the owner, 2026-11-12, with his reference shots: "the player should hold the pistol
+# A pistol held in both hands (HA1; the owner, 2026-11-12, with his reference shots: "the player should hold the pistol
 # with two hands"): the right hand as approved, and the left wrapped round it, thumbs forward. Its marks are the
 # pistol's own space, as the right hand's: the thumb's root (`web`) low behind the grip's left side, under the right
 # thumb; the index finger's knuckle (`index`) at the grip's front left corner under the trigger guard and the little
@@ -375,7 +375,7 @@ LEFT_HELD = "LeftHeld"
 RIGHT_THUMB = ("Thumb2_R", "Thumb3_R")
 # Where a rifle sits as its hold is solved: the hip place the owner approved the holds at (BL4, BP8), its arms'
 # shoulders with it (BL_HIP=x,y,z solves at another place, as the game writes it). In the game the replica sits nearer
-# and lower (FP1, the owner: at the hip only the left hand shows; ViewModelConfig.hip, GAME_HIP here) and the arms ride
+# and lower (HA1, the owner: at the hip only the left hand shows; ViewModelConfig.hip, GAME_HIP here) and the arms ride
 # it as solved, so the hands on it and the bots' copies of them are the approved ones, hold for hold.
 RIFLE_HIP = godot_to_eye(*(float(v) for v in os.environ.get("BL_HIP", "0.12,-0.19,-0.26").split(",")))
 # Where the game draws each replica at the hip (ViewModelConfig.hip), where it is not where its hold is solved: the
@@ -640,7 +640,7 @@ def web_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Colli
 
 
 def support_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Collider) -> tuple:
-    """The left hand bone's pose wrapped round a pistol the right hand holds (FP1; the owner, 2026-11-12: "the player
+    """The left hand bone's pose wrapped round a pistol the right hand holds (HA1; the owner, 2026-11-12: "the player
     is gripping the pistol tight"): laid by its three marks as `web_pose` lays a hand, then turned about the upright
     line through its index knuckle (r["yaws"], degrees: the heel of the hand in toward the grip) and rolled about the
     line from that knuckle to the thumb's root (r["rolls"]), each turn seated clear of the pistol and the right
@@ -988,7 +988,7 @@ def solve_grip(rig: Rig, hands: dict, j: dict, hold: Hold, rid: str, arms: list,
 def solve_support(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list, solid: list, spec: dict,
                   held: tuple) -> int:
     """With the hold `held` posed (the right hand as approved, the left down), the left hand wrapped round the pistol
-    and the right hand as `spec` asks (FP1): placed by its marks, turned to where its palm lies closest
+    and the right hand as `spec` asks (HA1): placed by its marks, turned to where its palm lies closest
     (`support_pose`), then settled, pressed and closed on the skinned surface against the pistol and the right arm as
     posed, less the right thumb's two outer sections, which lie where its heel belongs; that thumb is then laid again,
     on the left hand (`lay_right_thumb`). The clipping left (face pairs)."""
@@ -1044,7 +1044,7 @@ def solve_support(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list, solid:
 
 
 def lay_right_thumb(rig: Rig, hands: dict, hold: Hold, arms: list, solid: list, spec: dict) -> int:
-    """The right thumb laid on the left hand that now wraps the pistol (FP1; the owner, 2026-11-12: "the right hand
+    """The right thumb laid on the left hand that now wraps the pistol (HA1; the owner, 2026-11-12: "the right hand
     thumb should be resting on the left hand"): swung to the clear place whose tip comes nearest a spot over the left
     thumb's first section (spec["right_thumb"]: how far along that section, and how far above the two thumbs' skins
     meeting, m), then closed onto it. The face pairs where the two arms still pass into each other or the pistol."""
@@ -1170,7 +1170,7 @@ def build() -> None:
     right = pose.skin_object("Arm_R", mesh, arm, "R", NAMES)
     for ob in (left, right):
         ob.data.uv_layers.new(name="UVMap")
-    # The bare hands under the gloves (BP8, the owner's playtest note 11; FP1): the hand's skin, Skin_<side>, and the
+    # The bare hands under the gloves (BP8, the owner's playtest note 11; HA1): the hand's skin, Skin_<side>, and the
     # fingernails, Nails_<side>, painted by skin.py. Made before the holds so the build's pictures can show them
     # (BL_PREVIEW_SHOW), and left out of those pictures otherwise.
     hs.material(SKIN, *SKIN_PLAIN)
@@ -1199,7 +1199,7 @@ def build() -> None:
         holds = {"": kept(rig)}
         pictures(rid, hold, rid, rig, objects)
         if rid in SUPPORT and os.environ.get("BL_TWO") != "0":
-            # A pistol in both hands (FP1): the right hand as approved, the left wrapped round it.
+            # A pistol in both hands (HA1): the right hand as approved, the left wrapped round it.
             print("%s in both hands:" % rid)
             two_hits = solve_support(rig, hands, j, hold, [left, right], solid, SUPPORT[rid], holds[""])
             pose.key_pose(rig, "%s_%s_Hold" % (rid, TWO))

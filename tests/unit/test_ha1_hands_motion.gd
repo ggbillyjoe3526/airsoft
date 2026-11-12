@@ -1,5 +1,5 @@
 extends GutTest
-## FP1 (the owner: "go over all first person view animations and make them higher quality"): the life in the replica in
+## HA1 (the owner: "go over all first person view animations and make them higher quality"): the life in the replica in
 ## your hands (HandsMotion, HandsLifeConfig). It bobs with your steps and breathes while you stand, leans into a strafe,
 ## dips as you land, flicks on a spring with each shot and settles, keeps a small share with the sight raised and
 ## none with motion reduced to nothing; ReplicaView draws it by moving its own node about the replica's place, so the
