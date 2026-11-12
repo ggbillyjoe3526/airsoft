@@ -1,17 +1,23 @@
-Task: SM4 · QA commit e0b7c32 · Verdict: Pass
+Task: CN1 · QA commit (see git log, "Agent: qa", attempt 2, HEAD e1133ce) · Verdict: Pass
 
 Blocking: none.
-Advisory:
-- game/play/site/prop_layout.gd:103-111 · `facing` is read only by the default FIT lay (_fit_facing). On a block whose model has another lay (GRID, UNIT, RUN, BAY, SIDE, LINED...) it is silently ignored, and MapData does not warn. No Subway block does this today.
-- game/map/map_data.gd:388-393 · `"facing": ""` in a file warns (empty is not one of the four); harmless.
-- A facing on a ramp: dress on a rise block is dressed only under lay SET (prop_dress_config.gd:397), so facing never reaches FIT there. Not reachable in Subway.
+Advisory: none found. The collar now weighted by height alone (body.py collar_weights, uniform all round) and the zip pull
+on the same height weights cause no regression in the tests below. The glove plate TIE change (b8a38ad, weights within
+1e-3 go to the arm) keeps the plate count at 28 in test_bp6_models (3/3, 1804 asserts). game/ still never assumes a head
+is skinned to one joint (figure_body.gd folds parts by Skin resource; body_merge.gd copies skin_data per vertex).
 
-Checked, no bug: colliders unchanged (all 799 Subway blocks identical to base apart from `dress` and `facing`; no other top-level key changed); other maps carry no facing and use none of the new models; StationSurface still leaves the named faces out (test_station_dress, 22/22, with the two SM4 adjustments clearing `dress` only to isolate one block); facing +x/-x/+z/-z fills the box and the front points the named way, also for a non-square box and a model long in z.
+Tests (attempt 1, unchanged and still valid):
+- tests/unit/test_figure_collar_skin_qa.gd:13 · loads human.glb through the game's loader; for every Head_* mesh
+  (four heads, LOD0/1/2) asserts neck vertices below 1.50 m carry non-Head weight and vertices above 1.60 m are
+  Head-only. Checked in attempt 1: against origin/main's human.glb it fails for every Head_* mesh (no blended neck
+  vertices); passes on the head's glb. Passes again on HEAD (50 asserts), so the new height-only weights still blend
+  the neck and leave the skull rigid.
 
-Tests added (tests/unit/test_sm4_facing.gd, appended):
-- :test_a_facing_turns_a_model_long_in_z_and_its_depth_runs_along_the_front · all four facings with a z-long model fill and centre in a swapped-footprint box · without the facing branch the old path turns it toward the field's middle (and a z-long model in a x-long box would not fill it), so the +x/-x cases fail.
-- :test_a_facing_does_not_change_the_height_or_the_foot · y range stays foot..box top for every facing · old path has no faced size, a swapped size would break the height only if y were scaled wrongly; guards the _faced_size swap.
-- :test_a_numeric_facing_is_warned_about_and_the_map_still_loads · non-string facing gives empty facing, no problem · without the RISES check the number would be kept as a StringName.
-(I could not stub production out, as I may not edit game/; fails-without reasoned from the code.)
+Run on HEAD, single files, raw output in pipeline/out/qa/a2_<file>.txt:
+test_figure_collar_skin_qa 1/1, test_bp6_models 3/3, test_figure_body 17/17, test_figure_hit_area 6/6 (54 s),
+test_hit_registration 3/3, test_hit_registration_qa 5/5, test_figure_hands 24/24, test_bp7_figures 13/13.
+No script errors in any file. Full tools/check.sh and the smoke test not run by me (another process runs them).
 
-Runs: test_sm4_facing 6/6 (37 asserts), test_sm4_subway_models 3/3, test_station_dress 22/22, plus 12 other Subway-using files, all green. Raw output: pipeline/out/qa/sm4-tests.txt. Full tools/check.sh and the smoke test were not run by me (another check run was in progress); not run: window or visual checks of how the booths and wagons look (needs a display; owner's list).
+Not tested (needs a display / a person): the visual result (no dark V at the neck, collar and scarf overlap, the
+gentler back rise with BACK_RISE 5 mm, neck bend while crouching, leaning, flinching, zip pull following the collar):
+docs/PLAYTEST.md > CN1.
