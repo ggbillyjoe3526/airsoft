@@ -76,3 +76,34 @@ func test_a_map_reads_a_block_s_facing_and_refuses_one_outside_the_four() -> voi
 	assert_eq(m.blocks[m.blocks.size() - 1].facing, &"", "and leaves FIT's own turn")
 	m = _depot_with(shed)
 	assert_eq(m.blocks[m.blocks.size() - 1].facing, &"", "no facing named: empty")
+
+
+func test_a_facing_turns_a_model_long_in_z_and_its_depth_runs_along_the_front() -> void:
+	var long_z := AABB(Vector3(-0.5, 0.0, -1.5), Vector3(1.0, 2.0, 3.0))
+	var middle := Vector3(0.0, 0.0, -20.0)
+	var cases: Array = [[&"+x", Vector3(3.0, 2.0, 1.0)], [&"-x", Vector3(3.0, 2.0, 1.0)],
+			[&"+z", Vector3(1.0, 2.0, 3.0)], [&"-z", Vector3(1.0, 2.0, 3.0)]]
+	for c: Array in cases:
+		var b := _block(Vector3(8.0, 1.0, 4.0), c[1], c[0])
+		var foot := b.center - Vector3(0.0, b.size.y * 0.5, 0.0)
+		var t := PropLayout._fit_facing(long_z, b, foot, middle)
+		var box := t * long_z
+		assert_almost_eq(box.size, b.size, Vector3.ONE * 1e-4, "facing %s: a model long in z fills its box" % c[0])
+		assert_almost_eq(box.get_center(), b.center, Vector3.ONE * 1e-4, "facing %s: and stands in it" % c[0])
+
+
+func test_a_facing_does_not_change_the_height_or_the_foot() -> void:
+	for f: StringName in [&"+x", &"-x", &"+z", &"-z"]:
+		var b := _block(Vector3(0.0, 1.3, 0.0), Vector3(0.5, 2.6, 2.3), f)
+		var foot := Vector3(0.0, 0.0, 0.0)
+		var box := PropLayout._fit_facing(_model(), b, foot, Vector3.ONE) * _model()
+		assert_almost_eq(box.position.y, 0.0, 1e-4, "%s stands on its foot" % f)
+		assert_almost_eq(box.end.y, 2.6, 1e-4, "%s keeps the box's height" % f)
+
+
+func test_a_numeric_facing_is_warned_about_and_the_map_still_loads() -> void:
+	var shed := {"kind": "shed", "center": {"x": 0, "y": 1.3, "z": 6}, "size": {"x": 2, "y": 2.6, "z": 2.2},
+			"facing": 3}
+	var m := _depot_with(shed)
+	assert_eq(m.problems.size(), 0, "no problem")
+	assert_eq(m.blocks[m.blocks.size() - 1].facing, &"", "a number names no facing")
