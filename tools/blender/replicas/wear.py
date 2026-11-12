@@ -2,7 +2,7 @@
 recesses, so a replica looks real and slightly used (owner, 2026-11-10: "faint scratches/marks but keep it subtle").
 
 The wear is a mask, not paint: the replica is painted at run time in any of its schemes (game/play/replica_paint.gd), so
-the mask says where and how much, and the game's worn paint (game/play/replica_wear.gdshader) lightens, greys and
+the mask says where and how much, and the game's worn paint (game/play/replica_surface.gdshader) lightens, greys and
 polishes whatever colour is there. One texture per replica, `<model>_wear.png` beside its glb, on a second UV layer
 `Wear` (glTF TEXCOORD_1, which Godot's import makes these surfaces' UV) that only the hands' meshes get; the figures'
 copies (`Figure*`) keep none and draw plain. The channels:

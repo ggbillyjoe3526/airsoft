@@ -123,22 +123,30 @@ func test_the_cyber_pistol_keeps_its_own_colours() -> void:
 	for node: Node in view._held[0].root.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node := node as MeshInstance3D
 		for i in mesh_node.mesh.get_surface_count():
-			assert_null(_painted(mesh_node, i), "%s surface %d keeps its own" % [node.name, i])
+			# its own colours, each on its surface (MQ1): the surfaced material stands for the model's own
+			var shown := _painted(mesh_node, i)
+			assert_true(ReplicaPaint.is_surface(shown), "%s surface %d is on its surface" % [node.name, i])
+			assert_eq(ReplicaPaint.plain_of(shown), mesh_node.mesh.surface_get_material(i),
+					"%s surface %d keeps its own colour" % [node.name, i])
 	# Realistic colours: a dark grey slab and plain grey lines, nothing glowing; its metal keeps the model's own.
 	var own := _hands([_cyber()] as Array[ReplicaConfig], [ReplicaSchemes.OWN] as Array[StringName], true)
-	var slab := _override(own._held[0].root, &"CyberSlab") as StandardMaterial3D
+	var slab := _override(own._held[0].root, &"CyberSlab")
 	assert_eq(_colour(slab), ReplicaPaint.drawn(Color.hex(0x4a4f57ff)))
-	var line := _override(own._held[0].root, &"CyberLine") as StandardMaterial3D
+	var line := ReplicaPaint.plain_of(_override(own._held[0].root, &"CyberLine")) as StandardMaterial3D
 	assert_false(line.emission_enabled, "the lines don't glow")
-	assert_null(_override(own._held[0].root, &"CyberMetal"))
+	var metal := _override(own._held[0].root, &"CyberMetal")
+	assert_eq(ReplicaPaint.plain_of(metal).resource_name, "CyberMetal", "the metal is the model's own")
 
 
 func test_a_cyber_pistol_picture_repainted_from_realistic_gets_its_glow_back() -> void:
 	var view := _hands([_cyber()] as Array[ReplicaConfig], [ReplicaSchemes.OWN] as Array[StringName], true)
 	var model := view._held[0].root
-	assert_not_null(_override(model, &"CyberLine"))
+	var grey := ReplicaPaint.plain_of(_override(model, &"CyberLine")) as StandardMaterial3D
+	assert_false(grey.emission_enabled)
 	ReplicaPaint.apply(model, ReplicaSchemes.OWN, false)
-	assert_null(_override(model, &"CyberLine"), "back to the model's own glowing lines")
+	var lit := ReplicaPaint.plain_of(_override(model, &"CyberLine")) as StandardMaterial3D
+	assert_eq(lit.resource_name, "CyberLine", "back to the model's own lines")
+	assert_true(lit.emission_enabled, "glowing")
 
 
 func test_parts_the_scheme_does_not_name_keep_their_own() -> void:

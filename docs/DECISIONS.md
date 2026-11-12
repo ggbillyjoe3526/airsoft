@@ -784,6 +784,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Replicas, Loadout and levels
 
+- **Replicas are made of steel, aluminium and polymer under any paint (owner, 2026-11-12, MQ1).** "Pistol slides
+  are metal and body's made of polymer/plastic. Rifles should be mostly metal and sniper rifle barrel is metal." On
+  the first pictures: "Black polymer should be darker but not as dark as the black metals. Also, the white polymer
+  should be less bright. I don't like the wooden sniper rifle so remove that and keep polymer." So black metal is
+  the darkest, black polymer a shade lighter, white polymer an off-white, and the sniper's stock stays polymer; no
+  replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
 - **The next replica is a spring sniper rifle, and the owner is asked how to build it and its specs before work starts
   (owner, 2026-10-06).** The SMG and shotgun come after it.
 - **The Cyber Pistol is the owner's own design and the level cap's reward (owner, 2026-10-04; level 10 since

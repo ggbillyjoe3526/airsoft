@@ -1,33 +1,38 @@
-Task: SM5B · Subway's signs and posters in every room
+Task: MQ1 · Replicas made of steel, aluminium and polymer
 Attempt: 2 of 4
-Head: bc5bcf4 (= HEAD). Full tools/check.sh NOT run on this head (CI runs it on the PR); test_station_fixtures 9/9,
-   test_sm5_qa 13/13, test_sm5b_qa 10/10, gdlint clean. QA and performance reviewed 640241d (both Pass);
-   1567446..bc5bcf4 changes only two box heights, bounds, a test and the record. This verdict lapses if CI fails.
+Head: f0298f3 (checks passed on it; it is `git rev-parse HEAD`. The performance report was written on 6029fe9, and only test_mq1_qa.gd and the two reports changed after it.)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
 Score: 8/8 → Accept
+
 Failed checks, with evidence: none.
-Checked (what changed and what it could break):
-1. [measured] Read from the glbs: departures_n Sign quad x ±0.77, y -0.715..-0.330 = 1.54 x 0.385 = 4.00:1, the same
-   as its 512 x 128 cell. way_sign Sign 1.256 x 0.275 = 4.567:1 against 512 x 112 = 4.571:1 (was 4.906, 7.3 % off).
-   Prop bounds -0.745 and -0.599 match fixtures.py +22, +51-52. Tris unchanged (84 of 90), so budgets hold.
-   No reference photos or renders are named for these flat sign boxes; I judged them from geometry, as in attempt 1.
-2/3/5. No contract, runtime script or hot path touched. The only change in code is a test.
-4. test_station_fixtures.gd +99: the per-triangle ratio of world edge to sheet px. On the old departures it gives
-   (1.54/512)/(0.34/128) = 1.13, a 13 % stretch, so it fails at the 2 % limit; it caught way_sign on its own.
-6. Headroom: the lowest hung sign's underside is now 2.40 m (way_sign in 3.0 m passages, 3.0 - 0.599), and the boards'
-   is about 2.46 m over the platforms (ceiling 4.1, floor 0.9 by lowc, 3.2 - 0.745). Both are well over a standing or
-   jumping head, and they are look-only with no collision. The builder's clear() kept every spot (subway.json unchanged;
-   only the 4 earlier edge_sign spots are still left out). Lamp clearance is retested against the new mesh boxes
-   (test_sm5b_qa +215, which passes).
-7. Docstrings are updated (station_extras.py +100, +295). Advisory: the test's `for s in ...`, `for t`, `for e` loop
-   variables are untyped.
-8. way_sign is an SM5 model, fixed because the new test covers every printed model. The record's Decisions says so.
-   No player-facing change needs a wiki edit beyond the existing note.
+
+Basis for each check:
+1. I judged the models from renders 01 to 06. The record names no reference photos, so proportions are checked BEFORE against AFTER. The silhouettes are identical: AEG length 738/740 px, handguard, magazine drop, stock and slide all within 1 %, and the poses are unchanged.
+   - Attempt-1 must-fixes, all met:
+     - Black metal is the darkest part, with a satin highlight. This is visible on the GBB Black slide, the SMG magazine and the sniper barrel.
+     - The Ghost slide is off-white satin, not silver, and no grain smears over the serrations (replica_surfaces.gd:+44 sets stretch 1 on steel).
+     - The sniper barrel and its thread cap are dark steel in Tan (sniper.py:+552, +565).
+     - The polymer tones are the owner's (polymer gain 0.72 with bold_keeps 1, replica_surfaces.gd:+40-41).
+   - The owner called these renders "Excellent" (15:34).
+2. No contract changed. CC0_ASSETS › Surfaces is updated to the 16 slots.
+3. No per-frame allocation. dress() sets four prebuilt tables once per material (replica_surfaces.gd:+107-110). The shader adds ALU work and no texture fetches (replica_surface.gdshaderinc:+116-123).
+4. test_metal_keeps_a_light_paints_colour_and_only_bare_metal_is_brushed (test_replica_surfaces.gd:+109) fails without the attempt-2 change: there was no `light_keeps`, `floor` or `kind_shine`, and steel had stretch 10.
+5. Shader constants are named (LIGHT_PAINT, LUMA, CHROMA_FLOOR, gdshaderinc:+63-66). The presentation is only shaders and materials, and every variable is statically typed.
+6. Coated satin steel, matte polymer and no markings fit "toys, not firearms". Bots keep flat paints.
+7. The renames are complete (`_surfaced`, `MAX_SURFACED`, `surface_materials`), OWN_GLOW is gone, z_clip_scale now sits before the tables, and the Lossless import has a written reason.
+8. The scope is MQ1: wood is used by no replica, as the owner ruled. DECISIONS, the wiki and the record are updated. The changelog note is still due at pipeline step 6, after the critic.
+
+Advisories (not blocking):
+- game/play/replica_wear.gdshader is dead code now. Add it to KNOWN_ISSUES or to the owner's sweep list so it isn't lost.
+- AEG rail tops (render 01, the Cobalt pair) catch the overhead box as a white and black checker. It is physically plausible, but at hip it could read as aliasing.
+- Renders 03 and 06 of the Compact SMG show only the hands' copy. A bot's copy is still flat by design.
+
 Must-fix for the next attempt: none.
-Owner should test in the game:
-- From the platform edge, read both departure boards' rows and the bottom line. Is the text undistorted?
-- Walk under a "Way out" sign in a 3 m passage. Does it hang low or crowd the view?
-- Walk up to a line map: are the stop names readable at about 2 m?
-- Ride both escalators: do the level posters look right on the sloped walls, and do any clip the decks?
-- Are the no-smoking and handrail pictograms clear at a glance?
-- Are there too many or too few notices per room (hall, concourse, lift landing, plant room)?
+
+Owner should test in the game (Forward+, on a GPU):
+1. GBB Pistol in its default paint, hip and inspect in the Depot: does the slide stay in the paint's colour, or go grey as it did in the Compatibility render 06?
+2. AEG Rifle at hip in Cobalt: do the rail teeth shimmer or crawl as you move?
+3. Black replicas under the Subway's dim light: is black metal still darker than black polymer but never pure black?
+4. Customise pictures and turntable: do the soft studio panels give believable streaks on rails and barrels?
+5. Cyber Pistol: does the white coated shell's fine grain look like a finish or like noise up close?
+6. First equip of each replica on the Low preset: any hitch, and is the frame time fine with the grain fetches?

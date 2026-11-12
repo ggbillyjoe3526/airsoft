@@ -63,17 +63,17 @@ func test_the_smgs_magazine_copy_applied_plain_is_never_worn() -> void:
 	ReplicaPaint.apply(copy, &"ghost", true, false)
 	for i in copy.mesh.get_surface_count():
 		assert_false(ReplicaPaint.is_worn(copy.get_active_material(i)), "surface %d plain" % i)
-	assert_eq(ReplicaPaint.worn_materials().size(), 0, "no worn material built for a figure copy")
+	assert_eq(ReplicaPaint.surface_materials().size(), 0, "no worn material built for a figure copy")
 
 
 func test_repainting_the_smg_swaps_colours_and_keeps_one_worn_material_per_part() -> void:
 	var model := _model()
 	ReplicaPaint.apply(model, &"cobalt", false)
-	var before := ReplicaPaint.worn_materials().size()
+	var before := ReplicaPaint.surface_materials().size()
 	ReplicaPaint.apply(model, &"ghost", false)
-	var after := ReplicaPaint.worn_materials().size()
+	var after := ReplicaPaint.surface_materials().size()
 	ReplicaPaint.apply(model, &"ghost", false)
-	assert_eq(ReplicaPaint.worn_materials().size(), after, "a repeat builds nothing new")
+	assert_eq(ReplicaPaint.surface_materials().size(), after, "a repeat builds nothing new")
 	assert_lte(after, before * 2, "two paints, at most two sets")
 	for s: Array in _surfaces(model):
 		var mi := s[0] as MeshInstance3D

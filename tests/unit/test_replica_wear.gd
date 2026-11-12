@@ -1,7 +1,8 @@
 extends GutTest
 ## Replica wear (RW1, 2026-11-10): the AEG Rifle's and the GBB Pistol's hands' models carry a baked wear mask
 ## (tools/blender/replicas/wear.py) as their painted materials' ao_texture, and ReplicaPaint draws those surfaces in the
-## worn paint (game/play/replica_wear.gdshader); the figures' copies, the Cyber Pistol and the Sniper Rifle stay plain.
+## worn paint (game/play/replica_surface.gdshader with its `wear` on, MQ1); the figures' copies stay plain and the
+## Cyber Pistol and the Sniper Rifle clean.
 
 const WORN := ["aeg", "pistol", "smg"]
 const CLEAN := ["cyber", "sniper"]
@@ -105,7 +106,7 @@ func test_a_plain_apply_and_the_figures_copies_wear_the_plain_paint() -> void:
 		var mi := s[0] as MeshInstance3D
 		var part := ReplicaSchemes.PARTS.find(StringName(mi.mesh.surface_get_material(s[1]).resource_name))
 		assert_same(mi.get_surface_override_material(s[1]), plain[part], "%s is plain" % mi.name)
-	assert_eq(ReplicaPaint.worn_materials().size(), 0, "nothing worn was built")
+	assert_eq(ReplicaPaint.surface_materials().size(), 0, "nothing worn was built")
 
 
 func test_the_figures_corner_of_the_mask_is_clean() -> void:
@@ -135,7 +136,7 @@ func test_the_wear_is_light() -> void:
 
 func test_the_worn_paint_follows_the_hands_depth_press() -> void:
 	ReplicaPaint.apply(_model("aeg"), &"cobalt", false)
-	var worn := ReplicaPaint.worn_materials()
+	var worn := ReplicaPaint.surface_materials()
 	assert_gt(worn.size(), 0, "worn paints were built")
 	var shader := (worn[0] as ShaderMaterial).shader
 	var names: Array[StringName] = []
@@ -168,11 +169,11 @@ func test_repainting_a_model_swaps_the_worn_paint_and_back_to_plain_with_worn_fa
 func test_repeated_applies_build_no_duplicate_worn_materials() -> void:
 	var model := _model("pistol")
 	ReplicaPaint.apply(model, &"cobalt", false)
-	var built := ReplicaPaint.worn_materials().size()
+	var built := ReplicaPaint.surface_materials().size()
 	for i in 5:
 		ReplicaPaint.apply(model, &"cobalt", false)
 		ReplicaPaint.apply(_model("pistol"), &"cobalt", false)
-	assert_eq(ReplicaPaint.worn_materials().size(), built, "no new worn material per apply")
+	assert_eq(ReplicaPaint.surface_materials().size(), built, "no new worn material per apply")
 
 
 func test_the_own_paint_leaves_every_model_unworn() -> void:
@@ -184,7 +185,9 @@ func test_the_own_paint_leaves_every_model_unworn() -> void:
 			var mi := node as MeshInstance3D
 			for i in mi.mesh.get_surface_count():
 				assert_false(ReplicaPaint.is_worn(mi.get_active_material(i)), "%s %s own paint is not worn" % [id, mi.name])
-	assert_eq(ReplicaPaint.worn_materials().size(), 0, "nothing worn was built")
+	# their own colours go on their surfaces (MQ1), none of them worn
+	for built: Material in ReplicaPaint.surface_materials():
+		assert_false(ReplicaPaint.is_worn(built), "nothing worn was built")
 
 
 func test_clean_models_stay_plain_under_any_paint() -> void:
@@ -203,7 +206,7 @@ func test_clearing_the_cache_keeps_a_live_replicas_worn_paint() -> void:
 	var held := _first_override(model)
 	var albedo: Color = (held as ShaderMaterial).get_shader_parameter(&"albedo")
 	ReplicaPaint.clear()
-	assert_eq(ReplicaPaint.worn_materials().size(), 0, "the cache let go")
+	assert_eq(ReplicaPaint.surface_materials().size(), 0, "the cache let go")
 	assert_true(is_instance_valid(held), "the live material survives")
 	assert_eq((held as ShaderMaterial).get_shader_parameter(&"albedo"), albedo, "unchanged")
 	assert_not_null((held as ShaderMaterial).get_shader_parameter(&"wear_mask"), "mask kept")
@@ -218,7 +221,7 @@ func test_the_worn_cache_stays_bounded() -> void:
 	for p: StringName in ReplicaSchemes.SCHEMES.keys():
 		for r: bool in [false, true]:
 			ReplicaPaint.apply(model, p, r)
-	assert_lte(ReplicaPaint.worn_materials().size(), ReplicaPaint.MAX_WORN)
+	assert_lte(ReplicaPaint.surface_materials().size(), ReplicaPaint.MAX_SURFACED)
 
 
 func test_the_pressed_copy_keeps_the_worn_colour_and_mask() -> void:

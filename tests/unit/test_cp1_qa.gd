@@ -289,7 +289,10 @@ func test_a_cyber_menu_picture_goes_realistic_and_back() -> void:
 		var m := node as MeshInstance3D
 		for i in m.mesh.get_surface_count():
 			if m.mesh.surface_get_material(i).resource_name == "CyberLine":
-				assert_null(m.get_surface_override_material(i), "bold again: its own glowing line")
+				# its own glowing line again, on its surface (MQ1)
+				var line := ReplicaPaint.plain_of(m.get_surface_override_material(i)) as StandardMaterial3D
+				assert_eq(line, m.mesh.surface_get_material(i), "bold again: its own line")
+				assert_true(line.emission_enabled, "glowing")
 
 
 func test_a_cyber_figure_draws_the_pistol_and_goes_plain_under_realistic_colours() -> void:

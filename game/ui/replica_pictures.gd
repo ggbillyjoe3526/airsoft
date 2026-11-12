@@ -331,6 +331,8 @@ func _rig(model: Node3D, long_side: int, port_name: String) -> Shot:
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = AMBIENT
 	env.ambient_light_energy = AMBIENT_ENERGY
+	# The metal has a studio to reflect (MQ1): without one a steel part draws black.
+	StudioSky.light(env)
 	var world := WorldEnvironment.new()
 	world.environment = env
 	shot.port.add_child(world)

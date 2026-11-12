@@ -161,10 +161,20 @@ metalness; the light does the rest.
 - **Replicas are lightly used (RW1).** The AEG Rifle and the GBB Pistol in your hands, in the menus' pictures and the
   Customise turntable carry a baked mask (`tools/blender/replicas/wear.py`): faint scratches (most along the length,
   some in small parallel clusters, the magazine and slide handled most), rubbed outer edges and a few rubbed patches,
-  and dirt in the recesses. `replica_wear.gdshader` scuffs whichever paint is on towards a worn mid grey in
+  and dirt in the recesses. `replica_surface.gdshader` scuffs whichever paint is on towards a worn mid grey in
   square-root light (black greys up, white dirties down, a bold colour dulls), polishes the rubs and mattes the
-  scratches and dirt; a metal part wears to bare metal. Times `LookConfig.wear`. Bots' copies, the Cyber Pistol and the
-  Sniper Rifle draw clean.
+  scratches and dirt; a metal surface wears part of the way to bare metal. Times `LookConfig.wear`. Bots' copies, the
+  Cyber Pistol and the Sniper Rifle draw clean.
+- **Replicas are made of something (MQ1, owner 2026-11-12).** A paint picks the colour; the face's surface says how
+  that colour takes the light (`ReplicaSurfaces`, docs/CC0_ASSETS.md › Replica models › Surfaces). Steel (a slide, a
+  barrel, a stamped receiver) and aluminium (forged receivers, a rail, a magazine) are metal under the paint, as a
+  blued or anodised part is: they reflect the map, the sky and, on the menus' pictures, a small studio
+  (`StudioSky`), and read a shade deeper than the polymer beside them in the same paint. A light paint (white, tan)
+  stays its colour on metal, as a baked coat does, and takes a satin shine instead of a mirror's. A sniper's barrel is
+  dark steel in any paint. Polymer (a frame, a stock, a grip) is matte with a fine moulded grain. Black polymer is a shade lighter than the black metal
+  beside it and white polymer an off-white (owner, 2026-11-12). Wood is a kind too (a walnut stain the paint only
+  tints), on no replica: the owner kept the sniper's stock polymer. A coated part (the Cyber Pistol's white
+  shell) keeps its colour in any light. Bots' copies keep the flat paints.
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.
 
