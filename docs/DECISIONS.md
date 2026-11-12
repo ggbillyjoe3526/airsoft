@@ -913,8 +913,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   0.75 J and the pistol's 0.52 J. **Each keeps its job through its hop-up, not its energy** (the default taken to his
   "would that still be balanced?"): the extra energy is a quicker BB and a little reach as it comes, and the furthest
   either can be tuned to stays where it was. The pistol's hop-up tops out at 0.19 (0.3) and comes at 75 %: 29 m as it
-  comes, 31 and 32 m on Red and Black Gas, and at most 37 m with any gas and BB weight, under the Cyber Pistol's 33 m
-  and 38 m (untrimmed: 42 m on Black Gas with 0.32 g BBs, beside the AEG Rifle's 44 m). The SMG's tops out at 0.135
+  comes and 31 and 32 m on Red and Black Gas (the Cyber Pistol 33 m as it comes), and at most 37 m tuned, with any gas
+  and BB weight (the Cyber Pistol 38 m tuned; untrimmed the pistol reached 42 m on Black Gas with 0.32 g BBs, beside
+  the AEG Rifle's 44 m). The SMG's tops out at 0.135
   (0.15) and comes at 95 %: 30 m as it comes and 31 m at best, beside the AEG Rifle's 39 m. **A change to a replica's
   hop-up range converts saved dials** (`ReplicaRulesConfig.hop_up_rescale_v1`, loadouts.save version 2), so a saved
   setup lifts as it did (`docs/records/PH2.md`).

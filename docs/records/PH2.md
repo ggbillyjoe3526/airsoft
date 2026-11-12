@@ -1,12 +1,13 @@
 # PH2 · The GBB Pistol 0.70 J and the Compact SMG 0.85 J
 
-**Review:** REVIEW_LINE
+**Review:** 2 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-ATTEMPT_ROWS
+| 2026-11-12 | 1 | build thread | ✓ 6,041 of 6,043 (2 pending) | 6/8 Retry | Balance judged at factory BB weights only: a tuned pistol reached 42 m on Black Gas with 0.32 g; stale doc lines |
+| 2026-11-12 | 2 | build thread | ✓ 6,052 of 6,054 (2 pending) | 7/8 Accept | – |
 
 The owner (2026-11-12), on reading PH1's finding that the GBB Pistol's 0.52 J was below a real green-gas pistol's:
 "Increase gbb pistol to 0.7J and SMG to 0.85J. Would that still be balanced?" No task block (asked for directly).
@@ -50,6 +51,12 @@ and 44 m (0.35 g), the Sniper Rifle 48 m as it comes.
   (`ReplicaRulesConfig.hop_up_rescale_v1`, `SavedLoadouts._hop_ups_from_v1`), on a notch and no further than the
   dial goes, and is saved as version 2 at the next save. A pistol dial saved above 63 % was past what the new range
   lifts and loads at 100 %.
+- **A saved dial keeps its lift, not its place on the dial.** A pistol saved at the old factory 55 % loads at 85 %
+  (32 m on Green Gas, where it shot before the cap), not at the new factory 75 %: the conversion cannot tell a dial
+  the player chose from one saved by a repaint, and keeping what the replica did is the safe reading (the critic's
+  advisory; on Black Gas that dial is one notch under over-hop, as it was before).
+- **The critic's last failed check (8, two doc lines)** was fixed after the Accept: the night figure in
+  `changelog.d/physics-audit.md` (about 2 m) and the ruling's wording in `docs/DECISIONS.md`.
 - **No other replica, part or power source changed.** The site limits hold both with room: the pistol's strongest
   gas 0.84 J under 1.0 J, the SMG 0.85 J under 1.2 J.
 
