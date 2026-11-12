@@ -254,8 +254,44 @@ func test_strips_lie_on_the_platforms_and_the_rails_low_on_the_track_bed() -> vo
 		var mid := (t.from + t.to) * 0.5
 		var style := m.station.style_at(Vector3(mid.x, t.y + 0.05, mid.y))
 		assert_true(style == &"track" or style == &"tunnel", "a track in a track or a tunnel (%s)" % style)
-	var top := look.sleeper_size.y + look.rail_size.y
+	var top := (look.sleeper_size.y if look.sleepers else 0.0) + look.rail_size.y
 	assert_lt(top, tuning.body.max_step, "a rail stands lower than a step")
+	assert_false(look.sleepers, "the owner's track: rails on the ballast, no sleepers")
+	assert_gte(look.rail_size.y, 0.1, "rails high enough to see against the dark")
+
+
+func _track_mesh(with_sleepers: bool) -> ArrayMesh:
+	var l := look.duplicate() as StationLook
+	l.sleepers = with_sleepers
+	var t := StationDressing.Track.new()
+	t.from = Vector2(0.0, 0.0)
+	t.to = Vector2(10.0, 0.0)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_custom_format(0, SurfaceTool.CUSTOM_RGBA_FLOAT)
+	StationSurface._add_track(st, l, t)
+	return st.commit()
+
+
+func _vertex_array(mesh: ArrayMesh) -> PackedVector3Array:
+	return mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array
+
+
+func test_track_rails_lie_on_the_ballast_without_sleepers_and_on_them_with() -> void:
+	var bare := _vertex_array(_track_mesh(false))
+	var lo := INF
+	var hi := -INF
+	for v in bare:
+		lo = minf(lo, v.y)
+		hi = maxf(hi, v.y)
+	assert_almost_eq(lo, 0.0, 0.0001, "no sleepers: the rails start on the ballast")
+	assert_almost_eq(hi, look.rail_size.y, 0.0001, "no sleepers: only the rail height")
+	var laid := _vertex_array(_track_mesh(true))
+	hi = -INF
+	for v in laid:
+		hi = maxf(hi, v.y)
+	assert_almost_eq(hi, look.sleeper_size.y + look.rail_size.y, 0.0001, "sleepers on: rails ride on them")
+	assert_gt(laid.size(), bare.size(), "sleepers add geometry")
 
 
 func test_low_drops_the_relief() -> void:

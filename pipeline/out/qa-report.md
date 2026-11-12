@@ -1,19 +1,17 @@
-Task: SH1 · QA commit (see git log, subject "SH1 QA") · Verdict: Pass
+Task: none (MQ1B) · QA commit <none, uncommitted> · Verdict: Pass
 
-Blocking: none. Advisory: none found.
+Attempt 3 re-verification of 7499a89 (rounder tang, shorter FRAME_SPINE, closed cell ribs, studio shadow change).
 
-Tests added (tests/unit/test_sh1_qa.gd, 13, all pass; none could be run against a stubbed-out feature because QA edits no production code, so "fails without" is by construction: each asserts shot_bbs/pattern behaviour that is 1/0 on any replica without SH1):
-- shot_bbs cell "0","10","x","-1","2.5","" keeps 3 and warns; pattern cell "-1","9","wide" keeps 1.2 and warns (a read of the optional columns; without them every cell would be accepted or ignored silently).
-- stats.md with both new columns stripped reads with zero problems, aeg reads 1 and 0, shotgun row still reads.
-- Partial pull: 1 BB left sends 1 BB, one SHOT, mag 0; a shell of 4 gives 3 then 1, never below 0.
-- Empty shell: one DRY_FIRE, no SHOT, no BBs.
-- Laser flag: one SHOT event, value2 = SHOT_LASER, mag 27; three laser BBs on one body give one CHARACTER_HIT.
-- BB pool of 0, 1, 2 slots: no error, one SHOT, shell still loses 3; pool of 5 after two pulls keeps the newest three and the oldest-evicted order.
-- Bots: low_on_bbs counts BBs (2 of 30 is low), reload_when_due reloads an empty shell, press_kept is true during the pump and false once home.
-- Performance sheet: Figures carry shot_bbs 3 / pattern 1.2 for the shotgun, 1 / 0 for the AEG; Pattern row present only for the shotgun; rate text carries the BB count, the AEG's has no "×".
+Blocking: none. Advisory: none new.
 
-Not covered beyond the worker's tests (already passing in test_pump_shotgun.gd): spacing/first-straight-up, one-hit, ten pulls per shell, bottomless, springs/optics, sounds exist, model stand-in.
+Checks
+1. tests/unit/test_mq1b_qa.gd: 8/8 pass (41 asserts). tests/unit/test_cyber_grip.gd: 3/3 pass (44 asserts). Both run alone on the committed glb with -gconfig=.
+2. Spine and web through the rounder tang: tests/unit/test_cyber_grip.gd:84 reads the rearmost point of every Body vertex (spine, web and grip together) at seven heights from -0.03 to -0.09 m, and holds them to a straight line within 0.8 mm. The rebuilt glb passes, so no spine or web vertex pokes out behind the back strap there. Not covered: Body points above -0.03 m (the tang's notch and above). The 7499a89 change touches this region and I did not test it.
+   The cell and pad stay inside the grip's skin at rest and ride the Magazine bone (so they leave on Reload): tests/unit/test_mq1b_qa.gd:64, :135 and :156 pass on the rebuilt glb with the closed ribs.
+3. Model studio under xvfb at the three poses (cyber at pitch +12, cyber at 0, aeg at -20): rendered a.png, b.png and c.png with no script errors. The only ERROR lines are the sandbox's Vulkan failure (VK_KHR_surface missing, falls back to OpenGL) and ALSA, both environmental. I did not look at the images.
 
-Not run (per instruction; the worker's full run is on the machine): tools/unit_tests.sh, tools/check.sh, tools/smoke_test.sh, python3 tools/wiki.py check. Only test_sh1_qa.gd was run (13/13, 0.42 s).
+Tests added or changed: none this attempt. No real gap found. The earlier 8 tests still fail without their features, as checked in attempt 2.
 
-Could not test (needs display/audio/owner): the HUD magazine count dropping by 3 on screen, the pump cue and shell sounds actually playing (SimAudio._cycle needs the scene), saves/loadouts naming 000027 with Dev content off (not exercised; only is_offered false was seen in the worker's test), the "1.7 × 3" string's exact rendering through the translation server, a bot match with Clearer kits, wiki output of "shots/s, N BBs each".
+Counts: 11 tests, 85 asserts, a few seconds each.
+
+Not tested: how the shadow-map and far-plane change looks (the images need an owner's eye on a real GPU). I did not run tools/check.sh, as asked.
