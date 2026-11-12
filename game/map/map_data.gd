@@ -385,7 +385,7 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 		b.surface = SURFACES.get(str(bd["surface"]), style.surface_of(b.kind)) if bd.has("surface") \
 				else style.surface_of(b.kind)
 		b.dress = StringName(str(bd.get("dress", "")))
-		if bd.has("facing"):
+		if bd.has("facing") and str(bd["facing"]) != "":
 			b.facing = StringName(str(bd["facing"]))
 			if not RISES.has(str(b.facing)):
 				warnings.append("block %d's facing %s is not +x, -x, +z or -z; it faces the field's middle"

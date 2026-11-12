@@ -1,4 +1,4 @@
-Task: SM4 · QA commit (see git log, "Agent: qa") · Verdict: Pass
+Task: SM4 · QA commit e0b7c32 · Verdict: Pass
 
 Blocking: none.
 Advisory:
