@@ -97,10 +97,10 @@ def cctv_camera() -> sk.Mesh:
 
 
 def way_sign() -> sk.Mesh:
-    """A box sign 1.28 x 0.28 m, 0.07 deep, "Way out" on its front (+z), "Platforms" on its back, hung 0.3 m under
-    the ceiling on two rods with their roses."""
+    """A box sign 1.28 x 0.3 m, 0.07 deep, "Way out" on its front (+z), "Platforms" on its back (each 4.57 to 1, as
+    its cell), hung 0.3 m under the ceiling on two rods with their roses."""
     m = sk.Mesh("way_sign")
-    w, h, d, top = 0.64, 0.28, 0.035, -0.3
+    w, h, d, top = 0.64, 0.299, 0.035, -0.3
     y0, y1 = top - h, top
     m.box((-w, y0, -d), (w, y1, d), "sign_black", skip="fb")
     f = 0.012
@@ -292,10 +292,10 @@ def plate(name: str, cell: str, w: float, h: float, frame: str) -> sk.Mesh:
 
 
 def departures(name: str) -> sk.Mesh:
-    """A departure board 1.6 x 0.4 m, 0.1 deep, its dot-matrix face on both sides, hung 0.3 m under the ceiling on
-    two rods."""
+    """A departure board 1.6 x 0.445 m, 0.1 deep, its dot-matrix face (4 to 1, as its cell) on both sides, hung 0.3 m
+    under the ceiling on two rods."""
     m = sk.Mesh(name)
-    w, h, d, top = 0.8, 0.4, 0.05, -0.3
+    w, h, d, top = 0.8, 0.445, 0.05, -0.3
     y0, y1 = top - h, top
     m.box((-w, y0, -d), (w, y1, d), "sign_black", skip="fb")
     f = 0.03

@@ -96,6 +96,33 @@ func test_every_model_loads_within_its_budget_with_its_glass_or_print() -> void:
 		assert_true(BUDGETS.has(StringName(model)), "%s has a budget here" % model)
 
 
+func test_every_printed_face_keeps_its_cell_s_shape() -> void:
+	# Each printed triangle's world edges over its edges on the 2048 px sheet: one ratio a triangle, so no face
+	# stretches its cell's drawing (within 2%).
+	for model: StringName in PRINTED:
+		var mesh := _mesh(model)
+		for s in mesh.get_surface_count():
+			var mat := mesh.surface_get_material(s)
+			if mat == null or StringName(mat.resource_name) != StationFixtures.SIGN_SURFACE:
+				continue
+			var arrays := mesh.surface_get_arrays(s)
+			var pos: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var uv: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
+			var index: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var worst := 0.0
+			for t in index.size() / 3:
+				var ratios: Array[float] = []
+				for e in 3:
+					var a := index[t * 3 + e]
+					var b := index[t * 3 + (e + 1) % 3]
+					var px := (uv[a] - uv[b]).length() * 2048.0
+					if px > 4.0:
+						ratios.append(pos[a].distance_to(pos[b]) / px)
+				if ratios.size() >= 2:
+					worst = maxf(worst, ratios.max() / ratios.min() - 1.0)
+			assert_lt(worst, 0.02, "%s's print stretched %.1f%%" % [model, worst * 100.0])
+
+
 func test_subway_names_every_model_and_the_tunnels_their_lamps() -> void:
 	var m := _map("subway")
 	var counts: Dictionary[StringName, int] = {}

@@ -19,7 +19,7 @@ import math
 MODELS = {
     "tunnel_lamp": ((-0.083, 0.083, -0.163, 0.163, 0.0, 0.102), "wall"),
     "cctv_camera": ((-0.057, 0.057, -0.144, 0.078, 0.0, 0.307), "wall"),
-    "way_sign": ((-0.640, 0.640, -0.580, 0.0, -0.035, 0.035), "hung"),
+    "way_sign": ((-0.640, 0.640, -0.599, 0.0, -0.035, 0.035), "hung"),
     "fire_extinguisher": ((-0.163, 0.084, 0.0, 0.655, 0.0, 0.220), "wall"),
     "litter_bin": ((-0.230, 0.230, 0.0, 0.954, -0.180, 0.183), "floor"),
     "edge_sign": ((-1.0, 1.0, 0.0, 0.006, -0.125, 0.125), "floor"),
@@ -48,8 +48,8 @@ MODELS = {
     "notice_cctv": ((-0.195, 0.195, -0.195, 0.195, 0.0, 0.029), "wall"),
     "wall_sign_out": ((-0.660, 0.660, -0.160, 0.160, 0.0, 0.029), "wall"),
     "wall_sign_platforms": ((-0.660, 0.660, -0.160, 0.160, 0.0, 0.029), "wall"),
-    "departures_n": ((-0.800, 0.800, -0.700, 0.0, -0.050, 0.050), "hung"),
-    "departures_s": ((-0.800, 0.800, -0.700, 0.0, -0.050, 0.050), "hung"),
+    "departures_n": ((-0.800, 0.800, -0.745, 0.0, -0.050, 0.050), "hung"),
+    "departures_s": ((-0.800, 0.800, -0.745, 0.0, -0.050, 0.050), "hung"),
 }
 POSTERS = ["poster_%s" % k for k in "abcdefghijklm"]  # the spots below take them in turn
 # How each wall faces into its room: the turn (degrees) of a model on it.

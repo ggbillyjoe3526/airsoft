@@ -12,7 +12,8 @@ wordless pictogram plate in each lift car.
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | build thread | | | |
+| 2026-11-12 | 1 | build thread | ✓ | 7/8 Retry | the departure boards' printed face 13% wider than its cell |
+| 2026-11-12 | 2 | build thread | | | |
 
 ## What it adds
 
@@ -32,6 +33,8 @@ wordless pictogram plate in each lift car.
 
 ## Decisions
 
+- **Every printed face keeps its cell's shape** (a test: each printed triangle's world edges over its sheet edges,
+  within 2%): the departure boards grew to 0.445 m tall (face 4 to 1), and SM5's way-out sign, 7% wide, to 0.3 m.
 - **The escalator posters stand level, not along the slope** (the Tube's are often level in their frames); their
   middles 2.1 m over the pitch line (1.7 on the lower, lower ceiling), clear of the decks (1.0 m) and the ceiling.
 - **The departure boards read along the platform** (yaw 90) and hang 0.3 to 0.7 m under the ceiling, between strip
