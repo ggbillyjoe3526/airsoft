@@ -62,6 +62,6 @@ func test_dim_and_flickering_plain_lamps_keep_the_bounce_through_a_flicker_step(
 	add_child_autofree(plain)
 	assert_eq(plain.light_count(), 2, "the dead lamp has no light")
 	plain.set_flicker(1, 0.3)
-	for lamp in [0, 1]:
+	for lamp: int in [0, 1]:
 		assert_almost_eq(plain.light_of(lamp).light_indirect_energy, cfg.plain_lamp_indirect, 0.0001)
 	assert_eq(plain.light_of(1).light_bake_mode, Light3D.BAKE_DYNAMIC, "a flicker lamp stays dynamic")
