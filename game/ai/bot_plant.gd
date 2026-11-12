@@ -301,8 +301,7 @@ static func may_defuse(w: BotWorld) -> bool:
 
 ## Whether the player `you` is within `reach` m of the bomb, measured level, and on its storey (plant_player_level).
 static func _player_within(w: BotWorld, you: Character, reach: float) -> bool:
-	var at := w.plant.position
-	return absf(you.position.y - at.y) <= w.cfg.plant_player_level and _flat(you.position, at) <= reach
+	return on_bomb_level(you, w) and _flat(you.position, w.plant.position) <= reach
 
 
 ## Seconds of holding Use the defuse still needs.
@@ -348,9 +347,12 @@ static func act(b: Bot, w: BotWorld, cmd: PlayerCommand) -> void:
 				_hands_on(cmd)
 
 
-## The attacking bot that fetches a bomb on the ground: the nearest in play under no squad order, the one already going
-## kept unless another is raiser_switch_margin nearer. It walks to it at once and waits beside it (BotMovement) until
-## may_take.
+## The attacking bot that fetches a bomb on the ground: the nearest in play under no squad order, one on the bomb's
+## storey (within plant_player_level of its height) before any that is not. The one already going is kept unless another
+## on the bomb's storey is raiser_switch_margin nearer, or is there while the one going is not: level distance says
+## nothing between two bots a storey off (the one walking to the stairs walks away from the bomb, and two of them
+## swapped the job each time they passed until the clock ran out). It walks to it at once and waits beside it
+## (BotMovement) until may_take.
 static func _pick_fetcher(w: BotWorld) -> void:
 	var keep: Bot = null
 	for b in w.bots:
@@ -361,16 +363,36 @@ static func _pick_fetcher(w: BotWorld) -> void:
 		return
 	var best: Bot = null
 	var best_d := INF
+	var best_level := false
+	var kept := keep != null and _may_fetch(keep, w)
+	if kept:
+		best = keep
+		best_d = _flat(keep.character.position, w.plant.position) - w.cfg.raiser_switch_margin
+		best_level = on_bomb_level(keep.character, w)
 	for b in w.bots:
-		if BotFlag.role(b, w) != BotFlag.Role.ATTACK or not Elimination.is_in_play(b.character) \
-				or b.order != SquadOrder.Kind.NONE:
+		if b == keep or not _may_fetch(b, w):
 			continue
-		var d := _flat(b.character.position, w.plant.position) - (w.cfg.raiser_switch_margin if b == keep else 0.0)
-		if d < best_d:
-			best_d = d
+		var level := on_bomb_level(b.character, w)
+		if kept and not level:
+			continue
+		var d := _flat(b.character.position, w.plant.position)
+		if (level and not best_level) or (level == best_level and d < best_d):
 			best = b
+			best_d = d
+			best_level = level
 	if best != null:
 		best.fetcher = true
+
+
+## Whether `b` could be the one to fetch the bomb: an attacker in play under no squad order.
+static func _may_fetch(b: Bot, w: BotWorld) -> bool:
+	return BotFlag.role(b, w) == BotFlag.Role.ATTACK and Elimination.is_in_play(b.character) \
+			and b.order == SquadOrder.Kind.NONE
+
+
+## Whether `c` stands on the bomb's storey: within plant_player_level of its height.
+static func on_bomb_level(c: Character, w: BotWorld) -> bool:
+	return absf(c.position.y - w.plant.position.y) <= w.cfg.plant_player_level
 
 
 ## The defending bot that disarms an armed bomb, once a bot may (may_defuse): the nearest of those back at it, the one

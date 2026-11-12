@@ -9,10 +9,6 @@ extends GutTest
 const ARMED_SHARE_MIN := 0.4
 ## The attackers' share of all rounds stays inside this band.
 const ATTACK_BAND := Vector2(0.25, 0.7)
-## Subway until the map rework (MB1) lands: on this layout its bots queue at the ticket gates in every mode
-## (docs/KNOWN_ISSUES.md › Bots; about 9 held up a match here, 9 in a 7 round Attack / Defend match). It goes back to
-## the shared limit with MB1's lanes.
-const SUBWAY_HELD_UP_MAX := 30
 ## Seeds a field: Depot's 16 fit a CI job; Woodland's and Subway's longer matches take 8.
 const SEEDS_SHORT := 8
 
@@ -26,8 +22,7 @@ func test_woodland_plays_the_bomb() -> void:
 
 
 func test_subway_plays_the_bomb() -> void:
-	_judge("Subway", await MatchGuard.plant_the_bomb(self, "subway", &"normal", SEEDS_SHORT, false,
-			SUBWAY_HELD_UP_MAX))
+	_judge("Subway", await MatchGuard.plant_the_bomb(self, "subway", &"normal", SEEDS_SHORT))
 
 
 func _judge(field: String, t: PackedInt32Array) -> void:

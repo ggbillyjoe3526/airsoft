@@ -196,7 +196,9 @@ static func _flag(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 	# Fetching a bomb the player still has first pick of: it waits beside it, clear of their reach.
 	if b.fetcher and not BotPlant.may_take(w):
 		arrive = cfg.plant_wait_distance
-	if Vector2(b.flag_goal.x - p.x, b.flag_goal.z - p.z).length() <= arrive:
+	# A bomb on another storey is not come to by standing under or over it.
+	var there := not b.fetcher or BotPlant.on_bomb_level(b.character, w)
+	if there and Vector2(b.flag_goal.x - p.x, b.flag_goal.z - p.z).length() <= arrive:
 		BotRoutes.drop(b)
 		b.holding = b.flag_guard
 		if b.flag_guard:

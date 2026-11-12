@@ -124,6 +124,60 @@ func test_the_nearest_free_attacker_fetches_the_bomb_and_nobody_once_it_is_carri
 	assert_false(_bot(0).raiser)
 
 
+func test_a_bot_on_the_bombs_storey_fetches_it_before_a_nearer_one_a_storey_off() -> void:
+	_world()
+	var storey := w.cfg.plant_player_level + 6.0
+	rs.plant.position = START + Vector3(0.0, storey, 0.0)
+	cs[0].position = START + Vector3(1.0, 0.0, 0.0)
+	cs[1].position = START + Vector3(30.0, storey, 0.0)
+	cs[2].position = START + Vector3(4.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(1).fetcher, "30 m off on its storey, not 1 m off under it")
+	assert_false(_bot(0).fetcher or _bot(2).fetcher)
+
+
+func test_the_one_fetching_a_bomb_a_storey_off_is_kept_whoever_passes_nearer() -> void:
+	_world()
+	var storey := w.cfg.plant_player_level + 6.0
+	rs.plant.position = START + Vector3(0.0, storey, 0.0)
+	cs[0].position = START + Vector3(3.0, 0.0, 0.0)
+	cs[1].position = START + Vector3(8.0, 0.0, 0.0)
+	cs[2].position = START + Vector3(40.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(0).fetcher)
+	# It walks off to the stairs, away from the bomb as the crow flies, and another comes to stand under it.
+	cs[0].position = START + Vector3(25.0, 0.0, 0.0)
+	cs[1].position = START
+	BotPlant.plan(w)
+	assert_true(_bot(0).fetcher, "the job is not swapped between two bots neither of whom is on its storey")
+	assert_false(_bot(1).fetcher)
+	cs[2].position = START + Vector3(35.0, storey, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(2).fetcher, "one who is on its storey takes over")
+	cs[0].position = START + Vector3(1.0, storey, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(0).fetcher, "and on the same storey the nearer by the margin")
+	cs[0].status = Character.Status.OUT
+	BotPlant.plan(w)
+	assert_true(_bot(2).fetcher, "the one going is out: the next")
+
+
+func test_a_fetcher_has_not_come_to_a_bomb_it_stands_under() -> void:
+	_world()
+	var storey := w.cfg.plant_player_level + 6.0
+	rs.plant.position = START + Vector3(0.0, storey, 0.0)
+	cs[1].position = START
+	BotPlant.plan(w)
+	assert_true(_bot(1).fetcher)
+	cmd.reset()
+	BotMovement._flag(_bot(1), w, cmd, 1.0 / 60.0)
+	assert_false(cmd.crouch, "under it is not at it")
+	cs[1].position = START + Vector3(0.0, storey, 0.0)
+	cmd.reset()
+	BotMovement._flag(_bot(1), w, cmd, 1.0 / 60.0)
+	assert_true(cmd.crouch, "beside it on its storey it waits low")
+
+
 func test_with_no_player_attacking_the_bots_take_the_bomb_at_once() -> void:
 	_world()
 	assert_true(BotPlant.may_take(w))

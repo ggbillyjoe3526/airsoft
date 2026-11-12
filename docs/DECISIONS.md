@@ -819,7 +819,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   "bomb" (`bombSites`, `bombStart`, `MapData.bomb_sites`): a map names places as the player does, beside its `flags`,
   and no grenade has a site. A carrier 15 m off but a storey above or below the bomb has no claim on it
   (`BotConfig.plant_player_level`). A carrier hit in the air leaves the bomb on the floor it last stood on, and one
-  hit in a lift on the landing the car last stood at, never in the shaft. Measures: `docs/records/PB1.md`.
+  hit in a lift on the landing the car last stood at, never in the shaft. The bot that fetches a bomb from the ground
+  is the nearest on its storey, or the nearest of all with none there, and it keeps the job until one on the bomb's
+  storey is nearer: level distance says nothing between bots a storey off. Measures: `docs/records/PB1.md`.
 - **A field's layout is judged on its play record (owner, 2026-11-12, MB1).** He asked for every field to be analysed
   like a Counter-Strike or Valorant map (sight lines, chokes, heat maps, cover, every piece placed on purpose) and
   changed, with one rule: no new model or sound; a field may be resized or cut if balance wants it ("Balance and

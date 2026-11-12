@@ -43,7 +43,8 @@ was never started.
   `BOMB_SITES`). `FieldChecks.on_floor` now covers the sites and the bomb's start.
 - **Bots** (`game/ai/bot_plant.gd`). The sites stand in for Attack / Defend's poles (a `FlagState` a site in
   `BotWorld`), so lanes, posts, guards and retakes are BotFlag's and BotMovement's. On top: the nearest attacker
-  fetches the bomb (waiting beside it while the player has first pick); the carrier sweeps its lane, then goes in
+  fetches the bomb (waiting beside it while the player has first pick; one on the bomb's storey before any that is
+  not, and the one going keeps the job); the carrier sweeps its lane, then goes in
   last, once two of its team are by the site or it has waited 10 s, and arms the bomb behind crouch cover inside the
   ring; a bomb dropped in the defenders' half moves the plan to the nearest site and whoever takes it up carries
   straight on; the defenders learn of the keys only within earshot (20 m); every free defender goes back to an armed
@@ -89,20 +90,36 @@ Claude's, each the owner's to change (`docs/DECISIONS.md` › Maps and modes):
 
 Bots only, Normal, 6v6, `tests/support/match_runner.gd`.
 
-Sixteen seeds a field (seeds 1 to 16), on the layouts of main at f990ce4:
+Sixteen seeds a field (seeds 1 to 16), on MB1's reworked layouts and with SH1's bot kits (main at a41c1e9, merged
+before the push), the storey-wise fetcher in:
 
 | Field | Rounds | Attackers win | Armed | Made safe | Gone off | Defenders wiped | Attackers wiped | Held up |
 |---|---|---|---|---|---|---|---|---|
-| Depot | 122 | 41 % | 64 % (A 56 %) | 29 | 0 | 50 | 43 | 0 |
-| Woodland | 127 | 57 % | 66 % (A 37 %) | 30 | 0 | 72 | 23 | 0 |
-| Subway | 108 | 41 % | 79 % (A 51 %) | 42 | 0 | 44 | 22 | 136 |
+| Depot | 111 | 37 % | 67 % (A 57 %) | 34 | 0 | 41 | 36 | 0 |
+| Woodland | 117 | 41 % | 76 % (A 45 %) | 43 | 1 | 47 | 26 | 0 |
+| Subway | 122 | 48 % | 85 % (A 41 %) | 47 | 1 | 58 | 16 | 39 |
+
+The same sixteen seeds on the layouts the mode was built and reviewed on (main at f990ce4), which the last three
+bullets below quote: Depot 122 rounds, 41 % to the attackers, armed 64 % (A 56 %), 29 made safe; Woodland 127, 57 %,
+66 % (A 37 %), 30; Subway 108, 41 %, 79 % (A 51 %), 42, 136 held up. None went off there. MB1's Woodland (the Fort's
+west wall, the log stack by flag B) took the attackers from 57 % to 41 %.
 
 - The bomb is taken up in every round, 0.2 to 0.3 s after the whistle with no player to wait for.
-- The first key goes in a mean 45 s (Depot), 67 s (Woodland) and 63 s (Subway) into the round.
-- A defuse ends 7 to 29 s after the plant, a median 7 to 8 s after the last attacker is out (Depot 29 of 29 with no
-  attacker left, Woodland 28 of 30, Subway 29 of 42): the bots win the fight first, then work on the bomb. No bomb
-  went off: the fight round an armed bomb is over inside the fuse, one way or the other, with 2.8 to 3.6 attackers
-  against 2.4 to 3.2 defenders standing at the plant.
+- The first key goes in a mean 47 s (Depot), 56 s (Woodland) and 49 s (Subway) into the round.
+- A defuse nearly always ends with no attacker left (Depot 34 of 34, Woodland 42 of 43, Subway 45 of 47): the bots
+  win the fight first, then work on the bomb. Two bombs went off in 350 rounds; the fight round an armed bomb is over
+  inside the fuse, one way or the other, with 2.7 to 4.6 attackers against 2.6 to 4.3 defenders standing at the
+  plant. On the earlier layouts a defuse ended 7 to 29 s after the plant, a median 7 to 8 s after the last attacker
+  was out.
+- The fetcher (found on the merged layouts, after the critic's Accept): Subway's first measure there gave the
+  attackers 43 % of 118 rounds, two lost to the clock, and 66 bots held up, 14 and 13 in two matches. A carrier hit on
+  the concourse left the bomb a storey above the south platform; the fetcher was the nearest bot measured level, so
+  the one walking to the escalators (away from the bomb as the crow flies) lost the job to the one walking back to
+  the site, and the two swapped it each time they passed until the round ran out. Now a bot on the bomb's storey
+  fetches before any that is not, the one going is kept unless one on its storey is nearer, and a fetcher has come
+  to the bomb only on its storey (`BotPlant._pick_fetcher`, `on_bomb_level`; three tests in `test_bots_plant`): 48 %,
+  none on the clock, 39 held up and at most 8 in a match, so Subway's guard is back on the shared held-up limit
+  (`SUBWAY_HELD_UP_MAX` is gone). Depot's rounds are the same to the round; Woodland's moved by three.
 - Before the carrier went in last and a bomb taken up in the defenders' half was carried straight on, the attackers
   took 20 % on Depot, 36 % on Woodland and 22 % on Subway.
 - Subway before attempt 2 (the critic's Retry): 27 % to the attackers and Site A armed in 13 % of plants. Three
@@ -112,9 +129,9 @@ Sixteen seeds a field (seeds 1 to 16), on the layouts of main at f990ce4:
   attacker was still in play, most within a metre or two of the bot disarming, blind in a cloud on a platform 3.5 m
   wide; with the keys and the kit giving their user away within 5 m, 42 %. The same rule took Woodland from 46 % to
   57 % (fewer attackers wiped before the plant) and left Depot where it was.
-- Subway: its bots queue at the ticket gates on this layout in every mode (9 held up in a 7 round Attack / Defend
-  match on main; 8.5 a match here). Its guard keeps a held-up limit of its own until the map rework (MB1) lands
-  (`SUBWAY_HELD_UP_MAX`; `docs/KNOWN_ISSUES.md` › Bots); the attackers' band is the shared one.
+- Subway before MB1: its bots queued at the ticket gates in every mode (9 held up in a 7 round Attack / Defend match
+  on main; 8.5 a match here), and its guard kept a held-up limit of its own (30) until MB1's lanes and the fetcher's
+  fix; the attackers' band is the shared one.
 
 ## Checks
 
