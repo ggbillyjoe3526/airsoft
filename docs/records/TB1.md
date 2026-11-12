@@ -1,6 +1,6 @@
 # TB1 · Subway's platforms like the Tube
 
-**Review:** 3 attempts · critic pending · qa Pass · performance pending
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 Owner's ask (2026-11-12): "curved ceilings for the platforms. The yellow mind the gap line should only be on platform
 edges. The wall opposite a platform should be back (same as in the tunnel). I want the map to look more realistic like
@@ -15,7 +15,7 @@ more detail and make more realistic. It looks too empty and blocky."
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Opus 5.5 (build thread) | ✓ | 6/8 Retry | a black wedge over the north car's west end; the vault and far wall still brown-grey; posters, known issue and README rows untracked |
 | 2026-11-12 | 2 | Opus 5.5 (build thread) | ✓ | 5/8 Retry | no longer merged with SM5 (#315), the frieze sharing a plane with the wide posters' tops; no test for the attempt-1 wedge; the ribs called pale but drawn dark |
-| 2026-11-12 | 3 | Opus 5.5 (build thread) | ✓ | – | – |
+| 2026-11-12 | 3 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
