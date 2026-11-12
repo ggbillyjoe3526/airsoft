@@ -149,6 +149,29 @@ func test_woodland_flag_b_forward_post_is_behind_the_crates() -> void:
 	assert_lt(Vector2(post.x - flag.x, post.z - flag.z).length(), 12.0, "within reach of the pole")
 
 
+func test_subway_flag_b_stands_on_the_north_platform_floor_clear_of_every_block() -> void:
+	var m := maps["subway"]
+	var f := m.poles[1]
+	assert_almost_eq(f.x, 33.0, 0.01, "flag B x")
+	assert_almost_eq(f.z, -7.8, 0.01, "flag B z")
+	var nav := navs["subway"]
+	assert_true(nav.is_walkable_at(Vector3(f.x, f.y + 0.6, f.z)), "a bot can stand at flag B")
+	var floor_y := _floor("subway", f)
+	assert_almost_eq(floor_y, 0.9, 0.2, "on the platform storey")
+	var r := tuning.body.radius
+	var feet := floor_y + 0.2
+	var head := floor_y + tuning.body.stand_eye_height
+	var hit := PackedStringArray()
+	for b in m.blocks:
+		if b.rise != MapData.Rise.NONE:
+			continue
+		var h := b.size * 0.5
+		if absf(f.x - b.center.x) < h.x + r and absf(f.z - b.center.z) < h.z + r \
+				and feet < b.center.y + h.y and head > b.center.y - h.y:
+			hit.append("%s %s" % [b.kind, b.center])
+	assert_eq(hit.size(), 0, "no block in a standing body at the flag: %s" % [hit])
+
+
 ## The road's stack at the Culvert stands a gate screen's 2.8 m for this: the hump is 2.1 m over the dip the stack
 ## stands in, and at a woodpile's 1.8 m a standing eye on the road sees a chest in the pole's ring from 60 m.
 func test_woodland_long_road_does_not_see_flag_b_pole_ring_or_posts() -> void:
