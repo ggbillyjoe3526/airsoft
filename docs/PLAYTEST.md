@@ -1482,6 +1482,9 @@ Subway is Dev content: tick Settings › Dev › Dev content. On a real graphics
   never black; from Medium up they keep their sheen.
 - [ ] **Frame rate** on Low and Medium looking down the north platform: at least as good as before.
 - [ ] **Other maps unchanged:** Depot, Woodland and the Range look as before on every preset.
+- [ ] **Ultra's ceilings (UL2).** On Ultra, Subway's ticket hall, concourse and platform vaults show their ceilings
+  in dark grey, never black, and the shade under the pillars is dark but you can see a player standing in it. Depot's
+  hall on Ultra looks as before. Frame rate on Ultra in the ticket hall: as before.
 
 ## Reporting what you find
 
