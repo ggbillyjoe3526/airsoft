@@ -1507,13 +1507,16 @@ model until its own is built, and the pump, shot and shell sounds are stand-ins 
 - [ ] **One hit is one hit.** A pull that lands two or three BBs on a bot is one hit: one tick, one "HIT!".
 - [ ] **Springs.** The Armoury offers it the Sniper Rifle's M140 and M150 springs (the M130 is the one it comes with):
   each reaches a little further, pumps slower and kicks more; the M150 is louder. No batteries or gas fit.
-- [ ] **Parts.** Every optic fits the top rail. No grip, silencer, barrel or magazine part fits. The Red Laser and the
-  Weapon Torch wait for its own model.
+- [ ] **Parts.** Every optic fits the top rail and the Weapon Torch fits (drawn where the Sniper Rifle carries it for
+  now). No grip, silencer, barrel or magazine part fits. The Red Laser waits for its own model's side rail.
 - [ ] **The Loadout sheet** shows "1.7 × 3" for its rate and a Pattern row (1.2°) no other replica has.
 - [ ] **Bots.** With Dev content on, some bots carry it (the Clearer kit, a Red Dot and two flashes): they push and
   flank, fire one pull at a time and hold their fire at long range.
 - [ ] **Cold and indoors.** On a cold map it fires as hard as anywhere (a spring); indoors it starts as it always is,
   one pull a click.
+- [ ] **Frame rate.** A 6v6 with Dev content on, when several Clearer bots fire at once (three BBs and three puffs a
+  pull each): does the frame rate hold as it does without them? (The performance review's note: only your PC can
+  show it.)
 
 ## Reporting what you find
 

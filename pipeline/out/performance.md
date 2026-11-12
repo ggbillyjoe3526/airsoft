@@ -1,14 +1,16 @@
-Task: none (MQ1) · head 6029fe9 · Verdict: Pass
-Run: none (no --perf match, no GPU, check suite running); diff read only · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the diff
-Metrics: not measured (judgment). Textures fetches unchanged: 5 texture() calls in the include, same as attempt 1. glb triangles unchanged (same meshes). Install: assets/ 126 MB total, replica glbs +1.2 MB (aeg 4.35, pistol 3.76, smg 3.98, sniper 1.63, cyber 1.35 MB), grain png +36 KB; far under 500 MB.
-Regressions (> 10 % worse): none measured
+Task: SH1 · head 5d3d174 · Verdict: Pass
+Run: none (no Godot run, container shared; read-only review of the diff) · budget: no baseline yet (pipeline/perf-budget.json does not exist), judged against targets and the code
+Metrics: not measured this run. Checks reported by the worker: smoke ok (621 shots, zero script errors), 6112 tests, 0 failing. Frame times: owner's hardware only.
+Regressions (> 10 % worse): none measured; none expected for the single-BB replicas (judgment)
 Blocking findings: none
- - Allocations: replica_surfaces.gd:107-110 dress() sets four shared pre-built Array[Vector4] once per material (not per frame); _build() runs once (judgment).
- - Caching/freeing: replica_paint.gd:140-160 _surface_of caches by plain/mask/kind, capped at MAX_SURFACED 160 (cleared past it); clear() (:220-223) empties _surfaced, called at play_session.gd:1667. Rename complete: no stale worn_materials/MAX_WORN/OWN_GLOW references left in game, tests or tools.
- - Prewarm: play_session.gd:919 passes ReplicaPaint.surface_materials(); one shader for every replica and paint, so no new variants (KINDS 16 changes array size only, one compiled variant).
- - Shader cost: replica_surface.gdshaderinc:116-123 adds a handful of ALU ops (max/min, one divide, one smoothstep, a dot, mix) and SPECULAR per fragment, no fetches; uniform data 4 x 16 vec4 = 1 KB per material, uploaded on change only (judgment).
- - studio_sky.gd: static cached Sky (menu pictures only, 128 px radiance, rendered once per sky); not on the gameplay path.
-Advisory:
- - game/play/replica_surface.gdshaderinc:100-113 still 7 grain fetches a fragment on the replica in the hands, no preset hook (unchanged from attempt 1, not measurable without a GPU); worth a rendered check on the owner's Low-preset hardware.
- - game/play/replica_paint.gd:143-144 the cap clears the whole cache, so ShaderMaterials already on meshes stay alive via references but a later prewarm list shrinks; only matters past 160 combinations (judgment).
-Unexplained: none
+ - game/sim/armament.gd:489-516 (_fire, judgment): per pull only floats and Vector3 values. No Array, Dictionary, closure, Callable or string. The loop over `bbs` calls rng.randfn twice per BB, as the old code did once per pull; a single-BB replica makes the same draws as before. The cost per extra BB is one offset_direction (sin, cos, tan, normalize), so three BBs are about 3x the old trig on the shooter's tick: negligible next to the BB step.
+ - game/sim/bb_pool.gd:18-37 (judgment): the pool is fixed (max_bbs), allocates nothing and recycles the oldest BB when full. spawn scans the pool linearly, so a pull costs 3 scans instead of 1. That is a small constant while the pool is bounded. The pool cap is covered by test_sh1_qa.gd. Growth is bounded.
+ - game/ai/bot_combat.gd:~270 (pattern_too_wide, judgment): called per bot per shoot attempt, not per tick. It does one deg_to_rad and one tan, only when shot_bbs > 1 (the && short-circuits before the trig). Zero allocation. The `in_hand` lookup repeats bolt_waits', which is trivial.
+ - game/play/sim_audio.gd:197-198 (judgment): the _cycle lookup runs once per profile in setup (ResourceLoader.exists plus _load), and per shot it is a Dictionary.get on a StringName. No allocation, no new per-shot string formatting. The new cues are loaded at setup, not on first use, so there is no first-use hitch.
+ - No new node, material, mesh, tween, timer, particle or connection: the model is the Sniper Rifle's stand-in, so no shader prewarm entry is needed. No preset bypass (no shadow, resolution or draw-distance change).
+Advisory
+ - Three BBs a pull per shotgun-armed bot raises live BBs and BB impact puffs per second (pooled and capped, so bounded). Only the owner's hardware can show whether the BB renderer and the puff pool keep frame times steady with several bots pumping at once. Add this to the owner's playtest list. (judgment)
+ - assets/audio/cues: 18 new wavs, about 585 KB of the 48 MB audio folder (about 1.2 %). perf-budget.json has no install or audio line, so nothing to compare against. Record it when the owner sets the budget. (measured size, judgment on budget)
+ - game/ui/loadout_performance.gd: the Pattern row and "1.7 × 3" rate are built in menu code, not in a per-frame path. Fine.
+Fixes: none required.
+Unexplained: none. Node count, orphan nodes, static memory and script time per tick were not measured against origin/main this run (the brief limited me to one short Godot job at most, and the diff adds no nodes or resources). Re-run `--perf` on both heads if the critic wants numbers.

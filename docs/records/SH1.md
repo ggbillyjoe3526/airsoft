@@ -65,8 +65,9 @@
 - **The bot kit** is the Clearer: a Red Dot, a GBB Pistol, two flashes, rushers and flankers, weights 3, 6 and 8
   (Easy, Normal, Hard) beside the Breacher's.
 - **Its model is the Sniper Rifle's** until SH2 builds its own from the owner's five photos (saved in the project
-  files, `art/references/shotgun/`). The stand-in has no laser's place, so the side rail (the Red Laser and the Weapon
-  Torch, the owner's "default" parts) joins `data/pool.md` with the model; it takes every optic and the springs now.
+  files, `art/references/shotgun/`). The stand-in has no laser's place, so the side rail (the Red Laser's) joins
+  `data/pool.md` with the model; it takes every optic, the Weapon Torch (which fits any rifle, drawn at the Sniper
+  Rifle's mount for now) and the springs now.
 - **Stand-in sounds** (`tools/cut_recordings.py`, marked there): the shot is the owner's sniper shot pitched down and
   cut short, the pump his sniper bolt squeezed to the pump's 0.59 s, the shell out and in his cover clicks pitched
   down. What to record is in the project files' `audio/record-next.md`, the state in `audio/sound-status.md`.
@@ -77,7 +78,7 @@
 
 ## Known issues left
 
-- Drawn, held and pictured as the Sniper Rifle; no laser or torch yet (SH2). `docs/KNOWN_ISSUES.md`.
+- Drawn, held and pictured as the Sniper Rifle; no Red Laser yet (SH2). `docs/KNOWN_ISSUES.md`.
 - Its sounds are stand-ins until the owner records them. `docs/KNOWN_ISSUES.md`.
 - Balanced on benches, not by play: the Dev 3 checklist asks the owner how the first pull, the pump's pace and the
   pattern's width feel. `docs/KNOWN_ISSUES.md`.

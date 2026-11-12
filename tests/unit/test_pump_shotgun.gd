@@ -17,6 +17,7 @@ const RED_DOT := "000007"
 const SCOPE := "000010"
 const VERTICAL := "000006"
 const RED_LASER := "000005"
+const TORCH := "000020"
 const SILENCER := "000018"
 const LONG_BARREL := "000017"
 const HI_CAP := "000012"
@@ -280,6 +281,7 @@ func test_it_takes_the_optics_and_the_springs_and_nothing_else_yet() -> void:
 	assert_true(rules.set_part(l, SHOTGUN, &"optic", SCOPE), "a scope on its top rail")
 	assert_true(rules.set_part(l, SHOTGUN, &"optic", RED_DOT))
 	assert_false(rules.set_part(l, SHOTGUN, &"laser", RED_LASER), "its side rail comes with its own model")
+	assert_true(rules.set_part(l, SHOTGUN, &"light", TORCH), "the Weapon Torch fits any rifle")
 	assert_false(rules.set_part(l, SHOTGUN, &"muzzle", SILENCER), "three barrels: no thread")
 	assert_false(rules.set_part(l, SHOTGUN, &"grip", VERTICAL), "the pump is the grip")
 	assert_false(rules.set_part(l, SHOTGUN, &"barrel", LONG_BARREL), "no barrel mount")
