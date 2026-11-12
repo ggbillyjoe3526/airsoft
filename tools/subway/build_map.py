@@ -19,6 +19,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import layout as L  # noqa: E402
+import fixtures  # noqa: E402
 import station_dress  # noqa: E402
 
 OUT = os.path.join(HERE, "..", "..", "data", "maps", "subway.json")
@@ -509,6 +510,7 @@ def build() -> dict:
         "lifts": lifts(),
         "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT)},
     }
+    m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, [shaft_hole()])
     del sx
     return m
 
@@ -521,7 +523,7 @@ ROOF_OVER = 0.4      # the roof's height (m) over the highest ceiling's top: an 
 
 def lamps() -> list[dict]:
     """A strip lamp on each room's own ceiling (but a doorway's), every LAMP_STEP m along its longer side (two rows across a wide room),
-    its `y` the ceiling's underside there."""
+    its `y` the ceiling's underside there, turned (`turn` 90) to run along a room longer in z than in x."""
     out = []
     for rm in L.rooms:
         if not rm["ceil"] or max(rm["x1"] - rm["x0"], rm["z1"] - rm["z0"]) < LAMP_ROOM_MIN:
@@ -541,7 +543,10 @@ def lamps() -> list[dict]:
                     y = ceil_under(rm, *cell)
                 else:
                     y = ceil_at(rm, floor_at(rm, x))
-                out.append({"x": r(x), "z": r(z), "y": r(y + LIFT)})
+                lamp = {"x": r(x), "z": r(z), "y": r(y + LIFT)}
+                if not along_x:
+                    lamp["turn"] = 90   # the strip lamp (SM5) runs along its room
+                out.append(lamp)
     return out
 
 

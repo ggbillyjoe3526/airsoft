@@ -32,7 +32,10 @@ extends Resource
 ## lamp's half width, the truss's half width and a hand between).
 @export var lamp_clear: float = 0.4
 @export var lamp_drop: float = 0.6
-## A plain roof's lamps (MT1, MapData.roof_plain: a station's strip lights): panels this far under their ceiling.
+## A plain roof's lamps (MT1, MapData.roof_plain: a station's strip lights): the strip lamp model (SM5, its top at the
+## ceiling, its own `lamp_lens` glowing, turned along its room by MapData.roof_lamp_turns), or without it panels
+## `plain_lamp_drop` m under their ceiling.
+@export_file("*.glb") var plain_lamp_model: String = "res://assets/models/props/strip_lamp.glb"
 @export var plain_lamp_drop: float = 0.08
 @export var lamp_size: Vector2 = Vector2(1.4, 0.5)
 @export var lamp_colour: Color = Color(1.0, 0.96, 0.86)

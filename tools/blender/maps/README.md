@@ -45,11 +45,18 @@ blocks read from `data/maps/woodland.json` (rerun a structure's script after `to
 | `spiral_stair.py` | `spiral_stair.glb` | Subway's spiral stair over its ramps and landings (`Lay.SET`; the core stays the station's pillar) |
 | `platform_stair.py` | `platform_stair.glb` | Subway's stair to the platforms over its two flights (`Lay.SET`, its handrails `set_heads` over the box) |
 | `railing.py` | `railing_bar.glb`, `railing_top.glb`, `railing_foot.glb`, `railing_post.glb` | Every bar railing's pieces (`RailingMesh`, `MapStyle.railing_look`), fitted to the bars and rails a BB meets |
+| `station_lamps.py` | `strip_lamp.glb`, `tunnel_lamp.glb` | Subway's ceiling strip lamps (`RoofConfig.plain_lamp_model`, turned along their rooms) and the running tunnels' bulkhead lamps (SM5) |
+| `station_extras.py` | `cctv_camera.glb`, `way_sign.glb`, `fire_extinguisher.glb`, `litter_bin.glb`, `edge_sign.glb`, `platform_clock.glb`, `poster_a..d.glb`, `name_board.glb` | Subway's look-only extras (`StationFixtures`, spots from `tools/subway/fixtures.py`) |
 
 Subway's stairs, escalators, lifts and railing (SM2) share `transit_kit.py`: their paints, a mesh builder with boxes,
 sweeps, lathes, tubes round filleted paths, knobs and rings, and `report`, which writes the model and fails it over its
 budget or off its box by more than 5 mm. The steps' cleats and nosings are drawn by the props' shader (`map_kit.ribbed`:
 UV.x under -1 draws ribs 8.5 mm apart).
+
+Subway's lamps and extras (SM5) share `stationkit.py` (a mesh builder in the game's axes: `Prop`, `Lens` and `Sign`
+faces, a printed face's UVs into the sign sheet) and `station_cells.py` (the sheet's cells); `station_signs.py` draws
+the sheet itself (`assets/textures/station/signs.png`, every word invented) and `station_render.py` renders the
+models for review with their glass lit and their print on.
 
 The trees share `treekit.py`: stems, limbs, foliage clumps and spruce tiers with crown-lit normals, and the build gates
 (budget, no team hue, the trunk inside its foot radius, the crown only over the clearance outside it). A tree's trunk

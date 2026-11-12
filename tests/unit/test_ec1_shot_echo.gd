@@ -163,3 +163,12 @@ func test_an_old_match_leaving_after_a_new_setup_leaves_the_echo_on() -> void:
 	remove_child(now)
 	assert_false(_echo_on(), "the match that set it puts it back")
 	add_child(now)
+
+
+func test_subways_default_echo_is_quieter_than_the_first_one_but_still_there() -> void:
+	var echo: ShotEcho = cfg.shot_echoes[&"subway"]
+	assert_lt(echo.wet, 0.28, "less reverb than the first cut")
+	assert_lt(echo.room_size, 0.72, "a shorter tail than the first cut")
+	assert_gt(echo.wet, 0.0, "still an echo")
+	assert_gt(echo.room_size, 0.0)
+	assert_almost_eq(echo.gain_db, 2.0, EPS)

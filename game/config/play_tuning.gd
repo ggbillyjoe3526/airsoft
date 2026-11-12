@@ -37,6 +37,8 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 @export var site_look: SiteLook = SiteLook.new()
 ## How a map naming a station dress is drawn (MT3: Subway's CC0 photo sets).
 @export var station_look: StationLook = StationLook.new()
+## A station's lamps and extras (SM5: Subway's tunnel lamps, signs, posters, clocks, bins), StationFixtures.
+@export var station_fixtures: StationFixturesConfig = StationFixturesConfig.new()
 ## The game's look on every map: the shared light, the picture's grade and the graphics effects (docs/ART.md).
 @export var look: LookConfig = LookConfig.new()
 ## Seconds the match's summary stays up before the next match starts (a click starts it sooner); the wait starts once

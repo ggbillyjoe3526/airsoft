@@ -11,7 +11,8 @@
 // With `wear` (SL2, docs/ART.md › Surfaces), times the look's `look_wear`, the model is worn in world space: grime up
 // its foot (from its floor, `wear_floor` m up its own y: PropDress sets its box's bottom, where PropLayout stands it),
 // streaks down its sides, broad stains, and dust settled on its tops, so no two props wear alike. Edge scuffs are the
-// models' own paint (tools/blender). 0 (foliage, the greybox) is clean.
+// models' own paint (tools/blender). 0 (foliage, the greybox) is clean. With `use_sheet` (SM5, Subway's signs and
+// posters: StationFixtures), the vertex colour is printed with `sheet` at the model's UVs.
 shader_type spatial;
 render_mode blend_mix, cull_back;
 
@@ -29,6 +30,8 @@ uniform bool srgb_colours = false;
 uniform bool keep_by_alpha = false;
 uniform bool paint_by_custom = false;
 uniform bool perforations = false;
+uniform bool use_sheet = false;
+uniform sampler2D sheet : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
 // kit.PERF_PITCH and kit.PERF_RADIUS (tools/blender/maps/map_kit.py) keep the same.
 uniform float perforation_pitch = 0.045;
 uniform float perforation_radius = 0.0045;
@@ -100,6 +103,9 @@ void fragment() {
 		float groove = 1.0 - smoothstep(rib_groove - edge, rib_groove + edge, t);
 		groove = mix(groove, rib_groove, smoothstep(0.25, 0.6, edge));
 		own *= mix(1.0, rib_shade, groove);
+	}
+	if (use_sheet) {
+		own *= texture(sheet, UV).rgb;
 	}
 	vec3 col = own * paint * tint.rgb;
 	float rough = roughness;

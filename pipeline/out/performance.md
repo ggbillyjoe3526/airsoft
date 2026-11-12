@@ -1,11 +1,12 @@
-Task: CN1 · head e1133ce · Verdict: Pass (attempt 2)
-Run: no match run needed (no game/ code changed since adb2321; only tools/blender/figures, tests, rebuilt human.glb and body textures) · budget: no baseline yet, judged against targets and base 4ea951a
-Metrics (measured on the committed files):
-- human.glb 9,707,612 B / base 9,708,632 (-0.0 %), attempt 1 9,703,220 (+0.05 %). ok
-- human_body_col.webp 565,022 / base 567,998 (-0.5 %); orm 90,776 / 91,778 (-1.1 %); nrm 856,624 / 852,226 (+0.5 %). ok
-- glb structure: 26 meshes, 68 primitives (surfaces), 8 materials, 10 images, identical to base. No new meshes, surfaces or materials.
-- Triangles per LOD for the largest-head human (budgets 60k / 20k / 6k): tests/unit/test_figure_body.gd HUMAN_HIGH = [58868, 58868, 19424, 5639] is unchanged by this diff, so the pinned counts still hold. QA's run at this head reports test_figure_body 17/17 (pipeline/out/qa-report.md). My own re-run timed out at 300 s because tools/check.sh was loading the machine, so the per-LOD counts are QA's measurement plus the test file untouched, not mine. All inside the budgets (judgment on that last point).
-Regressions (> 10 % worse): none
+Task: SM5 · head 94294ee · Verdict: Pass
+Run: no rendered run (cloud, no GPU); static measurement of the diff b43f473..94294ee · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the install budget
+Metrics: signs.png 4.52 MB on disk (measured; install budget 500 MB, assets/ total 122 MB, ok). VRAM BC7+mips about 5.3 MiB vs about 4 MiB (+1.3 MiB, judgment from size). Poster triangles: 28 placed x 38 = about 1.06k (measured from data/maps/subway.json). Fixture MultiMeshes: 24 model entries (24 distinct models, 103 instances; 16 are posters). Draw calls: about +12 (judgment, not rendered). Frame times: not measured.
+Regressions (> 10 % worse): none measured. Draw calls rise from about 12 to about 24 fixture draws on Subway (judgment; unconfirmed in a render).
 Blocking findings: none
-Advisory: none new. The only runtime-visible change is skin weights and vertex positions (collar, back rise, scarf radius), so no new draw calls, shaders, prewarm entries or per-frame work.
-Unexplained: none
+Advisory:
+- game/play/station/station_fixtures.gd:85-94 one MultiMeshInstance3D per model, no visibility range set; shadows are off (line 94), so the cost is draw calls only. 12 extra draws is small against Low's 60 FPS target but unmeasured on low-powered hardware. Judgment.
+- Option 1, one poster mesh per size (small, wide) with instance custom-data UV offset: cuts the poster draws from 16 to 2 (saves about 14). It needs a shader change and the prewarm entry; worth doing only if the owner's Low-preset run shows draw-call pressure. Judgment.
+- Option 2, visible_instance_end_margin or visibility_range on poster MultiMeshes: posters are tiny, per-MultiMesh culling is by whole AABB, so it helps little with posters spread over the map. Not recommended. Judgment.
+- signs.png 2048x2048 is shared by all printed faces (one material, no new material or shader), so no new prewarm entry needed. If the Low preset ever needs VRAM headroom, import the sheet at half resolution there. Judgment.
+Fixes, ranked: none required.
+Unexplained: none. Please record a rendered Subway draw-call count on the owner's hardware to start perf-budget.json.

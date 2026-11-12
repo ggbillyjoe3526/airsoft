@@ -153,6 +153,7 @@ var _light: LightingConfig = null
 var _pools: LightPools = null
 ## What the field's lights stand on or hang from (LightFixtures: Woodland's campfires and lanterns), day and night.
 var _fixtures: LightFixtures = null
+var _station_fixtures: StationFixtures = null
 ## The weapon torches drawn at night (TorchBeams; null by day).
 var _torches: TorchBeams = null
 ## Dev › Lasers' beams (LZ1): made for every match, drawing only while lasers are fired.
@@ -443,6 +444,9 @@ func _dress_part(part: int) -> void:
 			_fixtures = LightFixtures.build(_map, _play.light_fixtures, _light)
 			if _fixtures != null:
 				add_child(_fixtures)
+			_station_fixtures = StationFixtures.build(_map, _play.station_fixtures)
+			if _station_fixtures != null:
+				add_child(_station_fixtures)
 		3:
 			_woods = WoodsView.build(_map, _play.woods, _play.skyline, _light, _play.map_style,
 					_play.site_look.props)
@@ -927,6 +931,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_pools.materials())
 	if _fixtures != null:
 		first_use.append_array(_fixtures.materials())
+	if _station_fixtures != null:
+		first_use.append_array(_station_fixtures.materials())
 	first_use.append_array(_level.glass_materials())
 	if _woods != null:
 		first_use.append_array(_woods.materials())

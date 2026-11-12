@@ -100,6 +100,10 @@ func _run() -> void:
 	var fixtures := LightFixtures.build(map, play.light_fixtures, sun)
 	if fixtures != null:
 		port.add_child(fixtures)
+	# A station's lamps and extras (SM5: Subway's signs, posters, clocks, tunnel lamps).
+	var station_fixtures := StationFixtures.build(map, play.station_fixtures)
+	if station_fixtures != null:
+		port.add_child(station_fixtures)
 	var pools := LightPools.build(map, sun)
 	if pools != null:
 		port.add_child(pools)

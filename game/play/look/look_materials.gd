@@ -24,6 +24,15 @@ static func vertex_colour(roughness: float, metallic: float, tint: Color = Color
 	return m
 
 
+## A material printing `sheet` (sRGB) at a model's UVs over its vertex colours in the shared light (SM5: Subway's
+## signs, posters and clock faces), `roughness` over it, worn as `vertex_colour`'s `wear`.
+static func printed(sheet: Texture2D, roughness: float, wear: float = 0.0) -> ShaderMaterial:
+	var m := vertex_colour(roughness, 0.0, Color.WHITE, false, wear)
+	m.set_shader_parameter(&"use_sheet", true)
+	m.set_shader_parameter(&"sheet", sheet)
+	return m
+
+
 ## A material painting a whole mesh without vertex colours `colour` (sRGB) in the shared light, `roughness` and
 ## `metallic` over it: a door's leaves, a flag pole (BP7). A mesh without colours reads as white, so the tint is its
 ## paint.

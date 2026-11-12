@@ -1,26 +1,33 @@
-Task: CN1 · The shirt collar at the back of the neck (owner bug report, 2026-11-10)
-Attempt: 4 of 4
-Head: b31bf5a (full check.sh not yet passed on it: parts 1-3 on e1133ce, the five figure/model tests on 87208e6 with
-  the same counts, parts 4-7 and smoke re-running. This Accept holds only once they and CI pass on b31bf5a)
+Task: SM5 · Subway's lamps and extras
+Attempt: 10 (past 4; review-cap ruling: keep fixing until the critic passes), William's "Make the far trackside
+   posters much larger"
+Head: 21ad054 (= HEAD). Full tools/check.sh started on 21ad054 and NOT finished when judged (its output was empty);
+   test_station_fixtures 8/8 and test_sm5_qa 13/13 ran on it. The diff touches no runtime script.
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (conditional on the pending check.sh parts 4-7, smoke and CI on b31bf5a)
+Score: 8/8 → Accept (merge only once tools/check.sh ends green; the verdict lapses if it fails)
 Failed checks, with evidence: none.
-1. Models rule, judged from v4/1-boonie-before-after.jpg and v4/2-boonie-angles.jpg (no reference photo named, so (a)
-   can't be measured). All four attempt-3 must-fixes met: the widen-only cone pass is removed (headwear.py was
-   :756-765); the lower rows go through over_collar (:725-738) onto collar.outer_radius + SCARF_OVER_COLLAR 6 mm (:713);
-   the hem sits SCARF_HEM_DROP 5 mm under RINGS[2] (:751), 12 mm above RINGS[1], so nothing below it can flare or step
-   in; folds fade out over the lowest 35 % (:755, so the az*7 scallop is zero at the hem); roll 4.5 mm (:722, :764);
-   standing back plus 30° each side rendered. In the renders the scarf reads as a gaiter wrapped on the collar:
-   standing, aiming, crouched and behind-right show no ruff, no overhang past the collar's edge, no poke-through.
-   The 1.4 m view reads clean. Cap, High-cut and Full-cut are unchanged since attempt 2 (v3 sheets, judged clean then).
-   Not blocking, worth a later polish pass: the standing-back AFTER hem is still a pale rolled band with a thin
-   shadow line under it; at play distance (1.4 m view) it reads as a hem, not a gap. The scarf is now short at the
-   back and looks more like a tight gaiter than a loosely knotted shemagh. If the owner wants it looser, add a short
-   hanging tail at the back (an IDEAS row, not a CN1 retry).
-Must-fix before merge: confirm check.sh parts 4-7, smoke and CI green on b31bf5a; then fill in attempt 4's row in
-   docs/records/CN1.md (still "pending").
+Checked this attempt (git diff HEAD~1 HEAD, sm5-4 shots 1, 13, 14, sm5-6):
+1. station_extras.py:+292 builds poster(cell, 3.0, 1.5, 0.05), a 6 x 3 m face in a 50 mm frame; fixtures.py:+40-42
+   bounds of +-3.05 x +-1.55 match it; WIDE_Y 2.4 (+55) puts it at 0.85 to 3.95 with the frame, under the 4.1 vault.
+   Clearances, worked from fixtures.py:+89-90 and subway.json: north 28 and 38 clear the boards at 22 and 44 by 1.49
+   and 1.49 m and each other by 3.9 m; south -35, -17, 4 and 23 clear the boards at -44, -26, -8 and 14 by at least
+   1.41 m. test_sm5_qa.gd:+182-192 now asserts 6, y 2.4, board gap 3.05 + 1.46, poster gap 6.1.
+1. Readability at 112 px/m: in sm5-6 the smallest line ("Bikes by the hour ...") is about 0.15 m tall, about 17
+   texels; the titles are about 0.33 m, about 37 texels. From 4 to 8 m on a 1080p screen at a 75° FOV, a metre is
+   about 235 to 117 screen px, so texels are shown at 1 to 2x. The titles stay crisp; the small line is soft at 4 m
+   but still legible. Shots 13 and 14 match a 6 x 3 m poster when measured against the 2.9 m board (shot 14: about
+   1.6x the board's width at its distance ratio).
+6. station_signs.py:+260 the lamp's glow is now a neutral, greenish grey, off the team hues; the fixture hue gate
+   passes. It still reads as a warm lamp beside the butter moon in sm5-6.
+8. The record (+21, +51-54, +83-84), ASSETS (+85) and the changelog note (+7) say 6 x 3 m. The dark track bed is left
+   to the platforms thread, under Known issues.
+Advisory (non-blocking): sm5-4 shot 13's caption still says "3 x 1.5 m" (the contact sheet's label, not repo text).
+   The sheet's frame and fixture art keep the same 38 triangles, so they cost nothing more.
+Must-fix for the next attempt: none. Merge once tools/check.sh on 21ad054 ends green.
 Owner should test in the game:
-   - A boonie bot standing with his back to you at 3-5 m: does the scarf read as cloth on the collar, not a frill?
-   - The same bot crouched and aiming: does the scarf's hem stay on the collar with no dark gap or poke-through?
-   - Cap, High-cut and Full-cut bots from behind and aiming with cheek on stock: the collar's back looks like a shirt.
-   - Your own figure in any third-person or death view: collar and neck bend together, no gap at the nape.
+- From each platform at 4 to 8 m, read every line of the three trackside posters, the small bottom line included.
+- Are 6 x 3 m posters the size you wanted, or too dominant next to the name boards?
+- From the track bed, does a poster's top edge sit clear of the vault's curve, with no clipping?
+- Do the two north and four south posters spread evenly between the boards, with no wall looking empty?
+- Does the Lamplight Room's grey-green glow still read as a warm lamp?
+- At a shallow angle along the platform, does the text shimmer or smear (mipmaps)?
