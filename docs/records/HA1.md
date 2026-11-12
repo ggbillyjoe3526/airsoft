@@ -2,15 +2,15 @@
 
 **Review:** REVIEW_LINE
 
-Owner's ask (2026-11-12, with reference pictures from other games and photos of a hand): "go over the first person
-arms and their grips on weapons to make them appear more realistic. When not aiming down sight with a rifle only the
-player's left hand should be visible … When aiming down sight no hands should be visible. For pistols, the player
-should hold the pistol with two hands … When aiming down sight on a pistol the hand should only be slightly visible.
-Go over all first person view animations and make them higher quality. For the first person arms with no gloves I
-want you to improve the quality and detail of the hand model and its textures." Then, on the first pictures: the right
-index finger "looks unnatural", "the hands need detailed texture for the gloves and clothes. Make the models as
-detailed and high quality as possible", and "the wrist to thumb joint also doesn't look natural". The ruling is in
-`docs/DECISIONS.md` › First-person hands.
+Owner's ask (2026-11-12, with reference pictures from other games and photos of a hand): "go over the first person arms
+and their grips on weapons to make them appear more realistic. When not aiming down sight with a rifle only the player's
+left hand should be visible … When aiming down sight no hands should be visible. For pistols, the player should hold the
+pistol with two hands … When aiming down sight on a pistol the hand should only be slightly visible. Go over all first
+person view animations and make them higher quality. For the first person arms with no gloves I want you to improve the
+quality and detail of the hand model and its textures." Then, on the first pictures: the right index finger "looks
+unnatural", "the hands need detailed texture for the gloves and clothes. Make the models as detailed and high quality as
+possible", and "the wrist to thumb joint also doesn't look natural". Two more looks at pictures followed (quoted under
+Decisions). The ruling is in `docs/DECISIONS.md` › First-person hands.
 
 ## Attempts
 
@@ -35,23 +35,60 @@ ATTEMPT_ROWS
   hand cups the handguard from below, pitched 15 degrees (was 40), its fingertips on the far side 14 to 18 mm lower,
   under the rail's edge. **This re-solves the holds the owner approved in BL4, BP8 and BW2**, on his word here, and
   the bots copy the new ones.
+- **A straight support arm, close along the rifle** (`GUARD` `upper` and `y`, `arms.straight_elbow`,
+  `shoulder_behind`; the owner's third look: "the forearm/wrist for the rifle hold is bent in an unnatural way. The arm
+  and wrist should be straight", and "try angle the left arm/hand on the rifle close to the replica"): the wrist bent
+  50 degrees on the AEG and SMG and 34 on the Sniper, because the elbow hung from a fixed shoulder place far below
+  the hand. The view never shows the shoulder, so the solve now starts from the hand: the forearm lies on the hand's
+  own line and the shoulder goes the upper arm's length behind that elbow. The hand is turned 25 degrees off the
+  bore (was 60) and sits 5 cm further forward on the AEG's handguard, so the forearm runs up beside the rifle 30
+  degrees off the bore (was 40) with the wrist straight (0 to 1 degree) and its sleeve still passes the magazine;
+  with the hand where it was, nothing under 45 degrees cleared the AEG's magazine. The hand stays pitched 15
+  degrees, so the fingers stay hidden. The Compact SMG's handguard is 12 cm long with the magazine right behind
+  it: 7 cm forward a fingertip showed past its front, 5 cm forward the sleeve needs 37 degrees to pass the
+  magazine, so that is its hold (`SMG_GUARD` `search`), and its elbow hangs 10 degrees under the wrist's line
+  (`sag`), without which the upper arm came into the view's foot.
+- **The same straight arm on a foregrip** (`GRIP_LEFT` `upper` and `turn`, `GRIP_PIVOT`, `ANGLED_LEFT` `search`): on
+  the vertical grip the wrist bent 37 to 38 degrees. A fist round an upright grip with a straight wrist has its
+  forearm level and along the bore, through the magazine, so the hand's marks are turned about the grip's middle:
+  tilted 30 degrees, as a hand holds a hammer, so the forearm rises 29 degrees to it, and swung 35, so it comes from
+  the left 22 degrees off the bore (a 25 by 25 turn left the thumb in the grip). On the angled grip the hand sits 6 cm
+  behind the mount, where only a hand turned 50 degrees and pitched 30 keeps the sleeve off the magazine and the palm
+  out of the grip on both rifles, so its search is pinned there (the forearm 56 to 58 degrees off the bore, the wrist
+  straight; it was 19 to 24 degrees bent).
 - **A fuller wrist** (`glove.WRIST_FULL`, `wrist_full`; the owner: "too thin at the wrist"): the wrist measured 50 by
   39 mm against a hand 85 wide; it is widened a fifth and thickened an eighth between the cuff and the heel of the
   hand, and the sleeve stands 10.5 mm off the arm at its cuff (was 8).
-- **Pistols in both hands** (`<id>_two_Hold`, `<id>_two_Reload`; `ArmsView.TWO_HANDS`, `clip_base`): the left hand
-  wraps the right hand's fingers (`SUPPORT_LEFT`, `CYBER_SUPPORT`), solved against the pistol and the right arm as
-  posed. The owner's second look: "The pistol grip shows the players left hand fingers ... They should be resting on
-  top of the right hand and out of sight. The right hand thumb should be resting on the left hand. The player is
-  gripping the pistol tight." The first solve laid the left hand by its marks and counted how far it was pushed off
-  them; the right thumb, lying where the left hand's heel belongs, pushed it out flat beside the grip, and its fingers
-  closed short of the right hand in a fist. Now (`support_pose`, `lay_right_thumb`) the left hand is placed without
-  the right thumb's outer sections, turned to where its palm lies closest over the pistol and the right fingers; its
-  fingers start open and close round the right hand's (`curl_more`); then the right thumb is laid again on the left
-  hand. The left shoulder sits 7 cm further in, so its forearm comes up beside the right one and the wrist bends
-  less. Through a reload the left hand draws off to the left, changes the magazine and comes back; its elbow keeps
-  9 cm off the right arm's bones (`magazine.ARM_CLEAR`); the right thumb keeps its raised place while the left hand is
-  away. Default taken: **the bots stay one-handed** (HG1; they copy `<id>_Hold`, which is unchanged), and **the
-  pistols keep their hip place** of 2026-11-06 (nearer places cut the hands off at the screen's foot).
+- **Pistols in both hands** (`<id>_two_Hold`, `<id>_two_Reload`; `ArmsView.TWO_HANDS`, `clip_base`): the left hand wraps
+  the right hand's fingers (`SUPPORT_LEFT`), solved against the pistol and the right arm as posed. The owner's second
+  look: "The pistol grip shows the players left hand fingers ... They should be resting on top of the right hand and out
+  of sight. The right hand thumb should be resting on the left hand. The player is gripping the pistol tight." The first
+  solve laid the left hand by its marks and counted how far it was pushed off them; the right thumb, lying where the
+  left hand's heel belongs, pushed it out flat beside the grip, and its fingers closed short of the right hand in a
+  fist. Now (`support_pose`, `lay_right_thumb`) the left hand is placed without the right thumb's outer sections, turned
+  to where its palm lies closest over the pistol and the right fingers; its fingers start open and close round the right
+  hand's (`curl_more`); then the right thumb is laid again on the left hand. The left shoulder sits 7 cm further in, so
+  its forearm comes up beside the right one and the wrist bends less. The owner's third look, of the view over the
+  sights: "the player can see a gap between the left hand and the pistol grip. The hand should be pressed against the
+  handle/grip". Measured, the upper palm and the left thumb stood 8 to 20 mm off the grip's bare left side, the thumb in
+  an arch over it. The turn is now scored by how close the hand's skin lies on that side (`bare`, `bare_cost`), within
+  the rolls that leave the thumb a clear place flat on the frame: the palm and thumb lie 0 to 5 mm off it and the right
+  thumb keeps the place he approved. Through a reload the left hand draws off to the left, changes the magazine and
+  comes back; its elbow keeps 9 cm off the right arm's bones (`magazine.ARM_CLEAR`); the right thumb keeps its raised
+  place while the left hand is away. Default taken: **the bots stay one-handed** (HG1; they copy `<id>_Hold`, which is
+  unchanged), and **the pistols keep their hip place** of 2026-11-06 (nearer places cut the hands off at the screen's
+  foot).
+- **The Cyber Pistol takes the GBB's hold** (`CYBER_RIGHT`, `CYBER_SUPPORT`, `CYBER_LIFT`; the owner: "Cyber pistol
+  should have same grip as gbb pistol ... the thumb looks too long (it should stick out like the thumb in the gbb
+  shot)"): its grip was reshaped to the GBB's sections (MQ1B, #324), so the GBB's marks seat the same hands on it, 7 mm
+  higher because its trigger hangs that much higher; the thumb pinned flat across the old slab is gone. The merged
+  grip keeps flat sides to square back corners and a frame at full width ahead of the grip, where the GBB's round
+  off and narrow: on the GBB's exact marks the left thumb's root lay in the corner, the thumb found no clear place
+  along the frame and stood out sideways, and the right thumb was laid flat across after it (the very look he turned
+  down). So the support hand sits 3 mm further out and back (`CYBER_OUT`) at the GBB's turn (15 and 4 degrees,
+  pinned), and the right thumb's turn in the one-handed hold is searched, not the GBB's (there it closed into the
+  frame and was eased 20 degrees out into the air). The trigger finger's second search is kept only when it ends no
+  further from the trigger (`trigger_again`). The bots' one-handed Cyber hold changes with it.
 - **Aimed, a rifle's hands are out of view, never faded** (`ArmsTuck`, `ViewModelConfig.aim_tuck`; the owner: "the
   hands should not fade out of view. When the animation plays to ADS (except for pistols) the hands are simply out of
   view. At most a small tip of the players left hand thumb can be visible"): the first pass faded them, which he
@@ -104,5 +141,10 @@ ATTEMPT_ROWS
 
 ## Known issues left
 
+- With the Angled Grip on the AEG your left arm comes in 65 degrees off the bore; the SMG's far-side fingertips stand
+  1 to 2 cm off the narrow front of its handguard (a bot close up shows it, your view never); aimed, the Cyber's
+  right thumb lies a little flatter than the GBB's (`docs/KNOWN_ISSUES.md` › Graphics).
+- MQ2's attachments pull request lengthens the Vertical Grip (64 mm under the rail, 53 now) and the Pump Shotgun adds
+  a sixth hold: whichever merges after this one rebuilds `arms.glb` from the merged scripts.
 - The skin's atlas has about 530 texels (of 1.46 million) claimed by two places on the hand, at the thumb's web; no
   seam shows in the pictures.

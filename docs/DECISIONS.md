@@ -184,7 +184,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   thumb can be visible"; `ArmsTuck`, `aim_tuck`), a pistol keeping what lies just under the sight line
   (`aim_hands_hint`, `aim_hint_below`: he chose "tops of the hands only" over whole solid hands and over a fainter
   edge, on pictures of each); your pistol is held in both hands, tight, the left fingers out of sight over the right
-  hand's and the right thumb resting on the left hand (the arms model's `<id>_two_Hold`). Defaults taken: the bots
+  hand's and the right thumb resting on the left hand (the arms model's `<id>_two_Hold`). His third look: "the
+  forearm/wrist for the rifle hold is bent in an unnatural way. The arm and wrist should be straight" (the support
+  arm lies on the hand's own line, close along the rifle: `arms.py` `GUARD` `upper`); a pistol's left hand is
+  "pressed against the handle/grip", no gap seen over the sights; and the "Cyber pistol should have same grip as gbb
+  pistol", its thumb sticking out as the GBB's does (`CYBER_RIGHT`). Defaults taken: the bots
   stay one-handed on pistols (HG1 below; they copy `<id>_Hold`), and the pistols keep their hip place of 2026-11-06.
   His reference pictures are other games' and set hand placement and framing only; the art is our own.
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands

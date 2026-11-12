@@ -200,8 +200,10 @@ own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a 
   tip-up (the stock down out of view) and the pistols' tip toward you read well? Settings › Dev › Skin-only arms swaps the gloves for
   bare hands at once.
 - [ ] **Your hands, at the hip and aimed** (HA1). A rifle sits near and low: only your left hand shows, under the
-  handguard, its thumb on the near side and no fingers on the far side; the SMG sits as the rifles do. A pistol is
-  held tight in both hands, no left fingers showing, the right thumb resting on the left hand. Raise the sight: a
+  handguard, its thumb on the near side and no fingers on the far side, the forearm and wrist in one straight line
+  running up close beside the rifle, with a foregrip fitted too; the SMG sits as the rifles do. A pistol is held tight in both hands, no left
+  fingers showing, the right thumb resting on the left hand, the Cyber Pistol held as the GBB is; over the sights no
+  gap shows between the left hand and the grip. Raise the sight: a
   rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and only the top of the
   hands shows under a pistol's slide. Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
   should hold up close on Inspect (Y); the right index finger and the skin between wrist and thumb look natural.
