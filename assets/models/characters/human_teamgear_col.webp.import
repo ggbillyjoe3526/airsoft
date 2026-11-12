@@ -3,24 +3,24 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgsosqr7wbhgw"
-path.s3tc="res://.godot/imported/human_teamgear_col.webp-d0194632d57e45352edbd0f034500fad.s3tc.ctex"
+path.bptc="res://.godot/imported/human_teamgear_col.webp-d0194632d57e45352edbd0f034500fad.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "3152f4651d07db9d2ffc2ed6b1aa7b52"
+"md5": "cae11a5deb38d2a3bde59eb2bbb1677a"
 }
 
 [deps]
 
 source_file="res://assets/models/characters/human_teamgear_col.webp"
-dest_files=["res://.godot/imported/human_teamgear_col.webp-d0194632d57e45352edbd0f034500fad.s3tc.ctex"]
+dest_files=["res://.godot/imported/human_teamgear_col.webp-d0194632d57e45352edbd0f034500fad.bptc.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

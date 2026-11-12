@@ -36,8 +36,14 @@ the model with 12 rays at every second pixel, and a normal map made from the sam
   charts at 0.71 mm a pixel). The figure keeps its eight materials.
 - **The lower levels are unchanged in look**: `_LOD1` and `_LOD2` still draw plain colours from a 256 by 32 strip of
   swatches, now placed in the same maps, so a figure at range and the team cue are as they were.
+- **No step where the detail drops.** The weave, the grime and the shade together leave each swatch its colour:
+  the painter lifts a swatch until its mean over the faces that show is the plain colour the lower levels draw
+  (QA measured the first build a third darker up close than at range). The team colour map imports at high quality
+  (BC7), as the pads' does since BP6: BC1 darkened the flat strip.
 - **No mesh changed** but the gear's own corners (a new UV each) and the pads' UVs (rescaled to their square):
-  `Kit` 10,098 / 3,276 / 760 triangles, `Kit_Pack` 2,836 / 834 / 188, `Kit_Radio` 764 / 240, as before.
+  `Kit` 10,098 / 3,276 / 760 triangles, `Kit_Pack` 2,836 / 834 / 188, `Kit_Radio` 764 / 240, as before. A chart's
+  border splits its corners, so the three full-detail pieces have 15,927 vertices (13,265 before; the whole figure
+  at full detail about 6.5 % more).
 - **No game code changed.** The materials keep their names; the figures' paint, fade and team colour read them as
   before.
 - **The build** (`tools/blender/figure-gear/`): `atlas.py` (numpy only) cuts charts where faces turn or change
@@ -51,7 +57,10 @@ the model with 12 rays at every second pixel, and a normal map made from the sam
 - **Tests** (`tests/unit/test_gear_surfaces.gd`): both families draw 2048 colour and normal maps; the full-detail
   pieces lie in charts, off the pads' square and off the strips, and cover a least share of the maps; the lower
   levels stay on the strips; the pads stay in their square; the normal maps carry relief where the charts are and
-  none on the strips; the figure has at most eight materials.
+  none on the strips; the figure has at most eight materials. QA's `test_mq3_qa.gd`: the team strip is the
+  swatches main had and stays neutral under the team paint; each piece's mean colour at full detail is its lower
+  level's; no chart overlaps another or samples empty canvas; the pads sample their own painting at every level;
+  the six maps' import settings.
 - **Docs:** `docs/ASSETS.md`, `docs/ART.md` › Figures, `assets/models/characters/README.md`,
   `tools/blender/figures/README.md`, `docs/PLAYTEST.md` › What the figures' gear is made of (MQ3).
 - **Pictures:** `art/model-quality/mq3/` in the project files: the carrier, the belt and pack, and the whole
@@ -75,7 +84,11 @@ the model with 12 rays at every second pixel, and a normal map made from the sam
 
 ## Known issues left
 
-- Texture memory for the figure grows by about 22 MB (two 2048 sets where there was a 512 colour map, a 1024
-  normal map and a strip).
+- Texture memory for the figure grows by 15 to 23 MB by the card's format (two 2048 sets where there was a 512
+  colour map, a 1024 normal map and a strip), and no graphics preset draws the figures' maps smaller: the lever, if
+  Low needs one on a modest card, is a size limit on these maps' import (performance advisory; a play check asks
+  for the frame rate).
+- A face nothing can see (a plate bag's inner side) keeps half the baked shade, so what shows of one past an edge
+  is dim, not black.
 - The weave is painted in each chart's own direction; across a seam between two charts it can turn. Seams lie on
   bound edges, where real kit turns its cloth too.

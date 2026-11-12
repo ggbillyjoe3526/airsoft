@@ -39,7 +39,8 @@ LOOP = {"coyote_loop", "ranger_loop", "team_loop"}
 ALONG = WEB | {"cord", "zip"}    # their pattern runs along the chart's length
 
 WEAVE_PITCH = 0.0016      # m, a yarn of 1000D cordura drawn a little coarse so 2K maps hold it
-WEAVE_HEIGHT = 0.07       # mm
+WEAVE_SHADE = 0.10       # the yarns' light and dark in the colour
+WEAVE_HEIGHT = 0.10       # mm
 WEB_PITCH = 0.0017        # m, a webbing's ribs across its width
 WEB_TICK = 0.0024         # m, the weave's step along a rib
 WEB_HEIGHT = 0.10
@@ -53,10 +54,10 @@ STITCH_WIDTH = 0.00042    # m, the thread's half width
 STITCH_PITCH = 0.0031     # m
 STITCH_ON = 0.70          # the share of a pitch the thread shows
 STITCH_HEIGHT = (-0.14, 0.26)   # mm: the needle's groove, the thread over it
-THREAD_GAIN = 1.32        # a thread's colour over its cloth's
-SWELL = (0.035, 0.6)      # m across, mm: cloth's slow swells
-MOTTLE = (0.045, 0.05)    # m across, share either way: cloth's uneven dye and dust
-SEAM_GRIME = (0.007, 0.13)   # m the dirt beside a seam fades over, the colour it takes at the seam
+THREAD_GAIN = 1.42        # a thread's colour over its cloth's
+SWELL = (0.035, 0.9)      # m across, mm: cloth's slow swells
+MOTTLE = (0.045, 0.085)    # m across, share either way: cloth's uneven dye and dust
+SEAM_GRIME = (0.007, 0.18)   # m the dirt beside a seam fades over, the colour it takes at the seam
 EDGE_RUB = (0.0012, 1.07)  # m from a hard edge, the cloth's colour there (rubbed lighter)
 MOULD_GRAIN = (0.0006, 0.018)   # m, mm: a moulding's fine texture
 MOULD_EDGE = (0.0007, 1.16, -0.08)   # m from an edge, colour gain, roughness: a moulding's edges worn smooth
@@ -67,6 +68,8 @@ ZIP_HEIGHT = 0.2
 SHADOW_STEP = 2          # every this many pixels each way is asked how shut in it is
 SHADOW_SOFTEN = 2        # passes of a 3 px blur over the answers
 SHADOW_DEPTH = 0.72      # how much of the colour a fully shut-in pixel loses
+HIDDEN_SHADE = 0.5       # the share of the shade a hidden face keeps
+LEVEL_AT_MOST = 1.6      # the most a swatch's colour is lifted to keep its mean over the faces that show
 BIND_RIB = 0.0012        # m, the binding tape's ribs
 PIXELS_A_PITCH = 3.2     # the fewest pixels a pattern's pitch is drawn across
 
@@ -545,7 +548,7 @@ def paint(f: Faces, lay: Layout, size: int, swatches: dict, shade_of, occlusion=
         swell = noise(p[cloth], SWELL[0], 13) + 0.4 * noise(p[cloth], SWELL[0] * 0.4, 14)
         h[cloth] += WEAVE_HEIGHT * yarn + 0.03 * fine[cloth] + SWELL[1] * swell
         # A weave drawn coarser than it is shows less in the colour, or it would read as a check.
-        gain[cloth] *= 1.0 + 0.075 * (WEAVE_PITCH / weave_pitch) ** 2 * yarn + mottle[cloth] + 0.03 * fine[cloth]
+        gain[cloth] *= 1.0 + WEAVE_SHADE * (WEAVE_PITCH / weave_pitch) ** 2 * yarn + mottle[cloth] + 0.03 * fine[cloth]
     web = of(WEB)
     if web.any():
         row = np.floor(t[web] / web_pitch)
@@ -600,9 +603,21 @@ def paint(f: Faces, lay: Layout, size: int, swatches: dict, shade_of, occlusion=
         gain[sewn] *= 1.0 + (EDGE_RUB[1] - 1.0) * roll * (d < EDGE_RUB[0])
     if occlusion is not None:
         open_sky = _shadow(drawn, lay, ys, xs, pid, occlusion)
-        gain *= 1.0 - SHADOW_DEPTH * (1.0 - open_sky)
+        # A face nothing sees keeps half the shade: what shows of it past an edge is dim, not a black hole.
+        depth = np.where(f.poly_hidden[pid], SHADOW_DEPTH * HIDDEN_SHADE, SHADOW_DEPTH)
+        gain *= 1.0 - depth * (1.0 - open_sky)
         # Dust and lint gather where the cloth is shut in.
         rough_add += 0.05 * (1.0 - open_sky)
+    # The patterns, the grime and the shade together leave each swatch its colour: from afar a chart is the plain
+    # colour the lower levels draw, so nothing steps where a figure's detail drops. Faces nothing sees don't count.
+    weight = 1.0 / lay.chart_scale[chart] ** 2
+    seen = ~f.poly_hidden[pid]
+    for k in range(len(names)):
+        mine = which == k
+        counted = mine & seen if (mine & seen).any() else mine
+        mean = float((gain[counted] * weight[counted]).sum() / weight[counted].sum())
+        lift = min(1.0 / mean, LEVEL_AT_MOST)
+        gain[mine] *= lift
     # Colour, roughness, metal.
     table = np.array([swatches[n][0] for n in names])
     lin = table[which] * (gain * shade_of(drawn["shade"][ys, xs].astype(np.float64)))[:, None]
