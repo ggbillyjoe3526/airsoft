@@ -595,10 +595,14 @@ def build() -> dict:
                                                                       "ground": HEMI_GROUND},
                                                              "exposureScale": 0.85}}},
         "roof": {"height": r(max(ceil_at(rm, max(rm["ya"], rm["yb"])) for rm in L.rooms if rm["ceil"]) + FT + ROOF_OVER
-                             + LIFT), "plain": True, "lamps": lamps()},
+                             + LIFT), "plain": True,
+                 # UL1: no sky down here; the sun standing in for the lamps (Low, Medium) casts no shadow.
+                 "underground": True, "lamps": lamps()},
         "areas": areas(),
         "lifts": lifts(),
-        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT)},
+        # UL1: the grey puff feet kick up off the station's dusty floors (white without a tint).
+        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT),
+                     "kickedDust": {"tint": 0xB0AEA8, "scale": 0.9}},
     }
     # nothing in the shafts, nor in a balustrade down an escalator (its pieces' whole boxes, as the game's tests take them)
     holes = [shaft_hole()] + [box for bl in L.blocks if bl["y"] is None for box, _ in ramp_barrier(bl)]

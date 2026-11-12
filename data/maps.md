@@ -23,12 +23,20 @@ warning; a map with no row is not listed.
   bots' too; you can still switch to auto in the round. Blank or `auto` starts every replica as it comes, and a
   selector stays as set for the match. Anything else starts them as they come, with a warning. "No full auto indoors"
   (owner, 2026-11-02): Depot, the one fully indoor field, starts on `semi`.
+- **Wind (×)** is the share of the match's breeze that reaches the field (PH1): 0 indoors, where the air stands still
+  and BBs fly straight; 1 in the open, where each match draws a breeze of 0.3 to 1.8 m/s that drifts BBs (about 30 cm
+  at 30 m for a rifle at its strongest; `game/config/wind_config.gd`). 0 to 2; blank is 1.
+- **Air (°C)** is the field's air by day (PH1); a night match is 8 °C colder on a field the breeze reaches (Wind
+  above 0: a field with still air is indoors and keeps its air; `game/config/weather_config.gd`). Colder
+  air is thicker, so BBs slow a little sooner, and a gas replica shoots softer in it: about 1.2 % of its energy a °C
+  from the 20 °C every replica is rated at (a pistol on Green Gas loses about 1 fps a °F, as players reckon), never
+  past its site limit. Electric and spring replicas don't mind. −10 to 40; blank is 20.
 
 ## Maps
 
-| Id | Name | Kind | Tag | Min | Standard | Max | Round | Start mode | Blurb |
-|---|---|---|---|---|---|---|---|---|---|
-| depot | Depot | field | public | 5 | 6 | 8 |  | semi | An indoor airsoft hall: three lanes, two dark tunnels. |
-| woodland | Woodland | field | public | 5 | 6 | 8 | 180 |  | A big open wood round a shallow stream, by day or night. |
-| subway | Subway | field | dev | 5 | 6 | 8 |  | semi | A closed metro station on three levels, from the ticket hall down to the trains. |
-| range | Range | range | public | 1 | 1 | 1 |  |  | Targets 10 to 60 m. No bots, no score. |
+| Id | Name | Kind | Tag | Min | Standard | Max | Round | Start mode | Wind (×) | Air (°C) | Blurb |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| depot | Depot | field | public | 5 | 6 | 8 |  | semi | 0 | 20 | An indoor airsoft hall: three lanes, two dark tunnels. |
+| woodland | Woodland | field | public | 5 | 6 | 8 | 180 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
+| subway | Subway | field | dev | 5 | 6 | 8 |  | semi | 0 | 14 | A closed metro station on three levels, from the ticket hall down to the trains. |
+| range | Range | range | public | 1 | 1 | 1 |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |

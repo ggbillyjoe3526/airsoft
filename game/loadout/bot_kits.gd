@@ -201,6 +201,8 @@ static func kit_of(plan: Plan, rules: LoadoutRules) -> Kit:
 		kit.lights.resize(plan.slots.size())
 		kit.glow_bbs.resize(plan.slots.size())
 		kit.capped.resize(plan.slots.size())
+		kit.energies.resize(plan.slots.size())
+		kit.limits.resize(plan.slots.size())
 	for r in kit.replicas:
 		if r.fire_modes.has(ReplicaConfig.FireMode.AUTO):
 			r.default_fire_mode = ReplicaConfig.FireMode.AUTO

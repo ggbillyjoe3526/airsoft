@@ -29,6 +29,11 @@ const TITLE_SPACING := 0.04
 const SUBTITLE_SIZE := 18
 const SUBTITLE_TOP := 6
 const BUTTONS_TOP := 34
+## The field's weather under the subtitle (PH1: "Air 16 °C · breeze 1.2 m/s"): its gap above and type size, and the
+## breeze (m/s) under which it reads "still air".
+const WEATHER_TOP := 4
+const WEATHER_SIZE := 15
+const STILL_BELOW := 0.05
 const BUTTON_GAP := 12
 const BUTTON_PAD_X := 22
 const BUTTON_PAD_Y := 17
@@ -94,6 +99,7 @@ var _leave: Button = null
 var _leave_gap: Control = null
 var _top_gap: Control = null
 var _subtitle_gap: Control = null
+var _weather: Label = null
 var _buttons_gap: Control = null
 ## Practice: the Timed challenge's row and its chips, and whether it is on.
 var _challenge: Button = null
@@ -111,6 +117,15 @@ var _screen: SettingsScreen = null
 ## "Depot · Elimination · Round 3".
 static func subtitle(map_name: String, mode_name: String, round_number: int) -> String:
 	return TranslationServer.translate("PAUSE_SUBTITLE") % [map_name, mode_name, round_number]
+
+
+## The field's weather in words: its air (°C, to the degree) and the match's mean breeze (m/s), "still air" for none:
+## "Air 16 °C · breeze 1.2 m/s", "Air 20 °C · still air".
+static func weather_line(temperature: float, wind_speed: float) -> String:
+	var air := TranslationServer.translate("PAUSE_AIR") % roundi(temperature)
+	if wind_speed < STILL_BELOW:
+		return air + TranslationServer.translate("PAUSE_STILL_AIR")
+	return air + TranslationServer.translate("PAUSE_BREEZE") % wind_speed
 
 
 func _ready() -> void:
@@ -157,6 +172,13 @@ func _ready() -> void:
 	_subtitle.add_theme_color_override("font_color", GameTheme.MUTED)
 	line.add_child(_subtitle)
 	box.add_child(line)
+	box.add_child(_gap(WEATHER_TOP))
+	_weather = Label.new()
+	_weather.name = "Weather"
+	_weather.add_theme_font_size_override("font_size", WEATHER_SIZE)
+	_weather.add_theme_color_override("font_color", GameTheme.DIM)
+	_weather.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(_weather)
 	_buttons_gap = _gap(BUTTONS_TOP)
 	box.add_child(_buttons_gap)
 	var buttons := VBoxContainer.new()
@@ -192,6 +214,17 @@ func set_match(map_name: String, mode_name: String, round_number: int, match_see
 	_set_practice(false)
 	_subtitle.text = subtitle(map_name, mode_name, round_number)
 	_seed.text = str(match_seed)
+
+
+## The weather the match or practice is played in (PH1, GameState.air_temperature and the match's mean breeze,
+## Wind.speed), under the subtitle: what drifts your BBs and softens a gas replica.
+func set_weather(temperature: float, wind_speed: float) -> void:
+	_weather.text = weather_line(temperature, wind_speed)
+
+
+## The weather line's words.
+func weather_text() -> String:
+	return _weather.text
 
 
 ## Practice, on the map `map_name`: "Practice · Range", with " · timed challenge" while the challenge is `on` and

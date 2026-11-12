@@ -39,7 +39,7 @@ and, on the range, `test_range_map.gd`).
 | `torch.gd` | `Torch`: the weapon torch on the replica in hand (`Armament.lights`, night only), switched by the command's `toggle_torch` with a `TORCH` event; out when holstered, on a replica without one, when hit and at each round start |
 | `bb.gd`, `bb_pool.gd`, `air_model.gd`, `ballistics.gd` | BBs in flight: drag by Reynolds number through the moving air, hop-up's Magnus lift, one midpoint step a tick |
 | `hit_facts.gd` | `HitFacts`: what the "What got you" card says about a hit on you (where from, how far, moving, held angle, time in view), one record kept by `BotController` |
-| `wind.gd` | The match's breeze, drawn from its seed each match, with gusts and a slow veer |
+| `wind.gd` | The match's breeze, drawn from its seed each match, with gusts and a slow veer, and the field's share of it (none indoors; `Simulation.set_weather`, which also sets the field's air for every BB, `GameState.air`, PH1) |
 | `ricochet.gd` | A BB bouncing off concrete and steel; whether a bounced BB knocks anyone out is the match's rule |
 | `hitbox.gd`, `bb_step.gd` | The hit volume (a head sphere, four torso capsules, the hips, each leg's thigh, shin and boot) on the drawn figure's joints, or the built-in one for the range's plywood figures, and its ray tests; each tick's BB flight against the level, bushes (0.6 m of leaves over a flight stops a BB) and bodies, building a body's volume only once a BB comes near it |
 | `hit_fit.gd`, `hit_pose.gd` | HV1: the human figure's joints baked from its own animation graph (`tools/hit_fit_bake.gd`), and posed from them as the graph and FigureBend pose the drawn figure |

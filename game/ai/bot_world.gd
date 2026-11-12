@@ -47,6 +47,8 @@ var lifts: LiftState = null
 ## The field's start mode (RoundState.start_mode, NA1): below AUTO, the bots keep to it and go full auto only for an
 ## open shot (BotFireMode).
 var start_mode: ReplicaConfig.FireMode = ReplicaConfig.FireMode.AUTO
+## The field's own air (GameState.air, PH1), for a BB's flight time; null: the air replicas are rated in.
+var air: AirModel = null
 ## Watching here (BP8, SquadOrderBook.give_watch): per team, the spot one of its players marked to cover themselves
 ## (NAN: none). The team's bots on the team plan keep their hunts and held angles off the area round it (covered).
 var watched: PackedVector3Array = PackedVector3Array([Vector3(NAN, NAN, NAN), Vector3(NAN, NAN, NAN)])

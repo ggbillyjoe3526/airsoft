@@ -493,6 +493,14 @@ func _keep_a_playable_map() -> void:
 	_play.disabled = true
 
 
+## A field card's tooltip: its blurb, then its weather (PH1, data/maps.md Wind and Air): still air or open to the
+## breeze, and its air by day (the pause menu has the match's own, a night's colder air included).
+static func field_tip(e: MapCatalog.Entry, tuning: SimTuning) -> String:
+	var day := roundi(e.air_or(tuning.ballistics.air_temperature))
+	var words := "MATCH_FIELD_STILL" if e.wind <= 0.0 else "MATCH_FIELD_BREEZY"
+	return TranslationServer.translate(words) % [e.blurb, day]
+
+
 ## A field's row: its eye-height picture, then its name (with DEV or LATER) over its blurb.
 func _map_card(e: MapCatalog.Entry, later: bool) -> MenuCard:
 	var card := MenuCard.new()
@@ -526,7 +534,7 @@ func _map_card(e: MapCatalog.Entry, later: bool) -> MenuCard:
 	text.add_child(blurb)
 	row.add_child(text)
 	pad.add_child(row)
-	card.tooltip_text = e.blurb
+	card.tooltip_text = field_tip(e, _tuning)
 	card.add_content(pad)
 	card.set_greyed(later)
 	card.pressed.connect(_pick_map.bind(e.id))

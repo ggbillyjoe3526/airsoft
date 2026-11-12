@@ -56,6 +56,13 @@ blocks read from `data/maps/woodland.json` (rerun a structure's script after `to
 | `railing.py` | `railing_bar.glb`, `railing_top.glb`, `railing_foot.glb`, `railing_post.glb` | Every bar railing's pieces (`RailingMesh`, `MapStyle.railing_look`), fitted to the bars and rails a BB meets |
 | `station_lamps.py` | `strip_lamp.glb`, `tunnel_lamp.glb` | Subway's ceiling strip lamps (`RoofConfig.plain_lamp_model`, turned along their rooms) and the running tunnels' bulkhead lamps (SM5) |
 | `station_extras.py` | `cctv_camera.glb`, `way_sign.glb`, `fire_extinguisher.glb`, `litter_bin.glb`, `edge_sign.glb`, `platform_clock.glb`, `poster_a..d.glb`, `name_board.glb` | Subway's look-only extras (`StationFixtures`, spots from `tools/subway/fixtures.py`) |
+| `ticket_gate.py` | `ticket_gate.glb`, `gate_paddle.glb` | Subway's gate line, a slim pedestal a block with 1 m lanes between, and the paddle door GatePaddles swings in each lane (SM3) |
+| `ticket_machine.py` | `ticket_machine.glb` | Subway's row of four ticket machines (SM3) |
+| `kiosk.py` | `kiosk.glb`, `kiosk_long.glb` | Subway's shuttered kiosks, the hall's and the concourse's (SM3) |
+| `ticket_office.py`, `booking_counter.py` | `ticket_office.glb`, `booking_counter.glb` | Subway's closed ticket office and the booking hall's counter (SM3) |
+| `help_point.py` | `help_point.glb` | Subway's help point and map columns (SM3) |
+| `station_bench.py` | `station_bench.glb`, `station_bench_long.glb` | Subway's benches, three seats and four (SM3) |
+| `crowd_barrier.py` | `crowd_barrier.glb` | Subway's crowd barriers (SM3) |
 
 Subway's stairs, escalators, lifts and railing (SM2) share `transit_kit.py`: their paints, a mesh builder with boxes,
 sweeps, lathes, tubes round filleted paths, knobs and rings, and `report`, which writes the model and fails it over its
@@ -78,5 +85,6 @@ root>`, then `godot --headless --path . --import`. Pictures for review: `tools/p
 for a field (`night` lights its fires and lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's
 scripts run as `python3 tools/blender/maps/<script>.py`), `docs/records/WG2.md`, `docs/records/WG3.md`,
 `docs/records/WG4.md` (`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`, `docs/records/SM2.md`,
+`docs/records/SM3.md` (`hallkit.py`: SM3's face decals, shutters, louvres and tubes on `prop.py`'s Prop),
 `docs/records/SM4.md` (`works_kit.py`: the works gear's running rails, underframe, weathering and box fit). Dev only: tools/ never
 ships.

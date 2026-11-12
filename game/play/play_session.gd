@@ -171,6 +171,8 @@ var _roof: RoofView = null
 var _doors: DoorView = null
 ## The field's lifts, or null on a field without (LiftView, MT2).
 var _lifts: LiftView = null
+## The ticket gates' paddle doors, or null on a field without (GatePaddles, SM3).
+var _paddles: GatePaddles = null
 ## A wood's crowns and dressing, or null on a map with neither (WoodsView, WL4).
 var _woods: WoodsView = null
 ## The map's streams (WS1), or null on a map with none.
@@ -409,6 +411,7 @@ func _dress_part(part: int) -> void:
 		0:
 			_play.look.push_globals()
 			_lighting = FieldLighting.build(_light, _play.look)
+			_lighting.set_underground(_map.roof_underground)
 			_lighting.add_probes(_map)
 			add_child(_lighting)
 			_site = SiteDress.build(_map, _play.site_look, _level.site_material(), _play.skyline)
@@ -438,6 +441,9 @@ func _dress_part(part: int) -> void:
 			_lifts = LiftView.build(_map, _play.map_style, _tuning.lifts, _play.lifts)
 			if _lifts != null:
 				add_child(_lifts)
+			_paddles = GatePaddles.build(_map, _play.gate_paddles)
+			if _paddles != null:
+				add_child(_paddles)
 			_pools = LightPools.build(_map, _light)
 			if _pools != null:
 				add_child(_pools)
@@ -653,6 +659,13 @@ func _start_simulation(map: MapData) -> void:
 	# "No full auto indoors" (data/maps.md Start mode): every round's selectors start held to it, bots' too.
 	if listed != null:
 		state.round_state.start_mode = listed.start_mode
+	# The field's weather (data/maps.md Wind and Air, PH1): still air indoors, and colder air on a night in the open,
+	# for every BB. A field the breeze doesn't reach (Wind 0) is the indoor one, on purpose: under a roof the night
+	# doesn't cool the air either (data/maps.md says so; one cell, so a field can't be half indoors).
+	var rated := _tuning.ballistics.air_temperature
+	var wind_share := listed.wind if listed != null else 1.0
+	_sim.set_weather(state, wind_share, _tuning.weather.temperature_at(
+			listed.air_or(rated) if listed != null else rated, _light.night and wind_share > 0.0))
 	var loadout := ReplicaStats.default_loadout()
 	if kit == null:
 		var s := settings if settings != null else Settings.shared()
@@ -661,6 +674,8 @@ func _start_simulation(map: MapData) -> void:
 		kit = saved.carried_kit(s.dev.dev_content)
 		_kit_unlocked_all = s.dev.disable_levelling
 	state.dev_content = state.dev_content or kit.dev_under(_light.night)
+	# Gas shoots softer in the cold (PH1): your gas replicas', and below the bots', in this field's air.
+	kit.set_temperature(_tuning.weather, state.air_temperature, rated)
 	player = Character.new(PLAYER_ID, player_team, Vector3.ZERO, 0.0, kit.replicas, kit.bb_weights)
 	player.grenades.picks = kit.bombs
 	# Your weapon light is fitted only at night (WL7): by day the kit plays exactly as one without.
@@ -705,6 +720,7 @@ func _start_simulation(map: MapData) -> void:
 			state.characters.append(Character.new(id, team, Vector3.ZERO, 0.0, loadout))
 			continue
 		var bot_kit := BotKits.kit_of(plan, kit_rules)
+		bot_kit.set_temperature(_tuning.weather, state.air_temperature, _tuning.ballistics.air_temperature)
 		var bot := Character.new(id, team, Vector3.ZERO, 0.0, bot_kit.replicas, bot_kit.bb_weights)
 		bot.grenades.picks = bot_kit.bombs
 		state.characters.append(bot)
@@ -927,6 +943,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_doors.materials())
 	if _lifts != null:
 		first_use.append_array(_lifts.materials())
+	if _paddles != null:
+		first_use.append_array(_paddles.materials())
 	if _pools != null:
 		first_use.append_array(_pools.materials())
 	if _fixtures != null:
@@ -971,6 +989,7 @@ func _build_views(ui: CanvasLayer) -> void:
 	_hud = Hud.new()
 	ui.add_child(_hud)
 	_hud.setup(_play.hud, _colours.hud, _play.view, _tuning, player)
+	_hud.set_field_air(state.air)
 	_hud.setup_weapon_rail(player.armament.replicas, kit.paints, realistic)
 	_hud.setup_sound_cues(_cues, _access)
 	_hud.setup_orders(_play.controls)
@@ -1443,6 +1462,8 @@ func _process(delta: float) -> void:
 		_doors.refresh(state.doors)
 	if _lifts != null:
 		_lifts.refresh(state.lifts, fraction)
+	if _paddles != null:
+		_paddles.refresh(state.characters, delta)
 	if not _flags.is_empty():
 		var rs := state.round_state
 		for i in mini(_flags.size(), rs.flags.size()):
@@ -1706,6 +1727,7 @@ func _open_pause() -> void:
 		var listed := MapCatalog.shared().find(map_id)
 		_pause.set_match(listed.display_name if listed != null else _map.display_name,
 				tr(MatchOptions.MODE_NAME[mode]), state.round_state.number, state.match_seed)
+	_pause.set_weather(state.air_temperature, state.wind.speed)
 	_pause.open()
 
 
@@ -2067,10 +2089,11 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 		_level.set_detail(values.mesh_detail)
 		if _level.baked_light_builds() != _relit:
 			_relight()
-	var contact := GraphicsApply.contact_shadows(values)
+	var contact := GraphicsApply.contact_shadows(values, _lighting)
+	var shadows := GraphicsApply.any_shadows(values, _lighting)
 	for f in _figures:
 		f.set_contact_shadow(contact)
-		f.set_shadow_cast(GraphicsApply.any_shadows(values))
+		f.set_shadow_cast(shadows)
 	if _skyline != null:
 		_skyline.set_smoke(SkylineView.smokes(values))
 	if _torches != null:
@@ -2094,6 +2117,8 @@ func _relight() -> void:
 	var lights := _level.baked_lights()
 	if _doors != null:
 		_doors.relight(lights)
+	if _paddles != null:
+		_paddles.relight(lights)
 	for f in _flags:
 		f.relight(lights)
 	if _overtime_flag != null:

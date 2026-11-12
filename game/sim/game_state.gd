@@ -23,6 +23,12 @@ var challenge: RangeChallenge = RangeChallenge.new()
 ## first starts.
 var match_number: int = 0
 var wind: Wind = null
+## The field's weather (PH1, Simulation.set_weather before the match starts): the share of the breeze that reaches it
+## (0 indoors), its air's temperature (°C) and the air BBs fly through at that temperature. Until set: the whole
+## breeze, in the air replicas are rated in (BallisticsConfig.air_temperature).
+var wind_share: float = 1.0
+var air_temperature: float = 0.0
+var air: AirModel = null
 ## The magazines in the air (MagShare), a pool of MagShareConfig.max_tosses made once.
 var mag_tosses: Array[MagShare.Toss] = []
 ## The smoke and flash bombs thrown (Grenades, SF1), a pool of GrenadeConfig.max_grenades made once.
@@ -48,6 +54,8 @@ func _init(seed_value: int = 0, tuning: SimTuning = null) -> void:
 	bbs = BBPool.new(t.ballistics.max_bbs)
 	round_state = RoundState.new()
 	wind = Wind.still(t.wind)
+	air_temperature = t.ballistics.air_temperature
+	air = AirModel.of(t.ballistics)
 	mag_tosses = MagShare.make_tosses(t.mag_share.max_tosses)
 	grenades = Grenades.make_pool(t.grenades.max_grenades)
 

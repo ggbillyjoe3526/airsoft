@@ -146,8 +146,9 @@ The rifle comes with iron sights; a red dot or a 2× scope is a part you fit in 
 ### Hop-up, flight and wind
 
 Hop-up puts backspin on the BB, which lifts it so it flies flat for longer; each replica has a dial in Loadout ›
-Customise. BBs fly by real air physics, and each match has a light breeze (calm to about 2 m/s) that pushes BBs,
-never players.
+Customise. BBs fly by real air physics. Out of doors (Woodland, the Range) each match has a light breeze (calm to
+about 2 m/s) that pushes BBs, never players; indoors (Depot, Subway) the air stands still (PH1). Each field has its
+own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a gas replica shoots softer in the cold.
 
 - [ ] **Factory hop (rifle 65 %, pistol 55 %), at a target 30 m or more away.** Rifle BBs rise about a hand's width
   near 20 m and stay on target to about 39 m, taking about half a second; the pistol's drop from about 27 m.
@@ -156,6 +157,15 @@ never players.
 - [ ] **Turn the dial in a match (4 less, 5 more).** The panel shows the setting and how far a level shot stays
   flat; past the best setting it says the BB climbs. Each replica keeps its own dial until the match ends.
 - [ ] **Watch the dust (Medium or up).** It drifts one way, the wind, which changes from match to match.
+- [ ] **Depot, a long shot down the Chrono hall (PH1).** BBs fly dead straight left to right, every match; the pause
+  menu reads "Air 20 °C · still air". On Woodland it reads the match's breeze and 16 °C, or 8 °C at night.
+- [ ] **The GBB Pistol on Woodland at night against Depot (PH1).** At night its BBs drop about 3 m sooner (24 m
+  against 27 m); Red or Black Gas wins the reach back. The AEG Rifle and the Sniper Rifle shoot the same on both.
+- [ ] **A bot sprinting across your line at 10 to 20 m (PH1).** A BB you see strike its trailing edge counts, and one
+  you see pass just ahead of it doesn't.
+- [ ] **BB weight to 0.40 g in Customise (PH1).** The flight picture shows the Sniper Rifle flying flattest with the
+  heaviest BBs and the pistols dropping short with them.
+- [ ] **Lob a rifle shot at about 25° on Woodland (PH1).** The BB comes down and lands (a puff), however far.
 - [ ] **Practice range, every target to 60 m.** Each can be hit: from 40 m aim high (or turn the hop up) and a little
   upwind; a level shot at the 60 m plate lands short.
 
@@ -594,6 +604,13 @@ a cross-passage between the running tunnels, and they swap at half time. Turn on
   landing, both on short poles that fit under the roof; Elimination's overtime flag rises in the lower hall.
 - [ ] **The lift shafts stand shut (MT1).** The two lifts come in their own step (MT2); until then their shafts are
   solid in the ticket hall.
+- [ ] **The ticket hall and concourse models (SM3).** The ticket gates (14 slim pedestals, a 1 m lane between each
+  two, a black paddle door each side of every lane), the row of ticket machines, both kiosks and the ticket office (shuttered), the booking counter, the help points, the benches and the
+  crowd barriers stand in their boxes: nothing floats, sticks out of its box or blocks where the box didn't. The
+  platform benches sit with their backs to the wall, seats to the track. No word, logo or team colour on any of them.
+- [ ] **The ticket gates' paddle doors (SM3).** Walk up to a lane: its two paddles swing open towards the platforms in
+  about a third of a second and shut behind you; the next lane's stay shut. Bots walk the lanes without snagging, and
+  BBs and bodies pass a lane as before (the paddles are look only). The paddles sit in the gates' baked light.
 
 ## Bots
 
@@ -1451,6 +1468,20 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   than in Woodland and rings off the tiles lightly, fading in under a second; a silenced one is still muffled, with the room round it.
 - [ ] **Bots' shots** on Subway echo too, behind a wall as well; steps, impacts and grenades don't (shots only).
 - [ ] **Every other map** (Depot, Woodland, the Range): shots sound exactly as before, also after a Subway match.
+
+## Subway lit as underground (UL1)
+
+Subway is Dev content: tick Settings › Dev › Dev content. On a real graphics card, play Subway once on each preset.
+
+- [ ] **No blue cast.** On Low and High, the ticket hall's terrazzo, the platform walls and the concourse read warm
+  grey and white like Depot's hall, never a cold blue. Ultra looks as it did.
+- [ ] **Medium is lit.** On Medium the platforms, concourse and ticket hall are lit from above, not one flat grey
+  shade; other players have a soft dark disc under their feet.
+- [ ] **Grey footstep dust.** From Medium up, running on the floors kicks up grey puffs, not white ones.
+- [ ] **Shiny things underground.** On Low, metal and polymer (your replica, the lift car, the rails) look matte but
+  never black; from Medium up they keep their sheen.
+- [ ] **Frame rate** on Low and Medium looking down the north platform: at least as good as before.
+- [ ] **Other maps unchanged:** Depot, Woodland and the Range look as before on every preset.
 
 ## Reporting what you find
 

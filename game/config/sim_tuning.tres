@@ -23,6 +23,7 @@
 [ext_resource type="Script" path="res://game/config/door_config.gd" id="21_do1dc"]
 [ext_resource type="Script" path="res://game/config/laser_config.gd" id="22_lz1lc"]
 [ext_resource type="Script" path="res://game/config/lift_config.gd" id="23_mt2lc"]
+[ext_resource type="Script" path="res://game/config/weather_config.gd" id="24_ph1wc"]
 
 [sub_resource type="Resource" id="Resource_glb71"]
 script = ExtResource("1_41pkq")
@@ -92,10 +93,14 @@ script = ExtResource("22_lz1lc")
 [sub_resource type="Resource" id="Resource_mt2lc"]
 script = ExtResource("23_mt2lc")
 
+[sub_resource type="Resource" id="Resource_ph1wc"]
+script = ExtResource("24_ph1wc")
+
 [resource]
 script = ExtResource("9_6ush2")
 ballistics = SubResource("Resource_m1e1h")
 wind = SubResource("Resource_qu7ug")
+weather = SubResource("Resource_ph1wc")
 ricochet = SubResource("Resource_qmyqd")
 movement = SubResource("Resource_s1lf3")
 vault = SubResource("Resource_hpjtr")
