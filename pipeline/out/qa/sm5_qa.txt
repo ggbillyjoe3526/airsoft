@@ -1,48 +1,19 @@
-Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Task: SM5 · QA commit none (nothing committed, as asked) · Verdict: Pass
 
----  GUT  ---
-[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
-Godot version:  4.7.2
-GUT version:  9.7.1
+Scope: the 2048 x 2048 sign sheet, poster_e..m, poster_wide_a..c, fixtures.py changes and the rebuilt subway.json (HEAD 94294ee).
+Blocking findings: none.
+Advisory findings: none new. Earlier lamp/extras findings stand in the earlier pass.
 
+Tests added to tests/unit/test_sm5_qa.gd (7, after the "sign sheet at 2048 x 2048" divider):
+- test_every_poster_and_wide_poster_loads_within_40_triangles_with_a_sign_surface: all 16 models listed, load, <=40 tris, a Sign surface. Fails without the feature: a missing .glb or model gives null / unlisted.
+- test_every_printed_model_s_uvs_stay_inside_its_own_cell_of_the_sheet: Sign UVs of every printed model (13 posters, 3 wide, name, edge, clock, way_sign) lie in their cell from station_cells.py (half-pixel slack). Fails on the old layout: the name/edge/way_out/clock cells moved, so old UVs fall outside the new rects.
+- test_the_sign_sheet_is_2048_square_and_has_an_import: signs.png loads at 2048 x 2048 and has its .import. Fails on the old 2048 x 1024 sheet.
+- test_every_listed_model_is_on_disk_with_an_import_and_subway_names_only_listed_ones: every listed .glb and .glb.import exists; every model in subway.json is listed, and every listed one is used. Fails if a model is unlisted or unplaced.
+- test_wide_posters_hang_on_the_trackside_walls_at_2_3_m_clear_of_the_name_boards: 7 wide posters at |z| 12.5, y 2.3, and no x-overlap with name boards (1.5 + 1.46 m) or each other on one wall. Fails on a count change, a wrong y/z, or an overlap.
+- test_no_two_neighbouring_posters_on_one_wall_share_a_design: same model, same facing and plane, within 8 m along the wall = fail. Fails if the a..m cycle repeats on neighbours.
+- test_edge_warnings_sit_0_7_m_in_from_their_platform_edge: edge_sign z is 0.7 m (+-1 cm) from the near edge of the train zones (z +-9). Fails on the old 0.15 m offset.
+(Checked by reading the data and the assertions' targets; I did not stub the change out and re-run each test.)
 
-res://tests/unit/test_sm5_qa.gd
-* test_a_roof_lamp_s_turn_is_read_in_degrees_and_a_missing_or_bad_one_is_zero
-* test_a_lamp_left_out_keeps_the_turns_in_step_with_the_lamps
-WARNING: MapData: a roof lamp is not {x, z}; left out
-     at: push_warning (core/variant/variant_utility.cpp:1033)
-     GDScript backtrace (most recent call first):
-         [0] parse (res://game/map/map_data.gd:269)
-         [1] _parse (res://tests/unit/test_sm5_qa.gd:10)
-         [2] test_a_lamp_left_out_keeps_the_turns_in_step_with_the_lamps (res://tests/unit/test_sm5_qa.gd:22)
-         [3] _run_test (res://addons/gut/gut.gd:622)
-         [4] _test_the_scripts (res://addons/gut/gut.gd:835)
-         [5] test_scripts (res://addons/gut/gut.gd:1047)
-         [6] run_tests (res://addons/gut/gui/GutRunner.gd:198)
-         [7] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
-         [8] main (res://addons/gut/cli/gut_cli.gd:297)
-         [9] _init (res://addons/gut/gut_cmdln.gd:39)
-* test_depot_s_roof_lamps_hang_unturned_where_they_did
-* test_lamp_place_without_a_turn_entry_falls_back_to_unturned
-* test_only_the_printed_material_turns_the_sheet_on
-* test_a_fixtures_entry_that_is_not_a_list_gives_no_fixtures
-6/6 passed.
+Run: godot test_sm5_qa.gd alone: 13 tests, 13 pass, 632 asserts. Raw output: pipeline/out/qa/sm5_qa_run2.txt. The push_warning from the malformed roof lamp case is expected. I did not run tools/check.sh or the smoke test (a full run was in progress).
 
-
-
-
-==============================================
-= Run Summary
-==============================================
-
-Totals
-------
-Scripts               1
-Tests                 6
-Passing Tests         6
-Asserts             305
-Time              0.364s
-
-
----- All tests passed! ----
-
+Could not test: how the posters, wide posters and the sheet look in a lit station, and that the printed text and pictures read. Texture bleed at mipmap levels needs a real window and GPU. The owner should look at the trackside wide posters from a platform and from the track.
