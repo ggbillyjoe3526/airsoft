@@ -14,9 +14,11 @@ assets/models/characters/human.glb in place of the old ones (splice.py), so the 
 - The radio: an unbranded dual-band handheld with a display, a knob and a 6 cm stub antenna, in an open pouch on the
   left of the cummerbund.
 
-No brand marks. Plain colours from a small swatch texture (the Gear strip in the knee pads' maps, `PADS_AT`, and
-`teamgear_col`), each surface a soft vertical gradient; detail is geometry. Fitted to the body in the file by rays
-(fit.py), clear of it at rest.
+No brand marks. The full-detail pieces are baked (MQ3, atlas.py): their faces unwrapped into charts and painted as
+what they are made of, cordura's weave, webbing's ribs, loop fields, mouldings, with bindings and stitches along the
+panels' edges, the Gear's charts in the knee pads' maps and the TeamGear's in its own. The lower levels draw plain
+colours from each family's swatch strip in those maps (`PADS_AT`, `TEAM_AT`), each surface a soft vertical gradient.
+Fitted to the body in the file by rays (fit.py), clear of it at rest.
 
 Run with Blender 5.x's Python, or Python with the `bpy` module (pip install bpy==5.2.3), from the repo root:
 
@@ -25,7 +27,6 @@ Run with Blender 5.x's Python, or Python with the `bpy` module (pip install bpy=
 
 import math
 import os
-import struct
 import sys
 
 import bpy  # first: it brings bmesh and mathutils with it
@@ -58,6 +59,7 @@ SWATCHES = {
     "cord": ("Gear", 9, 0x2C2C2C, 0.7, 0.0),
     "tan_web": ("Gear", 10, 0x8C7759, 0.85, 0.0),
     "ranger_loop": ("Gear", 11, 0x3B4132, 0.95, 0.0),
+    "zip": ("Gear", 12, 0x2A2B2C, 0.55, 0.0),
     "team": ("TeamGear", 0, 0xC2C2C2, 0.9, 0.0),
     "team_web": ("TeamGear", 1, 0x7A7A7A, 0.86, 0.0),
     "team_loop": ("TeamGear", 2, 0x6E6E6E, 0.95, 0.0),
@@ -67,12 +69,33 @@ COLUMNS = 16          # swatch columns in each texture
 TEX_W, TEX_H = 256, 32
 GRADIENT = (0.84, 1.0)  # a surface's colour at its foot and its top
 # The Gear strip lives in the knee pads' maps (BP6: one material fewer, the figure within its 8): pads.py paints it
-# (pads_patch) with its top left PADS_AT pixels into the pads' PADS_TEX maps, below their islands, and the Gear
-# surfaces draw with the pads' material there (pads_uv), so rerun pads.py before this after changing a Gear swatch.
+# (pads_patch) with its top left PADS_AT pixels into the pads' own PADS_TEX square, below their islands, and the Gear
+# surfaces draw with the pads' material there (strip_uv), so rerun pads.py before this after changing a Gear swatch.
 PADS_MATERIAL = "Pads"
 PADS_TEX = 1024
 PADS_AT = (32, 928)
 PADS_WRAP = 32
+# The full-detail pieces are baked (MQ3, atlas.py): their faces unwrapped into charts and painted as cordura,
+# webbing, loop and moulding, with bindings and stitches. Both families' maps are ATLAS px square. The Gear's charts
+# fill the pads' maps round the pads' own PADS_TEX square; the TeamGear's fill its own maps round its swatch strip at
+# TEAM_AT. The lower levels still draw from the strips.
+ATLAS = 2048
+ATLAS_PIECES = ("Kit", "Kit_Pack", "Kit_Radio")
+TEAM_AT = (32, 32)
+TEAM_STRIP = (TEAM_AT[0] + TEX_W + PADS_WRAP, TEAM_AT[1] + TEX_H + PADS_WRAP)   # the strip's far corner with its wrap
+ATLAS_REGIONS = {
+    "Gear": [(PADS_TEX, 0, ATLAS, ATLAS), (0, PADS_TEX, PADS_TEX, ATLAS)],
+    "TeamGear": [(0, TEAM_STRIP[1] + 8, ATLAS, ATLAS), (TEAM_STRIP[0] + 8, 0, ATLAS, TEAM_STRIP[1] + 8)],
+}
+ATLAS_EMPTY = {"TeamGear": (150, 150, 150)}   # the TeamGear colour map where nothing is drawn
+WEBP_QUALITY = 92
+COVER_RAYS = 16
+COVER_SPREAD = 0.92      # the rays' share of the half space, from straight out toward the face's own plane
+COVER_REACH = 0.3        # m
+COVER_LIFT = 0.0008      # m off the face the rays start
+GOLDEN_ANGLE = 2.39996323
+SHADE_RAYS = 12
+SHADE_REACH = 0.13       # m: the shadow where a pouch meets the carrier, a strap lies on a bag (the body's is 0.12)
 
 
 def swatch_materials() -> None:
@@ -1108,7 +1131,7 @@ def pack(kit: Kit, tree, lod: int) -> None:
         inner = rounded([(-p["half"] + e, p["bottom"] + e), (p["half"] - e, p["bottom"] + e),
                          (p["half"] - e, p["top"] - 0.055), (p["half"] - 0.068, p["top"] - e),
                          (-p["half"] + 0.068, p["top"] - e), (-p["half"] + e, p["top"] - 0.055)], 0.03, 2)
-        pip = piping("PackZip", inner, 0.0, "cord")
+        pip = piping("PackZip", inner, 0.0, "zip")
         face = BVHTree.FromPolygons([v.co.copy() for v in ob.data.vertices],
                                     [list(q.vertices) for q in ob.data.polygons])
         for v in pip.data.vertices:
@@ -1138,7 +1161,7 @@ def pack(kit: Kit, tree, lod: int) -> None:
         fit.pillow(fc, 0.008, -fc_d * 0.6)
         # The pocket's zip round its face.
         fpip = piping("PackFrontZip", rounded([(-0.104, 0.014), (0.104, 0.014), (0.104, fc_h - 0.014),
-                                               (-0.104, fc_h - 0.014)], 0.024, 2), -fc_d - 0.0005, "cord", r=0.0024)
+                                               (-0.104, fc_h - 0.014)], 0.024, 2), -fc_d - 0.0005, "zip", r=0.0024)
         for v in fpip.data.vertices:
             v.co.y -= fc_pillow(v.co.x, v.co.z)
         fc = join("PackFront", [fc, fpip])
@@ -1162,7 +1185,7 @@ def pack(kit: Kit, tree, lod: int) -> None:
         fit.subdivide_x(ad, 0.1)
         fit.pillow(ad, 0.005, -ad_d * 0.6)
         apip = piping("PackAdminZip", rounded([(-0.086, 0.09), (0.086, 0.09), (0.086, 2 * ad_hh - 0.012),
-                                               (-0.086, 2 * ad_hh - 0.012)], 0.02, 2), -ad_d - 0.0005, "cord",
+                                               (-0.086, 2 * ad_hh - 0.012)], 0.02, 2), -ad_d - 0.0005, "zip",
                       r=0.0022)
         for v in apip.data.vertices:
             # Riding the pocket's pillow.
@@ -1355,18 +1378,6 @@ def _lin(c: float) -> float:
     return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
 
 
-def png(width: int, height: int, rows: list) -> bytes:
-    """An 8-bit RGB PNG from rows of (r, g, b) byte tuples, top row first."""
-    import zlib
-    raw = b"".join(b"\0" + bytes(c for px in row for c in px) for row in rows)
-
-    def chunk(kind: bytes, data: bytes) -> bytes:
-        return (struct.pack(">I", len(data)) + kind + data
-                + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF))
-    head = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
-    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", head) + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b"")
-
-
 def strip(fam: str) -> tuple:
     """The family's colour strip (sRGB, each column a swatch, lighter towards the top) and its ORM strip (occlusion 1,
     roughness, metal) as rows of (r, g, b) byte tuples, top row first."""
@@ -1392,18 +1403,12 @@ def strip(fam: str) -> tuple:
     return col_rows, orm_rows
 
 
-def textures() -> dict:
-    """PNG bytes of the TeamGear colour strip (the Gear strip is painted into the pads' maps: pads_patch)."""
-    col_rows, _orm = strip("TeamGear")
-    return {("TeamGear", "col"): png(TEX_W, TEX_H, col_rows)}
-
-
-def pads_patch() -> tuple:
-    """The Gear strip as pads.py paints it into the pads' maps at PADS_AT: (colour, ORM) uint8 arrays, the strip with
-    PADS_WRAP pixels of itself wrapped round it (the next column and row over, as a repeating strip's), so its mip
-    levels blend as the strip's own did."""
+def patch(fam: str) -> tuple:
+    """A family's strip as it is painted into larger maps: (colour, ORM) uint8 arrays, the strip with PADS_WRAP pixels
+    of itself wrapped round it (the next column and row over, as a repeating strip's), so its mip levels blend as the
+    strip's own did."""
     import numpy as np
-    col_rows, orm_rows = strip("Gear")
+    col_rows, orm_rows = strip(fam)
     out = []
     for rows in (col_rows, orm_rows):
         tiled = np.tile(np.array(rows, np.uint8), (3, 3, 1))
@@ -1411,14 +1416,213 @@ def pads_patch() -> tuple:
     return tuple(out)
 
 
-def pads_uv(u: float, v: float) -> tuple:
-    """A Gear surface's glTF UV on its strip (0-1 across it) where pads_patch puts the strip in the pads' maps."""
-    return ((PADS_AT[0] + u * TEX_W) / PADS_TEX, (PADS_AT[1] + v * TEX_H) / PADS_TEX)
+def pads_patch() -> tuple:
+    """The Gear strip as pads.py paints it into the pads' maps at PADS_AT."""
+    return patch("Gear")
 
 
-def extract(ob: bpy.types.Object, max_index_family: dict = None) -> list:
+STRIP_AT = {"Gear": PADS_AT, "TeamGear": TEAM_AT}
+
+
+def strip_uv(fam: str, u: float, v: float) -> tuple:
+    """A surface's glTF UV on its family's strip (0-1 across it) where the strip lies in the family's maps."""
+    at = STRIP_AT[fam]
+    return ((at[0] + u * TEX_W) / ATLAS, (at[1] + v * TEX_H) / ATLAS)
+
+
+# ------------------------------------------------------------------------------------------------- the baked maps
+
+def gather(obs: list, fam: str) -> tuple:
+    """The family's faces of `obs` for atlas.py, and whose each corner is: (object, loop index)."""
+    import atlas
+    co, corner_vert, corner_shade, polys, swatch, tris, tri_poly, keys = [], [], [], [], [], [], [], []
+    for ob in obs:
+        me = ob.data
+        me.calc_loop_triangles()
+        uv = me.uv_layers.active.data
+        first = len(co)
+        co.extend(tuple(v.co) for v in me.vertices)
+        corner_of, poly_of = {}, {}
+        for p in me.polygons:
+            name = me.materials[p.material_index].name
+            if SWATCHES[name][0] != fam:
+                continue
+            poly_of[p.index] = len(polys)
+            corners = []
+            for li in p.loop_indices:
+                corner_of[li] = len(corner_vert)
+                corners.append(len(corner_vert))
+                corner_vert.append(first + me.loops[li].vertex_index)
+                corner_shade.append(uv[li].uv.y)   # paint()'s height through the part
+                keys.append((ob, li))
+            polys.append(corners)
+            swatch.append(name)
+        for t in me.loop_triangles:
+            if t.polygon_index in poly_of:
+                tris.append([corner_of[li] for li in t.loops])
+                tri_poly.append(poly_of[t.polygon_index])
+    return atlas.Faces(co, corner_vert, corner_shade, polys, swatch, tris, tri_poly), keys
+
+
+def cover_tree(obs: list) -> BVHTree:
+    """Everything that can lie over a face of the gear: the body and the gear itself."""
+    verts, polys = [], []
+    for ob in obs:
+        first = len(verts)
+        verts.extend(ob.matrix_world @ v.co for v in ob.data.vertices)
+        polys.extend(tuple(first + i for i in p.vertices) for p in ob.data.polygons)
+    return BVHTree.FromPolygons(verts, polys)
+
+
+def covered(faces, tree: BVHTree) -> list:
+    """Whether each face is out of sight: all but one of COVER_RAYS rays spread over the half space it faces meet
+    something within COVER_REACH (the plate bags' inner faces, a pouch's back, the carrier's back under the pack)."""
+    rays = []
+    for i in range(COVER_RAYS):
+        z = 1.0 - (i + 0.5) / COVER_RAYS * COVER_SPREAD
+        r = math.sqrt(1.0 - z * z)
+        rays.append((r * math.cos(i * GOLDEN_ANGLE), r * math.sin(i * GOLDEN_ANGLE), z))
+    out = []
+    for corners in faces.polys:
+        pts = [Vector(faces.co[faces.corner_vert[c]]) for c in corners]
+        centre = sum(pts, Vector()) / len(pts)
+        n = sum((pts[k].cross(pts[(k + 1) % len(pts)]) for k in range(len(pts))), Vector())
+        if n.length < 1e-12:
+            out.append(True)
+            continue
+        n.normalize()
+        a = n.orthogonal().normalized()
+        b = n.cross(a)
+        start = centre + n * COVER_LIFT
+        hits = sum(1 for x, y, z in rays if tree.ray_cast(start, a * x + b * y + n * z, COVER_REACH)[0] is not None)
+        out.append(hits >= COVER_RAYS - 1)
+    return out
+
+
+def occlusion(tree: BVHTree):
+    """atlas.paint's `occlusion`: how open each point is to the sky, from SHADE_RAYS rays spread over the half space
+    its face looks into; something nearer than SHADE_REACH shuts a ray, the nearer the more."""
+    import numpy as np
+    rays = []
+    for i in range(SHADE_RAYS):
+        z = math.sqrt((i + 0.5) / SHADE_RAYS)   # more of them near straight out: what lights a face most
+        r = math.sqrt(1.0 - z * z)
+        rays.append((r * math.cos(i * GOLDEN_ANGLE), r * math.sin(i * GOLDEN_ANGLE), z))
+
+    def ask(points, normals):
+        out = np.ones(len(points))
+        for k in range(len(points)):
+            n = Vector(normals[k])
+            a = n.orthogonal().normalized()
+            b = n.cross(a)
+            start = Vector(points[k]) + n * COVER_LIFT
+            shut = 0.0
+            for x, y, z in rays:
+                hit = tree.ray_cast(start, a * x + b * y + n * z, SHADE_REACH)
+                if hit[0] is not None:
+                    shut += 1.0 - hit[3] / SHADE_REACH
+            out[k] = 1.0 - shut / SHADE_RAYS
+        return out
+    return ask
+
+
+def swatch_table() -> dict:
+    """{swatch: (linear rgb, roughness, metal)} for atlas.paint."""
+    return {name: (tuple(_lin(((rgb >> s) & 255) / 255.0) for s in (16, 8, 0)), rough, metal)
+            for name, (_fam, _col, rgb, rough, metal) in SWATCHES.items()}
+
+
+def shade_gain(v):
+    """The strip's gradient at paint()'s `v`: GRADIENT's foot at the part's foot, its top at the top."""
+    return GRADIENT[1] - (GRADIENT[1] - GRADIENT[0]) * (1.0 - v)
+
+
+def bake(pieces: dict, body: bpy.types.Object) -> dict:
+    """Unwraps the full-detail pieces' faces into each family's charts (their UVs set to the charts') and paints
+    them: {family: atlas.paint's maps}."""
+    import atlas
+    obs = [pieces[name] for name in ATLAS_PIECES]
+    tree = cover_tree(obs + [body])
+    out = {}
+    for fam, regions in ATLAS_REGIONS.items():
+        faces, keys = gather(obs, fam)
+        faces.poly_hidden[:] = covered(faces, tree)
+        if os.environ.get("GEAR_DUMP"):
+            faces.save(os.path.join(os.environ["GEAR_DUMP"], fam + ".npz"))
+        lay = atlas.unwrap(faces, regions)
+        out[fam] = atlas.paint(faces, lay, ATLAS, swatch_table(), shade_gain, occlusion(tree))
+        for (ob, li), (x, y) in zip(keys, lay.px):
+            ob.data.uv_layers.active.data[li].uv = (x / ATLAS, 1.0 - y / ATLAS)
+        print("%-8s %d charts at %.0f px a metre (%.2f mm a pixel)" % (fam, len(lay.chart_swatch), lay.scale,
+                                                                       1000.0 / lay.scale))
+    return out
+
+
+def _webp(array) -> bytes:
+    import io
+    from PIL import Image
+    buf = io.BytesIO()
+    Image.fromarray(array).save(buf, "WEBP", quality=WEBP_QUALITY, method=6)
+    return buf.getvalue()
+
+
+def _orm(maps: dict):
+    import numpy as np
+    return np.dstack((np.full(maps["rough"].shape, 255.0), maps["rough"] * 255.0, maps["metal"] * 255.0))
+
+
+def team_images(maps: dict) -> dict:
+    """The TeamGear maps as WebP bytes: its strip at TEAM_AT (the lower levels'), the baked charts round it."""
+    import numpy as np
+    col = np.empty((ATLAS, ATLAS, 3), np.uint8)
+    col[:] = ATLAS_EMPTY["TeamGear"]
+    nrm = np.empty_like(col)
+    nrm[:] = (128, 128, 255)
+    orm = np.empty_like(col)
+    orm[:] = (255, int(round(SWATCHES["team"][3] * 255)), 0)
+    strip_col, strip_orm = patch("TeamGear")
+    y0, x0 = TEAM_AT[1] - PADS_WRAP, TEAM_AT[0] - PADS_WRAP
+    spot = (slice(y0, y0 + strip_col.shape[0]), slice(x0, x0 + strip_col.shape[1]))
+    col[spot] = strip_col
+    orm[spot] = strip_orm
+    assert not maps["mask"][spot].any(), "a TeamGear chart lies on the strip"
+    mask = maps["mask"]
+    col[mask] = maps["col"][mask]
+    nrm[mask] = maps["nrm"][mask]
+    orm[mask] = _orm(maps).round().astype(np.uint8)[mask]
+    return {"col": _webp(col), "nrm": _webp(nrm), "orm": _webp(orm)}
+
+
+def pads_images(maps: dict, in_file: dict) -> dict:
+    """The pads' maps with the Gear's baked charts painted round the pads' own square: the square painted afresh by
+    pads.py's own painter, so a rerun never works from a compressed copy. `in_file` (the file's maps' bytes by slot)
+    only says whether pads.py has made its maps, and the pads' UVs, ATLAS px yet."""
+    import io
+    import tempfile
+    import numpy as np
+    from PIL import Image
+    side = Image.open(io.BytesIO(in_file["col"])).size[0]
+    if side != ATLAS:
+        raise SystemExit("the pads' maps are %d px: run tools/blender/figures/pads.py first (it makes them %d)"
+                         % (side, ATLAS))
+    sys.path.insert(0, os.path.join(HERE, "..", "figures"))
+    import pads
+    painted = pads.textures(tempfile.mkdtemp(prefix="gear_pads_"))
+    mask = maps["mask"]
+    assert not mask[:PADS_TEX, :PADS_TEX].any(), "a Gear chart lies on the pads' square"
+    new = {"col": maps["col"], "nrm": maps["nrm"], "orm": _orm(maps).round().astype(np.uint8)}
+    out = {}
+    for slot, path in painted.items():
+        image = np.array(Image.open(path).convert("RGB"))
+        image[mask] = new[slot][mask]
+        out[slot] = _webp(image)
+    return out
+
+
+def extract(ob: bpy.types.Object, baked: bool = False) -> list:
     """The object's triangles as glTF primitives, one per material family: positions, normals and UVs per corner
-    (shared where equal), its four strongest bones per vertex."""
+    (shared where equal), its four strongest bones per vertex. A `baked` object's UVs are its charts'; another's
+    are on its swatches, moved here to where each family's strip lies in its maps."""
     me = ob.data
     me.calc_loop_triangles()
     normals = me.corner_normals
@@ -1442,7 +1646,7 @@ def extract(ob: bpy.types.Object, max_index_family: dict = None) -> list:
             co = me.vertices[vi].co
             n = normals[li].vector
             t = uv[li].uv
-            key = (vi, round(n.x, 4), round(n.y, 4), round(n.z, 4), round(t.x, 5), round(t.y, 5))
+            key = (vi, round(n.x, 4), round(n.y, 4), round(n.z, 4), round(t.x, 6), round(t.y, 6))
             idx = p["_key"].get(key)
             if idx is None:
                 idx = len(p["positions"])
@@ -1460,7 +1664,8 @@ def extract(ob: bpy.types.Object, max_index_family: dict = None) -> list:
             prims[fam].pop("_key")
             if fam == "Gear":
                 prims[fam]["material"] = PADS_MATERIAL
-                prims[fam]["uvs"] = [pads_uv(u, v) for u, v in prims[fam]["uvs"]]
+            if not baked:
+                prims[fam]["uvs"] = [strip_uv(fam, u, v) for u, v in prims[fam]["uvs"]]
             out.append(prims[fam])
     return out
 
@@ -1504,16 +1709,23 @@ def main() -> None:
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
     arm, body = load_figure()
     pieces, seat = build_all(arm, body)
+    maps = bake(pieces, body)
     meshes = {}
     for name, ob in pieces.items():
-        meshes[name] = extract(ob)
-    tex = textures()
-    mats = [
-        {"name": "TeamGear", "col": tex[("TeamGear", "col")], "col_name": "teamgear_col", "metallic": 0.0,
-         "roughness": SWATCHES["team"][3]},
-    ]
+        meshes[name] = extract(ob, name in ATLAS_PIECES)
+    if os.environ.get("GEAR_DUMP"):
+        from PIL import Image
+        for fam, m in maps.items():
+            for slot in ("col", "nrm"):
+                Image.fromarray(m[slot]).save(os.path.join(os.environ["GEAR_DUMP"], "%s_%s.png" % (fam, slot)))
     if "--no-splice" not in args:
-        report = splice.splice(HUMAN, HUMAN, meshes, mats, sibling="Kit")
+        team = team_images(maps["TeamGear"])
+        mats = [
+            {"name": "TeamGear", "col": team["col"], "col_name": "teamgear_col", "nrm": team["nrm"],
+             "nrm_name": "teamgear_nrm", "orm": team["orm"], "orm_name": "teamgear_orm", "occlusion": False},
+        ]
+        pads = pads_images(maps["Gear"], splice.images_of(HUMAN, PADS_MATERIAL))
+        report = splice.splice(HUMAN, HUMAN, meshes, mats, sibling="Kit", repaint={PADS_MATERIAL: pads})
         write_seat(HUMAN, seat)
         for name in sorted(report):
             print("%-16s %6d triangles" % (name, report[name]))
