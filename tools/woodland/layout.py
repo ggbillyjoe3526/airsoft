@@ -347,6 +347,9 @@ rect("tyrestack", -1.0, -5.0, 1.8, 1.8)
 rect("log", -4.0, 9.5, 6.5, 0.8, -8)
 rect("crates", -1.0, 12.0, 2.4, 1.6, 0, top=2.4)            # south crate stack: cover for the Tyre wall exit
 rect("tyre", -15.0, -4.0, 1.7, 1.7)
+# MB1: the west's sweep ended in the open under the Hut rise, 20 m from the head of the Ford's ramp: a fallen tree lies
+# across the lane just past the field's middle, and the west's stop (LANES) is behind it.
+rect("windthrow", 1.5, 1.0, 6.0, 2.0, 90, top=2.4)
 # Hut row (defenders' mid): two huts with doors and windows, a crate yard between
 hut(27.0, -0.5, 6.0, 4.0, 0, [(3, 1.3, 2.7, "door"), (1, 1.3, 2.7, "door"), (0, 1.5, 4.5, "window"),
                               (2, 1.5, 4.5, "window")], tag="hut1")
@@ -571,7 +574,7 @@ LANE_PATHS = {
     # MB1: the middle lane goes round the Woodpile's north end and the Birch stand's stack, up the Ford's ramp north
     # of its thickets and between them and hut 1, and ends in the Back yard, where Attack / Defend's middle
     # defenders hold between the two sites (it ended in their camp).
-    "m": [(-74, 4), (-52, 4), (-38, 0.5), (-26, -2.5), (-19, -2.0), (-6, 2), (3, 1.5),
+    "m": [(-74, 4), (-52, 4), (-38, 0.5), (-26, -2.5), (-19, -2.0), (-6, 2), (-0.4, 1.6), (1.5, -3.3),
           (9.5, 0.5), (15.5, -3.6), (20.6, -5.0), (22.4, 0.4), (22.6, 3.4), (31.2, 2.2), (36.5, 2.4), (40.5, 4.2),
           (43.2, 1.0), (58, 4.5)],
     # MB1: the south lane leaves the road for its north verge at the fallen tree and comes back onto it past the stack.
