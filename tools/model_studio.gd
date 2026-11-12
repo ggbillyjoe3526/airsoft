@@ -17,6 +17,8 @@ const MARGIN := 1.08
 const CAMERA_DISTANCE := 2.0
 const NEAR_AT_LEAST := 0.05
 const FAR_AT_MOST := CAMERA_DISTANCE * 3.0
+## The sun's shadow map's side (px): the largest, so a close-up's shadow edges stay fine.
+const SHADOW_MAP := 16384
 const GROUND := Color(0.20, 0.205, 0.215)
 const AMBIENT := Color("c8d4ea")
 const SUN_ANGLE := Vector2(-48.0, 38.0)
@@ -49,6 +51,7 @@ func _run() -> void:
 	port.own_world_3d = true
 	port.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(port)
+	RenderingServer.directional_shadow_atlas_set_size(SHADOW_MAP, true)
 	port.add_child(_environment())
 	port.add_child(_light(SUN_ANGLE, SUN_ENERGY, true))
 	port.add_child(_light(FILL_ANGLE, FILL_ENERGY, false))
@@ -132,8 +135,9 @@ func _shot(port: SubViewport, f: PackedStringArray, out: String) -> int:
 	var reach := box.size.length()
 	var behind := reach
 	if angles[1] > 0.0:
-		var rise := camera.size * 0.5 * SIZE.y / SIZE.x + centre.y - ground.position.y
-		behind = clampf(rise / tan(deg_to_rad(angles[1])), reach, FAR_AT_MOST - CAMERA_DISTANCE)
+		var pitch := deg_to_rad(angles[1])
+		var rise := camera.size * 0.5 * SIZE.y / SIZE.x * cos(pitch) + centre.y - ground.position.y
+		behind = clampf(rise / sin(pitch), reach, FAR_AT_MOST - CAMERA_DISTANCE)
 	camera.near = maxf(NEAR_AT_LEAST, CAMERA_DISTANCE - reach)
 	camera.far = CAMERA_DISTANCE + behind
 	camera.make_current()

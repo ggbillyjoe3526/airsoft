@@ -158,6 +158,8 @@ HEX_SQUASH = 0.68
 GRIP_TOP_PX = 113.0
 GRIP_TANG_PX = (116.0, 120.0, 125.0, 130.0, 135.0, 140.0)
 GRIP_ROW_PX = 6.0
+GRIP_RUN_PX = 144.0
+GRIP_FOOT_ROWS_PX = (12.5, 12.0, 8.0, 4.0, 0.0)
 GRIP_RING = 36
 # The back strap (owner, 2026-11-12, on the first pictures: "make the handle less curved on the back side"): the GBB's
 # hollows under the tang and swells out again at the palm; this one runs straight from the hollow, filled BACK_NOTCH's
@@ -166,6 +168,10 @@ GRIP_RING = 36
 BACK_NOTCH = (178.0, 0.0025)
 BACK_HEEL = (400.0, 0.0025)
 BACK_BLEND = 0.003
+# The back half of a section is no squarer than this superellipse exponent, the GBB's own down its grip: the GBB's
+# frame is a square block behind its slide (24), and the corners of that block ran down this white shell as two
+# creases from the tang to the palm.
+BACK_ROUND = 3.0
 # The trigger guard's opening and the slot the trigger hangs from.
 # The old model's shape (owner, 2026-11-05: "more like the original trigger and guard"): a narrow loop in front, a
 # full-width web behind, the opening tall enough for the trigger and a little more. The trigger and guard sit 12 mm
@@ -183,7 +189,7 @@ GUARD_LOOP = [(52.0, -14.0), (52.0, -24.0, 1.0), (34.5, -34.0, 2.0), (34.5, -42.
 # The dust cover's slab ends at FRAME_SPLIT, just ahead of the grip's front; the spine behind it (side outline,
 # FRAME_SPINE_IN narrower a side) stays inside the grip's top and clear of the back strap.
 FRAME_SPLIT = -27.0
-FRAME_SPINE = [(-26.0, 0.0), (-26.0, -19.0), (-70.0, -19.0), (-88.0, -6.0), (-88.0, 0.0)]
+FRAME_SPINE = [(-26.0, 0.0), (-26.0, -19.0), (-66.0, -19.0), (-80.0, -6.0), (-80.0, 0.0)]
 FRAME_SPINE_IN = 1.0
 # The web behind the trigger, full width as the old model's, drawn in to the grip's rounded front so no ledge stands
 # over the front strap: sections along y, each (y, half width, bottom z), from WEB_TOP down.
@@ -197,6 +203,7 @@ TRIGGER_SLOT = ((-8.0 - TRIGGER_BACK, 13.0 - TRIGGER_BACK), (-26.0, -8.0), 3.4)
 WINDOW_Z = (-38.0, -104.0)
 WINDOW_HALF = 13.5
 WINDOW_FLOOR = 11.2
+WINDOW_DEPTH = 8.0
 AXIS_Z = (-50.0, -105.0)
 # The magazine (the power cell): raked on the handle's middle line, CELL_MARGIN wider than the window fore and aft
 # (so it fills it) and well inside the grip's rounded walls all the way down, between CELL_Z; its sides (MAG_HW) just
@@ -205,6 +212,17 @@ CELL_Z = (-18.0, -122.0)
 CELL_MARGIN = 2.5
 MAG_HW = 12.6
 CELL_RING_Z = -62.0
+# The cell's ribs: CELL_RIBS grooves from CELL_RIB_TOP down, CELL_RIB_STEP apart, each (half height, depth); the
+# ones within CELL_WIDE_NEAR of the ring are wide, and none is cut within CELL_RING_CLEAR of it. They end
+# CELL_RIB_INSET inside the window's edges, so the window's walls stand on a clean face.
+CELL_RIBS = 10
+CELL_RIB_TOP = -32.0
+CELL_RIB_STEP = 8.5
+CELL_RIB = (0.9, 0.6)
+CELL_RIB_WIDE = (1.5, 0.8)
+CELL_WIDE_NEAR = 13.5
+CELL_RING_CLEAR = 9.0
+CELL_RIB_INSET = 2.0
 # The base pad under the foot: the foot's own rounded outline (the grip's last ring, PAD_RING points) made PAD_WIDEN
 # wider and longer about its middle, so it sits just inside the grip's width and length and nothing overhangs the
 # heel, then carried down the handle's rake in tiers of (z, scale, material): a chamfered metal plate, a groove round
@@ -655,7 +673,7 @@ def frame() -> list:
     thw /= SIZE_X_FRAME
     cut.append(box("c_tslot", (-thw, ty0, tz0), (thw, ty1, tz1), "CyberSlab"))
     for sx in (-1, 1):
-        cut.append(side_recess("c_window", grip_window(), sx, WINDOW_FLOOR + 8.0, 8.0))
+        cut.append(side_recess("c_window", grip_window(), sx, WINDOW_FLOOR + WINDOW_DEPTH, WINDOW_DEPTH))
         cut.append(side_recess("c_housing", HOUSING, sx, FRAME_HW, 1.6))
         # A channel along the guard's bottom bar.
         cut.append(side_recess("c_gch", [(24.5, -44.1, 0.6), (0.0, -44.1, 0.6), (0.0, -42.9, 0.6), (24.5, -42.9, 0.6)],
@@ -715,11 +733,11 @@ def unfit(p: tuple) -> tuple:
 def grip_rows() -> list:
     """The GBB's photo heights the grip's rings are lofted at, top to foot (as gbb.grip's below the frame's top)."""
     rows = [GRIP_TOP_PX, *GRIP_TANG_PX]
-    py = 144.0
-    while py < gbb.GRIP_FOOT - 13.0:
+    py = GRIP_RUN_PX
+    while py < gbb.GRIP_FOOT - GRIP_FOOT_ROWS_PX[0]:
         rows.append(py)
         py += GRIP_ROW_PX
-    return rows + [gbb.GRIP_FOOT - d for d in (12.5, 12.0, 8.0, 4.0, 0.0)]
+    return rows + [gbb.GRIP_FOOT - d for d in GRIP_FOOT_ROWS_PX]
 
 
 def back_strap(py: float) -> float:
@@ -739,14 +757,22 @@ def back_strap(py: float) -> float:
 
 
 def grip_ring(py: float, count: int, scale: float = 1.0) -> list:
-    """The grip's ring at photo height py (metres, at the GBB's size): the GBB's, its back half drawn to
-    `back_strap`; `scale` times its size about its middle (the base pad's tiers)."""
-    cy, half, _z, _hw, _n = gbb.grip_section(py)
-    back = (cy - back_strap(py)) / half
-    mid = cy - 0.5 * (half * back - half)
+    """The grip's ring at photo height py (metres, at the GBB's size): the GBB's section ahead of its middle (its
+    width, its swell out of the frame, its finger grooves), and behind it a half drawn to `back_strap` and no
+    squarer than BACK_ROUND; the halves meet at the section's widest, where both run straight back. `scale` times
+    its size about its middle (the base pad's tiers)."""
+    cy, half, z, hw, n = gbb.grip_section(py)
+    back = cy - back_strap(py)
+    mid = cy + 0.5 * (half - back)
     ring = []
-    for x, y, z in gbb.grip_ring(py, count):
-        y = cy + (y - cy) * (back if y < cy else 1.0)
+    for i in range(count):
+        a = 2.0 * math.pi * i / count
+        c, s = math.cos(a), math.sin(a)
+        depth, power = (half, n) if s >= 0.0 else (back, min(n, BACK_ROUND))
+        d = math.copysign(abs(s) ** (2.0 / power), s)
+        # The width swells out of the frame along the GBB's own section, so it is read where the GBB's would be.
+        x = gbb.swell(py, cy + d * half, hw) * math.copysign(abs(c) ** (2.0 / power), c)
+        y = cy + d * depth
         ring.append((x * scale, mid + (y - mid) * scale, z))
     return ring
 
@@ -837,18 +863,13 @@ def magazine() -> object:
     ring_at = (axis(CELL_RING_Z), CELL_RING_Z)
     cut = []
     for sx in (-1, 1):
-        for i in range(10):
-            z = -32.0 - i * 8.5
-            if abs(z - ring_at[1]) < 9.0:
+        for i in range(CELL_RIBS):
+            z = CELL_RIB_TOP - i * CELL_RIB_STEP
+            if abs(z - ring_at[1]) < CELL_RING_CLEAR:
                 continue
-            if abs(z - ring_at[1]) < 13.5:
-                y = _mag_front(z)
-                cut.append(side_recess("c_wide", [(y + 2.0, z - 1.5), (y - 60.0, z - 1.5), (y - 60.0, z + 1.5),
-                                                  (y + 2.0, z + 1.5)], sx, MAG_HW, 0.8, "CyberFrame"))
-                continue
-            y = _mag_front(z)
-            cut.append(side_recess("c_rib", [(y + 2.0, z - 0.9), (y - 60.0, z - 0.9), (y - 60.0, z + 0.9),
-                                             (y + 2.0, z + 0.9)], sx, MAG_HW, 0.6, "CyberFrame"))
+            half, depth = CELL_RIB_WIDE if abs(z - ring_at[1]) < CELL_WIDE_NEAR else CELL_RIB
+            cut.append(side_recess("c_rib", raked(z + half, z - half, WINDOW_HALF - CELL_RIB_INSET), sx,
+                                   MAG_HW, depth, "CyberFrame"))
         r = hs.Builder("c_ring", ["CyberFrame"])
         place(r, r.lathe([(m(-1.0), m(5.2)), (m(1.0), m(5.2))], "CyberFrame", 28, axis="x"), sx,
               (m(sx * MAG_HW), m(ring_at[0]), m(ring_at[1])))
@@ -888,10 +909,6 @@ def pad() -> object:
             b.loft(rings[start:i + 1], PAD_TIERS[i][2], cap0=start == 0, cap1=last)
             start = i
     return hs.finish(b.build(), 0.0)
-
-
-def _mag_front(z: float) -> float:
-    return axis(z) + WINDOW_HALF + CELL_MARGIN
 
 
 # ------------------------------------------------------------------------------------------------------------ warp
