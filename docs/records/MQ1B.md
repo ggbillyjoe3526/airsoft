@@ -1,6 +1,6 @@
 # MQ1B · The Cyber Pistol's grip in the GBB Pistol's shape
 
-**Review:** 3 attempts · critic PENDING · qa PENDING · performance PENDING
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Fable 5.2 (model quality thread) | pass | Retry 7/8 | A pin stood out of the tang; the skin showed facets and bands; the web and frame left ledges over the grip's top; the base pad was a square block wider than the grip |
 | 2026-11-12 | 2 | Fable 5.2 (model quality thread) | pass | Retry 6/8 | The square corners of the GBB's frame ran down the back of the white shell as two creases from the tang; the cell's ribs notched the window's edge; docs/ASSETS.md and docs/KNOWN_ISSUES.md not updated |
-| 2026-11-12 | 3 | Fable 5.2 (model quality thread) | PENDING | PENDING | – |
+| 2026-11-12 | 3 | Fable 5.2 (model quality thread) | pass | Accept 8/8 | – |
 
 ## What changed
 
@@ -74,3 +74,5 @@ strap, the finger grooves and the width are the GBB's to within 1.5 mm down the 
 
 - The first-person Cyber hold (`tools/blender/arms/arms.py` `cyber`, `CYBER_RIGHT`) still carries the slab's numbers
   until the FP arms thread refits it (`docs/KNOWN_ISSUES.md`); the play check is on the Dev 3 checklist.
+- The critic's note for the next pass on this model: from the side a faint shade band shows 2 to 3 mm under the
+  tang, where `BACK_BLEND` joins the tang's curve to the straight line; a wider blend would soften it.
