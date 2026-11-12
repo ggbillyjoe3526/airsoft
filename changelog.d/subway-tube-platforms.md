@@ -1,0 +1,11 @@
+### Subway platforms like the Tube, and Morrin Street
+- Each platform now shares a deep tunnel with its track, under a curved white-tiled arched ceiling with dark rings every 6 m.
+- The yellow line is only at the platform edges, with a pale edge and MIND THE GAP painted in white.
+- The wall across the track is white tiles now, not black.
+- Tiles across the station are white and grey under a cool white light.
+- Platform floors are smooth grey concrete, and the track bed is near black.
+- A dark tiled band runs under the curve, with cables along the wall across the track and a dark face on each platform edge.
+- The station is called Morrin Street on its name boards, line map and information panel.
+- The name boards are orange, the same as the stripe on the trains.
+- Departure boards hang on rods from the curved ceiling.
+- BBs and grenades can now fly over the roof of a standing train.

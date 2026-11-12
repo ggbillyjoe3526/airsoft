@@ -34,6 +34,8 @@ GROW = 0.01          # each floor and ramp grown this much a side
 EYE_FACING_EAST = -math.pi / 2
 EYE_FACING_WEST = math.pi / 2
 SHAFT_COLOUR = 0x9c978d   # the shafts' walls, as MT1's shut shaft
+HEMI_SKY = 0xdfe6ec       # the fill's colours (sRGB, LightingConfig.override_fill_*): a cool white, no warm bounce
+HEMI_GROUND = 0xc9cdd0
 
 
 def r(v: float) -> float:
@@ -245,8 +247,9 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
                                           rise="+x" if fb > fa else "-x"))
             else:
                 boxes.append(([rm["x0"], rm["x1"], low - FT, rm["ya"], rm["z0"], rm["z1"]], -1, "floor"))
-        # The ceiling, a ramp's stepped down with it (each step closing the riser to the one above).
-        if rm["ceil"]:
+        # The ceiling, a ramp's stepped down with it (each step closing the riser to the one above); a vault room's
+        # is its platform tunnel's vault (vault_boxes).
+        if rm["ceil"] and not rm["vault"]:
             if is_ramp(rm) and rm.get("flat"):
                 y = ceil_at(rm, 0.0)
                 boxes.append(([rm["x0"], rm["x1"], y, y + FT, rm["z0"], rm["z1"]], -1, "wall"))
@@ -272,7 +275,7 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
             for pa, pb in pieces_of(a, b, cuts):
                 f_lo, f_hi = edge_floor(rm, edge, pa, pb)
                 c_lo, c_hi = ceil_at(rm, f_lo), ceil_at(rm, f_hi)
-                top = c_hi + FT if rm["ceil"] else c_hi - 0.01
+                top = c_hi if rm["vault"] else c_hi + FT if rm["ceil"] else c_hi - 0.01
                 if rm["ceil"] and is_ramp(rm) and not rm.get("flat") and edge in "ns":
                     # Up to the stepped ceiling's top over this stretch, so no gap opens between them.
                     ca, cb = next(c for c in ramp_cells(rm) if c[0] - EPS <= (pa + pb) / 2 <= c[1] + EPS)
@@ -341,6 +344,81 @@ def spiral() -> tuple[list[dict], list[list[float]]]:
         boxes.append([ca, cb, top - FT, top, cc, cd])
     boxes.append([x0 + f, x1 - f, s["y0"], s["y1"] + s["top"], z0 + f, z1 - f])  # the core
     return ramps, boxes
+
+
+# ---------------- The platform tunnels' vaults ----------------
+
+VAULT_PROUD = 0.08   # a vault's collider boxes stand at most this far (m) in front of its drawn arc
+
+
+def vault_circle(v: dict) -> tuple[float, float, float]:
+    """A vault's arc: the circle (its middle's z and y, its radius) through both springings and the crown."""
+    half = (v["z1"] - v["z0"]) / 2
+    radius = (half * half + L.VAULT_RISE * L.VAULT_RISE) / (2 * L.VAULT_RISE)
+    return (v["z0"] + v["z1"]) / 2, v["y"] + L.VAULT_RISE - radius, radius
+
+
+def vault_y(v: dict, z: float) -> float:
+    """The vault's underside over z (its springing's height at or past a wall)."""
+    zc, yc, radius = vault_circle(v)
+    d = min(abs(z - zc), (v["z1"] - v["z0"]) / 2)
+    return yc + math.sqrt(radius * radius - d * d)
+
+
+def vault_top(v: dict) -> float:
+    return v["y"] + L.VAULT_RISE + FT
+
+
+def vault_air(v: dict) -> list[float]:
+    """The air a vault holds: its tunnel from a car's roof up, cut out of the shell (the lintels over a car)."""
+    return [v["x0"], v["x1"], v["low"] + FT, vault_top(v), v["z0"], v["z1"]]
+
+
+def vault_pieces(v: dict) -> list[tuple[float, float]]:
+    """The arc's points (z, y) from one springing to the other, each piece as long as its bounds' corner inside the arc
+    (at the lower end's height and the z nearest the crown's) stays within VAULT_PROUD of it: short
+    pieces where the arc is steep, long ones over the crown."""
+    zc, yc, radius = vault_circle(v)
+    alpha = math.asin((v["z1"] - v["z0"]) / 2 / radius)
+
+    def point(a: float) -> tuple[float, float]:
+        return zc + radius * math.sin(a), yc + radius * math.cos(a)
+
+    def proud(a: float, b: float) -> float:
+        (za, ya), (zb, yb) = point(a), point(b)
+        inner = zc if (za - zc) * (zb - zc) < 0 else za if abs(za - zc) < abs(zb - zc) else zb
+        return radius - math.hypot(inner - zc, min(ya, yb) - yc)
+
+    out = [point(-alpha)]
+    a = -alpha
+    while a < alpha - EPS:
+        lo, hi = 0.0, alpha - a
+        if proud(a, a + hi) > VAULT_PROUD:
+            for _ in range(40):
+                mid = (lo + hi) / 2
+                lo, hi = (mid, hi) if proud(a, a + mid) <= VAULT_PROUD else (lo, mid)
+            hi = lo
+        a += hi
+        out.append(point(a))
+    return out
+
+
+def vault_boxes(v: dict) -> list[list[float]]:
+    """A vault's colliders: each arc piece's bounds up to the vault's top, which sit on the drawn arc (never short of
+    it, at most VAULT_PROUD in front of it: vault_pieces); its walls from a car's roof up to the springing (the
+    trackside wall over a car); and its ends, under the springing and over it."""
+    top = vault_top(v)
+    low = v["low"] + FT
+    out = []
+    pts = vault_pieces(v)
+    for (za, ya), (zb, yb) in zip(pts, pts[1:]):
+        out.append([v["x0"], v["x1"], min(ya, yb), top, min(za, zb), max(za, zb)])
+    out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z0"] - FT, v["z0"]])
+    out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z1"], v["z1"] + FT])
+    for xa, xb in ((v["x0"] - FT, v["x0"]), (v["x1"], v["x1"] + FT)):
+        out.append([xa, xb, low, v["y"], v["z0"], v["z1"]])
+        out.append([xa, xb, v["y"], top, v["z0"], v["z1"]])
+    return [[r(c) for c in bx] for bx in out]
 
 
 def ramp_barrier(bl: dict) -> list[tuple[list[float], str]]:
@@ -474,15 +552,21 @@ def build() -> dict:
     for bx, kind in shaft_boxes():
         blocks.append(as_block(kind, bx, colour=SHAFT_COLOUR))
         solid.append(bx)
-    kinds = 0
+    vaults = [vault_air(v) for v in L.VAULTS]
     for bx, owner, kind in shell_boxes:
-        holes = [a for i, a in air if i != owner] + [shaft]
+        holes = [a for i, a in air if i != owner] + [shaft] + vaults
         parts = cut([bx], holes)
         parts = cut(parts, [s for s in solid if overlap(s, bx)])
         for p in parts:
             blocks.append(as_block(kind, p))
             solid.append(p)
-            kinds += 1
+    # The vaults over the platform tunnels, round the shell already standing and clear of every room's air.
+    for v in L.VAULTS:
+        for bx in vault_boxes(v):
+            parts = cut(cut([bx], [a for _, a in air]), [s for s in solid if overlap(s, bx)])
+            for p in parts:
+                blocks.append(as_block("wall", p))
+                solid.append(p)
     # The cover must stand clear of every room's walls: none inside another's air but its own room's.
     sx = L.SPIRAL
     m = {
@@ -500,16 +584,20 @@ def build() -> dict:
         "botSight": 50,
         "poleHeight": L.POLE_HEIGHT,
         "ambience": "tunnel",  # his tunnel recording (2026-11-11)
-        # Depot's overhead light: the lamps' stand-in on Low and Medium (RoofConfig).
+        # Depot's overhead light: the lamps' stand-in on Low and Medium (RoofConfig); the fill a cool white, as a
+        # station's fluorescent tubes light white tiles (owner, 2026-11-12: "a more white/grey look", TB1).
         "lighting": {"presets": ["day"], "overrides": {"day": {"key": {"elevation": 76, "heading": 25, "intensity": 1.1},
-                                                             "hemi": {"intensity": 0.55}, "exposureScale": 0.85}}},
+                                                             "hemi": {"intensity": 0.55, "sky": HEMI_SKY,
+                                                                      "ground": HEMI_GROUND},
+                                                             "exposureScale": 0.85}}},
         "roof": {"height": r(max(ceil_at(rm, max(rm["ya"], rm["yb"])) for rm in L.rooms if rm["ceil"]) + FT + ROOF_OVER
                              + LIFT), "plain": True, "lamps": lamps()},
         "areas": areas(),
         "lifts": lifts(),
-        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT)},
+        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT)},
     }
     m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, [shaft_hole()])
+    m["dressing"]["station"]["trims"] += drop_rods(m["dressing"]["station"]["fixtures"])
     del sx
     return m
 
@@ -518,6 +606,39 @@ LAMP_STEP = 8.0      # m between a room's ceiling lamps along it
 LAMP_ROOM_MIN = 3.0  # a smaller room (a doorway, a short flight) is lit by its neighbours' lamps
 LAMP_ROWS_OVER = 8.0  # a room wider than this gets two rows of lamps
 ROOF_OVER = 0.4      # the roof's height (m) over the highest ceiling's top: an unseen lid; its lamps hang lower
+ROD = 0.025            # a drop rod's half thickness (m)
+ROD_IN = 0.15          # each rod in from its hung model's end
+ROD_INTO = 0.05        # and run this far up into the arc, hidden behind it
+
+
+def drop_rods(placed: list[dict]) -> list[dict]:
+    """Two look-only rods (trims) holding each model hung under a vault (fixtures.VAULT_DROP), from its top up into
+    the arc over each rod (TB1 x SM5: the platforms' departure boards)."""
+    out = []
+    for f in placed:
+        b, how = fixtures.MODELS[f["model"]]
+        y = f["y"] - LIFT
+        v = next((v for v in L.VAULTS if v["x0"] <= f["x"] <= v["x1"] and v["z0"] <= f["z"] <= v["z1"]
+                  and v["y"] - fixtures.VAULT_DROP - EPS <= y < v["y"]), None)
+        if how != "hung" or v is None:
+            continue
+        c, s = math.cos(math.radians(f["yaw"])), math.sin(math.radians(f["yaw"]))
+        for px in (b[0] + ROD_IN, b[1] - ROD_IN):
+            x, z = f["x"] + px * c, f["z"] - px * s
+            top = vault_y(v, z) + ROD_INTO + LIFT
+            out.append({"finish": "steel", "box": [r(x - ROD), r(x + ROD), r(f["y"]), r(top), r(z - ROD), r(z + ROD)]})
+    return out
+
+
+LAMP_HALF_DEPTH = 0.3  # a lamp panel's half depth (RoofConfig.lamp_size.y) and a little: hung clear of a vault
+
+
+def vault_of(rm: dict) -> dict | None:
+    """The vault over a vault room (the one whose tunnel holds it)."""
+    if not rm["vault"]:
+        return None
+    return next(v for v in L.VAULTS if v["x0"] - EPS <= rm["x0"] and rm["x1"] <= v["x1"] + EPS
+                and v["z0"] - EPS <= rm["z0"] and rm["z1"] <= v["z1"] + EPS)
 
 
 def lamps() -> list[dict]:
@@ -537,7 +658,12 @@ def lamps() -> list[dict]:
             for t in rows:
                 b = b0 + (b1 - b0) * t
                 x, z = (a, b) if along_x else (b, a)
-                if is_ramp(rm) and not rm.get("flat"):
+                v = vault_of(rm)
+                if v is not None:
+                    # Under the vault, low enough that the panel's side nearer the wall clears the curve.
+                    zc = (v["z0"] + v["z1"]) / 2
+                    y = vault_y(v, zc + math.copysign(abs(z - zc) + LAMP_HALF_DEPTH, z - zc))
+                elif is_ramp(rm) and not rm.get("flat"):
                     cell = next(c for c in ramp_cells(rm) if c[0] - EPS <= x <= c[1] + EPS)
                     y = ceil_under(rm, *cell)
                 else:
