@@ -38,7 +38,8 @@ func test_the_shipped_file_reads_clean() -> void:
 	var k := BotKits.read_file(pool)
 	assert_eq(k.problems, [] as Array[String])
 	assert_eq(k.kits.map(func(p: BotKits.Plan) -> String: return p.kit_name),
-			["Factory", "Rifleman", "Marksman", "Support", "Stealth", "Pointman", "Cyber", "Sniper", "Breacher"])
+			["Factory", "Rifleman", "Marksman", "Support", "Stealth", "Pointman", "Cyber", "Sniper", "Breacher",
+			"Clearer"])
 	var cyber := _kit(k, "Cyber")
 	assert_eq(cyber.slots[0].replica, CYBER)
 	assert_eq(cyber.weights[&"easy"], 0.0, "never at Easy")

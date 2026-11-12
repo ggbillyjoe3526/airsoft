@@ -2102,6 +2102,8 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 	if _lifts != null:
 		_lifts.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
 		_lifts.set_probes(values.reflections != GraphicsQuality.Reflections.OFF)
+	if _station_fixtures != null:
+		_station_fixtures.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
 	if _level != null:
 		_level.set_detail(values.mesh_detail)
 		if _level.baked_light_builds() != _relit:

@@ -245,11 +245,17 @@ static func next_fire_mode(r: ReplicaConfig, mode: ReplicaConfig.FireMode) -> Re
 ## `max_pitch` (rad) so a shot never goes over the top; sideways is a turn about the line of sight's own up, so it is the
 ## same angle at any pitch.
 static func spread_direction(yaw: float, pitch: float, spread: float, gx: float, gy: float, max_pitch: float) -> Vector3:
-	var p := clampf(pitch + gy * spread, -max_pitch, max_pitch)
+	return offset_direction(yaw, pitch, gx * spread, gy * spread, max_pitch)
+
+
+## The aim (`yaw`, `pitch`) turned `right` and `up` (rad) off its line, as spread_direction turns it: up is a change of
+## pitch held within `max_pitch`, right a turn about the line of sight's own up.
+static func offset_direction(yaw: float, pitch: float, right: float, up: float, max_pitch: float) -> Vector3:
+	var p := clampf(pitch + up, -max_pitch, max_pitch)
 	var cp := cos(p)
 	var f := Vector3(-sin(yaw) * cp, sin(p), -cos(yaw) * cp)
-	# Right of the aim, level and square to it; a tangent, so the angle off the aim is exactly gx × spread.
-	var side := tan(gx * spread)
+	# Right of the aim, level and square to it; a tangent, so the angle off the aim is exactly `right`.
+	var side := tan(right)
 	return Vector3(f.x + cos(yaw) * side, f.y, f.z - sin(yaw) * side).normalized()
 
 
@@ -397,10 +403,12 @@ static func step(c: Character, cmd: PlayerCommand, eye: Vector3, kick_scale: flo
 	a.pending_press = 0.0
 	if a.burst_shots_left > 0:
 		a.burst_shots_left -= 1
+	# One pull sends shot_bbs BBs (three barrels, SH1), or what the magazine has left of them.
+	var bbs := mini(replica_now.shot_bbs, ammo_now.mag)
 	if not a.bottomless:
-		ammo_now.mag -= 1
+		ammo_now.mag -= bbs
 	a.cooldown += 1.0 / replica_now.fire_rate
-	a._fire(c, replica_now, eye, kick_scale, pool, rng, events, tuning)
+	a._fire(c, replica_now, eye, kick_scale, bbs, pool, rng, events, tuning)
 
 
 func _event(events: SimEvents, kind: GameEvent.Kind, actor: int) -> GameEvent:
@@ -478,25 +486,34 @@ func _start_reload(actor: int, events: SimEvents) -> void:
 	_event(events, GameEvent.Kind.RELOAD_START, actor)
 
 
-func _fire(c: Character, r: ReplicaConfig, eye: Vector3, kick_scale: float, pool: BBPool, rng: RandomNumberGenerator,
-		events: SimEvents, tuning: SimTuning) -> void:
+func _fire(c: Character, r: ReplicaConfig, eye: Vector3, kick_scale: float, bbs: int, pool: BBPool,
+		rng: RandomNumberGenerator, events: SimEvents, tuning: SimTuning) -> void:
 	var rules := tuning.replica_rules
-	# Sideways first, then up and down: the browser game's draw order.
-	var gx := rng.randfn(0.0, 1.0)
-	var gy := rng.randfn(0.0, 1.0)
 	var spread := deg_to_rad(r.spread_deg) * c.spread_scale
-	var dir := spread_direction(c.yaw, c.pitch + recoil, spread, gx, gy, deg_to_rad(rules.max_shot_pitch_deg))
+	var max_pitch := deg_to_rad(rules.max_shot_pitch_deg)
+	var aim_pitch := c.pitch + recoil
 	recoil = minf(deg_to_rad(rules.recoil_max_deg), recoil + deg_to_rad(r.recoil_deg) * kick_scale)
 	var e := _event(events, GameEvent.Kind.SHOT, c.id)
 	e.position = eye
-	e.direction = dir
-	# The BB's path starts at the eye: its first step catches cover right in front of the shooter and anyone point-blank,
-	# and it never hits its owner. Presentation draws it leaving the muzzle.
 	var grams := bb_weights[active]
-	var bb := pool.spawn(c.id, eye, dir, Ballistics.muzzle_velocity(r, rules, grams),
-			Ballistics.hop_up_lift(r, hop_ups[active], rules), Ballistics.bb_mass(r, grams), tuning.ballistics.spin_per_hop,
-			active)
-	# Dev › Lasers (LZ1): the same shot, spread and kick, but a laser that BBStep resolves this tick.
-	if c.lasers and bb != null:
-		bb.laser = true
-		e.value2 = GameEvent.SHOT_LASER
+	var speed := Ballistics.muzzle_velocity(r, rules, grams)
+	var lift := Ballistics.hop_up_lift(r, hop_ups[active], rules)
+	var mass := Ballistics.bb_mass(r, grams)
+	# Several BBs leave spaced evenly round the shot's line, the first straight up (the barrels' pattern, SH1).
+	var pattern := deg_to_rad(r.pattern_deg) if bbs > 1 else 0.0
+	for i in bbs:
+		# Sideways first, then up and down: the browser game's draw order. Each BB has its own scatter.
+		var gx := rng.randfn(0.0, 1.0)
+		var gy := rng.randfn(0.0, 1.0)
+		var turn := PI * 0.5 + TAU * i / bbs
+		var dir := offset_direction(c.yaw, aim_pitch, gx * spread + pattern * cos(turn),
+				gy * spread + pattern * sin(turn), max_pitch)
+		if i == 0:
+			e.direction = dir
+		# The BB's path starts at the eye: its first step catches cover right in front of the shooter and anyone
+		# point-blank, and it never hits its owner. Presentation draws it leaving the muzzle.
+		var bb := pool.spawn(c.id, eye, dir, speed, lift, mass, tuning.ballistics.spin_per_hop, active)
+		# Dev › Lasers (LZ1): the same shot, spread and kick, but a laser that BBStep resolves this tick.
+		if c.lasers and bb != null:
+			bb.laser = true
+			e.value2 = GameEvent.SHOT_LASER

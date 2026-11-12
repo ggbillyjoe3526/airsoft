@@ -24,6 +24,7 @@ G, C, P, T = 0.0, -10.0, -18.0, -18.9
 LANDING = -14.0
 TRAIN_IN = 2.4    # a car's height inside
 TUNNEL_H = 3.2    # platform tunnels and running tunnels: 0.5 m over a car's roof
+RUN_SPRING = 2.7  # where a running tunnel's arch springs over the track bed (RUN_VAULTS)
 rooms: list[dict] = []
 blocks: list[dict] = []
 
@@ -142,12 +143,14 @@ room("stair2", "Stair", 37.5, 45.5, -1.6, 1.6, LANDING, P, h=3.0, dress="platfor
 # VAULT_RISE m high spans the two (VAULTS; build_map.py builds it, StationSurface draws it curved). Each vault's `y`
 # is where it springs, its `low` a standing car's ceiling: the air over a car's roof is the vault's too.
 VAULT_RISE = 2.5
-VAULTS = [dict(name="north", x0=-52, x1=50, z0=-12.5, z1=-5.5, y=P + TUNNEL_H, low=P + TRAIN_IN),
-          dict(name="south", x0=-52, x1=50, z0=5.5, z1=12.5, y=P + TUNNEL_H, low=P + TRAIN_IN)]
+VAULTS = [dict(name="north", x0=-52, x1=50, z0=-12.5, z1=-5.5, y=P + TUNNEL_H, low=P + TRAIN_IN, rise=VAULT_RISE,
+               style="track"),
+          dict(name="south", x0=-52, x1=50, z0=5.5, z1=12.5, y=P + TUNNEL_H, low=P + TRAIN_IN, rise=VAULT_RISE,
+               style="track")]
 room("plat_n", "North platform", -52, 47, -9, -5.5, P, h=TUNNEL_H, vault=True)
 room("plat_n_end", "North platform", 47, 50, -7.5, -5.5, P, h=TUNNEL_H, vault=True)
 room("endramp_n", "North platform", 47, 50, -9, -7.5, P, T, h=TUNNEL_H, flat=True, vault=True)
-room("ramp_foot", "North tunnel", 50, 52, -9, -7.5, T, h=TUNNEL_H + 0.9)
+room("ramp_foot", "North tunnel", 50, 52, -9, -7.5, T, h=RUN_SPRING)
 room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H, vault=True)
 # The track pits, 0.9 m under the platforms: no steps up (owner, 2026-11-10, CL1: "remove the trackside stairs"), a
 # body climbs out over a platform's edge (VaultConfig climb_depth) and drops back down; bots take the same links.
@@ -328,10 +331,19 @@ block("barrier", T, -52, -51.5, -TRACK_Z - 1.15, -TRACK_Z + 1.15, 1.2, dress="bu
 block("barrier", T, -52, -51.5, TRACK_Z - 1.15, TRACK_Z + 1.15, 1.2, dress="buffer_stop", facing="+x")
 
 # ---------------- Running tunnels east, -18.9 m (Tunnel team's start) ----------------
-room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=TUNNEL_H + 0.9)
+# Each running tunnel is arched to follow a car's rounded roof (owner, 2026-11-12: "curved/arched to closely match the
+# shape of the trains"): straight sides to RUN_SPRING over the track bed, 1.8 m over a car's floor where its sides
+# lean in, then an arch to the old roof, 0.5 m over a car's crown and about 0.15 m clear of its shoulders (SM1's car:
+# 1.55 m from its middle at 1.95 m over its floor, 1.3 m at 2.4 m). Its west end opens onto its platform tunnel.
+RUN_VAULTS = [dict(name="north_run", x0=50, x1=82, z0=-12.6, z1=-9, y=T + RUN_SPRING, low=P + TRAIN_IN,
+                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west"),
+              dict(name="south_run", x0=50, x1=82, z0=9, z1=12.6, y=T + RUN_SPRING, low=P + TRAIN_IN,
+                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west")]
+VAULTS += RUN_VAULTS
+room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=RUN_SPRING, vault=True)
 # The south train's open cab door stands 0.9 m over the track: no steps, a body climbs up into it from the track
 # (VaultConfig climb_depth: the car's floor runs on behind the doorway) and drops back down (owner, 2026-11-12).
-room("run_s", "South tunnel", 60, 82, 9, 12.6, T, h=TUNNEL_H + 0.9)
+room("run_s", "South tunnel", 60, 82, 9, 12.6, T, h=RUN_SPRING, vault=True)
 room("xpass", "Cross passage", 74, 77, -9, 9, T, h=2.6)
 block("cabinet", T, 60.5, 61.8, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley_short")  # trolley
 block("crate", T, 69.5, 70.9, -TRACK_Z - 0.7, -TRACK_Z + 0.7, 1.4, dress="cable_drum_small")  # between the rails

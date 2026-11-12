@@ -53,8 +53,8 @@ extends Resource
 	&"gap_line": Color8(0xe0, 0xbc, 0x2a), &"paint": Color8(0xe8, 0xe6, 0xe0),
 	# The platforms' floor: smooth, even grey concrete (owner, 2026-11-12: "more solid and clean looking").
 	&"platform_floor": Color8(0xb8, 0xb8, 0xb6),
-	# TB1's trims: the vault's ribs in pale grey paint, the frieze in dark green-grey tiles (a band of colour off both
-	# team hues), the cables black rubber.
+	# TB1's trims: the vault's ribs in pale grey concrete, which, facing down away from the lamps, reads darker than the
+	# tiles beside it (rings); the frieze in dark green-grey tiles (a band of colour off both team hues); the cables black.
 	&"vault_rib": Color8(0xc8, 0xcb, 0xcc), &"frieze": Color8(0x3c, 0x48, 0x44), &"cable": Color8(0x60, 0x60, 0x60),
 	# The track bed's ballast a dark grey, near black, under the rails (owner, 2026-11-12).
 	&"ballast": Color8(0x4a, 0x4a, 0x4a),

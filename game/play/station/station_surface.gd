@@ -96,6 +96,11 @@ static func mesh(m: MapData, style: MapStyle, look: StationLook, props: PropDres
 			add_face(st, look, l.face(), l.finish, look.tint_of(l.finish, null), l.floor_y)
 	for v in dress.vaults:
 		add_vault(st, look, v)
+		if v.open_west:
+			# The wider tunnel's end round the arch, in that tunnel's walls.
+			var c := v.circle()
+			var wider := dress.style_at(Vector3(v.area.position.x - 0.5, v.y + v.rise * 0.5, c.x))
+			_add_mouth(st, look, v, look.style_walls.get(wider, look.outside))
 	st.generate_tangents()
 	return st.commit()
 
@@ -356,7 +361,7 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 	var c := v.circle()
 	var x0 := v.area.position.x
 	var x1 := v.area.end.x
-	var finish := look.vault_finish
+	var finish := v.finish if v.finish != &"" else look.vault_finish
 	var tint := look.tint_of(finish, null)
 	var pbr := look.pbr_of(finish)
 	var size := look.scale_of(finish)
@@ -382,7 +387,10 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 			st.set_uv(uvs[i] / size)
 			st.add_vertex(quad[i])
 	_add_ribs(st, look, v)
-	for end: float in [x0 + look.vault_proud, x1 - look.vault_proud]:
+	var ends: Array[float] = [x1 - look.vault_proud]
+	if not v.open_west:
+		ends.append(x0 + look.vault_proud)
+	for end: float in ends:
 		var cap := PackedVector3Array()
 		for k in steps + 1:
 			var p := v.point(-half + 2.0 * half * float(k) / float(steps))
@@ -391,6 +399,27 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 		if (GreyboxFaces.face_normal(cap).x > 0.0) != (end < v.area.get_center().x):
 			cap.reverse()
 		add_face(st, look, cap, finish, tint, NO_FLOOR)
+
+
+## Open vault `v`'s mouth: the wider tunnel's end round its arch, the two corners between the arc and its crown's
+## height over each springing, `vault_proud` m in front of the end, facing out of the arch, in `finish`.
+static func _add_mouth(st: SurfaceTool, look: StationLook, v: StationDressing.TunnelVault, finish: StringName) -> void:
+	var steps := maxi(look.vault_steps, 2)
+	var half := v.half_angle()
+	var x := v.area.position.x - look.vault_proud
+	var top := v.y + v.rise
+	var tint := look.tint_of(finish, null)
+	for side: float in [-1.0, 1.0]:
+		# A fan from the corner over the springing (add_face fans from the first point) along the arc between the
+		# crown and the springing, turned to face -x.
+		var arc := PackedVector3Array()
+		for k in steps / 2 + 1:
+			var p := v.point(side * half * float(k) / float(steps / 2))
+			arc.append(Vector3(x, p.y, p.x))
+		var corner := PackedVector3Array([Vector3(x, top, v.area.get_center().y + side * v.area.size.y * 0.5)])
+		if GreyboxFaces.face_normal(corner + arc).x > 0.0:
+			arc.reverse()
+		add_face(st, look, corner + arc, finish, tint, NO_FLOOR)
 
 
 ## Vault `v`'s ribs: a band `vault_rib_width` m wide round the arc every `vault_rib_every` m along it, standing

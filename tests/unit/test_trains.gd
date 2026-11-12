@@ -711,20 +711,21 @@ func test_a_train_in_a_running_tunnel_is_lined_in_the_tunnels_concrete() -> void
 	var look := play.station_look
 	var t := m.trains[1]
 	var concrete := look.style_walls[&"tunnel"]
+	var sides := {}
 	var over := 0
-	var sides := 0
 	for l in StationSurface.lining(look, m.station, t.box):
 		if l.from >= 50.0 - 0.001 and l.axis == 2:
 			assert_eq(l.finish, concrete, "the running tunnel's sides at x %.1f" % l.from)
-			sides += 1
+			if l.lo <= t.box.position.y + 0.001:
+				sides[l.at] = true
 		if l.axis == 1 and l.inward < 0.0:
-			assert_eq(l.finish, look.style_ceilings[&"tunnel"], "the running tunnel's roof over the train")
-			assert_almost_eq(l.from, 50.0, 0.001, "its roof from where the vault ends")
 			over += 1
 		if l.to <= 50.0 + 0.001 and l.axis == 2:
 			assert_eq(l.finish, look.style_walls[&"track"], "under the vault, the track's tiles at x %.1f" % l.from)
-	assert_eq(sides, 2, "both sides in the running tunnel")
-	assert_eq(over, 1, "its roof")
+	assert_eq(sides.size(), 2, "both sides in the running tunnel, from the track up")
+	# TB2: the running tunnel's arch closes over the car, so nothing lines its top there (nor under the platform
+	# tunnel's vault).
+	assert_eq(over, 0, "no roof stretch: the arch is over it")
 
 
 func _dress_of(zones: Array) -> StationDressing:

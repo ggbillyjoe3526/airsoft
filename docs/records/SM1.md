@@ -25,7 +25,11 @@
 - **The north gangways widen 10 cm to 1.2 m**, matching the south's (the only collision change).
 - **The south train's west end is an uncoupled end** (its outside face, end door, tail lamps and underframe drawn);
   its east end is the open cab, the way out onto the track, **climbed into from the track with no steps** (owner,
-  2026-11-12: "shouldn't have a ramp"; the cab's ramp room is gone, the south tunnel runs on to the end).
+  2026-11-12: "shouldn't have a ramp"; the cab's ramp room is gone, the south tunnel runs on to the end). Merged
+  with TB2's arched running tunnels, whose detrainment steps (`cab_steps`, there until SM1 landed) go the same way:
+  the south tunnel is one vault room from the cab on. A room's end opening into a vault room's now opens up to the
+  arch over it (`build_map.arch_over`), so the cab door no longer warns it is walled (the doorway was open to the
+  car's roof before and after: no block changed).
 - **The wheels** (owner, 2026-11-12): under each train's two ends a space 0.75 m tall runs in 3.85 m over the track
   (its own track room, `layout.UNDER_ENDS`, opening into the track however low, `opens`), and in it the bogie stands
   on the rails as a block of its own (`cabinet`, 2.7 x 0.64 x 2.4 m from its flanges' foot, 3 cm under the rails'
