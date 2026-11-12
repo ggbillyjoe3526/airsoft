@@ -44,6 +44,8 @@ var plant_go_for: int = -1
 var plant_hold_since: float = -1.0
 ## The bomb last fell in the defenders' half: whoever takes it there carries it straight on (BotPlant.observe).
 var plant_fell_far: bool = false
+## The defenders' site guards are dealt for this round (BotPlant._post_defenders: once, after the lanes).
+var plant_posted: bool = false
 ## Elimination's overtime flag (OV2; RoundState's, read each tick): up, its foot and the time it has left.
 var overtime_flag: OvertimeFlag = OvertimeFlag.new()
 ## The dark on a field played at night (WL6): light pools, canopy and roofs, built once as the match loads (null by

@@ -85,11 +85,12 @@ static func visible_part(viewer: Character, target: Character, w: BotWorld, reac
 		return 0.0
 	var eye := eye_of(viewer, w.tuning)
 	var leafy := flat > cfg.close_awareness
+	var smoky := not BotPlant.given_away(target, flat, w)
 	var point := body_point(target, w.tuning.hits, cfg.aim_height_fraction)
-	if _sight_clear(eye, point, viewer, target, w, leafy):
+	if _sight_clear(eye, point, viewer, target, w, leafy, smoky):
 		return cfg.aim_height_fraction
 	point = body_point(target, w.tuning.hits, cfg.head_height_fraction)
-	if _sight_clear(eye, point, viewer, target, w, leafy):
+	if _sight_clear(eye, point, viewer, target, w, leafy, smoky):
 		return cfg.head_height_fraction
 	return 0.0
 
@@ -222,12 +223,12 @@ static func smoke_clear(w: BotWorld, a: Vector3, b: Vector3) -> bool:
 	return Grenades.smoke_depth(w.grenades, w.tuning.grenades, a, b, most) <= most
 
 
-## A clear line from `eye` to `point`: no wall, no body of someone already hit, no more smoke than smoke_see_through,
-## and with `leafy` (farther than close_awareness) no more bush than foliage_see_through.
+## A clear line from `eye` to `point`: no wall, no body of someone already hit, with `smoky` no more smoke than
+## smoke_see_through, and with `leafy` (farther than close_awareness) no more bush than foliage_see_through.
 static func _sight_clear(eye: Vector3, point: Vector3, viewer: Character, target: Character, w: BotWorld,
-		leafy: bool) -> bool:
+		leafy: bool, smoky: bool = true) -> bool:
 	return sight_clear(w.query, eye, point) and (not leafy or leaves_clear(w, eye, point)) \
-			and smoke_clear(w, eye, point) and not _body_in_sight(eye, point, viewer, target, w)
+			and (not smoky or smoke_clear(w, eye, point)) and not _body_in_sight(eye, point, viewer, target, w)
 
 
 ## True if the body of someone already hit stands in the line from `a` to `b`: a body stops BBs, and sight too.

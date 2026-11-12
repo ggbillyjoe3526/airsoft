@@ -113,7 +113,8 @@ seconds, or until you have walked <!-- wiki:config bot_config.plant_player_left 
 m away without it. Carry it towards the other site and they come
 with you.
 
-Defending bots hold their posts by the sites. They learn the bomb is being planted only when one of them is within <!-- wiki:config bot_config.plant_heard -->
+Defending bots hold their posts by the sites; where their posts would leave one site open, half
+of them guard that site instead. They learn the bomb is being planted only when one of them is within <!-- wiki:config bot_config.plant_heard -->
 m of it and hears the code keyed in. Once it is armed every free
 defender goes back to it; the nearest defuses while the others cover.
 
@@ -121,6 +122,10 @@ defender goes back to it; the nearest defuses while the others cover.
 m of the armed bomb no bot defuses it, until the fuse leaves a
 bot only just time: its defuse plus <!-- wiki:config bot_config.plant_takeover_margin --> seconds. With your own
 hands on it they never take over. A [squad order](Squad-Orders) keeps a bot off the bomb: it does what you asked.
+
+**Smoke does not hide the work.** A bot within <!-- wiki:config bot_config.plant_gives_away -->
+m of whoever is keying the bomb in or defusing it makes them out through smoke: the keypad and the kit are too loud
+to miss that close. That goes for you as for them; anyone with their hands off the bomb is hidden as usual.
 
 ## Callouts
 

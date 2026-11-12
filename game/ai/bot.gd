@@ -215,6 +215,9 @@ var flag_goal: Vector3 = Vector3.ZERO
 var flag_spot: Vector3 = Vector3.ZERO
 var flag_fetching: bool = false
 var flag_guard: bool = false
+## Plant The Bomb (PB1): the site this defender guards from the round's start, in cover by it, where the lanes dealt
+## would leave it with nobody (BotPlant._post_defenders); -1: it holds its lane's post.
+var site_guard: int = -1
 ## The pole (BotWorld.flag_index) its flag spot was picked by: when the pole in play changes it picks again (AB1).
 var flag_pole: int = -1
 ## Elimination's overtime flag (OV2): when it sets off for the flag (s of match time: the flag going up plus its skill's
@@ -336,6 +339,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	lane_dir = 1 if character.end == 0 else -1
 	lane_index = -1
 	lane_points = points
+	site_guard = -1
 	hunting = false
 	hunt_picked_at = -INF
 	hold_left = start_hold

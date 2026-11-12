@@ -294,6 +294,65 @@ func test_the_bots_leave_the_defuse_to_a_player_near_the_bomb_until_the_fuse_is_
 	assert_true(BotPlant.may_defuse(w), "nor one out of play")
 
 
+## Defenders 3 to 5 dealt `lane`s (an index each into w.lanes), each to hold its lane's last point.
+func _deal(lanes: Array[int]) -> void:
+	for i in lanes.size():
+		var b := _bot(3 + i)
+		cs[3 + i].end = 1
+		b.reset(lanes[i], 1, 0.0, w.cfg)
+
+
+func test_a_site_no_defender_s_lane_ends_at_gets_guards_of_its_own() -> void:
+	_world()
+	# Every lane ends by site A (as Subway's do): B would stand open.
+	w.lanes = [PackedVector3Array([START, SITE_A + Vector3(4.0, 0.0, 2.0)]),
+			PackedVector3Array([START, SITE_A + Vector3(6.0, 0.0, 9.0)]),
+			PackedVector3Array([START, SITE_A + Vector3(2.0, 0.0, -3.0)])]
+	_deal([0, 1, 2])
+	BotPlant.plan(w)
+	assert_eq(_bot(4).site_guard, 1, "the one whose post lies nearest B guards it")
+	assert_eq(_bot(3).site_guard, -1)
+	assert_eq(_bot(5).site_guard, -1, "half of three, rounded down: one")
+	assert_true(BotPlant.wants_site(_bot(4), w), "at its site from the round's start")
+	assert_true(BotPlant.guards(_bot(4), w), "in cover by it, not standing on it")
+	assert_eq(BotFlag.pole_of(_bot(4), w), 1)
+	assert_false(BotPlant.wants_site(_bot(3), w), "the others hold their lanes")
+	# The bomb armed at A: its guard goes back with the rest.
+	_arm(0)
+	BotPlant.plan(w)
+	assert_eq(BotFlag.pole_of(_bot(4), w), 0)
+	assert_true(BotPlant.wants_site(_bot(4), w))
+
+
+func test_with_a_post_by_each_site_nobody_is_moved() -> void:
+	_world()
+	w.lanes = [PackedVector3Array([START, SITE_A + Vector3(4.0, 0.0, 2.0)]),
+			PackedVector3Array([START, Vector3(34.0, 0.0, 1.0)]),
+			PackedVector3Array([START, SITE_B + Vector3(4.0, 0.0, -2.0)])]
+	_deal([0, 1, 2])
+	BotPlant.plan(w)
+	for id: int in [3, 4, 5]:
+		assert_eq(_bot(id).site_guard, -1)
+		assert_false(BotPlant.wants_site(_bot(id), w))
+
+
+func test_site_guards_are_dealt_afresh_each_round() -> void:
+	_world()
+	w.lanes = [PackedVector3Array([START, SITE_A + Vector3(4.0, 0.0, 2.0)])]
+	_deal([0, 0, 0])
+	BotPlant.plan(w)
+	assert_eq(_bot(3).site_guard + _bot(4).site_guard + _bot(5).site_guard, -1, "one of the three guards B")
+	# Next round the lanes cover both sites: last round's guard holds its lane again.
+	w.lanes = [PackedVector3Array([START, SITE_A]), PackedVector3Array([START, SITE_B])]
+	_deal([0, 1, 0])
+	var events := SimEvents.new()
+	events.add(GameEvent.Kind.ROUND_START)
+	BotPlant.observe(w, events, 0.0)
+	BotPlant.plan(w)
+	for id: int in [3, 4, 5]:
+		assert_eq(_bot(id).site_guard, -1)
+
+
 func test_the_bots_follow_a_player_carrying_the_bomb_to_the_other_site() -> void:
 	_world(PLAYER)
 	rs.plant.status = PlantState.Status.CARRIED
@@ -438,3 +497,51 @@ func test_the_armed_bombs_guards_split_between_the_other_site_and_the_defenders_
 	assert_eq(BotPlant.watch_point(_bot(2), w), SITE_B)
 	cs[0].status = Character.Status.OUT
 	assert_eq(BotPlant.watch_point(_bot(1), w), SITE_B, "the turns are among those still in play")
+
+
+## A bot's eyes in the test world: an open floor and one smoke cloud, grown, with its middle at `at`.
+func _smoke(at: Vector3) -> void:
+	var box := BoxWorld.new(w.tuning.body)
+	box.add_floor(120.0, 80.0)
+	w.query = box
+	var g := Grenade.new()
+	g.launch(Grenade.Kind.SMOKE, 0, at, Vector3.ZERO)
+	g.resting = true
+	g.popped = true
+	g.smoking = w.tuning.grenades.smoke_grow + 1.0
+	w.grenades = [g]
+
+
+func test_the_kit_gives_the_one_disarming_away_through_smoke_at_close_range() -> void:
+	_world()
+	_arm(0)
+	var bomb := rs.plant.position
+	_smoke(bomb)
+	cs[4].position = bomb + Vector3(1.0, 0.0, 0.0)
+	cs[0].position = bomb + Vector3(-2.0, 0.0, 0.0)
+	cs[0].yaw = BotAim.look_yaw(cs[0].position, cs[4].position)
+	assert_eq(BotSenses.visible_part(cs[0], cs[4], w), 0.0, "in the cloud, hands off: unseen at 3 m")
+	rs.plant.defuser = 4
+	assert_gt(BotSenses.visible_part(cs[0], cs[4], w), 0.0, "the kit at work 3 m off gives its user away")
+	cs[0].position = bomb + Vector3(-w.cfg.plant_gives_away - 0.5, 0.0, 0.0)
+	assert_eq(BotSenses.visible_part(cs[0], cs[4], w), 0.0, "further off the smoke hides them as anyone")
+	cs[5].position = bomb + Vector3(1.0, 0.0, 1.0)
+	cs[0].position = bomb + Vector3(-2.0, 0.0, 0.0)
+	assert_eq(BotSenses.visible_part(cs[0], cs[5], w), 0.0, "and whoever stands by with hands off stays hidden")
+
+
+func test_the_keys_give_the_one_arming_away_through_smoke_and_a_wall_still_hides_them() -> void:
+	_world()
+	var site := rs.plant.sites[0]
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 1
+	rs.plant.position = site
+	_smoke(site)
+	cs[1].position = site
+	cs[3].position = site + Vector3(3.0, 0.0, 0.0)
+	cs[3].yaw = BotAim.look_yaw(cs[3].position, cs[1].position)
+	assert_eq(BotSenses.visible_part(cs[3], cs[1], w), 0.0, "carrying it through the cloud: unseen")
+	rs.plant.planter = 1
+	assert_gt(BotSenses.visible_part(cs[3], cs[1], w), 0.0, "keying it in 3 m off: made out")
+	(w.query as BoxWorld).add_box(site + Vector3(1.5, 1.5, 0.0), Vector3(0.2, 3.0, 6.0))
+	assert_eq(BotSenses.visible_part(cs[3], cs[1], w), 0.0, "a wall between hides them all the same")

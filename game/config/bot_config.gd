@@ -395,6 +395,12 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var plant_player_claim: float = 15.0
 ## ... until the fuse leaves only what the defuse still needs plus this (s): then the nearest bot takes it.
 @export var plant_takeover_margin: float = 4.0
+## Where every defender's lane ends nearer one site, this share of the defending bots guard the other site itself
+## from the round's start (rounded down; BotPlant._post_defenders), so neither site stands open.
+@export var plant_site_guard_share: float = 0.5
+## Whoever has both hands on the bomb (arming or disarming it) is made out through smoke by a bot within this of them
+## (m, level): the keys and the kit give their user away at close range (BotPlant.given_away). The player's too.
+@export var plant_gives_away: float = 5.0
 ## The player is near the bomb (for taking it up and for disarming it) only within this of its height (m): a storey
 ## above or below it (Subway's are 9 m apart) they are no nearer than the stairs, and the bots don't wait for them.
 @export var plant_player_level: float = 2.5

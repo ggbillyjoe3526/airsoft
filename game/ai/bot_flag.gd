@@ -40,6 +40,9 @@ static func on_worked_rope(b: Bot, w: BotWorld) -> bool:
 static func pole_of(b: Bot, w: BotWorld) -> int:
 	if on_worked_rope(b, w):
 		return b.flag_pole
+	# Plant The Bomb: a defender dealt a site of its own to guard (BotPlant._post_defenders) is there until called back.
+	if w.plant != null and b.site_guard >= 0 and not BotPlant.called_back(b, w):
+		return b.site_guard
 	return b.retake_pole if b.retake_pole >= 0 else w.flag_index
 
 

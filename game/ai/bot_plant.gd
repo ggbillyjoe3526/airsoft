@@ -88,6 +88,7 @@ static func observe(w: BotWorld, events: SimEvents, time: float) -> void:
 		if e.kind == GameEvent.Kind.ROUND_START or e.kind == GameEvent.Kind.ROUND_GO:
 			w.plant_down_at = time
 			w.plant_fell_far = false
+			w.plant_posted = false
 		elif e.kind == GameEvent.Kind.PLANT and e.value == Plant.Cue.DROPPED:
 			w.plant_down_at = time
 			w.plant_fell_far = w.plant != null and w.planner != null \
@@ -107,6 +108,9 @@ static func observe(w: BotWorld, events: SimEvents, time: float) -> void:
 static func plan(w: BotWorld) -> void:
 	if w.plant == null or w.attackers < 0:
 		return
+	if not w.plant_posted:
+		w.plant_posted = true
+		_post_defenders(w)
 	_pick_fetcher(w)
 	var ps := w.plant
 	var carrier: Bot = null
@@ -124,6 +128,55 @@ static func plan(w: BotWorld) -> void:
 	else:
 		BotFlag.pick_retakers(w)
 	_pick_defuser(w)
+
+
+## Once a round, after the lanes are dealt: a site no defender's lane ends at gets guards of its own. A field's lanes
+## were laid for Attack / Defend's poles, and where every defender's post lies nearer one site the other would stand
+## open all round (Subway: every lane ends by the south platform). Then plant_site_guard_share of the defending bots,
+## those whose posts lie nearest the open site, guard it from the start (Bot.site_guard: in cover by it, as an attacker
+## guards a pole), and the rest hold their lanes. With a defender's post by each site already, nobody is moved.
+static func _post_defenders(w: BotWorld) -> void:
+	var ps := w.plant
+	if ps.sites.size() != 2:
+		return
+	var at_a := 0
+	var at_b := 0
+	for b in w.bots:
+		b.site_guard = -1
+		if b.character.team == w.attackers or not _has_post(b, w):
+			continue
+		if Plant.nearest_site(ps, _post(b, w)) == 0:
+			at_a += 1
+		else:
+			at_b += 1
+	if (at_a > 0) == (at_b > 0):
+		return
+	var open := 0 if at_a == 0 else 1
+	for _n in int((at_a + at_b) * w.cfg.plant_site_guard_share):
+		var pick: Bot = null
+		var best := INF
+		for b in w.bots:
+			if b.character.team == w.attackers or b.site_guard >= 0 or not _has_post(b, w):
+				continue
+			var d := _flat(_post(b, w), ps.sites[open])
+			if d < best:
+				best = d
+				pick = b
+		if pick == null:
+			return
+		pick.site_guard = open
+
+
+## Whether `b` was dealt a lane with points to walk.
+static func _has_post(b: Bot, w: BotWorld) -> bool:
+	return b.lane >= 0 and b.lane < w.lanes.size() and b.lane_points > 0 and not w.lanes[b.lane].is_empty()
+
+
+## The lane point `b` holds at: the last of those it walks from its end (_has_post).
+static func _post(b: Bot, w: BotWorld) -> Vector3:
+	var lane := w.lanes[b.lane]
+	var walked := mini(b.lane_points, lane.size()) - 1
+	return lane[walked if b.lane_dir > 0 else lane.size() - 1 - walked]
 
 
 ## The carrier goes in last (w.plant_go): its lane swept, it holds there until plant_escorts of its team in play, or
@@ -155,7 +208,8 @@ static func _hold_carrier(w: BotWorld, carrier: Bot) -> void:
 
 ## Whether `b` should be at its site (or at the bomb) now. An attacker: fetching the bomb, with the bomb armed, with
 ## plant_rush_clock or less of the round left and nothing armed yet, or once its lane is swept (the carrier: once its
-## escort is in, _hold_carrier). A defender: picked to go back to a site where the bomb is being armed or stands armed.
+## escort is in, _hold_carrier). A defender: picked to go back to a site where the bomb is being armed or stands armed,
+## or guarding a site of its own until a bomb is armed (Bot.site_guard).
 static func wants_site(b: Bot, w: BotWorld) -> bool:
 	match BotFlag.role(b, w):
 		BotFlag.Role.ATTACK:
@@ -163,12 +217,18 @@ static func wants_site(b: Bot, w: BotWorld) -> bool:
 				return true
 			return b.lane_done and (w.plant_go or not b.raiser)
 		BotFlag.Role.DEFEND:
-			return b.retake and b.retake_pole >= 0 and w.flags[b.retake_pole].progress > 0.0
+			return called_back(b, w) or (b.site_guard >= 0 and not w.plant.planted())
 	return false
 
 
+## Whether defender `b` is picked to go back to a site where the bomb is being armed (and heard) or stands armed.
+static func called_back(b: Bot, w: BotWorld) -> bool:
+	return b.retake and b.retake_pole >= 0 and w.flags[b.retake_pole].progress > 0.0
+
+
 ## Whether `b` takes cover by its site rather than going onto it: an attacker who is neither fetching the bomb nor
-## carrying it in, and a defender back at an armed bomb who is not the one disarming it. An attacker who hears the kit
+## carrying it in, a defender back at an armed bomb who is not the one disarming it, and a defender guarding its own
+## site (Bot.site_guard) while nothing calls it back to the other. An attacker who hears the kit
 ## at work on the armed bomb (within plant_heard of it) leaves its cover and goes to the bomb itself.
 static func guards(b: Bot, w: BotWorld) -> bool:
 	if b.fetcher:
@@ -178,7 +238,16 @@ static func guards(b: Bot, w: BotWorld) -> bool:
 				and _flat(b.character.position, w.plant.position) <= w.cfg.plant_heard:
 			return false
 		return not b.raiser
-	return w.plant.planted() and not b.defuser
+	if w.plant.planted():
+		return not b.defuser
+	return b.site_guard >= 0 and not called_back(b, w)
+
+
+## Whether smoke does not hide `target`, `flat` m off (level), from a bot: it has both hands on the bomb (arming or
+## disarming it, Plant.busy) within plant_gives_away m, where the keys and the kit are heard too plainly to miss. Walls
+## and bodies hide it as ever, and the bot still has to face it and react.
+static func given_away(target: Character, flat: float, w: BotWorld) -> bool:
+	return w.plant != null and flat <= w.cfg.plant_gives_away and Plant.busy(w.plant, target)
 
 
 ## Where an attacker guarding the armed bomb watches for the defenders coming back, and hides from: the guards split,

@@ -808,7 +808,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   bomb armed, the attackers all out does not end the round; time up before it is armed is the defenders' round, with
   up to 5 s more while it is being keyed in; going off is a field prop's pop and buzzer and gets nobody out; the bots
   leave the bomb to the player for 6 s (until the player is 10 m off without it) and the defuse to a player within
-  15 m of it until the fuse leaves 4 s more than the work needs; a bot carrier goes in last, behind two of its team.
+  15 m of it until the fuse leaves 4 s more than the work needs; a bot carrier goes in last, behind two of its team;
+  where the defending bots' posts would leave a site open, half of them guard that site (`plant_site_guard_share`);
+  a bot within 5 m of whoever is keying the bomb in or disarming it makes them out through smoke, the player
+  included (`plant_gives_away`: without it a cloud over the bomb let a bot disarm it a metre from its guards).
   The mode is public, third on the Match page (Attack / Defend, Elimination, Plant The Bomb, Practice). The device is
   `Plant` in code (`Plant`, `PlantState`, `GameEvent.Kind.PLANT`, `HudPlant`, `PlantView`, `PlantShape`): the smoke
   and flash grenades were "bombs" there already (`BotBombs`, the player's bomb keys). Only the map file's words keep
