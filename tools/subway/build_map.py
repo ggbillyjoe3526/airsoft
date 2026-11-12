@@ -510,7 +510,9 @@ def build() -> dict:
         "lifts": lifts(),
         "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT)},
     }
-    m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, [shaft_hole()])
+    # nothing in the shafts, nor in a balustrade down an escalator (its pieces' whole boxes, as the game's tests take them)
+    holes = [shaft_hole()] + [box for bl in L.blocks if bl["y"] is None for box, _ in ramp_barrier(bl)]
+    m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, holes)
     del sx
     return m
 

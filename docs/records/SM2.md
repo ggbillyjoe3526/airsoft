@@ -105,6 +105,13 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   panel at eye height, four standing figures for its capacity, wordless, in the car's vertex colours (SM5's sheet is
   still changing, so it is not tied to it). The blank plate over the car's door is gone, so the sign is the only one.
 
+- **The lower shaft's posters (merged with SM5B)**: the narrower escalators put a deck between each escalator and the
+  shaft wall, where SM5B's posters hang; the game's fixture test takes each deck piece as its whole box, which reached
+  the lower shaft's posters at 1.7 m. The lower row now starts at -3.5 m, so each poster sits inside one 1 m ceiling
+  step and one deck piece's lower half, at 1.9 m (the window that clears both runs 1.8 to 2.05 m); still 6 a wall.
+  `build_map.py` now hands `fixtures.place` the escalators' deck pieces as boxes nothing stands in, so a spot the test
+  would refuse is left out and named when the map is built.
+
 ## Known issues left
 
 - The landing doorway uses 61 % of its budget and a leaf 16 %: both are flat steel in the photos, and more triangles
