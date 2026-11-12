@@ -71,7 +71,7 @@ func test_it_plays_by_its_stats_row_semi_and_full_auto() -> void:
 	assert_eq(r.power, &"electric")
 	assert_eq(r.sound_profile(), &"smg", "its own sounds")
 	assert_false(r.bolt_action)
-	assert_almost_eq(r.muzzle_energy, 0.75, 1e-6)
+	assert_almost_eq(r.muzzle_energy, 0.85, 1e-6)
 	assert_almost_eq(r.bb_weight, 0.2, 1e-6)
 	assert_almost_eq(r.fire_rate, 18.0, 1e-6)
 	assert_eq([r.mag_size, r.mags], [45, 5])

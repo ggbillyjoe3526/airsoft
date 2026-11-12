@@ -105,7 +105,7 @@ cardboard and on a player, so you hear what a shot hit.
 Every replica can load any BB weight from **0.20 g to 0.40 g**, picked per replica in the [Loadout](Loadout). A
 heavier BB leaves the barrel slower but keeps its speed further out and holds its line better in the wind; a lighter
 one is quicker up close but drifts more. A hop-up can only lift so much: past a replica's
-best weight the BB drops short (the AEG Rifle's is about 0.32 g, the GBB Pistol's about 0.28 g), and only the Sniper
+best weight the BB drops short (the AEG Rifle's is about 0.32 g, the GBB Pistol's about 0.22 g), and only the Sniper
 Rifle makes full use of 0.40 g. Each replica above lists its factory weight, and the Loadout's flight picture shows
 what a weight does before you play it.
 
