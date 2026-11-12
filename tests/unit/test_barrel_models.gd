@@ -121,8 +121,20 @@ func test_a_barrels_inside_keeps_its_own_materials_under_paint() -> void:
 		holder.add_child(inside)
 		ReplicaPaint.apply(holder, &"cobalt", false)
 		var m := inside as MeshInstance3D
+		var named := ReplicaSurfaces.named(m.mesh)
+		var surfaced := 0
 		for i in m.mesh.get_surface_count():
-			assert_null(m.get_surface_override_material(i), "barrel_%s inside surface %d keeps its own" % [key, i])
+			var own := m.mesh.surface_get_material(i)
+			var worn := m.get_surface_override_material(i)
+			if not named.has(StringName(own.resource_name)):
+				assert_null(worn, "barrel_%s inside surface %d (%s) keeps its own" % [key, i, own.resource_name])
+				continue
+			# MQ2: what it names a kind for (the inner barrel, the chamber, the bucking) is drawn on that surface, still
+			# in its own colour and never the paint's.
+			surfaced += 1
+			assert_true(ReplicaPaint.is_surface(worn), "barrel_%s inside %s is drawn on its surface" % [key, own.resource_name])
+			assert_eq(ReplicaPaint.plain_of(worn), own, "barrel_%s inside %s keeps its own colour" % [key, own.resource_name])
+		assert_gt(surfaced, 0, "barrel_%s: its inner barrel names what it is made of" % key)
 
 
 func test_the_barrel_cards_are_turned_so_they_read() -> void:

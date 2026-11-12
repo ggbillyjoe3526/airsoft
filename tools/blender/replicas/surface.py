@@ -24,16 +24,26 @@ booleans, joins): a face built in the material `Body@polymer` is a Body-coloured
 folds the alias materials back into the ones they stand for, so the
 file's materials are the ones it always had. `strip` takes the attribute off the figures' copies afterwards: they are
 drawn in the plain paints, far off. `hardsurface.export` writes the attribute.
+
+A part or an accessory (MQ2: an attachment, a magazine, a barrel) is simpler: each of its materials is one kind all
+over, so its mesh carries no attribute (the parts files are near their size cap, and a colour a vertex is 8 bytes) but
+a small table, material name to kind, as the mesh's custom property `surfaces`. The glb holds it as the mesh's extras,
+Godot keeps those as the mesh's `extras` metadata, and the game reads the table there (ReplicaSurfaces.named).
+
+    surface.name([part] + list(part.children_recursive), {"Detail": "aluminium", "Rubber": "rubber"})
 """
 
 import bpy
 
 # The kinds, by index: game/config/replica_surfaces.gd KINDS, in the same order (the files hold the index).
-KINDS = ("polymer", "steel", "aluminium", "wood", "rubber", "bare", "coated")
+KINDS = ("polymer", "steel", "aluminium", "wood", "rubber", "bare", "coated", "polished")
 SLOTS = 16
 DEFAULT = "polymer"
 ATTR = "Surface"
 SEP = "@"
+# The mesh custom property (the glb's mesh extras) a part's table of kinds rides in, and the figures' copies' suffix.
+EXTRA = "surfaces"
+FIGURE_SUFFIX = "_Figure"
 
 
 def alias(base: str, kind: str) -> str:
@@ -166,3 +176,36 @@ def adopt() -> None:
         if ATTR in me.color_attributes or len(me.color_attributes) != 1:
             continue
         me.color_attributes[0].name = ATTR
+
+
+def name(objects: list, table: dict) -> None:
+    """Says what each material of a part's meshes is made of, a whole material one kind (see the module's docstring):
+    the mesh's `surfaces` table, holding only the materials the mesh has and the table names. The figures' copies
+    (`*_Figure`) are left out: they are drawn in the plain paints."""
+    for ob in objects:
+        if ob.type != "MESH" or ob.name.endswith(FIGURE_SUFFIX):
+            continue
+        named = {m.name: table[m.name] for m in ob.data.materials if m is not None and m.name in table}
+        for kind in named.values():
+            if kind not in KINDS:
+                raise SystemExit("%s: no surface kind '%s'" % (ob.name, kind))
+        if EXTRA in ob.data:
+            del ob.data[EXTRA]
+        if named:
+            ob.data[EXTRA] = named
+
+
+def only_tables() -> None:
+    """Lets go of every custom property but the meshes' tables before a file is written: the exporter writes each one
+    as glTF extras (hardsurface.export), and the tables are all the game reads."""
+    blocks = list(bpy.data.objects) + list(bpy.data.meshes) + list(bpy.data.materials) + list(bpy.data.scenes)
+    for block in blocks:
+        for key in list(block.keys()):
+            if not (key == EXTRA and isinstance(block, bpy.types.Mesh)):
+                del block[key]
+
+
+def named(ob: bpy.types.Object) -> dict:
+    """A part's table of kinds as `name` wrote it (or as a glb read back holds it), material name to kind."""
+    table = ob.data.get(EXTRA) if ob.type == "MESH" else None
+    return dict(table.items()) if table is not None else {}
