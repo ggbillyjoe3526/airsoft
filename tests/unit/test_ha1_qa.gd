@@ -406,3 +406,94 @@ func test_a_view_freed_with_the_sight_raised_leaves_no_orphans() -> void:
 		hands.free()
 	await wait_process_frames(2)
 	assert_lte(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before, "no orphans left by the views")
+
+
+# --- round 3: the model's holds as rebuilt ---------------------------------------------------------------------------
+
+
+## The bones of the model with clip `clip` sought to its start.
+func _posed(clip: StringName) -> Skeleton3D:
+	var model := (load(MODEL_PATH) as PackedScene).instantiate()
+	add_child_autofree(model)
+	var player := model.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
+	assert_true(player.has_animation(clip), "the model has %s" % clip)
+	player.play(clip)
+	player.pause()
+	player.seek(0.0, true)
+	var skeleton := model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	skeleton.force_update_all_bone_transforms()
+	return skeleton
+
+
+func _origin(skeleton: Skeleton3D, bone_name: String) -> Vector3:
+	return skeleton.get_bone_global_pose(skeleton.find_bone(bone_name)).origin
+
+
+## The bend at the left wrist (degrees): how far the hand is turned from the forearm, against the rig's rest, whose
+## knuckles already sit about 15 degrees off the forearm's line (a straight wrist reads about 0 here).
+func _wrist_bend(skeleton: Skeleton3D) -> float:
+	var forearm := skeleton.get_bone_global_pose(skeleton.find_bone("Forearm_L")).basis
+	var hand := skeleton.get_bone_global_pose(skeleton.find_bone("Hand_L")).basis
+	var rest := skeleton.get_bone_rest(skeleton.find_bone("Hand_L")).basis
+	var local := forearm.orthonormalized().inverse() * hand.orthonormalized()
+	return rad_to_deg((local * rest.orthonormalized().inverse()).get_rotation_quaternion().get_angle())
+
+
+func test_every_rifle_and_foregrip_hold_has_the_left_wrist_nearly_straight() -> void:
+	var clips: Array[StringName] = []
+	for id: StringName in RIFLES:
+		clips.append(StringName(String(id) + "_Hold"))
+	for id: StringName in [&"aeg", &"sniper"]:
+		for key: String in ["vertical", "angled"]:
+			clips.append(StringName("%s_grip_%s_Hold" % [id, key]))
+	for clip in clips:
+		var bend := _wrist_bend(_posed(clip))
+		assert_lt(bend, 12.0, "%s: the left wrist bends %.1f degrees" % [clip, bend])
+
+
+## The right thumb's direction in the right hand's own frame.
+func _thumb_in_hand(skeleton: Skeleton3D) -> Vector3:
+	var hand := skeleton.get_bone_global_pose(skeleton.find_bone("Hand_R"))
+	var dir := (_origin(skeleton, "Thumb3_R") - _origin(skeleton, "Thumb1_R")).normalized()
+	return hand.basis.inverse() * dir
+
+
+func test_the_cyber_pistol_two_handed_hold_has_the_thumb_as_the_gbb_pistols_does() -> void:
+	var gbb := _thumb_in_hand(_posed(&"pistol_two_Hold"))
+	var cyber := _thumb_in_hand(_posed(&"cyber_two_Hold"))
+	assert_gt(gbb.dot(cyber), 0.9, "the thumbs point the same way in the hand (%.2f)" % gbb.dot(cyber))
+
+
+func test_every_clip_the_game_looks_up_still_exists_in_the_model() -> void:
+	var arms := _bare(&"pistol")
+	var names: Array[StringName] = []
+	for id: StringName in RIFLES:
+		names.append(StringName(String(id) + "_Hold"))
+		names.append(StringName(String(id) + "_Reload"))
+	for id: StringName in PISTOLS:
+		names.append(StringName(String(id) + "_two_Hold"))
+		names.append(StringName(String(id) + "_two_Reload"))
+	for id: StringName in [&"aeg", &"sniper"]:
+		for key: String in ["vertical", "angled"]:
+			for suffix: String in ["Hold", "Reload"]:
+				names.append(StringName("%s_grip_%s_%s" % [id, key, suffix]))
+	for key: String in ["vertical", "angled"]:
+		names.append(StringName("sniper_grip_%s_Fire" % key))
+	names.append(&"sniper_Fire")
+	for n in names:
+		assert_true(arms._anim.has_animation(n), String(n))
+
+
+func test_every_foregrip_hold_keeps_the_left_hand_on_the_replica_for_hold_and_reload() -> void:
+	for id: StringName in [&"aeg", &"sniper"]:
+		for key: String in ["vertical", "angled"]:
+			var base := "%s_grip_%s" % [id, key]
+			var hold := _posed(StringName(base + "_Hold"))
+			var plain := _posed(StringName("%s_Hold" % id))
+			var rh := _origin(hold, "Hand_R")
+			var d := _origin(hold, "Hand_L").distance_to(rh)
+			assert_lt(d, 0.6, "%s: the left hand %.2f m from the right" % [base, d])
+			assert_gt(d, 0.12, "%s: and not on top of it" % base)
+			assert_lt(_origin(hold, "Hand_R").distance_to(_origin(plain, "Hand_R")), 0.02, "%s: the right hand as the plain hold" % base)
+			var reload := _posed(StringName(base + "_Reload"))
+			assert_true(_origin(reload, "Hand_L").is_finite())
