@@ -97,7 +97,7 @@ func test_each_face_takes_its_room_s_finish() -> void:
 	assert_eq(_finish_at(m, Vector3(-45.0, 18.9, 5.0), Vector3.UP), &"terrazzo", "the ticket hall's floor")
 	assert_eq(_finish_at(m, Vector3(-62.0, 20.0, 0.0), Vector3.RIGHT), &"wall_tile", "the ticket hall's west wall")
 	assert_eq(_finish_at(m, Vector3(-50.0, 24.9, 0.0), Vector3.DOWN), &"plaster", "the ticket hall's ceiling")
-	assert_eq(_finish_at(m, Vector3(0.0, 0.9, -7.0), Vector3.UP), &"platform", "the north platform")
+	assert_eq(_finish_at(m, Vector3(0.0, 0.9, -7.0), Vector3.UP), &"platform_floor", "the north platform")
 	assert_eq(_finish_at(m, Vector3(-30.0, 0.0, 11.5), Vector3.UP), &"ballast", "the south track bed")
 	assert_eq(_finish_at(m, Vector3(70.0, 1.5, 12.6), Vector3.FORWARD), &"lining", "the south running tunnel's wall")
 	assert_eq(_finish_at(m, Vector3(40.0, 2.0, 9.0), Vector3.FORWARD), &"car", "the south train's side, outside")
@@ -268,7 +268,138 @@ func test_low_drops_the_relief() -> void:
 
 func test_no_tint_reads_as_a_team() -> void:
 	for f: StringName in look.finish_tints:
-		assert_lt(look.finish_tints[f].s, 0.2, "%s's tint is near grey" % f)
+		var tint := look.finish_tints[f]
+		if look.safety_finishes.has(f):
+			# TB1: the one safety yellow, well off Beta's orange and Alpha's blue
+			assert_between(tint.h * 360.0, 40.0, 65.0, "%s's tint is safety yellow" % f)
+			continue
+		assert_lt(tint.s, 0.2, "%s's tint is near grey" % f)
+
+
+func test_each_platform_tunnel_is_vaulted_and_its_colliders_hug_the_drawn_arc() -> void:
+	var m := _map("subway")
+	assert_eq(m.station.vaults.size(), 2, "both platform tunnels")
+	for v in m.station.vaults:
+		var c := v.circle()
+		assert_almost_eq(v.point(0.0).y, v.y + v.rise, 0.001, "the crown")
+		assert_almost_eq(v.point(v.half_angle()).x, v.area.end.y, 0.001, "springs from one wall")
+		assert_almost_eq(v.point(-v.half_angle()).x, v.area.position.y, 0.001, "and the other")
+		var x := v.area.get_center().x + 7.3
+		var lid := v.lid()
+		for b in m.blocks:
+			var box := AABB(b.center - b.size * 0.5, b.size)
+			if not lid.encloses(box) or box.position.x > x or box.end.x < x:
+				continue
+			# the box's point (z, y) deepest inside the arc stays within a few centimetres of it
+			var near := Vector2(clampf(c.x, box.position.z, box.end.z), clampf(c.y, box.position.y, box.end.y))
+			assert_gt(near.distance_to(Vector2(c.x, c.y)), c.z - 0.09, "a vault collider at most 8 cm proud of the arc")
+		for k in range(1, 40):
+			# just behind the drawn arc there is always a collider: no BB slips into the tiles
+			var a := v.half_angle() * (-1.0 + 2.0 * float(k) / 40.0)
+			var behind := Vector3(x, c.y + (c.z + 0.02) * cos(a), c.x + (c.z + 0.02) * sin(a))
+			var held := false
+			for b in m.blocks:
+				if AABB(b.center - b.size * 0.5, b.size).grow(0.001).has_point(behind):
+					held = true
+					break
+			assert_true(held, "a collider just behind the arc at %.2f rad" % a)
+
+
+func test_the_vault_s_colliders_are_drawn_as_the_arc_and_lamps_hang_under_it() -> void:
+	var m := _map("subway")
+	var v := m.station.vaults[0]
+	var inside := 0
+	for b in m.blocks:
+		if m.station.in_vault(AABB(b.center - b.size * 0.5, b.size)):
+			inside += 1
+			assert_eq(b.kind, &"wall", "a vault collider is wall")
+	assert_gt(inside, 30, "each vault's arc pieces and ends")
+	var c := v.circle()
+	var lit := 0
+	for i in m.roof_lamps.size():
+		var p := m.roof_lamps[i]
+		var h := m.roof_lamp_heights[i]
+		# the platforms' and the track's own lamps (not a train's under its roof, or a level above's)
+		var style := m.station.style_at(Vector3(p.x, v.y - 0.5, p.y))
+		if not v.area.has_point(p) or h > v.y + v.rise + 1.0 or h < v.y - 0.5 \
+				or (style != &"platform" and style != &"track"):
+			continue
+		lit += 1
+		var arc := c.y + sqrt(c.z * c.z - pow(absf(p.y - c.x) + 0.25, 2.0))
+		assert_lt(m.roof_lamp_heights[i], arc + 0.001, "lamp %d's panel clears the arc" % i)
+		assert_gt(m.roof_lamp_heights[i], v.y, "and hangs in the vault")
+	assert_gt(lit, 10, "the platform and its track lit under the vault")
+
+
+func test_mind_the_gap_reads_from_each_platform_along_its_edge() -> void:
+	var m := _map("subway")
+	assert_eq(m.station.words.size(), 2, "one line of words a platform")
+	for w in m.station.words:
+		assert_eq(w.text, "MIND THE GAP")
+		var mid := Vector3(w.area.get_center().x, w.y + 0.05, w.area.get_center().y)
+		assert_eq(m.station.style_at(mid), &"platform", "on a platform")
+		assert_almost_eq(m.floor_under(mid.x, mid.z, w.y + 0.5), w.y, 0.01, "on its floor")
+		assert_lt(w.height, w.area.size.y, "inside the coping")
+	for ch in "MIND THE GAP":
+		assert_true(ch == " " or PlatformWords.GLYPHS.has(ch), "the font has %s" % ch)
+	assert_eq(PlatformWords.width("MI"), 11, "two letters and a gap")
+	var yellow := m.station.strips.filter(func(s: StationDressing.Strip) -> bool: return s.finish == &"gap_line")
+	assert_eq(yellow.size(), 2, "the yellow line on each platform's edge only")
+
+
+func test_trims_lie_flat_on_the_tunnel_walls_out_of_the_way() -> void:
+	var m := _map("subway")
+	var by_finish: Dictionary[StringName, int] = {}
+	for t in m.station.trims:
+		assert_true(look.finish_sets.has(t.finish), "%s is a finish the look knows" % t.finish)
+		assert_lt(minf(t.box.size.x, t.box.size.z), 0.07, "%s lies flat on a wall" % t.finish)
+		by_finish[t.finish] = by_finish.get(t.finish, 0) + 1
+	assert_eq(by_finish.get(&"frieze", 0), 4, "a frieze on both walls of each vault")
+	assert_gt(by_finish.get(&"cable", 0), 0, "cables along the trackside walls")
+	assert_gt(by_finish.get(&"lining", 0), 0, "a face on each platform edge over the track")
+	for t in m.station.trims:
+		var v := m.station.vaults[0] if t.box.get_center().z < 0.0 else m.station.vaults[1]
+		if t.finish == &"frieze":
+			assert_lt(t.box.end.y, v.y, "the frieze stays under the springing")
+			assert_gt(t.box.position.y, 3.6, "and over the car roofs and the openings")
+		elif t.finish == &"steel":
+			# a drop rod holding a hung board (SM5's departures) from the vault
+			assert_true(v.lid().has_point(t.box.end - Vector3(0.0, 0.01, 0.0) - Vector3(0.0, 0.0, t.box.size.z * 0.5)),
+					"a rod reaches up into the vault")
+		else:
+			assert_lt(t.box.end.y, 0.9, "%s stays under the platform's height" % t.finish)
+	assert_gt(look.vault_rib_every, 0.0, "the vault has ribs")
+	assert_true(look.finish_sets.has(look.vault_rib_finish), "drawn in a finish the look knows")
+
+
+func test_the_trackside_wall_over_the_cars_is_tiled_like_the_track() -> void:
+	# TB1 attempt 1: the wall over a standing car faced no room and drew as the dark outside, a black wedge.
+	var m := _map("subway")
+	for v in m.station.vaults:
+		var wall := v.area.position.y if v.area.get_center().y < 0.0 else v.area.end.y
+		var n := Vector3.BACK if v.area.get_center().y < 0.0 else Vector3.FORWARD
+		var tiled := 0
+		for i in 101:
+			var p := Vector3(v.area.position.x + 0.5 + float(i), v.y - 0.3, wall)
+			if _face_at(m, p, n).is_empty():
+				continue
+			tiled += 1
+			assert_eq(_finish_at(m, p, n), &"wall_tile", "the trackside wall at %s" % p)
+			assert_eq(m.station.style_at(p + n * 0.5), &"track", "the air over the car at %s is the track's" % p)
+		assert_gt(tiled, 50, "the trackside wall runs over the cars")
+
+
+func test_the_frieze_clears_the_wide_posters() -> void:
+	var m := _map("subway")
+	var wide := m.station.fixtures.filter(func(f: StationDressing.Fixture) -> bool:
+		return String(f.model).begins_with("poster_wide"))
+	assert_gt(wide.size(), 0, "the trackside posters (SM5)")
+	for t in m.station.trims:
+		if t.finish != &"frieze":
+			continue
+		for f: StationDressing.Fixture in wide:
+			# a wide poster is 3.1 m tall about its spot (tools/subway/fixtures.py)
+			assert_gt(t.box.position.y, f.position.y + 1.55, "the frieze over %s's top" % f.model)
 
 
 func test_a_malformed_station_dress_is_warned_about_and_left_out() -> void:
@@ -279,9 +410,15 @@ func test_a_malformed_station_dress_is_warned_about_and_left_out() -> void:
 		"zones": [{"style": "hall", "box": [0, 1, 0, 1, 0, 1]}, {"style": "hall", "box": [1, 0, 0, 1, 0, 1]}, {"box": []}],
 		"strips": [{"finish": "tactile", "x0": 0, "x1": 2, "z0": 0, "z1": 1, "y": 0.9}, {"x0": 0}],
 		"tracks": [{"x0": 0, "x1": 10, "z0": 0, "z1": 1, "y": 0}, {"x0": 5, "x1": 1, "z0": 0, "z1": 1, "y": 0}],
+		"words": [{"text": "MIND", "x0": 0, "x1": 9, "z0": 0, "z1": 1, "y": 0.9, "height": 0.2, "every": 4, "up": -1},
+				{"text": "", "x0": 0, "x1": 9, "z0": 0, "z1": 1, "y": 0.9, "height": 0.2, "every": 4, "up": -1}],
+		"vaults": [{"x0": 0, "x1": 9, "z0": 0, "z1": 7, "y": 4, "rise": 2, "thick": 0.3},
+				{"x0": 0, "x1": 9, "z0": 0, "z1": 7, "y": 4, "rise": 0, "thick": 0.3}],
+		"trims": [{"finish": "frieze", "box": [0, 9, 3.8, 4, 0, 0.02]}, {"finish": "frieze", "box": [0, 9]}],
 	}}, warnings)
-	assert_eq([d.zones.size(), d.strips.size(), d.tracks.size()], [1, 1, 1], "the good ones kept")
-	assert_eq(warnings.size(), 5, "each bad one warned about, and the bad dress")
+	assert_eq([d.zones.size(), d.strips.size(), d.tracks.size(), d.words.size(), d.vaults.size(), d.trims.size()],
+			[1, 1, 1, 1, 1, 1], "the good ones kept")
+	assert_eq(warnings.size(), 8, "each bad one warned about, and the bad dress")
 	assert_eq(d.style_at(Vector3(0.5, 0.5, 0.5)), &"hall", "a point in a zone")
 	assert_eq(d.style_at(Vector3(5.0, 0.5, 0.5)), &"", "a point in none")
 
@@ -395,3 +532,33 @@ func test_bands_tile_each_face_exactly_with_its_normal_and_no_sliver() -> void:
 				at = bhi
 			assert_almost_eq(at, hi, 0.001, "the bands reach the face's top")
 	assert_gt(cut, 0, "Subway's lift shafts are cut")
+
+
+func _vault_vertices(v: StationDressing.TunnelVault, l: StationLook) -> PackedVector3Array:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_custom_format(0, SurfaceTool.CUSTOM_RGBA_FLOAT)
+	StationSurface.add_vault(st, l, v)
+	var arrays := st.commit().surface_get_arrays(0)
+	return arrays[Mesh.ARRAY_VERTEX]
+
+
+func test_vault_ribs_stand_under_the_arc_inside_the_vault_and_off_turns_them_off() -> void:
+	var m := _map("subway")
+	var v := m.station.vaults[0]
+	var c := v.circle()
+	var bare := look.duplicate() as StationLook
+	bare.vault_rib_depth = 0.0
+	var plain := _vault_vertices(v, bare)
+	var ribbed := _vault_vertices(v, look)
+	assert_gt(ribbed.size(), plain.size(), "the ribs add faces")
+	var low := c.z - look.vault_rib_depth - 0.001
+	for i in range(plain.size(), ribbed.size()):
+		var p := ribbed[i]
+		var r := Vector2(p.z - c.x, p.y - c.y).length()
+		assert_between(r, low, c.z + 0.001, "a rib vertex stays within its depth of the arc")
+		assert_between(p.x, v.area.position.x, v.area.end.x, "a rib stays within the vault's length")
+	var huge := look.duplicate() as StationLook
+	huge.vault_rib_every = 1000.0
+	huge.vault_rib_width = 1000.0
+	assert_eq(_vault_vertices(v, huge).size(), plain.size(), "a rib wider than the vault is left out")

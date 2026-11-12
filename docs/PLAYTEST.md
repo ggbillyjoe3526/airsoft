@@ -1415,6 +1415,27 @@ Subway is Dev content: tick Settings › Dev › Dev content.
 - [ ] **Compact SMG** (Dev content): full auto buzzes with a little of your toothbrush's whir under the motor.
 - [ ] **Sniper Rifle:** unchanged (your pick).
 
+## Subway's platforms like the Tube (TB1)
+
+Subway is Dev content: tick Settings › Dev › Dev content.
+
+- [ ] **Curved ceilings.** Both platforms share one tunnel with their track under a tiled barrel vault. Walk each
+  platform end to end: the curve is smooth (no facets or seams), its ends close the tunnel above the walls and the
+  tunnel mouth, and the ceiling lamps hang just under it, never inside it.
+- [ ] **BBs on the vault.** Shoot up into the vault from the platform and the track: each BB stops on the curve where
+  you see it (a few centimetres at most in front of it), never vanishing into it or stopping short in the air. A smoke
+  or flash thrown over a train lands on its roof or comes back down, never stuck in the air.
+- [ ] **The edge.** Each platform's edge has a pale coping stone with MIND THE GAP painted on it in white, reading from
+  the platform, and a narrow yellow line behind it; no yellow anywhere but the platforms' edges.
+- [ ] **White tiles.** The walls are white and grey tiles, the wall across the track too; nothing looks cream or
+  brown. Climbing out of the track and the cover, sight lines and bots on the platforms play as before.
+- [ ] **Detail.** Concrete ribs cross each vault every few metres (dark rings against the vault), a dark tiled band runs under the curve on both walls,
+  three cables run along the wall across the track and each platform edge has a dark face over the track. None of it
+  flickers or blocks a BB or a step.
+- [ ] **Morrin Street.** Every name board on the platforms says Morrin Street on the trains' stripe orange, as do the
+  line map's ringed stop and the information panel; the departure boards hang on two rods from the curved ceiling.
+- [ ] **Frame rate.** F3 on Low looking along a platform: 60 FPS.
+
 ## Subway's echo on the shots (EC1)
 
 - [ ] **Subway** (Dev content): fire every replica, then fit a silencer and fire again. Each shot is a little louder
