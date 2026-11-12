@@ -114,3 +114,50 @@ func test_painting_and_freeing_a_replica_leaves_no_orphans() -> void:
 		ReplicaPaint.apply(model, &"cobalt", false)
 		model.free()
 	assert_eq(ReplicaPaint.surface_materials().size(), cached, "more copies add no cached materials")
+
+
+## Every vertex colour alpha in the replica and part files, as a kind slot (alpha * SLOTS): a whole number below the
+## kinds' count, or 16 (no kind). A file still cut for 8 slots would read as a different kind.
+func _glbs(dir: String) -> Array[String]:
+	var out: Array[String] = []
+	for f in DirAccess.get_files_at(dir):
+		if f.ends_with(".glb"):
+			out.append(dir.path_join(f))
+	return out
+
+
+func _slots_in(node: Node, bad: Array[String], path: String) -> void:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		var mesh := (node as MeshInstance3D).mesh
+		for s in mesh.get_surface_count():
+			var colours: Variant = mesh.surface_get_arrays(s)[Mesh.ARRAY_COLOR]
+			if colours is PackedColorArray:
+				for c in (colours as PackedColorArray):
+					var slot := c.a * float(ReplicaSurfaces.SLOTS)
+					if absf(slot - roundf(slot)) > 0.2 or int(roundf(slot)) > ReplicaSurfaces.SLOTS \
+							or (int(roundf(slot)) >= ReplicaSurfaces.KINDS.size() and int(roundf(slot)) != ReplicaSurfaces.SLOTS):
+						bad.append("%s %s %f" % [path, node.name, c.a])
+						return
+	for child in node.get_children():
+		_slots_in(child, bad, path)
+
+
+func test_every_replica_and_part_file_names_kinds_in_sixteenths_or_none() -> void:
+	var bad: Array[String] = []
+	var files: Array[String] = _glbs("res://assets/models/replicas") + _glbs("res://assets/models/replicaParts")
+	assert_gt(files.size(), 5)
+	for p in files:
+		var scene := load(p) as PackedScene
+		var root := scene.instantiate()
+		_slots_in(root, bad, p)
+		root.free()
+	assert_eq(bad, [] as Array[String], "files still cut for another slot count")
+
+
+func test_all_four_kind_tables_are_the_shaders_length() -> void:
+	var m := ShaderMaterial.new()
+	ReplicaSurfaces.dress(m)
+	for t: StringName in [&"kind_finish", &"kind_grain", &"kind_tone", &"kind_shine"]:
+		assert_eq((m.get_shader_parameter(t) as Array).size(), ReplicaSurfaces.SLOTS, str(t))
+	var src := FileAccess.get_file_as_string("res://game/play/replica_surface.gdshaderinc")
+	assert_true(src.contains("KINDS = %d;" % ReplicaSurfaces.SLOTS))

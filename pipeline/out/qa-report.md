@@ -1,13 +1,18 @@
-Task: none (MQ1) · QA commit 33d207b · Verdict: Pass
+Task: none (MQ1) · QA commit this commit · Verdict: Pass
 
-Blocking: none. Advisory: (1) ReplicaPaint.apply with OWN, worn=false, on a mesh already surfaced leaves the surface material for names outside OWN_REALISTIC (replica_paint.gd ~L111-116); no caller does this today. (2) _worn keys use plain.get_instance_id(); a freed own material could in theory reuse an id (only after ReplicaPaint.clear is skipped); not reproducible.
-Tests added: tests/unit/test_mq1_qa.gd (6 tests), checked against the old code, which lacks is_surface/default_kind/_surface_of (they cannot pass without the feature):
-- test_a_model_with_no_vertex_colours_draws_as_its_part_default: parts-file mesh, Furniture -> polymer, Metal -> steel.
-- test_repainting_back_and_forth_gives_the_same_shared_materials: no new material per repaint, cache holds 2.
-- test_a_cap_overflow_keeps_every_drawn_material_working: MAX_WORN clear leaves drawn materials valid surfaces with plain_of.
-- test_a_depth_pressed_copy_is_still_a_surface_with_its_plain_paint: duplicate keeps is_surface/is_worn/plain_of (the ReplicaView._press_depth path).
-- test_a_see_through_or_textured_own_colour_is_left_as_the_file_has_it: alpha/textured Cyber materials get no override.
-- test_painting_and_freeing_a_replica_leaves_no_orphans: orphan count unchanged, cache does not grow.
-Hunted and fine: BaseMaterial3D casts (ReplicaView._press_depth handles ShaderMaterial; ReplicaPictures._restyle skips non-Base via null check and works on file materials), Realistic colours and back, Cyber glow.
-Run: SUBSET only (not tools/check.sh): 11 files (test_mq1_qa, replica_surfaces, replica_paint, replica_wear, magazine_wear, fb4_qa, cp1_qa, bp5_models, model_pictures, replica_turntable, hands_feel): 121 tests, 120 passing, 1 pending (pre-existing cp1 figure case), 3921 asserts, 5.2 s. gdlint clean on my file. tools/smoke_test.sh passes (0 script errors). Logs: pipeline/out/qa/.
-Not testable headless (owner's list): how steel/aluminium/wood/polymer look and reflect in the hands and the Customise pictures (needs a display), grain shimmer at distance, shader compile time on first draw in a real renderer.
+Attempt 2 review (git diff 370f289 HEAD, the 16-slot change).
+Blocking: none. Advisory: none new.
+
+Checked by reading and by test:
+- No code path still assumes 8 slots: grep of game/, tests/, tools/ finds no `* 8`, no old names (worn_materials, MAX_WORN, OWN_GLOW) left; renamed callers (play_session, tests) use surface_materials / surfaced.
+- ReplicaSurfaces._build pads to SLOTS (16) for indices past the 7 kinds with the polymer row, so kind_finish/grain/tone/shine are all 16 long; KINDS = 16 and hint_range(0, 15) in the shader match. Alpha 1.0 (no colours) reads 16 -> default_kind (never indexes a table).
+- Chroma maths: divisor is max(top, CHROMA_FLOOR), so pure black is safe; a paint above 1 (bare gain 2.2) only raises chroma, mix stays finite.
+- Part and attachment/magazine files (not rebuilt) carry no kinds or only valid sixteenths: scan test below passes, so they draw as default polymer / steel by part.
+- Shader compile: tests that build and dress the material (test_replica_surfaces, test_replica_wear, test_mq1_qa) run without script errors headless; a Compatibility-renderer compile needs a display (owner's list).
+
+Tests added (tests/unit/test_mq1_qa.gd):
+- test_every_replica_and_part_file_names_kinds_in_sixteenths_or_none · scans every vertex-colour alpha in assets/models/replicas and replicaParts for a whole slot below KINDS or 16 · fails on a file still cut for 8 slots (alpha 1/8 would be 2 sixteenths... checked by reasoning, not by a stale file; no stale glb exists to stub).
+- test_all_four_kind_tables_are_the_shaders_length · dress() sets four tables of SLOTS entries and the include's KINDS equals SLOTS · fails if either side is changed alone (old value 8 vs 16).
+
+Runs: test_mq1_qa 8/8, test_replica_surfaces 14/14, test_replica_wear 15/15; gdlint clean. Full suite, smoke and check.sh not run (background suite ran per instruction).
+Not testable here: Compatibility/Forward+ shader look, turntable and menu pictures on screen, bots' figure copies visually (display needed).
