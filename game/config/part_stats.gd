@@ -19,13 +19,16 @@ const TABLES: Array[Dictionary] = [
 		{"header": "Raise time (×)", "field": &"raise", "kind": Kind.SCALE, "min": 0.2, "max": 5.0},
 		{"header": "In the glass", "field": &"in_glass", "kind": Kind.YES_NO},
 		{"header": "Zoom to (×)", "field": &"zoom_to", "kind": Kind.SCALE, "min": 1.0, "max": 8.0},
+		{"header": "Draw (×)", "field": &"draw", "kind": Kind.SCALE, "min": 0.2, "max": 5.0},
 	]},
 	{"heading": "Grips", "slot": &"grip", "columns": [
 		{"header": "Handling (×)", "field": &"handling", "kind": Kind.SCALE, "min": 0.2, "max": 5.0},
 		{"header": "Shake (×)", "field": &"shake", "kind": Kind.SCALE, "min": 0.0, "max": 5.0},
+		{"header": "Moving spread (×)", "field": &"move_spread", "kind": Kind.SCALE, "min": 0.2, "max": 2.0},
 	]},
 	{"heading": "Lasers", "slot": &"laser", "columns": [
-		{"header": "Spread (×)", "field": &"spread", "kind": Kind.SCALE, "min": 0.1, "max": 5.0},
+		{"header": "Hip spread (×)", "field": &"hip", "kind": Kind.SCALE, "min": 0.1, "max": 5.0},
+		{"header": "Handling (×)", "field": &"handling", "kind": Kind.SCALE, "min": 0.2, "max": 5.0},
 	]},
 	{"heading": "Magazines", "slot": &"magazine", "columns": [
 		{"header": "Capacity (×)", "field": &"capacity", "kind": Kind.SCALE, "min": 0.1, "max": 10.0},
@@ -65,8 +68,13 @@ class Part:
 	## The time to bring the replica up and raise a sight; how long a sprint's or landing's shake stays in the aim.
 	var handling: float = 1.0
 	var shake: float = 1.0
+	## A barrel's share of the spread; a laser's of the spread with the sight down (on top of the replica's own hip
+	## spread, RP1); a grip's of the spread that moving adds (on top of the replica's own).
 	var spread: float = 1.0
-	## A magazine's capacity, magazines added to those carried, and its reload and draw times.
+	var hip: float = 1.0
+	var move_spread: float = 1.0
+	## A magazine's capacity, magazines added to those carried, and its reload and draw times (an optic has a draw
+	## time too, RP1).
 	var capacity: float = 1.0
 	var carried: int = 0
 	var reload: float = 1.0

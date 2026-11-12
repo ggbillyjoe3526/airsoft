@@ -84,7 +84,7 @@ func test_the_cyber_pistol_takes_no_part_but_the_light_and_plays_as_it_comes() -
 		assert_false(rules.set_part(l, CYBER, slot, SILENCER))
 	var kit := rules.carried(l)
 	assert_eq(kit.replicas[1].id, &"cyber", "playable since CP1")
-	assert_eq(kit.replicas[1].mag_size, 50)
+	assert_eq(kit.replicas[1].mag_size, 30, "RP1: 30 BBs a magazine (50 before)")
 	assert_eq(kit.replicas[1].mags, 3)
 	assert_false(kit.replicas[1].rattles)
 	assert_eq(kit.replicas[1].heard_scale, 1.0)

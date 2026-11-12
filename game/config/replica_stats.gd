@@ -14,6 +14,9 @@ const LIMITS_TABLE := "Site limits"
 const POWER_TABLE := "Power sources"
 ## A power source's percentage columns (stats.md › Power sources) and the range each cell must fall in.
 const POWER_COLUMNS: Array[String] = ["Energy %", "Fire rate %", "Recoil %"]
+## How much further (or less far) its shots are heard, as a percentage (RP1: the springs'). Added after the rest: a table
+## without the column reads as 0 for every source, quietly.
+const POWER_HEARD_COLUMN := "Heard from %"
 const POWER_PERCENT_MIN := -90.0
 const POWER_PERCENT_MAX := 200.0
 const KEY_HEADER := "Key"
@@ -51,6 +54,8 @@ class Power:
 	var energy: float = 0.0
 	var fire_rate: float = 0.0
 	var recoil: float = 0.0
+	## How far its shots are heard, on top of the replica's and its muzzle part's (0.2: a fifth further).
+	var heard: float = 0.0
 
 
 ## Each replica Key's readable cells: ReplicaConfig property → value.
@@ -250,6 +255,15 @@ func _read_powers(t: DataTable) -> void:
 		p.energy = shares[0]
 		p.fire_rate = shares[1]
 		p.recoil = shares[2]
+		if t.has_column(POWER_HEARD_COLUMN):
+			var raw_heard := row.cell(POWER_HEARD_COLUMN)
+			var heard := DataTable.parse_number(raw_heard)
+			if is_nan(heard) or heard < POWER_PERCENT_MIN or heard > POWER_PERCENT_MAX:
+				problems.append("%s: %s must be a number from %s to %s, not \"%s\": counted as 0" % [
+						t.where(row.line), POWER_HEARD_COLUMN, _shown(POWER_PERCENT_MIN), _shown(POWER_PERCENT_MAX),
+						raw_heard])
+			else:
+				p.heard = heard / 100.0
 		powers[id] = p
 
 
