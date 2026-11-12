@@ -63,8 +63,8 @@ PAINT = {
     "strap": 0x8a8270,
     "concrete": 0xb4b0a8,
     "concrete_dark": 0x9a968e,
-    # works paint: the look's yellow (a wagon's solebar, a buffer stop) and the trolleys' a little paler (the photos' red
-    # trolleys: every red dull enough to weather sits on the Beta team's hue, so they are works yellow)
+    # works paint: the look's yellow (a wagon's solebar, a buffer stop) and the trolleys' a little paler (the photos'
+    # red trolleys: every red dull enough to weather sits on the Beta team's hue, so they are works yellow)
     "works_yellow": 0xd2b83a,
     "trolley_yellow": 0xc8b040,
     "hazard_black": 0x262426,
@@ -170,7 +170,7 @@ class Kit(rk.Kit):
 
     def wheelset(self, x: float, y_in: float, z: float, r: float, width: float, axle_r: float = 0.03,
                  mat: str = "wheel", seg: int = 14) -> None:
-        """Two wheels on an axle at x, their flanges' faces `y_in` off the middle (the gauge's half), centre height z."""
+        """Two wheels on an axle at x, their flanges' faces `y_in` off the middle (the gauge's half), centred at z."""
         for s in (-1.0, 1.0):
             self.rail_wheel((x, s * (y_in + width * 0.5), z), r, width, s, mat, seg)
         self.bar((x, -y_in, z), (x, y_in, z), axle_r, mat, seg=6, cap=False)

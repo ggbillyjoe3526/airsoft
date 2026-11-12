@@ -106,8 +106,8 @@ def build(name: str, length: float, depth: float) -> object:
 def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
     if paint in ("hoard_paint", "hoard_strip"):
         col = wt.mix(c, wk.lin(wk.GRIME), 0.1 + 0.3 * wt.smooth(0.45, 0.85, wt.fbm(p, 0.25, 91)))
-        scuff = wt.smooth(0.7, 0.9, wt.fbm(Vector((p.x * 3, p.y * 3, p.z * 8)), 0.2, 93)) * (1 - wt.smooth(0.3, 1.2,
-                                                                                                         p.z))
+        low = 1.0 - wt.smooth(0.3, 1.2, p.z)
+        scuff = wt.smooth(0.7, 0.9, wt.fbm(Vector((p.x * 3, p.y * 3, p.z * 8)), 0.2, 93)) * low
         col = wt.mix(col, wk.lin(wk.GRIME), 0.6 * scuff)  # boot scuffs and trolley knocks low down
         return wk.grime(p, n, col, seed=18)
     return wk.grime(p, n, c, seed=4, amount=0.7)

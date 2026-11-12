@@ -95,7 +95,9 @@ def build() -> object:
             k.blk((x - 0.12, y0 - 0.0, 0.0), (x + 0.12, y1, BEARER), "concrete_dark")
         for layer in range(LAYERS):
             z_out = BEARER + layer * step       # the outer face's lowest point
-            outer_at = lambda x, zo=z_out: zo + (RADIUS + THICK) - math.sqrt((RADIUS + THICK) ** 2 - x * x)
+
+            def outer_at(x: float, zo: float = z_out) -> float:
+                return zo + (RADIUS + THICK) - math.sqrt((RADIUS + THICK) ** 2 - x * x)
             if layer > 0:  # packers on the segment below, under this one's outer face
                 for x in (-0.55, 0.55):
                     z_top_below = BEARER + (layer - 1) * step + THICK + RADIUS - math.sqrt(RADIUS ** 2 - x * x)

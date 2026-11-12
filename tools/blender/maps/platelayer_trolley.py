@@ -25,7 +25,8 @@ from mathutils import Vector  # noqa: E402
 
 BUDGET = 1200
 HIGH = 1.2
-SIZES = {"platelayer_trolley": (1.5, 1.3), "platelayer_trolley_short": (1.5, 1.0), "platelayer_trolley_long": (2.0, 1.3)}
+SIZES = {"platelayer_trolley": (1.5, 1.3), "platelayer_trolley_short": (1.5, 1.0),
+         "platelayer_trolley_long": (2.0, 1.3)}
 WHEEL_R = 0.17
 
 
@@ -62,7 +63,8 @@ def build(name: str, length: float, width: float) -> object:
     for y in (-fy + 0.03, fy - 0.03):
         k.blk((sx0 - 0.03, y - 0.03, f1), (sx1, y + 0.03, HIGH - 0.03), "trolley_yellow")
         k.bar((sx0 + 0.015, y, HIGH - 0.24), (sx0 + 0.015, y, HIGH - 0.025), 0.022, "trolley_yellow", seg=6)
-    k.bar((sx0 + 0.015, -fy + 0.03, HIGH - 0.022), (sx0 + 0.015, fy - 0.03, HIGH - 0.022), 0.022, "trolley_yellow", seg=6)
+    k.bar((sx0 + 0.015, -fy + 0.03, HIGH - 0.022), (sx0 + 0.015, fy - 0.03, HIGH - 0.022), 0.022, "trolley_yellow",
+          seg=6)
     for y in (-fy * 0.33, fy * 0.33):
         k.bar((sx0 + 0.015, y, HIGH - 0.24), (sx0 + 0.015, y, HIGH - 0.025), 0.016, "trolley_yellow", seg=6)
     # The push rail at the -x end: two uprights and the bar across, at waist height.
