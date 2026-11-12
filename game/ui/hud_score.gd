@@ -3,7 +3,8 @@ extends Control
 ## The score bar at the top (UI concept B v2 `hud.png`): one rounded glass plate holding each team's pips (one slanted
 ## pip per win needed, filled up to its wins), the team's rounded colour block with its score, and the clock with the
 ## round under it. In Attack / Defend an ATK tag (accent) and a DEF tag (dark), rounded, sit on the two blocks, and the
-## clock reads "OT" and the overtime left once time has run out while the attackers work the rope. With gauge patterns
+## clock reads "OT" and the overtime left once time has run out while the attackers work the rope (Plant The Bomb's,
+## PB1: the same, and the armed bomb's fuse left in the same style). With gauge patterns
 ## on (set_patterned), Beta's filled pips and score block are striped (HudStyle.STRIPED_TEAM; GaugePattern, built once
 ## at setup) and the block's number gets a dark edge. Your team sits on the left (setup's `first`), the other on the
 ## right, each in its own colour, through half time too (owner, 2026-10-30). Everything redraws or retypes only when a

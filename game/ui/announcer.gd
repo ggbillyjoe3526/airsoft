@@ -4,7 +4,8 @@ extends RefCounted
 ## tick's events into lines in the HUD's own words for HudAnnounce to hand a screen reader. Each hit feed line ("Rook
 ## called HIT · Alpha", "You" for the player), your own hit in its place ("You're hit · Rook"), each round's start
 ## ("Round 3", with the banner's line under it when it has one), each round's end (the stamp, the banner's line and the
-## score, your team first), Elimination's overtime flag going up ("Overtime · touch the flag", as its banner), the
+## score, your team first), Elimination's overtime flag going up ("Overtime · touch the flag", as its banner), Plant The
+## Bomb's pick-up, drop and plant ("Rook picked up the bomb", "Bomb planted at A · Defuse it before it goes off"), the
 ## match's end (the stamp and the match's score) and each of your team's callouts the feed shows ("Brick: Two, Crate
 ## yard!") and each notice of the magazine hand-off's line (MH3, HudMagLine: "+1 mag from Brick · 60 BBs", "Nobody near
 ## has a mag to spare"), and each squad order you give ("Order · Follow Me"), or that waits for the next round (BP6).
@@ -84,6 +85,8 @@ func on_tick(state: GameState) -> void:
 					add(round_over_line(state.round_state, e.value, e.value2 as GameEvent.RoundEnd), false)
 			GameEvent.Kind.MATCH_OVER:
 				add(match_over_line(e.value, state.round_state.score), true)
+			GameEvent.Kind.BOMB:
+				add(bomb_line(state, e), false)
 			GameEvent.Kind.SQUAD_ORDER:
 				if e.actor == _you.id:
 					add(order_line(e.value), false)
@@ -168,8 +171,40 @@ func round_start_line(rs: RoundState, number: int) -> String:
 		var side := tr(&"HUD_ATTACK" if attacking else &"HUD_DEFEND")
 		var job := tr(&"HUD_HALF_TIME") if half else tr(&"HUD_TAKE_FLAG" if attacking else &"HUD_HOLD_POLE")
 		return (tr(&"HUD_ROUND_SIDE") % [number, side]) + PART + job
+	if rs.mode == RoundState.Mode.PLANT_THE_BOMB:
+		var attacking := _you.team == rs.attackers
+		var side := tr(&"HUD_ATTACK" if attacking else &"HUD_DEFEND")
+		var job := tr(&"HUD_HALF_TIME") if half else _plant_job(rs, attacking)
+		return (tr(&"HUD_ROUND_SIDE") % [number, side]) + PART + job
 	var title := tr(&"HUD_ROUND") % number
 	return title + PART + tr(&"HUD_HALF_TIME") if half else title
+
+
+## Plant The Bomb's job for a side as its banner says it: "Plant the bomb", or "Hold sites A and B".
+func _plant_job(rs: RoundState, attacking: bool) -> String:
+	if attacking:
+		return tr(&"HUD_PLANT_THE_BOMB")
+	if rs.plant.sites.size() < 2:
+		return tr(&"HUD_HOLD_SITE") % Plant.LETTERS[0]
+	return tr(&"HUD_HOLD_SITES") % [Plant.LETTERS[0], Plant.LETTERS[1]]
+
+
+## A bomb event of Plant The Bomb as the HUD says it, or "" for none: your team's pick-up and drop when you attack
+## ("Rook picked up the bomb"), and the bomb armed as its banner says it ("Bomb planted at A · Defuse it before it goes
+## off"). The defuse and the bomb going off are read in the round's end line.
+func bomb_line(state: GameState, e: GameEvent) -> String:
+	var rs := state.round_state
+	if e.value == Plant.Cue.PLANTED:
+		var letter: String = Plant.LETTERS[clampi(e.value2, 0, Plant.MOST - 1)]
+		var job := tr(&"HUD_BOMB_PLANTED_ATTACK" if _you.team == rs.attackers else &"HUD_BOMB_PLANTED_DEFEND")
+		return (tr(&"HUD_BOMB_PLANTED_AT") % letter) + PART + job
+	if e.value != Plant.Cue.PICKED_UP and e.value != Plant.Cue.DROPPED:
+		return ""
+	if e.actor < 0 or e.actor >= state.characters.size():
+		return ""
+	var actor := state.characters[e.actor]
+	var words := HudPlant.feed_words(rs, e, actor, _you)
+	return tr(&"HUD_SR_BOMB") % [_name(actor), words] if not words.is_empty() else ""
 
 
 ## Elimination's overtime flag going up, as its banner says it: "Overtime · Touch the flag".
@@ -179,7 +214,8 @@ func overtime_line() -> String:
 
 ## A round's end as its banner says it, and the score after it: "Won · Round 3 · Alpha take the round · Alpha 2 – 1
 ## Beta"; by the flag "Lost · Round 3 · Flag raised · Beta take the round · …" (at the overtime flag "Flag touched");
-## "Draw · Round 3 · The round is played again · …". `winner` -1 for a draw.
+## "Draw · Round 3 · The round is played again · …". `winner` -1 for a draw. Plant The Bomb's: "Won · Round 3 · Bomb
+## went off · Alpha take the round · …", "Bomb defused", or the clock run out "Defended · Time's up · nothing planted".
 func round_over_line(rs: RoundState, winner: int, reason: GameEvent.RoundEnd) -> String:
 	var parts := PackedStringArray([_stamp(winner), tr(&"HUD_ROUND") % rs.number])
 	if winner < 0:
@@ -192,6 +228,15 @@ func round_over_line(rs: RoundState, winner: int, reason: GameEvent.RoundEnd) ->
 		elif reason == GameEvent.RoundEnd.SIMULATED:
 			parts.append(tr(&"HUD_SIMULATED"))
 			parts.append(tr(&"HUD_ROUND_WON") % team)
+		elif rs.mode == RoundState.Mode.PLANT_THE_BOMB and reason != GameEvent.RoundEnd.ELIMINATED:
+			match reason:
+				GameEvent.RoundEnd.WENT_OFF, GameEvent.RoundEnd.DEFUSED:
+					var went_off := reason == GameEvent.RoundEnd.WENT_OFF
+					parts.append(tr(&"HUD_BOMB_WENT_OFF" if went_off else &"HUD_BOMB_DEFUSED"))
+					parts.append(tr(&"HUD_ROUND_WON") % team)
+				_:
+					parts.append(tr(&"HUD_DEFENDED"))
+					parts.append(tr(&"HUD_BOMB_NO_PLANT"))
 		elif rs.mode == RoundState.Mode.ATTACK_DEFEND and reason != GameEvent.RoundEnd.ELIMINATED:
 			var captured := reason == GameEvent.RoundEnd.CAPTURED
 			parts.append(tr(&"HUD_FLAG_RAISED" if captured else &"HUD_DEFENDED"))

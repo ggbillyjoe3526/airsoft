@@ -6,6 +6,8 @@ extends Control
 ## With gauge patterns on (set_patterned), a striped team's fill (HudStyle.STRIPED_TEAM, Beta's) is striped
 ## too: each notch's GaugePattern is built again only when the gauge's size changes. Redraws only when the filled
 ## notches, the line, the colour or the stripes change.
+## Plant The Bomb (PB1) reuses it under the score bar (set_word, set_bomb): the label reads "PLANTING", "DEFUSING" or
+## "BOMB A", the fill is the arming or the disarming, and the carry case stands at the end in place of the flag.
 
 ## The track's and the line's heights, and the end flag's mast and pennant, as shares of the gauge's height (the
 ## pennant's length in px).
@@ -19,13 +21,20 @@ const MAST_HEIGHT := 0.56
 const MAST_WIDTH := 2.0
 const PENNANT_LENGTH := 11.0
 const PENNANT_HEIGHT := 0.24
+## The bomb's carry case at the end: its top and its side, as shares of the gauge's height.
+const CASE_TOP := 0.12
+const CASE_SIZE := 0.76
 
 var _notches: int = 12
 var _progress: float = -1.0
 var _colour: Color = Color.WHITE
 var _label: Label = null
-## The hold's whole seconds left shown in the label; -1: none ("FLAG").
+## The hold's whole seconds left shown in the label; -1: none (the resting word).
 var _hold_left: int = -1
+## The label's resting word ("FLAG"; Plant The Bomb's own), and whether the end sign is the bomb's carry case.
+var _word: String = ""
+var _bomb: bool = false
+var _case := BombShape.new()
 var _pennant := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
 var _mast := Rect2()
 var _patterned: bool = false
@@ -44,7 +53,8 @@ func setup(notches: int, width: float) -> void:
 	custom_minimum_size = Vector2(width, HudStyle.GAUGE_HEIGHT)
 	_label = HudStyle.label(self, HudStyle.GAUGE_LABEL_SIZE, 800, GameTheme.MUTED, HORIZONTAL_ALIGNMENT_LEFT,
 			HudStyle.SPACING_ROUND)
-	_label.text = HudStyle.caps("HUD_FLAG")
+	_word = HudStyle.caps("HUD_FLAG")
+	_label.text = _word
 	_label.position = Vector2(HudStyle.GAUGE_PAD, 0.0)
 	_label.size = Vector2(HudStyle.GAUGE_LABEL_WIDTH, HudStyle.GAUGE_HEIGHT)
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -69,7 +79,29 @@ func set_hold(left: int) -> void:
 	if left == _hold_left:
 		return
 	_hold_left = left
-	_label.text = HudStyle.caps("HUD_FLAG") if left < 0 else (tr("HUD_FLAG_HOLD") % left).to_upper()
+	_label.text = _word if left < 0 else (tr("HUD_FLAG_HOLD") % left).to_upper()
+
+
+## The label's resting word ("PLANTING"); the hold's seconds still replace it while one runs. Words change only when
+## `word` does.
+func set_word(word: String) -> void:
+	if word == _word:
+		return
+	_word = word
+	if _hold_left < 0:
+		_label.text = word
+
+
+## The carry case at the end of the track in place of the flag (Plant The Bomb), or the flag again.
+func set_bomb(on: bool) -> void:
+	if on != _bomb:
+		_bomb = on
+		queue_redraw()
+
+
+## Whether the end sign is the bomb's, for tests.
+func bomb_sign() -> bool:
+	return _bomb
 
 
 ## The label's words, for tests.
@@ -120,6 +152,7 @@ func _notification(what: int) -> void:
 		_pennant[0] = Vector2(fx + MAST_WIDTH, h * MAST_TOP)
 		_pennant[1] = Vector2(fx + MAST_WIDTH + PENNANT_LENGTH, h * (MAST_TOP + PENNANT_HEIGHT * 0.5))
 		_pennant[2] = Vector2(fx + MAST_WIDTH, h * (MAST_TOP + PENNANT_HEIGHT))
+		_case.fit(Rect2(fx, h * CASE_TOP, h * CASE_SIZE, h * CASE_SIZE))
 
 
 func _draw() -> void:
@@ -137,5 +170,8 @@ func _draw() -> void:
 	# Where the flag is: a white line through the track.
 	var at := HudStyle.GAUGE_PAD + HudStyle.GAUGE_LABEL_WIDTH + _track_width() * maxf(_progress, 0.0)
 	draw_rect(Rect2(at - LINE_WIDTH * 0.5, h * LINE_TOP, LINE_WIDTH, h * LINE_HEIGHT), GameTheme.TEXT)
+	if _bomb:
+		_case.paint(self, GameTheme.TEXT, GameTheme.BAD, GameTheme.BG)
+		return
 	draw_rect(_mast, GameTheme.TEXT)
 	draw_colored_polygon(_pennant, GameTheme.TEXT)

@@ -5,8 +5,10 @@ extends Control
 ## the area they stand in at its top left and "Depot · Round 2" under it. It shows you as a white arrow, your teammates as
 ## dots in the team's colour (grey once hit, an arrow up or down on another storey, pinned to the edge when off the
 ## panel), Attack / Defend's pole while the round is live, Elimination's overtime flag (a chequered flag) while it
-## stands in a live round, your Hold here's spot as a diamond, your team's pings (PN2: a spot's ring in the team's colour,
-## a contact's diamond in the other team's, on the rim when off the panel; `add_pings`), and the other team only as
+## stands in a live round, Plant The Bomb's two sites (a ring and its letter) and its bomb (a carry case: the attackers'
+## only while it lies or is carried, beside its carrier's dot; everyone's once armed), your Hold here's spot as a
+## diamond, your team's pings (PN2: a spot's ring in the team's colour, a contact's diamond in the other team's, on the
+## rim when off the panel; `add_pings`), and the other team only as
 ## the patches where your side last heard them (MinimapHearing). Rotating turns the field so the way you look is up;
 ## Fixed keeps north (the map's -z) up and turns the arrow. The field is drawn once a match (MinimapField, one picture per
 ## storey) and the panel only places it, so a frame allocates nothing. `View` draws everything over the picture; the
@@ -190,7 +192,8 @@ func follow(state: GameState, watched: Character, yaw: float, fraction: float, t
 
 ## Puts on `view` (begun for this frame) what the minimap shows over the field for `watched`, on `storey`, `fraction` of
 ## the way through the tick: the teammates, the patches your side heard, the pole or the overtime flag while the round
-## is live, and Hold here's spot `hold` when `holding`. Never the other team itself. Allocates nothing.
+## is live (Plant The Bomb: the sites and the bomb), and Hold here's spot `hold` when `holding`. Never the other team
+## itself. Allocates nothing.
 func fill(view: View, state: GameState, watched: Character, fraction: float, storey: int, holding: bool,
 		hold: Vector3) -> void:
 	var rs := state.round_state
@@ -214,11 +217,26 @@ func fill(view: View, state: GameState, watched: Character, fraction: float, sto
 	if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0 and rs.under_way():
 		for p in rs.poles:
 			view.set_pole(Vector2(p.x, p.z))
+	elif rs.mode == RoundState.Mode.PLANT_THE_BOMB and rs.attackers >= 0 and rs.under_way():
+		_fill_plant(view, rs, watched)
 	elif rs.overtime_flag.up and rs.under_way():
 		view.set_pole(Vector2(rs.overtime_flag.foot.x, rs.overtime_flag.foot.z), true)
 	if holding:
 		view.set_hold(Vector2(hold.x, hold.z))
 	view.queue_redraw()
+
+
+## Plant The Bomb's marks (PB1): both sites with their letters, and the bomb: where it lies while it is on the ground or
+## carried (a small mark on its carrier's dot) for the attackers only, and for both teams once it is armed. Allocates
+## nothing.
+func _fill_plant(view: View, rs: RoundState, watched: Character) -> void:
+	var ps := rs.plant
+	for i in ps.sites.size():
+		view.set_site(Vector2(ps.sites[i].x, ps.sites[i].z), i)
+	var armed := ps.status == PlantState.Status.PLANTED
+	var loose := ps.status == PlantState.Status.DOWN or ps.status == PlantState.Status.CARRIED
+	if armed or (loose and watched.team == rs.attackers):
+		view.set_bomb(Vector2(ps.position.x, ps.position.z), ps.status == PlantState.Status.CARRIED)
 
 
 ## Adds the pings of `team` up in `book` at `now` (s of match time) to this frame's panel (after follow), or to `to`
@@ -264,8 +282,8 @@ func _build_caption(map_name: String) -> void:
 
 
 ## The square the field and everything over it is drawn in (clipped to it), from what the owner hands it each frame
-## (begin, then add_dot, add_patch, set_pole and set_hold): world positions as (x, z), and the layer to show. Preallocated:
-## drawing allocates nothing.
+## (begin, then add_dot, add_patch, set_pole, set_site, set_bomb and set_hold): world positions as (x, z), and the layer
+## to show. Preallocated: drawing allocates nothing.
 class View:
 	extends Control
 
@@ -311,6 +329,15 @@ class View:
 	const DOT_ARC_POINTS := 20
 	const POLE_ARC_POINTS := 16
 	const RIM_OUTLINE := 1.0
+	## Plant The Bomb's marks (px): a site's ring and its width, the letter's badge (its radius, and where it sits from
+	## the ring's middle) and the letter's type size; the bomb's case (its box) and where it sits from a carrier's dot.
+	const SITE_RING := 10.0
+	const SITE_RING_WIDTH := 1.8
+	const SITE_BADGE := 6.0
+	const SITE_BADGE_AT := Vector2(-7.0, -7.0)
+	const SITE_LETTER_SIZE := 9
+	const BOMB_BOX := 17.0
+	const BOMB_CARRY_AT := Vector2(7.0, -8.0)
 
 	var _cfg: MinimapConfig = null
 	var _textures: Array[Texture2D] = []
@@ -341,6 +368,19 @@ class View:
 	var _poles := PackedVector2Array()
 	var _pole_count: int = 0
 	var _chequered: bool = false
+	## Plant The Bomb's sites shown this frame (Plant.MOST at most), their letters' indices, and the bomb: whether it
+	## shows, where, and whether a carrier has it (drawn beside their dot). `sites_drawn` is false on the full-screen
+	## map, whose overlay draws the sites.
+	var sites_drawn: bool = true
+	var _sites := PackedVector2Array()
+	var _site_letters := PackedInt32Array()
+	var _site_count: int = 0
+	var _letter_font: Font = null
+	var _letter_at := PackedVector2Array()
+	var _bomb_on: bool = false
+	var _bomb: Vector2 = Vector2.ZERO
+	var _bomb_carried: bool = false
+	var _case := BombShape.new()
 	var _dark_checks: Array[Rect2] = []
 	var _hold_on: bool = false
 	var _hold: Vector2 = Vector2.ZERO
@@ -357,6 +397,8 @@ class View:
 
 	func _init() -> void:
 		_poles.resize(Flag.MOST)
+		_sites.resize(Plant.MOST)
+		_site_letters.resize(Plant.MOST)
 
 	## `textures` are the layers (one per storey) of a drawing at `field_scale` px/m whose top left is the world's
 	## `field_origin` (x, z); up to `capacity` dots and patches. `ground` (null for none) is sloping ground's picture,
@@ -373,6 +415,11 @@ class View:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		clip_contents = true
 		texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		_letter_font = GameTheme.font(800)
+		_letter_at.resize(Plant.MOST)
+		for i in Plant.MOST:
+			var word := _letter_font.get_string_size(Plant.LETTERS[i], HORIZONTAL_ALIGNMENT_LEFT, -1, SITE_LETTER_SIZE)
+			_letter_at[i] = Vector2(-word.x * 0.5, -word.y * 0.5 + _letter_font.get_ascent(SITE_LETTER_SIZE))
 		_dots.resize(capacity)
 		_dot_colours.resize(capacity)
 		_dot_arrows.resize(capacity)
@@ -480,6 +527,8 @@ class View:
 		_dot_count = 0
 		_patch_count = 0
 		_pole_count = 0
+		_site_count = 0
+		_bomb_on = false
 		_hold_on = false
 		_ping_count = 0
 
@@ -510,6 +559,37 @@ class View:
 		_poles[_pole_count] = at
 		_pole_count += 1
 		_chequered = chequered
+
+	## One of Plant The Bomb's sites at the world's `at`, number `index` (0: A, 1: B): a yellow ring with its letter
+	## (PB1). Ignored where the overlay draws them (`sites_drawn` false).
+	func set_site(at: Vector2, index: int) -> void:
+		if not sites_drawn or _site_count >= _sites.size():
+			return
+		_sites[_site_count] = at
+		_site_letters[_site_count] = clampi(index, 0, Plant.MOST - 1)
+		_site_count += 1
+
+	## The bomb at the world's `at` (x, z): a small carry case, or with `carried` beside its carrier's dot.
+	func set_bomb(at: Vector2, carried: bool) -> void:
+		_bomb_on = true
+		_bomb = at
+		_bomb_carried = carried
+
+	## How many sites show this frame, site `i`'s spot, and whether the bomb shows and where: for tests.
+	func site_count() -> int:
+		return _site_count
+
+	func site_at(i: int) -> Vector2:
+		return _sites[i]
+
+	func bomb_shown() -> bool:
+		return _bomb_on
+
+	func bomb_at() -> Vector2:
+		return _bomb
+
+	func bomb_carried() -> bool:
+		return _bomb_carried
 
 	## How many poles show this frame, and pole `i`'s spot (x, z): for tests.
 	func pole_count() -> int:
@@ -570,6 +650,8 @@ class View:
 			_draw_ping(mid + _pin(_to_panel(_pings[i]), _cfg.mark_pad), _ping_contacts[i] == 1, _ping_alphas[i])
 		for i in _pole_count:
 			_draw_pole(mid + _pin(_to_panel(_poles[i]), _cfg.mark_pad))
+		for i in _site_count:
+			_draw_site(mid + _pin(_to_panel(_sites[i]), _cfg.mark_pad), _site_letters[i])
 		for i in _dot_count:
 			_draw_dot(mid + _pin(_to_panel(_dots[i]), _cfg.dot_pad), _dot_colours[i], _dot_arrows[i])
 		if _you_on:
@@ -577,6 +659,8 @@ class View:
 			draw_colored_polygon(_you_shape, YOU_COLOUR)
 			draw_polyline(_you_shape, _cfg.ink, OUTLINE, true)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		if _bomb_on:
+			_draw_bomb(mid + _pin(_to_panel(_bomb), _cfg.dot_pad if _bomb_carried else _cfg.mark_pad))
 
 	## The panel's point (px from the middle) for the world's `at`.
 	func _to_panel(at: Vector2) -> Vector2:
@@ -654,6 +738,22 @@ class View:
 			_ping_diamond.draw(self, at, Color(_enemy, alpha), ink)
 		else:
 			_ping_ring.draw(self, at, Color(_team, alpha), ink)
+
+	## A bomb site (PB1): a yellow ring on a dark outline, its letter on a yellow badge up and left of it.
+	func _draw_site(at: Vector2, index: int) -> void:
+		draw_arc(at, SITE_RING, 0.0, TAU, ARC_POINTS, _cfg.ink, SITE_RING_WIDTH + RING_INK, true)
+		draw_arc(at, SITE_RING, 0.0, TAU, ARC_POINTS, GameTheme.WARN, SITE_RING_WIDTH, true)
+		var badge := at + SITE_BADGE_AT
+		draw_circle(badge, SITE_BADGE + RING_INK * 0.5, _cfg.ink)
+		draw_circle(badge, SITE_BADGE, GameTheme.WARN)
+		draw_string(_letter_font, badge + _letter_at[index], Plant.LETTERS[index], HORIZONTAL_ALIGNMENT_LEFT, -1,
+				SITE_LETTER_SIZE, GameTheme.WARN_INK)
+
+	## The bomb: a small carry case with its light, beside its carrier's dot while carried.
+	func _draw_bomb(at: Vector2) -> void:
+		var centre := at + BOMB_CARRY_AT if _bomb_carried else at
+		_case.fit(Rect2(centre - Vector2.ONE * BOMB_BOX * 0.5, Vector2.ONE * BOMB_BOX))
+		_case.paint(self, GameTheme.WARN, GameTheme.BAD, _cfg.ink)
 
 	## The pole: a yellow flag on a white staff, its foot a dot; the overtime flag's cloth chequered off-white and dark,
 	## its foot off-white.

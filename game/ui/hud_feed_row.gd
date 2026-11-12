@@ -4,7 +4,8 @@ extends Control
 ## hit, and their HIT call, on a rounded dark pill with the shooter's team bar inside its left end. Names in their
 ## team's colour, "You" in white; a teammate's name carries the teammate chevron; your own lines are framed in accent. A
 ## teammate's callout (CO2, concept `step27/callouts.png`) is a row of its own kind: the team bar, the speaker's chevron
-## and name, a radio glyph and the words. One node: everything is drawn, laid out once each time the line changes.
+## and name, a radio glyph and the words (a note of the bomb, PB1, the bomb's sign instead). One node: everything is
+## drawn, laid out once each time the line changes.
 
 const HEIGHT := 38.0
 const PAD_LEFT := 12.0
@@ -43,6 +44,8 @@ const GRILLE_LINE := 1.5
 const GRILLE_GAP := 1.5
 const GRILLE_INSET := 2.5
 const RADIO_ALPHA := 0.85
+## A note of the bomb's sign: its box's side (px).
+const NOTE_GLYPH := 20.0
 
 
 ## One side of a line, as shown: the name, its colour, and whether it is your teammate (with the chevron) or you (in
@@ -71,6 +74,9 @@ var _tag_font: Font = null
 var _words_font: Font = null
 ## A callout row: its words, and where they and the radio glyph sit.
 var _call: bool = false
+## The call is a note of the bomb (Plant The Bomb): its sign in place of the radio.
+var _note: bool = false
+var _bomb := BombShape.new()
 var _words := ""
 var _words_x: float = 0.0
 var _radio := Rect2()
@@ -141,8 +147,9 @@ func show_line(shooter: Who, victim: Who, bar: Color, mate_colour: Color, framed
 
 
 ## Fills the row as `speaker`'s callout (read now, not kept): `words` as said, the bar in `bar` (their team's colour),
-## the chevron in `mate_colour`.
-func show_call(speaker: Who, words_said: String, bar: Color, mate_colour: Color) -> void:
+## the chevron in `mate_colour`. A `note` of the bomb (Plant The Bomb: "planted the bomb at A") has the bomb's sign
+## where a callout has the radio.
+func show_call(speaker: Who, words_said: String, bar: Color, mate_colour: Color, note: bool = false) -> void:
 	_shooter = speaker.text
 	_shooter_colour = speaker.colour
 	_shooter_mate = speaker.mate
@@ -153,6 +160,7 @@ func show_call(speaker: Who, words_said: String, bar: Color, mate_colour: Color)
 	_mate_colour = mate_colour
 	_framed = false
 	_call = true
+	_note = note
 	_lay_out_call()
 	queue_redraw()
 
@@ -204,8 +212,12 @@ func _lay_out_call() -> void:
 	x = _place_name(x, _shooter_mate, _shooter_chevron)
 	_shooter_x = x
 	x += _text_width(_shooter, _shooter_you) + GAP
-	_radio = Rect2(x, (HEIGHT - RADIO.y) * 0.5, RADIO.x, RADIO.y)
-	x += RADIO.x + GAP
+	if _note:
+		_radio = Rect2(x, (HEIGHT - NOTE_GLYPH) * 0.5, NOTE_GLYPH, NOTE_GLYPH)
+		_bomb.fit(_radio)
+	else:
+		_radio = Rect2(x, (HEIGHT - RADIO.y) * 0.5, RADIO.x, RADIO.y)
+	x += _radio.size.x + GAP
 	_words_x = x
 	x += _words_font.get_string_size(_words, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE).x
 	_baseline = _centred_baseline(_name_font, NAME_SIZE)
@@ -239,7 +251,10 @@ func _draw() -> void:
 	draw_string(_you_font if _shooter_you else _name_font, Vector2(_shooter_x, _baseline), _shooter,
 			HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE, _shooter_colour)
 	if _call:
-		_draw_radio()
+		if _note:
+			_bomb.paint(self, GameTheme.WARN, GameTheme.BAD, GameTheme.BG)
+		else:
+			_draw_radio()
 		draw_string(_words_font, Vector2(_words_x, _baseline), _words, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE,
 				GameTheme.TEXT)
 		return

@@ -107,6 +107,11 @@ var _leaves_notice: Label = null
 ## The reload prompt under them (RL2), and whether reloads are manual: the player's command says so each tick (the play
 ## scene copies PlayerCommand.manual_reload here), so the prompt follows the rule the simulation used.
 var _reload_prompt: HudReloadPrompt = null
+var _bomb_prompt: HudBombPrompt = null
+## What the marker and the gauge show for Plant The Bomb, as a key (aim, site, state), so their words are built only on
+## a change; -1 before the first.
+var _plant_marker_key: int = -1
+var _plant_gauge_key: int = -1
 var manual_reload: bool = false
 var _leaves_left: float = 0.0
 var _xp: XpCard = null
@@ -298,6 +303,8 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_leaves_notice.visible = false
 	_reload_prompt = HudReloadPrompt.new()
 	prompt.add_child(_reload_prompt)
+	_bomb_prompt = HudBombPrompt.new()
+	prompt.add_child(_bomb_prompt)
 	_hit_label = HudStyle.label(middle, GameTheme.HUGE_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
 	_hit_label.text = tr("HUD_YOU_ARE_HIT")
 	_hit_sub = HudStyle.label(middle, GameTheme.BODY_SIZE, 600, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
@@ -332,7 +339,7 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_board.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_board.pivot_offset_ratio = Vector2(0.5, 0.0) # held smaller about its top middle (_fit_board)
 	add_child(_board)
-	_board.setup(cfg, teams, teams.colours[player.team], sim.flag.max_overtime)
+	_board.setup(cfg, teams, teams.colours[player.team], sim.flag.max_overtime, sim.plant.max_overtime)
 	# Whose eyes you watch through, bottom centre.
 	var bottom := VBoxContainer.new()
 	_bottom = bottom
@@ -796,6 +803,7 @@ func refresh_door_prompt() -> void:
 	var what := _door_want
 	_door_want = DoorPrompt.NONE
 	set_door_prompt(what, _door_stop)
+	_bomb_prompt.refresh_key()
 
 
 ## Whether the door prompt shows.
@@ -913,11 +921,17 @@ func on_tick(state: GameState, mag_from_wheel: bool = false) -> void:
 					var attacking := _player.team == rs.attackers
 					_show_banner(HudStyle.side_round_title(e.value, attacking),
 							HudStyle.side_round_sub(e.value, _rounds.half_time_after, attacking))
+				elif rs.mode == RoundState.Mode.PLANT_THE_BOMB:
+					var attacking := _player.team == rs.attackers
+					_show_banner(HudStyle.side_round_title(e.value, attacking),
+							HudStyle.plant_round_sub(e.value, _rounds.half_time_after, attacking, rs.plant.sites.size()))
 				else:
 					_show_banner(HudStyle.round_title(e.value), HudStyle.round_sub(e.value, _rounds.half_time_after))
 			GameEvent.Kind.OVERTIME:
 				_show_banner(HudStyle.caps("HUD_OVERTIME"), HudStyle.caps("HUD_TOUCH_FLAG"))
 				_banner_left = _cfg.overtime_banner_time
+			GameEvent.Kind.BOMB:
+				_on_bomb(state, e)
 			GameEvent.Kind.ROUND_OVER:
 				_count.end()
 				_round_over(state.round_state, e, state.time)
@@ -1078,15 +1092,18 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 			_replica.hide_hop()
 	var rs := state.round_state
 	var flag_mode := rs.mode == RoundState.Mode.ATTACK_DEFEND
-	var overtime := HudStyle.overtime_clock(rs, _sim.flag.max_overtime)
+	var plant_mode := rs.mode == RoundState.Mode.PLANT_THE_BOMB
+	var overtime := HudStyle.overtime_clock(rs, _sim.plant.max_overtime if plant_mode else _sim.flag.max_overtime)
 	if overtime >= 0:
 		_score.set_clock(overtime, true)
 	else:
 		_score.set_clock(ceili(rs.clock))
 	_score.set_score(rs.score[0], rs.score[1])
 	_score.set_round(rs.number)
-	_score.set_sides(rs.attackers if flag_mode else -1)
+	_score.set_sides(rs.attackers if flag_mode or plant_mode else -1)
 	_gauge.visible = flag_mode
+	if plant_mode:
+		_update_plant(rs, in_play)
 	if flag_mode and rs.attackers >= 0:
 		# The pole in play, as the marker has it (AB1).
 		_shown_pole = _next_shown(rs)
@@ -1149,7 +1166,30 @@ func use_overtime_flag() -> void:
 func place_flag_marker(camera: Camera3D, pole: Vector3, show: bool, letter: String = "") -> void:
 	_flag_eye = camera.global_position
 	_flag_marker.set_letter(letter)
-	_flag_marker.place(camera, pole, show and not _board.visible, size, pin_point(), pin_right_top(), _left_stack_floor())
+	_place_marker(camera, pole, show)
+
+
+## Places the one marker for Plant The Bomb (PB1) as seen by `camera`, called every frame in that mode instead of
+## place_flag_marker: for `watched` (whose team and feet it reads) it points at what HudPlant.aim says, with the
+## carry case and its title: the bomb ("BOMB") for an attacker while it lies, the site nearest ("SITE A") while it is
+## carried (a teammate's carry: `planned_site`, the site the bots head for, -1 for the nearest) and for a defender, and
+## the armed bomb ("BOMB A") for both teams. Hidden outside a round under way (`rs.under_way()`).
+func place_plant_marker(camera: Camera3D, rs: RoundState, watched: Character, planned_site: int) -> void:
+	_flag_eye = camera.global_position
+	var a := HudPlant.aim(rs, watched, planned_site)
+	var site := HudPlant.aim_site(rs, watched, planned_site) if a != HudPlant.Aim.NONE else -1
+	var key := a * (Plant.MOST + 1) + site + 1
+	if key != _plant_marker_key and a != HudPlant.Aim.NONE:
+		_plant_marker_key = key
+		_flag_marker.set_title(HudPlant.aim_title(a, site))
+		_flag_marker.use_bomb(true)
+	_place_marker(camera, HudPlant.aim_spot(rs, a, site), a != HudPlant.Aim.NONE)
+
+
+## Places the flag marker over `spot` (hidden when `show` is false, or while Tab's board is held) and takes it away
+## from under the round banner and the countdown's plate.
+func _place_marker(camera: Camera3D, spot: Vector3, show: bool) -> void:
+	_flag_marker.place(camera, spot, show and not _board.visible, size, pin_point(), pin_right_top(), _left_stack_floor())
 	# Never over the round banner or the countdown's plate: it comes back as they go.
 	if _flag_marker.visible and overlaps_any(_flag_marker.occupied(), _stack_rects()):
 		_flag_marker.visible = false
@@ -1355,6 +1395,11 @@ func flag_gauge() -> HudFlagGauge:
 	return _gauge
 
 
+## Plant The Bomb's prompt under the crosshair (PB1): for tests.
+func bomb_prompt() -> HudBombPrompt:
+	return _bomb_prompt
+
+
 func score() -> HudScore:
 	return _score
 
@@ -1380,6 +1425,45 @@ func _update_warning(rs: RoundState, delta: float) -> void:
 		_warning.modulate.a = 1.0 - dip * (0.5 - 0.5 * cos(_pulse * TAU * _cfg.flag_warning_pulse))
 	else:
 		_pulse = 0.0
+
+
+## Plant The Bomb's part of a frame (PB1): the gauge under the score bar, and the prompt (only through your own eyes,
+## in a live round, while in play). Words are rebuilt only when the state they name changes.
+func _update_plant(rs: RoundState, in_play: bool) -> void:
+	var g := HudPlant.gauge(rs)
+	_gauge.visible = g != HudPlant.Gauge.NONE
+	if g != HudPlant.Gauge.NONE:
+		var key := g * (Plant.MOST + 1) + rs.plant.site + 1
+		if key != _plant_gauge_key:
+			_plant_gauge_key = key
+			_gauge.set_bomb(true)
+			match g:
+				HudPlant.Gauge.PLANTING:
+					_gauge.set_word(HudStyle.caps("HUD_BOMB_PLANTING"))
+				HudPlant.Gauge.DEFUSING:
+					_gauge.set_word(HudStyle.caps("HUD_BOMB_DEFUSING"))
+				_:
+					var letter: String = Plant.LETTERS[clampi(rs.plant.site, 0, Plant.MOST - 1)]
+					_gauge.set_word((tr("HUD_BOMB_NAMED") % letter).to_upper())
+		var team := HudPlant.gauge_team(rs, g)
+		_gauge.set_flag(HudPlant.gauge_fill(rs, g), _teams.colours[team], team == HudStyle.STRIPED_TEAM)
+	var own := in_play and _watching_name.is_empty()
+	_bomb_prompt.show_for(HudPlant.prompt(rs, _player, _sim.plant) if own else HudPlant.Prompt.NONE,
+			own and HudPlant.carrying(rs, _player))
+
+
+## A bomb event (Plant The Bomb): a feed note for the pick-up, drop, plant and defuse as `HudPlant.feed_words` has them,
+## and when the bomb is armed a banner over it for both teams.
+func _on_bomb(state: GameState, e: GameEvent) -> void:
+	var rs := state.round_state
+	if e.actor < 0 or e.actor >= state.characters.size():
+		return
+	var words := HudPlant.feed_words(rs, e, state.characters[e.actor], _player)
+	if not words.is_empty():
+		_hits.add_note(e.actor, words, state.time)
+	if e.value == Plant.Cue.PLANTED:
+		_show_banner(HudStyle.bomb_planted_title(e.value2),
+				HudStyle.bomb_planted_sub(_player.team == rs.attackers))
 
 
 func _draw() -> void:
@@ -1427,7 +1511,7 @@ func _round_over(rs: RoundState, e: GameEvent, state_time: float) -> void:
 	var by_flag := HudStyle.ended_by_flag(rs.mode, reason)
 	var key := _teams.names[e.value] if e.value >= 0 else ""
 	_show_banner(HudStyle.round_stamp(e.value, _player.team),
-			HudStyle.round_stamp_sub(rs.number, e.value, key, by_flag, reason),
+			HudStyle.round_stamp_sub(rs.number, e.value, key, by_flag, reason, rs.mode == RoundState.Mode.PLANT_THE_BOMB),
 			_teams.colours[e.value] if e.value >= 0 else Color.TRANSPARENT)
 	# With the overtime played: Attack / Defend's at the rope, or Elimination's at the flag (its time less what is left).
 	var played := _rounds.round_time - rs.clock + (rs.overtime if is_finite(rs.overtime) else 0.0)
