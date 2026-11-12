@@ -401,7 +401,7 @@ func test_the_grip_cards_show_the_moving_spread_only_where_it_changes() -> void:
 	var by: Dictionary[String, PartOptions.Option] = {}
 	for o in cards:
 		by[o.id()] = o
-	assert_string_contains(by[VERTICAL].figures_plain, "moving 80 %")
+	assert_string_contains(by[VERTICAL].figures_plain, "moving\u00a080\u00a0%")
 	assert_true(by[VERTICAL].better.has(tr("PART_BETTER_MOVE")))
 	assert_true(by[VERTICAL].worse.has(tr("PART_WORSE_AIM")))
 	assert_false(by[ANGLED].figures_plain.contains("moving"), "the Angled Grip leaves it")

@@ -1669,7 +1669,7 @@ msgid "PART_BLURB_SCOPEVAR"
 msgstr "Turns from 2x to 6x on the mouse wheel, slowest to raise."
 
 msgid "PART_BLURB_VERTICAL"
-msgstr "Steadier on the move and after a sprint, slower to bring up."
+msgstr "Steadier moving, slower to bring up."
 
 msgid "PART_BLURB_ANGLED"
 msgstr "Quick to bring up, but the aim shakes for longer after a sprint."
@@ -1714,7 +1714,7 @@ msgid "PART_FIG_HIP"
 msgstr "from the hip %s °"
 
 msgid "PART_FIG_MOVE"
-msgstr "moving %s %%"
+msgstr "moving %s %%"
 
 msgid "PART_FIG_ENERGY"
 msgstr "%s J"

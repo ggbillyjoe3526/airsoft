@@ -181,7 +181,7 @@ func test_a_part_adds_the_figures_it_changes_to_its_card() -> void:
 	assert_true(muzzles.card_text(1).begins_with("0.92 J · heard from 50 % · aim in 0.17 s"))
 	view.show_tab(GRIP)
 	# RP1: the Vertical Grip steadies the move too, so its card adds that figure; the Angled Grip's doesn't.
-	assert_true(view.part_page(GRIP).card_text(1).begins_with("Aim in 0.17 s · shake 60 % · moving 80 %"))
+	assert_true(view.part_page(GRIP).card_text(1).begins_with("Aim in 0.17 s · shake 60 % · moving\u00a080\u00a0%"))
 	assert_true(view.part_page(GRIP).card_text(2).begins_with("Aim in 0.13 s · shake 140 %"))
 	assert_false(view.part_page(GRIP).card_text(2).contains("moving"))
 	view.show_tab(LASER_TAB)
