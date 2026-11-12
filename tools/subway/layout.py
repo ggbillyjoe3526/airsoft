@@ -237,24 +237,28 @@ SPAWNS_W = [(x, z) for x in (-60.6, -58.6) for z in (-4.5, -1.5, 1.5, 4.5)]
 SPAWNS_E = [(75.5, z) for z in (-7.5, -5.4, -3.2, -1.1, 1.1, 3.2, 5.4, 7.5)]
 DEAD_W = [(x, z) for x in (-61.2, -60.4) for z in (6.4, 7.2, 8.0, 8.8)]          # the hall's south-west corner
 DEAD_E = [(x, z) for x in (80.4, 81.2) for z in (-12.0, -11.2, -10.4, -9.6)]    # the north tunnel's blocked end
-FLAGS = [(33.5, 10.75, P), (36.2, 0.0, LANDING)]    # A in the south train's first car, B on the stair's half landing
+# MB1: flag B stands on the north platform, between its east hoarding and booth (it stood on the stair's half landing,
+# 8 m from A: one fight at the stair top decided every round). The two poles are now a platform apart, each 12 m from
+# a lower-hall door, the east passage the defenders' way between them and the stair the attackers' way in behind both.
+FLAGS = [(33.5, 10.75, P), (33.0, -7.8, P)]    # A in the south train's first car, B on the north platform
 POLE_HEIGHT = 2.1                                     # the poles drawn this tall: a car is 2.4 m inside
 OT_FLAG = (12.0, 2.4, P)                              # the lower hall's west end
-# Bots' lanes, Street end to Tunnel end: (x, z, y) points on the floor. Each ends at the flags, not in the tunnel: a
+# Bots' lanes, Street end to Tunnel end: (x, z, y) points on the floor. Each ends by the flags, not in the tunnel: a
 # defender (Attack / Defend, the Tunnel team) holds its lane's last point or the one before (RoundPlanner), so the last
-# two are its posts: n the stair below B and B's landing, m the south platform's east end and train A's doors, s train
-# A's east car and flag A. The Tunnel team walks out of the tunnel to its lanes' ends.
+# two are its posts. The Tunnel team walks out of the tunnel to its lanes' ends.
+# MB1: n takes the lifts to the lift landing and the north platform's whole length past the north train to flag B
+# (posts: the lower hall's north doors and B's east side); m the escalators, the lower hall and the south platform to
+# train A's doors (its posts); s the escalators, the south passage and the stair (posts: the half landing and the
+# stair's foot, between the two flags). Before, all three met in the concourse and two shared the stair: the
+# platforms' west half, the lifts and the north train saw nobody. No lane takes the spiral stair: a bot was 40 s on
+# it, out of the round's first fight; it is a way round for whoever wants one.
 LANES = {
-    "n": [(-56, -3, G), (-46, -4, G), (-43.6, -9.3, G), (-42.3, -5.7, -1.0), (-38.7, -9.3, -3.0),  # spiral top half
-          (-40.5, -5.7, -5.0), (-42.3, -7.5, -6.5), (-42.3, -9.3, -7.0), (-38.7, -9.3, -9.0), (-38.7, -5.7, C),
-          (-38.5, -3.5, C), (-37.0, -8.2, C), (-27, -7.7, C), (-15, -8.0, C), (-5, -8.0, C), (4, -7.2, C),
-          (11, -7.8, C), (19, -7.5, C), (23.5, -6.5, C), (26, -0.0, C), (31, 0, -12.0), (36.2, 1.0, LANDING),
-          (41.5, 0, -16.0)],
+    "n": [(-56, -3, G), (-44.85, -2.6, G), (-44.85, -2.8, P), (-44, -5.25, P), (-44, -7.3, P), (-20.5, -7.0, P),
+          (-7, -6.3, P), (9, -7.6, P), (16, -7.3, P), (26, -6.8, P), (37, -8.3, P)],
     "m": [(-56, 0, G), (-44, 2.5, G), (-37, 1.2, G - 0.5), (-28, 1.2, -5.5), (-19, 1.2, C), (-10, 0, C),
           (-5, 1.2, C), (2, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P),
           (46.5, 7.0, P)],
     "s": [(-56, 3, G), (-44, 4, G), (-37, -1.2, G - 0.5), (-28, -1.2, -5.5), (-19, -1.2, C), (-10, 6, C), (-5, 8, C),
           (4, 7.2, C), (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (31, -0.5, -12.0),
-          (36.2, -1.0, LANDING), (41.5, 0, -16.0), (47, 0, P), (47, 4.5, P), (40, 7.3, P), (35.7, 7.3, P),
-          (35.7, 10.75, P), (46, 10.75, P)],
+          (36.2, -1.0, LANDING), (41.5, 0, -16.0)],
 }
