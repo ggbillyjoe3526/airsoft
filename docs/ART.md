@@ -237,6 +237,11 @@ weather, not to every match.
 The environment map that gives polymer and steel their sheen is **the game's own sky**, so the look stays consistent at
 every quality level, and a night or golden-hour sky changes everything at once.
 
+An **underground** field (`roof.underground`, Subway, UL1) sees no sky: its ambient is the map's fill alone, the sky is
+in no reflection (the area probes and screen reflections give its sheen from Medium up), and the sun that stands in for
+the lamps on Low and Medium casts no shadow, so the storeys above don't leave every floor below in one flat shade. High
+and Ultra light it with its lamps, as Depot's hall.
+
 ## A map in the look
 
 Every map takes the look this way (Depot did, AD1; Woodland, WA1):

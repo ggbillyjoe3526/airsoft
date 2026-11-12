@@ -411,6 +411,7 @@ func _dress_part(part: int) -> void:
 		0:
 			_play.look.push_globals()
 			_lighting = FieldLighting.build(_light, _play.look)
+			_lighting.set_underground(_map.roof_underground)
 			_lighting.add_probes(_map)
 			add_child(_lighting)
 			_site = SiteDress.build(_map, _play.site_look, _level.site_material(), _play.skyline)
@@ -2088,10 +2089,11 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 		_level.set_detail(values.mesh_detail)
 		if _level.baked_light_builds() != _relit:
 			_relight()
-	var contact := GraphicsApply.contact_shadows(values)
+	var contact := GraphicsApply.contact_shadows(values, _lighting)
+	var shadows := GraphicsApply.any_shadows(values, _lighting)
 	for f in _figures:
 		f.set_contact_shadow(contact)
-		f.set_shadow_cast(GraphicsApply.any_shadows(values))
+		f.set_shadow_cast(shadows)
 	if _skyline != null:
 		_skyline.set_smoke(SkylineView.smokes(values))
 	if _torches != null:
