@@ -312,7 +312,7 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		marks: WearMarks = null) -> void:
 	var to := rs if rs != null else server()
 	if lighting != null:
-		lighting.sun.shadow_enabled = values.sun_shadows
+		lighting.sun.shadow_enabled = sun_shadows(values, lighting)
 		lighting.sun.directional_shadow_max_distance = values.shadow_range
 		var ao := values.ambient_occlusion != GraphicsQuality.AmbientOcclusion.OFF
 		lighting.environment.ssao_enabled = ao and lighting.ssao_allowed()
@@ -324,7 +324,7 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		if values.volumetric_fog:
 			to.set_fog_grid(Vector2i(look.fog_volume_size, look.fog_volume_depth))
 		lighting.set_effects(values.global_illumination, values.reflections, values.glow, values.volumetric_fog,
-				values.sun_shadows and values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
+				sun_shadows(values, lighting) and values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
 		lighting.set_eye_adaptation(values.eye_adaptation)
 	if dust != null:
 		dust.set_share(values.wind_dust / PERCENT)
@@ -343,9 +343,16 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		marks.set_on(values.wear_marks)
 
 
-## Whether the figures draw their contact shadows with `values`: where the sun casts none.
-static func contact_shadows(values: GraphicsQuality) -> bool:
-	return not values.sun_shadows
+## Whether the sun casts shadows with `values` over `lighting`'s field: Sun shadows on, unless the field is underground
+## (FieldLighting.underground, UL1), where the sun only stands in for the lamps on Low and Medium and the storeys above
+## would shade every floor below it (and on High and Ultra it is out while the lamps shine).
+static func sun_shadows(values: GraphicsQuality, lighting: FieldLighting = null) -> bool:
+	return values.sun_shadows and (lighting == null or not lighting.underground())
+
+
+## Whether the figures draw their contact shadows with `values` (over `lighting`'s field): where the sun casts none.
+static func contact_shadows(values: GraphicsQuality, lighting: FieldLighting = null) -> bool:
+	return not sun_shadows(values, lighting)
 
 
 ## Whether a night's light pools' real lights cast shadows with `values`: with Lamp light on, as a roof's lamps do.
@@ -356,8 +363,8 @@ static func pool_shadows(values: GraphicsQuality) -> bool:
 ## Whether any light casts shadows with `values`: the sun, the torch's spot only with it (torch_mode), and an indoor
 ## field's roof lamps and a night's light pools while they are real lights (Lamp light). Without, the figures' shadow
 ## twins are hidden.
-static func any_shadows(values: GraphicsQuality) -> bool:
-	return values.sun_shadows or values.lamp_lights != GraphicsQuality.LampLights.OFF
+static func any_shadows(values: GraphicsQuality, lighting: FieldLighting = null) -> bool:
+	return sun_shadows(values, lighting) or values.lamp_lights != GraphicsQuality.LampLights.OFF
 
 
 ## How the view's weapon torch is drawn at night with `values` (WL7): a real spot while your kit carries a light this

@@ -13455,6 +13455,7 @@
  "roof": {
   "height": 25.6,
   "plain": true,
+  "underground": true,
   "lamps": [
    {
     "x": -58.0,
@@ -17307,6 +17308,10 @@
      "yaw": -180.0
     }
    ]
+  },
+  "kickedDust": {
+   "tint": 11579048,
+   "scale": 0.9
   }
  }
 }

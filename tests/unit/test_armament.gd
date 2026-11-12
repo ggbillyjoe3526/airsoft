@@ -264,7 +264,7 @@ func test_fires_each_replicas_own_bbs() -> void:
 	assert_ne(pistol_bb, rifle_bb)
 	assert_almost_eq(pistol_bb.mass, 0.0002, 1e-9)
 	assert_eq(pistol_bb.spin, pistol.hop_up_max * pistol.hop_up_dial * tuning.ballistics.spin_per_hop)
-	assert_almost_eq(pistol_bb.velocity.length(), 72.0, 0.5)
+	assert_almost_eq(pistol_bb.velocity.length(), 83.7, 0.5)  # 0.70 J with 0.20 g (PH2)
 
 
 func test_gives_each_bb_the_hop_up_its_replica_is_dialled_to() -> void:

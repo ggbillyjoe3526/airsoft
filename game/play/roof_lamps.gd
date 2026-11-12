@@ -57,6 +57,8 @@ static func build(spots: Array[Vector3], cfg: RoofConfig, cover: float = 0.0,
 		spot.light_color = cfg.lamp_dim_colour if dim else cfg.lamp_colour
 		spot.light_energy = lamps._energy * (cfg.lamp_dim_share if dim else 1.0)
 		spot.light_volumetric_fog_energy = cfg.lamp_fog
+		if plain:
+			spot.light_indirect_energy = cfg.plain_lamp_indirect
 		spot.spot_range = reaches[i] if i < reaches.size() else cfg.lamp_range
 		spot.spot_attenuation = cfg.lamp_falloff
 		spot.spot_angle = cfg.lamp_cone
