@@ -36,8 +36,8 @@ in `docs/PROCESS.md`.
   beside Ultra's scene bounce, as Depot's hall is mostly models; the owner stopped it there, 2026-11-10, keeping the
   live bounce; the sun's bounce goes from under a lit roof). The Ultra push is done. The owner added a replica (2026-11-10): the Compact SMG, its numbers
   and play first (CS1, Dev content), then its own model from his photos (CS2). And another (2026-11-12): the Pump
-  Shotgun, a spring pump replica that sends three BBs a pull (SH1, Dev content, drawn as the Sniper Rifle until its
-  own model from his photos, SH2). And a
+  Shotgun, a spring pump replica that sends three BBs a pull (SH1, Dev content), then its own model from his
+  photos, with no sights on it (SH2). And a
   new map (2026-11-10): Subway, a closed metro station on three levels, from his concept v2: its greybox as Dev
   content (MT1, done), then its working lifts (MT2, done), its CC0 materials (MT3, done), then its models and lamps.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
