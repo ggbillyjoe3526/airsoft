@@ -101,6 +101,8 @@ ROLL_STEP = 6
 # of the palm's sampled points measures how close it lies.
 YAW_STEP = 5
 PALM_SPARSE = 4
+# The points across and down the grip's bare side that a pistol's support hand is measured from (`support_pose`).
+BARE_GRID = (4, 2)
 # The AEG's handguard: its centre line (x, z in the rifle's space) and radius (m), measured from the model; a support
 # hand's finger knuckles want to sit between CUP_GAP of its surface (their joints' centres, a finger's half thickness
 # out) to wrap it; the search's step (degrees), and what each degree off the forearm's rise and each metre of loose
@@ -212,7 +214,7 @@ GUARD = {"kind": "guard", "y": 0.190, "forward": 0.026, "depth": 0.034, "standof
          "search": ((60, 60), (15, 15), (-20, -20)), "rise": 40.0, "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.030, "thumb_f": 0.055, "thumb_z": 0.055, "thumb_hug": 2.0,
          "thumb_pull": 30.0, "thumb_wide": 0.0, "tips_below": 0.050, "plan": 40.0,
-         "tip_at": (0.0275, 0.005, 0.030), "tip_swing": 8.0,
+         "upper": (-0.5, -0.8, 0.4), "tip_at": (0.0275, 0.005, 0.030), "tip_swing": 8.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -251,15 +253,11 @@ PISTOL_RIGHT = dict(RIGHT, web=(0.014, -0.100, -0.051), index=(0.018, -0.042, -0
                     shoulder=(-0.07, -0.15, 0.085), drop=0.04, swing=(-15.0, -15.0, -15.0),
                     rolls=(-6.0, -6.0), thumb_turn=(-20.0, 40.0, -100.0, 0.0), index_left=0.022,
                     index_bends=(70.0, 75.0, 35.0), index_from=0.0, index_arc=(40.0, 0.0005))
-# The Cyber Pistol, resized to the GBB's proportions (CZ1; the owner, 2026-11-06: "Cyber pistol looks good"): its own
-# marks, the web right of the back strap's centre line and the thumb aimed along the frame's side under its raised edge
-# beside the slide, which a thumb as high and far forward as the GBB's would pass into; the index knuckle 2 mm back
-# for its trigger (5 mm further from the back strap than the GBB's).
-CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.097, -0.047), index=(0.018, -0.044, -0.040),
-                   pinky=(0.018, -0.058, -0.098),
-                   thumb_at=(-0.020, -0.054, -0.040), thumb_hug=2.0, thumb_pull=30.0, thumb_curl=(40.0, 60.0),
-                   thumb_verify=0.0, rolls=(0.0, 0.0), thumb_turn=(25.0, -75.0, 40.0, 60.0), index_left=None,
-                   index_bends=None, index_from=None)
+# The Cyber Pistol takes the GBB's hold whole (HA1; the owner, 2026-11-12: "Cyber pistol should have same grip as gbb
+# pistol", and of its thumb, which lay flat across the back: "it should stick out like the thumb in the gbb shot"):
+# its grip was reshaped to the GBB's sections (MQ1B), so the same marks seat the same hand. Its own marks (CZ1) and
+# the thumb pinned under the old slab's raised edge are gone with that slab.
+CYBER_RIGHT = dict(PISTOL_RIGHT)
 # The AEG Rifle's grip: the same three marks, the hand high on the short grip with the little finger wholly on it, its
 # knuckle above the grip's flared foot (the owner, 2026-11-05; the critic: half of it hung below), the knuckles' line
 # raked back with the grip, the web closer in over the back strap so the thumb reaches round onto the grip's left
@@ -356,15 +354,15 @@ FLASH_RIGHT = dict(SMOKE_RIGHT, web=(0.012, -0.033, 0.004), index=(0.023, 0.012,
 SUPPORT_LEFT = {"kind": "support", "web": (-0.030, -0.088, -0.068), "index": (-0.043, -0.020, -0.064),
                 "pinky": (-0.043, -0.035, -0.130), "thumb_at": (-0.024, 0.0, -0.040), "pinky_cost": 300.0,
                 "thumb_hug": 2.0, "thumb_pull": 80.0, "thumb_curl": (40.0, 45.0), "swing": (0.0, 0.0, 0.0),
-                "shoulder": (0.04, -0.30, 0.095), "drop": 0.06, "across": 0.10, "rolls": (-20.0, 20.0),
-                "yaws": (-10.0, 30.0), "gap_cost": 3000.0, "bend_cost": 0.5, "right_thumb": (0.5, 0.004),
+                "shoulder": (0.04, -0.30, 0.095), "drop": 0.06, "across": 0.10, "rolls": (-20.0, 40.0),
+                "yaws": (-10.0, 40.0), "gap_cost": 1000.0, "bare_cost": 6000.0, "bend_cost": 0.5,
+                "bare": ((-0.088, -0.056), (-0.080, -0.050)), "side": -0.015,
+                "right_thumb": (0.5, 0.004),
                 "right_thumb_curl": (40.0, 60.0), "right_thumb_hug": 2.0, "right_thumb_pull": 80.0,
                 "fingers": {"Index": (35, 50, 30), "Middle": (35, 50, 30), "Ring": (35, 50, 30), "Pinky": (35, 50, 30)},
                 "curl_more": 0, "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
-# The Cyber's grip sits lower and further back and stands more upright: the same hand, moved and raked to it.
-CYBER_SUPPORT = dict(SUPPORT_LEFT, web=(-0.058, -0.075, -0.068), index=(-0.038, -0.007, -0.070),
-                     pinky=(-0.043, -0.027, -0.134), thumb_at=(-0.022, -0.004, -0.042))
-SUPPORT = {"pistol": SUPPORT_LEFT, "cyber": CYBER_SUPPORT}
+# The Cyber's grip is the GBB's (MQ1B): the same support hand on it.
+SUPPORT = {"pistol": SUPPORT_LEFT, "cyber": SUPPORT_LEFT}
 # The two-handed hold's name in its clips (`<id>_two_Hold`, `<id>_two_Reload`; ArmsView.TWO_HANDS).
 TWO = "two"
 # The right arm as the hold poses it, a still copy the left hand rests on.
@@ -560,6 +558,28 @@ def elbow_for(rig: Rig, side: str, hand_m: Matrix, quiet: bool = False) -> tuple
     return best[1] - s, best[0]
 
 
+def straight_elbow(rig: Rig, side: str, hand_m: Matrix) -> Vector:
+    """Where the elbow is when the wrist is straight: the forearm's length back along the hand's own line."""
+    fo, hn = "Forearm_" + side, "Hand_" + side
+    line = (hand_m.to_3x3() @ rig.rest[hn].to_3x3().inverted() @ rig.rest[fo].to_3x3()).col[1]
+    return hand_m.translation - line * (rig.rest[hn].translation - rig.rest[fo].translation).length
+
+
+def shoulder_behind(rig: Rig, side: str, hand_m: Matrix, upper: tuple) -> None:
+    """Moves the shoulder to where the wrist is straight: the upper arm's length from the straight-wrist elbow, along
+    `upper` (eye space, elbow to shoulder). The first-person view never shows the shoulder, only the forearm it
+    leaves in line with the hand."""
+    up = "UpperArm_" + side
+    reach = (rig.rest["Forearm_" + side].translation - rig.rest[up].translation).length
+    want = straight_elbow(rig, side, hand_m) + Vector(upper).normalized() * reach
+    rig.fk("Shoulder_" + side)
+    rig.fk(up)
+    key = "Shoulder_" + side
+    rig.shift[key] = rig.shift.get(key, Vector()) + want - rig.pose[up].translation
+    rig.fk(key)
+    rig.fk(up)
+
+
 def knuckle_pose(rig: Rig, hand: pose.Hand, j: dict, index_at: Vector, line: Vector, palm: Vector) -> Matrix:
     """The hand bone's pose with its index finger's knuckle at `index_at`, its knuckles' line (index to little
     finger) along `line` and its palm facing `palm` as near as that line allows."""
@@ -644,9 +664,13 @@ def support_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: C
     is gripping the pistol tight"): laid by its three marks as `web_pose` lays a hand, then turned about the upright
     line through its index knuckle (r["yaws"], degrees: the heel of the hand in toward the grip) and rolled about the
     line from that knuckle to the thumb's root (r["rolls"]), each turn seated clear of the pistol and the right
-    hand, to the turn whose palm lies closest over them (the mean gap under its skin, r["gap_cost"] a metre) with the
-    wrist least bent. `web_pose` counts how far the hand was pushed off its marks instead, which stood this hand off
-    the grip, flat beside it."""
+    hand, to the turn whose palm lies closest over them (the mean gap under its skin, r["gap_cost"] a metre) and
+    is pressed on the grip's bare left side behind the right hand's fingertips (the owner, of the view over the
+    sights: "a gap between the left hand and the pistol grip. The hand should be pressed against the handle/grip"):
+    the mean distance from that side (r["bare"], replica space: its y and z ranges on the side at x r["side"]) to
+    the hand's skin, the heel of the thumb's too, r["bare_cost"] a metre; with the wrist least bent
+    (r["bend_cost"] a degree). `web_pose` counts how far the hand was pushed off its marks instead, which stood
+    this hand off the grip, flat beside it."""
     to_eye = hold.to_eye()
     sx = pose.to_side("L")
     i_rest, w_rest, p_rest = sx(j["finger-2-1"]), sx(j["finger-1-1"]), sx(j["finger-5-1"])
@@ -657,7 +681,14 @@ def support_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: C
     rest = rig.rest["Hand_L"]
     # The palm's own side of the hand bone's skin: the half of it furthest out toward what it holds.
     out = rest.to_3x3().inverted() @ hand.palmar
-    skin = sorted(hand.palm, key=lambda q: -q.dot(out))[:len(hand.palm) // 2:PALM_SPARSE]
+    skin = sorted(hand.palm, key=lambda q: -q.dot(out))[:len(hand.palm) // 2][::PALM_SPARSE]
+    # The grip's bare side, and the skin that should lie on it: the hand bone's and the heel of the thumb's (the
+    # thumb as it rests; it is laid along the frame afterwards).
+    (y0, y1), (z0, z1) = r["bare"]
+    bare = [to_eye @ Vector((r["side"], y0 + (y1 - y0) * a / BARE_GRID[0], z0 + (z1 - z0) * b / BARE_GRID[1]))
+            for a in range(BARE_GRID[0] + 1) for b in range(BARE_GRID[1] + 1)]
+    thumb = rest.inverted() @ rig.rest["Thumb1_L"]
+    near = hand.points["Hand_L"] + [thumb @ q for q in hand.points["Thumb1_L"]]
     best = None
     for yaw in range(int(r["yaws"][0]), int(r["yaws"][1]) + 1, YAW_STEP):
         for roll in range(int(r["rolls"][0]), int(r["rolls"][1]) + 1, ROLL_STEP):
@@ -666,11 +697,13 @@ def support_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: C
             m0 = Matrix.Translation(i_at) @ rot.to_4x4() @ Matrix.Translation(-i_rest) @ rest
             m = hand.seat(m0, palm, col, whole=True)
             gap = sum(max(col.dist(m @ q), 0.0) for q in skin) / len(skin)
+            posed = [m @ q for q in near]
+            off = sum(min((q - p).length_squared for q in posed) ** 0.5 for p in bare) / len(bare)
             _, bend = elbow_for(rig, "L", m, quiet=True)
-            score = gap * r["gap_cost"] + bend * r["bend_cost"]
+            score = gap * r["gap_cost"] + off * r["bare_cost"] + bend * r["bend_cost"]
             if os.environ.get("BL_DEBUG"):
-                print("    yaw %3d roll %3d: gap %4.1f mm bend %4.1f moved %4.1f mm" % (
-                    yaw, roll, gap * 1000, bend, (m.translation - m0.translation).length * 1000))
+                print("    yaw %3d roll %3d: gap %4.1f mm bare %4.1f mm bend %4.1f moved %4.1f mm" % (
+                    yaw, roll, gap * 1000, off * 1000, bend, (m.translation - m0.translation).length * 1000))
             if best is None or score < best[0]:
                 best = (score, yaw, roll, m, palm)
     print("  L: support turned %d deg, rolled %d deg" % best[1:3])
@@ -770,6 +803,9 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider,
     hand.normal = palm
     # The fingers' highest (eye space) where they rest, level with the hand on the handguard.
     hand.tip_top = (to_eye @ Vector((0.0, y, spec["tips_below"]))).z
+    if "upper" in spec:
+        shoulder_behind(rig, "L", hand_m, spec["upper"])
+        rig.plan.pop("L", None)
     pole_l, _ = elbow_for(rig, "L", hand_m)
     pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
     # The thumb forward along the handguard's left side.
@@ -808,16 +844,20 @@ def cup(rig: Rig, hand: pose.Hand, j: dict, to_eye: Matrix, spec: dict, col: Col
         for pitch in range(p0, p1 + 1, CUP_STEP):
             for roll in range(r0, r1 + 1, CUP_STEP):
                 m, palm = placed(float(yaw), float(pitch), float(roll))
-                pole, bend = elbow_for(rig, "L", m, quiet=True)
-                if pole is None:
-                    continue
-                rig.fk("Shoulder_L")
-                rig.fk("UpperArm_L")
-                fore = m.translation - (rig.pose["UpperArm_L"].translation + pole)
+                if "upper" in spec:
+                    # The forearm lies on the hand's own line (`straight_elbow`): no bend to weigh.
+                    elbow, bend = straight_elbow(rig, "L", m), 0.0
+                else:
+                    pole, bend = elbow_for(rig, "L", m, quiet=True)
+                    if pole is None:
+                        continue
+                    rig.fk("Shoulder_L")
+                    rig.fk("UpperArm_L")
+                    elbow = rig.pose["UpperArm_L"].translation + pole
+                fore = m.translation - elbow
                 rise = math.degrees(math.atan2(fore.z, fore.xy.length))
                 plan = math.degrees(math.atan2(abs(fore.x), fore.y))
                 # The forearm (its sleeve) clears the replica: the magazine hangs just behind the support hand.
-                elbow = rig.pose["UpperArm_L"].translation + pole
                 clear = sum(max(0.0, FOREARM_CLEAR - col.dist(elbow.lerp(m.translation, t / 8.0)))
                             for t in range(1, 8))
                 gaps = []
@@ -903,6 +943,8 @@ def left_on_grip(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, spec: dict, col
     else:
         hand_m, palm = web_pose(rig, hand, j, hold, spec, col, "L")
     hand.normal = palm
+    if "upper" in spec:
+        shoulder_behind(rig, "L", hand_m, spec["upper"])
     pole_l, _ = elbow_for(rig, "L", hand_m)
     pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
     rig.refresh("Hand_L")
@@ -1080,6 +1122,14 @@ def lay_right_thumb(rig: Rig, hands: dict, hold: Hold, arms: list, solid: list, 
         print("   R thumb joints", [tuple(round(c, 3) for c in inv @ rig.pose["Thumb%d_R" % k].translation)
                                     for k in (1, 2, 3)], "target", tuple(round(c, 3) for c in inv @ target))
         print("   R skin gaps (mm)", pose.skin_gaps([right], frame + [under], "R"))
+        # How far each hand's skin stands off the grip's left side (replica space: rows down the grip, front to back).
+        other = pose.frozen(right, RIGHT_HELD)
+        for name, c in (("L", Collider([under])), ("R", Collider([other]))):
+            for z in (-0.050, -0.065, -0.080, -0.095, -0.110):
+                print("   %s off the left side at z %.3f:" % (name, z), " ".join(
+                    "%3d" % round(c.dist(to_eye @ Vector((-0.015, y / 1000.0, z))) * 1000)
+                    for y in range(-40, -106, -8)))
+        bpy.data.objects.remove(other, do_unlink=True)
     bpy.data.objects.remove(under, do_unlink=True)
     return hits
 

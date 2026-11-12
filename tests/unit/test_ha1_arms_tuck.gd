@@ -171,6 +171,17 @@ func test_switching_replica_starts_from_its_own_clip() -> void:
 		assert_true(_same(_bone(hands, bone), _bone(clean, bone)), "%s as a pistol drawn fresh has it" % bone)
 
 
+func test_a_new_hold_starts_from_its_clip_before_the_sight_is_read_again() -> void:
+	var hands := _hands([&"aeg", &"pistol"])
+	hands._show(0)
+	hands._arms.aim(1.0)
+	hands._show(1)
+	var clean := _hands([&"pistol"])
+	clean._show(0)
+	for bone: String in [UPPER, FORE, HAND]:
+		assert_true(_same(_bone(hands, bone), _bone(clean, bone)), "%s, with no aim() since the switch" % bone)
+
+
 func test_a_reach_too_far_draws_the_arm_out_straight_and_breaks_nothing() -> void:
 	var hands := _hands([&"aeg"])
 	hands._show(0)

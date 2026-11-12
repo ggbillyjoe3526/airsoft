@@ -147,6 +147,10 @@ func setup(cfg: ViewModelConfig) -> void:
 func hold(id: StringName, root: Node3D, grip: StringName = &"") -> void:
 	if _model == null:
 		return
+	# A hold starts from its clip alone: no clip keys the shoulder's place, so the last hold's drawn-in arm goes here.
+	if _tucked:
+		_tuck.clear(_skeleton)
+		_tucked = false
 	var mark := _model.find_child(HOLD_PREFIX + id, true, false) as Node3D
 	var base := clip_base(id, grip)
 	var clip := StringName(base + CLIP_SUFFIX)
