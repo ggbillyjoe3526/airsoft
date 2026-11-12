@@ -36,14 +36,19 @@ static func material(look: StationLook) -> ShaderMaterial:
 
 
 ## `m`'s blocks (as the greybox draws them: no see-through block, no bar railing's box), the ground beyond the walls,
-## its station's strips and its track, each face in its finish.
-static func mesh(m: MapData, style: MapStyle, look: StationLook) -> ArrayMesh:
+## its station's strips and its track, each face in its finish. A block `props` draws as its model (SD1: one naming a
+## model, PropDressConfig.named_only) is left out, its model standing in its box; a lined (TILE) or cored one keeps
+## its box.
+static func mesh(m: MapData, style: MapStyle, look: StationLook, props: PropDressConfig = null) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_custom_format(0, SurfaceTool.CUSTOM_RGBA_FLOAT)
 	var dress := m.station
 	for b in m.blocks:
 		if style.is_clear(b.kind) or (style.is_railing(b.kind) and b.rise == MapData.Rise.NONE):
+			continue
+		if props != null and props.dresses(b) and props.lay_of(b) != PropDressConfig.Lay.TILE \
+				and props.core_of(b) == Vector2.ZERO:
 			continue
 		var own := dress.owner_of(b)
 		var bottom := b.center.y - b.size.y * 0.5

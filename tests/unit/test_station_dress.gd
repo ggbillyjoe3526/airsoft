@@ -159,6 +159,57 @@ func test_the_level_draws_one_station_mesh_with_the_greybox_s_colliders() -> voi
 	assert_eq(_shapes(dressed), _shapes(plain), "the very same colliders")
 
 
+func test_a_block_naming_a_model_is_drawn_as_it_and_a_kind_alone_keeps_its_box() -> void:
+	# SD1: a station dresses only the blocks that name a model; kinds say nothing there (a cabinet is a ticket gate,
+	# a locker or a tool cart), so a crate kind's box stays a box unless it names the crate.
+	var m := _map("subway")
+	var crates: Array[MapData.Block] = []
+	for b in m.blocks:
+		if b.kind == &"crate":
+			crates.append(b)
+	assert_gt(crates.size(), 1, "Subway has crate boxes")
+	var props := play.site_look.props.named_only()
+	var plain := StationSurface.mesh(m, play.map_style, look, props)
+	assert_null(PropDress.build(m, props), "no block names a model: no props")
+	crates[0].dress = &"crate"
+	var named := StationSurface.mesh(m, play.map_style, look, props)
+	var dress := PropDress.build(m, props)
+	assert_not_null(dress, "the named block is dressed")
+	if dress != null:
+		add_child_autofree(dress)
+		assert_eq(dress.placed().keys(), [&"crate"] as Array[StringName], "the crate model alone")
+		var inside := 0
+		var box := AABB(crates[0].center - crates[0].size * 0.5, crates[0].size).grow(0.01)
+		for t: Transform3D in dress.placed()[&"crate"].transforms:
+			if box.has_point(t.origin):
+				inside += 1
+		assert_eq(inside, dress.placed()[&"crate"].transforms.size(), "every crate in the named box")
+	var faces := GreyboxFaces.faces_of(crates[0]).size()
+	assert_lt(_vertices(named), _vertices(plain), "the named box's %d faces left out" % faces)
+	var dressed := _level(m, look)
+	var greybox := _level(_map("subway"), null)
+	assert_eq(_shapes(dressed), _shapes(greybox), "the colliders stay the boxes'")
+
+
+func test_named_only_dresses_no_kind_and_leaves_the_config_as_it_was() -> void:
+	var props := play.site_look.props
+	var named := props.named_only()
+	assert_same(props.named_only(), named, "made once")
+	assert_true(named.kind_props.is_empty(), "no kind dressed")
+	assert_false(props.kind_props.is_empty(), "the shipped config keeps its kinds")
+	var b := MapData.Block.new()
+	b.kind = &"crate"
+	b.size = Vector3(1.2, 2.3, 1.0)
+	assert_true(props.dresses(b), "a crate box dressed by its kind elsewhere")
+	assert_false(named.dresses(b), "but not on a station")
+	b.dress = &"crate"
+	assert_true(named.dresses(b), "unless it names the crate")
+
+
+func _vertices(mesh: ArrayMesh) -> int:
+	return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+
+
 func _shapes(level: MapLevel) -> Array[String]:
 	var out: Array[String] = []
 	for body in level.find_children("*", "StaticBody3D", true, false):

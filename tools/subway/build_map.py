@@ -404,7 +404,7 @@ def lifts() -> list[dict]:
 
 # ---------------- Writing ----------------
 
-def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0) -> dict:
+def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "") -> dict:
     x0, x1, y0, y1, z0, z1 = bx
     if kind in ("floor", "ramp"):
         # Floors drawn edge to edge are grown a centimetre a side to meet (as Depot's): an edge on a grid cell's middle
@@ -416,6 +416,8 @@ def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0) -> dic
         b["rise"] = rise
     if colour:
         b["colour"] = colour
+    if dress:
+        b["dress"] = dress
     return b
 
 
@@ -454,14 +456,14 @@ def build() -> dict:
     for bl in L.blocks:
         if bl["y"] is None:
             for bx, rise in ramp_barrier(bl):
-                blocks.append(as_block(bl["kind"], bx, rise, colour=bl["colour"]))
+                blocks.append(as_block(bl["kind"], bx, rise, colour=bl["colour"], dress=bl["dress"]))
                 solid.append(bx)
             continue
         bx = [bl["x0"], bl["x1"], bl["y"], bl["y"] + bl["h"], bl["z0"], bl["z1"]]
         for other in solid:
             if overlap(bx, other, SLACK):
                 print("warning: cover", bl["kind"], bx, "overlaps", other)
-        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"]))
+        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"]))
         solid.append(bx)
     air = [(i, a) for i, rm in enumerate(L.rooms) for a in air_boxes(rm)]
     shaft = shaft_hole()

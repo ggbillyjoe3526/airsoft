@@ -355,6 +355,18 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.
 var _meshes: Dictionary[String, Mesh] = {}
+## This config with no kind dressed (`named_only`), made once.
+var _named: PropDressConfig = null
+
+
+## This config dressing only the blocks that name a model (MapData.Block.dress), never one by its kind alone: a
+## station's (SD1, Subway), whose generic kinds (a cabinet is a ticket gate, a locker or a tool cart) say nothing of
+## what stands there. Made once; the same config each call.
+func named_only() -> PropDressConfig:
+	if _named == null:
+		_named = duplicate() as PropDressConfig
+		_named.kind_props = {}
+	return _named
 
 
 ## Whether block `b` is drawn as props: the prop it names, or else its kind's, has a model that loads (a tree's with
