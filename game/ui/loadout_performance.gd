@@ -20,6 +20,8 @@ const TAB_ROWS: Array[StringName] = [&"zoom", &"aim"]
 ## Rows shown only for a replica whose value isn't 1, as carried or as it comes (the Compact SMG's pace and spread on
 ## the move, CS1; PP1): ×1 on every other replica, so they'd only crowd the sheet.
 const OFF_ONE_ROWS: Array[StringName] = [&"pace", &"move_spread"]
+## Rows shown only for a replica whose value is above 0, as carried or as it comes (the Pump Shotgun's pattern, SH1).
+const ABOVE_ZERO_ROWS: Array[StringName] = [&"pattern"]
 const MOVING_ROW := &"moving"
 ## The step a fire rate under WHOLE_RATE (BBs/s) is shown to, and the rate from which it shows whole (rate_text).
 const RATE_STEP := 0.01
@@ -41,6 +43,8 @@ const SPECS: Array[Dictionary] = [
 			"better": Better.LOWER},
 	{"field": &"spread", "name": "PERF_SPREAD", "unit": "PERF_UNIT_DEG", "decimals": 2, "full": 1.2, "invert": true,
 			"better": Better.LOWER},
+	{"field": &"pattern", "name": "PERF_PATTERN", "unit": "PERF_UNIT_DEG", "decimals": 1, "full": 3.0, "invert": false,
+			"better": Better.NONE},
 	{"field": &"zoom", "name": "PERF_ZOOM", "unit": "PERF_UNIT_X", "decimals": 2, "full": 6.0, "invert": false,
 			"better": Better.HIGHER},
 	{"field": &"aim", "name": "PERF_AIM", "unit": "PERF_UNIT_S", "decimals": 2, "full": 0.4, "invert": true,
@@ -69,6 +73,9 @@ class Figures:
 	var speed: float = 0.0
 	var bb_weight: float = 0.0
 	var rate: float = 0.0
+	## BBs a shot sends (the rate row reads "1.7 × 3", SH1) and how far off the shot's line each leaves (degrees).
+	var shot_bbs: int = 1
+	var pattern: float = 0.0
 	var on_target: float = 0.0
 	## True when the BB never left the band within the readout range ("60+ m").
 	var on_target_full: bool = false
@@ -152,6 +159,8 @@ static func measure(replica: ReplicaConfig, grams: float, dial: float, tuning: S
 	f.speed = Ballistics.muzzle_velocity(replica, rules, CHRONO_GRAMS) * FEET_PER_METRE
 	f.bb_weight = grams
 	f.rate = replica.fire_rate
+	f.shot_bbs = replica.shot_bbs
+	f.pattern = replica.pattern_deg if replica.shot_bbs > 1 else 0.0
 	var reach := Ballistics.hop_up_reach(replica, dial, tuning, dt, band, range_limit, grams)
 	f.on_target = reach.on_target_to
 	f.on_target_full = reach.on_target_to >= range_limit
@@ -191,6 +200,8 @@ static func compare(carried: Figures, comes: Figures, capped: bool, limit: float
 		r.tab_only = TAB_ROWS.has(field)
 		if OFF_ONE_ROWS.has(field):
 			r.present = not is_equal_approx(value, 1.0) or not is_equal_approx(before, 1.0)
+		elif ABOVE_ZERO_ROWS.has(field):
+			r.present = value > 0.0 or before > 0.0
 		r.text = _shown(field, carried, value, decimals)
 		r.as_comes_text = _shown(field, comes, before, decimals)
 		var share := clampf(value / float(spec["full"]), 0.0, 1.0)
@@ -235,6 +246,9 @@ static func _shown(field: StringName, f: Figures, value: float, decimals: int) -
 	if field == &"on_target" and f.on_target_full:
 		return TranslationServer.translate("PERF_FULL_RANGE") % roundi(value)
 	if field == &"rate":
+		# Several BBs a shot: shots a second times the BBs each sends ("1.7 × 3", as the magazines read "30 × 5").
+		if f.shot_bbs > 1:
+			return TranslationServer.translate("PERF_RATE_SHOTS_FORMAT") % [rate_text(value), f.shot_bbs]
 		return rate_text(value)
 	return ("%." + str(decimals) + "f") % value
 

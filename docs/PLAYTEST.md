@@ -1483,6 +1483,32 @@ Subway is Dev content: tick Settings › Dev › Dev content. On a real graphics
 - [ ] **Frame rate** on Low and Medium looking down the north platform: at least as good as before.
 - [ ] **Other maps unchanged:** Depot, Woodland and the Range look as before on every preset.
 
+## The Pump Shotgun (SH1)
+
+Dev content: tick Settings › Dev › Dev content (level 12; Dev unlocks it at any level). It wears the Sniper Rifle's
+model until its own is built, and the pump, shot and shell sounds are stand-ins cut from other recordings.
+
+- [ ] **Three BBs a pull.** On the Range pick the Pump Shotgun and fire at a wall from 10 m: three BBs leave together
+  as an even triangle about a hand and a half apart (one on top), and the triangle is twice as wide at 20 m. The
+  magazine count drops by three.
+- [ ] **The pump.** Each pull is followed by a pump you hear; a second click before it ends does nothing. Holding the
+  trigger fires once. About five pulls in three seconds.
+- [ ] **Ten pulls a shell.** A 30 BB shell is ten pulls; R swaps the shell like a magazine (a little over a second).
+  Five shells are carried.
+- [ ] **Close and wide.** Against bots inside 10 m a pull nearly always lands, also from the hip on the move; past 25 m
+  it mostly misses and the BBs drop short of the rifles'. Does the first pull win a doorway? Does a miss cost you the
+  fight against an SMG?
+- [ ] **One hit is one hit.** A pull that lands two or three BBs on a bot is one hit: one tick, one "HIT!".
+- [ ] **Springs.** The Armoury offers it the Sniper Rifle's M140 and M150 springs (the M130 is the one it comes with):
+  each reaches a little further, pumps slower and kicks more; the M150 is louder. No batteries or gas fit.
+- [ ] **Parts.** Every optic fits the top rail. No grip, silencer, barrel or magazine part fits. The Red Laser and the
+  Weapon Torch wait for its own model.
+- [ ] **The Loadout sheet** shows "1.7 × 3" for its rate and a Pattern row (1.2°) no other replica has.
+- [ ] **Bots.** With Dev content on, some bots carry it (the Clearer kit, a Red Dot and two flashes): they push and
+  flank, fire one pull at a time and hold their fire at long range.
+- [ ] **Cold and indoors.** On a cold map it fires as hard as anywhere (a spring); indoors it starts as it always is,
+  one pull a click.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

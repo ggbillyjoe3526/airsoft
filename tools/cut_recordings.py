@@ -418,6 +418,11 @@ LIFT_RIDE_S = 3.2
 # Subway's background (2026-11-11): his tunnel's phone rumble sits under this (Hz).
 TUNNEL_RUMBLE_HZ = 60.0
 BOLT_READY = 1.25
+# The Pump Shotgun's stand-ins (SH1): pulls a second with the spring it comes with (stats.md), and how far the
+# sniper's shot is pitched down and his bolt up for its thump and its pump.
+SHOTGUN_RATE = 1.7
+SHOTGUN_SHOT_PITCH = 0.8
+SHOTGUN_PUMP_PITCH = 1.15
 
 
 def bolt(x, length=0.85, back_at=0.50, home_at=0.71):
@@ -529,6 +534,21 @@ def build(folder):
     k = BOLT_READY / BOLT_CYCLE_END
     put("boltCycle", [bolt(s, 0.85 * k, 0.50 * k, 0.71 * k)
                       for s in pick(folder, [("sniper_bolt.wav", None)], 1.0, 0.1)[:3]], -14.0)
+
+    # Pump Shotgun (SH1, stand-ins until the owner records them: audio/record-next.md): the sniper's shot from where
+    # it bursts out, lower, shorter and softer (a hollow spring thump: three light BBs, not one hard crack) with no
+    # run-up before it; his bolt, a little higher and lighter, as the pump, its two knocks where the stand-in model's
+    # Fire clip (the Sniper Rifle's, stretched to the pump's 1.7 a second) has the handle back and home; its box of a
+    # shell the lowest of the magazine clicks.
+    shotgun_shot = "a hollow spring thump: a closed stapler hit with your palm, or a plastic tub's lid snapped shut"
+    put("shot_shotgun", variants(from_onsets(fire, bursts, 0.30), 5, SHOTGUN_SHOT_PITCH), -18.5, shotgun_shot)
+    k = (1.0 / SHOTGUN_RATE) / BOLT_CYCLE_END
+    put("cycle_shotgun", [bolt(resample(s, SHOTGUN_PUMP_PITCH), 0.85 * k, 0.50 * k, 0.71 * k)
+                          for s in pick(folder, [("sniper_bolt.wav", None)], 1.0, 0.1)[:3]], -16.0,
+        "the pump back and forward: a door bolt slid back and home, or one stroke of a bike pump")
+    shell = "its shell pulled out and pushed in: an AA battery out of a torch and back in until it clicks"
+    put("magOut_shotgun", variants(cover_off, 5, 0.75), -30.6, shell)
+    put("magIn_shotgun", variants(cover_on, 5, 0.75), -26.9, shell)
 
     # Cyber Pistol (electric pistol): a short whir of his electric toothbrush a little under its own pitch (owner,
     # 2026-11-04: "i prefer the cyber pistol with the toothbrush", over the motor's) under a small crack, 3 dB up, with

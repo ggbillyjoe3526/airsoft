@@ -45,7 +45,8 @@ What drives the replica, by type (pool.md's power source Type):
   follow-up shots; Black Gas reaches furthest, kicks 40 % harder and slams the slide, so it cycles a tenth slower
   (RP1).
 - **Spring.** Sets the energy, as a gas does, and how hard the rifle is to cock, how hard it kicks and how far its
-  shot is heard: each spring is its own trade (Which spring, under the Power sources table).
+  shot is heard: each spring is its own trade (Which spring, under the Power sources table). The Pump Shotgun takes
+  the same springs (SH1): each sets its energy, its pump's pace, its kick and how far it is heard the same way.
 
 ### Site limits
 
@@ -57,15 +58,17 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 
 ## Replicas
 
-| Key | Name | Class | Energy (J) | BB (g) | Fire rate (BBs/s) | Magazine (BBs) | Magazines | Reload (s) | Draw (s) | Spread (°) | Recoil (°) | Hip spread (×) | Pace (×) | Moving spread (×) |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| aeg | AEG Rifle | rifle | 0.97 | 0.25 | 13 | 60 | 4 | 1.8 | 0.45 | 0.45 | 0.18 | 1 | 1 | 1 |
-| pistol | GBB Pistol | pistol | 0.52 | 0.2 | 7 | 18 | 4 | 1.0 | 0.22 | 0.65 | 0.5 | 0.8 | 1.04 | 1 |
-| cyber | Cyber Pistol | pistol | 1.0 | 0.25 | 14 | 30 | 3 | 1.1 | 0.28 | 0.3 | 0.06 | 1 | 1.04 | 2 |
-| sniper | Sniper Rifle | sniper | 1.9 | 0.3 | 0.8 | 25 | 4 | 2.2 | 0.65 | 0.1 | 0.4 | 10 | 0.95 | 1 |
-| smg | Compact SMG | rifle | 0.75 | 0.2 | 18 | 45 | 5 | 1.4 | 0.32 | 0.6 | 0.14 | 0.75 | 1.08 | 0.5 |
+| Key | Name | Class | Energy (J) | BB (g) | Fire rate (BBs/s) | Magazine (BBs) | Magazines | Reload (s) | Draw (s) | Spread (°) | Recoil (°) | Hip spread (×) | Pace (×) | Moving spread (×) | BBs per shot | Pattern (°) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| aeg | AEG Rifle | rifle | 0.97 | 0.25 | 13 | 60 | 4 | 1.8 | 0.45 | 0.45 | 0.18 | 1 | 1 | 1 | 1 | 0 |
+| pistol | GBB Pistol | pistol | 0.52 | 0.2 | 7 | 18 | 4 | 1.0 | 0.22 | 0.65 | 0.5 | 0.8 | 1.04 | 1 | 1 | 0 |
+| cyber | Cyber Pistol | pistol | 1.0 | 0.25 | 14 | 30 | 3 | 1.1 | 0.28 | 0.3 | 0.06 | 1 | 1.04 | 2 | 1 | 0 |
+| sniper | Sniper Rifle | sniper | 1.9 | 0.3 | 0.8 | 25 | 4 | 2.2 | 0.65 | 0.1 | 0.4 | 10 | 0.95 | 1 | 1 | 0 |
+| smg | Compact SMG | rifle | 0.75 | 0.2 | 18 | 45 | 5 | 1.4 | 0.32 | 0.6 | 0.14 | 0.75 | 1.08 | 0.5 | 1 | 0 |
+| shotgun | Pump Shotgun | rifle | 0.65 | 0.2 | 1.7 | 30 | 5 | 1.2 | 0.5 | 0.5 | 0.45 | 0.7 | 1 | 1 | 3 | 1.2 |
 
 - **Fire rate.** BBs a second with the trigger held (auto, and within a burst), or the fastest you can click (semi).
+  For a replica that sends several BBs a shot (BBs per shot), shots a second.
 - **Magazines.** Carried per round, the loaded one included.
 - **Spread.** The random scatter of the shots from the hip (degrees), before stance, movement and the hip spread.
 - **Recoil.** The upward kick of each shot (degrees). Light: these are toys, not firearms.
@@ -77,6 +80,10 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   Compact SMG the quickest thing to fight with (1.08) and the long Sniper Rifle the slowest (0.95) (RP1).
 - **Moving spread.** The share of the extra spread that walking, running, jumping and sprinting add that it takes (0.5
   is half, 2 twice as much; standing still is as steady as ever).
+- **BBs per shot.** BBs one pull of the trigger sends, each off the magazine (SH1: the Pump Shotgun's three
+  barrels). One hit is still one hit: a pull that lands two BBs on someone counts once.
+- **Pattern.** How far off the shot's line each of those BBs leaves (degrees), spaced evenly round it with the first
+  straight up, as the barrels sit; each BB has the replica's Spread on top. 0 with one BB a shot.
 - **What each replica is for** (RP1, the owner's 2026-11-12 balance pass: every replica its own strengths and
   weaknesses). The AEG Rifle is the all-rounder that takes every part. The GBB Pistol is the fastest thing to bring up
   (0.22 s), tight for a pistol and tighter still from the hip, and its gas sets its reach; against that, single shots,
@@ -86,7 +93,7 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   jumping (standing, crouched or at a walk it is as tight as ever) and no parts. Until RP1 it had no
   weakness: it out-shot the AEG Rifle standing and the Compact SMG on the move. The Sniper Rifle is reach and
   precision, one shot at a time, slow on its feet and a guess from the hip. The Compact SMG is the one for shooting on
-  the move.
+  the move. The Pump Shotgun is the one whose first pull counts: three BBs at once up close, a pump before the next.
 - **Sniper Rifle** (SN1, owner 2026-11-02: like the AEG with a longer barrel, spring driven, single shot, the 2x Scope
   fitted as it comes). The long-range pick: 1.90 J with 0.30 g BBs (the Loadout loads up to 0.40 g, PH1, which it
   alone makes full use of; 440 fps on a 0.20 g chrono) stays within 15 cm of the aim line to about 48 m (the AEG
@@ -103,6 +110,19 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   0.75 J with 0.20 g BBs (284 fps) stays within 15 cm of the aim line to 27 m as it comes (31 m at its best hop-up; the
   AEG 39 m) and takes 0.59 s to fly 30 m (the AEG 0.52 s); a third wider spread aimed; 45 BBs a magazine, empty in
   2.5 s with the trigger held; and no grip, barrel or magazine parts. Semi and full auto, no burst.
+- **Pump Shotgun** (SH1, owner 2026-11-12: "a shotgun replica" that plays unlike the others; his answers: spring,
+  three BBs a pull, its shell swapped like a magazine, the Sniper Rifle's springs, level 12). The first-pull pick, for
+  corners and doorways: one pull sends three BBs, one from each barrel, 1.2° off the shot's line in an even triangle
+  (36 cm apart at 10 m), so a rushed aim that would put one BB past someone still lands one of three: with the aim
+  1° off, a pull hits a standing player 10 m away 19 times in 20 and at 15 m 4 times in 5, where one BB from any
+  other replica hits 7 times in 10 and under half the time. From the hip it is 0.7 times as wide, and its shell
+  changes in 1.2 s, the quickest of the long replicas. Against that, a pump after every pull (1.7 pulls a second: the
+  Compact SMG sends ten BBs in the time of one pump, so a missed pull is a long wait), single shots only, ten pulls a
+  shell and fifty a round, and the shortest reach of the long replicas: 0.65 J with 0.20 g BBs (265 fps) stays within
+  15 cm of the aim line to 24 m as it comes (28 m at its best hop-up) and takes 0.35 s to fly 20 m, and past about
+  25 m the three BBs land round a body more often than on it. It takes an optic and the springs, no grip (the pump is
+  the grip), silencer (three barrels), barrel or magazine parts. With the M140 it shoots 0.72 J to 25 m with a pump
+  every 0.62 s, with the M150 0.78 J to 27 m every 0.65 s. "No full auto indoors" (data/maps.md) never touches it.
 
 ## Power sources
 
@@ -126,7 +146,8 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   0.57 s), paid for with a shot every 1.39 s, half as much kick again (through a scope the view jumps, so you see less
   of where the shot went) and a crack heard a fifth further. The cocking stays 5 % and 10 % slower: the bolt's
   recording is cut for the M130's cycle (`docs/KNOWN_ISSUES.md`), and a slower M150 would leave its last knock further
-  ahead of the handle.
+  ahead of the handle. Those figures are the Sniper Rifle's; on the Pump Shotgun the same springs give 0.65, 0.72 and
+  0.78 J (its entry under the Replicas table).
 
 ## Optics
 
