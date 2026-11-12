@@ -28,14 +28,15 @@ MM = 0.001
 TAU = math.tau
 CAN_MAT, LABEL_MAT, PRINT_MAT = 0, 1, 2  # MATERIALS' order
 
-# The can (millimetres). Proportions from the photos: height 4.55 diameters, cap 0.56 diameters wide and 0.65 tall,
-# shoulder 0.56 diameters tall (a seventh of the can's height, as the cap is: measured again on the main photo in
-# MQ2B), its radius 1 - 0.42 (1 - d)^2 of the body's (d from the cap down).
+# The can (millimetres). Proportions from the main photo, measured on its pixels row by row (MQ2B, the table in
+# docs/records/MQ2B.md): height 4.5 diameters; the cap 0.147 of the height from its top to its skirt's foot and
+# 0.55 of the body wide; the shoulder 0.110 of the height from the skirt's foot to the straight wall; the solid print
+# ending 0.327 down from the top. The shoulder's radius is 1 - 0.46 (1 - d)^2 of the body's (d from the cap down).
 RADIUS = 33.0
 HEIGHT = 300.0
-CAP_HEIGHT = 43.0
-SHOULDER_HEIGHT = 37.0
-SHOULDER_NARROWING = 0.42
+CAP_HEIGHT = 43.0  # from the top to where the shoulder would meet the skirt; the skirt sinks CAP_SINK more
+SHOULDER_HEIGHT = 36.0
+SHOULDER_NARROWING = 0.46
 SHOULDER_UNDER_CAP = 0.09  # how far (in shoulder heights) the shoulder runs on up inside the cap
 SHOULDER_RINGS = 9
 BODY_SIDES = 48
@@ -50,11 +51,11 @@ DOME_RINGS = 2
 # The cap: plain skirt, a small step in, the ribbed band, a smooth band and a rounded top.
 CAP_SIDES = 60  # ribs: one crest per side
 CAP_SINK = 1.2  # the skirt sits this far down into the shoulder, so no light shows under it
-SKIRT_RADIUS = 19.3
+SKIRT_RADIUS = 18.3
 SKIRT_HEIGHT = 7.5
 SKIRT_BEVEL = 0.6
 STEP = 0.8
-CREST_RADIUS = 18.7
+CREST_RADIUS = 17.7
 VALLEY_DEPTH = 0.55
 RIB_TAPER = 1.2  # the ribs run out into the smooth band over this height
 TOP_BAND = 3.0
@@ -69,22 +70,21 @@ PRINT_EDGE = HEIGHT - CAP_HEIGHT - SHOULDER_HEIGHT - 20.0
 CHEVRON_DROP = 34.0
 CHEVRON_HALF_WIDTH = math.radians(60.0)
 STRIPES = ((4.0, 3.5), (10.0, 1.5))  # (gap under the level edge, width) of each chevron stripe
-FOOT_PRINT_LOW = CORNER_RADIUS + 3.0
-FOOT_PRINT_HIGH = FOOT_PRINT_LOW + 15.0
+FOOT_PRINT_LOW = CORNER_RADIUS + 0.5  # the pale band at the foot starts on the rolled corner, as the photo's
+FOOT_PRINT_HIGH = FOOT_PRINT_LOW + 9.5
 
 # The print on the front under the chevron (MQ2B), no letters, filling the label as the photos' does: a round
-# emblem with the gas's colour in its middle, a heavy mark, a bar of the gas's colour, a list of three points each
-# with its bullet, a paragraph of fine lines and, low on the can, a pale caution panel with a block of the gas's
-# colour and two dark lines. Each (from, to mm up; first side, sides wide of BODY_SIDES round from the front;
-# material; extra lift mm), PRINT_LIFT mm proud of the can.
-EMBLEM = (112.0, 146.0, (4, 6, 8, 8, 6, 4), (0, 2, 4, 4, 2, 0))  # from, to; each row's sides: the disc, its middle
-EMBLEM_ROW = (EMBLEM[1] - EMBLEM[0]) / len(EMBLEM[2])
-BLOCKS = tuple(
-    (EMBLEM[0] + EMBLEM_ROW * i, EMBLEM[0] + EMBLEM_ROW * (i + 1), -wide // 2, wide, mat, lift)
-    for row, mat, lift in ((EMBLEM[2], PRINT_MAT, 0.0), (EMBLEM[3], LABEL_MAT, 0.04))
-    for i, wide in enumerate(row) if wide
-) + (
-    (92.0, 106.0, -3, 2, PRINT_MAT, 0.0), (97.5, 100.5, -1, 2, PRINT_MAT, 0.0), (92.0, 106.0, 1, 2, PRINT_MAT, 0.0),
+# emblem (a pale ring round a disc of the gas's colour), a heavy mark of three slanted bars, a bar of the gas's
+# colour, a list of three points each with its bullet, a paragraph of fine lines and, low on the can, a pale caution
+# panel with a block of the gas's colour and two dark lines.
+# The emblem: its centre (mm up), the ring's outer and inner radius, the disc's radius, the points round a half.
+EMBLEM = (129.0, 17.0, 14.4, 11.4, 16)
+# The mark's bars: from, to (mm up); each bar's width, lean and the gap between two (mm round the can).
+MARK = (92.0, 106.0, 4.6, 3.2, 2.4)
+MARK_BARS = 3
+# The level print: each (from, to mm up; first side, sides wide of BODY_SIDES round from the front; material; extra
+# lift mm), PRINT_LIFT mm proud of the can.
+BLOCKS = (
     (84.0, 88.0, -4, 8, LABEL_MAT, 0.0),
     (76.0, 78.2, -5, 1, PRINT_MAT, 0.0), (76.0, 78.2, -3, 7, PRINT_MAT, 0.0),
     (70.5, 72.7, -5, 1, PRINT_MAT, 0.0), (70.5, 72.7, -3, 6, PRINT_MAT, 0.0),
@@ -212,6 +212,73 @@ def printed(bm: bmesh.types.BMesh) -> None:
             bm.faces.new((lower[i], lower[i + 1], upper[i + 1], upper[i])).material_index = mat
 
 
+def decal(bm: bmesh.types.BMesh, s0: float, s1: float, lower, upper, mat: int, breaks=(), hole=None) -> None:
+    """A printed shape of any outline on the can's wall: columns from s0 to s1 mm round from the front, cut at the
+    can's own facets and at `breaks`, each from lower(s) to upper(s) mm up. `hole` (s0, s1, lower, upper, breaks)
+    is left open inside it."""
+    facet = RADIUS * TAU / BODY_SIDES
+    cuts = {round(s0, 4), round(s1, 4)} | {round(b, 4) for b in breaks if s0 < b < s1}
+    cuts |= {round(k * facet, 4) for k in range(-BODY_SIDES // 2, BODY_SIDES // 2) if s0 < k * facet < s1}
+    if hole is not None:
+        cuts |= {round(b, 4) for b in (hole[0], hole[1]) + tuple(hole[4]) if s0 < b < s1}
+    cuts = sorted(cuts)
+    r = (RADIUS + PRINT_LIFT) * MM
+    made = {}
+
+    def vert(s: float, z: float):
+        key = (s, round(z, 4))
+        if key not in made:
+            made[key] = bm.verts.new((math.cos(s / RADIUS) * r, math.sin(s / RADIUS) * r, z * MM))
+        return made[key]
+
+    def face(corners: list) -> None:
+        own = [c for i, c in enumerate(corners) if c is not corners[i - 1]]
+        if len(own) > 2:
+            bm.faces.new(own).material_index = mat
+
+    for a, b in zip(cuts, cuts[1:]):
+        if hole is not None and hole[0] - 1e-6 <= a and b <= hole[1] + 1e-6:
+            face([vert(a, lower(a)), vert(b, lower(b)), vert(b, hole[2](b)), vert(a, hole[2](a))])
+            face([vert(a, hole[3](a)), vert(b, hole[3](b)), vert(b, upper(b)), vert(a, upper(a))])
+        else:
+            face([vert(a, lower(a)), vert(b, lower(b)), vert(b, upper(b)), vert(a, upper(a))])
+
+
+def round_outline(centre: float, radius: float, points: int) -> tuple:
+    """A circle on the can's wall for decal(): (s0, s1, lower, upper, breaks), `points` round each half."""
+    def half(s: float) -> float:
+        return math.sqrt(max(radius * radius - s * s, 0.0))
+
+    breaks = tuple(radius * math.cos(math.pi * i / points) for i in range(1, points))
+    return (-radius, radius, lambda s: centre - half(s), lambda s: centre + half(s), breaks)
+
+
+def emblem(bm: bmesh.types.BMesh) -> None:
+    """The label's round emblem: a pale ring round a disc of the gas's colour."""
+    centre, outer, inner, disc, points = EMBLEM
+    ring_out = round_outline(centre, outer, points)
+    decal(bm, ring_out[0], ring_out[1], ring_out[2], ring_out[3], PRINT_MAT, ring_out[4],
+          hole=round_outline(centre, inner, points))
+    middle = round_outline(centre, disc, points)
+    decal(bm, middle[0], middle[1], middle[2], middle[3], LABEL_MAT, middle[4])
+
+
+def mark(bm: bmesh.types.BMesh) -> None:
+    """The label's heavy mark: slanted bars, leaning to the right as they rise."""
+    z0, z1, width, lean, gap = MARK
+    left = -(MARK_BARS * width + (MARK_BARS - 1) * gap + lean) * 0.5
+    for i in range(MARK_BARS):
+        s0 = left + i * (width + gap)
+
+        def lower(s: float, s0: float = s0) -> float:
+            return z0 + (z1 - z0) * min(max((s - s0 - width) / lean, 0.0), 1.0)
+
+        def upper(s: float, s0: float = s0) -> float:
+            return z0 + (z1 - z0) * min(max((s - s0) / lean, 0.0), 1.0)
+
+        decal(bm, s0, s0 + width + lean, lower, upper, PRINT_MAT, breaks=(s0 + lean, s0 + width))
+
+
 def cap(bm: bmesh.types.BMesh, bottom: float) -> None:
     n = CAP_SIDES
     top = HEIGHT
@@ -277,6 +344,8 @@ def build() -> bpy.types.Object:
     skirt_bottom = can(bm)
     cap(bm, skirt_bottom)
     printed(bm)
+    emblem(bm)
+    mark(bm)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new("GasBottle")
     bm.to_mesh(me)

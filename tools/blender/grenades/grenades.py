@@ -134,14 +134,14 @@ S_PRINT = word_round(52.0, 66.0, 27, (0, 1, 2), "Kind") + word_round(34.0, 48.0,
      (92.5, 94.0, 27, 6, "Band"), (24.0, 25.2, 27, 7, "Band"),
      (64.0, 72.0, 3, 3, "Band"), (58.0, 59.2, 3, 5, "Band"), (55.0, 56.2, 3, 4, "Band"), (52.0, 53.2, 3, 5, "Band")]
 PRINT_LIFT = 0.08
-# The lever's pressed beads (MQ2B): one between each pair of its edge notches, stiffening the sheet as a real spoon's
-# do: (from, to mm up), a shallow round swell S_RIB_HALF mm either side of the middle and S_RIB_PROUD mm out of the
-# arm's outside face, running out to nothing at its ends and sides.
-S_RIBS = ((65.5, 75.2), (81.2, 93.2), (99.2, 111.2))
-S_RIB_HALF = 2.4
-S_RIB_PROUD = 0.35
-S_RIB_ALONG = ((0.0, 0.0), (0.12, 0.55), (0.3, 1.0), (0.7, 1.0), (0.88, 0.55), (1.0, 0.0))   # (share along, height)
-S_RIB_ACROSS = ((-1.0, 0.0), (-0.6, 0.6), (0.0, 1.0), (0.6, 0.6), (1.0, 0.0))                # (share across, height)
+# The lever's pressed beads (MQ2B): one between each pair of its edge nicks, stiffening the sheet as a real spoon's
+# do: (from, to mm up), one smooth swell S_RIB_HALF mm either side of the middle (six tenths of the arm's width) and
+# S_RIB_PROUD mm out of the arm's outside face, running out to nothing at its ends and sides.
+S_RIBS = ((64.5, 76.4), (80.0, 94.4), (98.0, 112.4))
+S_RIB_HALF = 5.1
+S_RIB_PROUD = 1.3
+S_RIB_ALONG = ((0.0, 0.0), (0.1, 0.5), (0.24, 1.0), (0.76, 1.0), (0.9, 0.5), (1.0, 0.0))     # (share along, height)
+S_RIB_ACROSS = ((-1.0, 0.0), (-0.62, 0.5), (0.0, 1.0), (0.62, 0.5), (1.0, 0.0))              # (share across, height)
 S_RIB_SUNK = 0.03  # the bead's rim sits this far inside the arm's face
 
 # ------------------------------------------------------------------------------------------------------------ flash
@@ -158,16 +158,17 @@ F_RING_PITCH = 1.7
 F_RING_AT = math.radians(-95.0)  # where round the tube the ring hangs (0 = +X, the photos' right side)
 F_HOOK_WIRE = 0.5
 # The tube's print (MQ2B), no letters, laid out as the photos' label is and turned to the side your hand leaves in
-# view (beside the ring): a pale band under the cap's; a word running up the tube under a block of the bomb's own
-# colour, a maker's square at its foot and a line of small print beside it; a column of square pictogram tiles next
+# view (beside the ring): a pale band under the cap's; a word running up the tube to just under that band, so its
+# last glyph shows over your thumb in the resting hold (MQ2B, third pass), a block of the bomb's own colour and a
+# maker's square at its foot and a line of small print beside it; a column of square pictogram tiles next
 # to the ring; on the side the menus' picture sees, three lines of small print and a square of the bomb's colour.
 # Each (from, to mm up; first segment, segments wide of SEG_FLASH round from +X; material[, extra lift mm]).
 F_PALE_BAND = (118.5, 122.6)
 F_PRINT = [(F_PALE_BAND[0], F_PALE_BAND[1], 0, SEG_FLASH, "Print")] + \
-    word_up(44.0, 10.0, 2.5, 34, (0, 1, 2, 3, 4), "Print") + \
-    [(107.0, 116.0, 34, 7, "Kind"), (26.0, 40.0, 34, 7, "Print"), (29.5, 36.5, 36, 3, "Kind", 0.04)] + \
-    [(a, b, 32, 1, "Print") for a, b in ((44.0, 52.0), (54.0, 57.0), (59.0, 68.0), (70.0, 74.0), (76.0, 86.0),
-                                         (88.0, 91.0))] + \
+    word_up(56.5, 10.0, 2.5, 34, (0, 1, 2, 3, 4), "Print") + \
+    [(44.5, 52.5, 34, 7, "Kind"), (26.0, 40.0, 34, 7, "Print"), (29.5, 36.5, 36, 3, "Kind", 0.04)] + \
+    [(a, b, 32, 1, "Print") for a, b in ((56.5, 64.5), (66.5, 69.5), (71.5, 80.5), (82.5, 86.5), (88.5, 98.5),
+                                         (100.5, 103.5))] + \
     [(28.0 + 12.4 * i, 34.0 + 12.4 * i, 43 + k, 1, "Kind" if k == 1 else "Print")
      for i in range(7) for k in range(3) if k != 1 or i % 2 == 0] + \
     [(36.0, 104.0, 1, 1, "Print"), (52.0, 104.0, 3, 1, "Print"), (44.0, 104.0, 5, 1, "Print"),
@@ -338,10 +339,11 @@ def arm_x(z: float) -> float:
     return S_ARM[1] + S_ARM_FLARE * min(max(share, 0.0), 1.0)
 
 
-def arm_edge(inset: float = 0.0) -> list:
-    """The arm's outside edge (x, z) mm from its tip up to the head, its notches cut in; `inset` mm in from it."""
+def arm_edge(inset: float = 0.0, notched: bool = True) -> list:
+    """The arm's outside edge (x, z) mm from its tip up to the head, its notches cut in (the flanges' edges; the web
+    between them runs plain, one sheet); `inset` mm in from it."""
     pts = [(arm_x(S_ARM_TIP[0]) - inset, S_ARM_TIP[0])]
-    for c in S_NOTCHES:
+    for c in S_NOTCHES if notched else ():
         h = S_NOTCH_H * 0.5
         pts += [(arm_x(c - h) - inset, c - h), (arm_x(c) - S_NOTCH_D - inset, c), (arm_x(c + h) - inset, c + h)]
     return pts
@@ -373,7 +375,8 @@ def lever_outlines() -> list:
     arm = arm_edge() + [(ox, join), (ix, join), (ix, S_ARM_TIP[1])]
     web_head = [(ox, join), (ox, S_CHAMFER_FOOT), (S_TOP_END, S_HEAD_TOP), (S_HEAD_LEFT + 3.0, S_HEAD_TOP),
                 (S_HEAD_LEFT + 3.0, S_HEAD_TOP - t), (x_in_top, S_HEAD_TOP - t), (ox - t, z_in_side), (ox - t, join)]
-    web_arm = arm_edge() + [(ox, join), (ox - t, join)] + [(x, z) for x, z in reversed(arm_edge(t))][:-1] + \
+    web_arm = arm_edge(notched=False) + [(ox, join), (ox - t, join)] + \
+        [(x, z) for x, z in reversed(arm_edge(t, notched=False))][:-1] + \
         [(arm_x(S_ARM_TIP[0]) - t, S_ARM_TIP[0] + 1.0)]
     return [(head, S_LEVER_Y), (arm, S_ARM_Y), (web_head, -S_LEVER_Y), (web_arm, -S_ARM_Y)]
 
