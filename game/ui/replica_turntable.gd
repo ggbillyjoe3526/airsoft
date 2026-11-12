@@ -116,6 +116,8 @@ func _init() -> void:
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = ReplicaPictures.AMBIENT
 	env.ambient_light_energy = ReplicaPictures.AMBIENT_ENERGY
+	# The metal has a studio to reflect (MQ1): without one a steel part draws black.
+	StudioSky.light(env)
 	var world := WorldEnvironment.new()
 	world.environment = env
 	_port.add_child(world)

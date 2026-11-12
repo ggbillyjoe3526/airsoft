@@ -11,5 +11,9 @@ named the AEG until its own `smg.glb` (CS1, CS2). Objects, materials, space and 
 
 `aeg_wear.png` and `pistol_wear.png` are those replicas' wear masks (RW1, 2026-11-10: faint scratches, rubbed edges,
 dirt in the recesses), baked by `tools/blender/replicas/wear.py` into their glb, extracted here by Godot's import and
-read by `game/play/replica_paint.gd` (docs/CC0_ASSETS.md › Replica models › Wear). The Cyber Pistol and the Sniper
-Rifle have none.
+read by `game/play/replica_paint.gd` (docs/CC0_ASSETS.md › Replica models › Wear). The Compact SMG has `smg_wear.png`
+too; the Cyber Pistol and the Sniper Rifle have none.
+
+Every face of the hands' meshes says what it is made of in its vertex colours (MQ1, 2026-11-12: steel, aluminium,
+polymer, wood; `tools/blender/replicas/surface.py`), and `game/play/replica_paint.gd` draws the paint on that surface
+(docs/CC0_ASSETS.md › Replica models › Surfaces). The figures' copies carry none.

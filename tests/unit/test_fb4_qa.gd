@@ -232,8 +232,8 @@ func test_every_surface_of_every_replica_with_every_part_is_pressed() -> void:
 				for i in m.mesh.get_surface_count():
 					var worn := m.get_active_material(i)
 					assert_not_null(worn, "%s %s surface %d has a material" % [held.id, node.name, i])
-					if ReplicaPaint.is_worn(worn):
-						# A painted part, lightly used (RW1): its own copy, pressed by its uniform.
+					if ReplicaPaint.is_surface(worn):
+						# A painted part on its surface (MQ1, worn or not): its own copy, pressed by its uniform.
 						seen += 1
 						assert_almost_eq(float((worn as ShaderMaterial).get_shader_parameter(&"z_clip_scale")),
 								cfg.depth_scale, 1e-6, "%s %s surface %d pressed" % [held.id, node.name, i])
@@ -279,7 +279,13 @@ func test_realistic_colours_keep_the_pressed_copy_in_the_realistic_paint() -> vo
 	for node: Node in cyber._held[0].root.find_children("*", "MeshInstance3D", true, false):
 		var m := node as MeshInstance3D
 		for i in m.mesh.get_surface_count():
-			assert_true((m.get_active_material(i) as BaseMaterial3D).use_z_clip_scale)
+			# on their surfaces (MQ1): pressed by the surface's uniform
+			var worn := m.get_active_material(i)
+			if worn is ShaderMaterial:
+				assert_almost_eq(float((worn as ShaderMaterial).get_shader_parameter(&"z_clip_scale")),
+						cfg.depth_scale, 1e-6)
+			else:
+				assert_true((worn as BaseMaterial3D).use_z_clip_scale)
 			assert_false((m.mesh.surface_get_material(i) as BaseMaterial3D).use_z_clip_scale, "the model's own untouched")
 
 

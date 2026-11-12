@@ -6,6 +6,10 @@ Seeded scripts (numpy and Pillow) that write tiling textures to `assets/textures
   `hall_concrete_nor_gl_2k.jpg` (DH1), from the owner's floor photos. It prints the colour map's mean linear luma,
   which goes in `SiteLook.slab_luma`.
 
+- `replica_grain.py`: the replicas' surface grain, `assets/textures/replica/replica_grain.png` (MQ1): one 512 px
+  tiling texture every replica and part shares (a moulded pebble's slope, a slow sheen cloud, wood figure), read by
+  `game/play/replica_surface.gdshaderinc`.
+
 Run: `python3 -I tools/textures/<script>.py <repo root>`, then `godot --headless --path . --import`. Dev only.
 
 # Fetched textures

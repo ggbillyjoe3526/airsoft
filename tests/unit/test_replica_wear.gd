@@ -1,7 +1,8 @@
 extends GutTest
 ## Replica wear (RW1, 2026-11-10): the AEG Rifle's and the GBB Pistol's hands' models carry a baked wear mask
 ## (tools/blender/replicas/wear.py) as their painted materials' ao_texture, and ReplicaPaint draws those surfaces in the
-## worn paint (game/play/replica_wear.gdshader); the figures' copies, the Cyber Pistol and the Sniper Rifle stay plain.
+## worn paint (game/play/replica_surface.gdshader with its `wear` on, MQ1); the figures' copies stay plain and the
+## Cyber Pistol and the Sniper Rifle clean.
 
 const WORN := ["aeg", "pistol", "smg"]
 const CLEAN := ["cyber", "sniper"]
@@ -184,7 +185,9 @@ func test_the_own_paint_leaves_every_model_unworn() -> void:
 			var mi := node as MeshInstance3D
 			for i in mi.mesh.get_surface_count():
 				assert_false(ReplicaPaint.is_worn(mi.get_active_material(i)), "%s %s own paint is not worn" % [id, mi.name])
-	assert_eq(ReplicaPaint.worn_materials().size(), 0, "nothing worn was built")
+	# their own colours go on their surfaces (MQ1), none of them worn
+	for built: Material in ReplicaPaint.worn_materials():
+		assert_false(ReplicaPaint.is_worn(built), "nothing worn was built")
 
 
 func test_clean_models_stay_plain_under_any_paint() -> void:

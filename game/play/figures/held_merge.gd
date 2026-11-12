@@ -7,6 +7,9 @@ extends RefCounted
 ## material, and hidden; the magazine in its well stays apart, since a reload hides and shows it. The merged mesh is
 ## made once for each replica, paint and set of parts (`key`) and shared by every figure holding the same.
 
+## What a far version's paint is named by, before its finish.
+const FAR_PAINT_PREFIX := "HeldFar_"
+
 ## One finish's surface of a far version as it is gathered: the first material with that finish and its triangles.
 class Painted:
 	extends RefCounted
@@ -242,7 +245,7 @@ static func _far_paint(like: BaseMaterial3D) -> StandardMaterial3D:
 	var made: StandardMaterial3D = _far_paints.get(finish)
 	if made == null:
 		made = StandardMaterial3D.new()
-		made.resource_name = "HeldFar_%s" % finish
+		made.resource_name = FAR_PAINT_PREFIX + finish
 		made.vertex_color_use_as_albedo = true
 		made.vertex_color_is_srgb = true
 		made.roughness = like.roughness
