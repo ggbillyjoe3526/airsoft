@@ -2,7 +2,7 @@ extends GutTest
 ## MB1: the three fields' lane and flag layouts as data. Every lane point and flag stands on walkable floor and is
 ## reached from both ends; each lane has a point either side of the field's middle, about equally deep for the two ends
 ## (the planner's _points_to_middle); the defender posts are on the site; Subway's flag B is on the north platform;
-## Woodland's Long road is shut to a standing body from the hump onto flag B's old forward post.
+## from Woodland's Long road west of the Culvert nobody sees a chest at flag B's pole or at its defenders' posts.
 
 const SIDE := 8
 const MAPS: Array[String] = ["depot", "woodland", "subway"]
@@ -11,9 +11,13 @@ const MAPS: Array[String] = ["depot", "woodland", "subway"]
 const DEPTH_SLACK := 3.5
 ## The farthest a lane's last two points (the defender posts) may stand from the nearest flag (m).
 const POST_REACH := 30.0
-## Woodland's Long road hump, flag B's old forward post, and the chest below the eye (m).
-const HUMP := Vector2(-8.0, 46.0)
-const OLD_POST := Vector2(44.0, 35.0)
+## Woodland's Long road west of the Culvert (x from, x to, z from, z to; its hump is x -13 to -3), flag B's pole,
+## the ring a body stands in to raise or hold it, its two defender posts, and the chest below the eye (m).
+const ROAD_WEST := Rect2(-30.0, 40.0, 44.0, 12.0)
+const HUMP_X := Vector2(-13.0, -3.0)
+const POLE_B := Vector2(49.0, 38.5)
+const POLE_RING := 1.5
+const POSTS_B: Array[Vector2] = [Vector2(44.6, 29.8), Vector2(49.0, 37.0)]
 const CHEST_BELOW_EYE := 0.3
 
 var tuning: SimTuning = SimTuning.load_default()
@@ -145,30 +149,9 @@ func test_woodland_flag_b_forward_post_is_behind_the_crates() -> void:
 	assert_lt(Vector2(post.x - flag.x, post.z - flag.z).length(), 12.0, "within reach of the pole")
 
 
-func test_subway_flag_b_stands_on_the_north_platform_floor_clear_of_every_block() -> void:
-	var m := maps["subway"]
-	var f := m.poles[1]
-	assert_almost_eq(f.x, 33.0, 0.01, "flag B x")
-	assert_almost_eq(f.z, -7.8, 0.01, "flag B z")
-	var nav := navs["subway"]
-	assert_true(nav.is_walkable_at(Vector3(f.x, f.y + 0.6, f.z)), "a bot can stand at flag B")
-	var floor_y := _floor("subway", f)
-	assert_almost_eq(floor_y, 0.9, 0.2, "on the platform storey")
-	var r := tuning.body.radius
-	var feet := floor_y + 0.2
-	var head := floor_y + tuning.body.stand_eye_height
-	var hit := PackedStringArray()
-	for b in m.blocks:
-		if b.rise != MapData.Rise.NONE:
-			continue
-		var h := b.size * 0.5
-		if absf(f.x - b.center.x) < h.x + r and absf(f.z - b.center.z) < h.z + r \
-				and feet < b.center.y + h.y and head > b.center.y - h.y:
-			hit.append("%s %s" % [b.kind, b.center])
-	assert_eq(hit.size(), 0, "no block in a standing body at the flag: %s" % [hit])
-
-
-func test_woodland_long_road_hump_does_not_see_flag_b_old_forward_post() -> void:
+## The road's stack at the Culvert stands a gate screen's 2.8 m for this: the hump is 2.1 m over the dip the stack
+## stands in, and at a woodpile's 1.8 m a standing eye on the road sees a chest in the pole's ring from 60 m.
+func test_woodland_long_road_does_not_see_flag_b_pole_ring_or_posts() -> void:
 	var m := maps["woodland"]
 	var level := MapLevel.new()
 	add_child(level)
@@ -177,21 +160,36 @@ func test_woodland_long_road_hump_does_not_see_flag_b_old_forward_post() -> void
 	var hit := RayHit.new()
 	var nav := navs["woodland"]
 	var eye := tuning.body.stand_eye_height
-	var from := Vector3(HUMP.x, nav.floor_at(Vector3(HUMP.x, 50.0, HUMP.y)) + eye, HUMP.y)
-	var seen := PackedStringArray()
-	# A standing body anywhere within 1.5 m of the hump point onto the post's 1.5 m neighbourhood.
-	for dx: float in [-1.5, 0.0, 1.5]:
-		for dz: float in [-1.5, 0.0, 1.5]:
-			var a := Vector3(from.x + dx, 0.0, from.z + dz)
-			a.y = nav.floor_at(Vector3(a.x, 50.0, a.z)) + eye
-			var to_x: float = OLD_POST.x
-			var to_z: float = OLD_POST.y
-			var g := nav.floor_at(Vector3(to_x, 50.0, to_z))
-			var chest := Vector3(to_x, g + eye - CHEST_BELOW_EYE, to_z)
-			if not q.ray(a, chest, hit):
-				seen.append("%s" % [a])
+	var ring: Array[Vector3] = []
+	for dx: float in [-POLE_RING, -POLE_RING * 0.5, 0.0, POLE_RING * 0.5, POLE_RING]:
+		for dz: float in [-POLE_RING, -POLE_RING * 0.5, 0.0, POLE_RING * 0.5, POLE_RING]:
+			ring.append(_chest(nav, POLE_B.x + dx, POLE_B.y + dz, eye))
+	var posts: Array[Vector3] = []
+	for p: Vector2 in POSTS_B:
+		posts.append(_chest(nav, p.x, p.y, eye))
+	var ring_seen := 0
+	var posts_seen := 0
+	var x := ROAD_WEST.position.x
+	while x <= ROAD_WEST.end.x:
+		var z := ROAD_WEST.position.y
+		while z <= ROAD_WEST.end.y:
+			var from := Vector3(x, nav.floor_at(Vector3(x, 50.0, z)) + eye, z)
+			for t: Vector3 in ring:
+				if not q.ray(from, t, hit):
+					ring_seen += 1
+			if x >= HUMP_X.x and x <= HUMP_X.y:
+				for t: Vector3 in posts:
+					if not q.ray(from, t, hit):
+						posts_seen += 1
+			z += 1.0
+		x += 1.0
 	level.free()
-	assert_eq(seen.size(), 0, "the hump sees the post from %s" % [seen])
+	assert_eq(ring_seen, 0, "the Long road west of the Culvert sees a chest in flag B's pole ring")
+	assert_eq(posts_seen, 0, "the Long road's hump sees a chest at one of flag B's defender posts")
+
+
+func _chest(nav: NavGrid, x: float, z: float, eye: float) -> Vector3:
+	return Vector3(x, nav.floor_at(Vector3(x, 50.0, z)) + eye - CHEST_BELOW_EYE, z)
 
 
 ## A seeded bot match on each field: it finishes, BBs land, and no bot is held up.

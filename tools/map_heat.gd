@@ -1,8 +1,8 @@
 extends SceneTree
 ## The maps' play record (MB1; dev only, never exported): seeded headless bot matches on a field through MatchRunner,
 ## writing where every character stood (once a second while a round is live, by the END it started the round at),
-## where every knock-out's shooter and target stood, and how every round ended, as one JSON file tools/maps/heat.py
-## draws as heat maps and tools/maps/report.py reads. Measured, never asserted: no check runs it.
+## where every knock-out's shooter and target stood, and how every round ended, as one JSON file tools/maps/plan.py
+## draws as heat maps and counts into its report. Measured, never asserted: no check runs it.
 ##   godot --headless --path . -s res://tools/map_heat.gd -- <map id> <out.json> [seeds] [mode] [size] [first seed]
 ## `mode` is "elimination" (the default) or "flag" (Attack / Defend); `size` the players a side (the map's standard
 ## by default).

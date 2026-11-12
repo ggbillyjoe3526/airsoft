@@ -33,7 +33,8 @@ decided a pass were re-run to 16 matches or more. Bands: each end 45 to 55 % of 
 
 RP1 (the replicas' balance, #319) merged while this task ran and moved the bots' fights, so every "after" below is
 measured on the branch rebuilt on it (`main` at 055b438), and the "before" is `main`'s own map at that commit unless
-a figure says "before RP1".
+a figure says "before RP1". SM3 (#322) then made Subway's ticket gates one person wide, so Subway's before and after
+are measured once more on `main` at 2bdbb01, through those gates.
 
 ## What the bots' planner needs of a lane
 
@@ -58,7 +59,7 @@ rounds, Attack / Defend's the attackers'.
 |---|---|---|---|
 | Depot | 49 % ±4 (124 rounds) to 51 % ±5 (121) | 44 % ±6 (62) to 51 % ±6 (65) | 13 m, 6 % to 12 m, 5 % |
 | Woodland | 55 % ±6 (60) to 50 % ±4 (173) | 56 % ±5 (120) to 59 % ±5 (117) | 40 m, 73 % to 20 m, 25 % |
-| Subway | 55 % ±4 (127) to 54 % ±4 (127) | 46 % ±6 (59) to 52 % ±6 (60) | 7 m to 8 m, none |
+| Subway | 57 % ±5 (115) to 50 % ±5 (121) | 37 % ±6 (60) to 53 % ±6 (64) | 7 m to 8 m, none |
 
 ### Depot (`tools/depot/layout.py`, `data/maps/depot.json`, 222 blocks, were 220; the bake rebuilt)
 
@@ -96,26 +97,26 @@ rounds, Attack / Defend's the attackers'.
   east bank, joined, with a hazel below and three on the crest at the head of the bank's ramp, 5 m wide; the Hut row
   crates deeper and double height, and a stack across the Back yard's mouth.
 - **South:** three fallen trees across the Long road, staggered, the first on the hump's top (`tag="roadblock"`:
-  `check.py` lets a piece meant to block the road stand on it); a cordwood stack across the road where the lane
-  leaves the Culvert, a gate screen's 2.8 m, and one behind the west camp's road gate; at the Sawmill a stack between flag B and
-  the road.
+  `check.py` lets a piece meant to block the road stand on it); a cordwood stack across the road where the lane leaves
+  the Culvert, a gate screen's 2.8 m, and one behind the west camp's road gate; at the Sawmill a stack between flag B
+  and the road.
 - **Lanes:** re-laid through the new pieces; the middle lane ends in the Back yard (it ended in the east camp). Each
-  has one point either side of the field's middle, the middle lane's western one behind the Clearing's tree. The
-  north lane's middle falls at the west end of the North bridge, a footbridge 1.8 m wide: the west's point is on the
-  deck's first metres and the east's 2 m off that end by the fallen tree's root plate, so the lane is fought at the
-  bridge's west head and the west is not sent over the deck. The south lane's last two, flag B's defenders, are behind the crates north of the road mouth and
-  behind the flag's stack.
+  has one point either side of the field's middle, the middle lane's western one behind the Clearing's tree. The north
+  lane's middle falls at the west end of the North bridge, a footbridge 1.8 m wide: the west's point is on the deck's
+  first metres and the east's 2 m off that end by the fallen tree's root plate, so the lane is fought at the bridge's
+  west head and the west is not sent over the deck. The south lane's last two, flag B's defenders, are behind the
+  crates north of the road mouth and behind the flag's stack.
 - **Passes:** fifteen layouts were measured (`pipeline/out/mb1/`, not committed). A screen with one gap on the Ridge
   gave the west 30 %. A fourth road tree and an open Ford each put the long lines back (26 m, 43 % over 30 m). A 2 m
   door between the Ford's thickets was a queue. A pen of two stacks round flag B gave the attackers 78 %. The road's
   stack at 1.8 m left one 52 m duel from the hump onto flag B's post, 88 of Attack / Defend's 142 knock-outs from over
-  38 m; a gate screen's 2.8 m shuts it. The same stack 3.5 m further east was the attackers' cover onto the site
-  (71 % of 126 rounds), so it stands where the lane leaves the Culvert. Flag B's forward defender in the road mouth
-  took 80 of the 175 knock-outs the attackers scored there, from 25 m; behind the crates the attackers' share fell
-  from 64 to 55 % (before RP1). With the north lane's western stop at the bridge's east end the west crossed the deck
-  into the east's guns, lost that lane 133 to 187 and won 40 to 44 % of Elimination over three layouts; at the west
-  end, 50 %. The first eight baseline matches read 43 % and 70 % and sixteen read 46 % and 61 %: the before is
-  measured as long as the after.
+  38 m; a gate screen's 2.8 m shuts it (that post then moved behind the crates: Decisions has the line as it stands).
+  The same stack 3.5 m further east was the attackers' cover onto the site (71 % of 126 rounds), so it stands where the
+  lane leaves the Culvert. Flag B's forward defender in the road mouth took 80 of the 175 knock-outs the attackers
+  scored there, from 25 m; behind the crates the attackers' share fell from 64 to 55 % (before RP1). With the north
+  lane's western stop at the bridge's east end the west crossed the deck into the east's guns, lost that lane 133 to
+  187 and won 40 to 44 % of Elimination over three layouts; at the west end, 50 %. The first eight baseline matches
+  read 43 % and 70 % and sixteen read 46 % and 61 %: the before is measured as long as the after.
 - **After:** Elimination: the west 50 % ±4 over 24 matches (173 rounds); the median knock-out at 20 m (40), 25 %
   from over 30 m (73), a round's first at 17 m (45); by lane the north 26 m, the middle 19 m, the road 14 m (39, 41
   and 41), and no lane is lost by more than 349 to 308. Attack / Defend: the attackers 59 % ±5 over 16 matches
@@ -125,19 +126,21 @@ rounds, Attack / Defend's the attackers'.
 ### Subway (`tools/subway/layout.py`, `data/maps/subway.json`; no block moved)
 
 - **Found:** the closest fights of the three (median 7 m) on two of three floors: both poles stood on the south side
-  (A on the south platform, B on the stair landing 11 m from it), so the north platform saw 1 % of Elimination's
-  knock-outs and under 0.4 % of Attack / Defend's play time. Every attacker came down the middle stair, where the
-  defenders scored 56 at its top for none lost, and a flag went up in 8 % of rounds (the attackers' 46 % ±6 came from
-  knock-outs). One lane ran down the spiral stair, about 40 s for a bot, and rounds ran 72 s.
+  (A on the south platform, B on the stair landing 11 m from it), so the north platform saw under 1 % of
+  Elimination's knock-outs and under 0.4 % of Attack / Defend's play time. Every attacker came down the middle stair,
+  where the defenders scored 70 at its top for none lost: the attackers won 37 % ±6 and a flag went up in 12 % of
+  rounds. One lane ran down the spiral stair, about 40 s for a bot, and rounds ran 72 s; the street end took 57 % ±5
+  of Elimination.
 - **Flag B** stands on the north platform at (33, -7.8).
 - **Lanes:** the north lane takes the lifts down and runs the north platform; the south lane takes the escalators'
   north lane (the middle lane their south one, as SM2 laid them) and the concourse to the middle stair, its last two
   points (the defenders' posts) the stair's landing and foot. None takes the spiral stair. The north lane has one
   point 4.45 m either side of the field's middle (QA found its stops 1.1 and 15 m deep).
-- **After:** the north platform takes 16 % of Elimination's knock-outs and 37 % of Attack / Defend's (98 to 103); a
-  flag goes up in 18 % of rounds (8 %); Elimination's rounds run 49 s (72) and Attack / Defend's 53 s (71); the stair
-  top costs the attackers 33 (56). The win shares hardly move: the street end 54 % ±4 of Elimination over 16 matches
-  (55 % ±4), at the band's upper edge both times, and the attackers 52 % ±6 (46 % ±6).
+- **After:** the north platform takes 14 % of Elimination's knock-outs (41 to 45) and 42 % of Attack / Defend's
+  (120 to 127); a flag goes up in 20 % of rounds (12 %); Elimination's rounds run 50 s (72) and Attack / Defend's
+  55 s (74); the stair top costs the attackers 25 (70). The street end takes 50 % ±5 of Elimination over 16 matches
+  (57 % ±5) and the attackers 53 % ±6 of Attack / Defend (37 % ±6). Before SM3's gates the same two layouts read
+  55 and 54 % of Elimination and 46 and 52 % of Attack / Defend.
 
 ## Decisions
 
@@ -149,12 +152,14 @@ rounds, Attack / Defend's the attackers'.
 - **Woodland's lanes differ in range** (the road 14 m, the Clearing 19 m, the north 26 m), so each replica class
   has a lane.
 - **Woodland's road stack stands a gate screen's 2.8 m,** though the owner asked for the woodpiles "less tall"
-  (2026-11-09): at a woodpile's 1.8 m the hump looks over it onto flag B's post. `test_wg2_woodland_models` allows
-  the two heights; a play check asks him to look at it.
+  (2026-11-09). Measured with the game's ray against flag B as it now stands, from every metre of the road west of
+  the Culvert: at 1.8 m a standing eye sees a chest in the ring round the pole along 1,531 of 55,625 lines, out to
+  63 m; at 2.8 m along none. The two defender posts are hidden at either height. `test_mb1_layouts` holds the line
+  shut and fails with the stack at 1.8 m. The stack is the camps' gate screen, a height the field already has. His
+  2026-11-12 ruling puts gameplay first and he wants no thread to wait on him, so 2.8 m is built and the height is
+  put to him on a decision card (keep it, or 1.8 m with the pole's south side covered another way).
 - **Woodland's attackers at 59 % are in the band's upper half** (40 to 65 %): the flags are now fought for on the
   sites, and the full balance pass measures it at 32 seeds.
-- **Subway's Elimination stays at the band's upper edge** (the street end 54 % ±4; 55 % ±4 before; 50 % at PP1's 32
-  seeds): moving a flag and the lanes did not move it apart from the noise, and the full balance pass measures it.
 - **Measured at Normal, 6v6, by day.** Easy, Hard, the other team sizes and Woodland's night belong to the full
   balance report of the Dev 3 final pass (`tools/balance.sh`).
 
@@ -167,8 +172,8 @@ rounds, Attack / Defend's the attackers'.
   (`test_wg2_woodland_models`) and tyre tracks under a road tree (`test_wear_marks`). The touched files pass again at
   the final head, merged with `main` (SM3's ticket gates, UL1, UL2); CI runs the whole suite.
 - QA added `tests/unit/test_mb1_layouts.gd` (nine tests: each lane's stops equally deep either side of the middle,
-  the defenders' posts by a pole, Subway's flag B on the north platform, the hump's line onto flag B's post shut,
-  seeded matches that end) and failed the first head on Subway's north lane, since evened.
+  the defenders' posts by a pole, Subway's flag B on the north platform, the Long road's line onto flag B's pole
+  ring and posts shut, seeded matches that end) and failed the first head on Subway's north lane, since evened.
 - Performance: no monitor moved; Woodland's level builds from 4 blocks fewer; a random route there costs about 1 ms
   more to find (3.0 to 3.9 ms mean), advisory.
 - **Not verified, for the owner's play:** how each change feels to a person. The play checks are on the Dev 3

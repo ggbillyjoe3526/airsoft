@@ -1,7 +1,7 @@
 extends SceneTree
 ## A field's survey (MB1; dev only, never exported): every place a player can stand, one a `step` square on each
-## floor, with what stands open to it and how far each end walks to it, written as one JSON file tools/maps/report.py
-## reads and tools/maps/heat.py draws. Measured on the game's own level, nav grid and sight ray (FieldMeasure), doors
+## floor, with what stands open to it and how far each end walks to it, written as one JSON file tools/maps/plan.py
+## reads for its report and its pictures. Measured on the game's own level, nav grid and sight ray (FieldMeasure), doors
 ## as a round starts them. Measured, never asserted: no check runs it.
 ##   godot --headless --path . -s res://tools/map_survey.gd -- <map id> <out.json> [step m]
 ## For every stand point: how many of the others within the bots' sight see it standing eye to standing eye

@@ -822,8 +822,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   hazels on the crest at the head of its ramp, and a log stack beside flag B, whose forward defender waits behind the
   crates north of the road mouth (in the mouth he was shot from 25 m before a fight reached the flag). A piece in a dip
   hides nobody on a rise behind it (the road's stack is a gate screen's 2.8 m where the lane leaves the Culvert: at
-  1.8 m the hump looked over it, 52 m onto flag B's post, and 3.5 m further east it was the attackers' cover onto
-  the site), and a screen with one gap is a trap for whoever must come through: bushes are walked through on a broad front.
+  1.8 m the road west of it looks over it at a chest by flag B's pole, 60 m off, and 3.5 m further east it was the
+  attackers' cover onto the site), and a screen with one gap is a trap for whoever must come through: bushes are walked through on a broad front.
   A pole walled on two sides hides whoever raises it as well as whoever holds it: a pen of two stacks round flag B,
   with the defenders' posts inside it, gave the attackers 78 % of 120 rounds, and came out. The north lane's two stops
   are at the North bridge's west head (the field's middle crosses there, and the bridge is a footbridge 1.8 m wide:
