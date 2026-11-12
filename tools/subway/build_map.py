@@ -346,7 +346,7 @@ def spiral() -> tuple[list[dict], list[list[float]]]:
     return ramps, boxes
 
 
-# ---------------- The platform tunnels' vaults ----------------
+# ---------------- The tunnels' vaults (platform tunnels and running tunnels) ----------------
 
 VAULT_PROUD = 0.08   # a vault's collider boxes stand at most this far (m) in front of its drawn arc
 
@@ -354,8 +354,8 @@ VAULT_PROUD = 0.08   # a vault's collider boxes stand at most this far (m) in fr
 def vault_circle(v: dict) -> tuple[float, float, float]:
     """A vault's arc: the circle (its middle's z and y, its radius) through both springings and the crown."""
     half = (v["z1"] - v["z0"]) / 2
-    radius = (half * half + L.VAULT_RISE * L.VAULT_RISE) / (2 * L.VAULT_RISE)
-    return (v["z0"] + v["z1"]) / 2, v["y"] + L.VAULT_RISE - radius, radius
+    radius = (half * half + v["rise"] * v["rise"]) / (2 * v["rise"])
+    return (v["z0"] + v["z1"]) / 2, v["y"] + v["rise"] - radius, radius
 
 
 def vault_y(v: dict, z: float) -> float:
@@ -366,12 +366,20 @@ def vault_y(v: dict, z: float) -> float:
 
 
 def vault_top(v: dict) -> float:
-    return v["y"] + L.VAULT_RISE + FT
+    return v["y"] + v["rise"] + FT
 
 
 def vault_air(v: dict) -> list[float]:
     """The air a vault holds: its tunnel from a car's roof up, cut out of the shell (the lintels over a car)."""
     return [v["x0"], v["x1"], v["low"] + FT, vault_top(v), v["z0"], v["z1"]]
+
+
+def vault_inner(v: dict) -> list[list[float]]:
+    """The air under a vault's arc, from its springing: under each arc piece (vault_pieces), up to the piece's lower
+    end. Nothing but a car's own shell stands in it (a running tunnel's arch springs under a car's roof)."""
+    pts = vault_pieces(v)
+    return [[v["x0"], v["x1"], v["y"], min(ya, yb), min(za, zb), max(za, zb)]
+            for (za, ya), (zb, yb) in zip(pts, pts[1:]) if min(ya, yb) > v["y"] + EPS]
 
 
 def vault_pieces(v: dict) -> list[tuple[float, float]]:
@@ -406,17 +414,22 @@ def vault_pieces(v: dict) -> list[tuple[float, float]]:
 def vault_boxes(v: dict) -> list[list[float]]:
     """A vault's colliders: each arc piece's bounds up to the vault's top, which sit on the drawn arc (never short of
     it, at most VAULT_PROUD in front of it: vault_pieces); its walls from a car's roof up to the springing (the
-    trackside wall over a car); and its ends, under the springing and over it."""
+    trackside wall over a car, none when a car's roof stands over the springing); and its ends, under the springing and
+    over it (none at a `mouth`, the end opening onto a wider tunnel)."""
     top = vault_top(v)
     low = v["low"] + FT
     out = []
     pts = vault_pieces(v)
     for (za, ya), (zb, yb) in zip(pts, pts[1:]):
         out.append([v["x0"], v["x1"], min(ya, yb), top, min(za, zb), max(za, zb)])
-    out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z0"] - FT, v["z0"]])
-    out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z1"], v["z1"] + FT])
-    for xa, xb in ((v["x0"] - FT, v["x0"]), (v["x1"], v["x1"] + FT)):
-        out.append([xa, xb, low, v["y"], v["z0"], v["z1"]])
+    walled = low < v["y"] - EPS
+    if walled:
+        out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z0"] - FT, v["z0"]])
+        out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z1"], v["z1"] + FT])
+    ends = [(v["x0"] - FT, v["x0"])] if v.get("mouth") != "west" else []
+    for xa, xb in ends + [(v["x1"], v["x1"] + FT)]:
+        if walled:
+            out.append([xa, xb, low, v["y"], v["z0"], v["z1"]])
         out.append([xa, xb, v["y"], top, v["z0"], v["z1"]])
     return [[r(c) for c in bx] for bx in out]
 
@@ -553,17 +566,22 @@ def build() -> dict:
         blocks.append(as_block(kind, bx, colour=SHAFT_COLOUR))
         solid.append(bx)
     vaults = [vault_air(v) for v in L.VAULTS]
+    inner = [bx for v in L.VAULTS for bx in vault_inner(v)]
     for bx, owner, kind in shell_boxes:
-        holes = [a for i, a in air if i != owner] + [shaft] + vaults
+        # A car's shell stands under a running tunnel's arch; nothing else does.
+        under = [] if L.rooms[owner]["area"].endswith("train") else inner
+        holes = [a for i, a in air if i != owner] + [shaft] + vaults + under
         parts = cut([bx], holes)
         parts = cut(parts, [s for s in solid if overlap(s, bx)])
         for p in parts:
             blocks.append(as_block(kind, p))
             solid.append(p)
-    # The vaults over the platform tunnels, round the shell already standing and clear of every room's air.
+    # The vaults over the tunnels, round the shell already standing and clear of every room's air and every arch's
+    # (a platform tunnel's end round a running tunnel's mouth).
     for v in L.VAULTS:
+        others = [bx for o in L.VAULTS if o is not v for bx in vault_inner(o)]
         for bx in vault_boxes(v):
-            parts = cut(cut([bx], [a for _, a in air]), [s for s in solid if overlap(s, bx)])
+            parts = cut(cut(cut([bx], [a for _, a in air]), others), [s for s in solid if overlap(s, bx)])
             for p in parts:
                 blocks.append(as_block("wall", p))
                 solid.append(p)
