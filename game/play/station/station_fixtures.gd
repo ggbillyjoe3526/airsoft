@@ -60,7 +60,7 @@ static func placings(station: StationDressing, cfg: StationFixturesConfig) -> Di
 			continue
 		if not out.has(f.model):
 			out[f.model] = []
-		out[f.model].append(Transform3D(Basis(Vector3.UP, f.yaw), f.position))
+		out[f.model].append(Transform3D(Basis(Vector3.UP, f.yaw).scaled(Vector3.ONE * f.scale), f.position))
 	return out
 
 

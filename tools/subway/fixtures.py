@@ -41,6 +41,15 @@ MODELS = {
     "poster_wide_b": ((-3.05, 3.05, -1.55, 1.55, 0.0, 0.020), "wall"),
     "poster_wide_c": ((-3.05, 3.05, -1.55, 1.55, 0.0, 0.020), "wall"),
     "name_board": ((-1.460, 1.460, -0.245, 0.245, 0.0, 0.046), "wall"),
+    "line_map": ((-1.220, 1.220, -0.170, 0.170, 0.0, 0.029), "wall"),
+    "info_panel": ((-0.620, 0.620, -0.320, 0.320, 0.0, 0.029), "wall"),
+    "notice_smoking": ((-0.195, 0.195, -0.195, 0.195, 0.0, 0.029), "wall"),
+    "notice_handrail": ((-0.195, 0.195, -0.195, 0.195, 0.0, 0.029), "wall"),
+    "notice_cctv": ((-0.195, 0.195, -0.195, 0.195, 0.0, 0.029), "wall"),
+    "wall_sign_out": ((-0.660, 0.660, -0.160, 0.160, 0.0, 0.029), "wall"),
+    "wall_sign_platforms": ((-0.660, 0.660, -0.160, 0.160, 0.0, 0.029), "wall"),
+    "departures_n": ((-0.800, 0.800, -0.700, 0.0, -0.050, 0.050), "hung"),
+    "departures_s": ((-0.800, 0.800, -0.700, 0.0, -0.050, 0.050), "hung"),
 }
 POSTERS = ["poster_%s" % k for k in "abcdefghijklm"]  # the spots below take them in turn
 # How each wall faces into its room: the turn (degrees) of a model on it.
@@ -58,6 +67,13 @@ CLOCK_Y = 2.9      # its bracket's top: the clock hangs under it
 CCTV_Y = 2.75
 EXTINGUISHER_Y = 0.4
 LAMP_Y = 2.6       # a tunnel lamp over the track bed, clear of the wagons' tops
+NOTICE_Y = 1.6
+SIGN_OVER = 0.35   # a wall sign's middle over an escalator's or a stair's mouth, from the mouth's ceiling
+# The escalator shafts' posters, Tube style: rows of small ones (ESC_SCALE of a poster: 0.6 x 0.9 m) on both side
+# walls, ESC_STEP apart, their middles this far over the stairs' pitch line, clear of the first and last 2 m.
+ESC_SCALE = 0.6
+ESC_STEP = 2.0
+ESC_ROWS = [("esc_up", -35.0, -21.0, 2.1), ("esc_low", -3.0, 7.0, 1.7)]
 
 # The spots: (model, room, wall, along, height over the floor) for a wall model; (model, room, x, z) hung or on the
 # floor; a hung sign's yaw 90 puts "Way out" facing east, read by those heading west towards the street, and
@@ -105,6 +121,33 @@ WALL = [
     ("cctv_camera", "plat_s", "n", -44.0, CCTV_Y), ("cctv_camera", "plat_s", "n", 44.0, CCTV_Y),
     ("fire_extinguisher", "plat_n", "s", -36.5, EXTINGUISHER_Y),
     ("fire_extinguisher", "plat_s", "n", 43.5, EXTINGUISHER_Y),
+    # The second pass (William, 2026-11-12: signs and posters in every room). "Platforms" over the escalators' and
+    # the stair's mouths on the way down (not where a hanging sign already stands in front of one), "Way out" over
+    # the platforms' doors to the lower hall (the arrow points ahead).
+    ("wall_sign_platforms", "hall", "e", 0.0, 3.2 + SIGN_OVER),
+    ("wall_sign_platforms", "upper", "e", 0.0, 2.8 + SIGN_OVER),
+    ("wall_sign_platforms", "east", "e", 0.0, 3.0 + SIGN_OVER),
+    ("wall_sign_out", "plat_n", "s", 12.75, 2.75), ("wall_sign_out", "plat_n", "s", 19.75, 2.75),
+    ("wall_sign_out", "plat_s", "n", 12.75, 2.75), ("wall_sign_out", "plat_s", "n", 19.75, 2.75),
+    # Hold the handrail at each escalator's head and foot; information panels, no smoking, CCTV notices.
+    ("notice_handrail", "esc_up", "n", -37.0, 1.9), ("notice_handrail", "esc_up", "s", -19.0, 1.9),
+    ("notice_handrail", "esc_low", "n", -5.0, 1.8), ("notice_handrail", "esc_low", "s", 9.0, 1.8),
+    ("info_panel", "hall", "n", -43.0, POSTER_Y), ("info_panel", "upper", "n", -9.0, POSTER_Y),
+    ("info_panel", "lowc", "e", 2.4, POSTER_Y),
+    ("notice_smoking", "hall", "s", -52.5, NOTICE_Y), ("notice_smoking", "upper", "s", -9.0, NOTICE_Y),
+    ("notice_smoking", "liftp", "n", -48.5, NOTICE_Y), ("notice_smoking", "plant", "s", 8.0, NOTICE_Y),
+    ("notice_cctv", "hall", "s", -50.5, 2.0), ("notice_cctv", "plat_n", "s", -46.5, NOTICE_Y + 0.1),
+    ("notice_cctv", "plat_s", "n", -41.5, NOTICE_Y + 0.1),
+    # The line's strip map along each platform's back wall, between the boards and posters.
+    ("line_map", "plat_n", "s", -28.5, 1.7), ("line_map", "plat_n", "s", 16.25, 1.7),
+    ("line_map", "plat_s", "n", -28.5, 1.7), ("line_map", "plat_s", "n", 16.25, 1.7),
+    # More posters where there were none: the lower hall, the mid and east passages, the lift landing.
+    ("poster_i", "lowc", "n", 16.25, POSTER_Y), ("poster_j", "lowc", "s", 16.25, POSTER_Y),
+    ("poster_k", "midp", "w", -3.0, POSTER_Y), ("poster_l", "midp", "w", 3.0, POSTER_Y),
+    ("poster_m", "midp", "e", -3.0, POSTER_Y), ("poster_a", "midp", "e", 3.0, POSTER_Y),
+    ("poster_b", "ecross", "w", -3.6, POSTER_Y), ("poster_c", "ecross", "w", 3.6, POSTER_Y),
+    ("poster_d", "ecross", "e", -3.0, POSTER_Y), ("poster_e", "ecross", "e", 3.0, POSTER_Y),
+    ("poster_f", "liftp", "s", -41.5, POSTER_Y),
     # The running tunnels' bulkhead lamps, staggered wall to wall, clear of the cross passage.
     ("tunnel_lamp", "run_n", "n", 54.0, LAMP_Y), ("tunnel_lamp", "run_n", "n", 62.0, LAMP_Y),
     ("tunnel_lamp", "run_n", "n", 70.0, LAMP_Y), ("tunnel_lamp", "run_n", "n", 78.0, LAMP_Y),
@@ -119,6 +162,9 @@ HUNG = [
     ("way_sign", "upper", -16.0, 0.0, 90.0), ("way_sign", "npass", 3.0, -8.0, 90.0),
     ("way_sign", "spass", 3.0, 8.0, 90.0), ("way_sign", "east", 22.5, 0.0, 90.0),
     ("way_sign", "lowc", 12.0, 0.0, 90.0), ("way_sign", "liftp", -40.0, -3.1, 90.0),
+    # The platforms' departure boards, between the ceiling's strip lamps, read along the platform.
+    ("departures_n", "plat_n", -10.75, -7.25, 90.0), ("departures_n", "plat_n", 30.5, -7.25, 90.0),
+    ("departures_s", "plat_s", -12.77, 7.25, 90.0), ("departures_s", "plat_s", 42.15, 7.25, 90.0),
 ]
 # Bins against a wall (their back to it): (room, wall, along).
 BINS = [
@@ -141,8 +187,8 @@ def place(L, floor_at, ceil_at, air_boxes, lift: float, holes: list) -> list[dic
     def in_air(x: float, y: float, z: float) -> bool:
         return any(a[0] <= x <= a[1] and a[2] <= y <= a[3] and a[4] <= z <= a[5] for a in air)
 
-    def world_box(model: str, x: float, y: float, z: float, yaw: float) -> list[float]:
-        b = MODELS[model][0]
+    def world_box(model: str, x: float, y: float, z: float, yaw: float, scale: float = 1.0) -> list[float]:
+        b = [v * scale for v in MODELS[model][0]]
         c, s = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
         xs, zs = [], []
         for px in (b[0], b[1]):
@@ -167,30 +213,41 @@ def place(L, floor_at, ceil_at, air_boxes, lift: float, holes: list) -> list[dic
                 return False
         return True
 
-    def add(model: str, x: float, y: float, z: float, yaw: float) -> None:
+    def add(model: str, x: float, y: float, z: float, yaw: float, scale: float = 1.0) -> None:
         out.append({"model": model, "x": round(x, 3), "y": round(y + lift, 3), "z": round(z, 3),
                     "yaw": round(((yaw + 180.0) % 360.0) - 180.0, 1)})
+        if scale != 1.0:
+            out[-1]["scale"] = scale
 
-    for model, name, wall, along, height in WALL:
+    wall = list(WALL)
+    for r, (name, x0, x1, height) in enumerate(ESC_ROWS):
+        for side, offset in (("n", 0), ("s", 7)):
+            for i in range(int(round((x1 - x0) / ESC_STEP)) + 1):
+                # the designs in turn down each row; the far wall's row and the next shaft start elsewhere
+                model = POSTERS[(i + offset + 3 * r) % len(POSTERS)]
+                wall.append((model, name, side, x0 + i * ESC_STEP, height, ESC_SCALE))
+    for spot in wall:
+        model, name, side, along, height = spot[:5]
+        scale = spot[5] if len(spot) > 5 else 1.0
         rm = rooms[name]
-        yaw = WALL_YAW[wall]
-        if wall in "ns":
-            x, z = along, rm["z0"] if wall == "n" else rm["z1"]
-            normal = (0.0, 1.0 if wall == "n" else -1.0)
+        yaw = WALL_YAW[side]
+        if side in "ns":
+            x, z = along, rm["z0"] if side == "n" else rm["z1"]
+            normal = (0.0, 1.0 if side == "n" else -1.0)
         else:
-            x, z = rm["x0"] if wall == "w" else rm["x1"], along
-            normal = (1.0 if wall == "w" else -1.0, 0.0)
+            x, z = rm["x0"] if side == "w" else rm["x1"], along
+            normal = (1.0 if side == "w" else -1.0, 0.0)
         y = floor_at(rm, x) + height
-        box = world_box(model, x, y, z, yaw)
-        why = "on %s's %s wall at %.1f" % (name, wall, along)
+        box = world_box(model, x, y, z, yaw, scale)
+        why = "on %s's %s wall at %.1f" % (name, side, along)
         # solid wall behind it all across: no doorway, no other room's air
-        lo, hi = (box[0], box[1]) if wall in "ns" else (box[4], box[5])
+        lo, hi = (box[0], box[1]) if side in "ns" else (box[4], box[5])
         ok = True
         for t in (0.02, 0.5, 0.98):
             for v in (box[2] + 0.01, 0.5 * (box[2] + box[3]), box[3] - 0.01):
                 a = lo + (hi - lo) * t
-                px = (a if wall in "ns" else x) - normal[0] * LOOK
-                pz = (a if wall in "we" else z) - normal[1] * LOOK
+                px = (a if side in "ns" else x) - normal[0] * LOOK
+                pz = (a if side in "we" else z) - normal[1] * LOOK
                 if in_air(px, v, pz):
                     print("fixtures: %s %s has an opening behind it; left out" % (model, why))
                     ok = False
@@ -198,7 +255,7 @@ def place(L, floor_at, ceil_at, air_boxes, lift: float, holes: list) -> list[dic
             if not ok:
                 break
         if ok and clear(model, box, why):
-            add(model, x, y, z, yaw)
+            add(model, x, y, z, yaw, scale)
     for model, name, x, z, yaw in HUNG:
         rm = rooms[name]
         y = ceil_at(rm, floor_at(rm, x))

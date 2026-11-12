@@ -14,6 +14,8 @@ is z 0 on the wall, facing +z; a hanging one's top is y 0 at the ceiling; a stan
 | `poster_a..m.glb` | poster_frames: a 1 x 1.5 m poster in a slim aluminium frame, thirteen invented posters | 30 |
 | `poster_wide_a..c.glb` | the same frame 6 x 3 m (50 mm), the trackside walls' big posters | 30 |
 | `name_board.glb` | station_name_platform: the station's name on a long band on the platform wall | 80 |
+| `line_map.glb`, `info_panel.glb`, `notice_*.glb`, `wall_sign_*.glb` | the second pass's wall plates (PLATES): the line's strip map, the information panel, three notices, "Way out" and "Platforms" on walls | 40 |
+| `departures_n.glb`, `departures_s.glb` | a dot-matrix departure board hung over each platform | 90 |
 
 Every word and name is invented (station_signs.py); no real network, brand or logo.
 
@@ -31,8 +33,18 @@ from station_cells import POSTERS, WIDE_POSTERS  # noqa: E402
 
 BUDGETS = {
     "cctv_camera": 320, "way_sign": 90, "fire_extinguisher": 480, "litter_bin": 320, "edge_sign": 12,
-    "platform_clock": 300, "poster": 40, "name_board": 40,
+    "platform_clock": 300, "poster": 40, "name_board": 40, "plate": 40, "departures": 90,
 }
+# The flat wall plates of the second pass (signs in every room): name, cell, half width and height (m), frame paint.
+PLATES = [
+    ("line_map", "line_map", 1.2, 0.15, "charcoal"),
+    ("info_panel", "info_panel", 0.6, 0.3, "charcoal"),
+    ("notice_smoking", "notice_smoking", 0.175, 0.175, "dark_alu"),
+    ("notice_handrail", "notice_handrail", 0.175, 0.175, "dark_alu"),
+    ("notice_cctv", "notice_cctv", 0.175, 0.175, "dark_alu"),
+    ("wall_sign_out", "way_out", 0.64, 0.14, "charcoal"),
+    ("wall_sign_platforms", "platforms", 0.64, 0.14, "charcoal"),
+]
 
 
 def cctv_camera() -> sk.Mesh:
@@ -267,6 +279,41 @@ def poster(cell: str, w: float = 0.5, h: float = 0.75, f: float = 0.025) -> sk.M
     return m
 
 
+def plate(name: str, cell: str, w: float, h: float, frame: str) -> sk.Mesh:
+    """A printed plate 2w x 2h in a 20 mm `frame`, 25 mm off the wall, its middle at the origin."""
+    m = sk.Mesh(name)
+    d, f = 0.025, 0.02
+    m.sign(cell, [(-w, -h, d), (w, -h, d), (w, h, d), (-w, h, d)])
+    m.box((-w - f, -h - f, 0.0), (w + f, -h, d + 0.004), frame, skip="b")
+    m.box((-w - f, h, 0.0), (w + f, h + f, d + 0.004), frame, skip="b")
+    m.box((-w - f, -h, 0.0), (-w, h, d + 0.004), frame, skip="bud")
+    m.box((w, -h, 0.0), (w + f, h, d + 0.004), frame, skip="bud")
+    return m
+
+
+def departures(name: str) -> sk.Mesh:
+    """A departure board 1.6 x 0.4 m, 0.1 deep, its dot-matrix face on both sides, hung 0.3 m under the ceiling on
+    two rods."""
+    m = sk.Mesh(name)
+    w, h, d, top = 0.8, 0.4, 0.05, -0.3
+    y0, y1 = top - h, top
+    m.box((-w, y0, -d), (w, y1, d), "sign_black", skip="fb")
+    f = 0.03
+    m.sign(name, [(-w + f, y0 + f, d), (w - f, y0 + f, d), (w - f, y1 - f, d), (-w + f, y1 - f, d)])
+    m.sign(name, [(w - f, y0 + f, -d), (-w + f, y0 + f, -d), (-w + f, y1 - f, -d), (w - f, y1 - f, -d)])
+    for z, sgn in ((d, 1.0), (-d, -1.0)):
+        for a, b in (((-w, y0), (w, y0 + f)), ((-w, y1 - f), (w, y1)), ((-w, y0 + f), (-w + f, y1 - f)),
+                     ((w - f, y0 + f), (w, y1 - f))):
+            (xa, ya), (xb, yb) = a, b
+            pts = [(xa, ya, z), (xb, ya, z), (xb, yb, z), (xa, yb, z)]
+            m.face(pts if sgn > 0 else [pts[1], pts[0], pts[3], pts[2]], "charcoal")
+    for x in (-0.55, 0.55):
+        m.tube([(x, top, 0.0), (x, 0.0, 0.0)], 0.01, "dark_alu", sides=4)
+        m.box((x - 0.035, -0.012, -0.035), (x + 0.035, 0.0, 0.035), "dark_alu", skip="u")
+        m.box((x - 0.02, top, -0.02), (x + 0.02, top + 0.02, 0.02), "dark_alu", skip="d")
+    return m
+
+
 def name_board() -> sk.Mesh:
     """The station's name on a 2.88 x 0.45 m band in a dark frame, 40 mm off the wall, its middle at the origin."""
     m = sk.Mesh("name_board")
@@ -291,6 +338,10 @@ def main() -> None:
     for cell in WIDE_POSTERS:
         sk.export(poster(cell, 3.0, 1.5, 0.05), cell, BUDGETS["poster"])
     sk.export(name_board(), "name_board", BUDGETS["name_board"])
+    for name, cell, w, h, frame in PLATES:
+        sk.export(plate(name, cell, w, h, frame), name, BUDGETS["plate"])
+    for name in ("departures_n", "departures_s"):
+        sk.export(departures(name), name, BUDGETS["departures"])
 
 
 if __name__ == "__main__":

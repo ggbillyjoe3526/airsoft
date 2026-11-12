@@ -11,15 +11,21 @@ const BUDGETS: Dictionary[StringName, int] = {
 	&"litter_bin": 320, &"edge_sign": 12, &"platform_clock": 300, &"poster_a": 40, &"poster_b": 40, &"poster_c": 40,
 	&"poster_d": 40, &"poster_e": 40, &"poster_f": 40, &"poster_g": 40, &"poster_h": 40, &"poster_i": 40, &"poster_j": 40,
 	&"poster_k": 40, &"poster_l": 40, &"poster_m": 40, &"poster_wide_a": 40, &"poster_wide_b": 40, &"poster_wide_c": 40,
-	&"name_board": 40,
+	&"name_board": 40, &"line_map": 40, &"info_panel": 40, &"notice_smoking": 40, &"notice_handrail": 40,
+	&"notice_cctv": 40, &"wall_sign_out": 40, &"wall_sign_platforms": 40, &"departures_n": 90, &"departures_s": 90,
 }
+const HUNG: Array[StringName] = [&"way_sign", &"departures_n", &"departures_s"]
 const LENSED: Array[StringName] = [&"strip_lamp", &"tunnel_lamp"]
 const PRINTED: Array[StringName] = [&"way_sign", &"edge_sign", &"platform_clock", &"poster_a", &"poster_b",
 		&"poster_c", &"poster_d", &"poster_e", &"poster_f", &"poster_g", &"poster_h", &"poster_i", &"poster_j", &"poster_k",
-		&"poster_l", &"poster_m", &"poster_wide_a", &"poster_wide_b", &"poster_wide_c", &"name_board"]
+		&"poster_l", &"poster_m", &"poster_wide_a", &"poster_wide_b", &"poster_wide_c", &"name_board", &"departures_n",
+		&"departures_s", &"line_map", &"info_panel", &"notice_smoking", &"notice_handrail", &"notice_cctv", &"wall_sign_out",
+		&"wall_sign_platforms"]
 const WALL: Array[StringName] = [&"tunnel_lamp", &"cctv_camera", &"fire_extinguisher", &"platform_clock", &"poster_a",
 		&"poster_b", &"poster_c", &"poster_d", &"poster_e", &"poster_f", &"poster_g", &"poster_h", &"poster_i", &"poster_j",
-		&"poster_k", &"poster_l", &"poster_m", &"poster_wide_a", &"poster_wide_b", &"poster_wide_c", &"name_board"]
+		&"poster_k", &"poster_l", &"poster_m", &"poster_wide_a", &"poster_wide_b", &"poster_wide_c", &"name_board",
+		&"line_map", &"info_panel", &"notice_smoking", &"notice_handrail", &"notice_cctv", &"wall_sign_out",
+		&"wall_sign_platforms"]
 const FLOOR: Array[StringName] = [&"litter_bin", &"edge_sign"]
 ## How far (m) a model may sink into the wall or ceiling it is fixed to.
 const TOUCH := 0.012
@@ -108,9 +114,9 @@ func test_each_fixture_stands_in_its_room_on_its_wall_ceiling_or_floor_and_in_no
 	for model in cfg.models:
 		boxes[StringName(model)] = _mesh(StringName(model)).get_aabb()
 	for f in m.station.fixtures:
-		var t := Transform3D(Basis(Vector3.UP, f.yaw), f.position)
+		var t := Transform3D(Basis(Vector3.UP, f.yaw).scaled(Vector3.ONE * f.scale), f.position)
 		var box := t * boxes[f.model]
-		var front := t.basis.z
+		var front := t.basis.z.normalized()
 		var tag := "%s at %s" % [f.model, f.position]
 		if m.station.zone_at(box.get_center()) == null:
 			bad.append("%s: in no room" % tag)
@@ -122,7 +128,7 @@ func test_each_fixture_stands_in_its_room_on_its_wall_ceiling_or_floor_and_in_no
 		if WALL.has(f.model):
 			if not _in_block(m, f.position - front * 0.03):
 				bad.append("%s: no wall behind it" % tag)
-		elif f.model == &"way_sign":
+		elif HUNG.has(f.model):
 			if not _in_block(m, f.position + Vector3.UP * 0.03):
 				bad.append("%s: no ceiling over it" % tag)
 			var floor_y := m.floor_under(f.position.x, f.position.z, box.position.y)

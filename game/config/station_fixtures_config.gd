@@ -11,6 +11,8 @@ extends Resource
 	"tunnel_lamp", "cctv_camera", "way_sign", "fire_extinguisher", "litter_bin", "edge_sign", "platform_clock",
 	"poster_a", "poster_b", "poster_c", "poster_d", "poster_e", "poster_f", "poster_g", "poster_h", "poster_i",
 	"poster_j", "poster_k", "poster_l", "poster_m", "poster_wide_a", "poster_wide_b", "poster_wide_c", "name_board",
+	"line_map", "info_panel", "notice_smoking", "notice_handrail", "notice_cctv", "wall_sign_out", "wall_sign_platforms",
+	"departures_n", "departures_s",
 ])
 ## Every printed face's picture (tools/blender/maps/station_signs.py: an invented station name, the way-out signs,
 ## the posters, the clock face, the edge warning).
