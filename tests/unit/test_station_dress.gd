@@ -556,3 +556,25 @@ func test_vault_ribs_stand_under_the_arc_inside_the_vault_and_off_turns_them_off
 	huge.vault_rib_every = 1000.0
 	huge.vault_rib_width = 1000.0
 	assert_eq(_vault_vertices(v, huge).size(), plain.size(), "a rib wider than the vault is left out")
+
+
+func test_a_malformed_finish_or_mouth_leaves_the_vault_out_and_a_good_one_is_read() -> void:
+	var base := {"x0": 0, "x1": 9, "z0": 0, "z1": 7, "y": 4, "rise": 2, "thick": 0.3}
+	var cases: Array = [
+		[{"finish": 5}, false], [{"finish": null}, false], [{"mouth": "east"}, false], [{"mouth": 1}, false],
+		[{"mouth": null}, false], [{"finish": "lining", "mouth": "west"}, true], [{"mouth": "west"}, true], [{}, true]]
+	for case: Array in cases:
+		var raw: Dictionary = base.duplicate()
+		raw.merge(case[0] as Dictionary, true)
+		var warnings: Array[String] = []
+		var d := StationDressing.read({"station": {"vaults": [raw]}}, warnings)
+		var kept := d != null and d.vaults.size() == 1
+		assert_eq(kept, case[1], "vault with %s" % [case[0]])
+		if not kept:
+			assert_eq(warnings.size(), 1 if d == null or true else 0, "a bad one warns: %s" % [case[0]])
+	var good := StationDressing.read({"station": {"vaults": [base.merged({"finish": "lining", "mouth": "west"})]}}, [] as Array[String])
+	assert_eq(good.vaults[0].finish, &"lining")
+	assert_true(good.vaults[0].open_west)
+	var plain := StationDressing.read({"station": {"vaults": [base]}}, [] as Array[String])
+	assert_eq(plain.vaults[0].finish, &"", "no finish: the look's own")
+	assert_false(plain.vaults[0].open_west)
