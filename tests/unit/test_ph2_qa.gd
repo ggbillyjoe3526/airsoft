@@ -8,6 +8,10 @@ const RANGE := 80.0
 const PISTOL := "000001"
 const AEG := "000002"
 const SMG := "000026"
+const CYBER := "000019"
+const SNIPER := "000021"
+const PATH := "user://test_ph2_qa.save"
+const PATH_B := "user://test_ph2_qa_b.save"
 const GREEN := "000004"
 const RED_GAS := "000008"
 const BLACK_GAS := "000009"
@@ -53,7 +57,8 @@ func _best(r: ReplicaConfig) -> float:
 func test_the_pistol_and_smg_come_with_the_new_energies_and_dials() -> void:
 	assert_almost_eq(_kit(PISTOL).replicas[0].muzzle_energy, 0.7, 1e-6)
 	assert_almost_eq(_kit(SMG).replicas[0].muzzle_energy, 0.85, 1e-6)
-	assert_almost_eq(_kit(PISTOL).replicas[0].hop_up_dial, 0.5, 1e-6)
+	assert_almost_eq(_kit(PISTOL).replicas[0].hop_up_dial, 0.75, 1e-6)
+	assert_almost_eq(_kit(PISTOL).replicas[0].hop_up_max, 0.19, 1e-6)
 	assert_almost_eq(_kit(SMG).replicas[0].hop_up_dial, 0.95, 1e-6)
 	assert_almost_eq(_kit(SMG).replicas[0].hop_up_max, 0.135, 1e-6)
 
@@ -71,7 +76,7 @@ func test_the_pistols_reach_as_it_comes_rises_with_each_stronger_gas_on_every_fi
 func test_one_notch_either_side_of_the_factory_dial_the_pistol_on_green_gas_does_not_collapse() -> void:
 	var step := rules.rules.hop_up_dial_step
 	var factory := _reach(_kit(PISTOL, GREEN), 20.0)
-	for dial: float in [0.5 - step, 0.5 + step]:
+	for dial: float in [0.75 - step, 0.75 + step]:
 		var m := _reach(_kit(PISTOL, GREEN), 20.0, dial)
 		assert_gt(m, factory * 0.6, "dial %.2f: %.1f m against %.1f m at the factory dial" % [dial, m, factory])
 
@@ -111,30 +116,6 @@ func test_the_smgs_factory_dial_is_on_a_notch_and_within_the_dial() -> void:
 	assert_almost_eq(pistol, rules.snap_hop_up(pistol), 1e-9)
 
 
-func test_a_loadout_saved_before_the_change_still_loads_and_plays() -> void:
-	var l := rules.default_loadout("Old")
-	assert_true(rules.equip(l, Loadout.Slot.PRIMARY, SMG))
-	assert_true(rules.equip(l, Loadout.Slot.SECONDARY, PISTOL))
-	rules.set_hop_up(l, SMG, 0.85)
-	rules.set_hop_up(l, PISTOL, 0.55)
-	assert_eq(rules.clean(l).size(), 0, "nothing is dropped or reset")
-	var kit := rules.carried(l)
-	assert_almost_eq(kit.replicas[0].hop_up_dial, 0.85, 1e-9)
-	assert_almost_eq(kit.replicas[1].hop_up_dial, 0.55, 1e-9)
-	var smg := Ballistics.hop_up_reach(kit.replicas[0], 0.85, tuning, DT, BAND, RANGE)
-	var pistol := Ballistics.hop_up_reach(kit.replicas[1], 0.55, tuning, DT, BAND, RANGE)
-	gut.p("saved SMG 0.85 dial: %.1f m (peak rise %.2f m); saved pistol 0.55 dial on Green: %.1f m" % [
-			smg.on_target_to, smg.peak_rise, pistol.on_target_to])
-	assert_gt(smg.on_target_to, 15.0, "the SMG's old dial is not far short")
-	assert_gt(pistol.on_target_to, 15.0, "the pistol's old dial is not far short")
-	# Black Gas at the old 0.55 dial.
-	assert_true(rules.set_power(l, PISTOL, BLACK_GAS))
-	var black := rules.carried(l).replicas[1]
-	var blk := Ballistics.hop_up_reach(black, 0.55, tuning, DT, BAND, RANGE)
-	gut.p("saved pistol 0.55 dial on Black Gas: %.1f m (peak rise %.2f m)" % [blk.on_target_to, blk.peak_rise])
-	assert_gt(blk.on_target_to, 15.0, "Black Gas at the old dial is not short")
-
-
 func test_the_bots_kits_with_the_pistol_or_smg_carry_the_new_figures() -> void:
 	var kits := BotKits.read_file(Pool.read_file())
 	assert_eq(kits.problems.size(), 0, str(kits.problems))
@@ -171,3 +152,189 @@ func test_nothing_under_game_hard_codes_the_old_energies() -> void:
 	assert_eq(stats.problems.size(), 0)
 	assert_almost_eq(load("res://game/config/replicas/pistol.tres").muzzle_energy as float, rules.config(rules.pool.item(PISTOL)).muzzle_energy, 1e-9, "the built-in matches stats.md")
 	assert_almost_eq(load("res://game/config/replicas/smg.tres").muzzle_energy as float, rules.config(rules.pool.item(SMG)).muzzle_energy, 1e-9)
+
+
+# --- The cap: no tuning of the pistol or the SMG reaches past the replicas above them ---
+
+func _weights() -> Array[float]:
+	var out: Array[float] = []
+	var step := rules.rules.bb_weight_step
+	var n := int(roundf((rules.rules.bb_weight_max - rules.rules.bb_weight_min) / step))
+	for i in n + 1:
+		out.append(snappedf(rules.rules.bb_weight_min + i * step, step))
+	return out
+
+
+## The furthest `id` on `power` (default "") stays on target over every dial notch and BB weight, at the rated air and gas energy (the most a day gives).
+func _best_tuned(id: String, power: String = "") -> float:
+	var best := 0.0
+	var step := rules.rules.hop_up_dial_step
+	var notches := int(roundf(1.0 / step))
+	for g in _weights():
+		var l := rules.default_loadout("T")
+		assert_true(rules.equip(l, Loadout.Slot.PRIMARY, id))
+		if power != "":
+			assert_true(rules.set_power(l, id, power))
+		rules.set_bb_weight(l, id, g)
+		var kit := rules.carried(l)
+		var r := kit.replicas[0]
+		for i in range(1, notches + 1):
+			best = maxf(best, Ballistics.hop_up_reach(r, minf(i * step, 1.0), tuning, DT, BAND, RANGE, g).on_target_to)
+	return best
+
+
+func test_the_pistol_tuned_on_any_gas_and_bb_weight_stays_under_the_cyber_pistols_best() -> void:
+	var cyber := _best_tuned(CYBER)
+	for gas: String in [GREEN, RED_GAS, BLACK_GAS]:
+		var pistol := _best_tuned(PISTOL, gas)
+		gut.p("pistol best on %s: %.1f m; Cyber Pistol best %.1f m" % [gas, pistol, cyber])
+		assert_lt(pistol, cyber, "tuned pistol on %s (%.1f m) against the Cyber Pistol (%.1f m)" % [gas, pistol, cyber])
+
+
+func test_the_pistol_as_it_comes_on_every_gas_stays_under_the_cyber_pistol_as_it_comes() -> void:
+	var cyber := _reach(_kit(CYBER), 20.0)
+	for gas: String in [GREEN, RED_GAS, BLACK_GAS]:
+		var m := _reach(_kit(PISTOL, gas), 20.0)
+		assert_lt(m, cyber, "%s: %.1f m against %.1f m" % [gas, m, cyber])
+
+
+func test_the_smgs_best_over_every_dial_and_bb_weight_stays_six_metres_under_the_aeg_as_it_comes() -> void:
+	var aeg := _reach(_kit(AEG), 20.0)
+	var smg := _best_tuned(SMG)
+	assert_lte(smg, aeg - 6.0, "SMG tuned %.1f m, AEG as it comes %.1f m" % [smg, aeg])
+
+
+# --- Saved dials from before PH2 ---
+
+func _saved() -> SavedLoadouts:
+	return SavedLoadouts.new(LoadoutRules.new(Pool.read_file(), ReplicaStats.read_file(), ReplicaRulesConfig.new()))
+
+
+func after_each() -> void:
+	SaveFile.remove(PATH)
+	SaveFile.remove(PATH_B)
+
+
+func _slot(tunes: Dictionary) -> Dictionary:
+	return {"name": "Old", "equipped": [AEG, PISTOL], "tunes": tunes}
+
+
+func _hop_of(s: SavedLoadouts, id: String, slot: int = 0) -> float:
+	return s.rules.tune_of(s.slots[slot], id).hop_up
+
+
+func _v1(tunes: Dictionary) -> Dictionary:
+	return {"slots": [_slot(tunes)], "current": 0}
+
+
+func test_a_version_1_file_loads_the_pistol_and_smg_dials_scaled_to_lift_as_before() -> void:
+	assert_true(SaveFile.write(PATH, SavedLoadouts.KIND, 1, _v1({PISTOL: {"hop_up": 0.55}, SMG: {"hop_up": 0.85}})))
+	var s := _saved()
+	s.load_file(PATH)
+	assert_almost_eq(_hop_of(s, PISTOL), 0.85, 1e-9)
+	assert_almost_eq(_hop_of(s, SMG), 0.95, 1e-9)
+	var step := s.rules.rules.hop_up_dial_step
+	assert_almost_eq(_hop_of(s, PISTOL) * 0.19, 0.3 * 0.55, step * 0.19, "the same lift within a notch")
+	assert_almost_eq(_hop_of(s, SMG) * 0.135, 0.15 * 0.85, step * 0.135)
+
+
+func test_a_scaled_dial_past_the_top_clamps_to_full() -> void:
+	SaveFile.write(PATH, SavedLoadouts.KIND, 1, _v1({PISTOL: {"hop_up": 0.9}, SMG: {"hop_up": 1.0}}))
+	var s := _saved()
+	s.load_file(PATH)
+	assert_almost_eq(_hop_of(s, PISTOL), 1.0, 1e-9)
+	assert_almost_eq(_hop_of(s, SMG), 1.0, 1e-9)
+
+
+func test_a_version_1_file_leaves_other_replicas_dials_alone() -> void:
+	SaveFile.write(PATH, SavedLoadouts.KIND, 1, _v1({AEG: {"hop_up": 0.55}, CYBER: {"hop_up": 0.35}, SNIPER: {"hop_up": 0.65}}))
+	var s := _saved()
+	s.load_file(PATH)
+	assert_almost_eq(_hop_of(s, AEG), 0.55, 1e-9)
+	assert_almost_eq(_hop_of(s, CYBER), 0.35, 1e-9)
+	assert_almost_eq(_hop_of(s, SNIPER), 0.65, 1e-9)
+
+
+func test_odd_entries_in_a_version_1_file_load_as_they_did_before() -> void:
+	var data := {"slots": [_slot({PISTOL: {"bb_weight": 0.3}, SMG: {"hop_up": "high"}, AEG: 5}), "junk", 7,
+			{"name": "NoTunes"}, {"name": "BadTunes", "tunes": [1]}], "current": 0}
+	SaveFile.write(PATH, SavedLoadouts.KIND, 1, data)
+	var s := _saved()
+	s.load_file(PATH)
+	assert_eq(s.load_message, "")
+	assert_gt(s.slots.size(), 0)
+	var d := _saved()
+	d.from_dict(data)
+	assert_eq(s.to_dict(), d.to_dict(), "as from_dict alone reads it")
+	var no_slots := _saved()
+	SaveFile.write(PATH_B, SavedLoadouts.KIND, 1, {"current": 0})
+	no_slots.load_file(PATH_B)
+	assert_eq(no_slots.slots.size(), 1)
+	assert_eq(no_slots.load_message, "")
+
+
+func test_a_nan_dial_is_left_for_from_dict_and_the_input_is_not_mutated() -> void:
+	var s := _saved()
+	var data := _v1({PISTOL: {"hop_up": NAN}, SMG: {"hop_up": 0.85}})
+	var out := s._hop_ups_from_v1(data)
+	assert_true(is_nan(((out["slots"][0]["tunes"] as Dictionary)[PISTOL] as Dictionary)["hop_up"] as float))
+	assert_almost_eq(float(data["slots"][0]["tunes"][SMG]["hop_up"]), 0.85, 1e-12, "the caller's data is as it was")
+	assert_almost_eq(float(out["slots"][0]["tunes"][SMG]["hop_up"]), 0.95, 1e-9)
+
+
+func test_an_old_file_is_rewritten_as_version_2_and_not_scaled_again() -> void:
+	SaveFile.write(PATH, SavedLoadouts.KIND, 1, _v1({PISTOL: {"hop_up": 0.55}, SMG: {"hop_up": 0.85}}))
+	var s := _saved()
+	s.load_file(PATH)
+	assert_true(s.dirty, "to be saved as this version")
+	s.save_if_dirty(PATH)
+	assert_false(s.dirty)
+	assert_eq(int(SaveFile.read(PATH, SavedLoadouts.KIND).version), 2)
+	var t := _saved()
+	t.load_file(PATH)
+	assert_false(t.dirty)
+	assert_almost_eq(_hop_of(t, PISTOL), 0.85, 1e-9, "not scaled twice")
+	assert_almost_eq(_hop_of(t, SMG), 0.95, 1e-9)
+
+
+func test_a_version_2_file_is_read_as_is() -> void:
+	var s := _saved()
+	assert_true(s.rules.equip(s.carried(), Loadout.Slot.SECONDARY, PISTOL))
+	s.rules.set_hop_up(s.carried(), PISTOL, 0.55)
+	s.rules.set_hop_up(s.carried(), AEG, 0.4)
+	assert_true(s.save(PATH))
+	assert_eq(int(SaveFile.read(PATH, SavedLoadouts.KIND).version), SavedLoadouts.VERSION)
+	var t := _saved()
+	t.load_file(PATH)
+	assert_almost_eq(_hop_of(t, PISTOL), 0.55, 1e-9)
+	assert_false(t.dirty)
+
+
+func test_a_version_3_file_is_still_refused_and_left_alone() -> void:
+	SaveFile.write(PATH, SavedLoadouts.KIND, 3, _v1({PISTOL: {"hop_up": 0.55}}))
+	var s := _saved()
+	s.load_file(PATH)
+	assert_ne(s.load_message, "")
+	assert_almost_eq(_hop_of(s, PISTOL), s.rules.tune_of(_saved().carried(), PISTOL).hop_up, 1e-9, "the default")
+	assert_false(s.save(PATH), "never written over")
+	assert_eq(int(SaveFile.read(PATH, SavedLoadouts.KIND).version), 3)
+
+
+func test_importing_a_bundle_with_a_version_1_loadouts_store_ends_with_converted_dials_once() -> void:
+	var data := _v1({PISTOL: {"hop_up": 0.55}, SMG: {"hop_up": 0.85}})
+	var b := SaveBundle.from_dict({"version": Version.current(), "saved_at": 1, "stores": {
+			SavedLoadouts.KIND: {"version": 1, "data": data}}})
+	var paths: Array[String] = [PATH_B + "_p", PATH_B, PATH_B + "_q", PATH_B + "_r"]
+	for p in paths:
+		SaveFile.remove(p)
+	assert_true(b.write(paths))
+	var s := _saved()
+	s.load_file(PATH_B)
+	assert_almost_eq(_hop_of(s, PISTOL), 0.85, 1e-9)
+	assert_almost_eq(_hop_of(s, SMG), 0.95, 1e-9)
+	s.save_if_dirty(PATH_B)
+	var t := _saved()
+	t.load_file(PATH_B)
+	assert_almost_eq(_hop_of(t, PISTOL), 0.85, 1e-9, "a second load does not scale again")
+	for p in paths:
+		SaveFile.remove(p)
