@@ -908,6 +908,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the Variable Scope so the level isn't empty with Dev content off (LV15, owner 2026-11-10; level 7 at first). A
   Breacher bot kit (red dot, rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor
   until he records one.
+- **The GBB Pistol shoots 0.70 J and the Compact SMG 0.85 J (owner, 2026-11-12, PH2).** "Increase gbb pistol to 0.7J
+  and SMG to 0.85J", after PH1's audit found the pistol's 0.52 J below a real green-gas pistol's. This replaces CS1's
+  0.75 J and the pistol's 0.52 J. Kept in balance by their hop-up, not their energy: the pistol comes at 50 % (a
+  stronger gas over-hopped one notch from 55 %), and the SMG's hop-up tops out at 0.135 (0.15 before; it comes at 95 %)
+  so its best reach stays 31 m and the extra energy is a quicker BB (302 fps), its short reach still its cost beside
+  the AEG Rifle's 39 m. The pistol now reaches 30 m as it comes and about the Cyber Pistol's 33 m on Black Gas; what
+  holds it to a sidearm is its spread, single shots, kick and 18 BBs (`docs/records/PH2.md`).
 - **Every replica and part has a job of its own (owner, 2026-11-12, RP1).** "Make sure each weapon has its own
   strengths and weaknesses. Each weapon should feel unique and attachments should offer incentives to use while also
   feeling unique from each other. Feel free to make any changes to the specs." Defaults taken (the owner may change

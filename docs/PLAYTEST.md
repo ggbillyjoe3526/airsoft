@@ -150,8 +150,9 @@ Customise. BBs fly by real air physics. Out of doors (Woodland, the Range) each 
 about 2 m/s) that pushes BBs, never players; indoors (Depot, Subway) the air stands still (PH1). Each field has its
 own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a gas replica shoots softer in the cold.
 
-- [ ] **Factory hop (rifle 65 %, pistol 55 %), at a target 30 m or more away.** Rifle BBs rise about a hand's width
-  near 20 m and stay on target to about 39 m, taking about half a second; the pistol's drop from about 27 m.
+- [ ] **Factory hop (rifle 65 %, pistol 50 %), at a target 30 m or more away.** Rifle BBs rise about a hand's width
+  near 20 m and stay on target to about 39 m, taking about half a second; the pistol's drop from about 30 m (0.70 J
+  since PH2; 27 m at 0.52 J before).
 - [ ] **Hop-up at 0 %, then 90 to 100 %.** At 0 BBs drop from about 14 m; at 90 to 100 they climb about half a metre
   over your aim and float before they fall.
 - [ ] **Turn the dial in a match (4 less, 5 more).** The panel shows the setting and how far a level shot stays
@@ -159,8 +160,8 @@ own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a 
 - [ ] **Watch the dust (Medium or up).** It drifts one way, the wind, which changes from match to match.
 - [ ] **Depot, a long shot down the Chrono hall (PH1).** BBs fly dead straight left to right, every match; the pause
   menu reads "Air 20 °C · still air". On Woodland it reads the match's breeze and 16 °C, or 8 °C at night.
-- [ ] **The GBB Pistol on Woodland at night against Depot (PH1).** At night its BBs drop about 3 m sooner (24 m
-  against 27 m); Red or Black Gas wins the reach back. The AEG Rifle and the Sniper Rifle shoot the same on both.
+- [ ] **The GBB Pistol on Woodland at night against Depot (PH1).** At night its BBs drop about 3 m sooner (27 m
+  against 30 m); Red or Black Gas wins the reach back. The AEG Rifle and the Sniper Rifle shoot the same on both.
 - [ ] **A bot sprinting across your line at 10 to 20 m (PH1).** A BB you see strike its trailing edge counts, and one
   you see pass just ahead of it doesn't.
 - [ ] **BB weight to 0.40 g in Customise (PH1).** The flight picture shows the Sniper Rifle flying flattest with the
@@ -1327,7 +1328,7 @@ Dev content: tick Settings › Dev › Dev content (or Disable levelling), then 
 - [ ] **On the move.** Strafe and shoot at a target 10 m away: the BBs land much closer together than the AEG's on the
   move. From the hip standing still they group about as the AEG's; with the sight up, a little wider.
 - [ ] **Reach.** At 35 m and beyond the BBs drop and spread more than the AEG's; the Loadout's on-target figure reads
-  about 27 m as it comes.
+  about 30 m as it comes and 31 m at its best hop-up (0.85 J since PH2: the BBs get there sooner, not further).
 - [ ] **Bots.** With Dev content on, some bots carry it (the Breacher kit, with a red dot). Do they feel dangerous up
   close and weak at range?
 - [ ] **Sound.** Its buzz sounds smaller and quicker than the AEG's (a stand-in until you record one).

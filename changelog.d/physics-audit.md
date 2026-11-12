@@ -4,7 +4,7 @@
 - Each field has its own air: Depot and the Range 20 °C, Woodland 16 °C by day and 8 °C at night, Subway 14 °C.
 - Cold air is a little thicker, so BBs slow slightly sooner.
 - Gas replicas shoot softer in the cold, about 1.2 % less energy for each degree below 20 °C. Electric and spring replicas are unaffected.
-- The GBB Pistol holds its aim line to about 27 m at 20 °C and about 24 m on Woodland at night.
+- The GBB Pistol holds its aim line about 3 m less far on Woodland at night than at 20 °C.
 - The pause menu shows the field's air under the match line, such as "Air 16 °C · breeze 1.2 m/s" or "Air 20 °C · still air".
 - A map card's tooltip says whether the field is open to the breeze.
 - BB weights on the Loadout go up to 0.40 g, from 0.30 g. Heavier than 0.30 g only pays on the Sniper Rifle.
