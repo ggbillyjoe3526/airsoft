@@ -1,6 +1,6 @@
 # SM2 · Subway's escalators, lifts, stairs and railing
 
-**Review:** 5 attempts (past the cap: the project keeps fixing until the critic passes) · critic pending · qa pending · performance pending
+**Review:** 6 attempts (past the cap: the project keeps fixing until the critic passes) · critic Accept 7/8 · qa Pass · performance Pass
 
 The owner (2026-11-12): "Begin work on subway models now." SM2 is models #14 to #18 of
 `art/subway-model-list.md`: the escalator banks, the lift car and doors, the spiral stair, the stair handrails and
@@ -16,7 +16,7 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
 | 2026-11-12 | 3 | Opus 5.5 (build thread) | pass (CI) | Retry 7/8 | the landing display unlit, the vision panel two slits, the decks dull and faceted, wide yellow step edges, the railing posts |
 | 2026-11-12 | 4 | Opus 5.5 (build thread) | pass (CI) | Retry 7/8 | the landing display's window still dark, the escalator's sides dull and its edges cream, the half panes narrow |
 | 2026-11-12 | 5 | Opus 5.5 (build thread) | pass (CI) | Retry 6/8 | the safety yellow rendering cream, banded deck tops, dark newel ends, the landing display off its frame, two changelog lines |
-| 2026-11-12 | 6 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-12 | 6 | Opus 5.5 (build thread) | pass (CI) | Accept 7/8 | – (check 7 non-blocking: a shader comment and untyped test loops, fixed after) |
 
 ## What changed
 

@@ -25,7 +25,7 @@ func test_full_colour_models_keep_by_alpha_and_others_do_not() -> void:
 	var other_seen := 0
 	for model: StringName in dress.placed():
 		var listed := look.props.full_colour.has(model)
-		for view in dress.views_of(model):
+		for view: MultiMeshInstance3D in dress.views_of(model):
 			var keeps: bool = (view.material_override as ShaderMaterial).get_shader_parameter(&"keep_by_alpha")
 			assert_eq(keeps, listed, "%s keep_by_alpha" % model)
 			if listed:
@@ -39,12 +39,12 @@ func test_full_colour_models_keep_by_alpha_and_others_do_not() -> void:
 func test_materials_are_shared_per_key_and_full_ones_are_separate() -> void:
 	var dress := _dress()
 	var mats := dress.materials()
-	var seen: Dictionary = {}
-	for mat in mats:
+	var seen: Dictionary[Material, bool] = {}
+	for mat: Material in mats:
 		assert_false(seen.has(mat), "each material listed once")
 		seen[mat] = true
 	var full := 0
-	for mat in mats:
+	for mat: Material in mats:
 		if (mat as ShaderMaterial).get_shader_parameter(&"keep_by_alpha"):
 			full += 1
 	assert_gt(full, 0, "a full-colour material exists")
@@ -55,5 +55,5 @@ func test_materials_are_shared_per_key_and_full_ones_are_separate() -> void:
 
 func test_the_default_full_colour_list_is_the_escalators_and_stairs() -> void:
 	var want: Array[StringName] = [&"escalator_upper", &"escalator_lower", &"spiral_stair", &"platform_stair"]
-	for m in want:
+	for m: StringName in want:
 		assert_true(look.props.full_colour.has(m), String(m))
