@@ -1,3 +1,0 @@
-Tests                 6 Passing Tests         6 Time              15.338s test_bot_climbs
-Tests                22 Passing Tests        22 Time              5.308s test_station_dress
-Tests                 2 Passing Tests         2 Time              18.954s test_overhang_links

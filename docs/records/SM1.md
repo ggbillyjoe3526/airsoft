@@ -1,6 +1,6 @@
 # SM1 · Subway's trains in their models
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 4 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,7 +9,7 @@
 | 2026-11-12 | 1 | Opus 5.5 (build thread) | pass | Retry 7/8 | judgment: proportions against the photos (doors too short and narrow, sills too high), open window corners, banding on the white paint, flat seat-end screens, a black gangway edge, a black frame round the cab fronts |
 | 2026-11-12 | 2 | Opus 5.5 (build thread) | pass | Retry 7/8 | judgment: the cab ends (a tiled card round each cab under the platform vault, notches at its top corners, a white sliver and a dark ledge at the open cab) |
 | 2026-11-12 | 3 | Opus 5.5 (build thread) | pass | Retry 7/8 | judgment: a pale strip beside the open cab in the running tunnel |
-| 2026-11-12 | 4 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-12 | 4 | Opus 5.5 (build thread) | pass | Accept 7/8 | – (judgment miss fixed before merge: QA had overwritten main's `test_sm1_qa.gd`; restored, its test moved to `test_sm1_trains_qa.gd`) |
 
 ## Decisions
 
