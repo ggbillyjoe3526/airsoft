@@ -152,7 +152,7 @@ static func _step_planted(ps: PlantState, characters: Array[Character], attacker
 			_cue(events, Cue.DEFUSING_STOPPED, ps.defuser, ps.position, ps.site)
 			ps.defuser = -1
 			ps.defusing = cfg.defuse_checkpoint if cfg.defuse_checkpoint > 0.0 \
-					and ps.defusing >= cfg.defuse_checkpoint else 0.0
+					and ps.defusing >= cfg.defuse_checkpoint - SLACK else 0.0
 	else:
 		if ps.defuser != on_it.id:
 			ps.defuser = on_it.id

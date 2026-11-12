@@ -125,9 +125,9 @@ static func attack_defend(test: GutTest, map_id: String, level: StringName = &"n
 ## Plant The Bomb over seeds 1 to `seeds` (PB1; the map needs sites), checked as Attack / Defend is: every match won, only
 ## the attackers must leave their spawn, no round runs past the clock, its overtime and the fuse, and every round's bomb
 ## is picked up. Returns [rounds, rounds armed, defused, gone off, rounds on time, rounds the attackers won] for the
-## file's own checks.
+## file's own checks. `held_up_max` is the most bots a match may leave held up (HELD_UP_MAX unless a field needs its own).
 static func plant_the_bomb(test: GutTest, map_id: String, level: StringName = &"normal", seeds: int = SEEDS,
-		night: bool = false) -> PackedInt32Array:
+		night: bool = false, held_up_max: int = HELD_UP_MAX) -> PackedInt32Array:
 	var r: MatchRunner = await runner(test, map_id, level, night, RoundState.Mode.PLANT_THE_BOMB)
 	test.assert_true(r.map.has_bomb_sites, "%s has bomb sites" % map_id)
 	var name := label(r, map_id) + " PTB"
@@ -149,7 +149,7 @@ static func plant_the_bomb(test: GutTest, map_id: String, level: StringName = &"
 				t[5] += 1
 		_heights(test, r, m, at)
 		test.assert_eq(m.stayed_home, 0, "%s: every attacker leaves its spawn each round" % at)
-		test.assert_lte(m.held_up, HELD_UP_MAX, "%s: bots aren't held up on their way" % at)
+		test.assert_lte(m.held_up, held_up_max, "%s: bots aren't held up on their way" % at)
 		test.assert_eq(m.friendly_hits, 0, "%s: no bot knocks out a teammate" % at)
 	test.gut.p("%s: %d rounds over %d seeds, %d armed, %d defused, %d gone off, %d on time, %d to the attackers" % [name,
 			t[0], seeds, t[1], t[2], t[3], t[4], t[5]])
