@@ -197,6 +197,35 @@ func test_the_view_draws_one_multimesh_a_model_glowing_and_printed_with_no_shado
 	assert_eq(view.materials().size(), 3)
 
 
+func test_each_tunnel_lamp_lights_its_running_tunnel_s_arch_from_its_glass() -> void:
+	var m := _map("subway")
+	var view := StationFixtures.build(m, cfg)
+	add_child_autofree(view)
+	var placed: Array = view.placed().get(&"tunnel_lamp", [])
+	assert_gt(placed.size(), 8, "the running tunnels have their lamps")
+	assert_eq(view.lamps().size(), placed.size(), "a light at each tunnel lamp, none elsewhere (TB2)")
+	view.set_lamps(true)
+	for lamp: OmniLight3D in view.lamps():
+		assert_true(lamp.visible and lamp.is_inside_tree(), "lit with the Lamp lights row on")
+	view.set_lamps(false)
+	for i in view.lamps().size():
+		var lamp: OmniLight3D = view.lamps()[i]
+		var t: Transform3D = placed[i]
+		assert_false(lamp.visible, "dark until the station's lamps light (Lamp lights)")
+		assert_false(lamp.shadow_enabled, "no shadow")
+		assert_almost_eq(lamp.position.distance_to(t.origin), cfg.lamp_out, 0.001, "at its glass, out from the wall")
+		assert_false(_in_block(m, lamp.position), "in the tunnel's air, not in its wall")
+		# under the running arch, which it lights from below (the roof's lamps shine down from its crown)
+		var v: StationDressing.TunnelVault = null
+		for o in m.station.vaults:
+			if o.open_west and o.area.has_point(Vector2(lamp.position.x, lamp.position.z)):
+				v = o
+		assert_not_null(v, "in a running tunnel: %s" % lamp.position)
+		if v != null:
+			assert_lt(lamp.position.y, v.y, "under the arch's springing")
+			assert_gt(lamp.omni_range, v.y + v.rise - lamp.position.y, "reaching its crown")
+
+
 func test_no_other_map_has_fixtures_and_freeing_leaves_no_orphans() -> void:
 	for id: String in ["depot", "woodland", "range"]:
 		assert_null(StationFixtures.build(_map(id), cfg), "%s has none" % id)

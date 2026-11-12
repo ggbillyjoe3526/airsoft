@@ -317,7 +317,7 @@ func test_no_tint_reads_as_a_team() -> void:
 
 func test_each_platform_tunnel_is_vaulted_and_its_colliders_hug_the_drawn_arc() -> void:
 	var m := _map("subway")
-	assert_eq(m.station.vaults.size(), 2, "both platform tunnels")
+	assert_eq(m.station.vaults.size(), 4, "both platform tunnels and both running tunnels")
 	for v in m.station.vaults:
 		var c := v.circle()
 		assert_almost_eq(v.point(0.0).y, v.y + v.rise, 0.001, "the crown")
@@ -415,6 +415,8 @@ func test_the_trackside_wall_over_the_cars_is_tiled_like_the_track() -> void:
 	# TB1 attempt 1: the wall over a standing car faced no room and drew as the dark outside, a black wedge.
 	var m := _map("subway")
 	for v in m.station.vaults:
+		if v.finish != &"":
+			continue  # a running tunnel's arch: its own lining, no platform
 		var wall := v.area.position.y if v.area.get_center().y < 0.0 else v.area.end.y
 		var n := Vector3.BACK if v.area.get_center().y < 0.0 else Vector3.FORWARD
 		var tiled := 0
@@ -601,3 +603,25 @@ func test_vault_ribs_stand_under_the_arc_inside_the_vault_and_off_turns_them_off
 	huge.vault_rib_every = 1000.0
 	huge.vault_rib_width = 1000.0
 	assert_eq(_vault_vertices(v, huge).size(), plain.size(), "a rib wider than the vault is left out")
+
+
+func test_a_malformed_finish_or_mouth_leaves_the_vault_out_and_a_good_one_is_read() -> void:
+	var base := {"x0": 0, "x1": 9, "z0": 0, "z1": 7, "y": 4, "rise": 2, "thick": 0.3}
+	var cases: Array = [
+		[{"finish": 5}, false], [{"finish": null}, false], [{"mouth": "east"}, false], [{"mouth": 1}, false],
+		[{"mouth": null}, false], [{"finish": "lining", "mouth": "west"}, true], [{"mouth": "west"}, true], [{}, true]]
+	for case: Array in cases:
+		var raw: Dictionary = base.duplicate()
+		raw.merge(case[0] as Dictionary, true)
+		var warnings: Array[String] = []
+		var d := StationDressing.read({"station": {"vaults": [raw]}}, warnings)
+		var kept := d != null and d.vaults.size() == 1
+		assert_eq(kept, case[1], "vault with %s" % [case[0]])
+		if not kept:
+			assert_eq(warnings.size(), 1, "a bad one warns once: %s" % [case[0]])
+	var good := StationDressing.read({"station": {"vaults": [base.merged({"finish": "lining", "mouth": "west"})]}}, [] as Array[String])
+	assert_eq(good.vaults[0].finish, &"lining")
+	assert_true(good.vaults[0].open_west)
+	var plain := StationDressing.read({"station": {"vaults": [base]}}, [] as Array[String])
+	assert_eq(plain.vaults[0].finish, &"", "no finish: the look's own")
+	assert_false(plain.vaults[0].open_west)

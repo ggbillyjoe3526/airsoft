@@ -60,6 +60,11 @@ class TunnelVault:
 	var y: float = 0.0
 	var rise: float = 0.0
 	var thick: float = 0.0
+	## Its own finish (a running tunnel's lining), or none: StationLook.vault_finish.
+	var finish: StringName = &""
+	## Whether its west end opens onto a wider tunnel (a running tunnel's mouth): no end drawn there, the wider
+	## tunnel's end round the arch instead.
+	var open_west: bool = false
 
 	## The arc's circle: its middle's z and y and its radius.
 	func circle() -> Vector3:
@@ -154,7 +159,8 @@ static func read(dressing: Variant, warnings: Array[String]) -> StationDressing:
 	for i in (arcs as Array).size() if arcs is Array else 0:
 		var v := _vault((arcs as Array)[i])
 		if v == null:
-			warnings.append("dressing.station.vaults %d needs x0, x1, z0, z1, y, rise and thick; left out" % i)
+			warnings.append(("dressing.station.vaults %d needs x0, x1, z0, z1, y, rise and thick (a finish and a mouth,"
+					+ " \"west\", if any); left out") % i)
 			continue
 		out.vaults.append(v)
 	var laid: Variant = d.get("trims", [])
@@ -323,8 +329,12 @@ static func _vault(raw: Variant) -> TunnelVault:
 	v.y = float((raw as Dictionary)["y"])
 	v.rise = float((raw as Dictionary)["rise"])
 	v.thick = float((raw as Dictionary)["thick"])
-	if v.rise <= 0.0 or v.thick < 0.0:
+	var finish: Variant = (raw as Dictionary).get("finish", "")
+	var mouth: Variant = (raw as Dictionary).get("mouth", "")
+	if v.rise <= 0.0 or v.thick < 0.0 or not finish is String or not mouth in ["", "west"]:
 		return null
+	v.finish = StringName(finish)
+	v.open_west = mouth == "west"
 	return v
 
 

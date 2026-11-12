@@ -1469,6 +1469,22 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   line map's ringed stop and the information panel; the departure boards hang on two rods from the curved ceiling.
 - [ ] **Frame rate.** F3 on Low looking along a platform: 60 FPS.
 
+## Subway's running tunnels arched like the trains (TB2)
+
+Subway is Dev content: tick Settings › Dev › Dev content.
+
+- [ ] **The arch.** Walk both running tunnels east of the platforms: straight sides up to about head height over a car,
+  then a smooth round arch over the track, with a ring every 6 m; where each meets its platform tunnel the arch opens
+  onto the platform's vault with no gap or seam. On High and Ultra the wall lamps light the curve above them; on Low and Medium it stays dark over the walls.
+- [ ] **The standing car.** The south train's east car stands under the arch: its roof steps down at both edges to
+  clear the curve, nothing of it pokes through the lining, and inside it the roof is closed (crouch and look up at the
+  sides: no gap). The cab steps down to the track and the ways round them each side still work.
+- [ ] **BBs and bombs.** Shoot up into the arch from the track and from a car's roof: each BB stops on the curve where
+  you see it. A smoke or flash thrown over a car in the tunnel lands on its roof or comes back down.
+- [ ] **As before below.** The wagons, the cross passage, the detrainment steps at the south cab and the climb out of
+  the track play exactly as before; bots get through both tunnels.
+- [ ] **Frame rate.** F3 on Low looking along a running tunnel: 60 FPS.
+
 ## Subway's echo on the shots (EC1)
 
 - [ ] **Subway** (Dev content): fire every replica, then fit a silencer and fire again. Each shot is a little louder
