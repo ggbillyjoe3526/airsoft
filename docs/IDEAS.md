@@ -78,7 +78,7 @@ he raises them; don't propose them again before that:
 Cut for adding more complexity than player value (owner, 2026-10-05; reasons in `docs/DECISIONS.md`). Don't propose
 these again unless the owner brings them up:
 
-- Bomb (Attack / Defend with another prop).
+- ~~Bomb (Attack / Defend with another prop).~~ The owner brought it back as Plant The Bomb (2026-11-12, PB1): built.
 - Intel grab (Extraction already is "grab it and get out").
 - Free-for-all.
 - The overshooting rule (bots never overshoot).

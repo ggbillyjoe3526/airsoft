@@ -660,6 +660,15 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
 - [ ] **Raise the flag.** Stand in the painted ring at the pole for 5 seconds; the strip under the score shows how far
   up it is and a marker shows the pole. Sides swap after round 4.
 
+### Plant The Bomb (PB1)
+
+- [ ] **Plant it.** Attacking, take the bomb from the ground at your start (hold Use), carry it into Site A's or
+  Site B's ring and hold Use until the gauge is full; then keep the defenders off it until the fuse runs out.
+- [ ] **Leave it.** Walk off without the bomb: a teammate takes it after a few seconds and the bots plant on their own,
+  the carrier going in last. A carrier who is hit drops it for the next attacker.
+- [ ] **Make it safe.** Defending, hold Use at the armed bomb until the gauge is full; past half way the work is
+  kept. Your bots leave it to you while you are near, until the fuse is nearly too short.
+
 ### Custom matches and rules
 
 Play › Match. The Rules row comes first: Skirmish (the standard match) or Custom, which
