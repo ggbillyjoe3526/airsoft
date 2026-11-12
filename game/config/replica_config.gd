@@ -42,9 +42,14 @@ const REPLICA_DIR := "res://game/config/replicas/"
 ## How much wider the spread is with the sight down than raised (Accuracy; 1: as wide as stance and movement make it).
 ## A long rifle pointed from the hip goes nowhere near where a raised sight would put it (the Sniper Rifle, SN1).
 @export var hip_spread: float = 1.0
-## Each shot is followed by a bolt worked by hand (the Sniper Rifle): its cycle is heard and drawn after every shot, and
-## its fire rate is how fast the bolt is worked.
+## Each shot is followed by a bolt or a pump worked by hand (the Sniper Rifle, the Pump Shotgun): its cycle is heard and
+## drawn after every shot, and its fire rate is how fast it is worked.
 @export var bolt_action: bool = false
+## BBs one pull of the trigger sends (the Pump Shotgun's three barrels, SH1), each off the magazine, and how far off the
+## shot's line each leaves (degrees): two or more are spaced evenly round it, the first straight up, as the barrels sit.
+## One hit is still one hit: a pull that lands two BBs on someone counts once.
+@export_range(1, 9) var shot_bbs: int = 1
+@export var pattern_deg: float = 0.0
 ## The pace it is carried at, as a share of the run and the sprint (Movement.target_speed; a compact replica is lighter
 ## on your feet, the Compact SMG, CS1). Holstered, the holster's pace stands instead.
 @export var pace: float = 1.0

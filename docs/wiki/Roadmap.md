@@ -26,8 +26,9 @@ The rest of this wiki describes all of it.
 
 ### Next
 
-- **0.1 Dev 3:** finished models for Depot and the practice range, and perhaps Woodland, a new replica: a compact
-  electric SMG, quick on your feet and fast on the trigger, short on reach, and a new map: Subway, a closed metro
+- **0.1 Dev 3:** finished models for Depot and the practice range, and perhaps Woodland, two new replicas: a compact
+  electric SMG, quick on your feet and fast on the trigger, short on reach, and a spring pump shotgun that sends
+  three BBs a pull for corners and doorways, with a pump between pulls, and a new map: Subway, a closed metro
   station on three levels, from the ticket hall down escalators, stairs and working lifts to the platforms, the
   trains and the tunnels, tiled, terrazzo-floored and lamp-lit, its shots ringing off the tiles (both in
   development).
