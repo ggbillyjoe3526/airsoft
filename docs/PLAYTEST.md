@@ -1415,6 +1415,13 @@ Subway is Dev content: tick Settings › Dev › Dev content.
 - [ ] **Compact SMG** (Dev content): full auto buzzes with a little of your toothbrush's whir under the motor.
 - [ ] **Sniper Rifle:** unchanged (your pick).
 
+## Subway's echo on the shots (EC1)
+
+- [ ] **Subway** (Dev content): fire every replica, then fit a silencer and fire again. Each shot is a little louder
+  than in Woodland and rings off the tiles for about a second; a silenced one is still muffled, with the room round it.
+- [ ] **Bots' shots** on Subway echo too, behind a wall as well; steps, impacts and grenades don't (shots only).
+- [ ] **Every other map** (Depot, Woodland, the Range): shots sound exactly as before, also after a Subway match.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
