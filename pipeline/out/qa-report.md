@@ -1,4 +1,4 @@
-Task: none (MQ1B) · QA commit 9673ce6 · Verdict: Pass
+Task: none (MQ1B) · QA commit 4cf2ee1 · Verdict: Pass
 
 Blocking: none.
 Advisory: the new power cell stands 0.6 mm proud of the Body's widest point each side (cell half width 16.1 mm vs body 15.5 mm), so its window reads; harmless, but a hand pose or wall-clip check that assumes "inside" would notice. The Cyber hold in arms.glb is not refit (owned by another thread, as stated); not checked.
