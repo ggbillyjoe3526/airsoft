@@ -67,7 +67,7 @@ block("railing", G, -43.12, -43.0, -8.6, -4.88, 1.1)
 # 2026-11-12), a wide deck between them with its uplighters and a deck from each to the wall. The decks are blocks on
 # the ramp: build_map.py follows its slope.
 ESC_LANE = 1.2
-ESC_MID = 1.0     # the middle deck's half width
+ESC_MID = 0.6     # the middle deck's half width: as wide as an escalator, as in the photos
 room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2, dress="escalator_upper")
 for z0, z1 in ((-3.5, -ESC_MID - ESC_LANE), (-ESC_MID, ESC_MID), (ESC_MID + ESC_LANE, 3.5)):
     block("barrier", None, -38, -18, z0, z1, 1.0, dress="escalator_upper")

@@ -199,7 +199,7 @@ def build() -> None:
             tk.knob(brackets, base, 0.03, 0.026, 0.008, facing, 8, axis)
             nxt_at += BRACKET_STEP
         walked += seg
-    objects = [treads.build("treads", TREAD), mk.ribbed(yellow.build("nosings", tk.YELLOW), 1),
+    objects = [mk.ribbed(treads.build("treads", TREAD), 1), mk.ribbed(yellow.build("nosings", tk.YELLOW), 1),
                risers.build("risers", RISER), under.build("soffits", SOFFIT, toned=False),
                rail.build("handrail", RAIL, smooth=50.0, toned=False),
                brackets.build("brackets", RAIL, smooth=50.0, toned=False)]

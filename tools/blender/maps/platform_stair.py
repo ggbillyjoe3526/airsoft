@@ -36,7 +36,7 @@ BRACKET_STEP = 1.5
 TREAD = 0x55514C
 RISER = 0x67625B
 NOSE = 0xA4A29C
-SKIRTING = 0x3E4A46   # a dark glazed tile, off the teams' hues
+SKIRTING = 0x5B6663   # a grey-green glazed tile, off the teams' hues
 RAIL = 0xB4B2AC
 SEED = 17
 
@@ -122,7 +122,7 @@ def build() -> None:
             tk.tube(brackets, [(x, y - 0.06, zw), (x, y - 0.06, zc), (x, y - RAIL_R, zc)], 0.007, 4, caps=False)
             tk.knob(brackets, (x, y - 0.06, zw), 0.028, 0.024, 0.007, s, 6)
             x += BRACKET_STEP
-    objects = [treads.build("treads", TREAD), mk.ribbed(noses.build("nosings", NOSE), 2),
+    objects = [mk.ribbed(treads.build("treads", TREAD), 0), mk.ribbed(noses.build("nosings", NOSE), 2),
                mk.ribbed(yellow.build("nosings_yellow", tk.YELLOW), 2), risers.build("risers", RISER),
                skirt.build("skirting", SKIRTING), rail.build("handrails", RAIL, smooth=50.0, toned=False),
                brackets.build("brackets", RAIL, smooth=50.0, toned=False)]

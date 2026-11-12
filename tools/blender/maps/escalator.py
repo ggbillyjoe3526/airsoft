@@ -284,6 +284,17 @@ def balustrade(bank: Bank, z_lo: float, z_hi: float, faces: tuple, rails: list, 
             continue  # along the floor
         quad = [(p[0], p[1], z_lo), (q[0], q[1], z_lo), (q[0], q[1], z_hi), (p[0], p[1], z_hi)]
         (deck if k == NEWEL_STEPS + 1 else body).poly(quad, [tone(c) for c in quad])
+        if k == NEWEL_STEPS + 1:
+            # The deck's sheets: a dark joint across it every panel's length, a hair over it.
+            length = math.hypot(q[0] - p[0], q[1] - p[1])
+            d = ((q[0] - p[0]) / length, (q[1] - p[1]) / length)
+            lift = (-d[1] * 0.0015, d[0] * 0.0015)
+            t = SEAM
+            while t < length - 0.3:
+                a = (p[0] + d[0] * t + lift[0], p[1] + d[1] * t + lift[1])
+                b = (a[0] + d[0] * 0.006, a[1] + d[1] * 0.006)
+                seams.poly([(a[0], a[1], z_lo), (b[0], b[1], z_lo), (b[0], b[1], z_hi), (a[0], a[1], z_hi)])
+                t += SEAM
     # The handrails, and the inlet where each goes into the newel.
     profile = tk.rounded_profile(RAIL_W, RAIL_H, 0.016, 0.004, 3)
     for zr in rails:
@@ -333,7 +344,7 @@ def build(room: str, name: str) -> None:
     balustrade(bank, bank.s1, bank.z1, (-1,), [bank.s1 + RAIL_W / 2], rng, parts)
     balustrade(bank, bank.m0, bank.m1, (-1, 1), [bank.m0 + RAIL_W / 2, bank.m1 - RAIL_W / 2], rng, parts)
     lamps(bank, parts["bronze"], parts["glass"], parts["inside"])
-    objects += [parts["body"].build("balustrade", tk.STAINLESS), parts["skirt"].build("skirt", tk.STAINLESS_DARK),
+    objects += [parts["body"].build("balustrade", tk.STAINLESS, smooth=40.0), parts["skirt"].build("skirt", tk.STAINLESS_DARK),
                 parts["brush"].build("brush", tk.GAP), parts["seams"].build("seams", tk.GAP),
                 parts["deck"].build("deck", tk.STAINLESS_DARK),
                 parts["rail"].build("handrail", tk.RUBBER, smooth=50.0, toned=False, outward=True),

@@ -351,6 +351,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"pine_young": 0.95, &"pine_grown": 0.95, &"pine_old": 0.95, &"oak": 0.95, &"birch": 0.95, &"spruce": 0.95,
 	&"pine_young_crown": 0.95, &"pine_grown_crown": 0.95, &"pine_old_crown": 0.95, &"oak_crown": 0.95,
 	&"birch_crown": 0.95,
+	# Subway's escalators' brushed stainless (SM2): a soft sheen.
+	&"escalator_upper": 0.4, &"escalator_lower": 0.4,
 }
 ## How worn the props are drawn (SL2, look_vertex.gdshader's `wear`; LookConfig.wear scales it): grime up their feet,
 ## streaks, stains and dust on top. Models worn otherwise (each its own material): the trees' crowns are clean, as
@@ -362,6 +364,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"pine_young_crown": 0.0, &"pine_grown_crown": 0.0, &"pine_old_crown": 0.0, &"oak_crown": 0.0, &"birch_crown": 0.0,
 	# a thicket's spruce is all boughs (FT1: worn, the dust on its upturned tiers drew its sunlit tops pale beige)
 	&"spruce": 0.0,
+	# Subway's escalators and stairs, swept daily: full dust drew their steps and decks beige (SM2)
+	&"escalator_upper": 0.25, &"escalator_lower": 0.25, &"spiral_stair": 0.35, &"platform_stair": 0.35,
 }
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.

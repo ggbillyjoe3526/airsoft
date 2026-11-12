@@ -25,10 +25,10 @@ PROPS = os.path.join(ROOT, "assets", "models", "props")
 # The paints (sRGB), every one off the teams' hues (tests/unit/test_props.gd): brushed stainless, the steps' dark
 # aluminium and their lighter risers, safety yellow (the station's only bright colour), the handrails' black rubber,
 # chequer plate, a dull bronze for the old lamps, frosted glass, and the dark of a gap.
-STAINLESS = 0xB4B2AC
+STAINLESS = 0xBFC1C0
 STAINLESS_DARK = 0x8E8C86
-TREAD = 0x55555A
-RISER = 0x9C9B98
+TREAD = 0x48484C
+RISER = 0x67676A
 YELLOW = 0xE4CA46
 RUBBER = 0x2A292D
 CHEQUER = 0x8A8882

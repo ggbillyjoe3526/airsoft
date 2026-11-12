@@ -58,7 +58,7 @@ CEILING = 0xC2C0BA
 DIFFUSER = 0xF2EEE2
 GLASS = 0x2C3032          # the vision panels' wired glass, dark (the shaft is dark behind it)
 DISPLAY = 0x18181A
-LENS = 0x7A7468           # the display's unlit arrows
+LENS = 0xE6E2D6           # the display's arrows, lit warm white (amber would read as Beta's orange)
 DOT = 0x34312D            # the dot-matrix window behind its dots
 LEAF = 0xA8A6A0
 
@@ -373,14 +373,17 @@ def landing() -> list:
         pts = [(x, 0.0, -a_t + 0.004), (x, DOOR_H + a_w, -a_t + 0.004), (x + s_ * 0.008, DOOR_H + a_w + 0.008, 0.0),
                (x + s_ * 0.008, 0.0, 0.0)]
         arch.poly(pts if s_ > 0 else list(reversed(pts)))
-    # The linings: steel through the wall to the leaves, both jambs and the head.
-    for x, s_ in ((-hw, 1.0), (hw, -1.0)):
-        pts = [(x, 0.0, 0.0), (x, 0.0, DEPTH / 2), (x, DOOR_H, DEPTH / 2), (x, DOOR_H, 0.0)]
+    # The linings: steel through the whole wall to the car, both jambs and the head (the leaves slide into the wall
+    # through them, as into a real landing's jambs), so no tile shows from inside the car. They stand 3 mm in from the
+    # wall's opening so its tiled faces can't fight through them.
+    li, lh = hw - 0.003, DOOR_H - 0.003
+    for x, s_ in ((-li, 1.0), (li, -1.0)):
+        pts = [(x, 0.0, 0.0), (x, 0.0, DEPTH), (x, lh, DEPTH), (x, lh, 0.0)]
         lining.poly(pts if s_ < 0 else list(reversed(pts)), [0.8, 0.7, 0.7, 0.95] if s_ < 0 else [0.95, 0.7, 0.7,
                                                                                                 0.8])
-    lining.poly([(-hw, DOOR_H, 0.0), (hw, DOOR_H, 0.0), (hw, DOOR_H, DEPTH / 2), (-hw, DOOR_H, DEPTH / 2)])
-    # The sill: grooved aluminium from the landing's floor to the leaves, its front edge bevelled down to the floor.
-    sill.box((-hw - 0.02, 0.0, -0.05), (hw + 0.02, 0.006, DEPTH / 2), skip=("-y", "+z", "-z"))
+    lining.poly([(-li, lh, 0.0), (li, lh, 0.0), (li, lh, DEPTH), (-li, lh, DEPTH)])
+    # The sill: grooved aluminium from the landing's floor through the wall, its front edge bevelled down to the floor.
+    sill.box((-hw - 0.02, 0.0, -0.05), (hw + 0.02, 0.006, DEPTH), skip=("-y", "+z", "-z"))
     sill.quad((-hw - 0.02, 0.006, -0.05), (hw + 0.02, 0.006, -0.05), (hw + 0.02, 0.0, -0.062),
               (-hw - 0.02, 0.0, -0.062))
     # A dark shadow line where the architrave meets the wall, and its mitres.

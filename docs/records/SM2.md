@@ -1,6 +1,6 @@
 # SM2 · Subway's escalators, lifts, stairs and railing
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 2 attempts · critic pending · qa pending · performance pending
 
 The owner (2026-11-12): "Begin work on subway models now." SM2 is models #14 to #18 of
 `art/subway-model-list.md`: the escalator banks, the lift car and doors, the spiral stair, the stair handrails and
@@ -11,14 +11,15 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-12 | 1 | Opus 5.5 (build thread) | pass | Retry 7/8 | the escalator's proportions, finishes and the lift's tiled jambs against the photos |
+| 2026-11-12 | 2 | Opus 5.5 (build thread) | – | – | – |
 
 ## What changed
 
-- **Escalators** (`escalator.py`, 7,190 and 6,566 triangles of 8,000): each bank is one model laid over its ramp and
+- **Escalators** (`escalator.py`, 7,292 and 6,644 triangles of 8,000): each bank is one model laid over its ramp and
   its three decks (`PropDressConfig` SET). Each bank's two escalators are 1.2 m wide between their balustrades, two
   abreast (the owner, 2026-11-12: "Escalators need to be narrower. Only wide enough for 2 people."; they were 3.2 m):
-  `layout.py` gives each bank a 2 m middle deck and a deck from each escalator to the wall, solid 1 m blocks on the
+  `layout.py` gives each bank a 1.2 m middle deck and a deck from each escalator to the wall, solid 1 m blocks on the
   slope like the old middle balustrade. The shafts, their walls and ceilings are unchanged. It has ribbed steps with yellow sides and nosings, landing plates and
   combs, newel-ended stainless balustrades, black handrails looping into their inlets, skirting brushes, stop buttons,
   and bronze uplighters on the middle deck.
@@ -61,6 +62,15 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   model is built for it.
 - **The railing's posts add no steel a BB could meet**: they are a bar's width along the run and deeper across it. At a
   grazing angle a BB may pass a post's edge it seems to touch (2.5 cm).
+
+- **Critic attempt 1 fixes**: the middle deck is 1.2 m (it was 2 m), so a bank reads as one escalator pair; the
+  steps are dark steel grey, less dusty (`model_wear` 0.25) and shinier, the stainless brighter; the balustrade body is
+  smooth-shaded and the decks have seams every 1 m; the lift landing's linings run through the whole wall, 3 mm in
+  from its opening, so no tile shows from inside the car, and the display's arrows are lit; the stair treads are
+  ribbed and the skirting lighter.
+- **Kept against the critic**: the railing's bar pitch is the sim's (gameplay, budget-bound); the posts stay a bar wide
+  along the run (wider would add steel no BB meets); the bars end on the foot rail as the sim's do; each lift leaf
+  keeps its own vision panel (a MultiMesh can't mirror one leaf); the stair handrail is already 44 mm.
 
 ## Known issues left
 
