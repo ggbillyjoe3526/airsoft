@@ -73,7 +73,7 @@ moved here from `head_textures.py`), `head_textures.py`, `headwear.py`, `splice_
 its own images, its occlusion, the lens's tint), `game/config/figure_config.gd` (`face_offsets`),
 `tools/model_studio.gd` (a shot can name a face look, `#hex@2`, and turn the model, `yaw,pitch,turn`),
 `assets/models/characters/human.glb` and the extracted `human_face_*`, `human_headwear_*`,
-`tests/unit/test_face_map.gd` (new), `tests/unit/test_mq3c_qa.gd` (QA), `tests/unit/test_figure_body.gd` (counts).
+`tests/unit/test_face_map.gd` (new), `tests/unit/test_mq3c_qa.gd`, `test_mq3c_qa2.gd` (QA), `tests/unit/test_figure_body.gd` (counts).
 
 Pictures (before from main's file, after from this one, same camera): `art/model-quality/mq3c/` in the project
 files, `mq3c-1-eyes-front.jpg` to `mq3c-5-side-and-far-levels.jpg`.
