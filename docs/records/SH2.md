@@ -1,6 +1,6 @@
 # SH2 · The Pump Shotgun's own model, first-person hold and pump
 
-**Review:** attempt 3 in review
+**Review:** attempt 4 in review
 
 ## Attempts
 
@@ -8,7 +8,8 @@
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | build thread | ✓ 6,132 of 6,134 (2 pending, as on main) | 7/8 Retry | check 1: the stock's grooves were hairlines and its toe loop missing; the forearm showed at the hip; nothing gated the wrist; aimed, the stock filled the view's foot |
 | 2026-11-13 | 2 | build thread | ✓ 6,205 of 6,207 (2 pending, as on main) | 7/8 Retry | check 1: a bot's trigger finger stuck out to reach the trigger; the stock's last column of slots showed the tube's end and a grey floor |
-| 2026-11-13 | 3 | build thread | in review | in review | – |
+| 2026-11-13 | 3 | build thread | ✓ 6,433 of 6,435 (2 pending, as on main) | 7/8 Retry | check 1 (measured): the stock's last column of slots was cut 0.78 of the others' length; photo 4's five are equal |
+| 2026-11-13 | 4 | build thread | in review | in review | – |
 
 ## Decisions
 
@@ -25,11 +26,13 @@
   was then cut open by the near plane) and 9 cm behind the rail's back end (the rifles' 20 cm put the stock across
   the foot of the view: attempt 1). `test_iron_sights` lets a model in `NO_SIGHTS` carry no sight bones.
 - **The stock's slots go through into its hollow** (attempt 2): three rows of five each side through 2.2 mm of
-  wall, the last column shorter as the photos'. Behind them the receiver extension runs the hollow's whole length
-  with the rail under it drawn as a keel tapering down from the tube's flanks (attempt 3), both black aluminium with
-  faces that look down: all fifteen slots read black end to end from either side. A polymer wall behind them, then
-  an upright rail, read grey in the studio's unshadowed fill light, and the tube's end face showed as a lit sliver
-  in the last column while it stopped short. A sling loop hangs at the toe.
+  wall, the five columns equal and the last running to the butt pad's lip, measured on photo 4 (slots 59 to 60 px on
+  a 64 px pitch, 4 px ribs; attempt 4: attempt 3 had cut the last column short to keep it inside the hollow, which
+  the photo does not show). Behind them the hollow, the receiver extension and the rail under it run back to the
+  pad, the rail drawn as a keel tapering down from the tube's flanks (attempt 3), both black aluminium with faces
+  that look down: all fifteen slots read black end to end from either side. A polymer wall behind them, then an
+  upright rail, read grey in the studio's unshadowed fill light, and the tube's end face showed as a lit sliver in
+  the last column while it stopped short. A sling loop hangs at the toe.
 - **The first-person hold.** The left hand holds the pump at its back end, 13 cm further forward than the AEG's
   handguard hold. From the rifles' hip place that showed 11 cm of forearm (the house rule is glove and cuff only), so
   the replica has its own hip place, 5 cm nearer and 2 cm lower (`ViewModelConfig.hip`, the same in `arms.py`'s

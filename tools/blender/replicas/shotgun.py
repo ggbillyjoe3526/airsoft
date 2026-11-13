@@ -168,8 +168,8 @@ PAD_HW = 0.0205
 # The stock's side grooves: three rows of five.
 GROOVE_ROWS = ((84.0, 95.0), (99.5, 110.5), (115.0, 124.0))
 GROOVE_PX = 1152.0
-GROOVE_PITCH = 64.0
-GROOVE_LEN = 57.0
+GROOVE_PITCH = 63.75
+GROOVE_LEN = 59.25
 GROOVE_DEPTH = 0.0058
 # The grooves open into the stock's hollow, as the photos' do (they read as black slots): one chamber across the
 # stock behind each of the upper two rows and the lowest (front, back px; each chamber's top and foot py, a shelf
@@ -177,15 +177,15 @@ GROOVE_DEPTH = 0.0058
 # whole length (to EXT_END_PX), and the rail under it (the one a real stock's latch pin locks into: its top and foot
 # py, its half width at each; drawn as a keel tapering down from the tube's flanks, so its sides face down as the
 # tube's do and take no light), both black aluminium: every slot reads black end to end from either side, where a
-# polymer wall or an upright rail behind them read grey (the critic, SH2). The last column is shorter, as the
-# photos' (GROOVE_LAST, px).
-HOLLOW_PX = (1146.0, 1458.0)
+# polymer wall or an upright rail behind them read grey (the critic, SH2). The five columns are equal and the last
+# runs to the butt pad's lip, as photo 4's (slots 59 to 60 px on a 64 px pitch, the last ending at 1466), so the
+# hollow, the extension and its rail run back to the pad too.
+HOLLOW_PX = (1146.0, 1468.0)
 HOLLOW_PY = ((81.0, 111.8), (113.6, 127.0))
 HOLLOW_WALL = 0.0022
-EXT_END_PX = 1456.0
+EXT_END_PX = 1465.0
 EXT_RAIL_PY = (98.0, 126.0)
 EXT_RAIL_HW = (0.0105, 0.0008)
-GROOVE_LAST = 44.0
 # The sling loop hanging at the fin's toe (the photos' left side): its lug on the fin's front edge and the wire loop
 # through it (centre px, py; half width and height, m; the wire's radius).
 TOE_LOOP = (1437.5, 289.0, 0.0034, 0.0128, 0.0011)
@@ -721,8 +721,7 @@ def stock() -> list:
             for k in range(5):
                 px = GROOVE_PX + GROOVE_PITCH * k
                 # Square-cornered (the body's bevel softens them): rounded corners cost 400 triangles over 30 slots.
-                back = Y(px + (GROOVE_LAST if k == 4 else GROOVE_LEN))
-                cutters.append(box_cutter("c_gr", (sx * (STOCK_HW - GROOVE_DEPTH), back, Z(py1)),
+                cutters.append(box_cutter("c_gr", (sx * (STOCK_HW - GROOVE_DEPTH), Y(px + GROOVE_LEN), Z(py1)),
                                           (sx * (STOCK_HW + 0.01), Y(px), Z(py0))))
     # The hollow behind the slots, across the stock: the extension and its rail stand in it.
     x_wall = STOCK_HW - HOLLOW_WALL
