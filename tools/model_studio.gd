@@ -5,8 +5,9 @@ extends SceneTree
 ## Needs a display, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . -s res://tools/model_studio.gd \
 ##       -- <folder> <name>|<res path>|<node or ->|<paint or ->|<yaw>,<pitch>[|<x>,<y>,<z>,<span m>][|<parts>] ...
-## `node` draws one top-level node of the file alone (a part of a parts file); `paint` is a ReplicaSchemes paint, `-`
-## the replica's own colours, a name ending in `!` the Realistic colours' version, and one ending in `~` the flat paint
+## `node` draws one top-level node of the file alone (a part of a parts file), or `+Body+Kit+Head_Cap` only the
+## meshes named, wherever they are in the file (a figure); `paint` is a ReplicaSchemes paint, `#2f7fff` a figure's
+## team colour, `-` the replica's own colours, a name ending in `!` the Realistic colours' version, and one ending in `~` the flat paint
 ## a figure's copy wears (no surfaces, no wear). `yaw` 0 looks at the model's
 ## right side (the muzzle to the picture's right... of a replica whose bore runs along -Z), 180 its left; `pitch` looks
 ## down. The optional box centres the picture on a point of the model (m) and shows `span` metres across. `parts`
@@ -31,6 +32,8 @@ const HIDDEN_PREFIX := "Figure"
 const REALISTIC_MARK := "!"
 const FLAT_MARK := "~"
 const OWN_MARK := "-"
+const SHOWN_MARK := "+"
+const TEAM_MARK := "#"
 
 
 func _initialize() -> void:
@@ -73,7 +76,9 @@ func _shot(port: SubViewport, f: PackedStringArray, out: String) -> int:
 	var model := scene.instantiate() as Node3D
 	var stage := Node3D.new()
 	port.add_child(stage)
-	if f[2] != "-":
+	if f[2].begins_with(SHOWN_MARK):
+		_show_only(model, f[2].substr(1).split(SHOWN_MARK))
+	elif f[2] != "-":
 		var part := model.get_node_or_null(f[2]) as Node3D
 		if part == null:
 			push_error("model_studio: no %s in %s" % [f[2], f[1]])
@@ -103,7 +108,10 @@ func _shot(port: SubViewport, f: PackedStringArray, out: String) -> int:
 	paint = paint.trim_suffix(FLAT_MARK)
 	var realistic := paint.ends_with(REALISTIC_MARK)
 	paint = paint.trim_suffix(REALISTIC_MARK)
-	ReplicaPaint.apply(model, ReplicaSchemes.OWN if paint == OWN_MARK else StringName(paint), realistic, not flat)
+	if paint.begins_with(TEAM_MARK):
+		_team(model, Color(paint.substr(1)))
+	else:
+		ReplicaPaint.apply(model, ReplicaSchemes.OWN if paint == OWN_MARK else StringName(paint), realistic, not flat)
 	var angles := f[4].split_floats(",")
 	var box := _bounds(model)
 	var centre := box.get_center()
@@ -162,6 +170,27 @@ func _fit(box: AABB, camera: Camera3D) -> float:
 		hi = hi.max(Vector2(p.x, p.y))
 	var need := hi - lo
 	return maxf(need.x, need.y * SIZE.x / SIZE.y)
+
+
+## Hides every mesh under `model` but the `named` ones: a figure's file holds its body, its kit, each head and their
+## levels of detail in one skeleton, and a picture wears one of each.
+func _show_only(model: Node3D, named: PackedStringArray) -> void:
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		(node as MeshInstance3D).visible = named.has(String(node.name))
+
+
+## Paints `model`'s team materials (FigureConfig.team_material_prefix) `colour`, as a figure's are in a match.
+func _team(model: Node3D, colour: Color) -> void:
+	var prefix := FigureConfig.new().team_material_prefix
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		for i: int in mi.mesh.get_surface_count():
+			var own := mi.mesh.surface_get_material(i) as BaseMaterial3D
+			if own == null or not own.resource_name.to_lower().begins_with(prefix):
+				continue
+			var worn := own.duplicate() as BaseMaterial3D
+			worn.albedo_color = Color(colour, own.albedo_color.a)
+			mi.set_surface_override_material(i, worn)
 
 
 ## The box round every mesh shown under `model`, in the stage's space.

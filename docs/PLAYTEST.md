@@ -1622,6 +1622,21 @@ A match on Depot with a smoke and a flash bomb; then Customise › Power and the
   paper on glossy red film, with a yellow one by its leads; each spring is painted wire in its own colour. Nothing
   has gone black or blown out.
 
+## What the figures' gear is made of (MQ3)
+
+Stand beside a teammate at the start of a round, or watch one from the dead zone, on High or Ultra.
+
+- [ ] **The plate carrier up close.** The team-colour cloth shows a fine weave, the webbing rows their ticks, the
+  loop panel a soft pile, and the edges a bound tape with stitching beside it; the pouches sit in a soft shade on
+  the carrier instead of floating on it.
+- [ ] **Belt, holster, pack and radio.** The holster and the buckles look like moulded polymer, the belt like
+  webbing, the pack's zips and cord like zips and cord; nothing looks stretched, smeared or cut by a seam. The
+  rolled pouch on the right hip is round, its weave the same size all the way round.
+- [ ] **At range nothing changed.** Alpha's blue and Beta's orange carriers read at 30 m as before, and a figure
+  walking away shows no jump in colour where its detail drops.
+- [ ] **Knee and elbow pads** look as before.
+- [ ] **Frame rate** with both teams in view is as before on every preset.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
