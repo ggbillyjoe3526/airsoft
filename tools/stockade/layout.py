@@ -256,7 +256,7 @@ wall_z(-15.0 - T, -STREET, 1.5)
 # ------------------------------------------------------------------ the Tavern north of the Green, the Store south
 TAVERN = (-10.0, -29.0, 8.0, -15.0)
 building(*TAVERN, [("w", -27.5, DOOR_W, "door"), ("e", -17.5, DOOR_W, "door"), ("s", -1.0, DOOR_W, "door"),
-                   ("s", -6.0, 2.0, "window"), ("s", 4.0, 2.0, "window"), ("n", 3.0, DOOR_W, "door")])
+                   ("s", -6.0, 2.0, "window"), ("s", 4.0, 2.0, "window"), ("n", 2.5, DOOR_W, "door")])
 # A front room on the Green and a back room on the Back Lane, the doorway between them off to the east.
 wall_x(-20.0 - T / 2, -10.0 + T, 8.0 - T, [(5.0, DOOR_W, "gap")])
 STORE = (-8.0, 13.0, 8.0, 27.0)

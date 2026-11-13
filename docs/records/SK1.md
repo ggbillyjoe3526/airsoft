@@ -155,7 +155,9 @@ cutting the attackers' chicanes, which break lines over 34 m.
   poles, flag and bomb start reached from both ends, no standable roof, no floor cut off; and in attempt 2 MB1's lane
   rules as `test_mb1_layouts` checks the shipped fields, the doors (26 in attempt 3, all open), the Orchard's gates,
   the Bell house's doors and a seeded bot match with no bot held up; in attempt 3 four minutes of play, not a whole
-  match, which took about 190 s headless).
+  match, which took about 190 s headless). Attempt 3, QA: Pass; the Tavern's north door moved 0.5 m off the Back
+  Lane's woodpile its open leaf folded over; the Barn's east door's leaf still folds 10 cm over the woodpile at the
+  Barn's corner (moving either opened a 39 m line; cosmetic, nobody is blocked).
 - Performance: Pass. Map load 36 ms (Depot 8, Woodland 143), nav build 1.18 s (0.90, 3.3), 383 blocks against
   Woodland's 945, 26 lights within LightPools' 32; frame time at night on Low is on the checklist.
 

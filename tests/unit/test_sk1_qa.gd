@@ -269,6 +269,10 @@ func test_a_seeded_bot_match_plays_rounds_with_no_bot_held_up() -> void:
 	var t := runner.play(11, MATCH_SECONDS)
 	runner.free_level()
 	gut.p("stockade: %d rounds, %d hits, held up %d, stayed home %d" % [t.rounds.size(), t.hits, t.held_up, t.stayed_home])
-	assert_gt(t.rounds.size(), 1, "rounds end")
+	var decided := 0
+	for r in t.rounds:
+		if r.winner >= 0:
+			decided += 1
+	assert_gt(decided, 0, "a round is won")
 	assert_gt(t.hits, 0, "BBs land")
 	assert_eq(t.held_up, 0, "no bot held up")
