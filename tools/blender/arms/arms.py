@@ -368,24 +368,22 @@ SHOTGUN_PUMP = dict(GUARD, y=0.325, axis=(0.0, 0.030), radius=0.0203, tips_below
 # knuckle about 30 mm under the rail and 12 mm off the grip's side, a finger's thickness, so the finger has room to
 # turn round its front), tilted 20 not 30 (the finger's sweep rises less toward the rail), and the index and middle
 # fingers close until they touch (`press`).
-# His fifth look (2026-11-13 00:26): "Move the hand up the vertical grip a bit more so more fingers grip it": the
-# vertical grip's fist sat 10 mm higher, tilted 8 degrees. His sixth (04:22): "The previous version was better, so go
-# back to that but the hand should be further up the grip (with fingers wrapped around the grip and the thumb resting
-# on the near side)". So the vertical grip's fist is the fourth look's again (tilted 20), 10 mm higher (the index
-# knuckle about 20 mm under the rail, just under the grip's flared top): the index, middle and ring fingers hold the
-# grip's body and the little finger its foot, and the thumb no longer goes round the grip's back but lies forward
-# along its near side, under the flare.
+# His fifth look (2026-11-13 00:26): "Move the hand up the vertical grip a bit more so more fingers grip it" (the
+# fist 10 mm higher, tilted 8 degrees); his sixth (04:22): "The previous version was better, so go back to that but
+# the hand should be further up the grip (with fingers wrapped around the grip and the thumb resting on the near
+# side)" (the fourth look's fist 10 mm higher, the thumb forward along the grip's left side); his seventh (05:28), on
+# that one's pictures: "That is still bad. Go back to the previous one". So the vertical grip's hold is the fourth
+# look's exactly, and stays there: neither a higher fist nor a thumb on the near side was better.
 GRIP_LEFT = {"kind": "grip", "pinky_cost": 300.0, "thumb_hug": 2.0, "thumb_pull": 30.0, "thumb_curl": (40.0, 45.0),
              "swing": (8.0, 8.0, 8.0), "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06, "across": 0.25,
              "upper": (-0.5, -0.8, 0.4), "turn": (20.0, 35.0), "sag": 0.0, "press": ("Index", "Middle"),
              "fingers": {"Index": (60, 60, 40), "Middle": (60, 60, 45), "Ring": (60, 60, 45), "Pinky": (55, 55, 40)},
              "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # The vertical grip (its body 29 mm fore and aft, 24 mm across, 16 to 64 mm under the rail's face below its flared
-# top; MQ2 made it 64 mm from 53): the index, middle and ring fingers round it, the little finger at its foot.
-# `pivot` is the middle of the grip where the hand holds it (the grip part's space), which `turn` turns the hand about.
-VERTICAL_LEFT = dict(GRIP_LEFT, web=(-0.018, -0.027, -0.032), index=(-0.024, 0.012, -0.023),
-                     pinky=(-0.024, 0.006, -0.080), thumb_at=(-0.015, 0.016, -0.008), thumb_curl=(10.0, 15.0),
-                     pivot=(0.0, 0.0, -0.045))
+# top; MQ2 made it 64 mm from 53): the index and middle fingers round it, the ring finger at its foot. `pivot` is
+# the middle of the grip where the hand holds it (the grip part's space), which `turn` turns the hand about.
+VERTICAL_LEFT = dict(GRIP_LEFT, web=(-0.018, -0.027, -0.042), index=(-0.024, 0.012, -0.033),
+                     pinky=(-0.024, 0.006, -0.090), thumb_at=(0.014, -0.012, -0.032), pivot=(0.0, 0.0, -0.045))
 # The angled handstop (its tall end in front, 26 mm fore and aft, 21 mm across, down to 48 mm under the rail; the
 # swept face behind it): held as the vertical grip is (the owner, above), the fist round its tall end, the web of
 # the thumb behind it under the swept face and the thumb round its back.

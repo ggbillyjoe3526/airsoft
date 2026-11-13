@@ -71,13 +71,13 @@ ATTEMPT_ROWS
   the thumb round its back. The vertical grip (64 mm since MQ2) is tilted 20 degrees (forearm rising 20, 24 off the
   bore); the angled grip's tall end is held the same way, tilted 12, because its raked front and rail plate leave
   the index less room. The wrist stays straight (under 1 degree) on both. His fifth look: "Move the hand up the
-  vertical grip a bit more so more fingers grip it": the vertical grip's fist sat 10 mm higher, tilted 8 degrees, the
-  thumb still round the grip's back. His sixth: "The previous version was better, so go back to that but the hand
-  should be further up the grip (with fingers wrapped around the grip and the thumb resting on the near side)". So
-  the vertical grip's fist is the fourth look's again (tilted 20, forearm rising 20), 10 mm higher, the index knuckle
-  just under the grip's flared top: the index, middle and ring fingers hold its body and the little finger its foot,
-  and the thumb lies forward along the grip's near side under the flare (`thumb_at`, `thumb_curl`), no longer round
-  its back. Default taken: the angled grip keeps its thumb round the back (he asked for the vertical grip only).
+  vertical grip a bit more so more fingers grip it" (built: the fist 10 mm higher, tilted 8 degrees); his sixth: "The
+  previous version was better, so go back to that but the hand should be further up the grip (with fingers wrapped
+  around the grip and the thumb resting on the near side)" (built: the fourth look's fist 10 mm higher, the thumb
+  forward along the grip's left side); his seventh, on those pictures: "That is still bad. Go back to the previous
+  one". So the vertical grip's hold is the fourth look's exactly (`VERTICAL_LEFT`), and neither a higher fist nor a
+  thumb on the near side stands; `test_ha1_grips.gd` keeps the thumb round each grip's back. That hold was fitted
+  to MQ2's 64 mm grip, so the row MQ2 left in `docs/KNOWN_ISSUES.md` (holds posed on the 53 mm grip) is closed.
 - **The thumb on the handguard** (`thumb_f`, `thumb_z`, `thumb_hug`; the owner's fourth look: "The thumb should be
   resting against the replica"): it reached 55 mm forward along the handguard's lower left edge, its tip past the
   handguard's front, so from the eye it stood beside the rifle. It lies 35 mm forward and 5 mm higher, up on the side
