@@ -1,16 +1,18 @@
-Task: PB3 · head 1a9bf361 · Verdict: Pass
-Run: no --perf bot run (tools/check.sh owns the machine and a second run collides); static diff review only · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the diff
-Metrics: not measured this pass (node count, orphans, static memory, script time and draw calls unmeasured).
-Regressions (> 10 % worse): none measured
+Task: HA1 · head 9f3de58 · Verdict: Pass
+Run: no Godot run (QA holds it); arms.glb measured statically from its glTF JSON · budget: docs/CC0_ASSETS.md > Size limits (no perf-budget.json lines), compared with attempt 3 (ef9d94f)
+Metrics (measured, now / attempt 3 / limit):
+- File size 6.48 MB / 6.48 MB / 8 MB (ok)
+- Materials 4 / 4 / 4 (ok)
+- Images 9 / 9 / 2K (unchanged; git shows only arms.glb changed under assets/models/arms)
+- Triangles drawn, gloved: 38,900 / 38,900 / 40,000 (ok; Arm 2x2976 + GloveKit 2x2824 + HandSurface 2x13650)
+- Triangles drawn, bare: 34,452 / 34,452 / 40,000 (ok; Arm + Skin 2x13650 + Nails 2x600)
+- Mesh objects 10, index counts identical to attempt 3
+- Clips 28 / 28; sampler key data 31,887 keys (small, no growth in file size)
+Regressions (> 10 % worse): none
 Blocking findings: none
- - simulation.gd per-character loop (judgment): the two rays (Plant.room_ahead, Plant.floor_at) run only for the carrier holding Use before arming starts, into one reused RayHit (_set_hit). No Array, Dictionary or String is built per tick. Vector3 temporaries are stack values.
- - Plant.hands_on (judgment): bool checks per character per tick. put_down and bring_up run only on edges.
- - weapon_rail.gd:511 refresh (judgment): rows are rebuilt only when lit or carry changes. HudPlant.rail_carry is an enum compare per HUD frame with no allocation.
- - replica_pictures.gd:224 bomb_texture (judgment): built once (the _bomb_shot null guard), UPDATE_ONCE, same SubViewport rig and parent as the grenade shots. It is freed with the pictures node, so there is no new orphan path. weapon_rail.gd:98 calls it once in setup.
- - plant_view.gd refresh (judgment): only reads ps.set_at and ps.facing. No allocation.
-Advisory:
- - replica_pictures.gd:239 (judgment): the bomb rig is never queue_freed on its own. Part shots are, so it is the same as the grenade shots. It is fine if ReplicaPictures is freed with the HUD, so confirm the orphan count in the next --perf run.
- - simulation.gd (judgment): floor_at runs every tick while Use is held with the bomb. A second cast is cheap, but it could be cached while the carrier is still.
- - The bomb picture is a new SubViewport with its own World3D. The first render can hitch, and the prewarm list has no entry for it (judgment, rendered hardware only). It draws once at HUD setup, not mid-round.
-Fixes: none required.
-Unexplained: none
+Advisory: none
+- Diff since ef9d94f touches no runtime code of HA1: the only file under assets/ is the rebuilt arms.glb (re-baked left-hand finger poses); tools/blender/arms/*.py are build tools (not shipped); test_ha1_rifle_hold.gd is test only (CPU vertex loops, run only in GUT, not in game).
+- game/ changes in the range (ui/hud*, weapon_rail, replica_pictures) come from the merged origin/main work (PB3, AU11), reviewed by their own threads; not reviewed here.
+- No new material, particle or shader, so no prewarm entry is needed; no preset bypass.
+Fixes: none needed
+Unexplained: none. Frame time, draw calls, orphan nodes and static memory were not measured (no Godot run allowed); nothing in the delta can move them, since mesh, material and image data are unchanged.

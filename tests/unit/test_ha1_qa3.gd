@@ -6,6 +6,8 @@ const ARMS_MODEL := "res://assets/models/arms/arms.glb"
 const FINGERS: Array[String] = ["Index", "Middle", "Ring", "Pinky"]
 ## The least (m) between neighbouring fingers' bones; the build puts them 16 to 19 mm apart, they were 3 to 10.
 const LEAST_APART := 0.012
+## A fingertip's bone, from its joint to the pad's middle (m).
+const TIP_BONE := 0.02
 const GUARD_SIDE := 0.018
 const SIZE_LIMIT := 8 * 1024 * 1024
 
@@ -38,20 +40,27 @@ func _seg_gap(a: Vector3, b: Vector3, c: Vector3, d: Vector3) -> float:
 	return best
 
 
+## A finger's last two bones as posed: the middle bone from its joint to the last joint, and the last bone on from
+## there by TIP_BONE along its own line (the pinch the critic saw was between fingertips).
+func _lines(sk: Skeleton3D, finger: String) -> Array[Vector3]:
+	var last := sk.get_bone_global_pose(sk.find_bone(finger + "3_L"))
+	return [_joint(sk, finger + "2_L"), last.origin, last.origin, last.origin + last.basis.y.normalized() * TIP_BONE]
+
+
 func test_neighbouring_left_fingers_stand_apart_on_the_sniper_and_the_smg() -> void:
 	for id: StringName in [&"sniper", &"smg"]:
 		var hands := _hands(id)
 		var sk := hands._arms._skeleton
 		sk.force_update_all_bone_transforms()
 		for i in FINGERS.size() - 1:
+			var a := _lines(sk, FINGERS[i])
+			var b := _lines(sk, FINGERS[i + 1])
 			var least := INF
-			for k: int in [1, 2]:
-				var a0 := _joint(sk, "%s%d_L" % [FINGERS[i], k])
-				var a1 := _joint(sk, "%s%d_L" % [FINGERS[i], k + 1])
-				var b0 := _joint(sk, "%s%d_L" % [FINGERS[i + 1], k])
-				var b1 := _joint(sk, "%s%d_L" % [FINGERS[i + 1], k + 1])
-				least = minf(least, _seg_gap(a0, a1, b0, b1))
-			assert_gt(least, LEAST_APART, "%s: %s and %s bones are %.1f mm apart" % [id, FINGERS[i], FINGERS[i + 1], least * 1000.0])
+			for j: int in [0, 2]:
+				for k: int in [0, 2]:
+					least = minf(least, _seg_gap(a[j], a[j + 1], b[k], b[k + 1]))
+			assert_gt(least, LEAST_APART,
+					"%s: %s and %s bones are %.1f mm apart" % [id, FINGERS[i], FINGERS[i + 1], least * 1000.0])
 
 
 func test_the_front_end_search_finds_each_rifles_handguard_and_a_finger_past_it_would_fail() -> void:
