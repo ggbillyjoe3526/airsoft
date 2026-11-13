@@ -450,3 +450,24 @@ func test_pump_hold_view_leaves_no_nodes_after_the_view_is_freed() -> void:
 		_step(hands, _character(&"shotgun"), 1.0, 3)
 		hands.free()
 	assert_eq(Performance.get_monitor(Performance.OBJECT_NODE_COUNT), before, "no nodes left")
+
+
+func _hold_bend(anim: Animation, bone: String) -> float:
+	for t in anim.get_track_count():
+		if String(anim.track_get_path(t)).ends_with(":" + bone):
+			return rad_to_deg((anim.track_get_key_value(t, 0) as Quaternion).get_angle())
+	return -1.0
+
+
+func test_the_shotguns_trigger_finger_is_curled_to_the_trigger_like_the_rifles_not_stuck_out() -> void:
+	var anim := (_scene(ARMS).find_child("AnimationPlayer", true, false) as AnimationPlayer)
+	var shotgun := anim.get_animation(&"shotgun_Hold")
+	var rifle := anim.get_animation(&"aeg_Hold")
+	var total := 0.0
+	var rifle_total := 0.0
+	for bone: String in ["Index1_R", "Index2_R", "Index3_R"]:
+		assert_gt(_hold_bend(shotgun, bone), 8.0, bone + " bent")
+		total += _hold_bend(shotgun, bone)
+		rifle_total += _hold_bend(rifle, bone)
+	assert_gt(total, 90.0, "the finger wraps the trigger")
+	assert_almost_eq(total, rifle_total, 25.0, "within a rifle trigger finger's reach, not swung away")
