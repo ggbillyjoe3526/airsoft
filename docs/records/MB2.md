@@ -1,6 +1,6 @@
 # MB2 · Woodland's road stack at a woodpile's 1.8 m
 
-**Review:** @REVIEW@
+**Review:** (the critic's verdict goes here) · qa Pass · performance Pass
 
 MB1 built the log stack across Woodland's Long road at the Culvert a gate screen's 2.8 m and put its height to the
 owner on a decision card, since he had asked for the woodpiles "less tall" (2026-11-09). The owner (2026-11-12):
@@ -11,11 +11,11 @@ another way, and the field is measured again.
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-@ATTEMPTS@
+| 2026-11-12 | 1 | build thread | ✓ (the 101 files that read Woodland; CI runs the suite) | (pending) | – |
 
 ## What changed
 
-- `tools/woodland/layout.py`, `data/maps/woodland.json` (946 blocks, as before: one piece in, MB1's none out):
+- `tools/woodland/layout.py`, `data/maps/woodland.json` (946 blocks, were 945):
   the road stack `rect("logstack", 20.5, 42.0, 1.6, 6.0)` drops its `top=2.8` and stands 1.8 m. A stand of young
   spruce, "the Culvert stand" (`THICKETS`), is planted against its east face: 1.7 m deep, the stack's 6 m wide, 5 m
   tall. A thicket is solid: nothing sees, shoots or walks through it. No new model, no new sound.
@@ -65,4 +65,21 @@ seeds, and the choice between layouts from 32.
 
 ## Verified
 
-@VERIFIED@
+- `python3 tools/woodland/build_map.py` writes the committed JSON; `python3 tools/woodland/check.py`: `TOTAL 0`.
+- gdlint, the changelog notes, the wiki check, the smoke test and the licence notices pass on the head.
+- Unit tests: the 101 files that read Woodland, 1,270 of 1,271 (one pending for want of a display, as on `main`);
+  `test_mb1_layouts` 10 of 10, and its road test and the new stack test both fail with the spruce taken out. CI runs
+  the whole suite and the match guards.
+- QA: Pass. It added `tests/unit/test_mb2_qa.gd`: only the six camp gate screens stand taller than a woodpile;
+  nothing but the stack and the stand is in the stand's box; the south lane is walked round the stand both ways.
+- Performance: Pass. A full Woodland session (8v8, 1,800 frames, headless, two runs a side) reads tick and views
+  6.1 ms mean on the head and 6.2 ms on `main`, under Low's 16.7 ms. Draw calls are not measured headless: the
+  stand's spruces are instances of the meshes every thicket shares.
+- **Not verified, for the owner's play:** how the lower stack with spruce behind it looks and plays from the road.
+  The play check is on the Dev 3 checklist.
+
+## Known issues left
+
+- The way round the stand's south end is 1.8 m wide for 1.7 m, between the spruce and the verge's log stack (QA: a
+  body passes, tight). MB1's stack left 1.9 m at the same corner; the south lane's figures above are measured through
+  it. Can wait.
