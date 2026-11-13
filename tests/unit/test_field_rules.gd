@@ -147,6 +147,30 @@ func test_each_field_reads_its_overtime_flag_and_one_lifted_fails_on_floor() -> 
 	assert_string_contains(r.text, "the overtime flag at %s is 0.5 m off the floor" % FieldChecks.at(m.overtime_flag))
 
 
+func test_each_field_hosts_plant_the_bomb_and_a_site_lifted_fails_on_floor() -> void:
+	for id in maps:
+		var f := maps[id]
+		assert_eq(f.bomb_sites.size(), Plant.MOST, "%s names both bomb sites" % id)
+		assert_eq(f.bomb_site_radii.size(), f.bomb_sites.size(), "%s: a radius a site" % id)
+		var start := f.bomb_start_ahead(tuning.plant.start_ahead)
+		var home := f.ends[1].spawns[0].position
+		for i in f.bomb_sites.size():
+			var site := f.bomb_sites[i]
+			assert_lt(site.distance_to(home), site.distance_to(start),
+					"%s: site %s is on the defenders' side" % [id, Plant.LETTERS[i]])
+		if f.bomb_sites.size() == Plant.MOST:
+			var apart := f.bomb_sites[0].distance_to(f.bomb_sites[1])
+			var widest := maxf(f.bomb_site_radii[0], f.bomb_site_radii[1])
+			assert_gt(apart, 2.0 * maxf(widest, tuning.plant.site_radius), "%s: the sites do not overlap" % id)
+		assert_eq(_only(results[id], FieldStandard.ON_FLOOR).status, FieldChecks.Status.PASS,
+				"%s: sites and the bomb's start on walkable floor" % id)
+	var m := MapData.load_map("depot", style, 1)
+	m.bomb_sites[1] += Vector3(0, 0.5, 0)
+	var r := FieldChecks.on_floor(m, navs["depot"])
+	assert_eq(r.status, FieldChecks.Status.FAIL)
+	assert_string_contains(r.text, "bomb site B at %s is 0.5 m off the floor" % FieldChecks.at(m.bomb_sites[1]))
+
+
 func test_a_ramp_of_one_in_one_and_a_half_fails_ramps() -> void:
 	var m := _depot()
 	var ramp: MapData.Block = null

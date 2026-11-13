@@ -112,10 +112,13 @@ if __name__ == "__main__":
     bm.to_mesh(me)
     bm.free()
     me.materials.append(material("Label", LABEL))
+    # What it is made of (tools/blender/replicas/surface.py, MQ2B): steel wire under a baked paint.
+    me["surfaces"] = {"Label": "coated"}
     me.shade_smooth()
     ob = bpy.data.objects.new("Spring", me)
     bpy.context.scene.collection.objects.link(ob)
     bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", export_yup=True, export_animations=False,
-            export_draco_mesh_compression_enable=False, export_cameras=False, export_lights=False)
+            export_draco_mesh_compression_enable=False, export_cameras=False, export_lights=False,
+            export_extras=True)
     print("Spring: %d triangles; wrote %s (%d bytes)" % (sum(len(p.vertices) - 2 for p in me.polygons), OUT,
                                                          os.path.getsize(OUT)))

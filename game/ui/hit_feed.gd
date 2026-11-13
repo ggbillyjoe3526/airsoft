@@ -19,6 +19,8 @@ class Line:
 	## A callout (`words` its line as said) rather than a hit.
 	var call: bool = false
 	var words: String = ""
+	## A note of the bomb (Plant The Bomb, PB1: "Rook planted the bomb at A"): a call's line, drawn with the bomb's sign.
+	var note: bool = false
 
 
 var max_lines: int = 6
@@ -56,12 +58,13 @@ func add(shooter: int, victim: int, at: float, kept: bool = false) -> void:
 	line.keep = kept
 	line.call = false
 	line.words = ""
+	line.note = false
 
 
 ## A teammate's callout: `speaker` said `words` at simulation time `at`, the newest line, so it always shows. It ages
 ## and fades as a hit line, even on Keep, where it takes the place of the oldest call once max_lines calls are held and
 ## never a hit's: the hits it moves past the newest max_lines are hidden, not dropped.
-func add_call(speaker: int, words: String, at: float) -> void:
+func add_call(speaker: int, words: String, at: float, note: bool = false) -> void:
 	_make_room(true)
 	var line := _front()
 	line.shooter = speaker
@@ -70,6 +73,13 @@ func add_call(speaker: int, words: String, at: float) -> void:
 	line.keep = false
 	line.call = true
 	line.words = words
+	line.note = note
+
+
+## A note of the bomb (Plant The Bomb, PB1): `actor` did `words` ("planted the bomb at A") at simulation time `at`. A
+## call's line in every way (the newest, aging and fading, gone with the round's calls) drawn with the bomb's sign.
+func add_note(actor: int, words: String, at: float) -> void:
+	add_call(actor, words, at, true)
 
 
 ## How many lines show: the newest max_lines (on Keep the feed may hold more, hits a call moved past them).

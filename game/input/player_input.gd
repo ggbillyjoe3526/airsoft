@@ -551,6 +551,8 @@ func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null, ho
 	cmd.throw_grenade = Grenade.Kind.NONE
 	cmd.ready_grenade = _bomb_latch
 	cmd.use_door = _door_latch
+	# Use held: hands on Plant The Bomb's device (PB1); never behind the order wheel or the map.
+	cmd.interact = _door_latch or (Input.is_action_pressed(USE_DOOR) and not _wheel.open and not _map.open)
 	cmd.zoom_steps = 0
 	if zoom_turns and cmd.aim:
 		# Aimed through a variable optic (SN2): the zoom keys turn it, and a key that is a switch too only zooms.

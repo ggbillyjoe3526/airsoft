@@ -122,6 +122,42 @@ static func attack_defend(test: GutTest, map_id: String, level: StringName = &"n
 	return PackedInt32Array([rounds, captures, raised, on_time])
 
 
+## Plant The Bomb over seeds 1 to `seeds` (PB1; the map needs sites), checked as Attack / Defend is: every match won, only
+## the attackers must leave their spawn, no round runs past the clock, its overtime and the fuse, and every round's bomb
+## is picked up. Returns [rounds, rounds armed, defused, gone off, rounds on time, rounds the attackers won] for the
+## file's own checks.
+static func plant_the_bomb(test: GutTest, map_id: String, level: StringName = &"normal", seeds: int = SEEDS,
+		night: bool = false) -> PackedInt32Array:
+	var r: MatchRunner = await runner(test, map_id, level, night, RoundState.Mode.PLANT_THE_BOMB)
+	test.assert_true(r.map.has_bomb_sites, "%s has bomb sites" % map_id)
+	var name := label(r, map_id) + " PTB"
+	var longest := longest_round(r.tuning, RoundState.Mode.PLANT_THE_BOMB)
+	var t := PackedInt32Array([0, 0, 0, 0, 0, 0])
+	for seed_value in range(1, seeds + 1):
+		var m := r.play(seed_value, MAX_MATCH_SECONDS)
+		var at := "%s seed %d" % [name, seed_value]
+		test.assert_true(m.finished, "%s: the match is won" % at)
+		t[0] += m.rounds.size()
+		t[1] += m.plants()
+		t[2] += m.defuses()
+		t[3] += m.went_off()
+		t[4] += m.on_time()
+		for round_tally in m.rounds:
+			test.assert_lte(round_tally.seconds, longest, "%s: no round runs past the clock, its overtime and the fuse" % at)
+			test.assert_gte(round_tally.picked_at, 0.0, "%s: the bomb is picked up every round" % at)
+			if round_tally.winner >= 0 and round_tally.winner == round_tally.attackers:
+				t[5] += 1
+		_heights(test, r, m, at)
+		test.assert_eq(m.stayed_home, 0, "%s: every attacker leaves its spawn each round" % at)
+		test.assert_lte(m.held_up, HELD_UP_MAX, "%s: bots aren't held up on their way" % at)
+		test.assert_eq(m.friendly_hits, 0, "%s: no bot knocks out a teammate" % at)
+	test.gut.p("%s: %d rounds over %d seeds, %d armed, %d defused, %d gone off, %d on time, %d to the attackers" % [name,
+			t[0], seeds, t[1], t[2], t[3], t[4], t[5]])
+	test.assert_gt(t[0], 0)
+	r.free_level()
+	return t
+
+
 ## Elimination's overtime flag in play (OV2): Elimination over seeds 1 to `seeds` with `round_time` s rounds, short
 ## enough that most run out the clock and go to the flag, checked as Elimination is (every match won, no round past its
 ## clock and the flag's time, nobody falls, flies or leaves the level, no bot knocks out a teammate). Returns [rounds,

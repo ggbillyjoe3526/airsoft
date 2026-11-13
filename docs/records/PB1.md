@@ -1,0 +1,167 @@
+# PB1 · Plant The Bomb
+
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
+
+## Attempts
+
+| Date | Attempt | Worker model | checks | Critic | Retry reason |
+|---|---|---|---|---|---|
+| 2026-11-12 | 1 | build thread (the screens: a worker) | ✓ 6,199 unit tests | 5/8 Retry | A hit carrier left the bomb in the air or in a lift's shaft; Subway's attackers took 27 % and armed Site A in 13 % of plants, and its guard's band was widened for it; `GameEvent.Kind.BOMB` against the naming ruling; `tests/README.md` rows |
+| 2026-11-12 | 2 | build thread | ✓ 6,265 unit tests | 8/8 Accept | – |
+
+## Goal
+
+The owner, 2026-11-12: a new mode, "Plant The Bomb". One team plants a bomb at 1 of 2 of the other team's sites (Site
+A or Site B); the other defends and defuses. The attackers win by detonating it or wiping the defenders out; the
+defenders by defusing it or wiping the attackers out. Every map supports it. "Work on the new game mode and make sure
+it is fun, strategic and balanced." His later rules the same day: the bomb starts on the ground at the attackers'
+start, bots may take it and must be able to plant on their own, but the player easily has time to take it first; a
+defending player is given time to defuse on their own, and bots defuse when the player is out or not near, kept fair.
+He makes the bomb's and the defusal tool's models and the mode's sounds; he asked what he needs (2 models, 8 sounds:
+the shared `audio/record-next.md`, numbers 10 to 17, and `art/references/plant-the-bomb/`).
+
+A dev-only field built for the mode, Stockade, follows as its own task. A second, Stacks ("Build both Stockade and
+Stacks maps. They are dev only maps."), he scrapped the same evening ("Scrap the Stacks map. Do not build it."); it
+was never started.
+
+## Approach
+
+- **Rules** (`game/sim/plant.gd`, `plant_state.gd`, `PlantConfig`; `RoundState.Mode.PLANT_THE_BOMB`). The bomb is
+  down, carried, planted, defused or gone off. An attacker in reach holding Use takes it up; the carrier holding Use
+  on the ground inside a site's ring arms it in `plant_time`, from nothing again if let go; a carrier who is hit
+  drops it on the floor they last stood on (a lift's landing, never its shaft). Armed, the fuse runs and beeps faster to its end; a defender in reach holding Use
+  disarms it in `defuse_time`, kept from `defuse_checkpoint` if let go. Round ends: gone off or every defender out
+  for the attackers; made safe, every attacker out before it is armed, or time up before it is armed (with
+  `max_overtime` more while it is being keyed in) for the defenders. With the bomb armed, the attackers all out does
+  not end the round: it still has to be made safe. Cues are `PLANT` events (`Plant.Cue`).
+- **Maps.** `bombSites` in each field's file (up to two spots with an optional radius; without them the poles stand
+  in) and `bombStart` (or 2.5 m in front of end 0's spawn line). The attackers always start from end 0, so the ends
+  swap with the roles. Depot: A and B are its two flag sites; Woodland: A in the Fort, B at the Sawmill; Subway: A on the
+  south platform and B on the north, each just east of the lower hall's doors behind the works hoarding (first tried:
+  A in the south train's first car, a one-door funnel no carrier got through, then both 8 m further east in plain
+  sight of the tunnel mouths); Subway's rings are 3.5 m, a platform's width. The builders write them (`tools/<map>/layout.py`
+  `BOMB_SITES`). `FieldChecks.on_floor` now covers the sites and the bomb's start.
+- **Bots** (`game/ai/bot_plant.gd`). The sites stand in for Attack / Defend's poles (a `FlagState` a site in
+  `BotWorld`), so lanes, posts, guards and retakes are BotFlag's and BotMovement's. On top: the nearest attacker
+  fetches the bomb (waiting beside it while the player has first pick; one on the bomb's storey before any that is
+  not, and the one going keeps the job); the carrier sweeps its lane, then goes in
+  last, once two of its team are by the site or it has waited 10 s, and arms the bomb behind crouch cover inside the
+  ring; a bomb dropped in the defenders' half moves the plan to the nearest site and whoever takes it up carries
+  straight on; the defenders learn of the keys only within earshot (20 m); every free defender goes back to an armed
+  bomb and the nearest disarms it, not while a player of their team is within 15 m of it until the fuse leaves 4 s
+  more than the work needs; the armed bomb's guards split between the other site and the defenders' start
+  (`watch_point`) and leave cover for a bomb they hear being disarmed. Where every defender's lane ends by one site
+  (Subway's all end by A), half the defending bots guard the other from the whistle (`_post_defenders`). A bot within
+  5 m of whoever has both hands on the bomb makes them out through smoke (`given_away`): the bots smoke a narrow
+  site so often that a defuser worked unseen a metre from the bomb's guards. Five new callouts (`data/callouts.md`).
+- **Seen and heard.** `PlantView`: a stand-in case with a lamp, on the ground, at a carrier's hip, or at the planter's
+  feet while it is keyed in; a ring and a letter a site. `tools/plant_sounds.py`: eight synthesised cues, the keys
+  and the kit as long as the plant and the defuse and cut when the hands come off (SimAudio). The replica is carried
+  low while the hands are on the bomb.
+- **Screens** (a worker, `game/ui/`): the mode's card, third on the Match page; banners, ATK and DEF tags, the
+  fuse on the clock in the accent colour, the PLANTING and BOMB gauge, the Use prompt, the marker, the minimap's and
+  the full-screen map's sites and bomb, feed notes, the screen reader's lines.
+- **Tests.** `test_plant` (rules), `test_bots_plant`, `test_plant_view`, `test_pb1_ui`, `test_plant_play` (a real
+  session: the Use key takes the bomb up), `test_field_rules` (every field names two sites on walkable floor on the
+  defenders' side), `test_callouts`; match guards `tests/guards/test_plant_guards.gd`, one CI job a field.
+  `tools/plant_pictures.gd` takes the review pictures.
+
+## Defaults taken
+
+Claude's, each the owner's to change (`docs/DECISIONS.md` › Maps and modes):
+
+- Hold Use (G) for all three jobs; no key of its own.
+- Plant 3.5 s, fuse 30 s, defuse 6 s with a half-way checkpoint. The fuse was 40 s at first: at 40 s no bomb went off
+  in over 400 bot rounds and a defuse landed a mean 17 s after the plant.
+- Nobody drops the bomb by choice; only a hit drops it.
+- Going off is a field prop's pop and buzzer: dust, no hit on anyone.
+- The bots leave the bomb to the player for 6 s (less once the player is 10 m away without it), and a dropped bomb
+  for 6 s while the player is within 12 m of it.
+- The mode is public and third on the Match page.
+- The stand-in case is hi-vis yellow, neither team's colour.
+- The clock shows the fuse with no word, in the accent colour: "OT" was wrong for it and "BOMB" did not fit the
+  panel; the BOMB gauge under it says what it counts.
+- Sites on Depot and Woodland are the Attack / Defend flag sites.
+- Defending bots never leave a site open: half guard the one no lane of theirs ends at.
+- The keypad and the kit give their user away to a bot within 5 m, smoke or not; the player's too. Hands off the
+  bomb, smoke hides everyone as before.
+
+## Measures
+
+Bots only, Normal, 6v6, `tests/support/match_runner.gd`.
+
+Sixteen seeds a field (seeds 1 to 16), on MB1's reworked layouts and with SH1's bot kits (main at a41c1e9, merged
+before the push), the storey-wise fetcher in:
+
+| Field | Rounds | Attackers win | Armed | Made safe | Gone off | Defenders wiped | Attackers wiped | Held up |
+|---|---|---|---|---|---|---|---|---|
+| Depot | 111 | 37 % | 67 % (A 57 %) | 34 | 0 | 41 | 36 | 0 |
+| Woodland | 117 | 41 % | 76 % (A 45 %) | 43 | 1 | 47 | 26 | 0 |
+| Subway | 122 | 48 % | 85 % (A 41 %) | 47 | 1 | 58 | 16 | 39 |
+
+Subway again after SM1's modelled trains landed (main at 699f914, merged before the push), same seeds: 124 rounds,
+53 % to the attackers, armed 85 % (A 44 %), 42 made safe, 1 gone off, none on the clock, 33 held up and at most 6 in a
+match.
+
+The same sixteen seeds on the layouts the mode was built and reviewed on (main at f990ce4), which the last three
+bullets below quote: Depot 122 rounds, 41 % to the attackers, armed 64 % (A 56 %), 29 made safe; Woodland 127, 57 %,
+66 % (A 37 %), 30; Subway 108, 41 %, 79 % (A 51 %), 42, 136 held up. None went off there. MB1's Woodland (the Fort's
+west wall, the log stack by flag B) took the attackers from 57 % to 41 %.
+
+- The bomb is taken up in every round, 0.2 to 0.3 s after the whistle with no player to wait for.
+- The first key goes in a mean 47 s (Depot), 56 s (Woodland) and 49 s (Subway) into the round.
+- A defuse nearly always ends with no attacker left (Depot 34 of 34, Woodland 42 of 43, Subway 45 of 47): the bots
+  win the fight first, then work on the bomb. Two bombs went off in 350 rounds; the fight round an armed bomb is over
+  inside the fuse, one way or the other, with 2.7 to 4.6 attackers against 2.6 to 4.3 defenders standing at the
+  plant. On the earlier layouts a defuse ended 7 to 29 s after the plant, a median 7 to 8 s after the last attacker
+  was out.
+- The fetcher (found on the merged layouts, after the critic's Accept): Subway's first measure there gave the
+  attackers 43 % of 118 rounds, two lost to the clock, and 66 bots held up, 14 and 13 in two matches. A carrier hit on
+  the concourse left the bomb a storey above the south platform; the fetcher was the nearest bot measured level, so
+  the one walking to the escalators (away from the bomb as the crow flies) lost the job to the one walking back to
+  the site, and the two swapped it each time they passed until the round ran out. Now a bot on the bomb's storey
+  fetches before any that is not, the one going is kept unless one on its storey is nearer, and a fetcher has come
+  to the bomb only within a hand's reach of its height (QA's find: half a flight below it on a stair it crouched for
+  good) (`BotPlant._pick_fetcher`, `on_bomb_level`, `BotMovement._flag`; three tests in `test_bots_plant`): 48 %,
+  none on the clock, 39 held up and at most 8 in a match, so Subway's guard is back on the shared held-up limit
+  (`SUBWAY_HELD_UP_MAX` is gone). Depot's rounds are the same to the round; Woodland's moved by three.
+- Before the carrier went in last and a bomb taken up in the defenders' half was carried straight on, the attackers
+  took 20 % on Depot, 36 % on Woodland and 22 % on Subway.
+- Subway before attempt 2 (the critic's Retry): 27 % to the attackers and Site A armed in 13 % of plants. Three
+  causes, each measured over 64 to 69 rounds. Every lane ends by the south platform, so all six defending bots stood
+  by A and none by B (A 5 % of plants on the merged layout): the site guards made it A 49 %, the attackers 26 %. The
+  sites in plain sight of the tunnel mouths: moved behind the hoardings, 28 %. And smoke: in 16 of 34 defuses an
+  attacker was still in play, most within a metre or two of the bot disarming, blind in a cloud on a platform 3.5 m
+  wide; with the keys and the kit giving their user away within 5 m, 42 %. The same rule took Woodland from 46 % to
+  57 % (fewer attackers wiped before the plant) and left Depot where it was.
+- Subway before MB1: its bots queued at the ticket gates in every mode (9 held up in a 7 round Attack / Defend match
+  on main; 8.5 a match here), and its guard kept a held-up limit of its own (30) until MB1's lanes and the fetcher's
+  fix; the attackers' band is the shared one.
+
+## Checks
+
+- `tools/check.sh`'s gates on attempt 2, the unit parts side by side: gdlint ✓, changelog notes ✓, wiki ✓, 6,265
+  unit tests ✓ (2 pending, as on main), smoke test ✓, licence notices ✓.
+- QA: Pass (attempt 1's run 1 failed on a defuse let go at exactly the checkpoint losing its progress to float error;
+  fixed, `Plant.SLACK`). 30 tests of its own in `tests/unit/test_pb1_qa.gd`.
+- Performance: Pass. The mode costs 0.7 % more simulation time than Attack / Defend; the other modes pay one null
+  check a sighting.
+- Critic: attempt 1 Retry 5/8 (the four items above), attempt 2 Accept 8/8. Its notes kept for the playtest: the
+  give-away rule works one way (a bot sees a busy player through smoke; a player sees only smoke and shoots at the
+  kit's sound), and if that reads unfair the fix is to show the bomb's lamp through smoke, not to drop the rule; no
+  bomb went off in 357 bot rounds, so if rounds after a plant play like Elimination with a site, shorten the fuse or
+  lengthen the defuse (`PlantConfig`).
+- Subway's guard run locally on attempt 2: 58 rounds over 8 seeds, 43 armed, 19 defused, 24 to the attackers.
+- After the merge of main at 7903cb4 (the Pump Shotgun, SH1, and Subway's arched tunnels, TB2): the gates again,
+  6,307 unit tests ✓ (2 pending, as on main), and the three match guards.
+- Attempt 3, after the merge of main at a41c1e9 (MB1's layouts) and the fetcher's fix: gdlint ✓, changelog notes ✓,
+  wiki ✓, 6,344 unit tests ✓ (2 pending, as on main), smoke test ✓, licence notices ✓. QA: Pass, five more tests
+  (35 in `test_pb1_qa.gd`); its advisory, a fetcher half a flight below a bomb on a stair counted as there and
+  crouched for good, is fixed (arrival needs `PlantConfig.reach_height`). Performance: Pass, from the diff (a few
+  comparisons a tick while a bomb lies on the ground; nothing allocated), not measured.
+- Reports: `/mnt/project-files/pipeline/runs/PB1/` (project files).
+
+## Left for the owner
+
+- How it plays: the play checks are on the Dev 3 checklist (five, PB1).
+- The bomb's and the defusal tool's models and the eight sounds; the hands-on animation waits for FP1.

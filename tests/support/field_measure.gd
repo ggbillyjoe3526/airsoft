@@ -376,10 +376,11 @@ func spawns_seen() -> YardLine:
 	return _measured["spawns_seen"]
 
 
-## The length of the walk on foot from `a` to `b` (m): NavGrid.find_route's legs from `a`, the walk a bot takes; INF
-## where there is no route or it stops more than the route snap short of `b`.
+## The length of the walk from `a` to `b` (m): NavGrid.find_route's legs from `a`, the walk a bot takes, over the vault
+## and climb links where the grid has them (SM1: Subway's Tunnel team climbs into the open cab, no ramp); INF where
+## there is no route or it stops more than the route snap short of `b`.
 func walk(a: Vector3, b: Vector3) -> float:
-	if not nav.find_route(a, b, _route):
+	if not nav.find_route(a, b, _route, true):
 		return INF
 	var last := _route[_route.size() - 1] if not _route.is_empty() else a
 	if Vector2(last.x - b.x, last.z - b.z).length() >= nav.snap:

@@ -245,12 +245,18 @@ func test_the_bomb_in_hand_presses_its_depth_as_the_arms_do_and_keeps_out_of_the
 	var mesh := v._held.mesh
 	assert_gt(mesh.get_surface_count(), 0)
 	for i in mesh.get_surface_count():
-		var m := v._held.get_surface_override_material(i) as BaseMaterial3D
-		assert_not_null(m, "surface %d pressed" % i)
+		var worn := v._held.get_surface_override_material(i)
+		assert_not_null(worn, "surface %d pressed" % i)
+		assert_ne(worn, mesh.surface_get_material(i), "a copy: the thrown and the figures' bombs keep their depth")
+		var m := worn as BaseMaterial3D
 		if m != null:
 			assert_true(m.use_z_clip_scale)
 			assert_almost_eq(m.z_clip_scale, view_cfg.depth_scale, 1e-6)
-			assert_ne(m, mesh.surface_get_material(i), "a copy: the thrown and the figures' bombs keep their depth")
+		else:
+			# MQ2B: a material the bomb names a kind for is drawn on its surface, pressed by the shader's own uniform.
+			assert_true(ReplicaPaint.is_surface(worn), "surface %d" % i)
+			assert_almost_eq(float((worn as ShaderMaterial).get_shader_parameter(&"z_clip_scale")),
+					view_cfg.depth_scale, 1e-6)
 	var shared := v.materials()
 	for m: Material in v.arms().materials():
 		assert_true(shared.has(m), "prewarmed with the bombs")

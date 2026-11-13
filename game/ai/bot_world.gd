@@ -30,6 +30,22 @@ var attackers: int = -1
 var flags: Array[FlagState] = [FlagState.new()]
 var flag: FlagState = flags[0]
 var flag_index: int = 0
+## Plant The Bomb (BotPlant.sync): the bomb and its sites (RoundState's; null in other modes), the sites as `flags`
+## (one FlagState a site, kept here), the site the attackers make for, and when the bomb last came to lie on the ground
+## (the round's GO, or a carrier hit).
+var plant: PlantState = null
+var site_flags: Array[FlagState] = []
+var plant_site: int = 0
+var plant_down_at: float = 0.0
+## The carrier's go to the site: latched once its escort is by the site or it has waited long enough (BotPlant.plan),
+## for the character carrying then (plant_go_for); plant_hold_since is when that carrier's lane was swept (-1: not yet).
+var plant_go: bool = false
+var plant_go_for: int = -1
+var plant_hold_since: float = -1.0
+## The bomb last fell in the defenders' half: whoever takes it there carries it straight on (BotPlant.observe).
+var plant_fell_far: bool = false
+## The defenders' site guards are dealt for this round (BotPlant._post_defenders: once, after the lanes).
+var plant_posted: bool = false
 ## Elimination's overtime flag (OV2; RoundState's, read each tick): up, its foot and the time it has left.
 var overtime_flag: OvertimeFlag = OvertimeFlag.new()
 ## The dark on a field played at night (WL6): light pools, canopy and roofs, built once as the match loads (null by

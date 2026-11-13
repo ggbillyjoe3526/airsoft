@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402  first: it brings bmesh and mathutils with it
 import hardsurface as hs  # noqa: E402
 import leads  # noqa: E402
+import surface  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
@@ -56,6 +57,10 @@ STICKER_ROWS = 18
 # sticker, from its lead-end edge).
 INK_BARS = ((0.55, 0.9, 0.12, 0.62), (0.12, 0.45, 0.12, 0.76), (-0.18, 0.45, 0.12, 0.55), (-0.48, 0.45, 0.12, 0.7))
 INK_LIFT = 0.04
+# The yellow caution sticker by the lead end (MQ2B), as real packs carry: (from, to mm along) and its dark bars, a
+# heavy heading and two lines (as INK_BARS).
+CAUTION = (8.0, 25.0)
+CAUTION_BARS = ((0.5, 1.3, 0.14, 0.72), (-0.05, 0.5, 0.14, 0.72), (-0.45, 0.5, 0.14, 0.5))
 
 # The leads (millimetres, from the lead end): 16 AWG silicone, separate, converging on the plug.
 LEAD_RADIUS = 1.5
@@ -67,13 +72,22 @@ BLACK_PATH = ((-1.8, -3.0, 2.0), (-2.1, 7.0, 1.5), (-3.0, 15.0, -10.0), (-2.8, 9
 SPAN_STEPS = 6
 
 WRAP, STICKER, INK = "Wrap", "Print", "Ink"
+WARN, WARN_INK = "Caution", "CautionInk"
 RED, BLACK, PLUG, SOCKET = "Lead", "LeadBlack", "Plug", "Socket"
+
+
+# What each material is made of (surface.py, MQ2B): glossy shrink film, paper stickers and their print, matte
+# silicone leads, a moulded plug. The plug's dark socket stays as the file has it.
+SURFACES = {WRAP: "coated", STICKER: "card", INK: "card", WARN: "card", WARN_INK: "card", RED: "polymer",
+            BLACK: "polymer", PLUG: "polymer"}
 
 
 def materials() -> None:
     hs.material(WRAP, 0xC8161E, 0.24)
     hs.material(STICKER, 0xE4E1D8, 0.55)
     hs.material(INK, 0x9A9890, 0.6)
+    hs.material(WARN, 0xE2B52C, 0.55)
+    hs.material(WARN_INK, 0x26241E, 0.6)
     hs.material(RED, 0xC42A28, 0.5)
     hs.material(BLACK, 0x1C1C1E, 0.5)
     hs.material(PLUG, 0xC9DD5A, 0.35)
@@ -126,8 +140,9 @@ def body(b: hs.Builder) -> None:
     b.loft(rings, WRAP)
 
 
-def sticker(b: hs.Builder, y0: float, y1: float) -> None:
-    """A thin sticker laid on the +X face from y0 to y1 (mm from the lead end), following the face's shape."""
+def sticker(b: hs.Builder, y0: float, y1: float, paper: str = STICKER, ink: str = INK, bars: tuple = INK_BARS) -> None:
+    """A thin sticker of `paper` laid on the +X face from y0 to y1 (mm from the lead end), following the face's shape,
+    with `bars` of `ink` on it."""
     def edge(t: float) -> float:
         # Rounded corners: how far in from y0 / y1 the sticker's end is at height t (-1 .. 1).
         a = abs(t) * STICKER_HALF
@@ -145,7 +160,7 @@ def sticker(b: hs.Builder, y0: float, y1: float) -> None:
         top.append(((x + STICKER_LIFT) * MM, ya, z * MM, (x + STICKER_LIFT) * MM, yb, z * MM))
         bottom.append(((x - 0.3) * MM, ya, z * MM, (x - 0.3) * MM, yb, z * MM))
     bm = b.bm
-    i = b.mat(STICKER)
+    i = b.mat(paper)
     vt = [(bm.verts.new(r[:3]), bm.verts.new(r[3:])) for r in top]
     vb = [(bm.verts.new(r[:3]), bm.verts.new(r[3:])) for r in bottom]
     faces = []
@@ -163,8 +178,8 @@ def sticker(b: hs.Builder, y0: float, y1: float) -> None:
             f.normal_flip()
     # Faint grey bars where its print would be, a heading and lines of small print: no letters.
     span = y1 - y0
-    i = b.mat(INK)
-    for zc, half, start, length in INK_BARS:
+    i = b.mat(ink)
+    for zc, half, start, length in bars:
         x = (face_x(zc * STICKER_HALF) + STICKER_LIFT + INK_LIFT) * MM
         ya = (LENGTH - y1 + span * (1.0 - start - length)) * MM
         yb = (LENGTH - y1 + span * (1.0 - start)) * MM
@@ -185,6 +200,7 @@ def build() -> bpy.types.Object:
     body(b)
     for y0, y1 in STICKERS:
         sticker(b, y0, y1)
+    sticker(b, CAUTION[0], CAUTION[1], WARN, WARN_INK, CAUTION_BARS)
     red = lead(b, RED_PATH, RED)
     black = lead(b, BLACK_PATH, BLACK)
     end = (red[-1] + black[-1]) * 0.5
@@ -200,6 +216,9 @@ def build() -> bpy.types.Object:
 if __name__ == "__main__":
     hs.reset()
     battery = build()
+    surface.name([battery], SURFACES)
+    surface.only_tables()
     bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", export_yup=True, export_animations=False,
-            export_draco_mesh_compression_enable=False, export_cameras=False, export_lights=False)
+            export_draco_mesh_compression_enable=False, export_cameras=False, export_lights=False,
+            export_extras=True)
     print("Battery: %d triangles; wrote %s (%d bytes)" % (hs.tris(battery), OUT, os.path.getsize(OUT)))

@@ -19,7 +19,7 @@ decide a fight more than the gear you carry.
 
 | Playing | Your kit | Matches |
 | --- | --- | --- |
-| [Movement](Movement): walk, sprint, lean, vault | [Replicas](Replicas): stats for every replica | [Modes](Modes): Elimination, Attack / Defend, Custom |
+| [Movement](Movement): walk, sprint, lean, vault | [Replicas](Replicas): stats for every replica | [Modes](Modes): Elimination, Attack / Defend, Plant The Bomb, Custom |
 | [Bots](Bots): difficulties, personalities and kits | [Parts and Power](Parts-and-Power): every part, battery and gas | [Maps](Maps): the fields |
 | [Squad Orders](Squad-Orders): tell your teammates what to do | [Loadout](Loadout): saved loadouts and Customise | [Practice Range](Practice-Range) and the timed challenge |
 | [HUD and Minimap](HUD-and-Minimap) | [Levels and Unlocks](Levels-and-Unlocks): XP, levels and the Armory | [Settings](Settings) and [Accessibility](Accessibility) |

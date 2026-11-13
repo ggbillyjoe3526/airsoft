@@ -120,6 +120,14 @@ def spot(x: float, z: float, yaw: float) -> dict:
     return {"position": {"x": r(x), "y": 0, "z": r(z)}, "yaw": yaw}
 
 
+def bomb_site(x: float, z: float, radius: float) -> dict:
+    """A Plant The Bomb site (PB1): its middle on the floor, and its radius where it isn't the game's usual."""
+    out = {"x": r(x), "y": 0, "z": r(z)}
+    if radius > 0:
+        out["radius"] = radius
+    return out
+
+
 def dead_zone(cx: float, cz: float, yaw: float) -> list[dict]:
     """Eight walk-off spots (8v8, TS1): two columns of four, 0.8 m apart, round (cx, cz)."""
     return [spot(cx + dx, cz + dz, yaw) for dz in (-1.2, -0.4, 0.4, 1.2) for dx in (-0.4, 0.4)]
@@ -251,6 +259,7 @@ def build() -> dict:
         "deadZones": [dead_zone(*L.DEAD_W, EYE_FACING_EAST), dead_zone(*L.DEAD_E, EYE_FACING_WEST)],
         "lanes": [[{"x": x, "y": 0, "z": z} for x, z in L.LANES[k]] for k in ("n", "m", "s")],
         "flags": [{"x": x, "y": 0, "z": z} for x, z in L.FLAGS],
+        "bombSites": [bomb_site(*s) for s in L.BOMB_SITES],
         "overtimeFlag": {"x": L.OT_FLAG[0], "y": 0, "z": L.OT_FLAG[1]},
         "botSight": 55,
         "ambience": "indoor",  # the owner's recording of a big quiet room (AU5)

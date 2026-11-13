@@ -34,6 +34,7 @@ func before_all() -> void:
 		var level := MapLevel.new()
 		add_child(level)
 		level.build(m, style, tuning.body)
+		NavVaults.link(nav, level.query(), tuning.vault, tuning.body, BotConfig.load_default().vault_price)
 		var measure := FieldMeasure.new(m, nav, level.query(), tuning.body)
 		results[e.id] = FieldChecks.layout(measure, FieldStandard.sightline_limit(e.id),
 				FieldStandard.sightline_reason(e.id))

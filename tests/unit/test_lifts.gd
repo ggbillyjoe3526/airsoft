@@ -293,6 +293,43 @@ func test_a_body_hit_mid_ride_walks_off_only_once_the_doors_open() -> void:
 	assert_gt((Vector2(me.position.x, me.position.z) - at).length(), 0.5, "walks off once they are open")
 
 
+## PB1: Plant The Bomb's carrier hit in a moving car leaves the bomb on the landing the car last stood at, never in the
+## car or hanging in the shaft.
+func test_a_bomb_carrier_hit_mid_ride_leaves_the_bomb_on_the_landing_it_left() -> void:
+	var w := _world(0)
+	var sim := Simulation.new(tuning, w, w.mover(), _ends(), -10.0)
+	var state := GameState.new(3, tuning)
+	for i in 3:
+		state.characters.append(Character.new(i, i % 2, Vector3.ZERO, 0.0, loadout))
+	state.round_state.mode = RoundState.Mode.PLANT_THE_BOMB
+	sim.start_match(state)
+	for i in 3:
+		_place(state.characters[i], Vector3(-8.0 + i * 0.8, LOW, -9.0), 0.0)
+	var me := state.characters[0]
+	var ps := state.round_state.plant
+	ps.status = PlantState.Status.CARRIED
+	ps.carrier = me.id
+	_place(me, Vector3(0.0, LOW, 0.2), 0.0)
+	_run(sim, state, 1, true, Vector2i(0, 1))
+	_run(sim, state, _ticks(cfg.door_time + cfg.floor_time * 0.5))
+	assert_eq(state.lifts.phase[0], LiftState.Phase.MOVING, "on its way up")
+	assert_gt(me.position.y, LOW + 0.5, "the carrier rides with it")
+	assert_true(ps.on_lift)
+	Elimination.eliminate(me, 1, state.characters, sim.ends)
+	_run(sim, state, 1)
+	assert_eq(ps.status, PlantState.Status.DOWN, "dropped")
+	var landing := _spec().landing_point(0, cfg)
+	assert_eq(ps.position, landing, "on the landing the car left")
+	assert_lt(ps.position.z, -1.3, "outside the shaft")
+	assert_almost_eq(ps.position.y, LOW, 1e-4, "on its floor")
+	# Out of a car, the carrier's own floor is the resting place again.
+	ps.status = PlantState.Status.CARRIED
+	ps.carrier = state.characters[2].id
+	_run(sim, state, 2)
+	assert_false(ps.on_lift)
+	assert_almost_eq(ps.rest.y, state.characters[2].position.y, 1e-4)
+
+
 ## PP1: a bomb lying on the car's floor rides up with it and still lies on it at the top.
 func test_a_bomb_on_the_car_s_floor_rides_with_it() -> void:
 	var w := _world(0)

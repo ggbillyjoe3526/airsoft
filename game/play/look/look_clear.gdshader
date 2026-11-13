@@ -6,6 +6,8 @@ render_mode blend_mix, cull_back, depth_draw_opaque;
 #include "res://game/play/look/look_light.gdshaderinc"
 
 uniform float roughness : hint_range(0.0, 1.0) = 0.3;
+// Its opacity over the whole surface where it is 0 or more (the trains' window glass, TrainView); else the colours'.
+uniform float opacity : hint_range(-1.0, 1.0) = -1.0;
 
 void fragment() {
 	vec3 own = COLOR.rgb;
@@ -14,5 +16,8 @@ void fragment() {
 	}
 	ALBEDO = look_paint(own);
 	ALPHA = COLOR.a;
+	if (opacity >= 0.0) {
+		ALPHA = opacity;
+	}
 	ROUGHNESS = roughness;
 }

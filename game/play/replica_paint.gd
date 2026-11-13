@@ -161,21 +161,37 @@ static func _surface_of(plain: StandardMaterial3D, mask: Texture2D, default_kind
 	if not _surfaced.has(key):
 		if _surfaced.size() >= MAX_SURFACED:
 			_surfaced.clear()
-		var m := ShaderMaterial.new()
-		m.resource_name = plain.resource_name + ("/worn" if mask != null else "/surface")
-		m.shader = SURFACE_SHADER
-		ReplicaSurfaces.dress(m)
-		m.set_shader_parameter(&"albedo", plain.albedo_color)
-		m.set_shader_parameter(&"default_kind", default_kind)
-		m.set_shader_parameter(&"emission", plain.emission if plain.emission_enabled else Color.BLACK)
-		m.set_shader_parameter(&"emission_energy",
-				plain.emission_energy_multiplier if plain.emission_enabled else 0.0)
-		m.set_shader_parameter(&"wear", 1.0 if mask != null else 0.0)
-		if mask != null:
-			m.set_shader_parameter(&"wear_mask", mask)
-		m.set_meta(PLAIN_META, plain)
-		_surfaced[key] = m
+		_surfaced[key] = _built(plain, mask, default_kind)
 	return _surfaced[key]
+
+
+## A new surface in `plain`'s colour and glow (MQ1), worn by `mask` where there is one (RW1), its faces with no kind of
+## their own drawn as `default_kind`.
+static func _built(plain: StandardMaterial3D, mask: Texture2D, default_kind: int) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.resource_name = plain.resource_name + ("/worn" if mask != null else "/surface")
+	m.shader = SURFACE_SHADER
+	ReplicaSurfaces.dress(m)
+	m.set_shader_parameter(&"albedo", plain.albedo_color)
+	m.set_shader_parameter(&"default_kind", default_kind)
+	m.set_shader_parameter(&"emission", plain.emission if plain.emission_enabled else Color.BLACK)
+	m.set_shader_parameter(&"emission_energy", plain.emission_energy_multiplier if plain.emission_enabled else 0.0)
+	m.set_shader_parameter(&"wear", 1.0 if mask != null else 0.0)
+	if mask != null:
+		m.set_shader_parameter(&"wear_mask", mask)
+	m.set_meta(PLAIN_META, plain)
+	return m
+
+
+## `own` (an accessory's own plain-coloured material: a bomb in the hand, a power source's picture, MQ2B) on a new
+## surface of kind `kind` in its own colour, the caller's to keep and to change (never one of surface_materials(): a
+## picture's or a view's own paint would otherwise stay in the shared store after it); `own` itself where the surface
+## can't stand in for it (glass, a texture).
+static func own_surface(own: Material, kind: int) -> Material:
+	var plain := own as StandardMaterial3D
+	if plain == null or not plain_colour(plain):
+		return own
+	return _built(plain, null, kind)
 
 
 ## The plain paint `material` was surfaced from (MQ1), or `material` itself where it is a plain one.

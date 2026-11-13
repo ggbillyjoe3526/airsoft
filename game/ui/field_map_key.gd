@@ -2,8 +2,9 @@ class_name FieldMapKey
 extends Control
 ## The full-screen map's key (FM2), down its right side: each mark the map draws beside what it means, in the map's own
 ## shapes and colours (your team's and the other's set by set_teams). Drawn once; redrawn only when the colours change.
+## In Plant The Bomb (PB1, set_plant) the Flag row names the bomb sites and a row for the bomb itself follows the rest.
 
-enum Glyph { YOU, MATE, OUT, STEPS, SHOT, PING, ORDER, FLAG, START, DEAD, DOOR, LOW, WALL, GREEN }
+enum Glyph { YOU, MATE, OUT, STEPS, SHOT, PING, ORDER, FLAG, START, DEAD, DOOR, LOW, WALL, GREEN, BOMB }
 
 ## The rows, in order, and their words.
 const ROWS: Array[Glyph] = [Glyph.YOU, Glyph.MATE, Glyph.OUT, Glyph.STEPS, Glyph.SHOT, Glyph.PING, Glyph.ORDER,
@@ -11,6 +12,9 @@ const ROWS: Array[Glyph] = [Glyph.YOU, Glyph.MATE, Glyph.OUT, Glyph.STEPS, Glyph
 const WORDS: Array[String] = ["MAP_KEY_YOU", "MAP_KEY_MATE", "MAP_KEY_OUT", "MAP_KEY_STEPS", "MAP_KEY_SHOT",
 		"MAP_KEY_PING", "MAP_KEY_ORDER", "MAP_KEY_FLAG", "MAP_KEY_START", "MAP_KEY_DEAD", "MAP_KEY_DOOR",
 		"MAP_KEY_LOW", "MAP_KEY_WALL", "MAP_KEY_GREEN"]
+## Plant The Bomb's words: the Flag row's, and the bomb's row (shown after the others).
+const SITE_WORD := "MAP_KEY_SITE"
+const BOMB_WORD := "MAP_KEY_BOMB"
 ## Sizes (px at 1080p): the heading's and a row's type, a row's height, the glyph's column and its half size, the
 ## inner padding, the rings' widths, the ink under a glyph.
 const HEADING_SIZE := 13
@@ -43,6 +47,10 @@ var _heading_font: Font = null
 var _badge_font: Font = null
 var _heading: String = ""
 var _words := PackedStringArray()
+var _site_word: String = ""
+var _bomb_word: String = ""
+var _plant: bool = false
+var _case := PlantShape.new()
 var _you := PackedVector2Array()
 var _diamond := PackedVector2Array()
 
@@ -55,6 +63,8 @@ func setup(cfg: MinimapConfig) -> void:
 	_heading_font = GameTheme.spaced_font(800, HudStyle.SPACING_SUB, HEADING_SIZE)
 	_badge_font = GameTheme.font(800)
 	_heading = HudStyle.caps("MAP_KEY")
+	_site_word = tr(SITE_WORD)
+	_bomb_word = tr(BOMB_WORD)
 	for w in WORDS:
 		_words.append(tr(w))
 	for p in YOU_SHAPE:
@@ -72,9 +82,26 @@ func set_teams(team: Color, enemy: Color) -> void:
 	queue_redraw()
 
 
+## Plant The Bomb's rows (the sites in the Flag row's place, the bomb's after the rest) on or off; true when that
+## changed the rows (the owner lays the key out again).
+func set_plant(on: bool) -> bool:
+	if on == _plant:
+		return false
+	_plant = on
+	queue_redraw()
+	return true
+
+
 ## The height its rows take (px), heading and padding included.
 func needed_height() -> float:
-	return PAD * 2.0 + ROW * (ROWS.size() + 1)
+	return PAD * 2.0 + ROW * (ROWS.size() + (2 if _plant else 1))
+
+
+## The words of row `i` as shown now (the bomb's row `ROWS.size()` when on): for tests.
+func row_word(i: int) -> String:
+	if i == ROWS.size():
+		return _bomb_word if _plant else ""
+	return _site_word if _plant and ROWS[i] == Glyph.FLAG else _words[i]
 
 
 func _draw() -> void:
@@ -82,11 +109,11 @@ func _draw() -> void:
 	var y := PAD + _heading_font.get_ascent(HEADING_SIZE)
 	draw_string(_heading_font, Vector2(PAD, y), _heading, HORIZONTAL_ALIGNMENT_LEFT, -1, HEADING_SIZE, GameTheme.MUTED)
 	var top := PAD + ROW
-	for i in ROWS.size():
+	for i in ROWS.size() + (1 if _plant else 0):
 		var mid := Vector2(PAD + GLYPH_COLUMN * 0.5, top + ROW * (i + 0.5))
-		_draw_glyph(ROWS[i], mid)
+		_draw_glyph(ROWS[i] if i < ROWS.size() else Glyph.BOMB, mid)
 		var base := Vector2(PAD + GLYPH_COLUMN + PAD * 0.5, mid.y + _font.get_ascent(WORD_SIZE) * 0.5 - 1.0)
-		draw_string(_font, base, _words[i], HORIZONTAL_ALIGNMENT_LEFT, size.x - base.x - PAD, WORD_SIZE,
+		draw_string(_font, base, row_word(i), HORIZONTAL_ALIGNMENT_LEFT, size.x - base.x - PAD, WORD_SIZE,
 				GameTheme.TEXT)
 
 
@@ -145,3 +172,6 @@ func _draw_glyph(g: Glyph, at: Vector2) -> void:
 			draw_rect(box, _cfg.tall_colour)
 		Glyph.GREEN:
 			draw_rect(box, _cfg.green_tall_colour)
+		Glyph.BOMB:
+			_case.fit(Rect2(at - Vector2.ONE * GLYPH * 1.2, Vector2.ONE * GLYPH * 2.4))
+			_case.paint(self, GameTheme.WARN, GameTheme.BAD, _cfg.ink)

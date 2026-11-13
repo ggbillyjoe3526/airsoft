@@ -453,7 +453,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   lowered), the canister thrown where you look a little lofted, then the replica back up. Bombs bounce and roll; they
   never hit or eliminate anyone. Numbers are in `game/config/grenade_config.gd`.
 - **Smoke hides, it never stops BBs (SF1).** The cloud (8 m across, about 15 s at full) blocks bots' sight like a wall
-  does; BBs fly through it. Your own screen goes milky inside it. Bots aim a little through its thin edge.
+  does; BBs fly through it. Your own screen goes milky inside it. Bots aim a little through its thin edge. One
+  exception (PB1): a bot within 5 m makes out whoever is keying Plant The Bomb's bomb in or disarming it.
 - **A flash blinds whoever faces it, teammates and the thrower too (SF1).** Up to 22 m, with a clear line from the eyes;
   full at 6 m and inside 60 degrees of the view, nothing looking (nearly) straight away (SF2: turning away is the
   counter, so a bot can look away from its own). 0.5 to 3.5 s. A blinded bot stops shooting,
@@ -795,6 +796,32 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   block's box and its crown starts over `WoodsConfig.crown_clear` (2.6 m); a thicket's spruces stay inside its box.
   Asked whether young pines and spruces should match his photos instead (branches to the ground, spruces spilling past
   the thicket's edge), he kept the boxes: what you see is what stops BBs and sight.
+- **Plant The Bomb is the third mode (owner, 2026-11-12, PB1).** His rules: the attackers plant a bomb at Site A or
+  Site B on the defenders' side; the defenders keep it from being planted or make it safe. The attackers win when it
+  goes off or the defenders are all out; the defenders win by making it safe or by getting every attacker out before
+  it is armed. Every field hosts it. The bomb starts on the ground at the attackers' start; bots may take it and plant
+  it on their own, "but the player should easily have enough time to pick it up"; defending, the player is "given
+  enough time to attempt to defuse on their own", and bots defuse when the player is out or not near, or when the fuse
+  would otherwise run out ("any other conditions but keep it fair"). He makes the bomb's and the defusal tool's models
+  and the mode's sounds; a stand-in prop and synthesised sounds ship first. Claude's defaults, his to change
+  (`PlantConfig`, `BotConfig` › Plant The Bomb): hold Use to pick up, plant and defuse; plant 3.5 s inside a site's
+  4.5 m ring (Subway's 3.5 m); fuse 30 s; defuse 6 s, kept from half way; nobody drops the bomb by choice; with the
+  bomb armed, the attackers all out does not end the round; time up before it is armed is the defenders' round, with
+  up to 5 s more while it is being keyed in; going off is a field prop's pop and buzzer and gets nobody out; the bots
+  leave the bomb to the player for 6 s (until the player is 10 m off without it) and the defuse to a player within
+  15 m of it until the fuse leaves 4 s more than the work needs; a bot carrier goes in last, behind two of its team;
+  where the defending bots' posts would leave a site open, half of them guard that site (`plant_site_guard_share`);
+  a bot within 5 m of whoever is keying the bomb in or disarming it makes them out through smoke, the player
+  included (`plant_gives_away`: without it a cloud over the bomb let a bot disarm it a metre from its guards).
+  The mode is public, third on the Match page (Attack / Defend, Elimination, Plant The Bomb, Practice). The device is
+  `Plant` in code (`Plant`, `PlantState`, `GameEvent.Kind.PLANT`, `HudPlant`, `PlantView`, `PlantShape`): the smoke
+  and flash grenades were "bombs" there already (`BotBombs`, the player's bomb keys). Only the map file's words keep
+  "bomb" (`bombSites`, `bombStart`, `MapData.bomb_sites`): a map names places as the player does, beside its `flags`,
+  and no grenade has a site. A carrier 15 m off but a storey above or below the bomb has no claim on it
+  (`BotConfig.plant_player_level`). A carrier hit in the air leaves the bomb on the floor it last stood on, and one
+  hit in a lift on the landing the car last stood at, never in the shaft. The bot that fetches a bomb from the ground
+  is the nearest on its storey, or the nearest of all with none there, and it keeps the job until one on the bomb's
+  storey is nearer: level distance says nothing between bots a storey off. Measures: `docs/records/PB1.md`.
 - **A field's layout is judged on its play record (owner, 2026-11-12, MB1).** He asked for every field to be analysed
   like a Counter-Strike or Valorant map (sight lines, chokes, heat maps, cover, every piece placed on purpose) and
   changed, with one rule: no new model or sound; a field may be resized or cut if balance wants it ("Balance and

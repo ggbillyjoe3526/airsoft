@@ -10,14 +10,15 @@ const LINES: PackedStringArray = [
 	"Contact, {area}!", "{count}, {area}!", "Movement, {area}.", "{left} left!", "Last one!", "Tagged!", "Reloading!",
 	"Pushing {area}!", "Flanking {area}.", "Checking {area}.", "Holding {area}.", "Raising!", "Flag!",
 	"Overtime, {area}!", "Going to {area}.", "Watching {area}.", "Need a mag!", "Mag coming!", "Thanks for the mag!",
-	"Need help!", "Go round!", "Cover me!", "Watching with you.", "It's yours.",
+	"Need help!", "Go round!", "Cover me!", "Watching with you.", "It's yours.", "Planting {area}!", "Bomb, {area}!",
+	"Armed, {area}!", "Defusing!", "Bomb down, {area}!",
 ]
 ## The shipped order of urgency.
 const ORDER: Array[int] = [
 	E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING, E.WATCH_JOIN, E.WATCH_REST, E.NEED_MAG, E.MAG_COMING,
 	E.NEED_HELP, E.COVER_ME,
 	E.GO_ROUND, E.OVERTIME, E.FLAG,
-	E.RAISING, E.CONTACTS, E.CONTACT, E.RELOADING, E.MAG_THANKS, E.HEARD, E.PUSHING, E.FLANKING, E.CHECKING,
+	E.RAISING, E.BOMB, E.BOMB_DOWN, E.PLANTING, E.DEFUSING, E.BOMB_ARMED, E.CONTACTS, E.CONTACT, E.RELOADING, E.MAG_THANKS, E.HEARD, E.PUSHING, E.FLANKING, E.CHECKING,
 	E.HOLDING,
 ]
 const DOCK := Vector3(10.0, 0.0, -10.0)
@@ -267,6 +268,49 @@ func test_has_the_attackers_call_the_flag_going_up_and_the_defenders_call_it_too
 	var s := _rig()
 	s.state.round_state.attackers = 1
 	assert_eq(s.tick([{"kind": GameEvent.Kind.FLAG_ROPE, "value": 0, "position": BAY}]), _said([]))
+
+
+func test_plant_the_bomb_the_planter_says_so_and_a_defender_in_earshot_calls_the_bomb() -> void:
+	var r := _rig()
+	r.director.bomb_heard = 20.0
+	r.state.round_state.attackers = 1
+	r.state.characters[2].position = BAY
+	r.state.characters[0].position = BAY + Vector3(-25.0, 0.0, 0.0)
+	r.state.characters[1].position = BAY + Vector3(-12.0, 0.0, 0.0)
+	var said := r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.ARMING, "actor": 2, "position": BAY}])
+	said.sort()
+	assert_eq(said, _said(["1: Bomb, Bay!", "2: Planting Bay!"]), "the defender in earshot, not the nearer-named one")
+	# Nobody in earshot: only the planter speaks. A player's own planting is never called for them.
+	var s := _rig()
+	s.director.bomb_heard = 20.0
+	s.state.round_state.attackers = 1
+	s.state.characters[0].position = BAY + Vector3(-25.0, 0.0, 0.0)
+	s.state.characters[1].position = BAY + Vector3(-25.0, 0.0, 0.0)
+	assert_eq(s.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.ARMING, "actor": 2, "position": BAY}]),
+			_said(["2: Planting Bay!"]))
+	var t := _rig()
+	t.state.round_state.attackers = 1
+	assert_eq(t.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.ARMING, "actor": 99, "position": BAY}]),
+			_said([]))
+
+
+func test_plant_the_bomb_armed_defusing_and_dropped_are_called_by_the_side_they_matter_to() -> void:
+	var r := _rig({}, {}, [0, 0, 0, 1.5])
+	r.state.round_state.attackers = 1
+	r.state.characters[3].position = DOCK
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.PLANTED, "actor": 2, "position": DOCK}]),
+			_said(["3: Armed, Dock!"]), "the attacker nearest the bomb")
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.DEFUSING, "actor": 0, "position": DOCK}]),
+			_said(["0: Defusing!"]))
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.DROPPED, "actor": 2, "position": BAY}]),
+			_said(["3: Bomb down, Bay!"]), "the attacker nearest where it fell")
+	# The fuse's beeps and a pick-up are no call, and nothing is called with no side attacking.
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.BEEP, "position": DOCK}]), _said([]))
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.PICKED_UP, "actor": 2, "position": DOCK}]),
+			_said([]))
+	r.state.round_state.attackers = -1
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.PLANTED, "actor": 2, "position": DOCK}]),
+			_said([]))
 
 
 func test_says_a_personalitys_own_lines_as_well_as_the_any_ones_never_anothers() -> void:

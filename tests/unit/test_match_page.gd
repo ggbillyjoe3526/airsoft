@@ -67,7 +67,7 @@ func test_the_page_shows_the_chips_the_summary_and_play() -> void:
 
 func test_a_map_offers_only_its_own_modes() -> void:
 	var catalog := MapCatalog.shared()
-	var field := PackedStringArray(["attack_defend", "elimination", "practice"])
+	var field := PackedStringArray(["attack_defend", "elimination", "plant_the_bomb", "practice"])
 	assert_eq(MatchOptions.modes_offered(catalog.find("depot")), field)
 	assert_eq(MatchOptions.modes_offered(catalog.find("woodland")), field)
 	assert_eq(MatchOptions.modes_offered(catalog.find("range")), PackedStringArray(["practice"]))

@@ -9,13 +9,14 @@ func _page() -> MatchPage:
 	return page
 
 
-func test_the_mode_cards_list_attack_defend_then_elimination_then_practice() -> void:
+func test_the_mode_cards_list_attack_defend_elimination_plant_the_bomb_then_practice() -> void:
 	var page := _page()
 	var box: Node = page.mode_card("elimination").get_parent()
 	var names := PackedStringArray()
 	for card in box.get_children():
 		names.append(card.name)
-	assert_eq(names, PackedStringArray(["Mode_attack_defend", "Mode_elimination", "Mode_practice"]))
+	assert_eq(names, PackedStringArray(["Mode_attack_defend", "Mode_elimination", "Mode_plant_the_bomb",
+			"Mode_practice"]))
 
 
 func test_a_field_without_a_pole_falls_back_to_elimination() -> void:
