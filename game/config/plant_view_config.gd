@@ -1,26 +1,18 @@
 class_name PlantViewConfig
 extends Resource
-## Plant The Bomb's prop and sites as drawn (PB1). Read by PlantView. The prop is a stand-in built from these sizes
-## until its model is made (owner, 2026-11-12: a model after his reference); scenery only, no collider.
+## Plant The Bomb's prop and sites as drawn (PB1). Read by PlantView. The prop is the bomb model built from the owner's
+## photos (PB2: assets/models/bomb/, tools/blender/bomb/bomb.py); scenery only, no collider.
 
-## The case: its size lying flat (m: long, tall, deep), hi-vis yellow so it reads on any floor and is neither team's
-## colour, and its roughness.
-@export var case_size: Vector3 = Vector3(0.36, 0.13, 0.26)
+## The bomb's bounds lying on the ground (m: across, tall, long), its lamp lit by the floor's light at its height. A
+## model that won't load draws a box this size, hi-vis yellow, at this roughness.
+@export var case_size: Vector3 = Vector3(0.113, 0.12, 0.27)
 @export var case_colour: Color = Color("d9b81e")
 @export var case_roughness: float = 0.6
-## Its bumpers, handle and panel: how far a bumper stands proud of the case and how wide it is (m), the handle's size
-## (m) over the long side, the panel's size (m) on the lid and its display's.
-@export var trim_colour: Color = Color("1d2026")
-@export var bumper_proud: float = 0.008
-@export var bumper_width: float = 0.05
-@export var handle_size: Vector3 = Vector3(0.14, 0.03, 0.02)
-@export var panel_size: Vector3 = Vector3(0.2, 0.006, 0.14)
-@export var panel_colour: Color = Color("8a9099")
-@export var display_size: Vector3 = Vector3(0.1, 0.004, 0.035)
-@export var display_colour: Color = Color("10261a")
-## The lamp on the lid: its radius (m) and where it sits on the panel (m from the case's middle, along and across).
-@export var lamp_radius: float = 0.016
-@export var lamp_at: Vector2 = Vector2(0.06, -0.035)
+## The wire cutters while someone makes it safe: at the model's `Cut` mark, coming in from this way (the bomb's own
+## axes; normalised), each half opening this far (rad) and back, this many snips a second.
+@export var cutters_from: Vector3 = Vector3(0.55, 0.75, -0.35)
+@export var cutters_open: float = 0.2
+@export var cutters_snips: float = 1.5
 ## The lamp unlit, waiting on the ground or being keyed (amber), armed (red, a flash on each beep), made safe (green).
 @export var lamp_off: Color = Color("2a2a2a")
 @export var lamp_waiting: Color = Color("ffb020")
@@ -32,9 +24,9 @@ extends Resource
 @export var lamp_wait_on: float = 0.25
 @export var lamp_key_period: float = 0.25
 @export var lamp_flash: float = 0.07
-## Carried by somebody else, it hangs at the carrier's left hip: this far up, left and forward of the feet (m), tipped
-## on its long edge.
-@export var carry_at: Vector3 = Vector3(0.26, 0.78, 0.02)
+## Carried by somebody else, it rides at the carrier's left hip: this far up, left and forward of the feet (m), on its
+## side with its keypad out.
+@export var carry_at: Vector3 = Vector3(0.19, 0.9, 0.04)
 ## A site's ring on the floor at its radius: width (m); off-white while nothing happens there, the attackers' colour
 ## while the bomb is keyed in or armed in it, the defenders' while it is being made safe.
 @export var ring_width: float = 0.1

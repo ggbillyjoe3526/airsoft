@@ -220,6 +220,23 @@ bomb, `assets/models/grenades/<smoke|flash>.glb`, built by `tools/blender/grenad
   letters.
 - **Budget.** 200 KB, 5,500 triangles a file. No textures.
 
+### Plant The Bomb's models
+
+The bomb (PB2) on the ground, at its carrier's hip and armed in a site, and the wire cutters snipping at it while it
+is defused, both drawn by `PlantView`: `assets/models/bomb/bomb.glb` and `cutters.glb`, built by
+`tools/blender/bomb/bomb.py` from the owner's photos (`/mnt/project-files/art/references/plant-the-bomb/`).
+
+- **Space.** Metres, life size. The bomb's origin is the middle of its base, its length along the model's -Z (the
+  wires' end at -Z, the antenna's at +Z); `PlantView` turns it half a turn. Its lamp is its own node, `Lamp`, whose
+  `Lamp` material the game swaps for the lamp's state colour; the empty `Cut` marks the red wire's loop at its
+  highest. The cutters lie flat, the pivot at the origin on the game's +Y axis, the jaws' tip 24.5 mm along -Z; each
+  half (`CutterTop`, `CutterBottom`) is its own node turning about its own Y, shut at rest.
+- **Materials.** Plain colours, which the game paints in the shared light (`LookMaterials.paint`, lit by the floor's
+  light like the other props). No letters or marks: the LCD shows ghost digits, the cutters' grip panels are blank.
+  Each file names its materials' surfaces in its mesh's `surfaces` table.
+- **Budget.** 10,000 triangles a file (the size of a replica part: one bomb and one pair of cutters in a match, seen
+  close while keyed in or defused), 600 KB, no textures.
+
 ## Blender, step by step
 
 For a Quaternius or Kenney character.
@@ -246,6 +263,7 @@ foundations).
 | A replica model | ≤ 6 MB, ≤ 40,000 triangles in the hands, ≤ 3,000 on a figure, ≤ 6 materials, 2K textures |
 | A replica's parts file | ≤ 4 MiB (2 MB until BL8b, 3 MiB until RW2: the attachments, magazines with their wear mask, and barrels share the AEG's), ≤ 10,000 triangles a part |
 | A grenade model | ≤ 200 KB, ≤ 5,500 triangles, plain colours |
+| The bomb or the wire cutters | ≤ 600 KB, ≤ 10,000 triangles, plain colours |
 | A prop | ≤ 1 MB, ≤ 5,000 triangles (a landmark ≤ 30,000 with LODs), sharing texture sets with other props |
 | A surface texture set | ≤ 6 MB at 2K (colour, normal, ORM) |
 | Everything external | ≤ 25 MB |

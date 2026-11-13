@@ -2,14 +2,24 @@ class_name PlantView
 extends Node3D
 ## Plant The Bomb in the world (PB1): each site's ring on the floor at its radius and its letter over it, and the prop
 ## itself: on the ground where it lies, at its carrier's hip, or standing armed in a site, its lamp telling its state
-## (PlantViewConfig). Scenery only: no collider, so BBs pass through. Reads the round's PlantState; owns no rule. Built
-## once a match; `refresh` changes only what moved or changed. The prop is a stand-in drawn from boxes until its model
-## is made.
+## (PlantViewConfig); the wire cutters at its wires, snipping, while someone makes it safe. Scenery only: no collider,
+## so BBs pass through. Reads the round's PlantState; owns no rule. Built once a match; `refresh` changes only what
+## moved or changed. The models (PB2) are painted in the shared light, lit as the floor under them.
 
 const RING_LIFT := 0.025
 const EDGE_LIFT := 0.024
-const LAMP_SEGMENTS := 12
-## The prop carried hangs from its handle: turned a quarter about its long axis.
+## The bomb and the cutters (tools/blender/bomb/bomb.py): the bomb's origin the middle of its base, its length along
+## the model's Z with the wires' end at -Z, which the prop turns to face +Z (towards whoever keys it in, so its LCD
+## reads the right way up); its lamp the `Lamp` node's `Lamp` material, the cutters' place the `Cut` mark. The
+## cutters' two halves turn about their own Y on the pivot, shut at rest, the tip `CUTTERS_TIP` m along -Z.
+const BOMB_MODEL := "res://assets/models/bomb/bomb.glb"
+const CUTTERS_MODEL := "res://assets/models/bomb/cutters.glb"
+const LAMP_NODE := "Lamp"
+const LAMP_MATERIAL := "Lamp"
+const CUT_MARK := "Cut"
+const CUTTER_HALVES: Array[String] = ["CutterTop", "CutterBottom"]
+const CUTTERS_TIP := 0.0245
+## The prop carried rides on its side: turned a quarter about its long axis, its keypad out from the carrier's hip.
 const CARRIED_TIP := PI * 0.5
 ## The stream the pop's puffs are placed from: the same puffs every time.
 const POP_SEED := 0x9B1
@@ -18,6 +28,9 @@ var _cfg: PlantViewConfig = null
 var _teams: TeamConfig = null
 var _prop: Node3D = null
 var _lamp: StandardMaterial3D = null
+## The cutters (null when their model won't load) and their two halves.
+var _cutters: Node3D = null
+var _halves: Array[Node3D] = []
 var _paints: Array[ShaderMaterial] = []
 var _paint_colours: PackedColorArray = PackedColorArray()
 var _rings: Array[StandardMaterial3D] = []
@@ -97,6 +110,7 @@ func refresh(ps: PlantState, attackers: int, carrier: Character, fraction: float
 		if _lights != null and not _prop.position.is_equal_approx(_lit_at):
 			relight(_lights)
 	_show_lamp(_lamp_colour(ps))
+	_show_cutters(ps.status == PlantState.Status.PLANTED and ps.defuser >= 0)
 	for i in _rings.size():
 		var shown := _ring_state(ps, i)
 		if shown == _ring_shown[i]:
@@ -189,53 +203,92 @@ func _show_lamp(colour: Color) -> void:
 	_lamp.albedo_color = colour
 
 
+## The cutters snipping while someone works at the wires, at their place while shown; hidden otherwise.
+func _show_cutters(working: bool) -> void:
+	if _cutters == null:
+		return
+	_cutters.visible = working
+	if not working:
+		return
+	var open := _cfg.cutters_open * (0.5 + 0.5 * cos(TAU * _cfg.cutters_snips * _clock))
+	_halves[0].rotation.y = -open
+	_halves[1].rotation.y = open
+
+
 func _build_prop(cfg: PlantViewConfig) -> void:
 	_prop = Node3D.new()
 	_prop.name = "Prop"
 	add_child(_prop)
-	var body := LookMaterials.paint(cfg.case_colour, cfg.case_roughness)
-	var trim := LookMaterials.paint(cfg.trim_colour, cfg.case_roughness)
-	var panel := LookMaterials.paint(cfg.panel_colour, cfg.case_roughness)
-	var display := LookMaterials.paint(cfg.display_colour, cfg.case_roughness)
-	_paints = [body, trim, panel, display]
-	_paint_colours = [cfg.case_colour, cfg.trim_colour, cfg.panel_colour, cfg.display_colour]
-	var size := cfg.case_size
-	var top := size.y
-	_box(size, body, Vector3(0.0, top * 0.5, 0.0))
-	# A bumper round each end and the handle on the long side.
-	var bumper := Vector3(cfg.bumper_width, size.y + cfg.bumper_proud * 2.0, size.z + cfg.bumper_proud * 2.0)
-	for side: float in [-1.0, 1.0]:
-		_box(bumper, trim, Vector3(side * (size.x - cfg.bumper_width) * 0.5, top * 0.5, 0.0))
-	_box(cfg.handle_size, trim, Vector3(0.0, top * 0.5, (size.z + cfg.handle_size.z) * 0.5))
-	_box(cfg.panel_size, panel, Vector3(0.0, top + cfg.panel_size.y * 0.5, 0.0))
-	_box(cfg.display_size, display, Vector3(-cfg.lamp_at.x * 0.5, top + cfg.panel_size.y + cfg.display_size.y * 0.5,
-			cfg.lamp_at.y))
 	_lamp = StandardMaterial3D.new()
 	_lamp.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_lamp.albedo_color = cfg.lamp_off
 	_lamp_shown = cfg.lamp_off
-	var dome := SphereMesh.new()
-	dome.radius = cfg.lamp_radius
-	dome.height = cfg.lamp_radius
-	dome.is_hemisphere = true
-	dome.radial_segments = LAMP_SEGMENTS
-	dome.rings = LAMP_SEGMENTS / 2
-	var lamp := MeshInstance3D.new()
-	lamp.mesh = dome
-	lamp.material_override = _lamp
-	lamp.position = Vector3(cfg.lamp_at.x, top + cfg.panel_size.y, cfg.lamp_at.y)
-	lamp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_prop.add_child(lamp)
+	var bomb := _model(BOMB_MODEL)
+	if bomb == null:
+		var box := BoxMesh.new()
+		box.size = cfg.case_size
+		var stand_in := MeshInstance3D.new()
+		stand_in.mesh = box
+		stand_in.material_override = _own_paint(cfg.case_colour, cfg.case_roughness, 0.0)
+		stand_in.position.y = cfg.case_size.y * 0.5
+		_prop.add_child(stand_in)
+		return
+	bomb.rotation.y = PI
+	_prop.add_child(bomb)
+	var lamp := bomb.find_child(LAMP_NODE, true, false) as MeshInstance3D
+	if lamp != null:
+		lamp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		for i in lamp.mesh.get_surface_count():
+			if lamp.mesh.surface_get_material(i).resource_name == LAMP_MATERIAL:
+				lamp.set_surface_override_material(i, _lamp)
+	var cutters := _model(CUTTERS_MODEL)
+	var cut := bomb.find_child(CUT_MARK, true, false) as Node3D
+	if cutters == null or cut == null:
+		if cutters != null:
+			cutters.free()
+		return
+	for half in CUTTER_HALVES:
+		_halves.append(cutters.find_child(half, true, false) as Node3D)
+	if _halves.has(null):
+		_halves.clear()
+		cutters.free()
+		return
+	_cutters = cutters
+	_cutters.name = "Cutters"
+	_cutters.visible = false
+	var basis := Basis.looking_at(-cfg.cutters_from.normalized(), Vector3.UP)
+	_cutters.transform = Transform3D(basis, cut.position - basis * Vector3(0.0, 0.0, -CUTTERS_TIP))
+	bomb.add_child(_cutters)
 
 
-func _box(size: Vector3, material: Material, at: Vector3) -> void:
-	var mesh := BoxMesh.new()
-	mesh.size = size
-	var m := MeshInstance3D.new()
-	m.mesh = mesh
-	m.material_override = material
-	m.position = at
-	_prop.add_child(m)
+## `path`'s scene (null when it won't load), each mesh's materials swapped for paints of their own colours in the
+## shared light, which `relight` lights as the floor under the prop.
+func _model(path: String) -> Node3D:
+	if not ResourceLoader.exists(path):
+		return null
+	var scene := load(path) as PackedScene
+	var root := scene.instantiate() as Node3D if scene != null else null
+	if root == null:
+		return null
+	var painted: Dictionary[Material, Material] = {}
+	for node in root.find_children("*", "MeshInstance3D", true, false):
+		var m := node as MeshInstance3D
+		for i in m.mesh.get_surface_count():
+			var own := m.mesh.surface_get_material(i) as BaseMaterial3D
+			if own == null:
+				continue
+			if not painted.has(own):
+				painted[own] = _own_paint(own.albedo_color, own.roughness, own.metallic)
+			m.set_surface_override_material(i, painted[own])
+	return root
+
+
+## A paint of `colour` in the shared light, kept with its colour for `relight`.
+func _own_paint(colour: Color, roughness: float, metallic: float) -> ShaderMaterial:
+	var paint := LookMaterials.paint(colour, roughness, metallic)
+	_paints.append(paint)
+	_paint_colours.append(colour)
+	return paint
 
 
 func _flat(parent: Node3D, mesh: Mesh, material: Material, lift: float) -> void:

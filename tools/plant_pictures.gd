@@ -2,7 +2,8 @@ extends SceneTree
 ## Pictures of Plant The Bomb for review (PB1): a whole PlaySession on a field, the bots standing at their starts, the
 ## bomb's state set by hand. First person with the HUD, as an attacker (the bomb on the ground at the start, carrying
 ## it in Site A, keying it in, the armed bomb) and as a defender (at the armed bomb, the kit at work); then the HUD
-## off and the camera free: the stand-in prop close up and each site's ring and letter. Needs a
+## off and the camera free: the bomb (PB2's model) armed close up, the wire cutters at its wires, a bot carrying it at
+## the hip, and each site's ring and letter. Needs a
 ## display, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --path . --rendering-driver opengl3 \
 ##       -s res://tools/plant_pictures.gd -- <folder> [map id] [--graphics=high]
@@ -136,11 +137,33 @@ func _run() -> void:
 	var camera := _session._eyes.camera
 	var view := _session.plant_view()
 	camera.fov = 60.0
-	# 7. The stand-in prop, armed, close up.
+	# 7. The bomb, armed, close up.
+	ps.defuser = -1
 	view.refresh(ps, rs.attackers, null, 1.0, false, 0.0)
 	camera.look_at_from_position(_towards(bomb, start, 0.9) + Vector3(0.35, 0.5, 0.0), bomb + Vector3.UP * 0.06)
-	await _grab("the-stand-in-bomb-armed-close-up")
-	# 8, 9. Each site from outside its ring.
+	await _grab("the-bomb-armed-close-up")
+	# 8. Being made safe: the cutters at its red wire, part open.
+	ps.defuser = you.id
+	view.refresh(ps, rs.attackers, null, 1.0, false, 0.12)
+	camera.look_at_from_position(_towards(bomb, start, 0.55) + Vector3(0.25, 0.35, 0.0), bomb + Vector3.UP * 0.08)
+	await _grab("the-wire-cutters-at-the-bomb-close-up")
+	ps.defuser = -1
+	# 9. Carried by a bot of the attackers, at its left hip.
+	var bot: Character = null
+	for c in st.characters:
+		if c != you and c.team == rs.attackers:
+			bot = c
+			break
+	if bot != null:
+		ps.status = PlantState.Status.CARRIED
+		ps.carrier = bot.id
+		view.refresh(ps, rs.attackers, bot, 1.0, false, 0.0)
+		var left := Vector3(-1.0, 0.0, 0.0).rotated(Vector3.UP, bot.yaw)
+		var ahead := Vector3(0.0, 0.0, -1.0).rotated(Vector3.UP, bot.yaw)
+		camera.look_at_from_position(bot.position + left * 1.6 + ahead * 0.9 + Vector3.UP * 1.3,
+				bot.position + left * 0.25 + Vector3.UP * 0.85)
+		await _grab("a-bot-carrying-the-bomb-at-its-hip")
+	# 10, 11. Each site from outside its ring.
 	ps.status = PlantState.Status.DOWN
 	ps.carrier = -1
 	ps.position = start
