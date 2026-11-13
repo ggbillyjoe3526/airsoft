@@ -1,17 +1,14 @@
-Task: PB3 · QA commit cadff13e · Verdict: Pass
+Task: HA1 · QA commit PENDING · Verdict: Pass
 
-Blocking: none.
-Advisory:
-- game/sim/plant.gd:100 set_down uses the planter's feet y; on stairs/slopes the point 0.55 m ahead can float or sink slightly (not testable without a display). KNOWN_ISSUES candidate.
-- game/sim/plant.gd:167 set_at is fixed once when arming begins; the planter walking off the spot is not an issue (they must stay in the site), but a lift site is not covered.
+Blocking: none. Advisory: none.
 
-Tests added (tests/unit/test_pb3_qa.gd, 6, all pass; each fails on origin/main: hands_on_bomb, set_at, Carry, rail_carry do not exist there):
-- test_a_carrier_hit_mid_plant_drops_it_at_rest_not_where_it_would_stand · Plant.step with the carrier OUT mid-arm · drop position is ps.rest, planter cleared
-- test_a_new_attempt_measures_the_set_down_afresh · stop and restart arming with new yaw/room · set_at and facing re-taken
-- test_the_set_down_stands_at_the_carriers_height · set_at.y equals feet y (step/lift)
-- test_a_bots_carry_never_lights_the_players_rail · HudPlant.rail_carry for a bot carrier or armed bomb is NONE (the HUD's c is always the player)
-- test_a_rail_without_a_bomb_row_ignores_the_carry_without_error · SETTING lights the bomb row, NONE hides it
-- test_in_a_session_hands_on_the_bomb_put_the_replica_away_and_a_crouch_is_not_forced · PlaySession depot: pick up, key at site, replica holstered, no forced crouch, set_at within set_ahead, replica drawn on letting go
+Delta reviewed (attempt 4, re-run 7): arms.glb rebuild, the new front-end test in test_ha1_rifle_hold.gd.
+Ran test_ha1_rifle_hold, test_hands_on_replica, test_sh2_qa, test_ha1_qa3: 45 tests, all pass (512 asserts). Not run: the full suite (build thread's).
 
-Checked by reading (no defect): respawn clears hands_on_bomb/bomb_was_holstered; an OUT character gets hands_on(false) with no redraw; a readied grenade keeps the replica away (bomb_was_holstered); weapon switch is blocked by the _working command; set_room is re-measured every tick before planter is set; Elimination returns NONE.
-Suite counts: test_pb3_qa 6/6 passing. Full suite and tools/check.sh not run by me (running in background). Not tested: BOMB ARMED gauge fit at 96 px in a real window, window modes, stairs visuals (need a display).
+Added tests/unit/test_ha1_qa3.gd:
+- test_neighbouring_left_fingers_stand_apart_on_the_sniper_and_the_smg: least distance between neighbouring finger bone segments over 12 mm (build: 16 to 19). Could NOT confirm it fails on the old glb: swapping the file did not take (import cache, headless), so its failing-without is unverified.
+- test_the_front_end_search_finds_each_rifles_handguard_and_a_finger_past_it_would_fail: the replica has handguard-side surface with depth on all three rifles (the existing front-end test's search finds something). Weak guard; the existing test already asserts front < INF.
+- test_the_arms_file_stays_under_the_size_budget: arms.glb 6.5 MB, under 8 MB.
+
+Hold regression coverage: eye test (0 points, 4 replicas), bots' holds, reload clip ends and the shotgun pump are covered by the existing files, all green. The AEG's fingers are held to 15 mm past the front end, as decided.
+Not tested: the triangle budget in either look (not re-measured), visual look (needs a display; owner).
