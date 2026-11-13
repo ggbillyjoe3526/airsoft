@@ -1,17 +1,27 @@
-Task: HA1 · QA commit see `git log -1` (HA1 QA re-run 2) · Verdict: Pass
+Task: HA1 · QA commit 5e73df1 · Verdict: Fail
 
-Blocking: none. Advisory: none new.
-- The replica_view.gd merge (~line 287) keeps both: `hands_busy` joins sprint and climb in the carry target, and the eased `carried` smoothstep scales the drop and tilt. Run, not just read (tests below).
-- The earlier four blocking items stay fixed: test_hands_on_replica, test_bp8_arms, test_ha1_arms_tuck all pass.
+Re-run 3, delta d5fede4..53fe4f0 (shotgun aim entries, merges, grips thumb). Delta itself is clean; one HA1 bug found that my earlier Pass missed.
 
-Tests added (tests/unit/test_ha1_rifle_hold.gd, 6 tests, 65 asserts):
-- :52 test_without_a_grip_the_left_hand_sits_between_the_magazine_and_the_grip_mount · wrist z for aeg/sniper/smg is ahead of the magazine's middle, at most 4 cm behind its front, 3 cm+ short of the GripMount · fails on the old GUARD y (0.240 on the AEG puts the wrist past the 4 cm bound); checked by arithmetic against the old values in git, not by rebuilding the model. Sniper (2.8 cm) and SMG (0.7 cm) shifts stay within the bounds, so for them it guards against wandering, not the exact move.
-- :74 test_no_left_fingertip_rides_above_the_handguard_in_the_hold · four fingertips' height against the replica's mesh top (1.5 cm along, 3 cm across) · guard only: I did not stub pose.py `over()` out (needs a Blender rebuild); no finger is above the top in the current model.
-- :113 test_a_bot_holds_every_rifle_s_handguard_where_the_arms_do · bot left hand within 5 mm / 0.05 rad of FigureArmsHold's mark for aeg, sniper and smg (existing test lacks the SMG) · fails if the figure hand leaves the arms' hold.
-- :170 test_busy_hands_carry_the_replica_low_as_a_sprint_does_and_let_it_back · hands_busy drops the replica sprint_drop like a sprint, nothing without it · fails without hands_busy in the carry target (drop stays 0).
-- :185 test_the_carry_eases_in_and_out_and_is_released_when_the_hands_are_free · a quarter in by time the drop is 0.05-0.22 of full (smoothstep 0.156, linear 0.25), full at carry_time, 0 again when freed · fails with a linear carry.
-- :232 test_each_reload_clip_ends_on_the_hold_pose · last frame of <id>_Reload (3 rifles) and both foregrip reloads (aeg, sniper) matches the Hold on every bone (3 mm, 0.02 rad) · fails if a reload clip ends off the hold.
+Blocking
+- game/play/arms_tuck.gd:38-41 (clear) with game/play/arms_view.gd:309-324 (_draw_in): clear resets only UpperArm_L's position. Forearm_L's local position is keyed by no clip, so each aimed frame's tuck stays in the bone and the next frame's draw_in reads it back: the error feeds on itself. Hold the sight up 5 s (300 frames) and lower it: the hip pose is not the clip's (fingertip centimetres off at 10 s: shotgun 2 cm, AEG 8 cm, sniper 7 cm; hand 1-2 mm) and stays so until the hold is re-posed. Applies to every rifle incl. the new shotgun entries. Repeated aimed pumps add ~13 um each (same cause). Fix: clear also resets Forearm_L (and Hand_L) position to rest.
 
-Suite (single files, one Godot at a time; check.sh was running elsewhere): test_ha1_rifle_hold 6/6, test_ha1_grips 3/3, test_ha1_qa 20/20, test_ha1_arms_tuck 10/10, test_ha1_arms_fade 6/6, test_ha1_hands_motion 13/13, test_hands_on_replica 10/10, test_arms_view 13/13, test_figure_hands 24/24, test_figure_hands_qa 21/21, test_grenade_arms 15/15, test_grenade_arms_qa 7/7, test_holster_sprint_arms 2/2, test_bp8_arms_qa 27/27, test_bp8_arms 16/16. No failures. gdlint clean. Logs in pipeline/out/qa/.
+Advisory
+- none beyond the above.
 
-Not run: tools/check.sh, the smoke test, the full suite (a check.sh run was in progress, as instructed). The new test file has no .uid yet (a headless GUT run does not write it; the next editor import will, commit it then). Needs a display, for the owner's list: how the hand looks on the handguard and grips.
+Delta checks that pass
+- Shotgun aimed: left hand/forearm tucked and slid as the rifles' (test_ha1_arms_tuck RIFLES incl. shotgun) and whole at the hip.
+- Pump stroke mid-stroke through a raise/lower returns the clip pose; stroke ending aimed (1 s) returns the hold; reload from aimed follows the reload clip and returns to hold.
+- shotgun/AEG/pistol swaps x3 leave no tuck (pistol equals a fresh pistol) and no nodes.
+- The aim entries equal the AEG's; bots' figures do not use ViewModelConfig.aim_*.
+- play_tuning.tres loads with HA1's life and SH2's additions (test_saved_configs).
+
+Tests added: tests/unit/test_ha1_shotgun.gd (new, 6)
+- test_a_pump_stroke_played_aimed_leaves_the_clip_whole_at_the_hip: fails if the tuck stayed over the Fire clip (control asserts the aimed pose differs).
+- test_a_pump_stroke_ending_aimed_returns_the_hold_at_the_hip: same, 60 aimed frames.
+- test_a_reload_from_aimed_leaves_the_hand_on_the_magazine_clip_and_returns_whole: fails if the tuck survived the reload seek.
+- test_swapping_shotgun_aeg_pistol_leaves_no_tuck_and_no_nodes: fails if _tucked/shoulder carried over.
+- test_a_bots_shotgun_hold_does_not_read_the_aim_entries: the shotgun's entries equal the rifles'.
+- test_a_sight_held_up_for_seconds_returns_the_hold_whole_on_every_rifle: FAILS now (the blocking bug); passes once clear() resets the unkeyed bones. Checked: 1 frame is exact, 10 frames 1e-6, 600 frames cm.
+
+Run (single files, one Godot each): test_ha1_shotgun 5/6 pass (the 1 failing is the bug); test_sh2_qa 22/22; test_saved_configs 1/1; test_ha1_grips 3/3. tools/check.sh not run (background checks running).
+Not testable here: how the drift looks on screen at the hip (needs a display).
