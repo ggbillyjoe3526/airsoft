@@ -2,8 +2,11 @@ extends GutTest
 ## MQ3C: the figure's face drawn as a real one (owner, 2026-11-13: "Has the players face been improved? If not then
 ## add that to the list of models to work on"). The face in the balaclava's eye opening has a map of its own
 ## (tools/blender/figures/face.py FACE_MAP, painted by face_paint.py): four looks, each with skin that carries pores,
-## brows of single hairs, a coloured iris round a dark pupil, whites and lashes. The heads keep their triangle
-## budgets (test_figure_body.gd) and the figure its eight materials (test_head_body_surfaces.gd).
+## brows of single hairs, a coloured iris round a dark pupil, whites and lashes. Each eyeball draws from a patch of
+## its own under the skin's part of the cell (face.py EYE_PATCH), where the pupil gives no light back and a small
+## facet beside it mirrors the light (the glint). The goggles' lens is a thin dark tint, so the pupils stay black.
+## The heads keep their triangle budgets (test_figure_body.gd) and the figure its eight materials
+## (test_head_body_surfaces.gd).
 
 const HEADS: Array[String] = ["Head_HighCut", "Head_FullCut", "Head_Cap", "Head_Boonie"]
 const LEVELS: Array[String] = ["", "_LOD1", "_LOD2"]
@@ -15,12 +18,19 @@ const SIDE_AT_MOST := 2048
 ## Each look's cell's top left corner in the map's picture (the mesh's own look first, then FigureConfig.face_offsets').
 const CELLS: Array[Vector2i] = [Vector2i(0, 512), Vector2i(1024, 512), Vector2i(0, 0), Vector2i(1024, 0)]
 ## Places in a cell (px from its top left; a pixel is about 0.14 mm): the pupils' middles, and from a pupil how far
-## out the iris's body and the white lie, how far down the cheek, and each brow's middle.
-const PUPILS: Array[Vector2i] = [Vector2i(295, 280), Vector2i(728, 280)]
-const IRIS_OUT := 23
-const WHITE_OUT := 54
+## out the iris's body and the white lie, how far down the cheek and out the temple (beside the outer corner: the
+## skin under the eye is drawn dry and nearly smooth, so no lamp sparks on it), and each brow's middle.
+const PUPILS: Array[Vector2i] = [Vector2i(292, 218), Vector2i(731, 218)]
+const IRIS_OUT := 27
+const WHITE_OUT := 62
 const CHEEK_DOWN := 78
-const BROWS: Array[Vector2i] = [Vector2i(283, 178), Vector2i(740, 178)]
+const TEMPLE_OUT := 150
+const BROWS: Array[Vector2i] = [Vector2i(286, 122), Vector2i(737, 122)]
+## Each eyeball's own patch: its pupil's middle, the glint beside it, and how far toward the ear (away from the cell's
+## middle) its white lies.
+const PATCH_PUPILS: Array[Vector2i] = [Vector2i(334, 446), Vector2i(689, 446)]
+const GLINTS: Array[Vector2i] = [Vector2i(317, 431), Vector2i(672, 431)]
+const PATCH_WHITE_OUT := 69
 ## Half the side of the box a colour is read over (px), and of the boxes the cheek's and the brow's grain is read over.
 const SPOT := 3
 const PATCH := 20
@@ -34,13 +44,25 @@ const BROW_OF_CHEEK_AT_MOST := 0.86
 const BROW_SPREAD_AT_LEAST := 0.08
 ## Each look's skin is at least this much darker than the look before it.
 const TONE_STEP_AT_LEAST := 0.05
-## A pixel of the normal map this far (of 255) off flat carries detail; the share of the cheek's that do, at least,
+## A pixel of the normal map this far (of 255) off flat carries detail; the share of the skin's that do, at least,
 ## and of the eye's, at most (the eye is smooth and wet).
 const BUMP := 3
-const CHEEK_BUMPY_AT_LEAST := 0.3
+const SKIN_BUMPY_AT_LEAST := 0.3
 const EYE_BUMPY_AT_MOST := 0.1
-const EYE_ROUGH_AT_MOST := 0.2
+const EYE_ROUGH_AT_MOST := 0.47
 const SKIN_ROUGH_AT_LEAST := 0.35
+## How open to the light round it (the map's occlusion, 0-1) a pupil is at most and the cheek at least; how far a
+## glint is bare mirror (the map's metal) and how light, at least.
+const PUPIL_OPEN_AT_MOST := 0.3
+const CHEEK_OPEN_AT_LEAST := 0.9
+const GLINT_METAL_AT_LEAST := 0.5
+const GLINT_LIGHT_AT_LEAST := 0.6
+## The lens's tint: its alpha over Godot's 0.1 (under it a lens stops shading the face behind it) and thin, its
+## colour dark (a pale thick one laid a grey haze over the eyes). The colour is read as Godot shows it (sRGB): the
+## dark tint reads about 0.52, the pale one it replaced 0.88.
+const LENS_ALPHA_OVER := 0.1
+const LENS_ALPHA_AT_MOST := 0.15
+const LENS_LIGHT_AT_MOST := 0.6
 
 var config: FigureConfig = null
 var models: FigureModels = null
@@ -147,6 +169,7 @@ func test_the_face_draws_from_a_map_of_its_own_within_the_texture_rule() -> void
 			assert_eq(Vector2i(face.albedo_texture.get_size()), MAP, "%s%s: the face's map" % [head, level])
 			assert_true(face.normal_enabled and face.normal_texture != null, "%s%s: a normal map" % [head, level])
 			assert_not_null(face.roughness_texture, "%s%s: a roughness map" % [head, level])
+			assert_true(face.ao_enabled and face.ao_texture != null, "%s%s: an occlusion map" % [head, level])
 			for texture: Texture2D in [face.albedo_texture, face.normal_texture, face.roughness_texture]:
 				assert_lte(maxi(texture.get_width(), texture.get_height()), SIDE_AT_MOST)
 
@@ -217,17 +240,48 @@ func test_the_looks_differ_in_skin_tone_and_each_brow_is_darker_hairs() -> void:
 		before = tone
 
 
-func test_the_skin_carries_pores_and_the_eye_is_smooth_and_wet() -> void:
+func test_the_skin_carries_pores_and_each_eyeballs_patch_is_smooth_with_a_dark_pupil_and_a_glint() -> void:
 	if _maps.is_empty():
 		fail_test("no face map")
 		return
 	var spot := Vector2i(SPOT, SPOT)
+	var dot := Vector2i.ONE
 	var patch := Vector2i(PATCH, PATCH)
 	for look in CELLS.size():
 		for eye in PUPILS.size():
 			var name := "look %d eye %d" % [look, eye]
 			var cheek := PUPILS[eye] + Vector2i(0, CHEEK_DOWN)
-			assert_gt(_bumpy(look, cheek, patch), CHEEK_BUMPY_AT_LEAST, "%s: the cheek's pores" % name)
-			assert_lt(_bumpy(look, PUPILS[eye], spot), EYE_BUMPY_AT_MOST, "%s: the eye is smooth" % name)
-			assert_lt(_mean("rough", look, PUPILS[eye], spot).g, EYE_ROUGH_AT_MOST, "%s: the eye is wet" % name)
-			assert_gt(_mean("rough", look, cheek, patch).g, SKIN_ROUGH_AT_LEAST, "%s: the skin is not" % name)
+			var out := 1 if eye == 1 else -1
+			var temple := PUPILS[eye] + Vector2i(TEMPLE_OUT * out, 0)
+			var pupil := PATCH_PUPILS[eye]
+			var white := pupil + Vector2i(PATCH_WHITE_OUT * out, 0)
+			assert_gt(_bumpy(look, temple, patch), SKIN_BUMPY_AT_LEAST, "%s: the skin's pores" % name)
+			assert_lt(_bumpy(look, white, spot), EYE_BUMPY_AT_MOST, "%s: the eye's white is smooth" % name)
+			assert_lt(_mean("colour", look, pupil, spot).get_luminance(), PUPIL_AT_MOST, "%s: the patch's pupil is dark" % name)
+			assert_gt(_mean("colour", look, white, spot).get_luminance(), WHITE_AT_LEAST, "%s: its white is light" % name)
+			var eye_rough := _mean("rough", look, white, spot).g
+			var skin_rough := _mean("rough", look, cheek, patch).g
+			assert_lt(eye_rough, EYE_ROUGH_AT_MOST, "%s: the eye is moist" % name)
+			assert_gt(skin_rough, SKIN_ROUGH_AT_LEAST, "%s: the skin is not" % name)
+			assert_gt(skin_rough, eye_rough, "%s: the skin is duller than the eye" % name)
+			assert_lt(_mean("rough", look, pupil, spot).r, PUPIL_OPEN_AT_MOST, "%s: the pupil gives no light back" % name)
+			assert_gt(_mean("rough", look, cheek, patch).r, CHEEK_OPEN_AT_LEAST, "%s: the cheek is open to the light" % name)
+			assert_gt(_mean("rough", look, GLINTS[eye], dot).b, GLINT_METAL_AT_LEAST, "%s: the glint mirrors the light" % name)
+			assert_gt(_mean("colour", look, GLINTS[eye], dot).get_luminance(), GLINT_LIGHT_AT_LEAST, "%s: and is light" % name)
+			assert_lt(_mean("rough", look, white, spot).b, GLINT_METAL_AT_LEAST, "%s: the white is no mirror" % name)
+
+
+func test_the_lens_is_a_thin_dark_tint_that_still_shades_the_face() -> void:
+	var root := _human()
+	var lenses := 0
+	for head in HEADS:
+		var mesh := _mesh(root, head)
+		var at := _surface(mesh, "Lens")
+		if at < 0:
+			continue
+		lenses += 1
+		var lens := mesh.surface_get_material(at) as BaseMaterial3D
+		assert_gt(lens.albedo_color.a, LENS_ALPHA_OVER, "%s: the lens still shades the face" % head)
+		assert_lte(lens.albedo_color.a, LENS_ALPHA_AT_MOST, "%s: the lens is thin" % head)
+		assert_lt(lens.albedo_color.get_luminance(), LENS_LIGHT_AT_MOST, "%s: the lens's tint is dark" % head)
+	assert_gt(lenses, 0, "a head wears a lens")

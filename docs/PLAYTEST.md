@@ -1670,15 +1670,18 @@ four heads differ.
 Stand face to face with a teammate at the start of a round, or watch a bot from the dead zone, on High or Ultra.
 Look at several: there are four faces (fair with blue eyes, medium with green, tan with brown, deep with dark brown).
 
-- [ ] **Skin** looks like skin, not plastic: uneven in tone, a little darker under the eyes, with a fine grain when
-  the light catches the bridge of the nose.
-- [ ] **Brows** are hairs, thicker toward the nose, not a painted block. **Lashes** are a fine fringe, not a drawn
-  outline.
-- [ ] **Eyes** are almond shaped with the upper lid resting on the iris (not staring), the iris has fine fibres
-  and a darker rim, the whites are not pure white, and the eye glints as the light moves.
+- [ ] **Skin** looks like skin, not plastic: uneven in tone, a little darker under the eyes, with a fine grain. No
+  white sparks or streaks beside the nose under a lamp or the sun.
+- [ ] **Brows** are hairs, low and heavy over the eyes, thicker toward the nose, not a painted block; the fair
+  face's brows still read at 2 to 3 m. **Lashes** are a fine fringe, not a drawn outline.
+- [ ] **Eyes** look alive: almond shaped, about one eye's width apart (neither small nor far apart), the upper lid
+  resting on the iris (not staring), a black pupil with a small glint, an iris of fine fibres with a darker rim,
+  whites that are not pure white, a pink corner by the nose. No white line along the lower lid.
+- [ ] **The goggles' lenses** are a thin dark tint on all four heads: the eyes show clearly through them, with no
+  grey haze.
 - [ ] **Through the goggles and under the helmets, cap and hat** nothing pokes through a lens or the balaclava, from
-  the front and from the side.
-- [ ] **At 10 m and more** a face still reads as eyes and brows in the opening, with no shimmer as the bot moves.
+  the front and from the side, and from the side the eye is not a flat disc with a white rim.
+- [ ] **At 10 to 20 m** a face still reads as eyes and brows in the opening, with no shimmer as the bot moves.
 
 ## Reporting what you find
 

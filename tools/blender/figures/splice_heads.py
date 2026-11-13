@@ -30,6 +30,7 @@ FACE = "Face"  # the eye opening's skin, lids and eyes (face.py): its own map (M
 TEAM_SOURCE = "TeamColour"  # the figure's team material: TeamHeadwear starts from its colour
 IMAGE_STEM = "headwear"
 FACE_STEM = "face"
+LENS_TINT = (0.22, 0.235, 0.245, 0.11)
 FLOAT, USHORT, UINT, UBYTE = 5126, 5123, 5125, 5121
 COMPONENTS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT4": 16}
 DTYPES = {FLOAT: np.float32, USHORT: np.uint16, UINT: np.uint32, UBYTE: np.uint8}
@@ -209,11 +210,16 @@ def splice(human_path: str, heads_path: str, images: dict, out_path: str, face_i
                                            "metallicFactor": 1.0, "roughnessFactor": 1.0}})
         if colour is not None:
             m["pbrMetallicRoughness"]["baseColorFactor"] = colour
-    # The lens is clear with a slight smoke (goggle photo 1), so the eyes show through.
+        if name == FACE:
+            # The face's map also says how open each pixel is to the light round it (the eyes under their lids).
+            m["occlusionTexture"] = {"index": maps["orm"]}
+    # The lens is clear with a slight smoke (goggle photo 1), so the eyes show through. Its tint is dark and thin
+    # (MQ3C): a pale one laid a grey haze over the eyes, and the pupils came out grey. LENS_TINT's alpha stays over
+    # Godot's 0.1, under which a lens stops shading the face behind it.
     lens = j["materials"][_material(j, LENS)]
     lens.clear()
     lens.update({"name": LENS, "doubleSided": True, "alphaMode": "BLEND",
-                 "pbrMetallicRoughness": {"baseColorFactor": [0.72, 0.76, 0.78, 0.24], "metallicFactor": 0.0,
+                 "pbrMetallicRoughness": {"baseColorFactor": list(LENS_TINT), "metallicFactor": 0.0,
                                           "roughnessFactor": 0.04}})
     remap = {i: _material(j, m["name"]) for i, m in enumerate(heads.json.get("materials", []))}
 

@@ -69,6 +69,10 @@ class Atlas:
         self.col[:] = (0.5, 0.5, 0.5)
         self.height = np.zeros((height, width), np.float32)
         self.rough = np.full((height, width), 0.8, np.float32)
+        # How open each pixel is to the light round it (1: fully) and how far it is bare metal: the face's map alone
+        # paints them (the eyes), so the heads' atlas packs as before.
+        self.occ = np.ones((height, width), np.float32)
+        self.metal = np.zeros((height, width), np.float32)
         self.swatches: dict = {}
         self.tiles: dict = {}
 
@@ -90,7 +94,7 @@ class Atlas:
         return t
 
     def images(self, stem: str) -> dict:
-        """Blender images: colour, normal (from the height) and metallic-roughness (G roughness)."""
+        """Blender images: colour, normal (from the height) and occlusion-roughness-metal (R, G, B)."""
         col = np.concatenate([self.col, np.ones((self.rows, self.width, 1), np.float32)], axis=2)
         # Height is in pixels: a rise of 1 over one pixel is a 45 degree slope.
         gy, gx = np.gradient(self.height)
@@ -104,7 +108,7 @@ class Atlas:
         nz = np.ones_like(nx)
         ln = np.sqrt(nx * nx + ny * ny + nz * nz)
         nrm = np.stack([nx / ln * 0.5 + 0.5, ny / ln * 0.5 + 0.5, nz / ln * 0.5 + 0.5, np.ones_like(nx)], axis=2)
-        orm = np.stack([np.ones_like(nx), self.rough, np.zeros_like(nx), np.ones_like(nx)], axis=2)
+        orm = np.stack([self.occ, self.rough, self.metal, np.ones_like(nx)], axis=2)
         out = {}
         for key, arr, colour_space in (("col", col, "sRGB"), ("nrm", nrm, "Non-Color"), ("orm", orm, "Non-Color")):
             im = bpy.data.images.new("%s_%s" % (stem, key), self.width, self.rows, alpha=False)
