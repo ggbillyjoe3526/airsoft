@@ -3,7 +3,7 @@
 `arms.glb` (glTF binary): your own arms in the first-person view, in dark olive gloves and sleeves, holding the replica in
 hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools/blender/arms/arms.py .`, pip
 `bpy==5.2.3`; each hold's marks and costs are data in `hold_tables.py`, solved by `hold_solve.py`; `sight.py` keeps a
-rifle's support fingers out of the eye's view); drawn by `game/play/arms_view.gd` (ArmsView, under ReplicaView).
+rifle's support fingers out of the eye's view and off one another); drawn by `game/play/arms_view.gd` (ArmsView, under ReplicaView).
 
 - **Space.** Metres, Blender +Y forward from the eye (at the origin), +Z up; exported +Y up, as every model here, so
   in Godot the eye looks along -z.

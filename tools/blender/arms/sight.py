@@ -13,6 +13,8 @@ SEEN_FAR = 0.005
 SEEN_COST = 0.5
 # Where along each of a finger's last two bones `crowd` measures (shares of the bone's length).
 CROWD_AT = (0.0, 0.5, 1.0)
+# A fingertip lies no further than a finger's width and this (m) from its neighbour's.
+TIP_SLACK = 0.004
 
 
 def ahead(hand, name: str) -> float:
@@ -59,16 +61,27 @@ def lines(hand, name: str) -> list:
 
 
 def crowd(hand, name: str) -> float:
-    """How far (m) the finger's last two bones come nearer than `hand.apart` to those of the fingers laid before it
-    (`hand.laid`, each bone's two ends): fingers lie side by side, never through one another. 0 with none laid."""
-    if not hand.laid:
+    """How far (m) the finger strays from the row the fingers laid before it make (`hand.laid`, each bone's two ends,
+    the last bone's last): its last two bones nearer than `hand.apart` to theirs (fingers lie side by side, never
+    through one another), its tip further than `hand.apart` + TIP_SLACK from the tip of the finger laid just before
+    it (no gap between neighbours), and its tip further back along the handguard than its own knuckle (no finger
+    hooked back over its root; `hand.front`'s way). 0 with none laid and no row asked for."""
+    if hand.apart <= 0.0:
         return 0.0
+    mine = lines(hand, name)
+    tip = mine[-1][1]
+    out = 0.0
+    if hand.front is not None:
+        way = hand.front[0]
+        out += max(0.0, (hand.rig.pose["%s1_%s" % (name, hand.side)].translation - tip).dot(way))
+    if not hand.laid:
+        return out
     least = hand.apart
-    for a, b in lines(hand, name):
+    for a, b in mine:
         for t in CROWD_AT:
             p = a.lerp(b, t)
             for c, d in hand.laid:
                 along = d - c
                 q = c + along * min(1.0, max(0.0, (p - c).dot(along) / along.length_squared))
                 least = min(least, (p - q).length)
-    return hand.apart - least
+    return out + hand.apart - least + max(0.0, (tip - hand.laid[-1][1]).length - hand.apart - TIP_SLACK)

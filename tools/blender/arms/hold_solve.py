@@ -451,9 +451,11 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider,
             js = [inv @ rig.pose["%s%d_L" % (name, k)].translation for k in (1, 2, 3)]
             m = rig.pose["%s3_L" % name]
             js.append(inv @ (m.translation + m.to_3x3().col[1] * rig.length["%s3_L" % name]))
-            print("   %s joints (replica, mm) %s seen %.3f clear %s" % (
+            fore = [round(max((inv @ (rig.pose[b] @ q)).y for q in hand.points[b]) * 1e3, 1)
+                    for b in ("%s%d_L" % (name, k) for k in (1, 2, 3))]
+            print("   %s joints (replica, mm) %s seen %.3f clear %s foremost %s" % (
                 name, [tuple(round(v * 1e3) for v in p) for p in js], sight.seen(hand, name),
-                [round(hand.clearance("%s%d_L" % (name, k), col) * 1e3, 1) for k in (1, 2, 3)]))
+                [round(hand.clearance("%s%d_L" % (name, k), col) * 1e3, 1) for k in (1, 2, 3)], fore))
         m = rig.pose["Thumb3_L"]
         tip = m.translation + m.to_3x3().col[1] * rig.length["Thumb3_L"]
         print("   thumb tip", tuple(round(v, 3) for v in to_eye.inverted() @ tip), "target",
@@ -808,7 +810,10 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
         if not trigger:
             fingers.insert(0, ("R", "Index"))
         if hold.left["kind"] == "guard":
-            fingers += [("L", n) for n in ("Index", "Middle", "Ring", "Pinky", "Thumb")]
+            # Fingers laid in a row (`tip_apart`) stay where the row put them: closed further, one curls back out of
+            # the row (the critic's fourth look: the SMG's little finger in a loop). The thumb still closes.
+            rowed = hold.left.get("tip_apart", 0.0) > 0.0
+            fingers += [("L", n) for n in (("Thumb",) if rowed else ("Index", "Middle", "Ring", "Pinky", "Thumb"))]
         print("  tightened", pose.tighten(rig, hands, arms, frame, fingers))
         print("  wrapped", pose.wrap(rig, hands, arms, frame, [f for f in fingers if f[1] != "Thumb"]))
         # Whatever the last passes did, the arms are checked once more before anything is written.

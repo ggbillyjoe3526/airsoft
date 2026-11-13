@@ -16,7 +16,11 @@ Decisions). The ruling is in `docs/DECISIONS.md` › First-person hands.
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-ATTEMPT_ROWS
+| 2026-11-13 | 1 | build thread | ✓ 6,533 of 6,535 (2 pending, as on main) | 6/8 Retry | checks 1 and 7: the hand unmeasured against the owner's photo, the bare hand's shape and paint short of it; the record's claims ahead of the pictures |
+| 2026-11-13 | 2 | build thread | ✓ 6,617 of 6,619 (2 pending, as on main) | 7/8 Retry | check 1: fingertips seen at the AEG's hip; far-side fingers floating under the handguard; a seam on the palm and a step at the nails; the Sniper's right hand off its trigger; the thumb unmeasured |
+| 2026-11-13 | 3 | build thread | ✓ 6,619 of 6,621 (2 pending, as on main) | 7/8 Retry | check 1: a far-side finger on the AEG past the handguard's front end; the Sniper's and the SMG's far-side fingers pinched into one another |
+| 2026-11-13 | 4 | build thread | ✓ 6,647 of 6,649 (2 pending, as on main) | 7/8 Retry | check 1: the SMG's rearmost far-side finger curled in a loop and the Sniper's leaning back from its neighbour (a closing pass ran after the row was laid) |
+ATTEMPT5_ROW
 
 ## Decisions
 
@@ -200,9 +204,12 @@ ATTEMPT_ROWS
   `tip_apart`, `sight.crowd`, `FRONT_CLEAR`, `FINGER_APART`): the critic's third look found a fingertip on the AEG
   past the handguard's front end, and neighbouring fingers pinched into one another on the Sniper and the SMG. On
   those two every fingertip now keeps 5 mm behind the front end as firmly as it keeps out of the replica, and each
-  finger keeps a finger's width (16 mm between middle lines) from the one laid before it: the four stand side by side
-  up the side face (16 to 19 mm apart, were 3 to 10). `test_every_left_finger_keeps_behind_the_handguard_s_front_end`
-  holds it on the skinned gloved and bare meshes. **The AEG keeps attempt 3's fingers**: its handguard ends 32 mm
+  finger is laid a finger's width (16 mm between middle lines) from the one laid before it, so no two pass into one
+  another (were 3 to 10 mm apart). What attempt 4's pictures showed is not what that aimed for: the index, middle and
+  ring fingers stood side by side, but the little finger was curled back, on the SMG into a closed loop, on the Sniper
+  leaning away from the ring finger with a V of daylight between them (the critic's fourth look; fixed in attempt 5,
+  the next entry). `test_every_left_finger_keeps_behind_the_handguard_s_front_end` holds the front end on the skinned
+  gloved and bare meshes. **The AEG keeps attempt 3's fingers**: its handguard ends 32 mm
   ahead of the index finger's knuckle with the hand where the owner approved it (the magazine well stops the hand
   going further back; his straight wrist keeps the fingers 47 degrees off the bore, so each finger's first bone
   already runs 23 to 29 mm forward before it can turn up the side), and the eye sees anything on that side above
@@ -214,6 +221,26 @@ ATTEMPT_ROWS
   (2026-11-13 21:10): keep the hand as approved, or turn it across with the wrist bent. **He chose the card's "Keep it
   as approved"** (21:21), which read: "Nothing in your view changes. On a bot's AEG one fingertip rests about 1 cm
   past the handguard's end, and I finish with that written down as accepted."
+- **A finger laid in the row is not closed again** (attempt 5; `hold_solve.py`, `sight.crowd`, `TIP_SLACK`): the
+  critic's fourth look found the SMG's rearmost far-side finger in a closed loop and the Sniper's leaning back from
+  its neighbour (it named the index finger; in the pictures and the build's log it is the little finger, the one
+  nearest the magazine). The cause was not the row: after the fingers were laid, the solve's closing passes
+  (`tighten`, `wrap`) curled the little finger further until its glove touched something, 51 degrees on the SMG and
+  10 on the Sniper, which took its tip back behind its own knuckle. Those passes now skip the four fingers of a hand
+  laid in a row (the thumb still closes; the AEG and the Pump Shotgun lay no row, so their fingers are as before).
+  The row itself also holds each tip within a finger's width and 4 mm of the tip laid before it and no further back
+  along the handguard than its own knuckle, and the Sniper's marks lead their knuckles by 4 cm, not 5, which its
+  little finger reaches. On the SMG those passes had also been what brought the index finger's glove behind the
+  front end, by a hundredth of a millimetre: swung at most 25 degrees sideways at its knuckle, the row's search had
+  no place for it there, so attempt 4's "as firmly as it keeps out of the replica" was not yet true of that finger.
+  It may now swing 30 degrees (`tip_swing`), which lays it 2 mm behind the limit with the other three beside it. In
+  the pictures the four fingers now stand side by side up the side face on both, tips
+  pointing up toward the bore; on the SMG a small opening still shows under the little finger's arch, since the
+  handguard is narrower there than the finger is long. Measured on the built model: neighbouring fingertips
+  TIPS_SMG mm apart on the SMG and TIPS_SN mm on the Sniper (round 4: up to 36 mm), every tip ahead of its knuckle.
+  `test_each_fingertip_lies_ahead_of_its_knuckle_and_beside_its_neighbour_s` (test_ha1_qa3.gd) holds both on the
+  skinned mesh, and fails on attempt 4's model (the little finger's tip behind its knuckle on both; ring to little
+  fingertip 35.0 mm on the Sniper, 36.4 mm on the SMG).
 - **The Sniper's right hand holds the stock's wrist** (attempt 3; `SNIPER_RIGHT` `index_soft`, `swing_search`,
   `press`): the trigger finger lay straight under the guard, 2 cm short. Its coarse search missed the pocket inside
   the guard (a gloved fingertip has 1 to 2 mm to spare there), so that search now forgives touching and the fine
