@@ -1,13 +1,13 @@
 # MQ3 · The figures' gear drawn as what it is made of
 
-**Review:** 2 attempts · critic PENDING · qa PENDING · performance PENDING
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Fable 5.2 (model quality thread) | ✓ | Retry 7/8 | The contact shade read as a wavy, blotchy band (12 rays at every second pixel, two passes of blur); the rolled dump pouch's paint was stretched round its flat facets; a light wedge on the pack's side; the whole figure hardly differed from before at a few metres; no reference photos named |
-| 2026-11-13 | 2 | Fable 5.2 (model quality thread) | PENDING | PENDING | – |
+| 2026-11-13 | 2 | Fable 5.2 (model quality thread) | ✓ | Accept 8/8 | – |
 
 ## What changed
 
@@ -84,7 +84,9 @@ softened within each chart (ten passes), and a normal map made from the same hei
   none on the strips; the figure has at most eight materials. QA's `test_mq3_qa.gd`: the team strip is the
   swatches main had and stays neutral under the team paint; each piece's mean colour at full detail is its lower
   level's; no chart overlaps another or samples empty canvas; the pads sample their own painting at every level;
-  the six maps' import settings.
+  the six maps' import settings; (attempt 2) no chart face shrunk or stretched beyond 0.7 of its chart's scale
+  (worst 0.825), no UV triangle flipped against its chart, `Kit` within its 10,300 triangles, every gear normal
+  of unit length and outward of its face.
 - **Docs:** `docs/ASSETS.md`, `docs/ART.md` › Figures, `assets/models/characters/README.md`,
   `tools/blender/figures/README.md`, `docs/PLAYTEST.md` › What the figures' gear is made of (MQ3).
 - **Pictures:** `art/model-quality/mq3/` in the project files: the carrier, the belt and pack, and the whole
@@ -127,5 +129,7 @@ softened within each chart (ten passes), and a normal map made from the same hei
 - The studio lamp's shadow of the chest's loop panel has a wavy edge (in main's pictures too); the game's sun may
   draw the same on a figure up close. It is the lamp's shadow on the bag, not the maps.
 - `Kit` is 12 triangles under its budget; another piece of gear needs the budget raised or a piece thinned.
+- Very close (a 30 cm view) the dump roll's ends still show their five-step corners (critic advisory); rounder
+  needs the owner to raise `Kit`'s budget.
 - The weave is painted in each chart's own direction; across a seam between two charts it can turn. Seams lie on
   bound edges, where real kit turns its cloth too.
