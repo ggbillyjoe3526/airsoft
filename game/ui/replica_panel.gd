@@ -149,8 +149,9 @@ func hide_hop() -> void:
 
 
 ## Follows `a` and `hand`: the count, the spare, the chips, the boxes and the status; rebuilt only on
-## a change. Down for a throw, the replica isn't said to be holstered.
-func refresh(a: Armament, hand: Grenades.Hand = null) -> void:
+## a change. Down for a throw, or away while the hands are on Plant The Bomb's bomb (`on_bomb`, PB3: the rail shows the
+## bomb as the thing in hand), the replica isn't said to be holstered.
+func refresh(a: Armament, hand: Grenades.Hand = null, on_bomb: bool = false) -> void:
 	var r := a.replica()
 	var mag := a.mag()
 	var spare := a.spare_bbs()
@@ -180,7 +181,7 @@ func refresh(a: Armament, hand: Grenades.Hand = null) -> void:
 	_gauges.refresh(a)
 	# STATUS_KEYS' order.
 	var status := 0
-	if throwing:
+	if throwing or on_bomb:
 		status = 0
 	elif in_hand != Grenade.Kind.NONE:
 		status = STATUS_IN_HAND + in_hand

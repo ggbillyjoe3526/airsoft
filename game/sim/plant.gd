@@ -114,12 +114,21 @@ static func room_ahead(feet: Vector3, facing: float, cfg: PlantConfig, query: Wo
 	return Vector2(hit.position.x - from.x, hit.position.z - from.z).length()
 
 
-## The floor's height under `at` (a ray down from set_drop over it to set_drop under it), or NAN with none there.
+## Where the bomb goes down for a carrier whose feet are at `feet`, facing `facing`, with `room` m clear ahead: set_down,
+## drawn in onto the ring of the site they stand in.
+static func set_spot(ps: PlantState, feet: Vector3, facing: float, cfg: PlantConfig, room: float = INF) -> Vector3:
+	var at := set_down(feet, facing, cfg, room)
+	var site := site_at(ps, feet, cfg)
+	return _in_site(ps, site, at, cfg) if site >= 0 else at
+
+
+## The floor's height under `at` (a ray down from set_drop over it to set_drop under it): INF with no floor there (a
+## ledge), NAN with no world to ask.
 static func floor_at(at: Vector3, cfg: PlantConfig, query: WorldQuery, hit: RayHit) -> float:
 	if query == null or hit == null:
 		return NAN
 	var drop := Vector3(0.0, cfg.set_drop, 0.0)
-	return hit.position.y if query.ray(at + drop, at - drop, hit) else NAN
+	return hit.position.y if query.ray(at + drop, at - drop, hit) else INF
 
 
 ## Seconds between beeps with `fuse_left` s of fuse to run.
@@ -173,8 +182,11 @@ static func _step_carried(ps: PlantState, characters: Array[Character], cfg: Pla
 		ps.planter = carrier.id
 		ps.planting = 0.0
 		ps.facing = carrier.yaw
-		ps.set_at = _in_site(ps, site, set_down(carrier.position, ps.facing, cfg, ps.set_room), cfg)
-		if not is_nan(ps.set_floor):
+		ps.set_at = set_spot(ps, carrier.position, ps.facing, cfg, ps.set_room)
+		# On the floor found there; with none (a ledge ahead) at the carrier's feet, never in the air.
+		if is_inf(ps.set_floor):
+			ps.set_at = carrier.position
+		elif not is_nan(ps.set_floor):
 			ps.set_at.y = ps.set_floor
 		ps.site = site
 		_cue(events, Cue.ARMING, carrier.id, ps.position, site)

@@ -183,7 +183,7 @@ func test_set_on_a_slope_it_lies_on_the_ground_there() -> void:
 	var slope := Slope.new()
 	var hit := RayHit.new()
 	assert_almost_eq(Plant.floor_at(Vector3(0.0, 0.0, -0.5), cfg, slope, hit), 0.05, 1e-5, "the floor ahead, up the slope")
-	assert_true(is_nan(Plant.floor_at(Vector3(0.0, 2.0, -0.5), cfg, slope, hit)), "nothing within set_drop: none")
+	assert_true(is_inf(Plant.floor_at(Vector3(0.0, 2.0, -0.5), cfg, slope, hit)), "nothing within set_drop: no floor")
 	assert_true(is_nan(Plant.floor_at(Vector3.ZERO, cfg, null, null)), "no world: the carrier's own floor")
 	var ps := PlantState.new()
 	ps.set_sites(PackedVector3Array([SITE]), PackedFloat32Array([0.0]), 4.0)
@@ -198,3 +198,51 @@ func test_set_on_a_slope_it_lies_on_the_ground_there() -> void:
 	var characters: Array[Character] = [c]
 	Plant.step(ps, characters, c.team, cfg, events, 0.1)
 	assert_almost_eq(ps.set_at.y, 0.07, 1e-6, "set at the floor found there")
+
+
+func test_with_no_floor_ahead_it_goes_at_the_feet_never_in_the_air() -> void:
+	var ps := PlantState.new()
+	ps.set_sites(PackedVector3Array([SITE]), PackedFloat32Array([0.0]), 4.0)
+	ps.reset()
+	c.position = SITE + Vector3(0.0, 0.4, 0.0)
+	c.grounded = true
+	c.using = true
+	ps.status = PlantState.Status.CARRIED
+	ps.carrier = c.id
+	ps.set_floor = INF
+	var characters: Array[Character] = [c]
+	Plant.step(ps, characters, c.team, cfg, events, 0.1)
+	assert_eq(ps.planter, c.id)
+	assert_eq(ps.set_at, c.position, "a ledge ahead: at the feet")
+
+
+func test_the_spot_is_drawn_into_the_ring_before_its_floor_is_looked_for() -> void:
+	var ps := PlantState.new()
+	ps.set_sites(PackedVector3Array([SITE]), PackedFloat32Array([0.0]), 4.0)
+	var feet := SITE + Vector3(3.9, 0.0, 0.0)
+	var spot := Plant.set_spot(ps, feet, -PI / 2.0, cfg)
+	assert_almost_eq(Vector2(spot.x - SITE.x, spot.z - SITE.z).length(), 4.0, 1e-4, "on the ring, not past it")
+	var outside := SITE + Vector3(10.0, 0.0, 0.0)
+	assert_almost_eq(Plant.set_spot(ps, outside, 0.0, cfg), Plant.set_down(outside, 0.0, cfg), Vector3.ONE * 1e-5,
+			"outside every site: just ahead")
+
+
+func test_setting_it_hides_the_carry_line_and_the_holstered_note() -> void:
+	var rs := RoundState.new()
+	rs.mode = RoundState.Mode.PLANT_THE_BOMB
+	rs.phase = RoundState.Phase.LIVE
+	rs.hold = 0.0
+	rs.attackers = c.team
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = c.id
+	assert_true(HudPlant.carrying(rs, c), "carried: the quiet line")
+	rs.plant.planter = c.id
+	assert_false(HudPlant.carrying(rs, c), "being set down: the PLANTING gauge says it")
+	var panel := ReplicaPanel.new()
+	add_child_autofree(panel)
+	panel.setup(HudConfig.new())
+	c.armament.put_down()
+	panel.refresh(c.armament, c.grenades)
+	assert_eq(panel._status.text, "HOLSTERED", "holstered by the player: said")
+	panel.refresh(c.armament, c.grenades, true)
+	assert_false(panel._status.visible, "away for the bomb: the rail's bomb row says what is in hand")

@@ -36,8 +36,8 @@ var set_at: Vector3 = Vector3.ZERO
 ## The room ahead of its carrier's feet (m, to the first thing set_ray_height over the floor; INF: open), measured by
 ## the simulation each tick the carrier holds Use before arming starts (Plant.room_ahead): it is set short of it.
 var set_room: float = INF
-## ... and the floor's height where it would be set (NAN: the carrier's own floor), from a ray down there (Plant.floor_at),
-## so on a slope it lies on the ground, not over or under it.
+## ... and the floor's height where it would be set, from a ray down there (Plant.floor_at), so on a slope it lies on
+## the ground, not over or under it (INF: no floor there, it goes at the carrier's feet; NAN: not measured).
 var set_floor: float = NAN
 ## Seconds of fuse left once armed.
 var fuse_left: float = 0.0

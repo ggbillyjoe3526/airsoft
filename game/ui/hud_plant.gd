@@ -38,10 +38,11 @@ static func prompt(rs: RoundState, player: Character, cfg: PlantConfig) -> Promp
 	return Prompt.NONE
 
 
-## Whether `player` carries the bomb now (the quiet line "You have the bomb").
+## Whether `player` carries the bomb now (the quiet line "You have the bomb"), not while setting it down (PB3: the
+## PLANTING gauge says what is going on then).
 static func carrying(rs: RoundState, player: Character) -> bool:
 	return live(rs) and rs.plant.status == PlantState.Status.CARRIED and rs.plant.carrier == player.id \
-			and Elimination.is_in_play(player)
+			and rs.plant.planter != player.id and Elimination.is_in_play(player)
 
 
 ## Plant The Bomb's bomb on the weapon rail of `c` (PB3, the owner's ask): carried, being set down and armed, or none.

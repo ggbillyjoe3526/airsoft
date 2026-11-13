@@ -71,6 +71,8 @@ const OT_GAP := 8.0
 const GAUGE_HEIGHT := 28.0
 const GAUGE_LABEL_SIZE := 12
 const GAUGE_LABEL_WIDTH := 96.0
+## Room between the gauge's word and its track, so the longest word (BOMB ARMED) never runs into it.
+const GAUGE_LABEL_GAP := 8.0
 const GAUGE_NOTCH_GAP := 3.0
 const GAUGE_PAD := 10.0
 const WARNING_SIZE := 30

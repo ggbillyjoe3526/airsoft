@@ -19,12 +19,15 @@
   Bots still crouch (`BotPlant`), as he asked.
 - **The bomb is set 0.55 m ahead of the planter's feet** (`set_ahead`), short of a wall (`set_clear` 0.16 m, a ray
   at `set_ray_height` 6 cm), drawn in onto the site's ring if it would lie past it, facing the planter. It lies on the floor found by a ray down there
-  (`set_drop` 0.3 m each way), so on Woodland's slopes it neither floats nor sinks. On main it
+  (`set_drop` 0.3 m each way), so on Woodland's slopes it neither floats nor sinks;
+  measured at the spot after the ring's pull, and with no floor there (a ledge ahead) it goes at the feet instead. On main it
   stood under the planter's feet, out of sight in first person.
 - **The rail's bomb row** shows while you carry it, lit while you set it, keyed with Use (G). Your replica's row is
   unlit while it is away, as when holstered.
+- **While your hands are on it the replica panel shows no HOLSTERED** (as for a throw: the rail's lit bomb row says
+  what is in hand), and the quiet "You have the bomb" line hides while the PLANTING gauge runs.
 - **BOMB ARMED** is the armed gauge's word for everyone, whichever team armed it; the gauge's word column grew from
-  72 to 96 px to fit it. The defuse still reads DEFUSING.
+  72 to 96 px to fit it, with an 8 px gap before the track (`HudStyle.GAUGE_LABEL_GAP`). The defuse still reads DEFUSING.
 - **PB2's wire cutters** still lie open beside the bomb while it is defused: nothing in his ruling touched them.
 
 ## Known issues left

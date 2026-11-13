@@ -176,8 +176,8 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		var ps := state.round_state.plant
 		if c.using and ps.status == PlantState.Status.CARRIED and ps.carrier == c.id and ps.planter != c.id:
 			ps.set_room = Plant.room_ahead(c.position, c.yaw, tuning.plant, query, _set_hit)
-			ps.set_floor = Plant.floor_at(Plant.set_down(c.position, c.yaw, tuning.plant, ps.set_room), tuning.plant,
-					query, _set_hit)
+			ps.set_floor = Plant.floor_at(Plant.set_spot(ps, c.position, c.yaw, tuning.plant, ps.set_room),
+					tuning.plant, query, _set_hit)
 		if Plant.hands_on(c, c.using and Plant.busy(ps, c), tuning.plant, state.events):
 			_working.reset(cmd.yaw, cmd.pitch)
 			_working.crouch = cmd.crouch

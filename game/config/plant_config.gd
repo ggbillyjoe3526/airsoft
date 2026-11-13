@@ -34,7 +34,7 @@ extends Resource
 ## Arming and disarming take both hands (PB3, the owner's ask): the replica is put away while they do and drawn again
 ## after, at this times its own draw time.
 @export var redraw_scale: float = 1.0
-## Keyed in, it is set down this far (m) ahead of its carrier's feet, in sight below the view (PB3); nearer with a wall
+## Keyed in, it is set down this far (m) ahead of its carrier's feet, in sight when they look down a little (PB3); nearer with a wall
 ## or anything ahead of them, its middle at least set_clear (m: half its length and a hair) short of it (a ray at
 ## set_ray_height over their feet).
 @export var set_ahead: float = 0.55
