@@ -175,14 +175,16 @@ GROOVE_DEPTH = 0.0058
 # stock behind each of the upper two rows and the lowest (front, back px; each chamber's top and foot py, a shelf
 # between them; the side wall's thickness, m). What the slots show is the receiver extension, which runs the hollow's
 # whole length (to EXT_END_PX), and the rail under it (the one a real stock's latch pin locks into: its top and foot
-# py, its half width), both black aluminium: every slot reads black end to end from either side, where a polymer
-# wall behind them read grey (the critic, SH2). The last column is shorter, as the photos' (GROOVE_LAST, px).
+# py, its half width at each; drawn as a keel tapering down from the tube's flanks, so its sides face down as the
+# tube's do and take no light), both black aluminium: every slot reads black end to end from either side, where a
+# polymer wall or an upright rail behind them read grey (the critic, SH2). The last column is shorter, as the
+# photos' (GROOVE_LAST, px).
 HOLLOW_PX = (1146.0, 1458.0)
 HOLLOW_PY = ((81.0, 111.8), (113.6, 127.0))
 HOLLOW_WALL = 0.0022
 EXT_END_PX = 1456.0
-EXT_RAIL_PY = (104.0, 126.0)
-EXT_RAIL_HW = 0.0040
+EXT_RAIL_PY = (98.0, 126.0)
+EXT_RAIL_HW = (0.0105, 0.0008)
 GROOVE_LAST = 44.0
 # The sling loop hanging at the fin's toe (the photos' left side): its lug on the fin's front edge and the wire loop
 # through it (centre px, py; half width and height, m; the wire's radius).
@@ -673,8 +675,9 @@ def stock() -> list:
     b.lathe([(Y(EXT_END_PX), 0.0), (Y(EXT_END_PX), EXT_R - 0.002), (Y(EXT_END_PX - 2), EXT_R),
              (Y(NUT_PX[0] - 6), EXT_R), (Y(NUT_PX[0] - 6), 0.0)], "Detail", 24, centre=(0.0, 0.0, EXT_Z))
     # The rail under it, inside the stock: what the lowest row of slots shows.
-    b.box((-EXT_RAIL_HW, Y(EXT_END_PX), Z(EXT_RAIL_PY[1])), (EXT_RAIL_HW, Y(HOLLOW_PX[0] + 4), Z(EXT_RAIL_PY[0])),
-          "Detail")
+    (top, foot), (hw_top, hw_foot) = EXT_RAIL_PY, EXT_RAIL_HW
+    b.prism([(-hw_foot, Z(foot)), (hw_foot, Z(foot)), (hw_top, Z(top)), (-hw_top, Z(top))], "y", Y(EXT_END_PX),
+            Y(HOLLOW_PX[0] + 4), "Detail")
     # The lock nut against the tower, notched round its back.
     y0, y1 = Y(NUT_PX[1]), Y(NUT_PX[0])
     b.lathe([(y0, 0.0), (y0, TOWER_R - 0.0026), (y0 + 0.0010, TOWER_R - 0.0012), (y1 - 0.0052, TOWER_R - 0.0012),
