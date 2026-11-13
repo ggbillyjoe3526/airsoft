@@ -39,6 +39,7 @@
 [ext_resource type="Script" uid="uid://crxm155pdir66" path="res://game/config/station_fixtures_config.gd" id="54_sm5fx"]
 [ext_resource type="Script" path="res://game/config/plant_view_config.gd" id="37_pb1pv"]
 [ext_resource type="Script" uid="uid://cc52dhprynifg" path="res://game/config/train_look.gd" id="54_sm1tl"]
+[ext_resource type="Script" uid="uid://botios24ftgv6" path="res://game/config/hands_life_config.gd" id="55_ha1hl"]
 
 [sub_resource type="Resource" id="Resource_01h5l"]
 script = ExtResource("1_ermsw")
@@ -296,8 +297,12 @@ shift = PackedVector3Array(0, 0, 0, -0.2, 0.07, -0.18, -0.21, 0.08, -0.18, -0.19
 sound_at = PackedFloat32Array(0.18, 0.23, 0.69, 0.73)
 sound_cue = Array[StringName]([&"selector", &"torchClick", &"dryFire", &"selector"])
 
+[sub_resource type="Resource" id="Resource_ha1hl"]
+script = ExtResource("55_ha1hl")
+
 [sub_resource type="Resource" id="Resource_k2yse"]
 script = ExtResource("10_bqp2c")
+life = SubResource("Resource_ha1hl")
 selector_at = PackedFloat32Array(0.5, 0.75, 1)
 inspect_poses = Dictionary[StringName, ExtResource("50_in1ip")]({
 &"aeg": SubResource("Resource_in1ae"),
