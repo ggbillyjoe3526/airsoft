@@ -192,7 +192,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   thick holding rifles" (half of the earlier thickening stands), "The thumb should be resting against the replica"
   (it lies up on the handguard's side), and "With a vertical grip the index finger should be under the replica and
   around the grip. Angled grip should be held similar to the vertical grip" (both a fist round the grip:
-  `VERTICAL_LEFT`, `ANGLED_LEFT`). Defaults taken: the bots
+  `VERTICAL_LEFT`, `ANGLED_LEFT`). His fifth look (2026-11-13): "Move the hand up the vertical grip a bit more so
+  more fingers grip it" (the fist 10 mm higher, three fingers on the grip's body), and "With no grip Move the left
+  hand back and closer to the magazine on the rifles. If you need to move more of the forearm out of view that's
+  ok" (4 cm back on the AEG, to the magazine well's front, 28 mm on the Sniper and 7 mm on the Compact SMG, each as
+  far as its magazine lets the palm stay on the replica; the forearm lower in the view). Defaults taken: the bots
   stay one-handed on pistols (HG1 below; they copy `<id>_Hold`), and the pistols keep their hip place of 2026-11-06.
   His reference pictures are other games' and set hand placement and framing only; the art is our own.
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands

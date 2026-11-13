@@ -218,12 +218,19 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # nor their middle joints stand above its top edge as the eye sees it, at the hip or aimed. His fourth look, of the
 # thumb reaching 55 mm forward along the handguard's lower left edge, its tip past the handguard's front: "The thumb
 # should be resting against the replica": it lies 35 mm forward and 5 mm higher, up on the side face, held closer
-# along its length (`thumb_hug` 4, was 2).
-GUARD = {"kind": "guard", "y": 0.240, "forward": 0.026, "depth": 0.034, "standoff": 0.0,
-         "search": ((25, 25), (15, 15), (-10, -10)), "rise": 8.0, "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06,
+# along its length (`thumb_hug` 4, was 2). His fifth look (2026-11-13 00:26): "With no grip Move the left hand back
+# and closer to the magazine on the rifles. If you need to move more of the forearm out of view that's ok": the hand
+# sits 4 cm further back (`y` 0.200, its cuff at the magazine well's front), turned 30 degrees off the bore, the
+# least that passes the sleeve by the magazine from there (at 25 the forearm passes into it), the elbow hung 12
+# degrees under the wrist's straight line (`sag`, as a hand carrying a rifle's weight has it), which drops the
+# forearm lower in the view; and each fingertip aims 3 cm ahead of its knuckle, low on the right side (`tip_at`),
+# never above `tips_below` (`Hand.onto` holds them under it): turned further across, fingers aimed level with their
+# knuckles hooked up past the handguard's far side, where the eye saw their tips.
+GUARD = {"kind": "guard", "y": 0.200, "forward": 0.026, "depth": 0.034, "standoff": 0.0,
+         "search": ((30, 30), (15, 15), (-10, -10)), "rise": 8.0, "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.030, "thumb_f": 0.035, "thumb_z": 0.060, "thumb_hug": 4.0,
          "thumb_pull": 30.0, "thumb_wide": 0.0, "tips_below": 0.050, "plan": 30.0,
-         "upper": (-0.5, -0.8, 0.4), "sag": 0.0, "tip_at": (0.0275, 0.005, 0.030), "tip_swing": 8.0,
+         "upper": (-0.5, -0.8, 0.4), "sag": 12.0, "tip_at": (0.0275, 0.030, 0.030), "tip_swing": 8.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -304,9 +311,10 @@ SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030
 # sits further right than on the AEG (`forward`; the narrow fore-end leaves the knuckles 14-21 mm off its right side),
 # the fingertips reach higher up that side (`tip_at`), the little finger's lower (`tip_drop`, m below the others',
 # curled in under the fore-end rather than clawed out from it), and the thumb presses on the left side face just
-# above its centre line.
-SNIPER_GUARD = dict(GUARD, y=0.260, axis=(0.0, 0.030), radius=0.025, tips_below=0.036,
-                    tip_at=(0.0255, 0.000, 0.022), thumb_x=-0.028, thumb_z=0.045, forward=0.034,
+# above its centre line. The fifth look: 28 mm further back, just ahead of the magazine's housing (the magazine's
+# front at y 0.171); any further and the housing holds the palm 1 cm off the fore-end.
+SNIPER_GUARD = dict(GUARD, y=0.232, axis=(0.0, 0.030), radius=0.025, tips_below=0.036,
+                    tip_at=(0.0255, 0.030, 0.022), thumb_x=-0.028, thumb_z=0.045, forward=0.034,
                     tip_drop={"Pinky": 0.015})
 # The Compact SMG (CS1): its grip raked 30 degrees as the AEG's and its front where the AEG's is at the hand's height
 # (smg.py), but 12 mm deeper, so the web and the little finger's knuckle sit that much further back and the thumb
@@ -318,10 +326,11 @@ SMG_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.113, -0.056), pinky=(0.024, -0.074, -
 # HA1: the handguard is short (it narrows from y 0.26 and ends at 0.27) and the magazine stands 6 cm behind the
 # hand, so the hand sits further back than the AEG's with the arm 37 degrees off the bore (`search`: nearer the
 # bore the forearm passes into the magazine, further forward a fingertip shows past the handguard's front), and the
-# elbow hangs 10 degrees under the wrist's straight line (`sag`), which keeps the upper arm out of the view.
-SMG_GUARD = dict(GUARD, y=0.212, axis=(0.0, 0.072), radius=0.022, tips_below=0.074,
-                 tip_at=(0.0275, 0.005, 0.056), thumb_x=-0.028, thumb_z=0.080,
-                 search=((30, 30), (15, 15), (-10, -10)), sag=10.0)
+# elbow hangs under the wrist's straight line (`sag`), which keeps the upper arm out of the view. The fifth look:
+# 7 mm further back, the cuff against the magazine's housing (any further and the arm turns 46 degrees and more off
+# the bore to pass it, across the view).
+SMG_GUARD = dict(GUARD, y=0.205, axis=(0.0, 0.072), radius=0.022, tips_below=0.074,
+                 tip_at=(0.0275, 0.030, 0.056), thumb_x=-0.028, thumb_z=0.080)
 # A foregrip fitted under the handguard (BP8, the owner's playtest note 6: "If a weapon has a grip attachment the
 # players left hand should hold it"): the left hand wraps the grip as the right hand wraps a pistol's, mirrored: its
 # palm on the grip's left side, the thumb's root (`web`) behind its back face, the index finger's knuckle high under
@@ -342,16 +351,21 @@ SMG_GUARD = dict(GUARD, y=0.212, axis=(0.0, 0.072), radius=0.022, tips_below=0.0
 # knuckle about 30 mm under the rail and 12 mm off the grip's side, a finger's thickness, so the finger has room to
 # turn round its front), tilted 20 not 30 (the finger's sweep rises less toward the rail), and the index and middle
 # fingers close until they touch (`press`).
+# His fifth look (2026-11-13 00:26): "Move the hand up the vertical grip a bit more so more fingers grip it": the
+# vertical grip's fist sits 10 mm higher (the index knuckle about 20 mm under the rail, just under the grip's flared
+# top), tilted 8 degrees, not 20, so the index finger's sweep stays under the flare; the index, middle and ring
+# fingers hold the grip's body and the little finger its foot.
 GRIP_LEFT = {"kind": "grip", "pinky_cost": 300.0, "thumb_hug": 2.0, "thumb_pull": 30.0, "thumb_curl": (40.0, 45.0),
              "swing": (8.0, 8.0, 8.0), "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06, "across": 0.25,
              "upper": (-0.5, -0.8, 0.4), "turn": (20.0, 35.0), "sag": 0.0, "press": ("Index", "Middle"),
              "fingers": {"Index": (60, 60, 40), "Middle": (60, 60, 45), "Ring": (60, 60, 45), "Pinky": (55, 55, 40)},
              "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # The vertical grip (its body 29 mm fore and aft, 24 mm across, 16 to 64 mm under the rail's face below its flared
-# top; MQ2 made it 64 mm from 53): the index and middle fingers round it, the ring finger at its foot. `pivot` is
-# the middle of the grip where the hand holds it (the grip part's space), which `turn` turns the hand about.
-VERTICAL_LEFT = dict(GRIP_LEFT, web=(-0.018, -0.027, -0.042), index=(-0.024, 0.012, -0.033),
-                     pinky=(-0.024, 0.006, -0.090), thumb_at=(0.014, -0.012, -0.032), pivot=(0.0, 0.0, -0.045))
+# top; MQ2 made it 64 mm from 53): the index, middle and ring fingers round it, the little finger at its foot.
+# `pivot` is the middle of the grip where the hand holds it (the grip part's space), which `turn` turns the hand about.
+VERTICAL_LEFT = dict(GRIP_LEFT, web=(-0.018, -0.027, -0.032), index=(-0.024, 0.012, -0.023),
+                     pinky=(-0.024, 0.006, -0.080), thumb_at=(0.014, -0.012, -0.024), pivot=(0.0, 0.0, -0.045),
+                     turn=(8.0, 35.0))
 # The angled handstop (its tall end in front, 26 mm fore and aft, 21 mm across, down to 48 mm under the rail; the
 # swept face behind it): held as the vertical grip is (the owner, above), the fist round its tall end, the web of
 # the thumb behind it under the swept face and the thumb round its back.

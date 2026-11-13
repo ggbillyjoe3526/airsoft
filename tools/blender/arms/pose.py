@@ -529,7 +529,9 @@ class Hand:
             arch = 0.0
             if self.index_arc is not None:
                 arch = self.index_arc[1] * (abs(a[1] - self.index_arc[0]) + 0.5 * abs(a[2] - 0.5 * self.index_arc[0]))
-            # Clear of the replica first, then the pad nearest the target.
+            # Clear of the replica first, then the pad nearest the target; and never standing above `tip_top`, when
+            # set (a support hand's fingertips kept under the handguard's top as the eye sees it).
+            over += self.over(name)
             return pad + arch + over * 10.0 + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
 
         swing = int(swing)

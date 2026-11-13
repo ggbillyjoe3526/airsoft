@@ -48,6 +48,16 @@ ATTEMPT_ROWS
   it: 7 cm forward a fingertip showed past its front, 5 cm forward the sleeve needs 37 degrees to pass the
   magazine, so that is its hold (`SMG_GUARD` `search`), and its elbow hangs 10 degrees under the wrist's line
   (`sag`), without which the upper arm came into the view's foot.
+- **The rifle hand back by the magazine** (`GUARD` `y`, `search`, `sag`, `tip_at`; `Hand.onto`; the owner's fifth
+  look: "With no grip Move the left hand back and closer to the magazine on the rifles. If you need to move more of
+  the forearm out of view that's ok"): the hand sits 4 cm further back on the AEG, its cuff at the magazine well's
+  front, 28 mm on the Sniper (further back its magazine's housing holds the palm off the fore-end) and 7 mm on the
+  Compact SMG, whose magazine was already right behind it. From there the
+  sleeve needs 30 degrees of turn to pass the magazine (at 25 the forearm passes into it), so the forearm runs 38
+  degrees off the bore, and the elbow hangs 12 degrees under the wrist's straight line, the bend a hand carrying a
+  rifle's weight has, which takes the forearm lower in the view. Turned further across, fingers aimed level with
+  their knuckles hooked up past the handguard's far side where the eye saw their tips, so each fingertip now aims
+  3 cm ahead of its knuckle and `Hand.onto` keeps it under `tips_below`: only the thumb shows.
 - **A fist round each foregrip** (`GRIP_LEFT` `upper`, `turn` and `press`, `VERTICAL_LEFT`, `ANGLED_LEFT`): the
   third look asked for the straight arm, which on a fist round an upright grip runs level along the bore, through
   the magazine, so the hand's marks are turned about the grip's middle (`pivot`): tilted, as a hand holds a hammer,
@@ -60,7 +70,10 @@ ATTEMPT_ROWS
   its front), the index and middle fingers closed until they touch, the ring and little fingers at and under its foot,
   the thumb round its back. The vertical grip (64 mm since MQ2) is tilted 20 degrees (forearm rising 20, 24 off the
   bore); the angled grip's tall end is held the same way, tilted 12, because its raked front and rail plate leave
-  the index less room. The wrist stays straight (under 1 degree) on both.
+  the index less room. The wrist stays straight (under 1 degree) on both. His fifth look: "Move the hand up the
+  vertical grip a bit more so more fingers grip it": the vertical grip's fist sits 10 mm higher, the index knuckle
+  just under the grip's flared top, tilted 8 degrees so the index still turns under the flare; the index, middle and
+  ring fingers hold its body and the little finger its foot.
 - **The thumb on the handguard** (`thumb_f`, `thumb_z`, `thumb_hug`; the owner's fourth look: "The thumb should be
   resting against the replica"): it reached 55 mm forward along the handguard's lower left edge, its tip past the
   handguard's front, so from the eye it stood beside the rifle. It lies 35 mm forward and 5 mm higher, up on the side
@@ -162,8 +175,8 @@ ATTEMPT_ROWS
 
 ## Known issues left
 
-- The SMG's far-side fingertips stand 1 to 2 cm off the narrow front of its handguard (a bot close up shows it,
-  your view never); aimed, the Cyber's right thumb lies a little flatter than the GBB's; on the Angled Grip's short
+- With no grip the rifles' left index and middle fingers lie open along the handguard's far side, under its top,
+  rather than wrapped up it, and reach past the SMG's narrow front (a bot close up shows it, your view never); aimed, the Cyber's right thumb lies a little flatter than the GBB's; on the Angled Grip's short
   tall end the ring and little fingers close under its foot (`docs/KNOWN_ISSUES.md` › Graphics).
 - The skin's atlas has about 530 texels (of 1.46 million) claimed by two places on the hand, at the thumb's web; no
   seam shows in the pictures.
