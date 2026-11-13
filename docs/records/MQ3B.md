@@ -1,6 +1,6 @@
 # MQ3B · The figures' headwear, arm bands and boots drawn as what they are made of
 
-**Review:** pending
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-13 | 1 | Fable 5.2 (model quality thread) | pass (6,442 tests) | Retry 7/8 (near miss, judgment) | – |
 | 2026-11-13 | 2 | Fable 5.2 (model quality thread) | pass (6,443 tests) | Retry 7/8 (near miss, judgment) | check 1, four surfaces: the boots' creases ran down the sides as streaks and the suede was blotchy; the ear cups read as turned rings; the boonie's sweat mark sat 3 cm above the band as a blotch |
-| 2026-11-13 | 3 | Fable 5.2 (model quality thread) | pending | pending | check 1, three surfaces (the boots passed): the boonie's weave met at the crown's middle as a starburst; faint rings still showed round the ear cups; the boonie's sweat line could not be seen |
+| 2026-11-13 | 3 | Fable 5.2 (model quality thread) | pass (6,445 tests) | Accept 8/8 | check 1, three surfaces (the boots passed): the boonie's weave met at the crown's middle as a starburst; faint rings still showed round the ear cups; the boonie's sweat line could not be seen |
 
 ## What changed
 
@@ -165,5 +165,8 @@ darker than the flat colour it was, which is the ribs' valleys, the grime and th
 - The band's ribs and the boots' creases are coarse beside the gear's weave (1.3 mm a pixel against 0.42): the body
   shares one 2048 atlas. Finer needs the body's atlas split in two, which is a rebake.
 - The rims' rubber trim, buckles, screws and the microphone still draw flat swatches.
+- The critic's notes on the accepted cups, left for the owner's eye in play: one scratch on a cup's face reads as a
+  dotted line, the smoother rubbed patches reach onto the face as soft clouds under a hard light, and a cup's
+  outline is faceted up close (the mesh, which this pass could not touch).
 - `body_surfaces.py` tells the boots' parts by the roughness the bake gave them; if `body.py`'s `ROUGH` changes,
   `PART_ROUGH` there changes with it (the build's report prints how many pixels each part got).
