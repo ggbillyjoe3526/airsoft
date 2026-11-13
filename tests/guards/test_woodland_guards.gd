@@ -3,9 +3,9 @@ extends GutTest
 ## 6v6 at night (its second time of day since WR1), the size it plays (TS1), in Elimination and Attack / Defend, over
 ## 16 seeds at Normal and 8 at Easy and Hard, checking what must never happen on any seed (MatchGuard, as for Depot):
 ## rounds settle, nobody is stuck or held up, falls through the ground, flies or leaves the level, and no bot knocks out a
-## teammate. Who wins is the balance report's (BR1). A match there takes 50 to 70 s headless, so the tests run as five
-## CI jobs of 8 or 16 matches (tools/match_guards.sh test_woodland_guards <part of a name>: elimination_at_normal,
-## elimination_at_easy, attack_defend_at_normal, attack_defend_at_easy and at_hard).
+## teammate. Who wins is the balance report's (BR1). A match there takes 50 to 70 s headless, so the tests run as six
+## CI jobs, one test each (tools/match_guards.sh test_woodland_guards <part of a name>: elimination_at_normal,
+## elimination_at_easy, elimination_at_hard, attack_defend_at_normal, attack_defend_at_easy and attack_defend_at_hard).
 
 
 func test_woodland_elimination_at_normal() -> void:
