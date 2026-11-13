@@ -444,16 +444,23 @@ def ear_defenders(k: Kit, sh: Shell, cups: str, cushion: str, arm_to_rail: bool)
         def ring(dx: float, r: float, sy: float = 0.8, sz: float = 1.0) -> list:
             return [c + ax * dx + Vector((0.0, math.cos(TAU * i / seg) * r * sy, math.sin(TAU * i / seg) * r * sz))
                     for i in range(seg)]
-        cushion_rows = [ring(0.0, 0.040), ring(0.004, 0.047), ring(0.012, 0.049), ring(0.017, 0.046)]
-        if not k.lv["straps"]:
-            cushion_rows = [cushion_rows[0], cushion_rows[2]]
-        inner = p.grid(cushion_rows, GEAR, lambda i, j: k.sw(cushion), wrap=True)[0]
-        cup_rows = [ring(0.017, 0.044), ring(0.021, 0.047), ring(0.034, 0.045), ring(0.042, 0.037),
-                    ring(0.046, 0.024)]
-        if not k.lv["straps"]:
-            cup_rows = [cup_rows[0], cup_rows[2], cup_rows[4]]
-        idx = p.grid(cup_rows, GEAR, lambda i, j: k.sw(cups), wrap=True)
-        p.fan(idx[-1], c + ax * 0.047, GEAR, lambda i: k.sw(cups), k.sw(cups), flip=side < 0)
+        # The cushion and the cup are unrolled into tiles of their own (s round them, t along their rings), so
+        # the leatherette's creases and the polymer's grain, joint and rubbed shoulder are drawn on them (MQ3B).
+        pad_at = head_textures.CUSHION_PROFILE
+        cup_at = head_textures.CUP_PROFILE
+        pad_rings = (0, 1, 2, 3) if k.lv["straps"] else (0, 2)
+        cup_rings = (0, 1, 2, 3, 4) if k.lv["straps"] else (0, 2, 4)
+        pad_tile = k.tile("cushion")
+        cup_tile = k.tile("cup_" + cups)
+        inner = p.grid([ring(*pad_at[r]) for r in pad_rings], GEAR,
+                       lambda i, j: pad_tile.uv(i / seg, head_textures.ring_t(pad_at, pad_rings[j])), wrap=True)[0]
+
+        def cup_uv(i: int, j: int):
+            return cup_tile.uv(i / seg, head_textures.ring_t(cup_at, cup_rings[j]))
+        idx = p.grid([ring(*cup_at[r]) for r in cup_rings], GEAR, cup_uv, wrap=True)
+        last = len(cup_rings) - 1
+        p.fan(idx[-1], c + ax * cup_at[-1][0], GEAR, lambda i: cup_uv(i, last),
+              lambda i: cup_tile.uv((i + 0.5) / seg, 1.0), flip=side < 0)
         p.fan(inner, c + ax * 0.002, GEAR, lambda i: k.sw(cushion), k.sw(cushion), flip=side > 0)
         if k.lv["small"]:
             # The volume knobs on the cup's front, a battery door at its back (no logos).
@@ -548,8 +555,9 @@ def goggles(k: Kit, drape: Drape, strap_z: float = 1.622, strap_b: float = 0.5) 
     # The frame's face over the lens's edge: a dark band, deepest at the ends where the strap clips sit, thin along
     # the bottom where the photos show the clear lens run past the gasket.
     inset = outline(GOGGLE, na, ns, 0.0018, ea=0.9, b0=0.07, b1=0.86)
+    frame_tile = k.tile("goggle_frame")
     p.grid([[q + (q - Vector((0, GOGGLE["cy"], q.z))).normalized() * 0.0003 for q in front], inset], GEAR,
-           lambda i, j: k.sw("goggle_frame"), wrap=True, flip=True)
+           lambda i, j: frame_tile.uv(i / len(front), 0.25 * (1 - j)), wrap=True, flip=True)
     centre = Vector((0.0, 0.025, 1.615))
     face = []
     for q in outline(GOGGLE, na, ns, -0.012):
@@ -567,7 +575,7 @@ def goggles(k: Kit, drape: Drape, strap_z: float = 1.622, strap_b: float = 0.5) 
         grow.append(m + (m - c).normalized() * 0.0005 + (Vector((0, 0, 1)) if q.z > 1.62 else Vector((0, 0, -1)))
                     * 0.0035)
     p.grid([[q.lerp(Vector((0, centre.y, q.z)), 0.004) for q in front], lip, grow, mid], GEAR,
-           lambda i, j: frame, wrap=True)
+           lambda i, j: frame_tile.uv(i / len(front), j / 3.0), wrap=True)
     foam_out = [a.lerp(b, 0.75) for a, b in zip(mid, face)]
     p.grid([mid, foam_out, face], GEAR, lambda i, j: foam, wrap=True)
     # The strap round the back of the head over whatever is there.
@@ -684,8 +692,13 @@ def mask(k: Kit, drape: Drape, eyewear: dict) -> Part:
     # The binding round the edge.
     loop = rows[-1] + [r[-1] for r in reversed(rows[1:-1])] + list(reversed(rows[0])) + [r[0] for r in rows[1:-1]]
     outs = [(q - MASK_CENTRE).normalized() for q in loop]
+    run = [0.0]
+    for a, b in zip(loop, loop[1:] + loop[:1]):
+        run.append(run[-1] + (b - a).length)
+    bind = k.tile("binding")
     p.sweep(loop, outs, [(-0.0045, -0.002), (0.0045, -0.002), (0.0045, 0.002), (-0.0045, 0.002)], GEAR,
-            uv=lambda i, j: k.sw("mask_binding"), closed_path=True)
+            uv=lambda i, j: bind.uv(head_textures.strip_s(run[j], head_textures.BINDING_RUN),
+                                    head_textures.BINDING_T[i]), closed_path=True)
     # Straps: top and bottom, from the mask's ends round the back of the head.
     strap = k.tile("strap")
     w = 0.019
@@ -1057,8 +1070,13 @@ def headband(k: Kit, crown_drape: Drape, drape: Drape) -> Part:
         path[i] = Vector((side * 0.122, 0.012, 1.638))
     outs = [(q - centre).normalized() for q in path]
     outs[0], outs[-1] = Vector((-1.0, 0.0, 0.0)), Vector((1.0, 0.0, 0.0))
+    run = [0.0]
+    for a, b in zip(path, path[1:]):
+        run.append(run[-1] + (b - a).length)
+    band = k.tile("headband")
     p.sweep(path, outs, [(-0.013, 0.0), (0.013, 0.0), (0.011, 0.006), (-0.011, 0.006)], GEAR,
-            uv=lambda i, j: k.sw("headset"))
+            uv=lambda i, j: band.uv(head_textures.strip_s(run[j], head_textures.HEADBAND_RUN),
+                                    head_textures.HEADBAND_T[i]))
     return p
 
 

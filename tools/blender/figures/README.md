@@ -8,7 +8,7 @@ The human figure's four heads, built from the owner's photos (`ref_images.zip` â
 | `headwear.py` | The heads (`Head_HighCut`, `Head_Cap`, `Head_Boonie`, `Head_FullCut`, each with `_LOD1` and `_LOD2`): what each wears, the levels of detail and the budget check. Run it to rebuild. |
 | `face.py` | The face in the balaclava's eye opening (FA1): the knit's hole, the skin (constrained Delaunay round the lids), the lids, the eyeballs and the knit hem; its four looks painted in the atlas. |
 | `head_shapes.py` | The head and the helmet shells as formulas: the head's radius by azimuth and height, the shells' superellipsoid and rim curves. |
-| `head_textures.py` | The 2048 px atlas (colour, normal, ORM) painted with numpy: the knit, loop, mesh, shells, brims and straps. |
+| `head_textures.py` | The 2048 px atlas (colour, normal, ORM) painted with numpy: the knit, loop, mesh, shells, brims and straps, each drawn as used kit from where a pixel lies on the part in metres (MQ3B: peel and scratches in paint, a moulded grain, faded cloth, chipped mesh), and the tiles of the ear cups, cushions, goggle frame, the mask's binding and the headset's band. The maps are saved lossless: lossy colour bled one tile's edge into the next. |
 | `headkit.py` | Shared helpers: mesh building (`Part`), draping on the head (`Drape`), the atlas (`Atlas`, `Tile`). |
 | `splice_heads.py` | Replaces the `Head_*` meshes, the `Headwear`, `TeamHeadwear` and `Lens` materials and the atlas inside `human.glb`, skinned to the `Head` bone but for the neck inside the collar, which takes the collar's weights (CN1); leaves every other node alone. |
 
@@ -27,6 +27,10 @@ count changed.
   agreed with the body (BL10) and carrier (BL12) work; the face (FA1) took the split's spare 1,000 / 600 / 100. The build stops if a head goes over. Every head aims at 95 to
   100 % of each level's budget (owner, 2026-11-05): `DENSITY` scales a head's counts per level; after changing a
   part, retune it (`HEADWEAR_DENSITY=Head_Cap:1:1.2 HEADWEAR_PARTS=1 ... --out x.glb` tries a value).
+- **Tiles that go round a part** (a shell, a cup, a cushion) must meet themselves where their ends meet: paint them
+  from `_st(t)` (a pixel's place as the UVs reach it) with a `wrap`. **Strips** swept along a path (the mask's
+  binding, the headset's band) draw from a short tile laid back and forth (`strip_s`), so the tile's two ends never
+  meet and any length is covered. A part moved off a swatch onto a tile changes UVs only, never the triangle counts.
 - **Team marks:** every surface on `TeamHeadwear` is tinted in game (the high cut's back patch, the full cut's band,
   the cap's front patch, the boonie's band).
 - **Face looks:** `Face` surfaces share the atlas; four looks (skin, brows, eyes) are painted in cells above the
@@ -66,3 +70,17 @@ swatch strip at `gear.PADS_AT` only; `gear.py` then bakes its charts into the re
 and last `python -I tools/blender/figures/body_weights.py assets/models/characters/human.glb` (the body's splice brings
 back the blended weights on the gloves' plates). `human_pads_col.webp` imports with high-quality compression (BC7): BC1
 darkened the gear's flat swatches.
+
+## The arm bands and the boots (MQ3B)
+
+| Script | What it does |
+|---|---|
+| `body_surfaces.py` | Plain Python with numpy and Pillow: paints the team arm bands (ribbed elastic, hems, the sewn overlap) and the boots (brushed suede, creases across the vamp, scuffed toe caps, lugs on the sole's side) over the body's three baked maps inside `human.glb`, from where each pixel lies in space, and gives the band's material the body's colour map (white under the game's team colour). No mesh, UV or weight changes. |
+
+    python3 -I tools/blender/figures/body_surfaces.py            # paint human.glb in place
+    python3 -I tools/blender/figures/body_surfaces.py --report   # also print each part's pixels and measurements
+
+Run it once after the body's splice (before or after the pads, gear and heads: they leave the body's maps alone). It
+tells a painted file by the arm band's colour map and stops, so a second run cannot paint twice. It tells the boots'
+parts by the roughness `body.py` gave them (`PART_ROUGH` there follows `body.ROUGH`); the body itself is not rebaked,
+because a rebuild does not give the committed mesh, UV layout and weights back.

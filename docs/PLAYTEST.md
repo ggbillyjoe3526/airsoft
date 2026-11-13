@@ -1610,6 +1610,26 @@ Stand beside a teammate at the start of a round, or watch one from the dead zone
 - [ ] **Knee and elbow pads** look as before.
 - [ ] **Frame rate** with both teams in view is as before on every preset.
 
+## Headwear, arm bands and boots up close (MQ3B)
+
+Stand beside teammates at the start of a round, or watch from the dead zone, on High or Ultra. Look at several: the
+four heads differ.
+
+- [ ] **Helmets.** The grey high cut's paint is scuffed and scratched with dust low down, its rails and ear cups look
+  like moulded plastic; the coyote full cut's cover is faded on top with dust by its seams. No line runs down the
+  back of either.
+- [ ] **Cap and boonie.** The cloth is unevenly faded with a sweat mark above the band; the headset's band over the
+  cap is padded and stitched. They look worn, not dirty or ruined.
+- [ ] **Mesh mask.** Its paint is chipped to bare steel in places and its edge is bound in woven tape with a stitch
+  row.
+- [ ] **Team arm bands.** Ribbed elastic with a hem at each edge, in exactly the team's blue or orange: not darker,
+  not greyer than the carrier beside it.
+- [ ] **Boots.** Brushed suede with creases across the top of the foot, a scuffed toe cap and lugs cut into the
+  sole's side.
+- [ ] **At range nothing changed.** A figure 30 m away reads as before, with no shimmer on the arm bands or the
+  soles as it walks.
+- [ ] **Faces** look as before.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

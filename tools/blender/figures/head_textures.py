@@ -1,10 +1,14 @@
 """The heads' texture atlas, painted with numpy (BL11, 2026-11-05): tools/blender/figures/headwear.py.
 
-Clean, stylised surfaces (the art direction: flat colour, crisp patterns, no grime or noise): the fabrics carry their
-weave, seams and stitching as colour and a little height (the normal map); hard parts are flat swatches and get their
-detail from the geometry. Every pattern is drawn at its real size for the part that covers its tile.
+The fabrics carry their weave, seams and stitching as colour and a little height (the normal map). Since MQ3B
+(2026-11-13) every tile is also drawn as what it is made of, used: a helmet's paint has its fine peel, scuffs and
+rubbed crown, moulded polymer its grain and worn edges, cloth its fade and dust, the steel mesh its chipped paint.
+The ear defenders' cups and cushions and the goggles' frame have tiles of their own; the small hard parts are flat
+swatches and get their detail from the geometry. Every pattern is drawn at its real size for the part that covers
+its tile, and none is a letter, a label or a maker's mark.
 """
 
+import math
 import os
 
 import numpy as np
@@ -34,6 +38,32 @@ FULL_COVER = 0x665640
 LOOP_DARK = 0x2a2c2d
 LOOP_COYOTE = 0x5b4e3a
 TEAM_LIGHT = 0xe4e4e4
+DEFENDER = 0x6b6651
+HEADSET = 0x2a2b2c
+CUSHION = 0x1c1c1d
+GOGGLE_FRAME = 0x34373a
+BARE_STEEL = 0x8a8d86
+DUST = 0x8b8370
+
+SHELL_R = 0.11             # m: a helmet shell's radius, for patterns drawn on it at their real size
+SHELL_T = (-25.0, 115.0)   # degrees: a shell tile's t is the elevation from the first, over the second (headwear.py)
+## An ear defender's cup, from its cushion out to the middle of its outer face: (m out from the head, m radius) of
+## each ring headwear.py builds, the last the centre. A cup tile's t is the way along this line, s the way round.
+CUP_PROFILE = ((0.017, 0.044), (0.021, 0.047), (0.034, 0.045), (0.042, 0.037), (0.046, 0.024), (0.047, 0.0))
+CUP_SQUASH = 0.8           # a cup is this much narrower front to back than it is tall
+## An ear cushion's rings, the same way (its tile's t runs across them).
+CUSHION_PROFILE = ((0.0, 0.040), (0.004, 0.047), (0.012, 0.049), (0.017, 0.046))
+## A strip swept along a path (the mesh mask's binding, the headset's band) draws from a short tile: s runs along the
+## path and turns back every RUN metres (headwear.py lays it back and forth, so the strip has no seam), t goes round
+## its four-sided profile, each side between two of these.
+BINDING = 0x565a40
+BINDING_RUN = 0.12
+BINDING_T = (0.0, 0.4, 0.5, 0.9, 1.0)      # a wide face, the fold, the other wide face, the fold
+BINDING_WIDTH = 0.009                      # m: a wide face
+HEADBAND_RUN = 0.18
+HEADBAND_T = (0.0, 0.3, 0.375, 0.925, 1.0)   # the underside, an edge, the top, the other edge
+HEADBAND_WIDTH = 0.022                     # m: the top
+SWATCH_ROWS = 64           # px: the swatches keep to the atlas's lowest rows; the cups' tiles lie above them
 KNIT = 0x27292b
 BOONIE = 0x58614c
 CAP = 0x6c5842
@@ -46,6 +76,13 @@ def paint() -> Atlas:
     a = Atlas()
     for name, (colour, rough) in SWATCHES.items():
         a.swatch(name, colour, rough)
+    assert len(a.swatches) * a.SWATCH * a.SWATCH <= a.SWATCH_AREA * SWATCH_ROWS, "the swatches reach the cups' tiles"
+    _cup(a.tile("cup_defender", 0, 64, 512, 64), DEFENDER, 0.55, 11)
+    _cup(a.tile("cup_headset", 0, 128, 512, 64), HEADSET, 0.62, 12)
+    _binding(a.tile("binding", 0, 192, 256, 64))
+    _headband(a.tile("headband", 256, 192, 256, 64))
+    _goggle_frame(a.tile("goggle_frame", 1024, 384, 512, 64))
+    _cushion(a.tile("cushion", 1024, 448, 512, 64))
     _knit(a.tile("knit", 512, 0, 1024, 384))
     face.paint(a)  # four 256 x 128 cells over the swatch area's top half
     _loop(a.tile("loop_cap", 512, 384, 512, 128), 0x5a4936, 0x4a3b2b)
@@ -56,7 +93,7 @@ def paint() -> Atlas:
     _cap_crown(a.tile("cap_crown", 1536, 768, 512, 256))
     _cap_brim(a.tile("cap_brim", 0, 1024, 512, 256))
     _loop(a.tile("loop", 512, 1024, 512, 256), LOOP_DARK, 0x1f2021)
-    _loop(a.tile("team_loop", 1024, 1024, 512, 256), TEAM_LIGHT, 0xbdbdbd)
+    _loop(a.tile("team_loop", 1024, 1024, 512, 256), TEAM_LIGHT, 0xbdbdbd, 0.06)
     _band(a.tile("band", 1536, 1024, 512, 256))
     _rail(a.tile("rail", 0, 1280, 1024, 256))
     _shell_high(a.tile("shell_high", 1024, 1280, 1024, 512))
@@ -69,20 +106,280 @@ def paint() -> Atlas:
 
 
 def save(atlas: Atlas, stem: str) -> dict:
-    """Writes the atlas as three WebP files (the normal and roughness maps at full quality); returns their paths by
-    kind. Image.save writes the pixels as painted (save_render would put them through the scene's view transform)."""
+    """Writes the atlas as three WebP files, all without loss (Blender's quality 100); returns their paths by kind.
+    A lossy colour map smeared each tile's edge into its neighbour, and a tile that goes round a part showed that as
+    a line where its two ends meet (MQ3B). Image.save writes the pixels as painted (save_render would put them
+    through the scene's view transform)."""
     images = atlas.images(os.path.basename(stem))
     out = {}
     for key, im in images.items():
         path = "%s_%s.webp" % (stem, key)
         im.filepath_raw = path
         im.file_format = "WEBP"
-        im.save(filepath=path, quality=90 if key == "col" else 100)
+        im.save(filepath=path, quality=100)
         out[key] = path
     return out
 
 
+# ------------------------------------------------------------------------------------------------- used surfaces
+
+def _hash(ix, iy, iz, seed: int):
+    """0-1 for each lattice point, the same every run."""
+    h = (ix * 374761393 + iy * 668265263 + iz * 2147483647 + seed * 1442695041) & 0xFFFFFFFF
+    h = ((h ^ (h >> 13)) * 1274126177) & 0xFFFFFFFF
+    return ((h ^ (h >> 16)) & 0xFFFF).astype(np.float32) / 65535.0
+
+
+def _noise(x, y, cell: float, seed: int, wrap: float = 0.0, z=None):
+    """Smooth noise, -1 to 1, in lumps `cell` across at each pixel's place (x, y and, on a curved part, z, in metres).
+    With `wrap` the lumps repeat every `wrap` of x, so a tile that goes round a part meets itself."""
+    n = max(1, int(round(wrap / cell))) if wrap > 0.0 else 0
+    if n:
+        cell = wrap / n
+    z = np.zeros_like(x) if z is None else z
+    f = [np.asarray(v, np.float64) / cell for v in (x, y, z)]
+    i = [np.floor(v).astype(np.int64) for v in f]
+    w = [v - iv for v, iv in zip(f, i)]
+    w = [v * v * (3.0 - 2.0 * v) for v in w]
+    out = np.zeros(x.shape, np.float32)
+    for dx in (0, 1):
+        ix = (i[0] + dx) % n if n else i[0] + dx
+        wx = w[0] if dx else 1.0 - w[0]
+        for dy in (0, 1):
+            wy = w[1] if dy else 1.0 - w[1]
+            for dz in (0, 1):
+                wz = w[2] if dz else 1.0 - w[2]
+                out += (_hash(ix, i[1] + dy, i[2] + dz, seed) * wx * wy * wz).astype(np.float32)
+    return out * 2.0 - 1.0
+
+
+def _grain(t, pos: tuple, size: float, depth: float, seed: int, wrap: float = 0.0) -> None:
+    """A fine even grain in the height alone: paint's peel, moulded polymer's pebble."""
+    t.view("height")[:] += depth * _noise(pos[0], pos[1], size, seed, wrap, pos[2])
+
+
+def _tone(t, pos: tuple, cell: float, share: float, seed: int, wrap: float = 0.0) -> None:
+    """Soft patches a share lighter and darker: dye and dust that never lie even."""
+    t.shade(1.0 + share * _noise(pos[0], pos[1], cell, seed, wrap, pos[2]))
+
+
+def _scuffs(t, pos: tuple, marks: list, light: float, rough: float, dent: float = 0.4) -> None:
+    """Straight scratches, each (a point, a second point, half its width) in metres: a shade lighter, duller and a
+    little sunk."""
+    m = np.zeros(pos[0].shape, np.float32)
+    for a, b, half in marks:
+        ab = [b[k] - a[k] for k in range(3)]
+        ln = sum(c * c for c in ab) or 1e-12
+        u = sum((pos[k] - a[k]) * ab[k] for k in range(3)) / ln
+        u = np.clip(u, 0.0, 1.0)
+        d2 = sum((pos[k] - (a[k] + ab[k] * u)) ** 2 for k in range(3))
+        ends = np.minimum(u, 1.0 - u) * 6.0 + 0.25  # a scratch thins out at its ends
+        m = np.maximum(m, np.clip(1.0 - np.sqrt(d2) / (half * np.minimum(ends, 1.0)), 0.0, 1.0))
+    t.shade(1.0 + light * m)
+    r = t.view("rough")
+    r[:] = np.clip(r + rough * m, 0.0, 1.0)
+    t.view("height")[:] -= dent * m
+
+
+def _marks_on_ball(count: int, radius: float, el: tuple, length: tuple, half: tuple, seed: int) -> list:
+    """Scratches scattered on a shell between two elevations (degrees), each lying on its surface."""
+    rng = np.random.default_rng(seed)
+    out = []
+    for _ in range(count):
+        az = rng.uniform(-math.pi, math.pi)
+        e = math.radians(rng.uniform(el[0], el[1]))
+        p = np.array((math.cos(e) * math.sin(az), -math.cos(e) * math.cos(az), math.sin(e)))
+        side = np.cross(p, (0.0, 0.0, 1.0))
+        side /= np.linalg.norm(side) or 1.0
+        up = np.cross(side, p)
+        turn = rng.uniform(0.0, math.pi)
+        along = (side * math.cos(turn) + up * math.sin(turn)) * rng.uniform(length[0], length[1]) * 0.5
+        out.append((tuple(p * radius - along), tuple(p * radius + along), rng.uniform(half[0], half[1])))
+    return out
+
+
+def _st(t) -> tuple:
+    """Each pixel's (s, t) as a part's UVs reach it (Tile.uv keeps a pixel in from the tile's edges), so that what
+    is drawn round a part meets itself exactly where the tile's two ends meet on it."""
+    return (t.s * t.w - 1.0) / (t.w - 2.0), (t.t * t.h - 1.0) / (t.h - 2.0)
+
+
+def _shell_pos(t) -> tuple:
+    """Where each pixel of a shell tile lies on the shell (metres from its centre), and its elevation in degrees."""
+    s, tt = _st(t)
+    az = (s - 0.5) * math.tau
+    el_deg = SHELL_T[0] + tt * SHELL_T[1]
+    el = np.radians(el_deg)
+    return (SHELL_R * np.cos(el) * np.sin(az), -SHELL_R * np.cos(el) * np.cos(az), SHELL_R * np.sin(el)), el_deg
+
+
+def _flat_pos(x, y) -> tuple:
+    return (x, y, None)
+
+
+def _worn_cloth(t, x, y, seed: int, wrap: float = 0.0, fade: float = 0.09, mottle: float = 0.045) -> None:
+    """Cloth that has been out: broad sun and dust patches, a finer uneven dye."""
+    pos = _flat_pos(_st(t)[0] * wrap if wrap > 0.0 else x, y)
+    _tone(t, pos, 0.055, fade, seed, wrap)
+    _tone(t, pos, 0.014, mottle, seed + 1, wrap)
+
+
+def _tide(t, top: float, wrap: float, seed: int, dark: float = 0.11, salt: float = 0.05) -> None:
+    """A sweat mark up from the bottom of a crown's tile to about `top` (t): darker cloth under a wandering edge,
+    and the pale line the salt leaves along it."""
+    s, tt = _st(t)
+    edge = top + 0.045 * _noise(s * wrap, np.zeros_like(s), 0.03, seed, wrap) + 0.015 * _noise(
+        s * wrap, np.zeros_like(s), 0.008, seed + 1, wrap)
+    under = np.clip((edge - tt) / 0.03, 0.0, 1.0)
+    line = np.exp(-((tt - edge - 0.012) / 0.012) ** 2)
+    t.shade(1.0 - dark * under + salt * line)
+
+
+def _along(profile: tuple, t, squash: float = 1.0) -> tuple:
+    """For a tile whose t runs along `profile` (rings out from the head: m out, m radius) and whose s runs round
+    it: each pixel's place in metres (out, forward, up), and the t of every ring."""
+    steps = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(profile, profile[1:])]
+    at = np.concatenate([[0.0], np.cumsum(steps)]) / sum(steps)
+    s, tt = _st(t)
+    out = np.interp(tt, at, [q[0] for q in profile])
+    r = np.interp(tt, at, [q[1] for q in profile])
+    ang = s * math.tau
+    return (out, r * squash * np.cos(ang), r * np.sin(ang)), at
+
+
+def ring_t(profile: tuple, ring: int) -> float:
+    """The t of ring `ring` of `profile` in its tile (headwear.py lays the part's UVs with it)."""
+    steps = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(profile, profile[1:])]
+    return sum(steps[:ring]) / sum(steps)
+
+
 # --------------------------------------------------------------------------------------------------- the tiles
+
+def _cup(t, colour: int, rough: float, seed: int) -> None:
+    """An ear defender's moulded cup (s round it, t from its cushion out to the middle of its face): pebbled polymer,
+    the joint to its back plate, a shallow panel line on its face, its shoulder rubbed lighter, a few scratches."""
+    t.fill(colour, rough)
+    pos, at = _along(CUP_PROFILE, t, CUP_SQUASH)
+    _grain(t, pos, 0.0007, 0.12, seed)
+    _tone(t, pos, 0.012, 0.035, seed + 1)
+    joint = np.clip(1.0 - np.abs(t.t - at[1]) / 0.012, 0.0, 1.0)
+    t.paint(joint, add_height=-1.2)
+    t.shade(1.0 - 0.22 * joint)
+    panel = np.clip(1.0 - np.abs(t.t - (at[4] + (1.0 - at[4]) * 0.3)) / 0.012, 0.0, 1.0)
+    t.paint(panel, add_height=-0.8)
+    t.shade(1.0 - 0.14 * panel)
+    rub = np.clip(_noise(pos[0], pos[1], 0.006, seed + 2, 0.0, pos[2]) * 0.8 + 0.6, 0.0, 1.0)
+    for ring, width, share in ((3, 0.035, 0.16), (4, 0.03, 0.12), (2, 0.025, 0.07)):
+        edge = np.clip(1.0 - np.abs(t.t - at[ring]) / width, 0.0, 1.0)
+        t.shade(1.0 + share * edge * rub)
+        r = t.view("rough")
+        r[:] = np.clip(r - 0.06 * edge * rub, 0.0, 1.0)
+    rng = np.random.default_rng(seed)
+    marks = []
+    for _ in range(5):
+        a = rng.uniform(0.0, math.tau)
+        rr = rng.uniform(0.004, 0.03)
+        c = np.array((0.045, rr * CUP_SQUASH * math.cos(a), rr * math.sin(a)))
+        d = rng.uniform(0.0, math.pi)
+        half = np.array((0.0, math.cos(d), math.sin(d))) * rng.uniform(0.003, 0.011)
+        marks.append((tuple(c - half), tuple(c + half), rng.uniform(0.0004, 0.0008)))
+    face_only = (t.t > at[3]).astype(np.float32)
+    before = t.view("col").copy(), t.view("rough").copy(), t.view("height").copy()
+    _scuffs(t, (np.full_like(pos[1], 0.045), pos[1], pos[2]), marks, 0.12, 0.15)
+    for name, was in zip(("col", "rough", "height"), before):
+        now = t.view(name)
+        keep = face_only[..., None] if now.ndim == 3 else face_only
+        now[:] = was + (now - was) * keep
+
+
+def _cushion(t) -> None:
+    """An ear cushion (s round it, t across it from the head out to the cup): soft leatherette with its fine creases
+    running across, a welded seam round its middle, a duller rubbed outer edge."""
+    t.fill(CUSHION, 0.55)
+    pos, at = _along(CUSHION_PROFILE, t, CUP_SQUASH)
+    round_m = _st(t)[0] * 0.27
+    crease = _noise(round_m, t.t * 0.004, 0.0009, 21, 0.27)
+    t.view("height")[:] += 0.2 * crease
+    t.shade(1.0 + 0.05 * crease)
+    _tone(t, pos, 0.01, 0.04, 22)
+    seam = np.clip(1.0 - np.abs(t.t - at[2]) / 0.05, 0.0, 1.0)
+    t.paint(seam, add_height=-1.0)
+    t.shade(1.0 - 0.2 * seam)
+    worn = np.clip((t.t - at[2]) / (1.0 - at[2]), 0.0, 1.0) * np.clip(_noise(round_m, t.t * 0.02, 0.008, 23, 0.27) + 0.5,
+                                                                    0.0, 1.0)
+    t.shade(1.0 + 0.10 * worn)
+    r = t.view("rough")
+    r[:] = np.clip(r + 0.2 * worn, 0.0, 1.0)
+
+
+def strip_s(metres: float, run: float) -> float:
+    """Where along a strip's tile a point `metres` along its path draws from: forth, then back, every `run`."""
+    u = (metres / run) % 2.0
+    return u if u <= 1.0 else 2.0 - u
+
+
+def _binding(t) -> None:
+    """The mesh mask's binding (s along it, t round it by BINDING_T): olive twill tape folded over the mesh's edge,
+    a row of stitches through both faces near the edge it ends at, the folds rubbed paler, dust in patches."""
+    t.fill(BINDING, 0.85)
+    s, tt = _st(t)
+    x = s * BINDING_RUN
+    wide = np.zeros_like(x)
+    for lo, hi, row in ((BINDING_T[0], BINDING_T[1], 0.72), (BINDING_T[2], BINDING_T[3], 0.28)):
+        v = (tt - lo) / (hi - lo)
+        on = ((v >= 0.0) & (v <= 1.0)).astype(np.float32)
+        y = v * BINDING_WIDTH
+        twill = lines(x + y, 0.0016, 0.0006, 0.0003) * on
+        t.paint(twill, add_height=0.4)
+        t.shade(1.0 - 0.09 * twill)
+        stitch = dashes(x, y - row * BINDING_WIDTH, 1.0, 0.0028, 0.0014, 0.0008, 0.0003) * on
+        t.paint(stitch * 0.9, 0x40442f, add_height=0.8)
+        wide = np.maximum(wide, on)
+    pos = _flat_pos(x, tt * 0.026)
+    _tone(t, pos, 0.02, 0.08, 201)
+    t.shade(1.0 + 0.10 * (1.0 - wide))
+    t.paint(0.22 * np.clip(_noise(x, tt * 0.026, 0.012, 202) + 0.1, 0.0, 1.0), DUST)
+
+
+def _headband(t) -> None:
+    """The headset's band over the cap (s along it, t round it by HEADBAND_T): padded leatherette quilted across
+    every 30 mm, a stitch row inside each edge of its top, the pads' crowns rubbed duller and paler."""
+    t.fill(HEADSET, 0.5)
+    s, tt = _st(t)
+    x = s * HEADBAND_RUN
+    pos = _flat_pos(x, tt * 0.06)
+    _grain(t, pos, 0.0008, 0.12, 211)
+    _tone(t, pos, 0.02, 0.05, 212)
+    v = (tt - HEADBAND_T[2]) / (HEADBAND_T[3] - HEADBAND_T[2])
+    top = ((v >= 0.0) & (v <= 1.0)).astype(np.float32)
+    y = v * HEADBAND_WIDTH
+    quilt = lines(x, 0.03, 0.0012, 0.0008) * top
+    pad = np.sin(np.clip(v, 0.0, 1.0) * math.pi) * np.abs(np.sin(x / 0.03 * math.pi)) * top
+    t.view("height")[:] += 2.0 * pad
+    t.paint(quilt, add_height=-1.0)
+    t.shade(1.0 - 0.22 * quilt)
+    for at in (0.003, HEADBAND_WIDTH - 0.003):
+        stitch = dashes(x, y - at, 1.0, 0.0028, 0.0014, 0.0008, 0.0003) * top
+        t.paint(stitch * 0.9, 0x414243, add_height=0.6)
+    rub = pad * np.clip(_noise(x, y, 0.012, 213) + 0.6, 0.0, 1.0)
+    t.paint(rub * 0.5, rough=0.68)
+    t.shade(1.0 + 0.12 * rub)
+
+
+def _goggle_frame(t) -> None:
+    """The goggles' rubber frame (s round it, t from the lens's edge back to the gasket): matte rubber with a fine
+    grain, its lip rubbed a shade lighter, dust lying toward the face."""
+    t.fill(GOGGLE_FRAME, 0.72)
+    x = _st(t)[0] * 0.5
+    y = t.t * 0.022
+    pos = _flat_pos(x, y)
+    _grain(t, pos, 0.0006, 0.1, 31, 0.5)
+    _tone(t, pos, 0.015, 0.04, 32, 0.5)
+    lip = np.clip(1.0 - np.abs(t.t - 1.0 / 3.0) / 0.12, 0.0, 1.0) * np.clip(_noise(x, y, 0.01, 33, 0.5) + 0.6, 0.0, 1.0)
+    t.shade(1.0 + 0.12 * lip)
+    dust = np.clip((t.t - 0.55) / 0.45, 0.0, 1.0) * np.clip(_noise(x, y, 0.02, 34, 0.5) * 0.6 + 0.6, 0.0, 1.0)
+    t.paint(dust * 0.22, DUST, 0.9)
+
 
 def _knit(t) -> None:
     """The balaclava: fine ribs round the head (the eye opening is cut in the mesh; face.py fills it)."""
@@ -93,6 +390,11 @@ def _knit(t) -> None:
     t.paint(np.ones_like(rib), height=0.0)
     t.paint(rib, add_height=1.2)
     t.shade(1.0 - 0.10 * rib)
+    _worn_cloth(t, x, y, 41, face.KNIT_ROUND, fade=0.05, mottle=0.03)
+    # Pilling: small pale bobbles where a knit has rubbed.
+    pill = np.clip(_noise(_st(t)[0] * face.KNIT_ROUND, y, 0.0016, 43, face.KNIT_ROUND) * 2.0 - 1.25, 0.0, 1.0)
+    t.shade(1.0 + 0.35 * pill)
+    t.paint(pill, add_height=0.6)
 
 
 def _mesh(t) -> None:
@@ -102,6 +404,18 @@ def _mesh(t) -> None:
     y = t.t * 0.13
     wire = np.maximum(lines(x, 0.003, 0.0009, 0.00025), lines(y, 0.003, 0.0009, 0.00025))
     t.paint(wire, STEEL, 0.45, height=1.5)
+    # The paint chips off a steel mask: at wire crossings here and there, and in small round patches where BBs
+    # have struck it, the bare steel shows.
+    chip = (_hash(np.floor(x / 0.003).astype(np.int64), np.floor(y / 0.003).astype(np.int64), np.zeros(x.shape, np.int64),
+                  51) > 0.84).astype(np.float32)
+    rng = np.random.default_rng(52)
+    struck = np.zeros_like(x)
+    for _ in range(34):
+        cx, cy, r = rng.uniform(0.02, 0.24), rng.uniform(0.02, 0.11), rng.uniform(0.0025, 0.0050)
+        struck = np.maximum(struck, np.clip(1.5 - np.hypot(x - cx, y - cy) / r, 0.0, 1.0))
+    bare = wire * np.clip(chip * 0.8 + struck, 0.0, 1.0)
+    t.paint(bare * 0.85, BARE_STEEL, 0.32)
+    t.shade(1.0 + 0.05 * _noise(x, y, 0.03, 53) * wire)
 
 
 def _shemagh(t) -> None:
@@ -120,6 +434,7 @@ def _shemagh(t) -> None:
     t.paint(cross * 0.8, SHEMAGH_CHECK)
     band = soft_box(t.s, t.t, -1, 2, 0.06, 0.12, 0.004)
     t.paint(band * 0.7, 0x7a6544)
+    _worn_cloth(t, x, y, 61, 0.62, fade=0.06, mottle=0.03)
 
 
 def _ripstop(t, x, y, strength: float = 0.05, height: float = 0.4) -> None:
@@ -149,6 +464,12 @@ def _brim(t) -> None:
     t.paint(stitch * 0.8, 0x48503f, add_height=0.6)
     under = soft_box(t.s, t.t, -1, 2, -1, 0.5, 0.002)
     t.shade(1.0 - 0.1 * under)
+    _worn_cloth(t, x, d, 71, 0.78)
+    # The sun fades the top of a brim, and its edge frays a shade paler.
+    t.shade(1.0 + 0.10 * (1.0 - under))
+    fray = np.clip((d - (width - 0.005)) / 0.005, 0.0, 1.0) * np.clip(_noise(_st(t)[0] * 0.78, d, 0.006, 73, 0.78) + 0.7,
+                                                                    0.0, 1.0)
+    t.shade(1.0 + 0.18 * fray)
 
 
 def _seams(t, x, along, pitch_s: float, colour: int) -> None:
@@ -171,6 +492,10 @@ def _boonie_crown(t) -> None:
     top = lines(t.t - 0.72, 10.0, 0.012, 0.004)
     t.paint(top, add_height=-1.2)
     t.shade(1.0 - 0.15 * top)
+    _worn_cloth(t, x, y, 81, 0.68)
+    # Paler toward the top, where the sun sits; a sweat-dark line just above the band.
+    t.shade(1.0 + 0.16 * np.clip((t.t - 0.45) / 0.4, 0.0, 1.0))
+    _tide(t, 0.36, 0.68, 83)
 
 
 def _cap_crown(t) -> None:
@@ -190,6 +515,9 @@ def _cap_crown(t) -> None:
                         0.0011, 0.0003)
         holes = np.maximum(holes, dot * region)
     t.paint(holes, 0x3e3426, 0.9, add_height=-1.2)
+    _worn_cloth(t, x, y, 91, 0.62)
+    t.shade(1.0 + 0.16 * np.clip((t.t - 0.45) / 0.4, 0.0, 1.0))
+    _tide(t, 0.20, 0.62, 93)
 
 
 def _cap_brim(t) -> None:
@@ -204,17 +532,25 @@ def _cap_brim(t) -> None:
     t.paint(stitch * 0.85, 0x564533, add_height=0.7)
     under = soft_box(t.s, t.t, -1, 2, -1, 0.5, 0.002)
     t.paint(under * 0.6, 0x5c513b)
+    _worn_cloth(t, x, d, 101)
+    # A cap's bill wears pale along its edge first.
+    fray = np.clip(1.0 - d / 0.004, 0.0, 1.0) * np.clip(_noise(x, d, 0.005, 103) + 0.7, 0.0, 1.0)
+    t.shade(1.0 + 0.20 * fray)
 
 
-def _loop(t, colour: int, border: int) -> None:
+def _loop(t, colour: int, border: int, lint_share: float = 0.25) -> None:
     """Loop fabric (the patch panels): a fine, even pile and a sewn binding round the edge."""
     t.fill(colour, 0.97)
     x = t.s * 0.12
     y = t.t * 0.06
     pile = np.sin(x / 0.0011 * 6.283) * np.sin(y / 0.0011 * 6.283)
     t.paint(np.ones_like(pile), add_height=0.0)
-    t.view("height")[:] += 0.35 * pile
-    t.shade(1.0 + 0.03 * pile)
+    t.view("height")[:] += 0.6 * pile
+    t.shade(1.0 + 0.05 * pile)
+    # The pile mats down in patches and holds pale lint.
+    _tone(t, _flat_pos(x, y), 0.012, 0.05, 111)
+    lint = np.clip(_noise(x, y, 0.0013, 112) * 3.0 - 2.2, 0.0, 1.0)
+    t.shade(1.0 + lint_share * lint)
     rim = 1.0 - soft_box(t.s, t.t, 0.035, 0.965, 0.07, 0.93, 0.01)
     t.paint(rim, border, 0.8, add_height=1.0)
     st = dashes(x, np.minimum(t.t, 1 - t.t) * 0.06 - 0.0028, 1.0, 0.0025, 0.0012, 0.0006, 0.0002)
@@ -228,9 +564,15 @@ def _band(t) -> None:
     tack = lines(x, 0.035, 0.0022, 0.0005) * soft_box(t.s, t.t, -1, 2, 0.12, 0.88, 0.01)
     t.paint(tack, 0xb4b4b4, add_height=-0.8)
     weave = lines(t.t * 0.03, 0.0012, 0.0005, 0.0002)
-    t.shade(1.0 - 0.06 * weave)
+    t.shade(1.0 - 0.10 * weave)
+    t.paint(weave, add_height=-0.7)
+    # Webbing is woven: each rib is crossed by the weft every 1.6 mm, and its selvedges are tighter and darker.
+    weft = lines(x, 0.0016, 0.0005, 0.0002) * (1.0 - weave)
+    t.shade(1.0 - 0.06 * weft)
+    t.paint(weft, add_height=-0.3)
     edge = soft_box(t.s, t.t, -1, 2, 0.06, 0.94, 0.008)
     t.shade(0.85 + 0.15 * edge)
+    _tone(t, _flat_pos(_st(t)[0] * 0.66, t.t * 0.03), 0.03, 0.04, 121, 0.66)
 
 
 def _rail(t) -> None:
@@ -247,6 +589,20 @@ def _rail(t) -> None:
     slots = np.maximum(upper, lower) * ends
     # Through-slots: near black with the shell's shadow in them, only a shallow bevel in the normal (a deep one read
     # as raised blocks under the rail's mirrored UVs).
+    # Moulded polymer: a fine pebble, and the corners of its section and the slots' lips rubbed paler and
+    # smoother where hands and kit ride along it.
+    y = t.t * 0.05
+    pos = _flat_pos(x, y)
+    _grain(t, pos, 0.0006, 0.12, 131)
+    _tone(t, pos, 0.02, 0.04, 132)
+    rub = np.clip(_noise(x, y, 0.012, 133) * 0.7 + 0.6, 0.0, 1.0)
+    corners = lines(t.t, 1.0 / 6.0, 0.012, 0.008) * rub
+    gy, gx = np.gradient(slots)
+    lips = np.clip(np.hypot(gx, gy) * 2.0, 0.0, 1.0) * (1.0 - slots)
+    worn = np.clip(corners + lips * 0.8, 0.0, 1.0)
+    t.shade(1.0 + 0.2 * worn)
+    r = t.view("rough")
+    r[:] = np.clip(r - 0.15 * worn, 0.0, 1.0)
     t.paint(slots, 0x0a0b0b, 0.9, height=-1.0)
     t.shade(1.0 - 0.4 * slots)
 
@@ -254,6 +610,20 @@ def _rail(t) -> None:
 def _shell_high(t) -> None:
     """The high cut's shell (s round it from the back, t the elevation -25..90 degrees): vents with recessed rims."""
     t.fill(HIGH_SHELL, 0.5)
+    # A sprayed coat: its fine peel, never quite one tone; the crown and the brow rubbed smoother and paler; a
+    # scatter of scratches from branches and doorways.
+    pos, el = _shell_pos(t)
+    _grain(t, pos, 0.0012, 0.08, 141)
+    _tone(t, pos, 0.03, 0.03, 142)
+    _tone(t, pos, 0.009, 0.02, 143)
+    exposed = np.clip((el - 45.0) / 30.0, 0.0, 1.0)
+    rub = exposed * np.clip(_noise(pos[0], pos[1], 0.018, 144, 0.0, pos[2]) * 1.4 + 0.2, 0.0, 1.0)
+    t.shade(1.0 + 0.09 * rub)
+    r = t.view("rough")
+    r[:] = np.clip(r - 0.12 * rub, 0.0, 1.0)
+    _scuffs(t, pos, _marks_on_ball(70, SHELL_R, (5.0, 82.0), (0.006, 0.032), (0.00035, 0.0008), 145), 0.2, 0.2)
+    dusty = np.clip((30.0 - el) / 40.0, 0.0, 1.0) * np.clip(_noise(pos[0], pos[1], 0.025, 146, 0.0, pos[2]) + 0.5, 0, 1)
+    t.paint(dusty * 0.14, DUST, 0.75)
     # Oval vents with raised rims (photos 1-5): two over the brow, two above the rails behind the side panels, two
     # at the back; clear of the loop panels.
     # The front pair smaller and flatter (photo 122704).
@@ -263,6 +633,8 @@ def _shell_high(t) -> None:
         tt = (el + 25.0) / 115.0
         rim = soft_disc(t.s, t.t, s, tt, r, 0.004, aspect=aspect)
         hole = soft_disc(t.s, t.t, s, tt, r - 0.009, 0.003, aspect=aspect)
+        foot = soft_disc(t.s, t.t, s, tt, r + 0.012, 0.01, aspect=aspect) - rim
+        t.paint(np.clip(foot, 0.0, 1.0) * 0.2, DUST, 0.8)  # dust gathers round a vent's raised rim
         t.paint(rim - hole, 0x5c5b58, add_height=2.0)
         t.paint(hole, 0x1a1b1c, 0.9, add_height=-3.0)
     top = soft_box(t.s, t.t, -1, 2, 0.6, 1.1, 0.25)
@@ -280,6 +652,18 @@ def _shell_full(t) -> None:
     t.shade(1.0 - 0.15 * seam)
     hem = soft_box(t.s, t.t, -1, 2, -1, 0.07, 0.01)
     t.shade(1.0 - 0.12 * hem)
+    # A cloth cover fades on top, holds dust beside its seams and along its hem, and scuffs pale where it rubs.
+    pos, el = _shell_pos(t)
+    _tone(t, pos, 0.05, 0.10, 151)
+    _tone(t, pos, 0.013, 0.045, 152)
+    t.shade(1.0 + 0.15 * np.clip((el - 35.0) / 40.0, 0.0, 1.0))
+    patchy = np.clip(_noise(pos[0], pos[1], 0.02, 153, 0.0, pos[2]) + 0.7, 0.0, 1.0)
+    beside = lines(t.s, 0.25, 0.02, 0.016) * (1.0 - seam)
+    t.paint(beside * 0.34 * patchy, DUST)
+    low = np.clip((12.0 - el) / 30.0, 0.0, 1.0)
+    t.paint(low * 0.30 * patchy, DUST)
+    scuff = np.clip(_noise(pos[0], pos[1], 0.011, 154, 0.0, pos[2]) * 2.2 - 1.2, 0.0, 1.0) * np.clip((el - 10.0) / 30.0, 0, 1)
+    t.shade(1.0 + 0.20 * scuff)
 
 
 def _shroud(t) -> None:
@@ -287,6 +671,12 @@ def _shroud(t) -> None:
     edge = 1.0 - soft_box(t.s, t.t, 0.05, 0.95, 0.08, 0.92, 0.03)
     t.paint(edge, add_height=-1.0)
     t.shade(1.0 - 0.15 * edge)
+    x = t.s * 0.05
+    y = t.t * 0.05
+    _grain(t, _flat_pos(x, y), 0.0006, 0.12, 161)
+    _tone(t, _flat_pos(x, y), 0.012, 0.04, 162)
+    lip = np.clip(soft_box(t.s, t.t, 0.07, 0.93, 0.10, 0.90, 0.02) - soft_box(t.s, t.t, 0.13, 0.87, 0.16, 0.84, 0.02), 0, 1)
+    t.shade(1.0 + 0.14 * lip * np.clip(_noise(x, y, 0.008, 163) + 0.6, 0.0, 1.0))
 
 
 def _strap(t) -> None:
@@ -296,6 +686,8 @@ def _strap(t) -> None:
     x = t.s * 0.3
     twill = lines(x + y, 0.0012, 0.0004, 0.0002)
     t.paint(twill, add_height=0.4)
+    t.shade(1.0 - 0.07 * twill)
+    _tone(t, _flat_pos(x, y), 0.02, 0.05, 171)
     for at in (0.0022, 0.0178):
         st = dashes(x, y - at, 1.0, 0.003, 0.0015, 0.0006, 0.0002)
         t.paint(st * 0.6, 0x3d3e40, add_height=0.5)
@@ -308,4 +700,6 @@ def _goggle_strap(t) -> None:
     edge = 1.0 - soft_box(t.s, t.t, -1, 2, 0.1, 0.9, 0.02)
     t.paint(edge, 0x2e3032, 0.7)
     ribs = lines(t.t * 0.036, 0.0015, 0.0006, 0.0002)
-    t.paint(ribs, add_height=0.4)
+    t.paint(ribs, add_height=0.6)
+    t.shade(1.0 - 0.08 * ribs)
+    _tone(t, _flat_pos(t.s * 0.5, t.t * 0.036), 0.03, 0.05, 181)
