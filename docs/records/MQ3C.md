@@ -82,7 +82,7 @@ moved here from `head_textures.py`), `head_textures.py`, `headwear.py`, `splice_
 its own images, its occlusion, the lens's tint), `game/config/figure_config.gd` (`face_offsets`),
 `tools/model_studio.gd` (a shot can name a face look, `#hex@2`, and turn the model, `yaw,pitch,turn`),
 `assets/models/characters/human.glb` and the extracted `human_face_*`, `human_headwear_*`,
-`tests/unit/test_face_map.gd` (new), `tests/unit/test_mq3c_qa.gd`, `test_mq3c_qa2.gd` (QA), `tests/unit/test_figure_body.gd` (counts).
+`tests/unit/test_face_map.gd` (new), `tests/unit/test_mq3c_qa.gd`, `test_mq3c_qa2.gd`, `test_mq3c_qa3.gd` (QA), `tests/unit/test_figure_body.gd` (counts).
 
 Pictures (before from main's file, after from this one, same camera): `art/model-quality/mq3c/` in the project
 files, `mq3c-1-eyes-front.jpg` to `mq3c-5-side-and-far-levels.jpg`.
@@ -134,6 +134,10 @@ files, `mq3c-1-eyes-front.jpg` to `mq3c-5-side-and-far-levels.jpg`.
   redone under the hem.
 - The brows' thickness is 0.25 of the eye's width against the photo's 0.27: on the two helmets the goggles' frame
   ends the room above them.
+- QA, attempt 3: with the eyes lower, the skin that runs on under the lower hem lies within its reach of the
+  eyes; on the cap it is 0.23 mm under the hem that lies on it (as built since FA1, not pierced). A shimmer there
+  at range is possible in theory; it is on the play checks. `test_mq3c_qa3.gd` holds the clearances (the lens at
+  least 13.6 mm from the skin, no skin through the knit).
 - In profile the eye lies under a ridge of 3 mm, not a real brow's 8 to 10: more would stand into the eyewear's
   room, and a deeper socket steepens the step under the eye.
 
