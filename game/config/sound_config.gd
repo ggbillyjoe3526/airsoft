@@ -81,8 +81,9 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## (plant_handle_gain, heard out to prop_reach), the code keyed in and the defusal kit at work (plant_work_gain, out to
 ## plant_work_reach m: BotConfig.plant_heard, the furthest a defender bot hears the keys), the armed tone, the fuse's
 ## beep and a defuse's power-down (plant_beep_gain, out to plant_beep_reach m) and its pop and buzzer as it goes off
-## (plant_went_off_gain, out to plant_went_off_reach m: the whole field).
-@export var plant_handle_gain: float = 0.7
+## (plant_went_off_gain, out to plant_went_off_reach m: the whole field). Taken up and put down play 6 dB under their
+## first level (owner, 2026-11-13: his recorded set-down "quieter").
+@export var plant_handle_gain: float = 0.35
 @export var plant_work_gain: float = 0.6
 @export var plant_work_reach: float = 20.0
 @export var plant_beep_gain: float = 0.9
