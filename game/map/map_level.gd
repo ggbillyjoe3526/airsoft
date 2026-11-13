@@ -227,7 +227,11 @@ func _build_piece() -> void:
 func _add_meshes() -> void:
 	_mesh = _make_mesh()
 	add_child(_mesh)
-	var glass := _glass_mesh(map, _style)
+	# a train's window glass is its models' (SM1, TrainView) when they all load
+	var trains: Array[TrainDressing] = []
+	if _station != null and _station.trains != null and _station.trains.loads():
+		trains = map.trains
+	var glass := _glass_mesh(map, _style, trains)
 	if glass != null:
 		_glass = MeshInstance3D.new()
 		_glass.name = "Glass"
@@ -597,6 +601,7 @@ func _make_mesh() -> MeshInstance3D:
 	# A station draws its own photo sets, unbaked (MT3: lit by its lamps; Subway names no bake).
 	if _station != null:
 		mi.name = "Station"
+		mi.layers = StationSurface.LAYER
 		mi.material_override = _station_material
 		mi.mesh = StationSurface.mesh(map, _style, _station, _props)
 		_baked = false
@@ -726,14 +731,14 @@ func _level_ray(ray_name: String) -> RayCast3D:
 
 
 ## The see-through blocks (MapStyle.clear_kinds: window glass, ST1) as one mesh, each in its colour at its kind's
-## opacity; null on a map with none. They stay out of the greybox (a bake still draws them solid: no baked map has
-## glass).
-static func _glass_mesh(m: MapData, style: MapStyle) -> ArrayMesh:
+## opacity, but those `trains` hold (their models draw the glass); null on a map with none. They stay out of the
+## greybox (a bake still draws them solid: no baked map has glass).
+static func _glass_mesh(m: MapData, style: MapStyle, trains: Array[TrainDressing] = []) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var any := false
 	for b in m.blocks:
-		if not style.is_clear(b.kind):
+		if not style.is_clear(b.kind) or StationSurface.held(trains, b):
 			continue
 		any = true
 		var c := style.block_colour(b)
