@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-13 | 1 | Fable 5.2 (model quality thread) | pass (6,442 tests) | Retry 7/8 (near miss, judgment) | – |
-| 2026-11-13 | 2 | Fable 5.2 (model quality thread) | pending | pending | check 1, four surfaces: the boots' creases ran down the sides as streaks and the suede was blotchy; the ear cups read as turned rings; the boonie's sweat mark sat 3 cm above the band as a blotch |
+| 2026-11-13 | 2 | Fable 5.2 (model quality thread) | pass (6,443 tests) | Retry 7/8 (near miss, judgment) | check 1, four surfaces: the boots' creases ran down the sides as streaks and the suede was blotchy; the ear cups read as turned rings; the boonie's sweat mark sat 3 cm above the band as a blotch |
+| 2026-11-13 | 3 | Fable 5.2 (model quality thread) | pending | pending | check 1, three surfaces (the boots passed): the boonie's weave met at the crown's middle as a starburst; faint rings still showed round the ear cups; the boonie's sweat line could not be seen |
 
 ## What changed
 
@@ -25,20 +26,22 @@ is now drawn used, from where a pixel lies on the part in metres:
 | High-cut helmet's shell | even grey paint | a fine peel in the paint, the crown rubbed, some seventy scratches, dust low down and round the vents' rims |
 | Rails and shroud | flat dark polymer | a moulded grain, corners and slot lips worn paler |
 | Full-cut helmet's cover | even coyote ripstop | faded on top and in broad patches, dust beside its seams and along the hem, pale scuffs |
-| Cap and boonie | even ripstop with stitching | unevenly faded cloth, paler on top, the brims' edges worn pale; a sweat mark above the cap's hem, a thin sweat-dark line just above the boonie's band; the boonie's weave at one scale from the band over the shoulder to the top |
+| Cap and boonie | even ripstop with stitching | unevenly faded cloth, paler on top, the brims' edges worn pale; a sweat mark above the cap's hem, a sweat-dark band 15 mm deep above the boonie's hat band; the boonie's weave at one scale up its wall, and its top a flat panel with a square weave and a seam round it |
 | Boonie's band | a flat team colour | woven ribs and weft with relief |
 | Loop patches (team and plain) | a faint speckle | a deeper pile, matted in patches, a little lint |
 | Balaclava and shemagh | even knit and weave | uneven dye, pilling |
 | Mesh mask | evenly painted wire | paint chipped to bare steel at crossings here and there and in small round patches where BBs struck |
-| Ear cups (both kinds) | one flat colour | moulded polymer on tiles of their own: the mould's shallow orange peel, the joint to the back plate, the shoulder rubbed in broken patches, a few scratches on the face |
+| Ear cups (both kinds) | one flat colour | moulded polymer on tiles of their own: an even colour, the mould's shallow orange peel in the relief and the sheen, the joint to the back plate, the shoulder rubbed smoother in patches, a few scratches on the face |
 | Ear cushions | one flat colour | soft leatherette with fine creases, a welded seam, a duller outer edge |
 | Goggles' frame | one flat colour | matte rubber with a grain, its lip rubbed lighter, dust toward the face |
 | Mesh mask's binding | one flat olive | twill tape folded over the mesh's edge with a row of stitches, its folds rubbed paler |
 | Headset's band | one flat grey | padded leatherette quilted every 30 mm, a stitch row inside each edge, the pads' crowns rubbed |
 
-The last five were the largest parts still drawn from flat swatches. They draw from six new tiles (`cup_defender`,
-`cup_headset`, `cushion`, `goggle_frame`, `binding`, `headband`: the two strips are short tiles laid back and forth
-along the part, so a 12 cm tile covers the whole binding with no seam). What is left on swatches is small and hard
+The last five were the largest parts still drawn from flat swatches. They draw from eight new tiles (`cup_defender`
+and `cup_headset` for the cups' side walls, `cup_face_defender` and `cup_face_headset` for their shoulders and faces
+laid flat, `cushion`, `goggle_frame`, `binding`, `headband`: the two strips are short tiles laid back and forth
+along the part, so a 12 cm tile covers the whole binding with no seam). The boonie's top panel has a flat tile of
+its own too (`boonie_top`), cut with the cups' faces from the upper half of the crown's old tile. What is left on swatches is small and hard
 (buckles, screws, the microphone, the rims' rubber trim: at most 15 % of a head's area that shows) and the inside of a
 helmet's shell, which nothing sees.
 
@@ -75,9 +78,8 @@ darker than the flat colour it was, which is the ribs' valleys, the grime and th
   It is small on screen behind goggles or glasses; the critic's and the owner's notes on it are in FA1.
 - **No mesh changed**: the heads' triangles (the largest 8,992 / 3,192 / 896), the body's (33,458), every UV island
   of the body and every weight are as they were. On the heads only UVs changed: the five moved parts', and the
-  boonie crown's (its rings laid by their distance over the cloth). The new seams split 385 vertices over the head
-  meshes (105,570 in the file, 105,185 before), with no triangle
-  added. `tests/unit/test_figure_body.gd`'s counts hold.
+  boonie crown's (its wall's rings laid by their distance over the cloth, its top laid flat). The new seams split
+  339 vertices over the head meshes (105,524 in the file, 105,185 before), with no triangle added. `tests/unit/test_figure_body.gd`'s counts hold.
 - **No game code changed.** The band's material keeps its name; `FigureModels.team_material` copies it and sets its
   colour as before, and the copy keeps the map (a test holds this).
 - **Lower detail levels** draw the same maps, so the body's far levels show the band's and boots' paint as far as a
@@ -86,7 +88,7 @@ darker than the flat colour it was, which is the ribs' valleys, the grime and th
   `python3 -I tools/blender/figures/body_surfaces.py` (8 s). The second runs once on a freshly built body: it tells a
   painted file by the arm band's colour map, which only it adds, and stops. Both builds give the same file byte for
   byte on a second run from main's file.
-- **Files:** `human.glb` 14.8 MB (was 12.5). The heads' three maps are now stored lossless (1.09, 1.79 and 0.08 MB;
+- **Files:** `human.glb` 14.8 MB (was 12.5). The heads' three maps are now stored lossless (1.07, 1.79 and 0.11 MB;
   0.20, 0.69 and 0.01 before): lossy colour smeared one tile's edge into the next, which showed as a line where a
   tile that goes round a part meets itself. The body's maps go back as lossy WebP at quality 95 (0.64, 0.92 and
   0.15 MB; 0.57, 0.86 and 0.09): the cloth round the painted parts differs from before by 0.5 of 255 in colour and
@@ -102,8 +104,9 @@ darker than the flat colour it was, which is the ribs' valleys, the grime and th
   `tools/blender/figures/README.md`, `docs/PLAYTEST.md` › Headwear, arm bands and boots up close (MQ3B).
 - **Pictures:** `art/model-quality/mq3b/` in the project files, the bot figure in the studio, before and after:
   the high-cut helmet (`mq3b-1`), the full-cut helmet and the mesh mask (`mq3b-2`), the cap and the boonie
-  (`mq3b-3`), from the front (`mq3b-4`), the arm band (`mq3b-5`), the boots from the side, the toe and above
-  (`mq3b-6`), the whole figure (`mq3b-7`), the ear cups up close (`mq3b-8`).
+  (the boonie also close from the side and from above, `mq3b-3`), from the front (`mq3b-4`), the arm band
+  (`mq3b-5`), the boots from the side, the toe and above (`mq3b-6`), the whole figure (`mq3b-7`), the ear cups up
+  close (`mq3b-8`).
 
 ## Decisions
 
@@ -125,17 +128,25 @@ darker than the flat colour it was, which is the ribs' valleys, the grime and th
   in turn: a tile's pattern not meeting itself where its ends meet (each pixel's place is now taken as the UVs
   reach it), lossy colour bleeding in from the next tile, and the slope across a tile's edge taken from the next
   tile's heights (each tile's slopes now come from its own heights).
-- **Nothing finer than its tile holds** (attempt 2): an ear cup's tile holds about 1 mm a pixel from the cushion to
-  the middle of its face, so a 0.7 mm pebble grain came out as rings round the cup. The cup is drawn as satin
-  polymer with a 3.6 mm orange peel, and its rubbed shoulder as broken patches, never a ring.
+- **A part's middle is laid flat, never unrolled to a point** (attempts 2 and 3): unrolled to its middle, a tile
+  is far finer round the part than across it. On the ear cups a 0.7 mm grain came out as rings, and so did a 3.6 mm
+  one, because a height's slopes then show across the rings and not along them, and the game's block compression
+  bands a faint tone the same way. On the boonie the weave's lines met at the middle as a starburst. So a cup's
+  shoulder and face lie flat on a square tile (0.75 mm a pixel every way), its side wall alone is unrolled, and
+  both are painted from a pixel's place on the cup, so they meet without a mark; the boonie's top panel lies flat on
+  its own tile inside the seam ring.
+- **An ear cup's colour is even** (attempt 3): in the block-compressed map a 3 % tone on so smooth a part came out
+  as squares, and rubbed patches 15 % lighter as stains. A moulded cup shows wear in its sheen: the orange peel is
+  relief and roughness, a rub is smoother, only the joint and the scratches change the colour.
 - **The suede's colour stays quiet** (attempt 2): the imported maps are block-compressed, and fine low-contrast
   colour noise at 1.3 mm a pixel came out as blotches and blocks. The nap is in broad soft patches of colour and in
   the roughness; the creases lie across the top of the vamp only (within 3 cm of the boot's middle line), as a
   boot's flex creases do.
 - **The boonie crown's rings are laid by their distance over the cloth** (attempt 2): its tile's rows were spaced by
   ring, so the weave tightened up the wall, the top's last rings ran off the tile's edge as a smear, and the sweat
-  mark meant for the band's edge landed 3 cm above it. Now one scale from the band to the middle of the top, at
-  every level; the sweat line is 11 mm above the band's top edge and 2 mm of wander.
+  mark meant for the band's edge landed 3 cm above it. Now one scale from the band to the seam round the top, at
+  every level. The sweat mark is a band from the hat band's top edge to 15 mm above it, a quarter darker, with
+  2 mm of wander (attempt 3: at 11 mm and 15 % it could not be seen).
 - **Cloth hats are worn, not ruined** (default): the fade, sweat mark and frayed edges are strong enough to see in
   the close pictures and no stronger; these are a weekend player's hats.
 - **The studio's streaky lit patch on the back of the high cut** is the lamp on a faceted shell (the colour, normal

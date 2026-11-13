@@ -31,6 +31,11 @@ count changed.
   from `_st(t)` (a pixel's place as the UVs reach it) with a `wrap`. **Strips** swept along a path (the mask's
   binding, the headset's band) draw from a short tile laid back and forth (`strip_s`), so the tile's two ends never
   meet and any length is covered. A part moved off a swatch onto a tile changes UVs only, never the triangle counts.
+  A part's middle is laid flat on a square tile, never unrolled to a point (the ear cups' faces `cup_face_*`, the
+  boonie's top `boonie_top`): unrolled, the tile is far finer round the part than across it, and a grain or a weave
+  comes out as rings or a starburst. Paint both tiles from a pixel's place on the part (`_cup_place`) and they
+  meet without a mark. A smooth even part keeps an even colour: the game's block compression turns a faint tone
+  into squares.
 - **Team marks:** every surface on `TeamHeadwear` is tinted in game (the high cut's back patch, the full cut's band,
   the cap's front patch, the boonie's band).
 - **Face looks:** `Face` surfaces share the atlas; four looks (skin, brows, eyes) are painted in cells above the

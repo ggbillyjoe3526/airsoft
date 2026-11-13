@@ -1618,8 +1618,9 @@ four heads differ.
 - [ ] **Helmets.** The grey high cut's paint is scuffed and scratched with dust low down, its rails and ear cups look
   like moulded plastic; the coyote full cut's cover is faded on top with dust by its seams. No line runs down the
   back of either.
-- [ ] **Cap and boonie.** The cloth is unevenly faded, with a thin sweat-dark line just above the boonie's band; the
-  headset's band over the cap is padded and stitched. They look worn, not dirty or ruined.
+- [ ] **Cap and boonie.** The cloth is unevenly faded, with a sweat-dark band just above the boonie's hat band; the
+  headset's band over the cap is padded and stitched. They look worn, not dirty or ruined. From above (a crouched
+  or prone bot) the boonie's top is a flat panel with a square weave, no star or pinch at its middle.
 - [ ] **Ear cups** (the helmets' ear defenders, the cap's headset) read as moulded plastic from a metre away, with
   no rings or swirls on them.
 - [ ] **Mesh mask.** Its paint is chipped to bare steel in places and its edge is bound in woven tape with a stitch

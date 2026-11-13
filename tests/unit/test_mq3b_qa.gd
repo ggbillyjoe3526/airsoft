@@ -14,11 +14,14 @@ const HEADWEAR_TRIANGLES := {
 	"Head_Boonie": 7276, "Head_Boonie_LOD1": 2412, "Head_Boonie_LOD2": 780,
 }
 ## The strip and block tiles (px from the atlas's left and bottom), as in head_textures.py.
-## The boonie crown tile in image pixels (x from the left, y from the top).
-const CROWN_TILE := Rect2(1024, 1024, 512, 256)
+## The boonie crown's tile (its wall and shoulder, unrolled) and its top panel's (laid flat) in image pixels (x from
+## the left, y from the top).
+const CROWN_TILE := Rect2(1024, 1152, 512, 128)
+const TOP_TILE := Rect2(1024, 1024, 128, 128)
 const TILES: Array[Rect2] = [
 	Rect2(0, 64, 512, 64), Rect2(0, 128, 512, 64), Rect2(0, 192, 256, 64), Rect2(256, 192, 256, 64),
 	Rect2(1024, 384, 512, 64), Rect2(1024, 448, 512, 64),
+	Rect2(1024, 896, 128, 128), Rect2(1152, 896, 128, 128), Rect2(1280, 896, 128, 128), Rect2(1024, 768, 512, 128),
 ]
 ## The arm band under the team colour: no sampled pixel is darker than this, the mean at least the other.
 const BAND_FLOOR := 0.3
@@ -181,8 +184,11 @@ func test_the_boonie_crown_climbs_its_tile_ring_by_ring_as_the_cloth_rises() -> 
 		var uv := arrays[Mesh.ARRAY_TEX_UV] as PackedVector2Array
 		var vertex := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
 		var heights := {}
+		var on_top := 0
 		for i in uv.size():
 			var px := uv[i] * float(MAP)
+			if TOP_TILE.has_point(px):
+				on_top += 1
 			if px.x < CROWN_TILE.position.x or px.x > CROWN_TILE.end.x or px.y < CROWN_TILE.position.y or px.y > CROWN_TILE.end.y:
 				continue
 			var t := snappedf((CROWN_TILE.end.y - px.y) / CROWN_TILE.size.y, 0.0005)
@@ -191,7 +197,8 @@ func test_the_boonie_crown_climbs_its_tile_ring_by_ring_as_the_cloth_rises() -> 
 			(heights[t] as Array).append(vertex[i].y)
 		var rows: Array = heights.keys()
 		rows.sort()
-		assert_gte(rows.size(), 6, "Body%s: the crown's rings" % level)
+		assert_gte(rows.size(), 4, "Body%s: the crown's rings" % level)
+		assert_gt(on_top, 8, "%s: the top panel draws from its flat tile" % level)
 		var last := -INF
 		for t: float in rows:
 			var mean := 0.0
@@ -200,4 +207,4 @@ func test_the_boonie_crown_climbs_its_tile_ring_by_ring_as_the_cloth_rises() -> 
 			mean /= float((heights[t] as Array).size())
 			assert_gte(mean, last - 0.0005, "%s: t %.3f sits no lower than the ring below" % [level, t])
 			last = mean
-		assert_gt(rows[rows.size() - 1], 0.95, "%s: the top fan reaches the tile's top" % level)
+		assert_gt(rows[rows.size() - 1], 0.95, "%s: the shoulder reaches the tile's top" % level)

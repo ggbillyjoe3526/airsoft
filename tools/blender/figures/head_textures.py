@@ -51,14 +51,26 @@ SHELL_T = (-25.0, 115.0)   # degrees: a shell tile's t is the elevation from the
 ## each ring headwear.py builds, the last the centre. A cup tile's t is the way along this line, s the way round.
 CUP_PROFILE = ((0.017, 0.044), (0.021, 0.047), (0.034, 0.045), (0.042, 0.037), (0.046, 0.024), (0.047, 0.0))
 CUP_SQUASH = 0.8           # a cup is this much narrower front to back than it is tall
-CUP_PEEL = (0.0036, 0.18)  # m across, pixels deep: the moulded shell's orange peel
-CUP_RUB = (0.011, 0.11, 0.07)   # m across, share lighter, roughness lost: the shoulder's rubbed patches
+## A cup's side wall, from the cushion to ring CUP_SPLIT, is unrolled into a strip; from that ring inward its shoulder
+## and face lie flat on a square tile CUP_FACE_SPAN metres across, so what is drawn there has one scale every way
+## (unrolled to its middle, a tile is far finer round the cup than across it, and any grain comes out as rings).
+CUP_SPLIT = 2
+CUP_FACE_SPAN = 0.094
+CUP_PEEL = (0.0030, 0.07, 0.22)  # m across, roughness either way, pixels deep: the moulded shell's orange peel
+CUP_RUB = (0.011, 0.16, 0.035)   # m across, roughness lost, m across the handled side: the shoulder's rubbed
+#                            patches
+CUP_JOINT = 0.0008         # m, half the width of the joint between a cup and its back plate
 ## An ear cushion's rings, the same way (its tile's t runs across them).
-## The boonie crown's tile runs this many metres over the cloth, from the band's foot up the wall, over the shoulder
-## and to the middle of the top.
-BOONIE_RUN = 0.141
-BOONIE_TOP_SEAM = 0.071    # m over the cloth: the seam where the wall meets the top panel
-BOONIE_SWEAT = (0.033, 0.0018, 0.005)   # m: the sweat mark's edge above the band's foot, its wander, its soft edge
+## The boonie crown's tile runs this many metres over the cloth, from the band's foot up the wall and over the
+## shoulder to the seam round the top panel (the ring at BOONIE_TOP_F of the top's radius). The top panel lies flat on
+## a square tile of its own, BOONIE_TOP_SPAN metres across.
+BOONIE_RUN = 0.0764
+BOONIE_TOP_F = 0.85
+BOONIE_TOP_SPAN = 0.150
+BOONIE_TOP_SEAM = 0.0735   # m over the cloth: the stitched seam just under the top panel's edge
+BOONIE_SUN = 0.16          # share paler: the top of the hat, where the sun sits
+BOONIE_SWEAT = (0.036, 0.0018, 0.006, 0.24, 0.05)   # m: the sweat mark's edge above the band's foot, its wander,
+#                            its soft edge; the share darker under it, the share paler along its salt line
 CUSHION_PROFILE = ((0.0, 0.040), (0.004, 0.047), (0.012, 0.049), (0.017, 0.046))
 ## A strip swept along a path (the mesh mask's binding, the headset's band) draws from a short tile: s runs along the
 ## path and turns back every RUN metres (headwear.py lays it back and forth, so the strip has no seam), t goes round
@@ -84,8 +96,10 @@ def paint() -> Atlas:
     for name, (colour, rough) in SWATCHES.items():
         a.swatch(name, colour, rough)
     assert len(a.swatches) * a.SWATCH * a.SWATCH <= a.SWATCH_AREA * SWATCH_ROWS, "the swatches reach the cups' tiles"
-    _cup(a.tile("cup_defender", 0, 64, 512, 64), DEFENDER, 0.55, 11)
-    _cup(a.tile("cup_headset", 0, 128, 512, 64), HEADSET, 0.62, 12)
+    _cup(a.tile("cup_defender", 0, 64, 512, 64), DEFENDER, 0.55, 11, False)
+    _cup(a.tile("cup_headset", 0, 128, 512, 64), HEADSET, 0.62, 12, False)
+    _cup(a.tile("cup_face_defender", 1152, 896, 128, 128), DEFENDER, 0.55, 11, True)
+    _cup(a.tile("cup_face_headset", 1280, 896, 128, 128), HEADSET, 0.62, 12, True)
     _binding(a.tile("binding", 0, 192, 256, 64))
     _headband(a.tile("headband", 256, 192, 256, 64))
     _goggle_frame(a.tile("goggle_frame", 1024, 384, 512, 64))
@@ -96,7 +110,8 @@ def paint() -> Atlas:
     _mesh(a.tile("mesh", 1536, 0, 512, 512))
     _shemagh(a.tile("shemagh", 0, 512, 1024, 512))
     _brim(a.tile("brim", 1024, 512, 1024, 256))
-    _boonie_crown(a.tile("boonie_crown", 1024, 768, 512, 256))
+    _boonie_crown(a.tile("boonie_crown", 1024, 768, 512, 128))
+    _boonie_top(a.tile("boonie_top", 1024, 896, 128, 128))
     _cap_crown(a.tile("cap_crown", 1536, 768, 512, 256))
     _cap_brim(a.tile("cap_brim", 0, 1024, 512, 256))
     _loop(a.tile("loop", 512, 1024, 512, 256), LOOP_DARK, 0x1f2021)
@@ -245,7 +260,7 @@ def _tide(t, top: float, wrap: float, seed: int, wander: float = 0.045, soft: fl
 
 def boonie_t(run: float) -> float:
     """The t in the boonie crown's tile of a place `run` metres over the cloth from the band's foot (headwear.py lays
-    the crown's rings with it)."""
+    the wall's and the shoulder's rings with it)."""
     return min(run / BOONIE_RUN, 1.0)
 
 
@@ -269,26 +284,54 @@ def ring_t(profile: tuple, ring: int) -> float:
 
 # --------------------------------------------------------------------------------------------------- the tiles
 
-def _cup(t, colour: int, rough: float, seed: int) -> None:
-    """An ear defender's moulded cup (s round it, t from its cushion out to the middle of its face): satin polymer
-    with the mould's shallow orange peel, the joint to its back plate, its shoulder rubbed lighter in broken patches,
-    a few scratches on its face."""
+def _cup_place(t, face: bool) -> tuple:
+    """Each pixel's place on an ear cup, in its side wall's strip or on its face's flat tile: (m out from the head,
+    m forward, m up), its distance in metres along the cup's profile from the cushion, and each ring's distance."""
+    steps = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(CUP_PROFILE, CUP_PROFILE[1:])]
+    along = np.concatenate([[0.0], np.cumsum(steps)])
+    outs = [q[0] for q in CUP_PROFILE]
+    radii = [q[1] for q in CUP_PROFILE]
+    s, tt = _st(t)
+    if face:
+        forward = (s - 0.5) * CUP_FACE_SPAN
+        up = (tt - 0.5) * CUP_FACE_SPAN
+        r = np.hypot(forward / CUP_SQUASH, up)
+        # From the split ring inward a ring's radius falls all the way to the middle.
+        path = np.interp(r, radii[:CUP_SPLIT - 1:-1], along[:CUP_SPLIT - 1:-1])
+    else:
+        path = tt * along[CUP_SPLIT]
+        r = np.interp(path, along, radii)
+        forward = r * CUP_SQUASH * np.cos(s * math.tau)
+        up = r * np.sin(s * math.tau)
+    return (np.interp(path, along, outs), forward, up), path, along
+
+
+def _cup(t, colour: int, rough: float, seed: int, face: bool) -> None:
+    """An ear defender's moulded cup, its side wall's strip or its face's flat tile: satin polymer with the mould's
+    shallow orange peel, the joint to its back plate, its shoulder rubbed lighter in broken patches, a few scratches
+    on its face. Everything is drawn from a pixel's place on the cup, so the two tiles meet without a mark."""
     t.fill(colour, rough)
-    pos, at = _along(CUP_PROFILE, t, CUP_SQUASH)
-    # The tile holds about a millimetre a pixel from the cushion to the face's middle: a finer grain than this
-    # turns to rings round the cup.
-    _grain(t, pos, CUP_PEEL[0], CUP_PEEL[1], seed)
-    _tone(t, pos, 0.016, 0.03, seed + 1)
-    joint = np.clip(1.0 - np.abs(t.t - at[1]) / 0.012, 0.0, 1.0)
+    pos, path, along = _cup_place(t, face)
+    peel = _noise(pos[0], pos[1], CUP_PEEL[0], seed, 0.0, pos[2])
+    r = t.view("rough")
+    r[:] = np.clip(r + CUP_PEEL[1] * peel, 0.0, 1.0)
+    if face:
+        # Only the flat tile has one scale every way: the strip is finer across the wall than round it.
+        t.view("height")[:] += CUP_PEEL[2] * peel
+    # No faint tone in the colour: the game's block-compressed map turns a near-even colour's drift into squares
+    # and stains, which a cup this smooth shows. Its colour changes only at the joint and where it is scratched.
+    joint = np.clip(1.0 - np.abs(path - along[1]) / CUP_JOINT, 0.0, 1.0)
     t.paint(joint, add_height=-1.2)
     t.shade(1.0 - 0.22 * joint)
-    # Rubbed where it is set down and handled: the shoulder, in patches, never a ring.
-    shoulder = np.clip(1.0 - np.abs(t.t - 0.5 * (at[2] + at[3])) / (0.75 * (at[3] - at[2])), 0.0, 1.0)
-    patch = np.clip(_noise(pos[0], pos[1], CUP_RUB[0], seed + 2, 0.0, pos[2]) * 1.6 - 0.15, 0.0, 1.0)
-    rub = shoulder * shoulder * (3.0 - 2.0 * shoulder) * patch
-    t.shade(1.0 + CUP_RUB[1] * rub)
-    r = t.view("rough")
-    r[:] = np.clip(r - CUP_RUB[2] * rub, 0.0, 1.0)
+    # Rubbed smoother where it is set down and handled: patches on the shoulder, on one side more than the other,
+    # fading into the face and the rim with no edge of their own. A rub shows in the sheen, not the colour.
+    window = np.sin(math.pi * np.clip((path - along[1]) / (along[4] - along[1]), 0.0, 1.0)) ** 2
+    side = np.clip(0.5 + 0.9 * _noise(pos[0], pos[1], CUP_RUB[2], seed + 3, 0.0, pos[2]), 0.0, 1.0)
+    patch = np.clip(_noise(pos[0], pos[1], CUP_RUB[0], seed + 2, 0.0, pos[2]) * 1.8 - 0.35, 0.0, 1.0)
+    rub = window * side * patch
+    r[:] = np.clip(r - CUP_RUB[1] * rub, 0.0, 1.0)
+    if not face:
+        return
     rng = np.random.default_rng(seed)
     marks = []
     for _ in range(5):
@@ -298,13 +341,7 @@ def _cup(t, colour: int, rough: float, seed: int) -> None:
         d = rng.uniform(0.0, math.pi)
         half = np.array((0.0, math.cos(d), math.sin(d))) * rng.uniform(0.003, 0.011)
         marks.append((tuple(c - half), tuple(c + half), rng.uniform(0.0004, 0.0008)))
-    face_only = (t.t > at[3]).astype(np.float32)
-    before = t.view("col").copy(), t.view("rough").copy(), t.view("height").copy()
     _scuffs(t, (np.full_like(pos[1], 0.045), pos[1], pos[2]), marks, 0.12, 0.15)
-    for name, was in zip(("col", "rough", "height"), before):
-        now = t.view(name)
-        keep = face_only[..., None] if now.ndim == 3 else face_only
-        now[:] = was + (now - was) * keep
 
 
 def _cushion(t) -> None:
@@ -508,9 +545,20 @@ def _boonie_crown(t) -> None:
     t.paint(top, add_height=-1.2)
     t.shade(1.0 - 0.15 * top)
     _worn_cloth(t, x, y, 81, 0.68)
-    # Paler toward the top, where the sun sits; a thin sweat-dark line just above the band.
-    t.shade(1.0 + 0.16 * np.clip((y - 0.045) / 0.05, 0.0, 1.0))
-    _tide(t, boonie_t(BOONIE_SWEAT[0]), 0.68, 83, boonie_t(BOONIE_SWEAT[1]), boonie_t(BOONIE_SWEAT[2]), 0.15, 0.04)
+    # Paler toward the top, where the sun sits; a sweat-dark band just above the hat band.
+    t.shade(1.0 + BOONIE_SUN * np.clip((y - 0.03) / 0.04, 0.0, 1.0))
+    _tide(t, boonie_t(BOONIE_SWEAT[0]), 0.68, 83, boonie_t(BOONIE_SWEAT[1]), boonie_t(BOONIE_SWEAT[2]),
+          BOONIE_SWEAT[3], BOONIE_SWEAT[4])
+
+
+def _boonie_top(t) -> None:
+    """The boonie's top panel, laid flat: the same ripstop, square, as sun-faded as the top of the wall."""
+    t.fill(BOONIE, 0.9)
+    x = (t.s - 0.5) * BOONIE_TOP_SPAN
+    y = (t.t - 0.5) * BOONIE_TOP_SPAN
+    _ripstop(t, x, y)
+    _worn_cloth(t, x, y, 85)
+    t.shade(1.0 + BOONIE_SUN)
 
 
 def _cap_crown(t) -> None:

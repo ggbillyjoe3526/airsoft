@@ -444,23 +444,33 @@ def ear_defenders(k: Kit, sh: Shell, cups: str, cushion: str, arm_to_rail: bool)
         def ring(dx: float, r: float, sy: float = 0.8, sz: float = 1.0) -> list:
             return [c + ax * dx + Vector((0.0, math.cos(TAU * i / seg) * r * sy, math.sin(TAU * i / seg) * r * sz))
                     for i in range(seg)]
-        # The cushion and the cup are unrolled into tiles of their own (s round them, t along their rings), so
-        # the leatherette's creases and the polymer's grain, joint and rubbed shoulder are drawn on them (MQ3B).
+        # The cushion and the cup's side wall are unrolled into tiles of their own (s round them, t along their
+        # rings) and the cup's shoulder and face are laid flat on a square one, so the leatherette's creases and the
+        # polymer's grain, joint and rubbed shoulder are drawn on them at one scale every way (MQ3B).
         pad_at = head_textures.CUSHION_PROFILE
         cup_at = head_textures.CUP_PROFILE
         pad_rings = (0, 1, 2, 3) if k.lv["straps"] else (0, 2)
         cup_rings = (0, 1, 2, 3, 4) if k.lv["straps"] else (0, 2, 4)
         pad_tile = k.tile("cushion")
         cup_tile = k.tile("cup_" + cups)
+        face_tile = k.tile("cup_face_" + cups)
+        split = head_textures.CUP_SPLIT
+        wall_rings = tuple(r for r in cup_rings if r <= split)
+        face_rings = tuple(r for r in cup_rings if r >= split)
         inner = p.grid([ring(*pad_at[r]) for r in pad_rings], GEAR,
                        lambda i, j: pad_tile.uv(i / seg, head_textures.ring_t(pad_at, pad_rings[j])), wrap=True)[0]
 
         def cup_uv(i: int, j: int):
-            return cup_tile.uv(i / seg, head_textures.ring_t(cup_at, cup_rings[j]))
-        idx = p.grid([ring(*cup_at[r]) for r in cup_rings], GEAR, cup_uv, wrap=True)
-        last = len(cup_rings) - 1
-        p.fan(idx[-1], c + ax * cup_at[-1][0], GEAR, lambda i: cup_uv(i, last),
-              lambda i: cup_tile.uv((i + 0.5) / seg, 1.0), flip=side < 0)
+            return cup_tile.uv(i / seg, head_textures.ring_t(cup_at[:split + 1], wall_rings[j]))
+
+        def face_uv(q: Vector):
+            return face_tile.uv(0.5 + (q.y - c.y) / head_textures.CUP_FACE_SPAN,
+                                0.5 + (q.z - c.z) / head_textures.CUP_FACE_SPAN)
+        p.grid([ring(*cup_at[r]) for r in wall_rings], GEAR, cup_uv, wrap=True)
+        face_rows = [ring(*cup_at[r]) for r in face_rings]
+        idx = p.grid(face_rows, GEAR, lambda i, j: face_uv(face_rows[j][i % seg]), wrap=True)
+        middle = c + ax * cup_at[-1][0]
+        p.fan(idx[-1], middle, GEAR, lambda i: face_uv(face_rows[-1][i % seg]), face_uv(middle), flip=side < 0)
         p.fan(inner, c + ax * 0.002, GEAR, lambda i: k.sw(cushion), k.sw(cushion), flip=side > 0)
         if k.lv["small"]:
             # The volume knobs on the cup's front, a battery door at its back (no logos).
@@ -805,6 +815,7 @@ def boonie(k: Kit) -> list:
     Returns [hat, band]."""
     p = Part("boonie")
     crown_t = k.tile("boonie_crown")
+    top_t = k.tile("boonie_top")
     brim_t = k.tile("brim")
     cols = k.cols()
     azs = [-math.pi + TAU * i / cols for i in range(cols)]
@@ -815,8 +826,10 @@ def boonie(k: Kit) -> list:
     heights = [0.0, 0.024, 0.042, 0.055, 0.0625] if k.lv["straps"] else [0.0, 0.04, 0.0625]
     shoulder = [(0.95, 0.0042), (0.85, 0.0075), (0.62, 0.0098), (0.35, 0.0106)] if k.lv["straps"] else \
         [(0.85, 0.0075), (0.45, 0.0104)]
-    # Each ring's place up the crown's tile is its distance over the cloth from the band, so the weave keeps one
-    # scale from the wall over the shoulder to the top, at every level.
+    # Each ring's place up the wall's tile is its distance over the cloth from the band, so the weave keeps one scale
+    # from the band over the shoulder, at every level. The top panel, from the seam ring inward, is laid flat on a
+    # tile of its own: a square weave with no pole at its middle.
+    seam = [f for f, _dz in shoulder].index(head_textures.BOONIE_TOP_F)
     top_r = sum(base_r(a) for a in azs) / cols * (1.0 - CROWN_TAPER)
     runs = list(heights)
     last = (1.0, 0.0)
@@ -847,10 +860,19 @@ def boonie(k: Kit) -> list:
             z = BOONIE_BAND_Z + heights[-1] + dz + 0.004 * math.cos(2 * a) - 0.003 * (1 - f) * abs(math.sin(a))
             row.append(Vector((math.sin(a) * r, -math.cos(a) * r, z)))
         top_rows.append(row)
-    idx2 = p.grid([crown_rows[-1]] + top_rows, GEAR,
-                  lambda i, j: uv_crown(i, len(heights) - 1 + j), wrap=True)
-    p.fan(idx2[-1], Vector((0, 0.004, BOONIE_BAND_Z + heights[-1] + 0.0112)), GEAR,
-          lambda i: uv_crown(i, len(runs) - 1), lambda i: crown_t.uv((i + 0.5) / cols, 1.0))
+    p.grid([crown_rows[-1]] + top_rows[:seam + 1], GEAR, lambda i, j: uv_crown(i, len(heights) - 1 + j), wrap=True)
+    middle = Vector((0, 0.004, BOONIE_BAND_Z + heights[-1] + 0.0112))
+    panel = top_rows[seam:]
+    reach = max(math.hypot(q.x - middle.x, q.y - middle.y) for q in panel[0])
+    if 2.0 * reach > head_textures.BOONIE_TOP_SPAN:
+        raise SystemExit("the boonie's top panel (%.4f m across) does not fit its tile" % (2.0 * reach))
+
+    def uv_top(q: Vector):
+        return top_t.uv(0.5 + (q.x - middle.x) / head_textures.BOONIE_TOP_SPAN,
+                        0.5 + (q.y - middle.y) / head_textures.BOONIE_TOP_SPAN)
+
+    idx2 = p.grid(panel, GEAR, lambda i, j: uv_top(panel[j][i % cols]), wrap=True)
+    p.fan(idx2[-1], middle, GEAR, lambda i: uv_top(panel[-1][i % cols]), uv_top(middle))
     del idx
     # The brim: upper and lower surfaces, a rolled edge.
     width = 0.063

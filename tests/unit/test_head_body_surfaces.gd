@@ -17,13 +17,21 @@ const TILES := {
 	"headband": Rect2(256.0, 192.0, 256.0, 64.0),
 	"goggle_frame": Rect2(1024.0, 384.0, 512.0, 64.0),
 	"cushion": Rect2(1024.0, 448.0, 512.0, 64.0),
+	"cup_face_defender": Rect2(1152.0, 896.0, 128.0, 128.0),
+	"cup_face_headset": Rect2(1280.0, 896.0, 128.0, 128.0),
+	"boonie_top": Rect2(1024.0, 896.0, 128.0, 128.0),
 }
+## A moulded cup's colour is even (a faint tone turns to squares in the game's compressed map): its side wall's
+## strip and its face's tile are painted in their sheen, the roughness spreading at least this far (0-1).
+const SHEEN_TILES: Array[String] = ["cup_defender", "cup_headset", "cup_face_defender", "cup_face_headset"]
+const SHEEN_SPREAD_AT_LEAST := 0.15
 ## Which heads wear what: the high cut olive ear defenders and a mesh mask under its glasses, the full cut goggles,
-## the cap a headset with its band, goggles and a mesh mask; the boonie none of these.
+## the cap a headset with its band, goggles and a mesh mask; the boonie its top panel, laid flat.
 const WEARS := {
-	"Head_HighCut": ["cup_defender", "cushion", "binding"],
+	"Head_HighCut": ["cup_defender", "cup_face_defender", "cushion", "binding"],
 	"Head_FullCut": ["goggle_frame"],
-	"Head_Cap": ["cup_headset", "cushion", "goggle_frame", "binding", "headband"],
+	"Head_Cap": ["cup_headset", "cup_face_headset", "cushion", "goggle_frame", "binding", "headband"],
+	"Head_Boonie": ["boonie_top"],
 }
 const HEADS: Array[String] = ["Head_HighCut", "Head_FullCut", "Head_Cap", "Head_Boonie"]
 ## The flat swatches' rows at the atlas's bottom left (head_textures.py SWATCH_ROWS, headkit.py SWATCH_AREA and
@@ -133,6 +141,14 @@ static func _bumpy_share(image: Image, at: Array[Vector2i]) -> float:
 	return float(bumpy) / maxf(float(at.size()), 1.0)
 
 
+## Samples laid out on a MAP-sized map, moved onto `image` (the roughness maps are imported smaller).
+static func _scaled(at: Array[Vector2i], image: Image) -> Array[Vector2i]:
+	var scaled: Array[Vector2i] = []
+	for p in at:
+		scaled.append(Vector2i(p.x * image.get_width() / MAP, p.y * image.get_height() / MAP))
+	return scaled
+
+
 ## The least, the mean and the most of one channel under the samples.
 static func _range(image: Image, at: Array[Vector2i], channel: int) -> Vector3:
 	var least := 1.0
@@ -171,6 +187,7 @@ func test_the_new_tiles_are_painted_and_carry_relief() -> void:
 	var m := head.surface_get_material(_surface(head, "Headwear")) as BaseMaterial3D
 	var colour := _image(m.albedo_texture)
 	var normal := _image(m.normal_texture)
+	var sheen := _image(m.roughness_texture)
 	assert_eq(colour.get_size(), Vector2i(MAP, MAP), "the heads' colour map")
 	for tile: String in TILES:
 		var rect := TILES[tile] as Rect2
@@ -178,8 +195,12 @@ func test_the_new_tiles_are_painted_and_carry_relief() -> void:
 		for y in range(int(MAP - rect.position.y - rect.size.y) + 4, int(MAP - rect.position.y) - 4, 3):
 			for x in range(int(rect.position.x) + 4, int(rect.end.x) - 4, 3):
 				at.append(Vector2i(x, y))
-		var green := _range(colour, at, 1)
-		assert_gt((green.z - green.x) / maxf(green.y, 0.001), TILE_SPREAD_AT_LEAST, "%s colours spread" % tile)
+		if tile in SHEEN_TILES:
+			var rough := _range(sheen, _scaled(at, sheen), 1)
+			assert_gt(rough.z - rough.x, SHEEN_SPREAD_AT_LEAST, "%s sheen spreads" % tile)
+		else:
+			var green := _range(colour, at, 1)
+			assert_gt((green.z - green.x) / maxf(green.y, 0.001), TILE_SPREAD_AT_LEAST, "%s colours spread" % tile)
 		assert_gt(_bumpy_share(normal, at), 0.05, "%s relief" % tile)
 
 
@@ -262,10 +283,7 @@ func test_the_boots_carry_relief_and_more_than_one_roughness() -> void:
 	assert_gt(at.size(), 2000, "the boots' samples")
 	assert_gt(_bumpy_share(_image(m.normal_texture), at), BOOT_BUMPY_AT_LEAST, "the boots' nap, creases and lugs")
 	var rough_image := _image(m.roughness_texture)
-	var scaled: Array[Vector2i] = []
-	for p in at:
-		scaled.append(Vector2i(p.x * rough_image.get_width() / MAP, p.y * rough_image.get_height() / MAP))
-	var rough := _range(rough_image, scaled, 1)
+	var rough := _range(rough_image, _scaled(at, rough_image), 1)
 	assert_gt(rough.z - rough.x, BOOT_ROUGH_SPREAD_AT_LEAST, "suede, rubbed patches, rubber and metal eyelets")
 
 
