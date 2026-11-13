@@ -1665,6 +1665,27 @@ four heads differ.
   soles as it walks.
 - [ ] **Faces** look as before.
 
+## Faces up close (MQ3C)
+
+Stand face to face with a teammate at the start of a round, or watch a bot from the dead zone, on High or Ultra.
+Look at several: there are four faces (fair with blue eyes, medium with green, tan with brown, deep with dark brown).
+
+- [ ] **Skin** looks like skin, not plastic: uneven in tone, a little darker under the eyes, with a fine grain. No
+  white sparks or streaks beside the nose under a lamp or the sun.
+- [ ] **Brows** are hairs, low and heavy over the eyes, thicker toward the nose, not a painted block; the fair
+  face's brows still read at 2 to 3 m. **Lashes** are a fine fringe, not a drawn outline.
+- [ ] **Eyes** look alive: almond shaped, about one eye's width apart (neither small nor far apart), the upper lid
+  resting on the iris (not staring), a black pupil with a small glint, an iris of fine fibres with a darker rim,
+  whites that are not pure white, a pink corner by the nose. No white line along the lower lid.
+- [ ] **The goggles' lenses** are a thin dark tint on all four heads: the eyes show clearly through them, with no
+  grey haze.
+- [ ] **Through the goggles and under the helmets, cap and hat** nothing pokes through a lens or the balaclava, from
+  the front and from the side, and from the side at 1 m the eye sits under the brow (not stuck on, not in a hole).
+  On the full-cut helmet, no skin or lid edge shows by the hem at the lower outer lid.
+- [ ] **At 10 to 40 m** a face still reads as eyes and brows in the opening, with no shimmer or ragged dark ring
+  round the eyes as the bot moves,
+  and none along the opening's lower hem on the cap (look at 1 m too).
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

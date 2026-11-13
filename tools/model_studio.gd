@@ -4,13 +4,14 @@ extends SceneTree
 ## ambient colour and the studio the metal reflects, StudioSky) with a fill, flat on (no perspective) from the view each shot names. Each shot is saved as `<folder>/<name>.png`.
 ## Needs a display, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . -s res://tools/model_studio.gd \
-##       -- <folder> <name>|<res path>|<node or ->|<paint or ->|<yaw>,<pitch>[|<x>,<y>,<z>,<span m>][|<parts>] ...
+##       -- <folder> <name>|<res path>|<node or ->|<paint or ->|<yaw>,<pitch>[,<turn>][|<x>,<y>,<z>,<span m>][|<parts>] ...
 ## `node` draws one top-level node of the file alone (a part of a parts file), or `+Body+Kit+Head_Cap` only the
 ## meshes named, wherever they are in the file (a figure); `paint` is a ReplicaSchemes paint, `#2f7fff` a figure's
-## team colour, `-` the replica's own colours, a name ending in `!` the Realistic colours' version, and one ending in `~` the flat paint
+## team colour (`#2f7fff@2` with face look 2, FigureConfig.face_offsets), `-` the replica's own colours, a name ending in `!` the Realistic colours' version, and one ending in `~` the flat paint
 ## a figure's copy wears (no surfaces, no wear). `yaw` 0 looks at the model's
 ## right side (the muzzle to the picture's right... of a replica whose bore runs along -Z), 180 its left; `pitch` looks
-## down. The optional box centres the picture on a point of the model (m) and shows `span` metres across. `parts`
+## down; `turn` turns the model itself about its upright axis (degrees), so a face can be seen front on from a view
+## where the studio's lamps reflect off to one side of its eyes. The optional box centres the picture on a point of the model (m) and shows `span` metres across. `parts`
 ## (`optic=000025+laser=000005`, pool keys by slot) fits parts to a replica as a match does. Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
@@ -34,6 +35,7 @@ const FLAT_MARK := "~"
 const OWN_MARK := "-"
 const SHOWN_MARK := "+"
 const TEAM_MARK := "#"
+const LOOK_MARK := "@"
 
 
 func _initialize() -> void:
@@ -109,10 +111,13 @@ func _shot(port: SubViewport, f: PackedStringArray, out: String) -> int:
 	var realistic := paint.ends_with(REALISTIC_MARK)
 	paint = paint.trim_suffix(REALISTIC_MARK)
 	if paint.begins_with(TEAM_MARK):
-		_team(model, Color(paint.substr(1)))
+		var team := paint.substr(1).split(LOOK_MARK)
+		_team(model, Color(team[0]), int(team[1]) if team.size() > 1 else 0)
 	else:
 		ReplicaPaint.apply(model, ReplicaSchemes.OWN if paint == OWN_MARK else StringName(paint), realistic, not flat)
 	var angles := f[4].split_floats(",")
+	if angles.size() > 2:
+		model.rotate_y(deg_to_rad(angles[2]))
 	var box := _bounds(model)
 	var centre := box.get_center()
 	var span := 0.0
@@ -179,18 +184,26 @@ func _show_only(model: Node3D, named: PackedStringArray) -> void:
 		(node as MeshInstance3D).visible = named.has(String(node.name))
 
 
-## Paints `model`'s team materials (FigureConfig.team_material_prefix) `colour`, as a figure's are in a match.
-func _team(model: Node3D, colour: Color) -> void:
-	var prefix := FigureConfig.new().team_material_prefix
+## Paints `model`'s team materials (FigureConfig.team_material_prefix) `colour` and gives its face look `look`
+## (FigureConfig.face_offsets), as a figure's are in a match.
+func _team(model: Node3D, colour: Color, look: int) -> void:
+	var config := FigureConfig.new()
+	var offset := config.face_offsets[look] if look > 0 and look < config.face_offsets.size() else Vector2.ZERO
 	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var mi := node as MeshInstance3D
 		for i: int in mi.mesh.get_surface_count():
 			var own := mi.mesh.surface_get_material(i) as BaseMaterial3D
-			if own == null or not own.resource_name.to_lower().begins_with(prefix):
+			if own == null:
 				continue
-			var worn := own.duplicate() as BaseMaterial3D
-			worn.albedo_color = Color(colour, own.albedo_color.a)
-			mi.set_surface_override_material(i, worn)
+			var named := own.resource_name.to_lower()
+			if named.begins_with(config.team_material_prefix):
+				var worn := own.duplicate() as BaseMaterial3D
+				worn.albedo_color = Color(colour, own.albedo_color.a)
+				mi.set_surface_override_material(i, worn)
+			elif named.begins_with(config.face_material_prefix) and offset != Vector2.ZERO:
+				var face := own.duplicate() as BaseMaterial3D
+				face.uv1_offset = own.uv1_offset + Vector3(offset.x, offset.y, 0.0)
+				mi.set_surface_override_material(i, face)
 
 
 ## The box round every mesh shown under `model`, in the stage's space.
