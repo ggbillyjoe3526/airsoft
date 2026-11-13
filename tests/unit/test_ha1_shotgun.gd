@@ -133,3 +133,17 @@ func test_a_sight_held_up_for_seconds_returns_the_hold_whole_on_every_rifle() ->
 			_frame(hands, 1.0)
 		_frame(hands, 0.0)
 		_assert_same(_pose(hands), clean, "%s: five seconds aimed, then the hip" % id, 1e-3)
+
+
+func test_a_sight_held_up_with_a_foregrip_returns_the_hold_whole() -> void:
+	for key: StringName in [&"vertical", &"angled"]:
+		var hands := _hands([&"aeg"])
+		hands._show(0)
+		var held: ReplicaView.Held = hands._held[0]
+		hands._arms.hold(held.id, held.root, key)
+		_frame(hands, 0.0)
+		var clean := _pose(hands)
+		for _i in 600:
+			_frame(hands, 1.0)
+		_frame(hands, 0.0)
+		_assert_same(_pose(hands), clean, "%s grip: ten seconds aimed, then the hip" % key, 1e-3)

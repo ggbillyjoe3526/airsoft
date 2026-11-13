@@ -1,4 +1,4 @@
-Task: HA1 · QA commit 5e73df1 · Verdict: Fail
+Task: HA1 · QA commit 5e73df1 · Verdict: Pass
 
 Re-run 3, delta d5fede4..53fe4f0 (shotgun aim entries, merges, grips thumb). Delta itself is clean; one HA1 bug found that my earlier Pass missed.
 
@@ -25,3 +25,5 @@ Tests added: tests/unit/test_ha1_shotgun.gd (new, 6)
 
 Run (single files, one Godot each): test_ha1_shotgun 5/6 pass (the 1 failing is the bug); test_sh2_qa 22/22; test_saved_configs 1/1; test_ha1_grips 3/3. tools/check.sh not run (background checks running).
 Not testable here: how the drift looks on screen at the hip (needs a display).
+
+RE-RUN 4 (head d7f9f9a): Verdict Pass. The fix rests position and scale of UpperArm_L, Forearm_L, Hand_L; set_bone_global_pose writes only position, rotation, scale of those. A sweep of all 28 clips in arms.glb (holds, fires, reloads, inspect, grips, pistols) found a rotation track on all three bones in every clip, so nothing unkeyed is left. Held 5 s (300 frames) on shotgun, aeg, sniper, smg and 10 s with vertical and angled foregrip, then hip: pose equals fresh (1 mm). test_ha1_shotgun 7/7 (added test_a_sight_held_up_with_a_foregrip_returns_the_hold_whole; fails on the old clear).
