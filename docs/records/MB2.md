@@ -17,7 +17,7 @@ clear." This record is the cleared road.
 
 ## What changed
 
-- `tools/woodland/layout.py`, `world.py`, `check.py`, `build_map.py`, `data/maps/woodland.json` (@@BLOCKS@@ blocks,
+- `tools/woodland/layout.py`, `world.py`, `check.py`, `build_map.py`, `data/maps/woodland.json` (960 blocks,
   945 on `main`):
   - **Nothing on the road.** The three fallen trees and the stack across the road are gone (`tag="roadblock"` with
     them), and attempt 1's Culvert stand. `ROAD_HALF = 2.5`: no piece reaches inside the 5 m gravel strip.
@@ -36,10 +36,15 @@ clear." This record is the cleared road.
     stack west of the road mouth is turned across the verge.
   - **Place names:** the Truck bend's and the Long road's areas reach the road's south bend. **Tyre tracks:** the
     pickup's follow the new road, in two arcs.
-- `tests/unit/test_mb2_qa.gd`: nothing stands within 2.5 m of the road's centre line between the camps; the road
-  is walked end to end on its strip; only the six camp gate screens stand taller than a woodpile.
+- `tests/unit/test_mb2_qa.gd`: nothing stands within 2.5 m of the road's centre line between the camps, and no bush
+  reaches the strip; the road is walked end to end on its strip; only the six camp gate screens stand taller than a
+  woodpile; the tyre tracks start on the road; every point along the road has a place name; a seeded match in each
+  of the three modes finishes with no bot held up (the last four are QA's).
 - `tests/unit/test_mb1_layouts.gd`: the road's strip west of the Culvert (its centre line and 2 m either side)
   sees no chest in flag B's pole ring or at its posts; attempt 1's stack test is gone with the stack.
+- `tests/unit/test_map_areas.gd`: Woodland has 246 area boxes (244), from the two redrawn road areas.
+- `tools/map_heat.gd` (dev only): `bomb` is a third mode name, and a round's record carries when and where the bomb
+  was armed.
 - `docs/wiki/Maps.md`, `docs/DECISIONS.md` › Maps and modes, `docs/KNOWN_ISSUES.md` (the two Woodland rows; the
   tight-passage row is gone with the passage).
 
@@ -77,6 +82,10 @@ Attack / Defend's attackers 40 to 65 %. The first and last rows are the same 32 
   the pole they hid the raiser from the defenders coming back, and the defender who stood behind them lost his duel
   with the pole 10 to 18 a hundred rounds on `main`; with the boards at the shed's east end he stands at the Back
   track's corner and wins it 15 to 13.
+- **Plant The Bomb is unmoved:** the attackers win 40 % ±4 (125 rounds, seeds 1 to 16; armed in 67 %) on the built
+  layout and 41 % ±5 (117; 76 %) on `main`'s, the same seeds (PB1 merged while this was measured; `tools/map_heat.gd`
+  takes `bomb` as a mode for it). The Elimination and Attack / Defend records above were played before that merge:
+  eight seeds of each played again after it give the same rounds and the same knock-outs, to the position.
 - **The eight-seed blocks of one layout ran from 59 to 74 %** in Attack / Defend, so the built layout and `main` are
   each read from 32 seeds, and attempt 1's 54 % was as much luck as layout.
 
@@ -95,6 +104,8 @@ Attack / Defend's attackers 40 to 65 %. The first and last rows are the same 32 
   (`docs/KNOWN_ISSUES.md`). Next: flag B's defender posts or its pole, measured at 32 seeds from the start.
 - **The road test's criterion is unchanged** (no chest in the ring or at the posts from the road west of the
   Culvert); what it samples is the new road's strip, not a box round the old one.
+- **The road's puddle stays** (west of the Truck bend, 1.1 m off the centre line, on `main` before MB1): it is the
+  gravel's own surface, walked through, and hides nobody.
 - **The map card is not rendered again:** it looks north-east from (35, -25), away from the road.
 
 ## Verified
