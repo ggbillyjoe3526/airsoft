@@ -11,8 +11,8 @@ const DISTANCES := [5.0, 10.0, 20.0, 40.0]
 ## BP6: the radio's LOD1 (240) drawn past the far line too, so LOD2 5,622. CN1: the collar round the neck, the body's
 ## and the gear's far levels decimated afresh round it: LOD1 19,424, LOD2 5,639. MQ3: the rolled dump pouch rounder
 ## at full detail (the gear 13,888). MQ3C: the eyes wider and nearer each other, their lids 20 to 24 sided at full
-## detail (the high cut 8,988 / 3,130 / 896; the largest heads, the high cut's 8,988 and the boonie's 3,188 and 896).
-const HUMAN_HIGH := [59058, 59058, 19416, 5639]
+## detail (the high cut 8,998 / 3,138 / 900; the largest heads, the high cut's 8,998 and the boonie's 3,196 and 900).
+const HUMAN_HIGH := [59068, 59068, 19424, 5643]
 const RADIO_LOD1 := 240
 const RED := Color(0.9, 0.2, 0.15)
 const BLUE := Color(0.2, 0.4, 0.95)

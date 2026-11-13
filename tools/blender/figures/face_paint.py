@@ -29,10 +29,11 @@ from headkit import Atlas, noise
 
 # --- sizes (metres on the face, but where noted) ---------------------------------------------------------------------
 
-IRIS_R = 0.0058
+IRIS_R = 0.0060
 PUPIL_R = 0.0018
 # Moist, not a mirror: at 0.10 the eye showed the room's lamps as hard blocks, and up to 0.2 its far edge, seen from
-# the side, mirrored the room as a white rim. The glint (GLINT) is what reads as wet.
+# the side, mirrored the room as a white rim. The glint (GLINT) is what reads as wet. One roughness over all of the
+# eye that shows: a band of another along the lids showed as a lighter stripe, in the packed map's blocks.
 EYE_ROUGH = 0.42
 EYE_ROUGH_FLAT = 0.5                  # the eyes painted on the skin's part (the lowest level, far off): no shine
 SCLERA = 0xddd6cc
@@ -46,18 +47,23 @@ CARUNCLE = (-0.93, 0.0020, 0.0016, 2.5)   # the pink mound in the inner corner: 
 # upper lid, and the pupil, which gives nothing back.
 EYE_OPEN = (0.66, 0.38, 0.10)
 LID_WALL_OPEN = 0.15
-# The glint: a facet of the cornea up and to one side of the pupil that mirrors whatever light stands there (the sky,
-# a lamp), so the eye shows a small catchlight even in the helmet's shade: its place (across, up), half sizes.
-GLINT = (0.0021, 0.0019, 0.00055, 0.00042)
+# The glint: a small soft catchlight painted up and to one side of the pupil, on the same side of both eyes: its place
+# (across, up), half sizes, how light. Paint only: a mirror facet in the map's metal channel spread over its 4 x 4
+# block when the map was packed and showed as a lighter square on the iris.
+GLINT = (0.0021, 0.0019, 0.00060, 0.00046, 0.97)
+# The white's end at the outer corner: within this of the corner's point it is the lids' shaded skin, so the white
+# ends round, short of the lids' angular meeting (from, to, how much).
+CORNER_ROUND = (0.0012, 0.0034, 0.92)
 
 # The brow over an eye, along a from 0 (its head, over the inner corner) to 1 (its tail): u = BROW_U[0] + BROW_U[1] a.
-# Low and heavy, as the owner's photo shows them: its lower edge about a fifth of an eye's width over the lid (any
-# higher and the goggles' frame hides its upper half), six millimetres thick at the middle.
+# Low and heavy, as the owner's photo shows them: its lower edge a good quarter of an eye's width (8 mm) over the
+# lid and the brow as thick again at its middle (the eyes sit low in the opening to give it the room under the
+# goggles' frame).
 BROW_U = (-0.0165, 0.0385)
-BROW_UP = 0.0122                      # its middle line above the cornea at the head
+BROW_UP = 0.01525                    # its middle line above the cornea at the head
 BROW_ARCH = (0.0016, 0.55, 0.32)      # the arch: height, where along it, how wide
 BROW_DROP = 0.0012                    # the tail's fall
-BROW_HALF = (0.0013, 0.0024)          # half its thickness: at the tail, and more at the head
+BROW_HALF = (0.0015, 0.0034)          # half its thickness: at the tail, and more at the head
 BROW_UNDER = 0.66                     # how far the skin under the hairs is shaded toward their colour
 HAIR_LONG = (0.0032, 0.0020)          # a brow hair's length: least, and the spread
 HAIR_HALF = (0.32, 0.18)              # its half width in pixels: least, and the spread
@@ -149,7 +155,7 @@ class _Look:
         self.z = TILE_Z[0] + (t.t * t.h - 1.0) / (t.h - 2.0) * (TILE_Z[1] - TILE_Z[0])
         self.az = self.s / R_REF
         self.col, self.rough, self.height = t.view("col"), t.view("rough"), t.view("height")
-        self.occ, self.metal = t.view("occ"), t.view("metal")
+        self.occ = t.view("occ")
         self.skin = _rgb(look["skin"])
         self.flush = np.clip(self.skin * np.array((1.0, 0.80, 0.76), np.float32), 0.0, 1.0)
         self.shadow = self.skin * np.array((0.80, 0.71, 0.72), np.float32)
@@ -395,6 +401,8 @@ class _Look:
         # The outer corner: the white turns away under the lids there, in their shade.
         outer = _smooth(0.66, 1.0, a) * inside
         self._mix(0.55 * outer, self.shadow * 0.80)
+        tip = np.hypot(u - (FIS_MID + FIS_W), v - FIS_TILT)
+        self._mix(CORNER_ROUND[2] * (1.0 - _smooth(CORNER_ROUND[0], CORNER_ROUND[1], tip)) * inside, self.shadow * 0.72)
         # The inner corner: the caruncle, a small pink mound of flesh, and the pale pink fold beside it.
         at, half_u, half_v, rise = CARUNCLE
         cu, cv = FIS_MID + at * FIS_W, FIS_TILT * at - 0.0002
@@ -436,7 +444,7 @@ class _Look:
         # Wet and smooth, but for the corners' folds (a glint there reads as a white wedge) and the caruncle.
         # Nor does its edge under the lids shine: a glint along the lower lid drew a hard white line.
         patch = scale != 1.0
-        wet = EYE_ROUGH + 0.12 * _smooth(0.62, 0.92, np.abs(a)) + 0.25 * _smooth(0.80, 0.98, rho)
+        wet = EYE_ROUGH + 0.12 * _smooth(0.62, 0.92, np.abs(a)) + 0.25 * _smooth(1.0, 1.12, rho)
         self._set(self.rough, inside, wet if patch else EYE_ROUGH_FLAT)
         self._set(self.rough, mound, 0.34 if patch else EYE_ROUGH_FLAT)
         # The cornea's dome over the iris (steeper than the ball: it gathers a light's reflection into a small glint)
@@ -447,17 +455,14 @@ class _Look:
         dome = CORNEA[1] * (dome_r * scale / pixel) / 1.54 * (1.0 - t2) ** 2
         self._set(self.height, inside, 0.0)
         self.height[:] += inside * dome + rise * scale * mound * np.clip(1.0 - far * far, 0.0, 1.0)
-        # How open it is to the light round it, and the glint (on the same side of both eyes, as one light gives).
+        # How open it is to the light round it, and the glint (on the same side of both eyes, as one light gives;
+        # in the colour alone: see GLINT).
         lit = EYE_OPEN[0] - (EYE_OPEN[0] - EYE_OPEN[1]) * np.clip(under_lid + 0.6 * _smooth(0.8, 1.05, rho), 0.0, 1.0)
         self._set(self.occ, inside, lit)
         self._set(self.occ, pupil, EYE_OPEN[2])
-        gu, gv, half_u, half_v = GLINT
-        glint = np.clip((1.0 - np.hypot((u + eye.side * gu) / half_u, (v - gv) / half_v)) / 0.4, 0.0, 1.0) * inside
-        self._mix(glint, (0.96, 0.96, 0.96))
-        if patch:
-            self._set(self.metal, glint, 1.0)
-            self._set(self.rough, glint, 0.04)
-            self._set(self.occ, glint, 1.0)
+        gu, gv, half_u, half_v, light = GLINT
+        glint = np.clip((1.0 - np.hypot((u + eye.side * gu) / half_u, (v - gv) / half_v)) / 0.5, 0.0, 1.0) * inside
+        self._mix(glint, (light, light, light))
 
     def _lids(self, eye, f: dict) -> None:
         """The lids' margins and lashes: a dark line of roots on the upper lid with short hairs fanning from it, the
@@ -474,6 +479,8 @@ class _Look:
         # The corners, where the two lids meet: in their own shade, never pale.
         meet = _smooth(0.78, 1.0, np.abs(a)) * np.clip((1.12 - rho) / 0.06, 0.0, 1.0) * on
         self.t.shade(1.0 - 0.45 * meet)
+        # The outer corner's walls most of all (a pale one showed as a grey sliver beyond the white's end).
+        self._mix(0.85 * _smooth(0.80, 0.98, a) * np.clip((1.15 - rho) / 0.06, 0.0, 1.0) * on, self.shadow * 0.60)
         self.rough[:] += 0.20 * meet * (self.rough < 0.4)
         # The lids' edges stand in each other's and the lashes' shade: their inner walls most (seen edge on, an open
         # one mirrored the room behind the head as a pale line).

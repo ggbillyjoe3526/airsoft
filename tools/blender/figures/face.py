@@ -19,8 +19,9 @@ The texture is a map of the face's own (MQ3C: FACE_MAP, painted by face_paint.py
 figure by offsetting the Face material's UVs (FigureConfig.face_offsets), so the four looks cost no triangles.
 
 Space as head_shapes.py: Blender metres, +Z up, the figure facing -Y, +X its left, the rest pose. Nothing here sits
-outside the head's knit surface except the eyelids, by at most LID_PROUD_MAX, well inside every lens: the eyewear,
-masks and scarf were fitted to that surface, so nothing clips.
+outside the head's knit surface except the eyelids, by at most LID_PROUD_MAX, and the brow's ridge over each eye
+(BROW_RIDGE, 3 mm), both well inside every lens: the eyewear, masks and scarf were fitted to that surface, so
+nothing clips.
 """
 
 import bisect
@@ -57,20 +58,21 @@ SKIN_DIVE = 0.6       # metres deeper per metre beyond the opening's edge
 
 # --- the eyes --------------------------------------------------------------------------------------------------------
 
-EYE_AZ = 0.345        # the pupils' azimuth (about 61 mm apart)
-EYE_Z = 1.6155
+EYE_AZ = 0.354        # the pupils' azimuth (61 mm apart)
+EYE_Z = 1.6115        # below the opening's middle: the brows take the room above (a third of the strip)
 EYE_R = 0.0125        # eyeball radius
-EYE_PROUD = 0.0003    # the cornea's front ahead of the head's socket floor (the brow's ridge stands over it)
+EYE_PROUD = -0.0012   # the cornea's front behind the head's surface: the eye is set into the face, under the brow
 # The eye's surface is the ball out to EYE_BALL from the cornea's middle (toward the ear, toward the nose); beyond
 # it runs on, flattening over EYE_EASE: the folds in the corners fill in front of the ball, most by the nose.
 EYE_BALL = (0.0070, 0.0060)
 EYE_EASE = (0.0060, 0.0015)
 # The fissure (the almond between the lids): its middle from the cornea's (toward the nose: the inner corner holds the
 # caruncle), half width, height above and below the centre, the outer corner's lift, and the superellipse power (under
-# 2 makes the corners pointed). 28.8 mm wide and 9.5 high; the inner corners 31 mm apart, a little over an eye's
-# width; the upper lid rests 1.7 mm over the iris and the lower just meets it (a relaxed look, not a stare).
+# 2 makes the corners pointed). 27 mm wide and 9.5 high; the inner corners 33 mm apart on the mesh, and an eye's
+# width apart by the eyes' drawn outlines (the lids' dark edges add about 1.2 mm at each corner: so a picture is
+# measured); the upper lid rests 1.9 mm over the iris and the lower just over its edge (relaxed, not a stare).
 FIS_MID = -0.0005
-FIS_W = 0.0144
+FIS_W = 0.0135
 FIS_UP = 0.0041
 FIS_LO = 0.0054
 FIS_TILT = 0.0007
@@ -94,6 +96,10 @@ LID_TUCK = 0.0011         # its inner edge, tucked into the eyeball (deeper than
 # across, so the nose's bridge and the temples keep the head's own shape).
 CARVE = (0.0180, 0.0100, 0.0086, 0.0172)          # out, up, down, in (toward the nose: shallower)
 CARVE_OUT = (0.0225, 0.0170, 0.0135, 0.0265)
+# The brow's ridge: the skin over each eye stands out of the head's surface along the brow (its height, how far over
+# the cornea, its half width up and down, from and to across the eye, the fade at each end), so the eye lies under
+# it and a profile is not a flat plane. It ends short of the nose's bridge and the temple, where eyewear sits.
+BROW_RIDGE = (0.0030, 0.0150, 0.0032, -0.0130, 0.0220, 0.0070)
 # Toward the nose the lid shell comes forward by up to this, so the socket's wall by the bridge is a gentle slope.
 MEDIAL_LIFT = 0.0024
 # The lid shell stops deepening this far behind its front (across, up): beyond the lids it only needs to meet the skin.
@@ -127,13 +133,13 @@ EYE_PATCH_HALF = (0.0205, 0.0085)             # half the patch's size on the map
 # fine lines are. The looks differ as people do, not only in colour.
 LOOKS = (
     {"skin": 0xe3b89c, "brow": 0x4a3020, "iris": 0x5f8496, "ring": 0x9c8f66, "ring_in": 0.55, "pink": 0xd99a8a,
-     "fibre": 0.30, "freckles": 70, "hairs": 2400, "brow_w": 1.05, "lines": 0.85},
+     "fibre": 0.30, "freckles": 70, "hairs": 3300, "brow_w": 1.05, "lines": 0.85},
     {"skin": 0xc8956c, "brow": 0x35241a, "iris": 0x5e7048, "ring": 0x8a6a34, "ring_in": 0.70, "pink": 0xd09682,
-     "fibre": 0.26, "freckles": 0, "hairs": 2200, "brow_w": 1.08, "lines": 1.0},
+     "fibre": 0.26, "freckles": 0, "hairs": 3050, "brow_w": 1.08, "lines": 1.0},
     {"skin": 0x965f3f, "brow": 0x241911, "iris": 0x5b3a21, "ring": 0x7a4a22, "ring_in": 0.60, "pink": 0xa06450,
-     "fibre": 0.16, "freckles": 0, "hairs": 2000, "brow_w": 1.0, "lines": 0.7},
+     "fibre": 0.16, "freckles": 0, "hairs": 2800, "brow_w": 1.0, "lines": 0.7},
     {"skin": 0x6f4531, "brow": 0x18120e, "iris": 0x3b2414, "ring": 0x4f2f18, "ring_in": 0.50, "pink": 0x8a5444,
-     "fibre": 0.10, "freckles": 0, "hairs": 1800, "brow_w": 0.92, "lines": 0.6},
+     "fibre": 0.10, "freckles": 0, "hairs": 2500, "brow_w": 0.92, "lines": 0.6},
 )
 
 # Per level: the skin's depth at its edge and how far it runs on under the knit (the knit's chords cut deeper at
@@ -141,7 +147,7 @@ LOOKS = (
 # the cap's edge), lid segments, hem segments and its profile.
 LEVELS = (
     {"edge": SKIN_EDGE, "margin": SKIN_MARGIN, "ds": 0.0092, "dz": 0.0072, "rings": (0, 1, 2, 3),
-     "eye_seg": 10, "eye_rings": (0.22, 0.45, 0.72, 1.0), "lid_seg": 20,
+     "eye_seg": 9, "eye_rings": (0.22, 0.45, 0.72, 1.0), "lid_seg": 20,
      "hem_seg": 32, "hem_corner": 4, "hem_nose": (0.005, 0.010, 0.0145, 0.026, 0.0475),
      "hem": ((-0.0050, -0.0032), (-0.0018, 0.0021), (0.0016, 0.0020), (0.0040, -0.0016))},
     {"edge": -0.0028, "margin": 0.0025, "ds": 0.0140, "dz": 0.0100, "rings": (0, 4, 5),
@@ -360,7 +366,16 @@ def skin_radius(s: float, z: float, carve: bool = True, edge: float = SKIN_EDGE)
         r = r + (rs - r) * w
         # Only the lids may stand out of the head's surface (beyond them the socket stays under it: no lumps).
         proud = max(proud, -0.0003 + (LID_PROUD_MAX + 0.0003) * (1.0 - smoothstep(LID_L2_RHO_LO, LID_L2_RHO_LO + 0.5, rho)))
-    return _smin(r, head_r + proud, 0.0015)
+    return _smin(r, head_r + proud, 0.0015) + brow_ridge(head_r * math.sin(az), z)
+
+
+def brow_ridge(x: float, z: float) -> float:
+    """How far the brow's ridge lifts the skin at x across the face and height z (BROW_RIDGE)."""
+    high, up, half, u0, u1, fade = BROW_RIDGE
+    eye = EYES[0] if x >= 0.0 else EYES[1]
+    u, v = eye.uv_of(x, z)
+    across = smoothstep(u0 - fade, u0, u) * (1.0 - smoothstep(u1, u1 + fade, u))
+    return high * gauss(v - up, half) * across
 
 
 def _smin(a: float, b: float, k: float) -> float:

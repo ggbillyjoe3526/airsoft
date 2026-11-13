@@ -43,12 +43,14 @@ count changed.
   atlas's swatches are empty); four looks (skin, brows, eyes) are painted in its cells (`face.FACE_CELLS`, `LOOKS`,
   `face_paint.py`) and the game offsets the material's UVs per figure (`FigureConfig.face_offsets`, `face_look`). A
   new look is a new cell, a `LOOKS` entry and an offset; the mesh doesn't change. Nothing of the face stands out of
-  the knit's surface but the lids (1.5 mm at most), so gear fitted to the head clears it. The extracted
+  the knit's surface but the lids (1.5 mm at most) and the brow's ridge over each eye (3 mm, `face.BROW_RIDGE`), so
+  gear fitted to the head clears it. The extracted
   `human_face_*.webp` are packed like the atlas's (their `.import` files: compressed, the normal map marked as one,
   the roughness map at half size); a hair or a pore is drawn at its real size, so nothing is finer than a pixel.
   The skin's part keeps a flat copy of each eye (the lowest level shows it); the eyeballs draw from patches of their
-  own under the strip (`face.EYE_PATCH`), each with its glint (a small mirror facet: the map's metal channel) and
-  the lids' shade in the map's occlusion channel (the `Face` material reads it). The lenses' tint is
+  own under the strip (`face.EYE_PATCH`), each with its glint (a small painted catchlight: a mirror facet in the
+  map's metal channel showed as a square once packed) and the lids' shade in the map's occlusion channel (the
+  `Face` material reads it). The lenses' tint is
   `splice_heads.LENS_TINT`: its alpha stays over 0.1, or Godot stops a lens shading the face.
 - **Space:** Blender metres, +Z up, the figure facing -Y, +X its left, at the rest pose. Everything sits on the whole
   LOD0 head, so the gear lands in the same place at every level.

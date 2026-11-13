@@ -4,7 +4,8 @@ extends GutTest
 ## (tools/blender/figures/face.py FACE_MAP, painted by face_paint.py): four looks, each with skin that carries pores,
 ## brows of single hairs, a coloured iris round a dark pupil, whites and lashes. Each eyeball draws from a patch of
 ## its own under the skin's part of the cell (face.py EYE_PATCH), where the pupil gives no light back and a small
-## facet beside it mirrors the light (the glint). The goggles' lens is a thin dark tint, so the pupils stay black.
+## catchlight is painted beside it (the glint: paint only, no mirror facet, which showed as a square when the map
+## was packed). The goggles' lens is a thin dark tint, so the pupils stay black.
 ## The heads keep their triangle budgets (test_figure_body.gd) and the figure its eight materials
 ## (test_head_body_surfaces.gd).
 
@@ -20,17 +21,17 @@ const CELLS: Array[Vector2i] = [Vector2i(0, 512), Vector2i(1024, 512), Vector2i(
 ## Places in a cell (px from its top left; a pixel is about 0.14 mm): the pupils' middles, and from a pupil how far
 ## out the iris's body and the white lie, how far down the cheek and out the temple (beside the outer corner: the
 ## skin under the eye is drawn dry and nearly smooth, so no lamp sparks on it), and each brow's middle.
-const PUPILS: Array[Vector2i] = [Vector2i(292, 218), Vector2i(731, 218)]
+const PUPILS: Array[Vector2i] = [Vector2i(282, 246), Vector2i(741, 246)]
 const IRIS_OUT := 27
-const WHITE_OUT := 62
+const WHITE_OUT := 56
 const CHEEK_DOWN := 78
 const TEMPLE_OUT := 150
-const BROWS: Array[Vector2i] = [Vector2i(286, 122), Vector2i(737, 122)]
+const BROWS: Array[Vector2i] = [Vector2i(280, 127), Vector2i(743, 127)]
 ## Each eyeball's own patch: its pupil's middle, the glint beside it, and how far toward the ear (away from the cell's
 ## middle) its white lies.
 const PATCH_PUPILS: Array[Vector2i] = [Vector2i(334, 446), Vector2i(689, 446)]
-const GLINTS: Array[Vector2i] = [Vector2i(317, 431), Vector2i(672, 431)]
-const PATCH_WHITE_OUT := 69
+const GLINTS: Array[Vector2i] = [Vector2i(316, 429), Vector2i(671, 429)]
+const PATCH_WHITE_OUT := 60
 ## Half the side of the box a colour is read over (px), and of the boxes the cheek's and the brow's grain is read over.
 const SPOT := 3
 const PATCH := 20
@@ -52,10 +53,10 @@ const EYE_BUMPY_AT_MOST := 0.1
 const EYE_ROUGH_AT_MOST := 0.47
 const SKIN_ROUGH_AT_LEAST := 0.35
 ## How open to the light round it (the map's occlusion, 0-1) a pupil is at most and the cheek at least; how far a
-## glint is bare mirror (the map's metal) and how light, at least.
+## glint is light, at least; and the map's metal at most anywhere on the eye (nothing in it is a mirror).
 const PUPIL_OPEN_AT_MOST := 0.3
 const CHEEK_OPEN_AT_LEAST := 0.9
-const GLINT_METAL_AT_LEAST := 0.5
+const METAL_AT_MOST := 0.05
 const GLINT_LIGHT_AT_LEAST := 0.6
 ## The lens's tint: its alpha over Godot's 0.1 (under it a lens stops shading the face behind it) and thin, its
 ## colour dark (a pale thick one laid a grey haze over the eyes). The colour is read as Godot shows it (sRGB): the
@@ -266,9 +267,9 @@ func test_the_skin_carries_pores_and_each_eyeballs_patch_is_smooth_with_a_dark_p
 			assert_gt(skin_rough, eye_rough, "%s: the skin is duller than the eye" % name)
 			assert_lt(_mean("rough", look, pupil, spot).r, PUPIL_OPEN_AT_MOST, "%s: the pupil gives no light back" % name)
 			assert_gt(_mean("rough", look, cheek, patch).r, CHEEK_OPEN_AT_LEAST, "%s: the cheek is open to the light" % name)
-			assert_gt(_mean("rough", look, GLINTS[eye], dot).b, GLINT_METAL_AT_LEAST, "%s: the glint mirrors the light" % name)
-			assert_gt(_mean("colour", look, GLINTS[eye], dot).get_luminance(), GLINT_LIGHT_AT_LEAST, "%s: and is light" % name)
-			assert_lt(_mean("rough", look, white, spot).b, GLINT_METAL_AT_LEAST, "%s: the white is no mirror" % name)
+			assert_gt(_mean("colour", look, GLINTS[eye], dot).get_luminance(), GLINT_LIGHT_AT_LEAST, "%s: the glint is light" % name)
+			assert_lt(_mean("rough", look, GLINTS[eye], spot).b, METAL_AT_MOST, "%s: and no mirror facet" % name)
+			assert_lt(_mean("rough", look, white, spot).b, METAL_AT_MOST, "%s: the white is no mirror" % name)
 
 
 func test_the_lens_is_a_thin_dark_tint_that_still_shades_the_face() -> void:
