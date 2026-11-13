@@ -4,13 +4,19 @@ extends SceneTree
 ## where every knock-out's shooter and target stood, and how every round ended, as one JSON file tools/maps/plan.py
 ## draws as heat maps and counts into its report. Measured, never asserted: no check runs it.
 ##   godot --headless --path . -s res://tools/map_heat.gd -- <map id> <out.json> [seeds] [mode] [size] [first seed]
-## `mode` is "elimination" (the default) or "flag" (Attack / Defend); `size` the players a side (the map's standard
-## by default).
+## `mode` is "elimination" (the default), "flag" (Attack / Defend) or "bomb" (Plant The Bomb); `size` the players a
+## side (the map's standard by default).
 
 ## Match time a match may take (s), as the balance report allows.
 const MAX_MATCH_SECONDS := 30.0 * 60.0
 ## Positions are written to this many metres.
 const QUANTUM := 0.25
+## The modes by the name the command line gives them.
+const MODES: Dictionary[String, RoundState.Mode] = {
+	"elimination": RoundState.Mode.ELIMINATION,
+	"flag": RoundState.Mode.ATTACK_DEFEND,
+	"bomb": RoundState.Mode.PLANT_THE_BOMB,
+}
 
 var _runner: MatchRunner = null
 var _stood: PackedFloat32Array = PackedFloat32Array()
@@ -31,7 +37,7 @@ func _run() -> void:
 		return
 	var map_id := args[0]
 	var seeds := args[2].to_int() if args.size() > 2 and args[2].is_valid_int() else 4
-	var flag := args.size() > 3 and args[3] == "flag"
+	var mode_name := args[3] if args.size() > 3 and MODES.has(args[3]) else "elimination"
 	var size := args[4].to_int() if args.size() > 4 and args[4].is_valid_int() else 0
 	var first := args[5].to_int() if args.size() > 5 and args[5].is_valid_int() else 1
 	_runner = MatchRunner.new(root, map_id, MatchRunner.sized_for(map_id, null, size))
@@ -41,7 +47,7 @@ func _run() -> void:
 		push_error("%s: %s" % [map_id, ", ".join(_runner.map.problems)])
 		quit(1)
 		return
-	_runner.mode = RoundState.Mode.ATTACK_DEFEND if flag else RoundState.Mode.ELIMINATION
+	_runner.mode = MODES[mode_name]
 	_runner.each_tick = _each_tick
 	var rounds: Array[Dictionary] = []
 	var started := Time.get_ticks_msec()
@@ -54,17 +60,17 @@ func _run() -> void:
 				"seed": seed_value, "winner": r.winner, "reason": r.reason, "seconds": snappedf(r.seconds, 0.1),
 				"alpha_end": r.alpha_end, "attackers": r.attackers, "top_flag": snappedf(r.top_flag, 0.01),
 				"first_hit_time": snappedf(r.first_hit_time, 0.1), "first_hit_range": snappedf(r.first_hit_range, 0.1),
-				"overtime": r.overtime,
+				"overtime": r.overtime, "planted_at": snappedf(r.planted_at, 0.1), "site": r.site,
+				"top_defuse": snappedf(r.top_defuse, 0.01),
 			})
-	print("%s, %s: %d matches in %.0f s" % [map_id, "Attack / Defend" if flag else "Elimination", seeds,
-			(Time.get_ticks_msec() - started) / 1000.0])
+	print("%s, %s: %d matches in %.0f s" % [map_id, mode_name, seeds, (Time.get_ticks_msec() - started) / 1000.0])
 	var file := FileAccess.open(args[1], FileAccess.WRITE)
 	if file == null:
 		push_error("can't write %s" % args[1])
 		quit(1)
 		return
 	file.store_string(JSON.stringify({
-		"map": map_id, "mode": "flag" if flag else "elimination", "seeds": seeds,
+		"map": map_id, "mode": mode_name, "seeds": seeds,
 		"size": _runner.tuning.rounds.team_size,
 		# Each sample: end, x, y, z, seconds into the round.
 		"stood": _stood,
