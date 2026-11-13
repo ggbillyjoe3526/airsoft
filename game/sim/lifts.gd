@@ -180,6 +180,20 @@ static func riding(query: WorldQuery, cfg: LiftConfig, lifts: LiftState, feet: V
 	return -1
 
 
+## Plant The Bomb (PB1): keeps a carried bomb's resting place (PlantState.rest) off the cars. While its carrier `c`
+## stands in a car, a hit would leave the bomb on the landing of the stop the car stands at or last stood at, never in
+## the car or the shaft. Each tick before the round's rules, with `c` null when nobody carries it.
+func bomb_rest(ps: PlantState, c: Character, lifts: LiftState) -> void:
+	ps.on_lift = false
+	if c == null:
+		return
+	var i := riding(_query, _cfg, lifts, c.position)
+	if i < 0:
+		return
+	ps.on_lift = true
+	ps.rest = _query.lifts[i].landing_point(lifts.stop[i], _cfg)
+
+
 ## Whether `c` stands in a car whose doors aren't open (shutting, riding or opening): nobody walks out of it yet.
 func shut_in(c: Character, lifts: LiftState) -> bool:
 	var i := riding(_query, _cfg, lifts, c.position)

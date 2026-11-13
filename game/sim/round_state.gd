@@ -6,8 +6,10 @@ extends RefCounted
 ## LIVE: playing; OVER: the pause between rounds; MATCH_OVER: a team has won the match (until a new match starts).
 enum Phase { LIVE, OVER, MATCH_OVER }
 ## ELIMINATION: a round is won by putting the other team out. ATTACK_DEFEND: also by raising the flag on the defenders'
-## pole, and the time-out goes to the defenders.
-enum Mode { ELIMINATION, ATTACK_DEFEND }
+## pole, and the time-out goes to the defenders. PLANT_THE_BOMB (PB1): the attackers carry a bomb to one of the
+## defenders' sites and arm it; armed, it wins them the round when its fuse runs out unless the defenders disarm it,
+## and the time-out before it is armed goes to the defenders.
+enum Mode { ELIMINATION, ATTACK_DEFEND, PLANT_THE_BOMB }
 
 ## The match's mode and, for Attack / Defend, the feet of its poles (map data: flag A's first, AB1) and the team
 ## attacking in the first half (it follows your team pick). Set before Round.start_match. `pole` is flag A's; setting it
@@ -56,6 +58,8 @@ var flag: FlagState:
 	get:
 		return flags[0]
 var overtime: float = 0.0
+## Plant The Bomb: the bomb and its sites (PlantState; the sites and its start set before Round.start_match).
+var plant: PlantState = PlantState.new()
 ## Elimination: the foot of the map's overtime flag (map data; set before Round.start_match on a map with a spot), and
 ## the flag itself (up, foot, time left, contested), down with all its time at each round's start. Without a spot, a
 ## clock run out with both teams in play is a draw at once. Never up in Attack / Defend or practice.
@@ -76,6 +80,17 @@ func reset_flags() -> void:
 	flags.resize(n)
 	for i in n:
 		flags[i].reset(poles[i] if i < poles.size() else Vector3.ZERO)
+
+
+## Whether `m` has an attacking and a defending team (Attack / Defend, Plant The Bomb): the attackers start from end 0,
+## the defenders from end 1 by their poles or sites, and the roles swap at half time.
+static func has_sides(m: Mode) -> bool:
+	return m != Mode.ELIMINATION
+
+
+## Whether this match has an attacking and a defending team (has_sides).
+func sided() -> bool:
+	return has_sides(mode)
 
 
 ## Whether the start countdown is still running.

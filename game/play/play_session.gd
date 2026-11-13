@@ -302,6 +302,8 @@ var _flags: Array[FlagView] = []
 ## Elimination's overtime flag, built once a match on a map with a spot for it and hidden until it goes up; null
 ## otherwise (Attack / Defend, practice, a map without a spot).
 var _overtime_flag: OvertimeFlagView = null
+## Plant The Bomb's prop and sites as drawn (PB1); null in the other modes.
+var _plant: PlantView = null
 ## The team colour set this match draws (Settings › Accessibility), resolved once at Play: a change in Settings shows
 ## from the next match.
 var _colours: TeamColours = null
@@ -704,6 +706,12 @@ func _start_simulation(map: MapData) -> void:
 		state.round_state.mode = RoundState.Mode.ATTACK_DEFEND
 		state.round_state.poles = map.poles
 		state.round_state.first_attackers = player_team
+	elif mode == MatchOptions.MODE_PLANT_THE_BOMB and map.has_bomb_sites:
+		# Plant The Bomb on a map with sites, your team attacking first (PB1).
+		state.round_state.mode = RoundState.Mode.PLANT_THE_BOMB
+		state.round_state.plant.set_sites(map.bomb_sites, map.bomb_site_radii, _tuning.plant.site_radius)
+		state.round_state.plant.start = map.bomb_start_ahead(_tuning.plant.start_ahead)
+		state.round_state.first_attackers = player_team
 	else:
 		mode = MatchOptions.MODE_ELIMINATION
 		# Elimination's overtime flag, on a map with a spot for it (OV1).
@@ -937,6 +945,11 @@ func _build_views(ui: CanvasLayer) -> void:
 			add_child(view)
 			_flags.append(view)
 			first_use.append_array(view.materials())
+	elif state.round_state.mode == RoundState.Mode.PLANT_THE_BOMB:
+		_plant = PlantView.new()
+		_plant.setup(_play.plant, _colours.figures, state.round_state.plant, _map.pole_height)
+		add_child(_plant)
+		first_use.append_array(_plant.materials())
 	elif state.round_state.has_overtime_spot and not practice:
 		_overtime_flag = OvertimeFlagView.new()
 		_overtime_flag.setup(_play.flag, _colours.figures, state.round_state.overtime_spot, _tuning.overtime.reach)
@@ -1225,6 +1238,11 @@ func overtime_flag_view() -> OvertimeFlagView:
 	return _overtime_flag
 
 
+## Plant The Bomb's prop and sites as drawn (null in the other modes): for tests.
+func plant_view() -> PlantView:
+	return _plant
+
+
 ## The enemy patches your side heard, for the minimap.
 func minimap_hearing() -> MinimapHearing:
 	return _heard
@@ -1337,6 +1355,8 @@ func _after_tick() -> void:
 						plate_hits += 1
 			GameEvent.Kind.CHALLENGE when e.value == RangeChallenge.Cue.TIME:
 				_keep_challenge_run()
+			GameEvent.Kind.PLANT when _plant != null:
+				_plant.on_cue(e.value, e.position, _puffs)
 			GameEvent.Kind.ROUND_OVER:
 				rounds_played += 1
 				_stop_skip()
@@ -1422,6 +1442,7 @@ func _process(delta: float) -> void:
 	# Inspect (IN1): your own replica, while you are in play and looking through your own eyes.
 	if _input.take_inspect() and watched == player and Elimination.is_in_play(player):
 		_hands.inspect()
+	_hands.hands_busy = _plant != null and Plant.busy(state.round_state.plant, player)
 	_hands.update(player, _input.view_yaw, _input.view_pitch, _eyes.global_position, look, delta,
 			aim if watched == player else player.aim_raise)
 	# Through your own scope only the figures its glass shows take the zoomed detail (BP7); the view round it keeps its own.
@@ -1488,6 +1509,11 @@ func _process(delta: float) -> void:
 		var shown := mini(_hud.shown_pole(), rs.flags.size() - 1)
 		_hud.place_flag_marker(_eyes.camera, rs.flags[shown].position, rs.attackers >= 0 and rs.under_way(),
 				Flag.LETTERS[shown] if rs.flags.size() > 1 else "")
+	elif _plant != null:
+		var rs := state.round_state
+		var carrier := state.character(rs.plant.carrier)
+		_plant.refresh(rs.plant, rs.attackers, carrier, fraction, carrier == watched, delta)
+		_hud.place_plant_marker(_eyes.camera, rs, watched, _bots.world.plant_site)
 	elif _overtime_flag != null:
 		var rs := state.round_state
 		var ot := rs.overtime_flag
@@ -2142,6 +2168,8 @@ func _relight() -> void:
 		f.relight(lights)
 	if _overtime_flag != null:
 		_overtime_flag.relight(lights)
+	if _plant != null:
+		_plant.relight(lights)
 	var props := _site.props() if _site != null else _props
 	if props != null:
 		props.relight(lights)

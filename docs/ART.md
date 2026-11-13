@@ -181,6 +181,10 @@ metalness; the light does the rest.
   barrel's brass or stainless crown is polished metal. Glass, reflectors and lit parts draw as they did. A part
   shows how it is made: a turned part its chamfers, grooves and wrench flats, a pressed steel shell its narrow ribs,
   lapped seam and spot welds, a moulded one its parting line, anything with a battery its door or cap.
+- **And the bombs and power sources (MQ2B).** A smoke bomb's sleeve is glossy printed film over a moulded cap and a
+  matte black painted lever; a flash bomb is a matte card tube; a gas can is coated aluminium, a battery glossy shrink film
+  with paper stickers and matte leads. Their labels carry print as blocks and bars where the real ones have words:
+  a heading, a few lines, one block in the item's own colour. Never letters, logos or symbols.
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.
 
@@ -308,6 +312,9 @@ arms, figures and replicas use (steps 23 and 28).
   lighter, mixed clothing a weekend player would wear, never all-dark kit and masks. Every figure keeps its
   team-colour plate carrier, the strongest team cue at range (AX1; owner, 2026-10-18). Their kit is already
   Sunlit Concrete's realistic multicam, khaki and olive (about a quarter saturation, SL4), so SL4 left it as it is.
+  Up close the gear is drawn as what it is made of (MQ3): woven cordura, webbing, loop pile, bound and stitched
+  edges, moulded polymer buckles and holster, with the shade of one piece on another painted in. The colours are the
+  swatches', so the team cue at range is unchanged.
 - **Detail.** This is a desktop game, so figures, arms and replicas are modelled at high quality, with LODs carrying
   less at range (owner, 2026-10-18). The budgets are in `docs/CC0_ASSETS.md` › Size limits.
 

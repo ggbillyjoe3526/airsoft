@@ -20,6 +20,8 @@ class AreaWords:
 var words: Array[AreaWords] = []
 ## The flags' spots (x, z), flag A first, as the file has them (Flag.LETTERS); empty on a map without.
 var flags: PackedVector2Array = PackedVector2Array()
+## Plant The Bomb's sites (x, z), site A first (Plant.LETTERS); empty on a map without.
+var sites: PackedVector2Array = PackedVector2Array()
 var has_overtime: bool = false
 var overtime: Vector2 = Vector2.ZERO
 ## Each end's start (round its spawns, `pad` m out) and dead zone (round its spots, as far out), end 0 first; a zero
@@ -36,6 +38,8 @@ static func of(map: MapData, pad: float) -> FieldMapMarks:
 	m.words = areas_of(map.areas)
 	for p in map.poles:
 		m.flags.append(Vector2(p.x, p.z))
+	for p in map.bomb_sites:
+		m.sites.append(Vector2(p.x, p.z))
 	m.has_overtime = map.has_overtime_flag
 	m.overtime = Vector2(map.overtime_flag.x, map.overtime_flag.z)
 	for e in map.ends:

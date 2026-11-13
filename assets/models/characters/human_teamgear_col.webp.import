@@ -2,24 +2,25 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7yvl70l7igg8"
-path="res://.godot/imported/human_teamgear_col.png-94b52ed9c915d438caff4560f2ea3101.ctex"
+uid="uid://cgsosqr7wbhgw"
+path.bptc="res://.godot/imported/human_teamgear_col.webp-d0194632d57e45352edbd0f034500fad.bptc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "f00cebf82bf4ce1eece92a065a61a60b"
+"md5": "db7c8adfd94fa9239b7924e2c5258cdb"
 }
 
 [deps]
 
-source_file="res://assets/models/characters/human_teamgear_col.png"
-dest_files=["res://.godot/imported/human_teamgear_col.png-94b52ed9c915d438caff4560f2ea3101.ctex"]
+source_file="res://assets/models/characters/human_teamgear_col.webp"
+dest_files=["res://.godot/imported/human_teamgear_col.webp-d0194632d57e45352edbd0f034500fad.bptc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -27,7 +28,7 @@ compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=true
-mipmaps/limit=4
+mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
 process/channel_remap/red=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

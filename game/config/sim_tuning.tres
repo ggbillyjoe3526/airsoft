@@ -24,6 +24,7 @@
 [ext_resource type="Script" path="res://game/config/laser_config.gd" id="22_lz1lc"]
 [ext_resource type="Script" path="res://game/config/lift_config.gd" id="23_mt2lc"]
 [ext_resource type="Script" path="res://game/config/weather_config.gd" id="24_ph1wc"]
+[ext_resource type="Script" path="res://game/config/plant_config.gd" id="25_pb1pl"]
 
 [sub_resource type="Resource" id="Resource_glb71"]
 script = ExtResource("1_41pkq")
@@ -96,6 +97,9 @@ script = ExtResource("23_mt2lc")
 [sub_resource type="Resource" id="Resource_ph1wc"]
 script = ExtResource("24_ph1wc")
 
+[sub_resource type="Resource" id="Resource_pb1pl"]
+script = ExtResource("25_pb1pl")
+
 [resource]
 script = ExtResource("9_6ush2")
 ballistics = SubResource("Resource_m1e1h")
@@ -121,3 +125,4 @@ grenades = SubResource("Resource_gr1gc")
 doors = SubResource("Resource_do1dc")
 lasers = SubResource("Resource_lz1lc")
 lifts = SubResource("Resource_mt2lc")
+plant = SubResource("Resource_pb1pl")

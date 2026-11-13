@@ -77,6 +77,18 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## heard out to the event's reach (LiftConfig.heard); a button's beep from the button, quieter.
 @export var lift_gain: float = 0.7
 @export var lift_button_gain: float = 0.4
+## Plant The Bomb's prop (BOMB, PB1), from where it is, yours too, muffled by the walls between: taken up and put down
+## (plant_handle_gain, heard out to prop_reach), the code keyed in and the defusal kit at work (plant_work_gain, out to
+## plant_work_reach m: BotConfig.plant_heard, the furthest a defender bot hears the keys), the armed tone, the fuse's
+## beep and a defuse's power-down (plant_beep_gain, out to plant_beep_reach m) and its pop and buzzer as it goes off
+## (plant_went_off_gain, out to plant_went_off_reach m: the whole field).
+@export var plant_handle_gain: float = 0.7
+@export var plant_work_gain: float = 0.6
+@export var plant_work_reach: float = 20.0
+@export var plant_beep_gain: float = 0.9
+@export var plant_beep_reach: float = 45.0
+@export var plant_went_off_gain: float = 1.6
+@export var plant_went_off_reach: float = 160.0
 ## Smoke and flash bombs (SF1): a bomb's bouncing can where it bounces (at the gain times its speed into the surface
 ## over bounce_full_speed, at most the gain), a bounce within bounce_hold (s) of the one that started it left silent,
 ## as the can's own knocks and rattle play on; a smoke going off (its spray), both heard out to prop_reach; a flash's

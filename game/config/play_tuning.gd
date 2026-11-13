@@ -34,6 +34,8 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 @export var teams: TeamConfig = TeamConfig.new()
 @export var debug_view: DebugViewConfig = DebugViewConfig.new()
 @export var flag: FlagViewConfig = FlagViewConfig.new()
+## Plant The Bomb's prop and sites as drawn (PB1).
+@export var plant: PlantViewConfig = PlantViewConfig.new()
 @export var range_view: RangeViewConfig = RangeViewConfig.new()
 @export var minimap: MinimapConfig = MinimapConfig.new()
 @export var figures: FigureConfig = FigureConfig.new()

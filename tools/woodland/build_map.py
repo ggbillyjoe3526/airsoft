@@ -526,6 +526,14 @@ def spot(x: float, z: float) -> dict:
     return {"x": r(x), "y": r(floor_at(x, z)), "z": r(z)}
 
 
+def bomb_site(x: float, z: float, radius: float) -> dict:
+    """A Plant The Bomb site (PB1): its middle on its floor, and its radius where it isn't the game's usual."""
+    out = spot(x, z)
+    if radius > 0:
+        out["radius"] = radius
+    return out
+
+
 def spawns() -> list[list[dict]]:
     return [[{"position": spot(x, z), "yaw": EYE_FACING_EAST} for (x, z) in L.SPAWNS_W],
             [{"position": spot(x, z), "yaw": EYE_FACING_WEST} for (x, z) in L.SPAWNS_E]]
@@ -711,6 +719,7 @@ def main() -> None:
         "deadZones": dead_zones(),
         "lanes": lanes(),
         "flags": [spot(x, z) for x, z in L.FLAGS],
+        "bombSites": [bomb_site(*s) for s in L.BOMB_SITES],
         "overtimeFlag": spot(*L.OT_FLAG),
         "botSight": BOT_SIGHT,
         "night": False,  # day by default (the first preset); night is the Time of day setting's

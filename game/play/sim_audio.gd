@@ -74,8 +74,12 @@ const OWN_CAP_CUES: Array[StringName] = [&"smoke_pop"]
 ## from tools/lift_sounds.py (MT2).
 const LIFT_CUES: Array[StringName] = [&"lift_button", &"lift_doors", &"lift_doors", &"lift_motor", &"lift_chime",
 		&"lift_buzz"]
+## Plant The Bomb's sounds by Plant.Cue (&"": the cue only stops the keys or the kit): placeholders from
+## tools/plant_sounds.py (PB1).
+const PLANT_CUES: Array[StringName] = [&"plant_pickup", &"plant_drop", &"plant_arming", &"", &"plant_armed",
+		&"plant_beep", &"plant_defusing", &"", &"plant_defused", &"plant_went_off"]
 ## What a play is, for its pitch and level spread, its priority in the field's pool and how many of its cue may sound.
-enum Kind { SHOT, MECHANISM, STEP, VAULT, ROPE, IMPACT, HIT, STEEL, INTERFACE, RADIO, FOLEY, CALL, PROP, RADIO_CALL }
+enum Kind { SHOT, MECHANISM, STEP, VAULT, ROPE, IMPACT, HIT, STEEL, INTERFACE, RADIO, FOLEY, CALL, PROP, RADIO_CALL, DEVICE }
 ## How far past the ears' distance a call's voice still carries, so the far edge of its ring is never cut off.
 const CALL_SLACK := 1.0
 
@@ -112,6 +116,9 @@ var _bolt_voice: PackedInt32Array = PackedInt32Array()
 var _bolt_serial: PackedInt64Array = PackedInt64Array()
 var _bolt_own: PackedByteArray = PackedByteArray()
 var _bolt_slot: PackedInt32Array = PackedInt32Array()
+## The voice the keyed code or the defusal kit plays on (-1: neither plays) and its serial in the pool (PB1).
+var _plant_voice: int = -1
+var _plant_serial: int = 0
 ## The voice the last `_play` took (-1: it played nothing) and whether it was in your ear.
 var _played_voice: int = -1
 var _played_own: bool = false
@@ -213,6 +220,9 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 		_load(cue)
 	for cue: StringName in LIFT_CUES:
 		_load(String(cue))
+	for cue: StringName in PLANT_CUES:
+		if cue != &"":
+			_load(String(cue))
 	_set_muffle(cfg.muffled_cutoff_hz)
 	set_echo(cfg.shot_echoes.get(StringName(map.id)) if map != null else null)
 	_echo_set_by = get_instance_id()
@@ -394,6 +404,8 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_play(LIFT_CUES[clampi(e.value, 0, LIFT_CUES.size() - 1)], e.position, false,
 						_cfg.lift_button_gain if button else _cfg.lift_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach, null,
 						true)
+			GameEvent.Kind.PLANT:
+				_plant_cue(e)
 			GameEvent.Kind.FLAG_ROPE:
 				_play(&"rope_up" if e.value == 1 else &"rope_down", e.position, false, _cfg.rope_gain, Kind.ROPE,
 						BUS_EFFECTS)
@@ -423,6 +435,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 			GameEvent.Kind.OVERTIME:
 				_blasts.overtime(now)
 			GameEvent.Kind.ROUND_OVER:
+				_stop_plant_work()
 				_blasts.round_over(now)
 			GameEvent.Kind.MATCH_OVER:
 				_blasts.match_over(now)
@@ -731,6 +744,40 @@ func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus
 		v.play()
 
 
+## Plant The Bomb's prop (PB1), from where it is, muffled by the walls between: each Plant.Cue's sound at its level and
+## reach (SoundConfig.plant_*); the keys and the kit play as long as the work does, cut the tick it stops.
+func _plant_cue(e: GameEvent) -> void:
+	var cue := PLANT_CUES[clampi(e.value, 0, PLANT_CUES.size() - 1)]
+	var working := e.value == Plant.Cue.ARMING or e.value == Plant.Cue.DEFUSING
+	if e.value != Plant.Cue.BEEP and e.value != Plant.Cue.PICKED_UP and e.value != Plant.Cue.DROPPED:
+		_stop_plant_work()
+	if cue == &"":
+		return
+	var gain := _cfg.plant_beep_gain
+	var reach := _cfg.plant_beep_reach
+	match e.value:
+		Plant.Cue.PICKED_UP, Plant.Cue.DROPPED:
+			gain = _cfg.plant_handle_gain
+			reach = _cfg.prop_reach
+		Plant.Cue.ARMING, Plant.Cue.DEFUSING:
+			gain = _cfg.plant_work_gain
+			reach = _cfg.plant_work_reach
+		Plant.Cue.WENT_OFF:
+			gain = _cfg.plant_went_off_gain
+			reach = _cfg.plant_went_off_reach
+	_play(cue, e.position, false, gain, Kind.DEVICE, BUS_EFFECTS, 1.0, reach, null, true)
+	if working and _played_voice >= 0:
+		_plant_voice = _played_voice
+		_plant_serial = _field_pool.serial_of(_played_voice)
+
+
+## Cuts the keys or the kit short (the hands came off, the work was done or the round ended), if they still play.
+func _stop_plant_work() -> void:
+	if _plant_voice >= 0 and _field_pool.serial_of(_plant_voice) == _plant_serial and _field[_plant_voice].playing:
+		_field[_plant_voice].stop()
+	_plant_voice = -1
+
+
 ## Keeps the voice the bolt cycle of `actor`'s replica in `slot` just took (by the last `_play`).
 func _keep_bolt(actor: int, slot: int) -> void:
 	if actor < 0 or _played_voice < 0:
@@ -822,13 +869,14 @@ func _kinds(cfg: SoundConfig) -> void:
 		Kind.VAULT: cfg.vault_pitch, Kind.ROPE: cfg.rope_pitch, Kind.IMPACT: cfg.impact_pitch, Kind.HIT: 0.0,
 		Kind.STEEL: cfg.steel_ring_pitch, Kind.INTERFACE: 0.0, Kind.RADIO: cfg.radio_ack_pitch,
 		Kind.FOLEY: cfg.foley_pitch, Kind.CALL: 0.0, # a call's spread is its own (AmbienceCall.pitch)
-		Kind.PROP: cfg.prop_pitch, Kind.RADIO_CALL: cfg.radio_call_pitch,
+		Kind.PROP: cfg.prop_pitch, Kind.RADIO_CALL: cfg.radio_call_pitch, Kind.DEVICE: 0.0,
 	}
 	var level: Dictionary[Kind, float] = {
 		Kind.SHOT: cfg.shot_spread_db, Kind.MECHANISM: cfg.mechanism_spread_db, Kind.STEP: cfg.step_spread_db,
 		Kind.VAULT: cfg.vault_spread_db, Kind.ROPE: cfg.rope_spread_db, Kind.IMPACT: cfg.impact_spread_db,
 		Kind.HIT: cfg.hit_spread_db, Kind.STEEL: cfg.steel_ring_spread_db, Kind.INTERFACE: 0.0, Kind.RADIO: 0.0,
 		Kind.FOLEY: cfg.foley_spread_db, Kind.CALL: 0.0, Kind.PROP: cfg.prop_spread_db, Kind.RADIO_CALL: 0.0,
+		Kind.DEVICE: 0.0,
 	}
 	for k: Kind in pitch:
 		_pitch_spread[k] = pitch[k]

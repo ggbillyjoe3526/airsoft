@@ -57,6 +57,13 @@ plays: the calls are what it already does, put into words.
 - **Flag.** Attack / Defend: the other team is raising the flag; the defender nearest the pole says it.
 - **Overtime.** Elimination: the clock ran out level and the overtime flag went up; on each team, the bot nearest it
   says it. Fills `{area}` (where the flag stands).
+- **Planting.** Plant The Bomb: it starts keying the bomb in. Fills `{area}` (where it plants: "A site").
+- **Bomb.** Plant The Bomb: a defender near enough to hear the bomb being keyed in (20 m) says so; the nearest one.
+  Fills `{area}`.
+- **Bomb armed.** Plant The Bomb: the bomb is armed; the attacker nearest it says so. Fills `{area}`.
+- **Defusing.** Plant The Bomb: it starts defusing the bomb. Fills nothing.
+- **Bomb down.** Plant The Bomb: the carrier was hit and dropped the bomb; the attacker nearest it says where. Fills
+  `{area}`.
 - **Going to your ping.** You ping a spot or an enemy (the Ping key) and a teammate sets off to look: the one nearest
   it says so. Fills `{area}` (the spot's). Its Checking, Pushing or Flanking is not called as well.
 - **Watching your ping.** As above, when none of them goes (under your order, at its post, holding): the nearest that
@@ -100,6 +107,11 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 | Overtime | 1 | 0 |
 | Flag | 1 | 10 |
 | Raising | 1 | 10 |
+| Bomb | 1 | 6 |
+| Bomb down | 1 | 0 |
+| Planting | 1 | 6 |
+| Defusing | 1 | 6 |
+| Bomb armed | 0.8 | 0 |
 | Contacts | 0.9 | 3 |
 | Contact | 0.85 | 3 |
 | Reloading | 0.5 | 6 |
@@ -231,6 +243,22 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 | Raising | Any | Raising the flag! |
 | Flag | Any | They're on the flag! |
 | Flag | Any | Flag's going up! |
+| Planting | Any | Planting, cover me! |
+| Planting | Any | Planting at {area}! |
+| Planting | Careful | Planting. Watch my back, please. |
+| Planting | Rusher | Planting, keep them off me! |
+| Bomb | Any | They're planting at {area}! |
+| Bomb | Any | I hear the bomb, {area}! |
+| Bomb | Anchor | Bomb going down at {area}. On it. |
+| Bomb armed | Any | Bomb's armed! Hold {area}! |
+| Bomb armed | Any | It's ticking. Keep them off it! |
+| Bomb armed | Anchor | Armed. Nobody touches it. |
+| Defusing | Any | Defusing, cover me! |
+| Defusing | Any | On the bomb, watch my back! |
+| Defusing | Careful | Defusing. Keep them off me, please. |
+| Bomb down | Any | Bomb's down at {area}! |
+| Bomb down | Any | Bomb's down! Somebody grab it! |
+| Bomb down | Rusher | Bomb's down, I'll get it! |
 | Overtime | Any | Overtime! Flag's up, {area}! |
 | Overtime | Any | Flag's up! First hand on it wins! |
 | Overtime | Rusher | Flag's up! I'm going for it! |

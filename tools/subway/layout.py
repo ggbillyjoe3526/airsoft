@@ -375,6 +375,12 @@ DEAD_E = [(x, z) for x in (80.4, 81.2) for z in (-12.0, -11.2, -10.4, -9.6)]    
 # a lower-hall door, the east passage the defenders' way between them and the stair the attackers' way in behind both.
 FLAGS = [(33.5, 10.75, P), (33.0, -7.8, P)]    # A in the south train's first car, B on the north platform
 POLE_HEIGHT = 2.1                                     # the poles drawn this tall: a car is 2.4 m inside
+# Plant The Bomb (PB1): the sites, A first, each (x, z, floor, radius m): A on the south platform and B on the north,
+# each just east of the lower hall's doors and behind the works hoarding and the staff booth as the Tunnel end sees
+# them, a crate inside the ring to arm the bomb behind; 3.5 m, as wide as a platform, not the game's 4.5. (First tried:
+# A in the south train's first car, where its one door was a funnel no carrier got through, then both 8 m further
+# east in the hoardings' chicane, in plain sight of the tunnel mouths: the bots' attackers took 26 % of rounds.)
+BOMB_SITES = [(25.5, 7.3, P, 3.5), (25.5, -7.3, P, 3.5)]
 OT_FLAG = (12.0, 2.4, P)                              # the lower hall's west end
 # Bots' lanes, Street end to Tunnel end: (x, z, y) points on the floor. Each ends by the flags, not in the tunnel: a
 # defender (Attack / Defend, the Tunnel team) holds its lane's last point or the one before (RoundPlanner), so the last

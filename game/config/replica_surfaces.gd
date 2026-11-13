@@ -13,7 +13,7 @@ extends RefCounted
 
 ## The kinds, by index.
 const KINDS: Array[StringName] = [
-	&"polymer", &"steel", &"aluminium", &"wood", &"rubber", &"bare", &"coated", &"polished",
+	&"polymer", &"steel", &"aluminium", &"wood", &"rubber", &"bare", &"coated", &"polished", &"card",
 ]
 ## How many kinds the shader's tables hold (the vertex colour's step is 1 / SLOTS).
 const SLOTS := 16
@@ -96,6 +96,14 @@ const LOOKS: Dictionary[StringName, Dictionary] = {
 		"tile": 0.02, "stretch": 1.0, "relief": 0.0, "figure": 0.0,
 		"cloud": 0.0, "dark": 1.0, "light": 1.0, "gain": 1.8,
 		"specular": 0.5, "light_keeps": 1.0, "floor": 0.0, "bold_keeps": 0.0,
+	},
+	# Card and paper in their own colour (MQ2B: a bomb's wound card tube, a printed label): dead matte, a fine fibrous
+	# tooth, hardly a highlight at all.
+	&"card": {
+		"metallic": 0.0, "roughness": 0.93, "sheen": 0.03, "bares": 0.0,
+		"tile": 0.012, "stretch": 1.0, "relief": 0.4, "figure": 0.0,
+		"cloud": 0.09, "dark": 1.0, "light": 1.0, "gain": 1.0,
+		"specular": 0.12, "light_keeps": 1.0, "floor": 0.0, "bold_keeps": 0.0,
 	},
 }
 

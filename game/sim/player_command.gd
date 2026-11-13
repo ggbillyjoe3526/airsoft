@@ -76,6 +76,8 @@ var ready_grenade: Grenade.Kind = Grenade.Kind.NONE
 ## one in reach nearest the view's line, or `door_to_use` when the controller picked one (a bot, the door its walk goes
 ## into; -1: none picked).
 var use_door: bool = false
+## Use held (PB1): hands on Plant The Bomb's device, to pick it up, arm it in a site or disarm it (Plant).
+var interact: bool = false
 var door_to_use: int = -1
 var lift_to_use: int = -1
 var lift_stop: int = -1
@@ -115,6 +117,7 @@ func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
 	throw_grenade = Grenade.Kind.NONE
 	ready_grenade = Grenade.Kind.NONE
 	use_door = false
+	interact = false
 	door_to_use = -1
 	lift_to_use = -1
 	lift_stop = -1
@@ -153,6 +156,7 @@ func copy_from(other: PlayerCommand) -> void:
 	throw_grenade = other.throw_grenade
 	ready_grenade = other.ready_grenade
 	use_door = other.use_door
+	interact = other.interact
 	door_to_use = other.door_to_use
 	lift_to_use = other.lift_to_use
 	lift_stop = other.lift_stop

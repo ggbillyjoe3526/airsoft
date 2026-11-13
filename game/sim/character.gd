@@ -114,6 +114,8 @@ var grenades: Grenades.Hand = Grenades.Hand.new()
 ## Dazzled by a flash (Grenades): seconds left, and how long the dazzle was when it began (for its fade).
 var dazzle_left: float = 0.0
 var dazzle_total: float = 0.0
+## Use held this tick, in play (PlayerCommand.interact; PB1): hands for Plant The Bomb's device (Plant).
+var using: bool = false
 
 
 func _init(character_id: int = 0, character_team: int = 0, spawn: Vector3 = Vector3.ZERO, facing: float = 0.0,
@@ -220,3 +222,4 @@ func respawn() -> void:
 	sprint_weight = 0.0
 	dazzle_left = 0.0
 	dazzle_total = 0.0
+	using = false

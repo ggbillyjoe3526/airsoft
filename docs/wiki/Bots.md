@@ -100,12 +100,40 @@ pick A or B each round and head for the pole in play, the one being fought over 
 fought over, and the nearest free defenders come to B while those at A stay. Each defender keeps watch round the pole
 nearest the point it holds.
 
+## Bots in Plant The Bomb
+
+Attacking bots pick Site A or B each round. One of them fetches the bomb, the others walk their lanes, and the
+carrier goes in once its lane is clear, or at once when <!-- wiki:config bot_config.plant_rush_clock --> seconds
+of the round are left. It plants kneeling behind cover inside the site where there is some, while the others guard
+it from cover close by, and they stay to hold the armed bomb. If the carrier is hit, the nearest attacker picks the
+bomb up; dropped by the other site, they plant there instead.
+
+**The bomb is yours first.** At the start of a round your teammates wait beside it for <!-- wiki:config bot_config.plant_player_first -->
+seconds, or until you have walked <!-- wiki:config bot_config.plant_player_left -->
+m away without it. Carry it towards the other site and they come
+with you.
+
+Defending bots hold their posts by the sites; where their posts would leave one site open, half
+of them guard that site instead. They learn the bomb is being planted only when one of them is within <!-- wiki:config bot_config.plant_heard -->
+m of it and hears the code keyed in. Once it is armed every free
+defender goes back to it; the nearest defuses while the others cover.
+
+**The defuse is yours first too.** While you are in play within <!-- wiki:config bot_config.plant_player_claim -->
+m of the armed bomb no bot defuses it, until the fuse leaves a
+bot only just time: its defuse plus <!-- wiki:config bot_config.plant_takeover_margin --> seconds. With your own
+hands on it they never take over. A [squad order](Squad-Orders) keeps a bot off the bomb: it does what you asked.
+
+**Smoke does not hide the work.** A bot within <!-- wiki:config bot_config.plant_gives_away -->
+m of whoever is keying the bomb in or defusing it makes them out through smoke: the keypad and the kit are too loud
+to miss that close. That goes for you as for them; anyone with their hands off the bomb is hidden as usual.
+
 ## Callouts
 
 Bots tell their team what they already do, in words in the [hit feed](HUD-and-Minimap#callouts)
 with a radio click, never a voice: a sighting ("Contact, Dock!"), a noise while nobody on the team sees anyone, the
-team's hits ("Two left!", "Last one!"), a reload under fire, setting off after someone, settling at a hold and the
-flag going up. A team speaks one call at a time, a moment apart, the most urgent first; each personality has its own
+team's hits ("Two left!", "Last one!"), a reload under fire, setting off after someone, settling at a hold, the
+flag going up, and in Plant The Bomb the bomb being planted, armed, defused or dropped ("They're planting at A
+site!"). A team speaks one call at a time, a moment apart, the most urgent first; each personality has its own
 lines and talks more or less. Hit players never talk, and what a bot says never changes how anyone plays. You see
 only your own team's words; an enemy close by is heard keying their radio.
 
