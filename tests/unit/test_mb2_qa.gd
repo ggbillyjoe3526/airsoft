@@ -92,3 +92,59 @@ func test_the_long_road_is_walked_end_to_end_on_its_strip() -> void:
 	for i in ROAD.size() - 1:
 		straight += ROAD[i].distance_to(ROAD[i + 1])
 	assert_lt(length, straight * 1.1, "the way from end to end is the road itself, not a way round")
+
+
+func _dist_to_road(x: float, z: float) -> float:
+	var best := INF
+	var p := Vector2(x, z)
+	for i in ROAD.size() - 1:
+		var a := ROAD[i]
+		var ab := ROAD[i + 1] - a
+		var t := clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		best = minf(best, p.distance_to(a + ab * t))
+	return best
+
+
+func test_no_bush_stands_on_the_long_road() -> void:
+	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/maps/woodland.json"))
+	var bushes: Array = (raw as Dictionary).get("foliage", [])
+	assert_gt(bushes.size(), 50, "Woodland has bushes")
+	var on_road := PackedStringArray()
+	for item: Variant in bushes:
+		var d := item as Dictionary
+		var x := float(d["x"])
+		var z := float(d["z"])
+		if _dist_to_road(x, z) < CLEAR_HALF + float(d.get("radius", 0.0)):
+			on_road.append("(%.1f, %.1f)" % [x, z])
+	assert_eq(on_road.size(), 0, "bushes reaching the road's strip: %s" % [on_road])
+
+
+func test_the_tyre_tracks_run_along_the_new_road() -> void:
+	var tracks := 0
+	for m in map.marks:
+		if m.kind == WearMark.TYRES:
+			tracks += 1
+			assert_lt(_dist_to_road(m.at.x, m.at.y), CLEAR_HALF, "tyre tracks start on the road: %s" % m.at)
+	assert_gt(tracks, 0, "Woodland has tyre tracks")
+
+
+func test_every_point_along_the_long_road_is_named() -> void:
+	var unnamed := PackedStringArray()
+	for p in _road_points():
+		if MapAreas.area_at(map.areas, p).is_empty():
+			unnamed.append("(%.1f, %.1f)" % [p.x, p.z])
+	assert_eq(unnamed.size(), 0, "road points with no area name: %s" % [unnamed])
+
+
+## One seeded match in each mode on Woodland: it finishes and no bot is held up (the road's S bends are walked).
+func test_a_seeded_match_in_each_mode_on_woodland_holds_no_bot_up() -> void:
+	for mode: RoundState.Mode in [RoundState.Mode.ELIMINATION, RoundState.Mode.ATTACK_DEFEND,
+			RoundState.Mode.PLANT_THE_BOMB]:
+		var runner := MatchRunner.new(self, "woodland")
+		runner.mode = mode
+		var t := runner.play(5, 1800.0)
+		runner.free_level()
+		gut.p("mode %d: %d rounds, %d hits, held up %d" % [mode, t.rounds.size(), t.hits, t.held_up])
+		assert_true(t.finished, "mode %d: the match is won" % mode)
+		assert_gt(t.hits, 0, "mode %d: BBs land" % mode)
+		assert_eq(t.held_up, 0, "mode %d: no bot held up" % mode)
