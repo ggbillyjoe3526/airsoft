@@ -28,7 +28,8 @@ One team attacks, the other defends a flagpole at the defenders' end. The team y
 swap at half time; the Match card says who attacks first. Depot and Woodland have two poles, **A** and **B**, one on
 each site: the attackers win by raising their flag on either, and each pole's flag goes up and down on its own.
 
-- **Attackers** raise their flag by standing at the pole, on the rope, for **<!-- wiki:config flag_config.raise_time --> seconds**, then
+- **Attackers** raise their flag by standing at the pole, on the rope, for **<!-- wiki:config flag_config.raise_time --> seconds** (a
+  big field takes longer: the [Maps](Maps) table lists each field's flag raise), then
   win the round by **holding it up for <!-- wiki:config flag_config.hold_time --> seconds**. The flag stays up on its own, but a defender on the
   rope pulls it off the top and the hold starts again; with both teams on the rope the hold waits. The FLAG gauge
   counts the hold down: **HOLD 3, 2, 1**
@@ -52,8 +53,10 @@ A map needs a flagpole for Attack / Defend; the Match screen says when one hasn'
 ## Plant The Bomb
 
 One team carries a bomb to the other team's end and plants it at **Site A** or **Site B**; the other team keeps it
-out, or defuses it before it goes off. The bomb is a field prop, a timer box with a lamp and a buzzer: when it goes
-off it pops a cloud of dust and sounds its buzzer, and nobody is hit by it. The team you pick attacks first, and the
+out, or defuses it before it goes off. The bomb is a field prop: four grey-green blocks bound with silver tape, a
+keypad timer with an LCD and a lamp on top, and a red and a blue wire looping into the front end; carried, it rides on
+its side at the carrier's hip. When it goes off it pops a cloud of dust and sounds its buzzer, and nobody is hit by
+it. The team you pick attacks first, and the
 sides swap at half time. Every field has both sites.
 
 - **The bomb starts on the ground** just ahead of the attackers' start each round. Stand over it and **hold <!-- wiki:key use_door -->**
@@ -77,7 +80,9 @@ the code as the clock runs out gets up to <!-- wiki:config plant_config.max_over
 
 On the field each site has a ring on the floor and a big **A** or **B** over it. The ring takes the attackers' colour
 while the bomb is keyed in and once it is armed, and the defenders' while it is being defused. The bomb's lamp winks
-amber while it waits on the ground, flashes red with each beep once armed, and ends green when it is made safe.
+amber while it waits on the ground, flashes red with each beep once armed, and ends green when it is made safe. While
+someone defuses it, a pair of teal wire cutters lies open beside its wires. Whoever carries it wears it strapped at the
+left hip, so you can tell the carrier at a glance.
 
 A map needs bomb sites for Plant The Bomb; the Match screen says when one hasn't got them.
 

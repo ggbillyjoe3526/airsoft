@@ -105,19 +105,27 @@ static func team_size(map: MapCatalog.Entry, custom: CustomRules) -> int:
 
 
 ## The round tuning a match on `map` plays: `base` with the Custom switches in force (`custom`, null under Skirmish), the
-## team size the map gives (team_size) and, under Skirmish, the map's round length (data/maps.md Round, WR2). A copy
-## wherever it differs from `base`, which is never written (the loaded tuning is shared).
+## team size the map gives (team_size), under Skirmish the map's round length (data/maps.md Round, WR2) and, under
+## either, the map's flag raise time (data/maps.md Raise, MB3). A copy wherever it differs from `base`, which is never
+## written (the loaded tuning is shared).
 static func match_tuning(base: SimTuning, map: MapCatalog.Entry, custom: CustomRules) -> SimTuning:
 	var t := base if custom == null else custom.applied_to(base)
 	var size := team_size(map, custom)
 	var length := round_time(map, custom, t.rounds.round_time)
-	if t.rounds.team_size == size and t.rounds.round_time == length:
-		return t
-	if t == base:
-		t = base.duplicate() as SimTuning
-		t.rounds = base.rounds.duplicate() as RoundConfig
-	t.rounds.team_size = size
-	t.rounds.round_time = length
+	var raise := raise_time(map, t.flag.raise_time)
+	if t.rounds.team_size != size or t.rounds.round_time != length:
+		if t == base:
+			t = base.duplicate() as SimTuning
+		if t.rounds == base.rounds:
+			t.rounds = base.rounds.duplicate() as RoundConfig
+		t.rounds.team_size = size
+		t.rounds.round_time = length
+	if t.flag.raise_time != raise:
+		if t == base:
+			t = base.duplicate() as SimTuning
+		if t.flag == base.flag:
+			t.flag = base.flag.duplicate() as FlagConfig
+		t.flag.raise_time = raise
 	return t
 
 
@@ -127,6 +135,13 @@ static func round_time(map: MapCatalog.Entry, custom: CustomRules, played: float
 	if custom != null or map == null or map.round_time <= 0.0:
 		return played
 	return map.round_time
+
+
+## The seconds a flag takes to raise on `map`: the map's own (data/maps.md Raise), else `played`, the flag tuning's.
+static func raise_time(map: MapCatalog.Entry, played: float) -> float:
+	if map == null or map.raise_time <= 0.0:
+		return played
+	return map.raise_time
 
 
 ## `map_id` loaded as the Match page lists it: its problems (empty when it can be played) and whether it has a pole.

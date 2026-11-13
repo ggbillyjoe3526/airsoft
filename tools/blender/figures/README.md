@@ -6,7 +6,8 @@ The human figure's four heads, built from the owner's photos (`ref_images.zip` â
 | Script | What it holds |
 |---|---|
 | `headwear.py` | The heads (`Head_HighCut`, `Head_Cap`, `Head_Boonie`, `Head_FullCut`, each with `_LOD1` and `_LOD2`): what each wears, the levels of detail and the budget check. Run it to rebuild. |
-| `face.py` | The face in the balaclava's eye opening (FA1): the knit's hole, the skin (constrained Delaunay round the lids), the lids, the eyeballs and the knit hem; its four looks painted in the atlas. |
+| `face.py` | The face in the balaclava's eye opening (FA1): the knit's hole, the skin (constrained Delaunay round the lids), the lids, the eyeballs and the knit hem; and the eyes' shape. |
+| `face_paint.py` | The face's own map (MQ3C: 2048 x 1024, four looks side by side, about 0.14 mm a pixel), painted with numpy from where a pixel lies on the face in metres: skin with uneven tone and pores, brows and lashes as single tapered hairs, the lids' fold and fine lines, an iris of fibres, veined whites. |
 | `head_shapes.py` | The head and the helmet shells as formulas: the head's radius by azimuth and height, the shells' superellipsoid and rim curves. |
 | `head_textures.py` | The 2048 px atlas (colour, normal, ORM) painted with numpy: the knit, loop, mesh, shells, brims and straps, each drawn as used kit from where a pixel lies on the part in metres (MQ3B: peel and scratches in paint, a moulded grain, faded cloth, chipped mesh), and the tiles of the ear cups, cushions, goggle frame, the mask's binding and the headset's band. The maps are saved lossless: lossy colour bled one tile's edge into the next. |
 | `headkit.py` | Shared helpers: mesh building (`Part`), draping on the head (`Drape`), the atlas (`Atlas`, `Tile`). |
@@ -38,10 +39,19 @@ count changed.
   into squares.
 - **Team marks:** every surface on `TeamHeadwear` is tinted in game (the high cut's back patch, the full cut's band,
   the cap's front patch, the boonie's band).
-- **Face looks:** `Face` surfaces share the atlas; four looks (skin, brows, eyes) are painted in cells above the
-  swatches (`face.FACE_CELLS`, `LOOKS`) and the game offsets the material's UVs per figure (`FigureConfig.face_offsets`,
-  `face_look`). A new look is a new cell, a `LOOKS` entry and an offset; the mesh doesn't change. Nothing of the face
-  stands out of the knit's surface but the lids (1.5 mm at most), so gear fitted to the head clears it.
+- **Face looks:** `Face` surfaces draw from the face's own map (`face.FACE_MAP`, MQ3C; its old cells above the
+  atlas's swatches are empty); four looks (skin, brows, eyes) are painted in its cells (`face.FACE_CELLS`, `LOOKS`,
+  `face_paint.py`) and the game offsets the material's UVs per figure (`FigureConfig.face_offsets`, `face_look`). A
+  new look is a new cell, a `LOOKS` entry and an offset; the mesh doesn't change. Nothing of the face stands out of
+  the knit's surface but the lids (1.5 mm at most) and the brow's ridge over each eye (3 mm, `face.BROW_RIDGE`), so
+  gear fitted to the head clears it. The extracted
+  `human_face_*.webp` are packed like the atlas's (their `.import` files: compressed, the normal map marked as one,
+  the roughness map at half size); a hair or a pore is drawn at its real size, so nothing is finer than a pixel.
+  The skin's part keeps a flat copy of each eye (the lowest level shows it); the eyeballs draw from patches of their
+  own under the strip (`face.EYE_PATCH`), each with its glint (a small painted catchlight: a mirror facet in the
+  map's metal channel showed as a square once packed) and the lids' shade in the map's occlusion channel (the
+  `Face` material reads it). The lenses' tint is
+  `splice_heads.LENS_TINT`: its alpha stays over 0.1, or Godot stops a lens shading the face.
 - **Space:** Blender metres, +Z up, the figure facing -Y, +X its left, at the rest pose. Everything sits on the whole
   LOD0 head, so the gear lands in the same place at every level.
 

@@ -373,6 +373,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   map naming a boot trail has it left out with a warning.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
+- **The figure's face is drawn as a real one (owner, 2026-11-13, MQ3C).** "Has the players face been improved? If
+  not then add that to the list of models to work on", in the pass that makes every model "more realistic". So the
+  face in the eye opening is no longer the clean stylised one FA1 drew: skin with its uneven tone and pores, brows
+  and lashes of single hairs, an iris of fibres, on a map of its own (2048 x 1024, four looks). Still only the
+  strip round the eyes is modelled: every head covers the rest (docs/records/MQ3C.md). The goggles' lenses are a
+  thin dark tint (alpha 0.11, kept over Godot's 0.1 so a lens still shades the face): the pale thicker one laid a
+  grey haze over the pupils. Skin stays drier than 0.55 roughness: a lamp lights single pores as white sparks.
 
 ## Gameplay and feel
 
@@ -635,7 +642,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   east end; Beta starts in the west. Attack / Defend follows the pick.
 - **Attack / Defend is the flag mode, named so Capture the Flag can be its own mode later (owner, 2026-10-01).** Standing
   within 1.6 m of the pole for 7 s raises the flag, and it must then stay up for 3 s to win: no longer an instant win
-  (BP8, owner 2026-11-08: longer raise and hold; was 5 s and none; tuned on the balance report). Defenders at the
+  (BP8, owner 2026-11-08: longer raise and hold; was 5 s and none; tuned on the balance report). A field may set
+  its own raise (`data/maps.md`, Raise): Woodland's is 9 s (owner, 2026-11-13, MB3 below). Defenders at the
   pole pull it down, and a defender on the rope restarts the hold. A time-out wins for the defenders; overtime lasts
   at most 15 s if attackers are on the rope, or a raised flag is held, at the buzzer. The
   pole is visual only: no collider, and BBs pass through.
@@ -877,23 +885,56 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   45 % of rounds, not 27 %).
 - **Woodland's lanes are broken by pieces on the high ground and by leaves (2026-11-12, MB1).** A hazel hedge on the
   Ridge's brow, a fallen tree and a log stack at the North bridge's heads, a west wall with a window and a doorway on
-  the Fort, three fallen trees across the Long road (the first on the hump's top) and a log stack across it east of the
-  Culvert, a fallen tree in the Clearing where the west's sweep ends, two spruce thickets on the Ford's east bank with
+  the Fort, a fallen tree in the Clearing where the west's sweep ends, two spruce thickets on the Ford's east bank with
   hazels on the crest at the head of its ramp, and a log stack beside flag B, whose forward defender waits behind the
-  crates north of the road mouth (in the mouth he was shot from 25 m before a fight reached the flag). A piece in a dip
-  hides nobody on a rise behind it (the road's stack is a gate screen's 2.8 m where the lane leaves the Culvert: at
-  1.8 m the road west of it looks over it at a chest by flag B's pole, 60 m off, and 3.5 m further east it was the
-  attackers' cover onto the site), and a screen with one gap is a trap for whoever must come through: bushes are walked through on a broad front.
+  crates north of the road mouth (in the mouth he was shot from 25 m before a fight reached the flag). (MB1 also
+  laid three fallen trees and a log stack across the Long road; the owner had the road cleared, MB2 below.) A piece
+  in a dip hides nobody on a rise behind it (the road west of the Culvert looks over a 1.8 m stack in the dip at a
+  chest by flag B's pole, 55 to 60 m off), and a screen with one gap is a trap for whoever must come through: bushes are walked through on a broad front.
   A pole walled on two sides hides whoever raises it as well as whoever holds it: a pen of two stacks round flag B,
   with the defenders' posts inside it, gave the attackers 78 % of 120 rounds, and came out. The north lane's two stops
   are at the North bridge's west head (the field's middle crosses there, and the bridge is a footbridge 1.8 m wide:
   sent over it to its east end, the west lost that lane 133 to 187). The lanes' ranges now differ (Elimination's median
   knock-out: the road 14 m, the Clearing 19 m, the north 26 m; each was about 40 m). The Ridge's 86 m overlook of the
   WR1 decision is gone; the 170 m exception stays for the pinholes between trunks.
+- **Woodland's Long road is clear (owner, 2026-11-12, MB2).** "I don't want woodpiles over the road ... The road
+  should be clear." Nothing stands on the road's 5 m gravel strip from camp to camp: no woodpile, no fallen tree, no
+  spruce (`tools/woodland/check.py`, `test_mb2_qa`), and a thicket keeps 3.5 m off its centre line. MB1's three
+  fallen trees and its stack across the road are gone, and the stack lowered to 1.8 m with spruce behind it (his
+  card, "Lower it to 1.8 m") was never merged; every woodpile and cordwood stack on the field is 1.8 m (his
+  2026-11-09 ruling) and only the camps' gate screens stand 2.8 m. The road itself ends its long line: west of the
+  Culvert it bends south round one stand of spruce and back north round another, and nobody sees through the double
+  bend from either side (the longest line along the strip is 63 m, from the west camp's gate down to the bend, and
+  57 m from the Sawmill's road mouth to it; the Truck bend to flag B was one 60 m line). The south lane's two stops
+  are at the bend's east mouth and the Culvert's west head. At flag B the sawn boards moved from the pole's north
+  side to the shed's east end (beside the pole they hid whoever raised the flag from the defenders coming back, and
+  the defender behind them lost his duel with the pole 10 to 18 a hundred rounds, 24 knock-outs to 43; from the Back
+  track's corner he now wins it 15 to 13), and the verge stack west of the road mouth is turned across the verge to keep the bend,
+  55 m off and 0.9 m higher, off the pole's ring. Bots, 6v6, Normal, the same 32 seeds: the west end takes 47 % ±3
+  of Elimination's rounds (48 % ±3 for MB1's road; band 45 to 55) and the attackers 69 % ±3 of Attack / Defend's
+  (62 % ±3 for MB1's road; band 40 to 65, so outside it: `docs/KNOWN_ISSUES.md`). Both were measured before one
+  Brow hazel moved off the north lane at the end of MB2; with it moved the west end took 41 % ±3 and the attackers
+  68 % ±3 on the same seeds (MB3). MB4 put the hazel back once BU1 had bots in one bush shoot it out: it is the
+  west's screen at the Ridge's brow, and the west end takes 47.6 % ±3.2 again.
+- **Woodland's flag takes 9 s to raise (owner, 2026-11-13, MB3).** His pick on the card "Make the flag take longer
+  to raise on Woodland, to help its defenders?": "9 s on Woodland (7 s now)", over 8 s, leaving it, and moving both
+  flags. Every other field keeps BP8's 7 s, and the 3 s hold is the same everywhere. A field's raise is its Raise
+  cell in `data/maps.md` (3 to 20 s, blank for the game's), played by Skirmish and Custom alike; no menu sets it.
+  Why Woodland: its poles are 77 m apart, the attackers all go for one of them, and only the two defenders posted
+  there are near it, so 7 s was up before the others arrived. On the field as MB2 left it (its hazel moved) the
+  attackers took 68 % ±3 of rounds at 7 s (245 rounds, seeds 1 to 32, band 40 to 65 %) and take 60 % ±3 at 9 s
+  (231). By the pole the attackers stood nearer in a round's last 15 s they won 72 % ±3 at flag A and 65 % ±3 at
+  flag B (64 seeds, 7 s), so flag B's cover was not it, and sending more defenders to pull a flag down
+  (`BotConfig.retakers` 3 or 4 for 2) moved it by less than the noise (`docs/records/MB3.md`).
 - **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the
   north lane has one stop 4.45 m either side of the field's middle. No block moved.
+- **Stockade has no Bell tower (owner, 2026-11-13, SK1).** Concept 1's tower, built from Woodland's watch tower, put a
+  standing eye 5 m up that saw over every 2.6 m wall (3,839 lines over 34 m, the longest 65 m to the attackers' gate).
+  Asked whether to keep it, he chose "Leave the tower out": a Bell house stands across Main Street's east end in its
+  place, a door onto the street behind and one onto the Green. Its bots keep to the outer ways, not through the Forge
+  and the Barn (owner, 2026-11-13: "Leave it to your playtest"; lanes through them cost the attackers about 10 points).
 
 ## Replicas, Loadout and levels
 

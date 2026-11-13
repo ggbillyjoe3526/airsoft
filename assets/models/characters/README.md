@@ -10,7 +10,8 @@
   them: `legacy/browser/src/config/figureRig.ts`.
 - The human's four heads (`Head_HighCut`, `Head_Cap`, `Head_Boonie`, `Head_FullCut` and their LODs) are rebuilt from
   the owner's photos by `tools/blender/figures/` (BL11), which splices them into `human.glb` with their own atlas
-  (`human_headwear_*`); the rest of the figure is left alone.
+  (`human_headwear_*`) and the face's own map (`human_face_*`, MQ3C: four looks of skin, brows and eyes, 2048 x 1024);
+  the rest of the figure is left alone.
 - The human's `Body` (its clothes, gloves and boots, with `Body_LOD1` and `Body_LOD2`) is rebuilt by
   `tools/blender/figures/body.py` (BL10) and spliced in by node, leaving the skeleton, the clips and the other parts
   alone: `BODY_MAPS=<dir> python -I tools/blender/figures/body.py <repo> out.blend body.glb`, then the splicer

@@ -1,13 +1,15 @@
 """Swaps the figure's four heads into human.glb at the glTF level (BL11, 2026-11-05).
 
-Only the Head_* nodes' meshes, the Headwear and TeamHeadwear materials and their three atlas images change: each new
+Only the Head_* nodes' meshes, the Headwear, TeamHeadwear and Face materials and their images (the heads' atlas and
+the face's own map, three each) change: each new
 mesh is skinned to the Head joint, but for its neck inside the shirt's collar, which takes the weights of the collar
 round it (CN1), so the neck bends with the collar instead of swinging out through it; every node, the skeleton, the
 inverse bind matrices, the clips and the other meshes and materials stay exactly as they were. What nothing uses any more (the old head meshes and their
 accessors) is dropped and the binary chunk repacked, so the splice can run again on any later human.glb (another
 thread's body or kit) and give the same heads. Joints are found by name.
 
-    python tools/blender/figures/splice_heads.py <human.glb> <heads.glb> <col.webp> <nrm.webp> <orm.webp> [out.glb]
+    python tools/blender/figures/splice_heads.py <human.glb> <heads.glb> <col.webp> <nrm.webp> <orm.webp>
+        <face col.webp> <face nrm.webp> <face orm.webp> [out.glb]
 
 headwear.py runs it after building the heads; it needs only numpy.
 """
@@ -24,9 +26,11 @@ HEAD_JOINT = "Head"
 GEAR = "Headwear"
 TEAM = "TeamHeadwear"
 LENS = "Lens"
-FACE = "Face"  # the eye opening's skin, lids and eyes (face.py): the same atlas, its UVs offset per figure in game
+FACE = "Face"  # the eye opening's skin, lids and eyes (face.py): its own map (MQ3C), its UVs offset per figure in game
 TEAM_SOURCE = "TeamColour"  # the figure's team material: TeamHeadwear starts from its colour
 IMAGE_STEM = "headwear"
+FACE_STEM = "face"
+LENS_TINT = (0.22, 0.235, 0.245, 0.11)
 FLOAT, USHORT, UINT, UBYTE = 5126, 5123, 5125, 5121
 COMPONENTS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT4": 16}
 DTYPES = {FLOAT: np.float32, USHORT: np.uint16, UINT: np.uint32, UBYTE: np.uint8}
@@ -167,7 +171,7 @@ def _image(j: dict, w: Writer, name: str, blob: bytes) -> int:
     return len(j["textures"]) - 1
 
 
-def splice(human_path: str, heads_path: str, images: dict, out_path: str) -> None:
+def splice(human_path: str, heads_path: str, images: dict, out_path: str, face_images: dict) -> None:
     human = Glb(human_path)
     heads = Glb(heads_path)
     j = human.json
@@ -190,26 +194,32 @@ def splice(human_path: str, heads_path: str, images: dict, out_path: str) -> Non
 
     collar = _collar(human)
 
-    # Materials: Headwear and TeamHeadwear on the new atlas; Lens clear.
+    # Materials: Headwear and TeamHeadwear on the new atlas; Face on its own map; Lens clear.
     tex = {k: _image(j, w, "%s_%s" % (IMAGE_STEM, k), open(p, "rb").read()) for k, p in images.items()}
+    face_tex = {k: _image(j, w, "%s_%s" % (FACE_STEM, k), open(p, "rb").read()) for k, p in face_images.items()}
     team_colour = [0.047, 0.258, 1.0, 1.0]
     for m in j["materials"]:
         if m.get("name") == TEAM_SOURCE:
             team_colour = m.get("pbrMetallicRoughness", {}).get("baseColorFactor", team_colour)
-    for name, colour in ((GEAR, None), (TEAM, team_colour), (FACE, None)):
+    for name, colour, maps in ((GEAR, None, tex), (TEAM, team_colour, tex), (FACE, None, face_tex)):
         m = j["materials"][_material(j, name)]
         m.clear()
-        m.update({"name": name, "doubleSided": True, "normalTexture": {"index": tex["nrm"]},
-                  "pbrMetallicRoughness": {"baseColorTexture": {"index": tex["col"]},
-                                           "metallicRoughnessTexture": {"index": tex["orm"]},
+        m.update({"name": name, "doubleSided": True, "normalTexture": {"index": maps["nrm"]},
+                  "pbrMetallicRoughness": {"baseColorTexture": {"index": maps["col"]},
+                                           "metallicRoughnessTexture": {"index": maps["orm"]},
                                            "metallicFactor": 1.0, "roughnessFactor": 1.0}})
         if colour is not None:
             m["pbrMetallicRoughness"]["baseColorFactor"] = colour
-    # The lens is clear with a slight smoke (goggle photo 1), so the eyes show through.
+        if name == FACE:
+            # The face's map also says how open each pixel is to the light round it (the eyes under their lids).
+            m["occlusionTexture"] = {"index": maps["orm"]}
+    # The lens is clear with a slight smoke (goggle photo 1), so the eyes show through. Its tint is dark and thin
+    # (MQ3C): a pale one laid a grey haze over the eyes, and the pupils came out grey. LENS_TINT's alpha stays over
+    # Godot's 0.1, under which a lens stops shading the face behind it.
     lens = j["materials"][_material(j, LENS)]
     lens.clear()
     lens.update({"name": LENS, "doubleSided": True, "alphaMode": "BLEND",
-                 "pbrMetallicRoughness": {"baseColorFactor": [0.72, 0.76, 0.78, 0.24], "metallicFactor": 0.0,
+                 "pbrMetallicRoughness": {"baseColorFactor": list(LENS_TINT), "metallicFactor": 0.0,
                                           "roughnessFactor": 0.04}})
     remap = {i: _material(j, m["name"]) for i, m in enumerate(heads.json.get("materials", []))}
 
@@ -440,6 +450,7 @@ def export_heads(path: str, objects: dict) -> None:
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    out = args[5] if len(args) > 5 else args[0]
-    splice(args[0], args[1], {"col": args[2], "nrm": args[3], "orm": args[4]}, out)
+    out = args[8] if len(args) > 8 else args[0]
+    splice(args[0], args[1], {"col": args[2], "nrm": args[3], "orm": args[4]}, out,
+           {"col": args[5], "nrm": args[6], "orm": args[7]})
     print("wrote", out)

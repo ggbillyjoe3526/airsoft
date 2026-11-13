@@ -1,6 +1,6 @@
 ### Plant The Bomb
 - New mode on the Match page, third card after Attack / Defend and Elimination, on Depot, Woodland and Subway.
-- One team carries a yellow bomb to the other team's end and plants it at Site A or Site B; the other team keeps it out or defuses it.
+- One team carries a bomb to the other team's end and plants it at Site A or Site B; the other team keeps it out or defuses it.
 - Hold Use (G by default) to pick the bomb up, plant it inside a site's ring (3.5 seconds) and defuse it (6 seconds).
 - Let go of a defuse past half way and the work is kept.
 - Once armed, the bomb goes off after 30 seconds, beeping faster. It pops dust and buzzes, and hits nobody.
@@ -9,4 +9,4 @@
 - Once armed, getting the attackers out is not enough: the bomb still has to be defused.
 - Bots fetch the bomb, push a site, plant behind cover and come back to defuse. A bot within 5 m of a planter or defuser sees them through smoke.
 - The ATK and DEF tags, the fuse on the clock, a PLANTING / BOMB gauge, a Use prompt, site markers and rings with A and B, and the sites and bomb on the minimap are all new.
-- The bomb's look and sounds are stand-ins until the final model and recordings are in.
+- The bomb's sounds are stand-ins until the final recordings are in.

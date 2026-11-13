@@ -579,6 +579,10 @@ Once the rest of step 26 lands:
 - [ ] **Bushes stop BBs (WL5, FO1).** A BB into a bush's middle never comes out, with a leafy rustle and falling
   leaves; through the edge it comes out off its line and slower. Fire from deep inside: "Leaves in the way · step
   clear to shoot". A Normal bot holds fire until it has a clearer line; an Easy one fires into the leaves.
+- [ ] **A bush at point blank (BU1).** Crouch deep in a big bush and let a bot walk in to you, or watch two foes meet
+  inside one: within 2.5 m the bot opens fire as soon as a BB can get through the leaves to you (pressed close, about
+  half a metre of leaf), and nobody stands pushing into anybody. From 3 m or more it still holds fire through the
+  bush.
 - [ ] **Night sight (WL6).** Bots see about 40 m into a light pool, 25 m in the open and 10 m under the trees; fires
   and lanterns give you away.
 - [ ] **The look and sound (the owner's models).** Bark trunks, log walls and log piles, plank fences; wind in the
@@ -1677,6 +1681,27 @@ four heads differ.
 - [ ] **At range nothing changed.** A figure 30 m away reads as before, with no shimmer on the arm bands or the
   soles as it walks.
 - [ ] **Faces** look as before.
+
+## Faces up close (MQ3C)
+
+Stand face to face with a teammate at the start of a round, or watch a bot from the dead zone, on High or Ultra.
+Look at several: there are four faces (fair with blue eyes, medium with green, tan with brown, deep with dark brown).
+
+- [ ] **Skin** looks like skin, not plastic: uneven in tone, a little darker under the eyes, with a fine grain. No
+  white sparks or streaks beside the nose under a lamp or the sun.
+- [ ] **Brows** are hairs, low and heavy over the eyes, thicker toward the nose, not a painted block; the fair
+  face's brows still read at 2 to 3 m. **Lashes** are a fine fringe, not a drawn outline.
+- [ ] **Eyes** look alive: almond shaped, about one eye's width apart (neither small nor far apart), the upper lid
+  resting on the iris (not staring), a black pupil with a small glint, an iris of fine fibres with a darker rim,
+  whites that are not pure white, a pink corner by the nose. No white line along the lower lid.
+- [ ] **The goggles' lenses** are a thin dark tint on all four heads: the eyes show clearly through them, with no
+  grey haze.
+- [ ] **Through the goggles and under the helmets, cap and hat** nothing pokes through a lens or the balaclava, from
+  the front and from the side, and from the side at 1 m the eye sits under the brow (not stuck on, not in a hole).
+  On the full-cut helmet, no skin or lid edge shows by the hem at the lower outer lid.
+- [ ] **At 10 to 40 m** a face still reads as eyes and brows in the opening, with no shimmer or ragged dark ring
+  round the eyes as the bot moves,
+  and none along the opening's lower hem on the cap (look at 1 m too).
 
 ## Reporting what you find
 

@@ -33,7 +33,7 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var revealed_view_distance: float = 70.0
 @export var revealed_for: float = 4.0
 ## Anyone this close is noticed whichever way the bot faces (m): footsteps, breathing, kit. Bushes hide no one this
-## close.
+## close, and within it a bot fires through as much bush as a BB gets through (BU1).
 @export var close_awareness: float = 2.5
 ## How much bush a bot sees someone through (m of leaves along the line, WL5, FO1): someone at the edge of a bush is
 ## seen, deeper in or behind one is not. The same as what stops a BB (BallisticsConfig.leaf_stop_depth; a test holds
@@ -142,7 +142,8 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Holds fire when its aim line meets a wall within this share of the distance to the target.
 @export var aim_wall_fraction: float = 0.5
 ## Hold fire when the line to the target runs through more than this much bush (m of leaves, FO1): BBs pushed that far
-## in come out well off their line or not at all, so the bot waits for a clearer shot.
+## in come out well off their line or not at all, so the bot waits for a clearer shot. Not at point blank (within
+## close_awareness across, BU1): there it fires whenever a BB gets through to the body (BotCombat.leaves_in_line).
 @export var foliage_fire_through: float = 0.25
 
 @export_group("Lanes and holds")
