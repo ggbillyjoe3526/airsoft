@@ -12,6 +12,9 @@ const TEAM_STRIP := Rect2i(32, 32, 256, 32)
 const POP_AT_MOST := 1.25
 const GRID := 1024
 const DOUBLE_COVER_AT_MOST := 0.01
+## A face's texel density may differ from its chart's mean by this factor at most (the worker's figure is 0.81).
+const CHART_FACE_AT_LEAST := 0.7
+const KIT_BUDGET := 10300
 const MAPS: Array[String] = ["teamgear_col", "teamgear_nrm", "teamgear_orm", "pads_col", "pads_nrm", "pads_orm"]
 
 var models: FigureModels = null
@@ -237,3 +240,129 @@ func test_the_team_paint_still_multiplies_the_baked_colour() -> void:
 	assert_eq(copy.albedo_texture, src.albedo_texture)
 	assert_eq(copy.normal_texture, src.normal_texture)
 	assert_true(copy.resource_name.begins_with("TeamGear") or copy.resource_name.to_lower().begins_with("team"))
+
+
+## Per triangle: [chart id, UV area, true area, UV orientation sign]. A chart is the triangles joined by shared vertices.
+static func _faces(mesh: Mesh, surface: int) -> Array:
+	var arrays := mesh.surface_get_arrays(surface)
+	var uv := arrays[Mesh.ARRAY_TEX_UV] as PackedVector2Array
+	var pos := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+	var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+	var parent := PackedInt32Array()
+	parent.resize(pos.size())
+	for v in pos.size():
+		parent[v] = v
+	for i in range(0, index.size(), 3):
+		for k in 2:
+			var ra := _root(parent, index[i])
+			var rb := _root(parent, index[i + 1 + k])
+			if ra != rb:
+				parent[rb] = ra
+	var out: Array = []
+	for i in range(0, index.size(), 3):
+		var a := index[i]
+		var b := index[i + 1]
+		var c := index[i + 2]
+		var area3 := (pos[b] - pos[a]).cross(pos[c] - pos[a]).length() * 0.5
+		var area2 := (uv[b] - uv[a]).cross(uv[c] - uv[a]) * 0.5
+		if area3 > 1e-9:
+			out.append([_root(parent, a), absf(area2), area3, signf(area2)])
+	return out
+
+
+static func _root(parent: PackedInt32Array, v: int) -> int:
+	var r := v
+	while parent[r] != r:
+		r = parent[r]
+	return r
+
+
+func test_no_chart_face_is_badly_shrunk_or_stretched() -> void:
+	var root := _human()
+	for part in BAKED:
+		var mesh := _mesh(root, part)
+		for family in FAMILIES:
+			var at := _surface(mesh, family)
+			if at < 0:
+				continue
+			var faces := _faces(mesh, at)
+			var uv_sum := {}
+			var true_sum := {}
+			for f: Array in faces:
+				uv_sum[f[0]] = float(uv_sum.get(f[0], 0.0)) + float(f[1])
+				true_sum[f[0]] = float(true_sum.get(f[0], 0.0)) + float(f[2])
+			var bad := 0
+			var worst := 1.0
+			for f: Array in faces:
+				if float(true_sum[f[0]]) < 1e-6:
+					continue
+				var scale := float(uv_sum[f[0]]) / float(true_sum[f[0]])
+				var rel := (float(f[1]) / float(f[2])) / scale
+				worst = minf(worst, rel)
+				if rel < CHART_FACE_AT_LEAST or rel > 1.0 / CHART_FACE_AT_LEAST:
+					bad += 1
+			gut.p("%s %s charts %d faces %d worst %.3f outside %d" % [part, family, uv_sum.size(), faces.size(), worst, bad])
+			assert_lt(float(bad) / float(maxi(1, faces.size())), 0.01, "%s %s: faces far from their chart's scale (worst %.3f)" % [part, family, worst])
+
+
+func test_no_uv_triangle_is_flipped_against_its_chart() -> void:
+	var root := _human()
+	for part in BAKED:
+		var mesh := _mesh(root, part)
+		for family in FAMILIES:
+			var at := _surface(mesh, family)
+			if at < 0:
+				continue
+			var pos_count := {}
+			var all_count := {}
+			var faces := _faces(mesh, at)
+			for f: Array in faces:
+				all_count[f[0]] = int(all_count.get(f[0], 0)) + 1
+				if float(f[3]) > 0.0:
+					pos_count[f[0]] = int(pos_count.get(f[0], 0)) + 1
+			var minority := 0
+			for c: int in all_count:
+				var p := int(pos_count.get(c, 0))
+				minority += mini(p, int(all_count[c]) - p)
+			gut.p("%s %s minority-wound faces %d of %d" % [part, family, minority, faces.size()])
+			assert_lt(float(minority) / float(maxi(1, faces.size())), 0.005, "%s %s: flipped UV triangles" % [part, family])
+
+
+func test_kit_stays_within_its_triangle_budget() -> void:
+	var mesh := _mesh(_human(), "Kit")
+	var triangles := 0
+	for i in mesh.get_surface_count():
+		triangles += (mesh.surface_get_arrays(i)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+	gut.p("Kit triangles %d" % triangles)
+	assert_lte(triangles, KIT_BUDGET, "Kit triangles")
+
+
+func test_vertex_normals_are_unit_and_face_outward_of_their_triangles() -> void:
+	# The soft shading (the rolled dump pouch) must not leave a normal turned against its own face, or a
+	# zero or non-unit one.
+	var root := _human()
+	for part in BAKED:
+		var mesh := _mesh(root, part)
+		var against := 0
+		var odd := 0
+		var total := 0
+		for s in mesh.get_surface_count():
+			var arrays := mesh.surface_get_arrays(s)
+			var pos := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+			var nrm := arrays[Mesh.ARRAY_NORMAL] as PackedVector3Array
+			var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+			for v in nrm.size():
+				if absf(nrm[v].length() - 1.0) > 0.02:
+					odd += 1
+			for i in range(0, index.size(), 3):
+				var face := (pos[index[i + 1]] - pos[index[i]]).cross(pos[index[i + 2]] - pos[index[i]])
+				if face.length() < 1e-12:
+					continue
+				total += 1
+				for k in 3:
+					if nrm[index[i + k]].dot(face.normalized()) > 0.0:  # Godot winds front faces clockwise
+						against += 1
+						break
+		gut.p("%s normals: odd %d, against their face %d of %d" % [part, odd, against, total])
+		assert_eq(odd, 0, "%s: non-unit normals" % part)
+		assert_lt(float(against) / float(maxi(1, total)), 0.005, "%s: triangles with a normal turned against them" % part)
