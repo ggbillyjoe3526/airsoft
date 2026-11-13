@@ -94,6 +94,12 @@ class Atlas:
         col = np.concatenate([self.col, np.ones((n, n, 1), np.float32)], axis=2)
         # Height is in pixels: a rise of 1 over one pixel is a 45 degree slope.
         gy, gx = np.gradient(self.height)
+        # Each tile's slopes from its own heights alone: across a tile's edge the next tile's height is another
+        # part's, and a tile that goes round a part showed that false step as a line where its ends meet (MQ3B).
+        for t in self.tiles.values():
+            ty, tx = np.gradient(self.height[t.y:t.y + t.h, t.x:t.x + t.w])
+            gy[t.y:t.y + t.h, t.x:t.x + t.w] = ty
+            gx[t.y:t.y + t.h, t.x:t.x + t.w] = tx
         nx, ny = -gx, -gy
         nz = np.ones_like(nx)
         ln = np.sqrt(nx * nx + ny * ny + nz * nz)
@@ -238,13 +244,14 @@ class Part:
         return idx
 
     def fan(self, ring: list, centre, mat: str, uv_ring, uv_centre, flip: bool = False) -> None:
-        """Triangles from a closed ring of point indices to a new centre point."""
+        """Triangles from a closed ring of point indices to a new centre point. `uv_centre` is one UV, or a function
+        of the triangle's number where the centre is a tile's whole edge (a part unrolled round its middle)."""
         c = len(self.pts)
         self.pts.append(Vector(centre))
         n = len(ring)
         for i in range(n):
             f = (ring[i], ring[(i + 1) % n], c)
-            u = (uv_ring(i), uv_ring(i + 1), uv_centre)
+            u = (uv_ring(i), uv_ring(i + 1), uv_centre(i) if callable(uv_centre) else uv_centre)
             if flip:
                 f, u = tuple(reversed(f)), tuple(reversed(u))
             self.faces.append(f)

@@ -4,7 +4,7 @@ extends GutTest
 ## worn paint (game/play/replica_surface.gdshader with its `wear` on, MQ1); the figures' copies stay plain and the
 ## Cyber Pistol and the Sniper Rifle clean.
 
-const WORN := ["aeg", "pistol", "smg"]
+const WORN := ["aeg", "pistol", "smg", "shotgun"]
 const CLEAN := ["cyber", "sniper"]
 const MODEL := "res://assets/models/replicas/%s.glb"
 const MASK := "res://assets/models/replicas/%s_wear.png"
@@ -55,6 +55,16 @@ func test_worn_models_carry_their_mask_on_every_painted_surface() -> void:
 		for s: Array in surfaces:
 			assert_eq(ReplicaPaint.wear_mask((s[0] as MeshInstance3D).mesh, s[1]), mask,
 					"%s %s surface %d carries the mask" % [id, (s[0] as MeshInstance3D).name, s[1]])
+
+
+func test_every_wear_mask_is_imported_compressed_for_video_memory() -> void:
+	# A 2K mask with its mipmaps is about 21 MB uncompressed in video memory, a few MB compressed (SH2's performance
+	# review: the Pump Shotgun's came in lossless).
+	for id: String in WORN:
+		var settings := ConfigFile.new()
+		assert_eq(settings.load("res://assets/models/replicas/%s_wear.png.import" % id), OK, "%s: its mask's import" % id)
+		assert_eq(int(settings.get_value("params", "compress/mode", -1)), 2, "%s: VRAM compressed" % id)
+		assert_true(bool(settings.get_value("params", "mipmaps/generate", false)), "%s: with mipmaps" % id)
 
 
 func test_clean_models_carry_no_mask() -> void:

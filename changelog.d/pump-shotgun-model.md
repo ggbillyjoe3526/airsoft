@@ -1,0 +1,12 @@
+### Pump Shotgun has its own model
+- The Pump Shotgun (in development, Dev content) no longer borrows the Sniper Rifle's model.
+- It has a plain barrel over a tube, a round ribbed pump, a boxy receiver, a box shell ahead of the trigger guard and a pistol grip.
+- The stock has six positions, slotted sides and a sling loop.
+- It has no iron sights: aim along the top rail. Any optic sits on the rail as on the other replicas.
+- Steel barrel and tube, aluminium receiver and rails, polymer pump, grip, stock and shell. Every paint scheme works on it.
+- In first person your left hand holds the pump and rides it back and home after each pull, in time with the two knocks.
+- The hand is held a little nearer and lower than on the other rifles, so only your hand and wrist show.
+- The reload shows your left hand taking the shell off and pushing a fresh one home.
+- The Red Laser sits on its left side rail and the Weapon Torch on its right.
+- Bots with the Clearer kit hold it with a hand on the pump and carry it on the backpack.
+- Its shot, pump and shell sounds are still stand-ins.

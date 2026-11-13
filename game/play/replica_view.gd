@@ -330,7 +330,8 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		# Working a bolt at the hip: canted toward the eye so the right hand stays on screen (BP7, row 17).
 		var work := _arms.work_share()
 		if work > 0.0:
-			var bell := sin(PI * work) * _motion.reload_cant * (1.0 - raise)
+			var share: float = _cfg.work_cant.get(held.id, 1.0)
+			var bell := sin(PI * work) * _motion.reload_cant * (1.0 - raise) * share
 			rot += Vector3(_cfg.bolt_tilt, _cfg.bolt_turn, _cfg.bolt_roll) * bell
 			pos += Vector3(-_cfg.bolt_inward, _cfg.bolt_lift, 0.0) * bell
 

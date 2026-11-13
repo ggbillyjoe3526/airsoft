@@ -4,8 +4,8 @@ extends SceneTree
 ## OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x1000x24" godot --path . --rendering-driver opengl3 --resolution 1600x1000 \
 ##       -s res://tools/render_stowed.gd -- <folder> [shot ...]
-## Shots (all by default): <rifle|pistol|holstered>_<rifle id>_<pistol id>_<view> (views below; rifle ids aeg, sniper;
-## pistol ids pistol, cyber), robot_pistol_aeg_pistol_front: rifle aims the rifle (the pistol in the holster), pistol
+## Shots (all by default): <rifle|pistol|holstered>_<rifle id>_<pistol id>_<view> (views below; rifle ids aeg, sniper,
+## smg, shotgun; pistol ids pistol, cyber), robot_pistol_aeg_pistol_front: rifle aims the rifle (the pistol in the holster), pistol
 ## aims the pistol (the rifle on the back), holstered puts both away, crouch aims the rifle crouched, run sprints
 ## holstered (on the spot).
 
@@ -54,7 +54,7 @@ func _run() -> void:
 	var font := GameTheme.font(800)
 	var shots: Array[String] = []
 	for held: String in ["rifle", "pistol", "holstered", "crouch", "run"]:
-		for rifle: String in ["aeg", "sniper"]:
+		for rifle: String in ["aeg", "sniper", "smg", "shotgun"]:
 			for pistol: String in ["pistol", "cyber"]:
 				for view: String in VIEWS:
 					shots.append("%s_%s_%s_%s" % [held, rifle, pistol, view])

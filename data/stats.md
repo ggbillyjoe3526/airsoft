@@ -121,8 +121,9 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   Compact SMG sends ten BBs in the time of one pump, so a missed pull is a long wait), single shots only, ten pulls a
   shell and fifty a round, and the shortest reach of the long replicas: 0.65 J with 0.20 g BBs (265 fps) stays within
   15 cm of the aim line to 24 m as it comes (28 m at its best hop-up) and takes 0.35 s to fly 20 m, and past about
-  25 m the three BBs land round a body more often than on it. It takes an optic and the springs, no grip (the pump is
-  the grip), silencer (three barrels), barrel or magazine parts. With the M140 it shoots 0.72 J to 25 m with a pump
+  25 m the three BBs land round a body more often than on it. It takes an optic, the Red Laser and the Weapon
+  Torch on its side rails and the springs; no grip (the pump is the grip), silencer (three barrels), barrel or
+  magazine parts. With the M140 it shoots 0.72 J to 25 m with a pump
   every 0.62 s, with the M150 0.78 J to 27 m every 0.65 s. "No full auto indoors" (data/maps.md) never touches it.
 - **GBB Pistol** (PH2, owner 2026-11-12: 0.70 J, a real green-gas pistol's, up from 0.52 J). 274 fps with 0.20 g BBs
   (237 before; 20 m in 0.34 s against 0.39 s), on the aim line to 29 m as it comes (27 m before); Red Gas 0.77 J and

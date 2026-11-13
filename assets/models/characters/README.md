@@ -16,7 +16,10 @@
   alone: `BODY_MAPS=<dir> python -I tools/blender/figures/body.py <repo> out.blend body.glb`, then the splicer
   replaces `Body` (and `Kit_Pads`) in `human.glb`. The build reads `human.glb` itself, so build into a copy and splice
   afterwards. The heads (`Head_*`), the carrier and gear (`Kit`, `Kit_Pack`, `Kit_Radio`) and the knee pads
-  (`Kit_Pads`) are separate nodes, each owned by its own build.
+  (`Kit_Pads`) are separate nodes, each owned by its own build. After the body's splice, run
+  `python3 -I tools/blender/figures/body_surfaces.py` once (MQ3B): it paints the team arm bands and the boots over
+  the body's baked maps inside `human.glb` and gives the band the body's colour map; it stops on a file it has
+  already painted.
 - The human's knee and elbow pads (`Kit_Pads` and its two LODs, BL13) are a part built by
   `tools/blender/figures/pads.py` and spliced into `human.glb`; they ride the shins and forearms rigidly.
 - The human's gear (`Kit*`, `Kit_Pack*`, `Kit_Radio*`, BL12) is built by `tools/blender/figure-gear/gear.py` and spliced
