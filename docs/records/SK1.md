@@ -112,8 +112,12 @@ keep to their lanes); Plant The Bomb's Site A is the Long House, and the Orchard
 
 - `test_field_rules`, `test_field_layout`, `test_sk1_qa`, `test_dev_settings`, `test_nr1_qa` pass (65 tests);
   `check.py`: no overlaps, no line over 34 m (its quick sweep: 33.8 m), every spot reached.
-- QA: pending (attempt 2).
-- Performance: pending (attempt 2).
+- QA: Pass, 16 tests of its own (`tests/unit/test_sk1_qa.gd`: loads clean, dev only, both lighting presets, sites,
+  poles, flag and bomb start reached from both ends, no standable roof, no floor cut off; and in attempt 2 MB1's lane
+  rules as `test_mb1_layouts` checks the shipped fields, the 23 doors, the Orchard's gates, the Bell house's door and
+  a seeded bot match with no bot held up, about 190 s headless).
+- Performance: Pass. Map load 36 ms (Depot 8, Woodland 143), nav build 1.18 s (0.90, 3.3), 383 blocks against
+  Woodland's 945, 26 lights within LightPools' 32; frame time at night on Low is on the checklist.
 
 ## Left for the owner
 
