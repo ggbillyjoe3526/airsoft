@@ -114,6 +114,14 @@ static func room_ahead(feet: Vector3, facing: float, cfg: PlantConfig, query: Wo
 	return Vector2(hit.position.x - from.x, hit.position.z - from.z).length()
 
 
+## The floor's height under `at` (a ray down from set_drop over it to set_drop under it), or NAN with none there.
+static func floor_at(at: Vector3, cfg: PlantConfig, query: WorldQuery, hit: RayHit) -> float:
+	if query == null or hit == null:
+		return NAN
+	var drop := Vector3(0.0, cfg.set_drop, 0.0)
+	return hit.position.y if query.ray(at + drop, at - drop, hit) else NAN
+
+
 ## Seconds between beeps with `fuse_left` s of fuse to run.
 static func beep_gap(fuse_left: float, cfg: PlantConfig) -> float:
 	return lerpf(cfg.beep_fast, cfg.beep_slow, clampf(fuse_left / maxf(cfg.fuse_time, SLACK), 0.0, 1.0))
@@ -166,6 +174,8 @@ static func _step_carried(ps: PlantState, characters: Array[Character], cfg: Pla
 		ps.planting = 0.0
 		ps.facing = carrier.yaw
 		ps.set_at = _in_site(ps, site, set_down(carrier.position, ps.facing, cfg, ps.set_room), cfg)
+		if not is_nan(ps.set_floor):
+			ps.set_at.y = ps.set_floor
 		ps.site = site
 		_cue(events, Cue.ARMING, carrier.id, ps.position, site)
 	ps.planting = minf(1.0, ps.planting + dt / maxf(cfg.plant_time, SLACK))

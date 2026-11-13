@@ -24,6 +24,19 @@ class Wall:
 		return true
 
 
+## A floor sloping up along -Z (y = -z * rise), for the ray down.
+class Slope:
+	extends WorldQuery
+	var rise: float = 0.1
+
+	func ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+		var y := -from.z * rise
+		if from.y < y or to.y > y:
+			return false
+		hit.position = Vector3(from.x, y, from.z)
+		return true
+
+
 func before_each() -> void:
 	cfg = PlantConfig.new()
 	events = SimEvents.new()
@@ -164,3 +177,24 @@ func test_keyed_in_it_stands_armed_where_it_was_set_down_facing_the_planter() ->
 	ps.reset()
 	assert_eq(ps.set_room, INF, "a new round: the room forgotten")
 	assert_eq(ps.set_at, ps.start)
+
+
+func test_set_on_a_slope_it_lies_on_the_ground_there() -> void:
+	var slope := Slope.new()
+	var hit := RayHit.new()
+	assert_almost_eq(Plant.floor_at(Vector3(0.0, 0.0, -0.5), cfg, slope, hit), 0.05, 1e-5, "the floor ahead, up the slope")
+	assert_true(is_nan(Plant.floor_at(Vector3(0.0, 2.0, -0.5), cfg, slope, hit)), "nothing within set_drop: none")
+	assert_true(is_nan(Plant.floor_at(Vector3.ZERO, cfg, null, null)), "no world: the carrier's own floor")
+	var ps := PlantState.new()
+	ps.set_sites(PackedVector3Array([SITE]), PackedFloat32Array([0.0]), 4.0)
+	ps.reset()
+	assert_true(is_nan(ps.set_floor))
+	c.position = SITE
+	c.grounded = true
+	c.using = true
+	ps.status = PlantState.Status.CARRIED
+	ps.carrier = c.id
+	ps.set_floor = 0.07
+	var characters: Array[Character] = [c]
+	Plant.step(ps, characters, c.team, cfg, events, 0.1)
+	assert_almost_eq(ps.set_at.y, 0.07, 1e-6, "set at the floor found there")

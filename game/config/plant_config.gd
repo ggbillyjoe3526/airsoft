@@ -40,5 +40,7 @@ extends Resource
 @export var set_ahead: float = 0.55
 @export var set_clear: float = 0.16
 @export var set_ray_height: float = 0.06
+## Its floor there is looked for this far (m) above and below its carrier's feet (a slope, a kerb).
+@export var set_drop: float = 0.3
 ## A skipped round simulated (Round.simulate): an armed bomb multiplies the attackers' chance by one plus this.
 @export var simulate_planted_lead: float = 1.5

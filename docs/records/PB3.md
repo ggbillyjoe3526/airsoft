@@ -18,7 +18,8 @@
 - **The player is not made to crouch** while working: he asked for no animation, and a forced crouch moves the view.
   Bots still crouch (`BotPlant`), as he asked.
 - **The bomb is set 0.55 m ahead of the planter's feet** (`set_ahead`), short of a wall (`set_clear` 0.16 m, a ray
-  at `set_ray_height` 6 cm), drawn in onto the site's ring if it would lie past it, facing the planter. On main it
+  at `set_ray_height` 6 cm), drawn in onto the site's ring if it would lie past it, facing the planter. It lies on the floor found by a ray down there
+  (`set_drop` 0.3 m each way), so on Woodland's slopes it neither floats nor sinks. On main it
   stood under the planter's feet, out of sight in first person.
 - **The rail's bomb row** shows while you carry it, lit while you set it, keyed with Use (G). Your replica's row is
   unlit while it is away, as when holstered.
