@@ -67,14 +67,18 @@ BAND_ROUGH = (0.72, 0.10)            # the ribs' crowns, how much rougher the va
 
 # The boots.
 BOOT_LENGTH = 0.272                  # m heel to toe (boots.py LENGTH)
-SUEDE_PATCH = ((0.045, 0.04), (0.009, 0.03))   # (m across, share either way): the nap lying this way and that
-SUEDE_STREAK = (0.004, 0.030, 0.025)  # m across, m long (up the boot), share: the nap brushed in streaks
-SUEDE_GRAIN = (0.0020, 0.035, 0.00007)   # m across, share of colour, m of height: the nap's fibres
+SUEDE_PATCH = ((0.045, 0.03), (0.020, 0.006))   # (m across, share either way): the nap lying this way and that
+SUEDE_STREAK = (0.0045, 0.030, 0.004, 0.05)   # m across, m long (up the boot), share of colour, roughness: the
+#                                      nap brushed in streaks, which shows in its sheen more than its colour
+SUEDE_GRAIN = (0.0020, 0.006, 0.00004)   # m across, share of colour, m of height: the nap's fibres
 SUEDE_ROUGH = (0.90, 0.60)           # the nap, a patch rubbed flat and shiny
 CREASES = (0.181, 0.192, 0.204)      # m from the heel's back: the vamp's creases where the foot bends
 CREASE = (0.0022, 0.0022, 0.00075, 0.16)   # m half width, m of wander, m deep, share of colour lost
 CREASE_Y = (0.042, 0.060, 0.100, 0.118)    # m: the creases fade in above the sole and out toward the laces
-RUB = (0.016, 0.10, 0.20)            # m across, share of colour lost, m: dark rubbed patches within this of the toe
+CREASE_ACROSS = (0.014, 0.030)       # m from the boot's middle line: the creases lie across the top and fade out
+#                                      before the sides
+CREASE_BOW = 0.007                   # m: a crease's ends lie this much nearer the heel than its middle
+RUB = (0.024, 0.08, 0.20)            # m across, share of colour lost, m: dark rubbed patches within this of the toe
 TRIM_SCRATCH = (0.0060, 0.050, 0.08, 0.00010)   # m across, m long, share lighter, m deep
 TRIM_SCUFF = (0.014, 0.13)           # m across, share lighter: soft scuffed patches
 TRIM_GRAIN = (0.0026, 0.03, 0.00005)
@@ -293,7 +297,7 @@ def paint_boots(body: Body, part: np.ndarray, tri: np.ndarray, pos: np.ndarray, 
     report = {}
     boots = np.isin(part, ["boot", "trim", "sole"])
     density = body.density(boots)
-    grain = max(SUEDE_GRAIN[0], 1.6 / density)
+    grain = max(SUEDE_GRAIN[0], PIXELS_A_PITCH / density)
     held = np.maximum(tri, 0)
     for side in (0, 1):
         mine = boots & ((body.mid[:, 0] < 0.0) == bool(side))
@@ -336,14 +340,17 @@ def _suede(p: np.ndarray, u: np.ndarray, w: np.ndarray, y: np.ndarray, grain: fl
     fibre = A.noise(p, grain, 61)
     gain *= 1.0 + SUEDE_GRAIN[1] * fibre
     height = SUEDE_GRAIN[2] * fibre
-    rough = np.full(len(p), SUEDE_ROUGH[0]) + 0.04 * streak
-    # The creases across the vamp, wandering a little, fading toward the sole and the laces.
+    rough = np.full(len(p), SUEDE_ROUGH[0]) + SUEDE_STREAK[3] * streak
+    # The creases across the top of the vamp, bowed and wandering a little, fading toward the laces and gone before
+    # the boot's sides.
     reach = _smooth(y, CREASE_Y[0], CREASE_Y[1]) * (1.0 - _smooth(y, CREASE_Y[2], CREASE_Y[3]))
+    reach *= 1.0 - _smooth(np.abs(w), CREASE_ACROSS[0], CREASE_ACROSS[1])
+    bow = CREASE_BOW * np.minimum(np.abs(w) / CREASE_ACROSS[1], 1.0) ** 2
     wander = CREASE[1] * A.noise(np.stack([w, y, np.zeros(len(p))], axis=1), 0.02, 67)
     crease = np.zeros(len(p))
     for i, at in enumerate(CREASES):
         broken = _smooth(A.noise(np.stack([w, y, np.full(len(p), float(i))], axis=1), 0.03, 71), -0.5, 0.1)
-        crease = np.maximum(crease, np.exp(-((u - at - wander * (1.0 + 0.3 * i)) / CREASE[0]) ** 2) * broken)
+        crease = np.maximum(crease, np.exp(-((u + bow - at - wander * (1.0 + 0.3 * i)) / CREASE[0]) ** 2) * broken)
     crease *= reach
     height -= CREASE[2] * crease
     gain *= 1.0 - CREASE[3] * crease

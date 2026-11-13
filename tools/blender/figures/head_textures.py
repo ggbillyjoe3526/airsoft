@@ -51,7 +51,14 @@ SHELL_T = (-25.0, 115.0)   # degrees: a shell tile's t is the elevation from the
 ## each ring headwear.py builds, the last the centre. A cup tile's t is the way along this line, s the way round.
 CUP_PROFILE = ((0.017, 0.044), (0.021, 0.047), (0.034, 0.045), (0.042, 0.037), (0.046, 0.024), (0.047, 0.0))
 CUP_SQUASH = 0.8           # a cup is this much narrower front to back than it is tall
+CUP_PEEL = (0.0036, 0.18)  # m across, pixels deep: the moulded shell's orange peel
+CUP_RUB = (0.011, 0.11, 0.07)   # m across, share lighter, roughness lost: the shoulder's rubbed patches
 ## An ear cushion's rings, the same way (its tile's t runs across them).
+## The boonie crown's tile runs this many metres over the cloth, from the band's foot up the wall, over the shoulder
+## and to the middle of the top.
+BOONIE_RUN = 0.141
+BOONIE_TOP_SEAM = 0.071    # m over the cloth: the seam where the wall meets the top panel
+BOONIE_SWEAT = (0.033, 0.0018, 0.005)   # m: the sweat mark's edge above the band's foot, its wander, its soft edge
 CUSHION_PROFILE = ((0.0, 0.040), (0.004, 0.047), (0.012, 0.049), (0.017, 0.046))
 ## A strip swept along a path (the mesh mask's binding, the headset's band) draws from a short tile: s runs along the
 ## path and turns back every RUN metres (headwear.py lays it back and forth, so the strip has no seam), t goes round
@@ -224,15 +231,22 @@ def _worn_cloth(t, x, y, seed: int, wrap: float = 0.0, fade: float = 0.09, mottl
     _tone(t, pos, 0.014, mottle, seed + 1, wrap)
 
 
-def _tide(t, top: float, wrap: float, seed: int, dark: float = 0.11, salt: float = 0.05) -> None:
-    """A sweat mark up from the bottom of a crown's tile to about `top` (t): darker cloth under a wandering edge,
-    and the pale line the salt leaves along it."""
+def _tide(t, top: float, wrap: float, seed: int, wander: float = 0.045, soft: float = 0.03, dark: float = 0.11,
+          salt: float = 0.05) -> None:
+    """A sweat mark up from the bottom of a crown's tile to about `top` (t): darker cloth under an edge that wanders
+    by `wander` (t), and the pale line the salt leaves along it."""
     s, tt = _st(t)
-    edge = top + 0.045 * _noise(s * wrap, np.zeros_like(s), 0.03, seed, wrap) + 0.015 * _noise(
+    edge = top + wander * _noise(s * wrap, np.zeros_like(s), 0.03, seed, wrap) + wander / 3.0 * _noise(
         s * wrap, np.zeros_like(s), 0.008, seed + 1, wrap)
-    under = np.clip((edge - tt) / 0.03, 0.0, 1.0)
-    line = np.exp(-((tt - edge - 0.012) / 0.012) ** 2)
+    under = np.clip((edge - tt) / soft, 0.0, 1.0)
+    line = np.exp(-((tt - edge - 0.4 * soft) / (0.4 * soft)) ** 2)
     t.shade(1.0 - dark * under + salt * line)
+
+
+def boonie_t(run: float) -> float:
+    """The t in the boonie crown's tile of a place `run` metres over the cloth from the band's foot (headwear.py lays
+    the crown's rings with it)."""
+    return min(run / BOONIE_RUN, 1.0)
 
 
 def _along(profile: tuple, t, squash: float = 1.0) -> tuple:
@@ -256,24 +270,25 @@ def ring_t(profile: tuple, ring: int) -> float:
 # --------------------------------------------------------------------------------------------------- the tiles
 
 def _cup(t, colour: int, rough: float, seed: int) -> None:
-    """An ear defender's moulded cup (s round it, t from its cushion out to the middle of its face): pebbled polymer,
-    the joint to its back plate, a shallow panel line on its face, its shoulder rubbed lighter, a few scratches."""
+    """An ear defender's moulded cup (s round it, t from its cushion out to the middle of its face): satin polymer
+    with the mould's shallow orange peel, the joint to its back plate, its shoulder rubbed lighter in broken patches,
+    a few scratches on its face."""
     t.fill(colour, rough)
     pos, at = _along(CUP_PROFILE, t, CUP_SQUASH)
-    _grain(t, pos, 0.0007, 0.12, seed)
-    _tone(t, pos, 0.012, 0.035, seed + 1)
+    # The tile holds about a millimetre a pixel from the cushion to the face's middle: a finer grain than this
+    # turns to rings round the cup.
+    _grain(t, pos, CUP_PEEL[0], CUP_PEEL[1], seed)
+    _tone(t, pos, 0.016, 0.03, seed + 1)
     joint = np.clip(1.0 - np.abs(t.t - at[1]) / 0.012, 0.0, 1.0)
     t.paint(joint, add_height=-1.2)
     t.shade(1.0 - 0.22 * joint)
-    panel = np.clip(1.0 - np.abs(t.t - (at[4] + (1.0 - at[4]) * 0.3)) / 0.012, 0.0, 1.0)
-    t.paint(panel, add_height=-0.8)
-    t.shade(1.0 - 0.14 * panel)
-    rub = np.clip(_noise(pos[0], pos[1], 0.006, seed + 2, 0.0, pos[2]) * 0.8 + 0.6, 0.0, 1.0)
-    for ring, width, share in ((3, 0.035, 0.16), (4, 0.03, 0.12), (2, 0.025, 0.07)):
-        edge = np.clip(1.0 - np.abs(t.t - at[ring]) / width, 0.0, 1.0)
-        t.shade(1.0 + share * edge * rub)
-        r = t.view("rough")
-        r[:] = np.clip(r - 0.06 * edge * rub, 0.0, 1.0)
+    # Rubbed where it is set down and handled: the shoulder, in patches, never a ring.
+    shoulder = np.clip(1.0 - np.abs(t.t - 0.5 * (at[2] + at[3])) / (0.75 * (at[3] - at[2])), 0.0, 1.0)
+    patch = np.clip(_noise(pos[0], pos[1], CUP_RUB[0], seed + 2, 0.0, pos[2]) * 1.6 - 0.15, 0.0, 1.0)
+    rub = shoulder * shoulder * (3.0 - 2.0 * shoulder) * patch
+    t.shade(1.0 + CUP_RUB[1] * rub)
+    r = t.view("rough")
+    r[:] = np.clip(r - CUP_RUB[2] * rub, 0.0, 1.0)
     rng = np.random.default_rng(seed)
     marks = []
     for _ in range(5):
@@ -486,16 +501,16 @@ def _seams(t, x, along, pitch_s: float, colour: int) -> None:
 def _boonie_crown(t) -> None:
     t.fill(BOONIE, 0.9)
     x = t.s * 0.68
-    y = t.t * 0.11
+    y = t.t * BOONIE_RUN
     _ripstop(t, x, y)
     _seams(t, x, y, 1.0 / 6.0, 0x48503f)
-    top = lines(t.t - 0.72, 10.0, 0.012, 0.004)
+    top = lines(y - BOONIE_TOP_SEAM, 10.0, 0.0013, 0.0005)
     t.paint(top, add_height=-1.2)
     t.shade(1.0 - 0.15 * top)
     _worn_cloth(t, x, y, 81, 0.68)
-    # Paler toward the top, where the sun sits; a sweat-dark line just above the band.
-    t.shade(1.0 + 0.16 * np.clip((t.t - 0.45) / 0.4, 0.0, 1.0))
-    _tide(t, 0.36, 0.68, 83)
+    # Paler toward the top, where the sun sits; a thin sweat-dark line just above the band.
+    t.shade(1.0 + 0.16 * np.clip((y - 0.045) / 0.05, 0.0, 1.0))
+    _tide(t, boonie_t(BOONIE_SWEAT[0]), 0.68, 83, boonie_t(BOONIE_SWEAT[1]), boonie_t(BOONIE_SWEAT[2]), 0.15, 0.04)
 
 
 def _cap_crown(t) -> None:

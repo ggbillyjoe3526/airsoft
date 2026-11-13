@@ -1618,14 +1618,16 @@ four heads differ.
 - [ ] **Helmets.** The grey high cut's paint is scuffed and scratched with dust low down, its rails and ear cups look
   like moulded plastic; the coyote full cut's cover is faded on top with dust by its seams. No line runs down the
   back of either.
-- [ ] **Cap and boonie.** The cloth is unevenly faded with a sweat mark above the band; the headset's band over the
-  cap is padded and stitched. They look worn, not dirty or ruined.
+- [ ] **Cap and boonie.** The cloth is unevenly faded, with a thin sweat-dark line just above the boonie's band; the
+  headset's band over the cap is padded and stitched. They look worn, not dirty or ruined.
+- [ ] **Ear cups** (the helmets' ear defenders, the cap's headset) read as moulded plastic from a metre away, with
+  no rings or swirls on them.
 - [ ] **Mesh mask.** Its paint is chipped to bare steel in places and its edge is bound in woven tape with a stitch
   row.
 - [ ] **Team arm bands.** Ribbed elastic with a hem at each edge, in exactly the team's blue or orange: not darker,
   not greyer than the carrier beside it.
-- [ ] **Boots.** Brushed suede with creases across the top of the foot, a scuffed toe cap and lugs cut into the
-  sole's side.
+- [ ] **Boots.** Soft suede with creases across the top of the foot only (none running down the sides), a scuffed
+  toe cap and lugs cut into the sole's side.
 - [ ] **At range nothing changed.** A figure 30 m away reads as before, with no shimmer on the arm bands or the
   soles as it walks.
 - [ ] **Faces** look as before.

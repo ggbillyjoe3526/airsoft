@@ -813,6 +813,16 @@ def boonie(k: Kit) -> list:
         return hs.head_radius(az, BOONIE_BAND_Z) + 0.008
 
     heights = [0.0, 0.024, 0.042, 0.055, 0.0625] if k.lv["straps"] else [0.0, 0.04, 0.0625]
+    shoulder = [(0.95, 0.0042), (0.85, 0.0075), (0.62, 0.0098), (0.35, 0.0106)] if k.lv["straps"] else \
+        [(0.85, 0.0075), (0.45, 0.0104)]
+    # Each ring's place up the crown's tile is its distance over the cloth from the band, so the weave keeps one
+    # scale from the wall over the shoulder to the top, at every level.
+    top_r = sum(base_r(a) for a in azs) / cols * (1.0 - CROWN_TAPER)
+    runs = list(heights)
+    last = (1.0, 0.0)
+    for f, dz in shoulder:
+        runs.append(runs[-1] + math.hypot(top_r * (last[0] - f), dz - last[1]))
+        last = (f, dz)
     crown_rows = []
     for h in heights:
         f = h / heights[-1]
@@ -824,14 +834,12 @@ def boonie(k: Kit) -> list:
         crown_rows.append(row)
 
     def uv_crown(i: int, j: int):
-        return crown_t.uv(i / cols, j / (len(heights) + 2))
+        return crown_t.uv(i / cols, head_textures.boonie_t(runs[j]))
 
     idx = p.grid(crown_rows, GEAR, uv_crown, wrap=True)
     # The top: a soft dome with the front-to-back pinch.
     # A rounded shoulder into the top (soft cotton, no crease), then the top with its front-to-back pinch.
     top_rows = []
-    shoulder = [(0.95, 0.0042), (0.85, 0.0075), (0.62, 0.0098), (0.35, 0.0106)] if k.lv["straps"] else \
-        [(0.85, 0.0075), (0.45, 0.0104)]
     for f, dz in shoulder:
         row = []
         for a in azs:
@@ -840,9 +848,9 @@ def boonie(k: Kit) -> list:
             row.append(Vector((math.sin(a) * r, -math.cos(a) * r, z)))
         top_rows.append(row)
     idx2 = p.grid([crown_rows[-1]] + top_rows, GEAR,
-                  lambda i, j: crown_t.uv(i / cols, (len(heights) - 1 + j) / (len(heights) + 2)), wrap=True)
+                  lambda i, j: uv_crown(i, len(heights) - 1 + j), wrap=True)
     p.fan(idx2[-1], Vector((0, 0.004, BOONIE_BAND_Z + heights[-1] + 0.0112)), GEAR,
-          lambda i: crown_t.uv(i / cols, 0.97), crown_t.uv(0.5, 1.0))
+          lambda i: uv_crown(i, len(runs) - 1), lambda i: crown_t.uv((i + 0.5) / cols, 1.0))
     del idx
     # The brim: upper and lower surfaces, a rolled edge.
     width = 0.063
