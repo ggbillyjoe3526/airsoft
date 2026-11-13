@@ -77,6 +77,11 @@ TIP_CUP = {"Middle": 0.4, "Ring": 0.75, "Pinky": 1.0}
 TIP_MOST = (90.0, 100.0)
 # A `tips_behind` or `tip_reach` that limits nothing (m).
 NO_LIMIT = 9.0
+# Where a hold keeps every fingertip behind its handguard's front end (`front_hard`), no fingertip's glove lies
+# nearer that end (`tips_behind`) than this (m).
+FRONT_CLEAR = 0.005
+# Two gloved fingers side by side, pressed together a little: their middle lines this far apart (m; `tip_apart`).
+FINGER_APART = 0.016
 # Round a grip with a `thumb_at` mark (the pistols', and the rifle's: the owner, 2026-11-05, its thumb round the
 # grip) the thumb turns further at its root (degrees): across the back strap to the grip's far side, twisted so its
 # tip joint bends in toward it (the web's weights are smoothed for this, glove.smooth_web); that tip joint may bend up
@@ -186,14 +191,21 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # on its own (`tip_most`'s third figure), no tip further forward than `tips_behind` (the handguard's front end) or
 # `tip_reach` ahead of its knuckle; and the solve counts against a pose the share of each finger the game's eye sees
 # past the replica (`game_eyes`, `sight.seen`; tests/unit/test_ha1_rifle_hold.gd holds it). The palm, the thumb and
-# the arm are where the owner approved them.
+# the arm are where the owner approved them. The critic's third look (2026-11-13): a fingertip on the AEG lay past the
+# handguard's front end, and on the Sniper and the SMG neighbouring fingers pinched into one another. Those two now
+# keep every fingertip FRONT_CLEAR behind the front end as firmly as out of the replica (`front_hard`) and each finger
+# a finger's width from the one laid before it (`tip_apart`, `sight.crowd`). On the AEG neither holds: its handguard
+# ends 32 mm ahead of the index finger's knuckle with the hand where the owner approved it (the magazine well stops
+# it going further back, his straight wrist keeps the fingers 47 degrees off the bore), and fifteen trial solves found
+# no place for four fingers behind that end that the eye does not see and that does not pass one finger through
+# another; so its fingers keep attempt 3's places, `tips_behind` counted as the height limit is (docs/records/HA1.md).
 GUARD = {"kind": "guard", "y": 0.200, "forward": 0.026, "depth": 0.034, "standoff": 0.0,
          "search": ((30, 30), (15, 15), (-10, -10)), "rise": 8.0, "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.030, "thumb_f": 0.035, "thumb_z": 0.060, "thumb_hug": 4.0,
          "thumb_pull": 30.0, "thumb_wide": 0.0, "tips_below": 0.058, "plan": 30.0,
          "upper": (-0.5, -0.8, 0.4), "sag": 12.0, "tip_at": (0.0245, 0.025, 0.050), "tip_swing": 25.0,
          "tip_back": 15.0, "tip_most": (90.0, 85.0, 60.0), "tips_behind": 0.272, "tip_cup": 25.0, "tip_reach": 0.040,
-         "pinky_drop": 0.0, "pinky_ahead": 0.0,
+         "pinky_drop": 0.0, "pinky_ahead": 0.0, "tip_apart": 0.0, "front_hard": False,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -281,10 +293,13 @@ SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030
 # middle joint closed no further than 25 degrees; since the critic's second look the fingers hook up onto its right
 # side as the AEG's do (its side face runs from z 0.022 to 0.054: `tip_at`, `tips_below`), no tip more than 35 mm
 # ahead of its knuckle (`tip_reach`); the fore-end runs on well past the hand, so its front end limits nothing. The
-# little finger aims 15 mm further forward than the others (`pinky_ahead`): aimed as they are, it folded into a hook.
+# critic's third look: the fingers pinched into one another there. Each now aims 5 cm ahead of its knuckle (`tip_at`;
+# at 2 cm the ring finger's tip folded back onto the little finger's) and keeps a finger's width from the one laid
+# before it (`tip_apart`), so the four stand side by side up the side face.
 SNIPER_GUARD = dict(GUARD, y=0.232, axis=(0.0, 0.030), radius=0.025, tips_below=0.050,
-                    tip_at=(0.0255, 0.020, 0.035), thumb_x=-0.028, thumb_z=0.045, forward=0.034,
-                    pinky_ahead=0.015, tip_most=(90.0, 85.0), tips_behind=NO_LIMIT, tip_reach=0.035)
+                    tip_at=(0.0255, 0.050, 0.035), thumb_x=-0.028, thumb_z=0.045, forward=0.034,
+                    tip_most=(90.0, 85.0), tips_behind=NO_LIMIT, tip_reach=0.035, tip_apart=FINGER_APART,
+                    front_hard=True)
 # The Compact SMG (CS1): its grip raked 30 degrees as the AEG's and its front where the AEG's is at the hand's height
 # (smg.py), but 12 mm deeper, so the web and the little finger's knuckle sit that much further back and the thumb
 # reaches round onto the grip's left side a little further back; its roll, thumb and trigger finger searched.
@@ -298,10 +313,11 @@ SMG_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.113, -0.056), pinky=(0.024, -0.074, -
 # elbow hangs under the wrist's straight line (`sag`), which keeps the upper arm out of the view. The fifth look:
 # 7 mm further back, the cuff against the magazine's housing (any further and the arm turns 46 degrees and more off
 # the bore to pass it, across the view). The fingers hook onto its right side face (z 0.064 to 0.080) behind its
-# front end (`tips_behind`), the little finger's mark 2 cm further forward (`pinky_ahead`).
+# front end (`tips_behind`), the little finger's mark 5 mm further forward (`pinky_ahead`; at 2 cm it leaned across
+# the ring finger, the critic's third look), each a finger's width from the one before it (`tip_apart`).
 SMG_GUARD = dict(GUARD, y=0.205, axis=(0.0, 0.072), radius=0.022, tips_below=0.084,
                  tip_at=(0.0235, 0.015, 0.072), thumb_x=-0.028, thumb_z=0.080, tip_most=(90.0, 85.0),
-                 tips_behind=0.277, tip_reach=NO_LIMIT, pinky_ahead=0.020)
+                 tips_behind=0.277, tip_reach=NO_LIMIT, pinky_ahead=0.005, tip_apart=FINGER_APART, front_hard=True)
 # The Pump Shotgun (SH2): its pistol grip is the AEG Rifle's own, in the AEG's place (shotgun.py builds it from
 # aeg.grip()), so the right hand holds it as the AEG's; its trigger sits in its own guard, so the trigger finger is
 # searched, and rests low on the blade (`trigger_at`): the blade's upper half is up inside the receiver's foot, and a

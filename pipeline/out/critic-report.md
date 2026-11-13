@@ -1,24 +1,22 @@
 Task: HA1 · First-person arms and grips, made realistic
-Attempt: 2 of 4
-Head: ec22685 (checks passed on it)
+Attempt: 3 of 4
+Head: ef9d94f (checks passed on it; HEAD is 7768f7b, a merge of main (PB3, AU11) that touches none of this task's hunks; its re-run must pass before merge)
 Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 7/8 → Retry (near miss, judgment: check 1 alone stands between this and Accept)
+Score: 7/8 → Retry (near miss, judgment: check 1 alone; QA Pass, performance Pass)
 Failed checks, with evidence (file:line, one or two lines each, each marked measured or judgment):
-1. [judgment] Owner's ruling broken at the AEG hip: the left fingertips show past the handguard's RIGHT side, in both looks (ha1-final-hip.jpg "AEG Rifle", a glove lump right of the rail's top; ha1-final-bare-before-now.jpg "NOW: AEG at the hip" and ha1-final-skin-zoom.jpg "AEG at the hip, bare hand", clearly skin). This is his "You can still see the players fingers on the right side of the AEG" exactly. hold_tables.py:177-183 (GUARD `tips_below` 0.050) keeps the tips 2 cm under the top in replica space, but the hip eye looks down past the far edge. test_ha1_rifle_hold.gd:82 tests height in replica space, not what the eye sees, so it passes. Sniper and SMG show only the near side (ok).
-1. [judgment] (b) Far side, attempt 1's must-fix not met (ha1-final-closeups.jpg "FROM THE FAR SIDE", AEG, Sniper, SMG): an open "waiter's tray" palm. Only the index tip meets the handguard. The middle, ring and little fingers fan apart in the air with gaps between them and to the handguard. On the AEG and SMG their tips reach past the handguard's front, under the barrel. The ask was "along or round the underside, touching it". The joints are no longer knotted (<90°), but the fingers still float and hold nothing. Bots show it close up.
-1. [judgment] (b) Palm side (rest_palm.png, same build): a hard-edged lighter patch, an arc, across the palm at the index finger's base (a paint or atlas seam). The thumb's outline has a sharp notch where its nail edge meets the pad, and a white nail sliver shows from the palm side. The palm is seen from below in the AEG bare hold.
-1. [judgment] (b)/(c) Sniper right hand (closeups "Sniper: right hand"): the fist hangs under the stock's wrist. Only the thumb is over it. The middle, ring and little fingers close on nothing, and the trigger finger lies straight under the guard, 2 cm short and below the trigger. Listing it in KNOWN_ISSUES does not make it finished work, and it is in this task's scope ("grips ... made realistic").
-1. (a) passes on the seven ratios, re-run by me (hand_ratios.py rest_back.png 1183): -6.7, +2.1, -2.6, -5.0, -5.2, +2.5, -7.7 %. The thumb is not proven. On rest_back.png the thumb's web-to-tip run over the middle finger is about 0.55, against 0.70 on the photo (-21 %). Some of that is foreshortening, but no picture settles it.
+1. [judgment] (b) AEG far side, attempt 2's must-fix "tips behind its front end" not met, and the record says otherwise. In ha1-round3-far-side.jpg "NOW: AEG Rifle" (and closeups "AEG: left hand, FROM THE FAR SIDE") the foremost (little) finger stands wholly in front of the handguard's front end, against the barrel under the front sight base, about one finger's width past it. docs/records/HA1.md:190 says "none past the handguard's front end". hold_tables.py GUARD (tip_at / tips_behind) does not hold it.
+1. [judgment] (b)/(d) Far-side fingers now touch but don't read as a grip. AEG: the index stands alone, a clear gap of more than a finger's width to the middle finger, all four rising nearly straight up from a palm that hangs below the handguard. Sniper: the four fingers are pinched together into a beak, overlapping, pads at mid-height of the stock's side, a light gap between the palm and the stock's underside along its whole length, so the hand hangs from its fingertips. SMG: the index curls into a tight hook pointing back with daylight between it and the middle finger (an "OK sign" ring), the little finger aimed forward (pinky_ahead). A hand carrying a rifle lays the fingers along the side face, closed together, slightly curled, with the weight on the palm and finger roots. Bots show this close up.
+1. passes: AEG hip, both looks (ha1-round3-hip.jpg NOW and ha1-final-bare-before-now.jpg): only the thumb shows. Sniper right hand (ha1-round3-sniper-hand.jpg): pad in the guard on the trigger, three fingers round the wrist. Palm arc gone, nails thin to the root (ha1-round3-palm-thumb.jpg). Thumb: 0.689 vs 0.710 (-2.9 %), seven older ratios within 7.7 %. Near side, foregrips and pistols unchanged as ruled.
+Non-blocking notes (check 7 still passes): tests/unit/test_ha1_rifle_hold.gd:23-28, the new FINGERS doc was inserted under END_PLACE's doc line ("How near (m) a reload's last frame..."), so END_PLACE lost its doc and FINGERS carries a wrong first line; :127-128 `_finger_points` doc says "those on the replica's far side" but it returns every left finger point (`_far_side` filters).
 Must-fix for the next attempt:
-- AEG no-grip hold (GUARD, Hand.onto): judge `tips_below` from the eye at GAME_HIP. Each far-side fingertip's projection must lie inside the replica's silhouette, at the hip and through the raise. Turn test_ha1_rifle_hold.gd:82 into that eye-space check (it fails today), then re-shoot the AEG at the hip in both looks.
-- Far-side fingers (AEG, Sniper, SMG): curl the middle, ring and little fingers against the handguard's underside or far face, touching it, closed together like the index, tips behind its front end. Joints stay under 90°, and the eye check above still holds. Re-render "FROM THE FAR SIDE" for all three.
-- Skin: remove the hard arc on the palm at the index base (paint or atlas seam; the colour must stay as approved) and smooth the thumb's outline at the nail edge. Re-render rest_palm.png.
-- Sniper right hand (SNIPER_RIGHT): wrap the middle, ring and little fingers round the stock's wrist and seat the trigger finger's pad on the trigger, as the AEG's is.
-- Thumb: add a rest render with the thumb held out as in the photo and list thumb length over middle finger length within 10 %.
+- AEG (GUARD): every far-side fingertip, little finger included, behind the handguard's front end by at least 5 mm; add that to the eye test or a sibling (tip z against the handguard's front in replica space) for AEG, Sniper, SMG, so the record's claim is tested.
+- Far-side fingers on AEG, Sniper and SMG: closed together (no daylight between neighbours from the far side), slightly curled along the side face with pads on its lower half, no finger hooked back (SMG index) and no pinch (Sniper). Raise the palm's far edge to touch the underside if the eye check and the approved near-side thumb allow it; if the palm can't move, say so in the record and keep the fingers' line instead. Keep the eye test at 0 points.
+- Re-render "FROM THE FAR SIDE" for all three from a side-on camera and the 3/4 below camera a bot is seen from.
+- Fix the two doc comments above.
 Owner should test in the game (at most 6, one line each):
-- AEG at the hip, gloves and bare: do any left fingertips show on the right of the handguard?
-- Sniper, work the bolt at the hip: the right glove fills the top-right quarter of the screen (ha1-final-aimed-skin.jpg). Acceptable?
-- Pistols at 25 cm, walking and firing: does the new bob, flick and roll feel good and not seasick?
-- GBB and Cyber aimed, bare hands: does the faded lower edge of the left hand read as "tops of the hands" and not a ghost?
-- Raise and lower the sight fast on each rifle: no pop or flash of the left hand?
-- Stand by a bot with an AEG and a Sniper: are its left fingers and right hand a believable hold?
+- AEG, Sniper, SMG at the hip, gloves and bare: any left fingertip on the right of the replica while walking, firing and turning?
+- Stand beside a bot with an AEG and a Sniper: do its left fingers read as holding the handguard?
+- Sniper, work the bolt at the hip: the right glove fills the top-right quarter of the screen; acceptable?
+- Raise and lower the sight fast on each rifle: any pop or flash of the left hand?
+- Pistols at 25 cm, walking and firing: do the bob, flick and roll feel good and not seasick?
+- Bare hands at 1440p: nails, tendons and skin as you approved them ("Perfect")?

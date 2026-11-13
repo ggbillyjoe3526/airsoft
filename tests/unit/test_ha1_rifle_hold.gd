@@ -2,8 +2,8 @@ extends GutTest
 ## HA1 QA, the owner's fifth look: with no grip the rifles' left hand sits back just ahead of the magazine (between it
 ## and the GripMount), no fingertip rides above the handguard's top and no finger under it is knotted, the bots' left
 ## hand still holds where the arms'
-## does for all three rifles, a bomb in both hands (PB1) carries the replica low through HA1's eased carry, and each
-## reload clip ends on the hold's pose.
+## does for all three rifles, a sprint carries the replica low through HA1's eased carry, and each reload clip ends
+## on the hold's pose.
 
 const DT := 1.0 / 60.0
 const RIFLES: Array[StringName] = [&"aeg", &"sniper", &"smg"]
@@ -20,12 +20,19 @@ const ABOVE_TOP := 0.005
 ## The most (rad) any joint of a finger resting under a bare handguard bends from its rest (the critic, HA1: the ring
 ## and little fingers lay knotted, a middle joint shut to 100 degrees).
 const MOST_BEND := PI / 2.0
-## How near (m) a reload's last frame comes to the hold's bone places, and (rad) its turns.
 ## The eye's view of the left fingers: their names, every which vertex of their skin is judged, and how far (m) short
 ## of a vertex the replica must stand in the eye's way for it to count as hidden.
 const FINGERS: Array[String] = ["Index", "Middle", "Ring", "Pinky"]
 const EYE_EVERY := 3
 const EYE_SKIN := 0.002
+## A handguard's side: at least this far (m) right of the replica's middle (a barrel is thinner), and how far (m)
+## behind its front end every part of a left finger keeps. The AEG's handguard is too short for that with the hand
+## where the owner approved it (docs/records/HA1.md): there the foremost fingertip rests no more than PAST_FRONT_AEG
+## past its end, beside the front sight's base.
+const GUARD_SIDE := 0.018
+const BEHIND_FRONT := 0.005
+const PAST_FRONT_AEG := 0.015
+## How near (m) a reload's last frame comes to the hold's bone places, and (rad) its turns.
 const END_PLACE := 0.003
 const END_TURN := 0.02
 const PLACE := 0.005
@@ -126,7 +133,7 @@ func _tris(n: Node, root: Node3D, out: PackedVector3Array) -> void:
 
 
 ## Every EYE_EVERY-th vertex of the arms' mesh `mesh_name` that a left finger's bone carries, as the skeleton poses it
-## now, in `root`'s space: those on the replica's far side.
+## now, in `root`'s space.
 func _finger_points(hands: ReplicaView, root: Node3D, mesh_name: String, every: int = EYE_EVERY) -> Array[Vector3]:
 	var out: Array[Vector3] = []
 	var mi := hands._arms._model.find_child(mesh_name, true, false) as MeshInstance3D
@@ -277,6 +284,36 @@ func test_the_eye_check_catches_a_fingertip_that_shows_and_holds_at_every_vertex
 			assert_eq(_seen(eye, points, tris), 0, "%s: no one of %d vertices of %s shows" % [id, points.size(), mesh_name])
 
 
+## The critic's third look: a far-side finger on the AEG lay past the handguard's front end, on the barrel's side. On
+## the Sniper and the SMG no part of a left finger, gloved or bare, comes nearer than BEHIND_FRONT to the front end of
+## the handguard it holds: the foremost of the replica's surface that stands GUARD_SIDE or more to the right at the
+## fingers' own height. On the AEG none lies more than PAST_FRONT_AEG past it.
+func test_every_left_finger_keeps_behind_the_handguard_s_front_end() -> void:
+	for id: StringName in RIFLES:
+		var hands := _hands(id)
+		var held: ReplicaView.Held = hands._held[0]
+		var tris: PackedVector3Array = []
+		_tris(held.root.get_child(0), held.root, tris)
+		for mesh_name: String in [ArmsView.HAND_PREFIX + "L", ArmsView.SKIN_PREFIX + "L"]:
+			var points := _finger_points(hands, held.root, mesh_name, 1)
+			var low := INF
+			var high := -INF
+			var foremost := INF
+			for p in points:
+				low = minf(low, p.y)
+				high = maxf(high, p.y)
+				foremost = minf(foremost, p.z)
+			var front := INF
+			for v in tris:
+				if v.x >= GUARD_SIDE and v.y >= low and v.y <= high:
+					front = minf(front, v.z)
+			assert_lt(front, INF, "%s: the handguard's front end is found" % id)
+			var limit := front - PAST_FRONT_AEG if id == &"aeg" else front + BEHIND_FRONT
+			assert_gt(foremost, limit,
+					"%s: %s's foremost finger point (%.3f) keeps behind %.3f (the front end %.3f)"
+					% [id, mesh_name, foremost, limit, front])
+
+
 func test_no_finger_under_a_bare_handguard_is_knotted() -> void:
 	for id: StringName in RIFLES:
 		var hands := _hands(id)
@@ -329,7 +366,7 @@ func test_a_bot_holds_every_rifle_s_handguard_where_the_arms_do() -> void:
 		assert_lt(turned, TURN, "%s: turned as the arms' is (%.3f rad)" % [id, turned])
 
 
-func _carried_drop(busy: bool, sprint: bool = false) -> float:
+func _carried_drop(sprint: bool) -> float:
 	var cfg := ViewModelConfig.new()
 	var c := Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
 	c.grounded = true
@@ -339,7 +376,6 @@ func _carried_drop(busy: bool, sprint: bool = false) -> float:
 	var hands := ReplicaView.new()
 	add_child_autofree(hands)
 	hands.setup(cfg, c.armament.replicas, BoxWorld.new())
-	hands.hands_busy = busy
 	c.sprinting = sprint
 	var frames := ceili(cfg.carry_time / DT) + 5
 	var drop := 0.0
@@ -352,14 +388,14 @@ func _carried_drop(busy: bool, sprint: bool = false) -> float:
 	return drop
 
 
-func test_busy_hands_carry_the_replica_low_as_a_sprint_does_and_let_it_back() -> void:
+## PB3 took the bomb out of the hands (it is set on the ground with no animation), so the sprint alone carries now.
+func test_a_sprint_carries_the_replica_low_and_a_walk_does_not() -> void:
 	var cfg := ViewModelConfig.new()
-	assert_almost_eq(_carried_drop(true), cfg.sprint_drop, 1e-3, "hands on the bomb: carried the whole drop")
-	assert_almost_eq(_carried_drop(false), 0.0, 1e-4, "free hands: not carried")
-	assert_almost_eq(_carried_drop(false, true), cfg.sprint_drop, 1e-3, "a sprint carries the same")
+	assert_almost_eq(_carried_drop(true), cfg.sprint_drop, 1e-3, "a sprint carries the whole drop")
+	assert_almost_eq(_carried_drop(false), 0.0, 1e-4, "at a walk: not carried")
 
 
-func test_the_carry_eases_in_and_out_and_is_released_when_the_hands_are_free() -> void:
+func test_the_carry_eases_in_and_out_and_is_released_when_the_sprint_ends() -> void:
 	var cfg := ViewModelConfig.new()
 	var c := Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
 	c.grounded = true
@@ -368,7 +404,7 @@ func test_the_carry_eases_in_and_out_and_is_released_when_the_hands_are_free() -
 	hands.setup(cfg, c.armament.replicas, BoxWorld.new())
 	hands.update(c, 0.0, 0.0, Vector3.ZERO, Vector3.FORWARD, DT, 0.0)
 	var y0 := hands._held[hands._active].root.position.y
-	hands.hands_busy = true
+	c.sprinting = true
 	var share := 0.0
 	var first := 0.0
 	# A quarter of the way in by time, the eased share is well under a quarter (smoothstep 0.156).
@@ -382,11 +418,11 @@ func test_the_carry_eases_in_and_out_and_is_released_when_the_hands_are_free() -
 		hands.update(c, 0.0, 0.0, Vector3.ZERO, Vector3.FORWARD, DT, 0.0)
 	share = (y0 - hands._held[hands._active].root.position.y) / cfg.sprint_drop
 	assert_almost_eq(share, 1.0, 0.03, "all the way down")
-	hands.hands_busy = false
+	c.sprinting = false
 	for i in ceili(cfg.carry_time / DT) + 2:
 		hands.update(c, 0.0, 0.0, Vector3.ZERO, Vector3.FORWARD, DT, 0.0)
 	share = (y0 - hands._held[hands._active].root.position.y) / cfg.sprint_drop
-	assert_almost_eq(share, 0.0, 0.03, "and back up when the hands are free")
+	assert_almost_eq(share, 0.0, 0.03, "and back up when the sprint ends")
 
 
 func _posed(player: AnimationPlayer, skeleton: Skeleton3D, clip: StringName, at: float) -> Dictionary:

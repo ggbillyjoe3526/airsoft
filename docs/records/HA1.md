@@ -187,8 +187,7 @@ ATTEMPT_ROWS
   `tips_behind`, `tip_reach`, `Hand.seen`, `hold_tables.game_eyes`): the critic's second look found the open fingers
   floating beside the handguard from the far side, and a fingertip showing past the AEG's handguard from the eye at
   the hip. The four fingers now hook up onto the right side together, pads on its lower half, each turned a little
-  about its own line as a cupped hand's are, none past the handguard's front end (on the AEG's short handguard the
-  index and middle fingertips rest just behind it), the little finger's mark a little further forward on the Sniper
+  about its own line as a cupped hand's are, the little finger's mark a little further forward on the Sniper
   and the SMG (`pinky_ahead`: aimed as the others it folded into a hook); and the solve counts against a pose
   the share of each finger that the game's eye (the hip place, 15 mm above it and 20 mm to its right) sees past the
   replica. `test_no_left_finger_shows_past_the_replica_from_the_eye_at_the_hip` casts rays in Godot from the view's
@@ -197,6 +196,24 @@ ATTEMPT_ROWS
   wrapped better but moved the thumb in his view, so it was dropped). The Pump Shotgun keeps SH2's marks and
   settings; under the same check its index, middle and ring fingers close a few degrees further, and the test covers
   it too. The foregrips' fists are untouched (the same bends in the build's log).
+- **The far-side fingers stand side by side behind the front end; the AEG's cannot** (attempt 4; `front_hard`,
+  `tip_apart`, `sight.crowd`, `FRONT_CLEAR`, `FINGER_APART`): the critic's third look found a fingertip on the AEG
+  past the handguard's front end, and neighbouring fingers pinched into one another on the Sniper and the SMG. On
+  those two every fingertip now keeps 5 mm behind the front end as firmly as it keeps out of the replica, and each
+  finger keeps a finger's width (16 mm between middle lines) from the one laid before it: the four stand side by side
+  up the side face (16 to 19 mm apart, were 3 to 10). `test_every_left_finger_keeps_behind_the_handguard_s_front_end`
+  holds it on the skinned gloved and bare meshes. **The AEG keeps attempt 3's fingers**: its handguard ends 32 mm
+  ahead of the index finger's knuckle with the hand where the owner approved it (the magazine well stops the hand
+  going further back; his straight wrist keeps the fingers 47 degrees off the bore, so each finger's first bone
+  already runs 23 to 29 mm forward before it can turn up the side), and the eye sees anything on that side above
+  about z 0.055. Sixteen trial solves (a row of fingertips, natural curls, a wider swing, a firm front limit, fingers
+  kept apart) each ended with a finger passing through its neighbour, 10 to 12 % of the middle finger showing from
+  the eye, or fingers curled back in loops beside the handguard. So on the AEG the middle fingertip rests 13 mm past
+  the handguard's end beside the front sight's base, hidden from the eye, and the test holds it to 15 mm. The palm
+  cannot be raised or turned to help: either moves the thumb the owner approved. Asked of the owner on a card
+  (2026-11-13 21:10): keep the hand as approved, or turn it across with the wrist bent. **He chose the card's "Keep it
+  as approved"** (21:21), which read: "Nothing in your view changes. On a bot's AEG one fingertip rests about 1 cm
+  past the handguard's end, and I finish with that written down as accepted."
 - **The Sniper's right hand holds the stock's wrist** (attempt 3; `SNIPER_RIGHT` `index_soft`, `swing_search`,
   `press`): the trigger finger lay straight under the guard, 2 cm short. Its coarse search missed the pocket inside
   the guard (a gloved fingertip has 1 to 2 mm to spare there), so that search now forgives touching and the fine
@@ -278,6 +295,9 @@ ATTEMPT_ROWS
 
 - Aimed, the Cyber's right thumb lies a little flatter than the GBB's; on the Angled Grip's short tall end the ring
   and little fingers close under its foot (`docs/KNOWN_ISSUES.md` › Graphics).
+- On the AEG's far side (a bot beside the player shows it; the player's own view never does) the left middle
+  fingertip rests 13 mm past the handguard's end, and the fingers stand less evenly than on the Sniper and the SMG
+  (the decision above; `docs/KNOWN_ISSUES.md` › Graphics).
 - The skin's atlas has about 1,000 texels (of 1.27 million) claimed by two places on the hand, at the thumb's web; no
   seam shows in the pictures.
 - Working the Sniper's bolt, the right elbow steps out a few centimetres over two frames where the sleeve would

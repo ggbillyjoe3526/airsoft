@@ -268,7 +268,10 @@ class Hand:
         self.far = None
         # How far forward a support hand's fingers may reach: a direction (eye space) and the furthest any of a
         # finger's glove may lie along it (m), the handguard's front end. None: no limit.
-        self.front = None
+        self.front, self.front_hard = None, False
+        # The fingers already laid (each of their last two bones' ends) and how far (m) apart the next keeps its own
+        # from them (`sight.crowd`).
+        self.laid, self.apart = [], 0.0
         # The furthest left (eye space) the trigger finger's outer bones may reach (`onto`). None: no limit.
         self.index_left = None
         # How far the trigger finger's joints may bend reaching the trigger (degrees, base to tip; `onto`).
@@ -562,8 +565,13 @@ class Hand:
                 arch = cost * (abs(a[1] - mid) + 0.5 * abs(a[2] - tip * mid))
             # Clear of the replica first, then the pad nearest the target; and never standing above `tip_top`, when
             # set (a support hand's fingertips kept under the handguard's top as the eye sees it).
-            over += self.over(name) + sight.ahead(self, name) + sight.seen(self, name) * sight.SEEN_COST
-            return pad + arch + over * 10.0 + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
+            # Past `front` (a handguard's front end) counts as the height limit does; or, where the hold says so
+            # (`front_hard`), as passing into the replica does: never, where any pose keeps behind it.
+            past = sight.ahead(self, name)
+            over += self.over(name) + (0.0 if self.front_hard else past) + sight.seen(self, name) * sight.SEEN_COST
+            over += sight.crowd(self, name)
+            return pad + arch + over * 10.0 + (1.0 + past * 10.0 if self.front_hard and past > 0.0 else 0.0) \
+                + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
 
         swing = int(swing)
         if os.environ.get("BL_DEBUG"):

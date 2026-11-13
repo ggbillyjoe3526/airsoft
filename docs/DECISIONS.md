@@ -205,7 +205,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   2026-11-06 (`ViewModelConfig.hip`). The bare hands (14:01, on the repainted skin in game): "Remove the white
   finger nail tips, make the tendons more subtle", and of the skin's texture "Keep the texture as is": the nails have
   no white free edge and a faint moon, the tendons a little under half their shade and height
-  (`skin.NAIL_TONE`, `MOON`, `TENDON_FORM`, `TENDON`); of that picture, "Perfect" (14:17). Default taken: the bots stay one-handed on pistols (HG1 below; they copy
+  (`skin.NAIL_TONE`, `MOON`, `TENDON_FORM`, `TENDON`); of that picture, "Perfect" (14:17). The AEG's far side (21:21, on a card: its
+  handguard is too short for four fingers behind its front end with the hand where he approved it): he chose "Keep it
+  as approved" over turning the hand across with the wrist bent, so on the side only a bot shows one fingertip rests
+  about 1 cm past the handguard's end. Default taken: the bots stay one-handed on pistols (HG1 below; they copy
   `<id>_Hold`).
   His reference pictures are other games' and set hand placement and framing only; the art is our own.
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands

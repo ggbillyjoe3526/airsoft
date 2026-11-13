@@ -17,7 +17,7 @@ import skin
 from pose import Collider, Rig, basis
 
 from hold_tables import (ACROSS, BARE_GRID, BEND_COST, CLEAR_COST, CUP_GAP, CUP_STEP, CUP_TRIES, ELBOW_DROP,
-    FOREARM_CLEAR, GRIP_HOLDS, GRIP_SHOULDER, GUARD_AXIS, GUARD_RADIUS, Hold, LEFT_HELD, LOOSE_COST, MOVE_COST,
+    FOREARM_CLEAR, FRONT_CLEAR, GRIP_HOLDS, GRIP_SHOULDER, GUARD_AXIS, GUARD_RADIUS, Hold, LEFT_HELD, LOOSE_COST, MOVE_COST,
     OVER_COST, PALM_FACING, PALM_SPARSE, PARTS, PINKY_COST, PLAN_COST, REPLICAS, RIGHT_HELD, RIGHT_THUMB, RISE_COST,
     ROLL_STEP, SHOULDER, THUMB_BENDS, THUMB_TIP, THUMB_TWISTS, THUMB_WIDE, TIP_COUPLE, TIP_CUP, TIP_MOST,
     TRIGGER_SLACK, WRAP, WRAP_COST, YAW_STEP, aim, game_eyes, roll_about, tuned)
@@ -410,7 +410,8 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider,
     hand.eyes, hand.screen = game_eyes(hold), col
     hand.far = ((to_eye.to_3x3() @ Vector((1.0, 0.0, 0.0))).normalized(), to_eye @ Vector((0.0, y, 0.0)))
     way = (to_eye.to_3x3() @ Vector((0.0, 1.0, 0.0))).normalized()
-    hand.front = (way, (to_eye @ Vector((0.0, spec["tips_behind"], 0.0))).dot(way))
+    behind = spec["tips_behind"] - (FRONT_CLEAR if spec["front_hard"] else 0.0)
+    hand.front, hand.front_hard = (way, (to_eye @ Vector((0.0, behind, 0.0))).dot(way)), spec["front_hard"]
     if "upper" in spec:
         shoulder_behind(rig, "L", hand_m, spec["upper"], spec.get("sag", 0.0))
         rig.plan.pop("L", None)
@@ -424,23 +425,27 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider,
     # rather than over the rail (the critic); each curls as a relaxed finger does (TIP_COUPLE), never a claw.
     # tip_at x 0 turns this off.
     inv = to_eye.inverted()
+    # Where each fingertip aims along the handguard (replica space, m): `tip_at`'s second figure ahead of its own
+    # knuckle, the little finger's `pinky_ahead` further.
+    mark = {n: (inv @ rig.pose["%s1_L" % n].translation).y + spec["tip_at"][1]
+            + (spec["pinky_ahead"] if n == "Pinky" else 0.0) for n in spec["fingers"]}
     ends = hand.front
+    hand.laid, hand.apart = [], spec["tip_apart"]
     for name in spec["fingers"] if spec["tip_at"][0] > 0.0 else ():
-        k = inv @ rig.pose["%s1_L" % name].translation
-        if ends is not None:
-            # No further forward than the handguard's front end, nor than `tip_reach` ahead of its own knuckle: the
-            # fingertips then lie in a row as the knuckles do, none laid out straight past the others.
-            hand.front = (ends[0], min(ends[1], rig.pose["%s1_L" % name].translation.dot(ends[0]) + spec["tip_reach"]))
-        # The little finger, the shortest and its knuckle the furthest back and out, may aim lower or further forward
-        # than the others (`pinky_drop`, `pinky_ahead`, m): aimed as they are it folds into a hook to reach its mark.
-        drop, more = (spec["pinky_drop"], spec["pinky_ahead"]) if name == "Pinky" else (0.0, 0.0)
-        target = to_eye @ Vector((spec["tip_at"][0], k.y + spec["tip_at"][1] + more, spec["tip_at"][2] - drop))
+        # No further forward than `tip_reach` ahead of its own knuckle either.
+        hand.front = (ends[0], min(ends[1], rig.pose["%s1_L" % name].translation.dot(ends[0]) + spec["tip_reach"]))
+        # The little finger may aim lower than the others (`pinky_drop`, m).
+        drop = spec["pinky_drop"] if name == "Pinky" else 0.0
+        target = to_eye @ Vector((spec["tip_at"][0], mark[name], spec["tip_at"][2] - drop))
         most = spec.get("tip_most", TIP_MOST)
         # A hold that gives the last joint's most bend too (`tip_most`'s third figure) searches it on its own.
         free = len(most) > 2
         curls[name] = hand.onto(name, target, col, (int(most[0]), int(most[1]), int(most[2]) if free else 0),
                                 spec["tip_swing"], 0.0 if free else TIP_COUPLE, back=int(spec.get("tip_back", 0.0)),
                                 cup=spec.get("tip_cup", 0.0) * TIP_CUP.get(name, 0.0))
+        if hand.apart > 0.0:
+            hand.laid += sight.lines(hand, name)
+    hand.laid = []
     if os.environ.get("BL_DEBUG"):
         for name in spec["fingers"]:
             js = [inv @ rig.pose["%s%d_L" % (name, k)].translation for k in (1, 2, 3)]

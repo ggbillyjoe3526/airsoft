@@ -17,7 +17,7 @@ SAMPLES = int(os.environ.get("BL_PREVIEW_SAMPLES", "24"))
 OUTSIDE = {"left": Vector((-0.45, -0.05, 0.10)), "right": Vector((0.45, -0.05, 0.10)),
            "front": Vector((-0.12, 0.45, 0.12)), "under": Vector((-0.15, -0.10, -0.42)),
            "top": Vector((-0.02, -0.12, 0.45)), "behind": Vector((-0.16, -0.40, 0.20)),
-           "ahead": Vector((0.30, 0.34, 0.06))}
+           "ahead": Vector((0.30, 0.34, 0.06)), "below": Vector((0.30, 0.22, -0.22))}
 OUTSIDE_FOV = math.radians(48.0)
 # BL_PREVIEW_VIEWS=<view>,... draws those views alone; BL_PREVIEW_NEAR=<share> brings the outside views that much
 # nearer (0.5: half as far, for a close look at a finger).

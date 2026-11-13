@@ -1,7 +1,8 @@
 """What the game's eye sees of a rifle's support hand (HA1): the owner, 2026-11-12, of the view at the hip: "You can
 still see the players fingers on the right side of the AEG. They should not be visible: only the thumb of the left
 hand". `pose.Hand.onto` counts both measures here against a finger's pose; hold_solve.left_on_guard sets what they
-read (`Hand.eyes`, `screen`, `far`, `front`)."""
+read (`Hand.eyes`, `screen`, `far`, `front`). `crowd` is the third: the far side as a bot beside the player shows it
+(the critic's third look: neighbouring fingers pinched into one another)."""
 
 # A point of a finger counts as hidden when the replica stands in the way at least this far (m) short of it.
 SEEN_SKIN = 0.002
@@ -10,6 +11,8 @@ SEEN_FAR = 0.005
 # Each hundredth of a finger's glove that shows costs as much as its pad lying SEEN_COST / 10 m off its mark (it
 # counts with the height limit, tenfold).
 SEEN_COST = 0.5
+# Where along each of a finger's last two bones `crowd` measures (shares of the bone's length).
+CROWD_AT = (0.0, 0.5, 1.0)
 
 
 def ahead(hand, name: str) -> float:
@@ -44,3 +47,28 @@ def seen(hand, name: str) -> float:
                     shown += 1
                     break
     return shown / max(1, total)
+
+
+def lines(hand, name: str) -> list:
+    """The finger's last two bones as it is posed: each one's two ends."""
+    out = []
+    for b in ("%s%d_%s" % (name, k, hand.side) for k in (2, 3)):
+        m = hand.rig.pose[b]
+        out.append((m.translation.copy(), m.translation + m.to_3x3().col[1] * hand.rig.length[b]))
+    return out
+
+
+def crowd(hand, name: str) -> float:
+    """How far (m) the finger's last two bones come nearer than `hand.apart` to those of the fingers laid before it
+    (`hand.laid`, each bone's two ends): fingers lie side by side, never through one another. 0 with none laid."""
+    if not hand.laid:
+        return 0.0
+    least = hand.apart
+    for a, b in lines(hand, name):
+        for t in CROWD_AT:
+            p = a.lerp(b, t)
+            for c, d in hand.laid:
+                along = d - c
+                q = c + along * min(1.0, max(0.0, (p - c).dot(along) / along.length_squared))
+                least = min(least, (p - q).length)
+    return hand.apart - least
