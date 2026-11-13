@@ -11,6 +11,9 @@ Bots know only what they see and hear:
 
 - They see in a **120° view** in front of them, never through walls, but through glass as you do. Glass still
   stops BBs, so a bot that sees you through it with no shot goes round to you.
+- A bush hides you from a bot only past <!-- wiki:config bot_config.close_awareness --> m: closer, it notices you
+  whichever way it faces. Further off it holds fire through more than a thin edge of leaves, but that close it fires
+  whenever a BB could get through to you, so hiding in the same bush as a bot means a shoot-out.
 - They hear running, sprinting, vaults, landings, knocked props, shots, and a [flash's bang or a smoke's
   pop](Grenades). Walls muffle what they hear. **Walking and
   moving crouched are silent**, so you can sneak up on a bot that hasn't seen you.

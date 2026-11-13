@@ -562,6 +562,10 @@ Once the rest of step 26 lands:
 - [ ] **Bushes stop BBs (WL5, FO1).** A BB into a bush's middle never comes out, with a leafy rustle and falling
   leaves; through the edge it comes out off its line and slower. Fire from deep inside: "Leaves in the way · step
   clear to shoot". A Normal bot holds fire until it has a clearer line; an Easy one fires into the leaves.
+- [ ] **A bush at point blank (BU1).** Crouch deep in a big bush and let a bot walk in to you, or watch two foes meet
+  inside one: within 2.5 m the bot opens fire as soon as a BB can get through the leaves to you (pressed close, about
+  half a metre of leaf), and nobody stands pushing into anybody. From 3 m or more it still holds fire through the
+  bush.
 - [ ] **Night sight (WL6).** Bots see about 40 m into a light pool, 25 m in the open and 10 m under the trees; fires
   and lanterns give you away.
 - [ ] **The look and sound (the owner's models).** Bark trunks, log walls and log piles, plank fences; wind in the
