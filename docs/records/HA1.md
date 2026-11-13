@@ -71,9 +71,13 @@ ATTEMPT_ROWS
   the thumb round its back. The vertical grip (64 mm since MQ2) is tilted 20 degrees (forearm rising 20, 24 off the
   bore); the angled grip's tall end is held the same way, tilted 12, because its raked front and rail plate leave
   the index less room. The wrist stays straight (under 1 degree) on both. His fifth look: "Move the hand up the
-  vertical grip a bit more so more fingers grip it": the vertical grip's fist sits 10 mm higher, the index knuckle
-  just under the grip's flared top, tilted 8 degrees so the index still turns under the flare; the index, middle and
-  ring fingers hold its body and the little finger its foot.
+  vertical grip a bit more so more fingers grip it": the vertical grip's fist sat 10 mm higher, tilted 8 degrees, the
+  thumb still round the grip's back. His sixth: "The previous version was better, so go back to that but the hand
+  should be further up the grip (with fingers wrapped around the grip and the thumb resting on the near side)". So
+  the vertical grip's fist is the fourth look's again (tilted 20, forearm rising 20), 10 mm higher, the index knuckle
+  just under the grip's flared top: the index, middle and ring fingers hold its body and the little finger its foot,
+  and the thumb lies forward along the grip's near side under the flare (`thumb_at`, `thumb_curl`), no longer round
+  its back. Default taken: the angled grip keeps its thumb round the back (he asked for the vertical grip only).
 - **The thumb on the handguard** (`thumb_f`, `thumb_z`, `thumb_hug`; the owner's fourth look: "The thumb should be
   resting against the replica"): it reached 55 mm forward along the handguard's lower left edge, its tip past the
   handguard's front, so from the eye it stood beside the rifle. It lies 35 mm forward and 5 mm higher, up on the side
@@ -134,7 +138,10 @@ ATTEMPT_ROWS
   handguard until the sight is 0.4 of the way up, when the replica is coming in front of it, and has slid by 0.9
   (`aim_slide_span`). Checked on pictures with iron sights, each optic and each grip. The right hand is under the
   screen's foot already. A reload lowers the sight (`Aiming.can_aim`), so the hand is the clip's again before it
-  reaches for the magazine.
+  reaches for the magazine. The Pump Shotgun (SH2, merged while this was open) takes the rifles' amounts, its hand
+  off the pump and out of view by the time the sight is up (SH2 left this to HA1: "aimed, the left fingertips show
+  beside the receiver"); its hold is built by this task's guard method (wrist 11 degrees, nothing passing), and
+  `test_sh2_qa.gd` now expects the other long replicas' hold marks where their holds are solved, not at the hip.
 - **Aimed, a pistol keeps the tops of the hands** (`aim_hands_hint`, `aim_hint_span` 0.3 to 0.8 of the raise,
   `aim_hint_below` 80 to 120 mm under the sight line; `ArmsFade`, `arms_fade.gdshader`): what lies below fades, so
   only the top of the hands shows under the slide (the owner picked this from pictures, over whole solid hands and

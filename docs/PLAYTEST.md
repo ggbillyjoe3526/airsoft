@@ -203,7 +203,7 @@ own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a 
   handguard just ahead of the magazine, its thumb on the near side and no fingers on the far side, the forearm and wrist in one straight line
   running up close beside the rifle, the thumb resting on the handguard's side; with a Vertical or Angled Grip
   fitted the hand is a fist round the grip, its index finger under the handguard (high on the Vertical Grip, three
-  fingers holding it); the SMG sits as the rifles do. A pistol is held tight in both hands, no left
+  fingers holding it and the thumb resting on its near side); the SMG sits as the rifles do. A pistol is held tight in both hands, no left
   fingers showing, the right thumb resting on the left hand, the Cyber Pistol held as the GBB is; over the sights no
   gap shows between the left hand and the grip. Raise the sight: a
   rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and only the top of the

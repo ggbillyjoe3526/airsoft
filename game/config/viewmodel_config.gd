@@ -31,14 +31,16 @@ extends Resource
 ## axes: x right, y up, z back; by replica id) and the elbow turns to hang under the line from it to the wrist
 ## (ArmsTuck), so the forearm lies behind the replica too.
 @export var aim_tuck: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.14, -0.06, 0.0),
-		&"sniper": Vector3(0.14, -0.06, 0.0), &"smg": Vector3(0.14, -0.06, 0.0)}
+		&"sniper": Vector3(0.14, -0.06, 0.0), &"smg": Vector3(0.14, -0.06, 0.0),
+		&"shotgun": Vector3(0.14, -0.06, 0.0)}
 ## The hand on the handguard would still show past the replica's sides when aimed (most with an optic fitted, which
 ## sits the eye higher): it slides this far along the replica as the sight comes up (the same axes; by replica id),
 ## back and down toward the receiver, which hides it. It holds the handguard while the sight is raised less than
 ## `aim_slide_span`'s first share and has slid by its second, so it lets go only once the replica is in front of it.
 @export var aim_slide_span: Vector2 = Vector2(0.4, 0.9)
 @export var aim_slide: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.0, -0.07, 0.22),
-		&"sniper": Vector3(0.02, -0.09, 0.22), &"smg": Vector3(0.0, -0.07, 0.22)}
+		&"sniper": Vector3(0.02, -0.09, 0.22), &"smg": Vector3(0.0, -0.07, 0.22),
+		&"shotgun": Vector3(0.0, -0.07, 0.22)}
 ## A replica in aim_hands_hint (the pistols) keeps the tops of its hands under the slide (the owner's pick of three
 ## pictures): as the sight's raise (as drawn, 0..1) passes from aim_hint_span's x to its y, what lies below the sight
 ## line fades out, whole down to aim_hint_below's x (m under it) and gone by its y.

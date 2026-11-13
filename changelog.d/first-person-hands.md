@@ -1,7 +1,7 @@
 ### Hands that look and move like yours
 - With an AEG Rifle, Sniper or Compact SMG at the hip, you see only your left hand under the handguard, ahead of the magazine.
 - Your right hand stays below the screen, and the Compact SMG sits at the same angle and size as the rifles.
-- With a Vertical Grip or Angled Grip fitted, your left hand is a fist round the grip; on the Vertical Grip it sits high.
+- With a Vertical Grip or Angled Grip fitted, your left hand is a fist round the grip; on the Vertical Grip it sits high, thumb on the near side.
 - Pistols are held tight in both hands, the left wrapped round the right; the Cyber Pistol is held like the GBB Pistol.
 - On a pistol reload your left hand lets go, changes the magazine and comes back.
 - Raise the sights and a rifle's hands leave the view; with a pistol only the tops of your hands show under the slide.

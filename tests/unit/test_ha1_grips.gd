@@ -2,7 +2,9 @@ extends GutTest
 ## HA1, the owner's fourth look (2026-11-12): "With a vertical grip the index finger should be under the replica and
 ## around the grip. Angled grip should be held similar to the vertical grip": on each foregrip's hold in the arms
 ## model the left hand is a fist, and both grips are held alike. His fifth look (2026-11-13): "Move the hand up the
-## vertical grip a bit more so more fingers grip it": the ring finger holds the vertical grip's body too.
+## vertical grip a bit more so more fingers grip it": the ring finger holds the vertical grip's body too. His sixth
+## (04:22): "the hand should be further up the grip (with fingers wrapped around the grip and the thumb resting on the
+## near side)": on the vertical grip the thumb lies forward along the grip's left side, not round its back.
 
 const MODEL_PATH := "res://assets/models/arms/arms.glb"
 const GRIPPED: Array[StringName] = [&"aeg", &"sniper"]
@@ -19,6 +21,10 @@ const ALIKE := 45.0
 ## How far (m) the index finger's tip at least comes back toward the thumb's side of the grip from its knuckle,
 ## measured along the palm's facing: round the grip, not lying open beside it.
 const WRAPPED := 0.015
+## The thumb's last bone (m), root to tip, and how far (m) forward of the thumb's root its tip at least lies on the
+## vertical grip.
+const THUMB_TIP := 0.025
+const THUMB_FORWARD := 0.025
 
 
 func _posed(clip: StringName) -> Skeleton3D:
@@ -85,3 +91,19 @@ func test_three_fingers_hold_the_vertical_grip() -> void:
 		var hand := _bone(skeleton, "Hand_L").basis.orthonormalized().inverse()
 		var off := rad_to_deg((hand * _bone(skeleton, "Ring3_L").basis.y).angle_to(hand * _bone(skeleton, "Middle3_L").basis.y))
 		assert_lt(off, ALIKE, "%s: the ring finger lies as the middle finger does (%.0f degrees off)" % [clip, off])
+
+
+func test_the_thumb_rests_on_the_vertical_grips_near_side() -> void:
+	for id in GRIPPED:
+		var clip := StringName("%s_grip_vertical_Hold" % id)
+		var skeleton := _posed(clip)
+		var last := _bone(skeleton, "Thumb3_L")
+		var tip := last.origin + last.basis.y.normalized() * THUMB_TIP
+		# The arms' own space: x to your right, -z forward. The fingers go round the grip's front onto its right
+		# side; the thumb stays left of the index knuckle, which sits beside the grip's left face.
+		var knuckle := _bone(skeleton, "Index1_L").origin
+		assert_lt(tip.x, knuckle.x, "%s: the thumb's tip on the grip's near side (%.3f left of the knuckle)" % [
+				clip, knuckle.x - tip.x])
+		assert_lt(tip.x, _bone(skeleton, "Index3_L").origin.x, "%s: and not round the back with the fingertips" % clip)
+		var forward := _bone(skeleton, "Thumb1_L").origin.z - tip.z
+		assert_gt(forward, THUMB_FORWARD, "%s: the thumb lies forward along the grip (%.3f m)" % [clip, forward])

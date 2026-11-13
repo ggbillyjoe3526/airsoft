@@ -8,7 +8,7 @@ extends GutTest
 
 const DT := 1.0 / 60.0
 const EPS := 1e-4
-const RIFLES := [&"aeg", &"sniper", &"smg"]
+const RIFLES := [&"aeg", &"sniper", &"smg", &"shotgun"]
 const PISTOLS := [&"pistol", &"cyber"]
 const UPPER := "UpperArm_L"
 const FORE := "Forearm_L"

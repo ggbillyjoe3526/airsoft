@@ -63,5 +63,6 @@
 - No sights: nothing marks the aim but the rail's far end (the owner's ruling; a play check asks).
   `docs/KNOWN_ISSUES.md`.
 - The hold and its hip place wait for the owner's word on the pictures. `docs/KNOWN_ISSUES.md`.
-- Aimed, the left fingertips show beside the receiver until HA1's aimed-hands rules have the shotgun's entries.
+- Aimed, the left fingertips showed beside the receiver until HA1's aimed-hands rules had the shotgun's entries
+  (added in HA1: `aim_tuck`, `aim_slide`).
 - Its sounds are still stand-ins (SH1).
