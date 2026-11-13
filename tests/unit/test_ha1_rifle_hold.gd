@@ -127,7 +127,7 @@ func _tris(n: Node, root: Node3D, out: PackedVector3Array) -> void:
 
 ## Every EYE_EVERY-th vertex of the arms' mesh `mesh_name` that a left finger's bone carries, as the skeleton poses it
 ## now, in `root`'s space: those on the replica's far side.
-func _finger_points(hands: ReplicaView, root: Node3D, mesh_name: String) -> Array[Vector3]:
+func _finger_points(hands: ReplicaView, root: Node3D, mesh_name: String, every: int = EYE_EVERY) -> Array[Vector3]:
 	var out: Array[Vector3] = []
 	var mi := hands._arms._model.find_child(mesh_name, true, false) as MeshInstance3D
 	var sk := hands._arms._skeleton
@@ -151,7 +151,7 @@ func _finger_points(hands: ReplicaView, root: Node3D, mesh_name: String) -> Arra
 		var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
 		var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
 		var per := bones.size() / vs.size()
-		for i in range(0, vs.size(), EYE_EVERY):
+		for i in range(0, vs.size(), every):
 			var most := 0
 			for k in per:
 				if weights[i * per + k] > weights[i * per + most]:
@@ -251,6 +251,30 @@ func test_no_left_finger_shows_past_the_replica_from_the_eye_at_the_hip() -> voi
 			assert_gt(points.size(), 50, "%s: %s has fingers on the far side to judge" % [id, mesh_name])
 			assert_eq(_seen(eye, points, tris), 0,
 					"%s: of %d points on %s's fingers, none shows past the replica" % [id, points.size(), mesh_name])
+
+
+## The eye test's own soundness: a point just outside the replica's far side shows, and judging every vertex (not
+## every third) finds none showing either.
+func test_the_eye_check_catches_a_fingertip_that_shows_and_holds_at_every_vertex() -> void:
+	var cfg := ViewModelConfig.new()
+	for id: StringName in HANDGUARD_HELD:
+		var hands := _hands(id)
+		var held: ReplicaView.Held = hands._held[0]
+		held.root.position = cfg.hip.get(id, cfg.hip_default)
+		held.root.rotation = Vector3.ZERO
+		var tris: PackedVector3Array = []
+		_tris(held.root.get_child(0), held.root, tris)
+		var eye := held.root.transform.affine_inverse() * Vector3.ZERO
+		var lo := Vector3.INF
+		var hi := -Vector3.INF
+		for v in tris:
+			lo = lo.min(v)
+			hi = hi.max(v)
+		var out: Array[Vector3] = [Vector3((lo.x + hi.x) / 2.0, hi.y + 0.05, (lo.z + hi.z) / 2.0)]
+		assert_eq(_seen(eye, out, tris), 1, "%s: a point above the replica shows to the check" % id)
+		for mesh_name: String in [ArmsView.HAND_PREFIX + "L", ArmsView.SKIN_PREFIX + "L"]:
+			var points := _far_side(eye, _finger_points(hands, held.root, mesh_name, 1), tris)
+			assert_eq(_seen(eye, points, tris), 0, "%s: no one of %d vertices of %s shows" % [id, points.size(), mesh_name])
 
 
 func test_no_finger_under_a_bare_handguard_is_knotted() -> void:
