@@ -117,7 +117,8 @@ west wall, the log stack by flag B) took the attackers from 57 % to 41 %.
   the one walking to the escalators (away from the bomb as the crow flies) lost the job to the one walking back to
   the site, and the two swapped it each time they passed until the round ran out. Now a bot on the bomb's storey
   fetches before any that is not, the one going is kept unless one on its storey is nearer, and a fetcher has come
-  to the bomb only on its storey (`BotPlant._pick_fetcher`, `on_bomb_level`; three tests in `test_bots_plant`): 48 %,
+  to the bomb only within a hand's reach of its height (QA's find: half a flight below it on a stair it crouched for
+  good) (`BotPlant._pick_fetcher`, `on_bomb_level`, `BotMovement._flag`; three tests in `test_bots_plant`): 48 %,
   none on the clock, 39 held up and at most 8 in a match, so Subway's guard is back on the shared held-up limit
   (`SUBWAY_HELD_UP_MAX` is gone). Depot's rounds are the same to the round; Woodland's moved by three.
 - Before the carrier went in last and a bomb taken up in the defenders' half was carried straight on, the attackers

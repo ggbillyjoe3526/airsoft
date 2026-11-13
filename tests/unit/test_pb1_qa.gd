@@ -512,3 +512,92 @@ func test_a_defuse_is_open_to_the_bots_when_the_player_is_on_another_storey() ->
 	assert_false(BotPlant.may_defuse(w), "the player stands by it with the fuse long")
 	bcs[3].position = SITE_A + Vector3(1.0, w.cfg.plant_player_level + 0.5, 0.0)
 	assert_true(BotPlant.may_defuse(w))
+
+
+# --- Attempt 3: the fetcher chosen by storey ---
+
+
+func _fetcher_id() -> int:
+	for b in w.bots:
+		if b.fetcher:
+			return b.character.id
+	return -1
+
+
+func _bomb_down_at(at: Vector3) -> void:
+	brs.plant.position = at
+	brs.plant.status = PlantState.Status.DOWN
+
+
+func test_a_fetcher_exactly_at_the_storey_limit_is_kept_over_a_nearer_one_below_it() -> void:
+	_bot_world()
+	_bomb_down_at(Vector3(0.0, 9.0, 0.0))
+	bcs[0].position = Vector3(30.0, 9.0 - w.cfg.plant_player_level, 0.0)
+	bcs[1].position = Vector3(40.0, 9.0 - w.cfg.plant_player_level - 0.01, 1.0)
+	bcs[2].position = Vector3(41.0, 9.0 - w.cfg.plant_player_level - 0.01, 1.0)
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), 0, "the only one within the limit")
+	bcs[1].position = Vector3(3.0, 9.0 - w.cfg.plant_player_level - 0.01, 0.0)
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), 0, "a hair under the limit is not on the storey")
+
+
+func test_a_fetcher_given_a_squad_order_hands_the_bomb_to_the_nearest_on_its_storey() -> void:
+	_bot_world()
+	_bomb_down_at(Vector3(0.0, 9.0, 0.0))
+	bcs[0].position = Vector3(5.0, 9.0, 0.0)
+	bcs[1].position = Vector3(20.0, 9.0, 0.0)
+	bcs[2].position = Vector3(4.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), 0)
+	w.bots[0].order = SquadOrder.Kind.HOLD if SquadOrder.Kind.has("HOLD") else SquadOrder.Kind.values()[1]
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), 1, "the keeper under orders is no keeper; the one off the storey stays out")
+	assert_false(w.bots[0].fetcher)
+
+
+func test_a_keeper_that_is_out_leaves_the_job_to_the_nearest_with_nobody_on_the_storey() -> void:
+	_bot_world()
+	_bomb_down_at(Vector3(0.0, 9.0, 0.0))
+	bcs[0].position = Vector3(10.0, 0.0, 0.0)
+	bcs[1].position = Vector3(20.0, 0.0, 0.0)
+	bcs[2].position = Vector3(2.0, 0.0, 30.0)
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), 0)
+	bcs[0].status = Character.Status.OUT
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), 1, "nobody on the storey and no keeper: the nearest level")
+
+
+func test_the_job_after_a_pick_up_and_drop_goes_to_the_one_on_the_storey_not_the_old_keeper() -> void:
+	_bot_world()
+	_bomb_down_at(Vector3(0.0, 9.0, 0.0))
+	bcs[0].position = Vector3(5.0, 0.0, 0.0)
+	bcs[1].position = Vector3(30.0, 9.0, 0.0)
+	bcs[2].position = Vector3(40.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), 1)
+	brs.plant.status = PlantState.Status.CARRIED
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), -1, "while it is carried nobody fetches")
+	_bomb_down_at(Vector3(0.0, 0.9, 0.0))
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), 0, "dropped a storey lower: the nearest of those on that storey")
+
+
+func test_a_fetcher_half_a_flight_below_a_bomb_on_the_stairs_has_not_come_to_it() -> void:
+	_bot_world()
+	_bomb_down_at(Vector3(0.0, 1.8, 0.0))
+	bcs[0].position = Vector3(0.3, 0.0, 0.0)
+	bcs[1].position = Vector3(30.0, 0.0, 0.0)
+	bcs[2].position = Vector3(31.0, 0.0, 0.0)
+	w.time = 100.0
+	BotPlant.plan(w)
+	assert_eq(_fetcher_id(), 0)
+	var cmd := PlayerCommand.new()
+	BotMovement._flag(w.bots[0], w, cmd, DT)
+	var cmd2 := PlayerCommand.new()
+	BotPlant.act(w.bots[0], w, cmd2)
+	assert_false(Plant.in_reach(brs.plant, bcs[0], w.tuning.plant.pickup_reach, w.tuning.plant), "out of a hand's reach")
+	assert_false(cmd2.interact)
+	assert_false(cmd.crouch, "so it has not come to it: it keeps on up the stairs (QA attempt 3: it crouched there for good)")
