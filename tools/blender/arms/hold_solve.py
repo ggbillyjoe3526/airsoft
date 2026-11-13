@@ -12,14 +12,15 @@ from mathutils import Matrix, Vector
 
 import cycle
 import pose
+import sight
 import skin
 from pose import Collider, Rig, basis
 
 from hold_tables import (ACROSS, BARE_GRID, BEND_COST, CLEAR_COST, CUP_GAP, CUP_STEP, CUP_TRIES, ELBOW_DROP,
     FOREARM_CLEAR, GRIP_HOLDS, GRIP_SHOULDER, GUARD_AXIS, GUARD_RADIUS, Hold, LEFT_HELD, LOOSE_COST, MOVE_COST,
     OVER_COST, PALM_FACING, PALM_SPARSE, PARTS, PINKY_COST, PLAN_COST, REPLICAS, RIGHT_HELD, RIGHT_THUMB, RISE_COST,
-    ROLL_STEP, SHOULDER, THUMB_BENDS, THUMB_TIP, THUMB_TWISTS, THUMB_WIDE, TIP_COUPLE, TIP_MOST, TRIGGER_SLACK, WRAP,
-    WRAP_COST, YAW_STEP, aim, roll_about, tuned)
+    ROLL_STEP, SHOULDER, THUMB_BENDS, THUMB_TIP, THUMB_TWISTS, THUMB_WIDE, TIP_COUPLE, TIP_CUP, TIP_MOST,
+    TRIGGER_SLACK, WRAP, WRAP_COST, YAW_STEP, aim, game_eyes, roll_about, tuned)
 
 
 # ------------------------------------------------------------------------------------------------------ placing
@@ -177,8 +178,19 @@ def pose_fingers(hand: pose.Hand, spec: dict, col: Collider, thumb_to: Vector = 
     curls = {}
     swing = dict(zip(("Middle", "Ring", "Pinky"), spec.get("swing", (0.0, 0.0, 0.0))))
     for name, start in spec["fingers"].items():
-        curls[name] = hand.settle(name, start, col, swing=swing.get(name, 0.0), root=root,
-                                  more=spec.get("curl_more"))
+        # A finger no curl of which clears the replica at its authored swing is tried swung further either way
+        # (`swing_search`, degrees more: the Sniper's middle finger, held under its trigger guard).
+        for more in (0.0,) + tuple(spec.get("swing_search", ())):
+            curls[name] = hand.settle(name, start, col, swing=swing.get(name, 0.0) + more, root=root,
+                                      more=spec.get("curl_more"), strict=True)
+            if curls[name] is not None:
+                swing[name] = swing.get(name, 0.0) + more
+                if more:
+                    print("  %s finger swung %+.0f degrees more to clear the replica" % (name, more))
+                break
+        else:
+            curls[name] = hand.settle(name, start, col, swing=swing.get(name, 0.0), root=root,
+                                      more=spec.get("curl_more"))
         if name in spec.get("press", ()):
             curls[name] = hand.press(name, curls[name], col, swing.get(name, 0.0))
     if thumb_to is not None:
@@ -344,6 +356,7 @@ def right_hand(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider, ob
     hand.index_bends = tuple(int(v) for v in r.get("index_bends") or (70, 90, 70))
     hand.index_from = -10 if r.get("index_from") is None else int(r["index_from"])
     hand.index_arc = r.get("index_arc")
+    hand.index_soft = bool(r.get("index_soft"))
     curls["Index"] = hand.onto("Index", face, frame, hand.index_bends, 40, pin=r.get("index_turn"))
     return pole_r, curls
 
@@ -389,11 +402,15 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider,
         # Held off the handguard a little where the fingers' roots would press into it.
         return Matrix.Translation(-palm.normalized() * spec["standoff"]) @ m, palm
 
-    hand.tip_top = None
+    hand.tip_top, hand.eyes, hand.front, hand.far = None, (), None, None
     hand_m, palm = cup(rig, hand, j, to_eye, spec, col, placed)
     hand.normal = palm
     # The fingers' highest (eye space) where they rest, level with the hand on the handguard.
     hand.tip_top = (to_eye @ Vector((0.0, y, spec["tips_below"]))).z
+    hand.eyes, hand.screen = game_eyes(hold), col
+    hand.far = ((to_eye.to_3x3() @ Vector((1.0, 0.0, 0.0))).normalized(), to_eye @ Vector((0.0, y, 0.0)))
+    way = (to_eye.to_3x3() @ Vector((0.0, 1.0, 0.0))).normalized()
+    hand.front = (way, (to_eye @ Vector((0.0, spec["tips_behind"], 0.0))).dot(way))
     if "upper" in spec:
         shoulder_behind(rig, "L", hand_m, spec["upper"], spec.get("sag", 0.0))
         rig.plan.pop("L", None)
@@ -407,14 +424,31 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider,
     # rather than over the rail (the critic); each curls as a relaxed finger does (TIP_COUPLE), never a claw.
     # tip_at x 0 turns this off.
     inv = to_eye.inverted()
+    ends = hand.front
     for name in spec["fingers"] if spec["tip_at"][0] > 0.0 else ():
         k = inv @ rig.pose["%s1_L" % name].translation
-        target = to_eye @ Vector((spec["tip_at"][0], k.y + spec["tip_at"][1],
-                                  spec["tip_at"][2] - spec.get("tip_drop", {}).get(name, 0.0)))
+        if ends is not None:
+            # No further forward than the handguard's front end, nor than `tip_reach` ahead of its own knuckle: the
+            # fingertips then lie in a row as the knuckles do, none laid out straight past the others.
+            hand.front = (ends[0], min(ends[1], rig.pose["%s1_L" % name].translation.dot(ends[0]) + spec["tip_reach"]))
+        # The little finger, the shortest and its knuckle the furthest back and out, may aim lower or further forward
+        # than the others (`pinky_drop`, `pinky_ahead`, m): aimed as they are it folds into a hook to reach its mark.
+        drop, more = (spec["pinky_drop"], spec["pinky_ahead"]) if name == "Pinky" else (0.0, 0.0)
+        target = to_eye @ Vector((spec["tip_at"][0], k.y + spec["tip_at"][1] + more, spec["tip_at"][2] - drop))
         most = spec.get("tip_most", TIP_MOST)
-        curls[name] = hand.onto(name, target, col, (int(most[0]), int(most[1]), 0), spec["tip_swing"], TIP_COUPLE,
-                                back=int(spec.get("tip_back", 0.0)))
+        # A hold that gives the last joint's most bend too (`tip_most`'s third figure) searches it on its own.
+        free = len(most) > 2
+        curls[name] = hand.onto(name, target, col, (int(most[0]), int(most[1]), int(most[2]) if free else 0),
+                                spec["tip_swing"], 0.0 if free else TIP_COUPLE, back=int(spec.get("tip_back", 0.0)),
+                                cup=spec.get("tip_cup", 0.0) * TIP_CUP.get(name, 0.0))
     if os.environ.get("BL_DEBUG"):
+        for name in spec["fingers"]:
+            js = [inv @ rig.pose["%s%d_L" % (name, k)].translation for k in (1, 2, 3)]
+            m = rig.pose["%s3_L" % name]
+            js.append(inv @ (m.translation + m.to_3x3().col[1] * rig.length["%s3_L" % name]))
+            print("   %s joints (replica, mm) %s seen %.3f clear %s" % (
+                name, [tuple(round(v * 1e3) for v in p) for p in js], sight.seen(hand, name),
+                [round(hand.clearance("%s%d_L" % (name, k), col) * 1e3, 1) for k in (1, 2, 3)]))
         m = rig.pose["Thumb3_L"]
         tip = m.translation + m.to_3x3().col[1] * rig.length["Thumb3_L"]
         print("   thumb tip", tuple(round(v, 3) for v in to_eye.inverted() @ tip), "target",
@@ -488,7 +522,7 @@ def left_down(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider) -> 
     index_at = SHOULDER["L"] + Vector(spec["at"])
     hand_m = knuckle_pose(rig, hand, j, index_at, Vector((0.0, -1.0, 0.0)), Vector((1.0, 0.0, 0.0)))
     hand.normal = Vector((1.0, 0.0, 0.0))
-    hand.tip_top = None
+    hand.tip_top, hand.eyes, hand.front, hand.far = None, (), None, None
     pole_l, _ = elbow_for(rig, "L", hand_m)
     pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
     curls = pose_fingers(hand, spec, col)
@@ -534,7 +568,7 @@ def left_on_grip(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, spec: dict, col
     """The left hand round a foregrip (spec in replica space): placed by its marks as the right hand is on a pistol's
     grip (web_pose, mirrored), its fingers closed round the grip's front and its thumb round the back over them."""
     to_eye = hold.to_eye()
-    hand.tip_top = None
+    hand.tip_top, hand.eyes, hand.front, hand.far = None, (), None, None
     if spec["kind"] == "support":
         hand_m, palm = support_pose(rig, hand, j, hold, spec, col)
     else:

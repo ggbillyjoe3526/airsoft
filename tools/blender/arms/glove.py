@@ -107,6 +107,12 @@ NAIL_WRAP = 38.0
 THUMB_NAIL_SPAN = (0.36, 0.98)
 THUMB_NAIL_WRAP = 50.0
 NAIL_THICK = 0.0004
+# Its edge's thickness and how far the whole plate stands off the skin (m); and its root, which grows out of the skin:
+# the share of its thickness there, and how far along it (of its -1..1) it reaches its full thickness. A plate as thick
+# at its root as at its middle left a step in the thumb's outline where it began.
+NAIL_EDGE = 0.00005
+NAIL_LIFT = 0.0001
+NAIL_ROOT = (0.15, 0.8)
 NAIL_GRID = (7, 7)
 # How much narrower a nail is at its root and at its tip than across its middle (shares of its width).
 NAIL_ROUND = (0.30, 0.16)
@@ -703,6 +709,12 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
     return out
 
 
+def _nail_root(v: float) -> float:
+    """A nail's thickness along it (v -1 at its root, 1 at its tip), as a share: it grows out of the skin."""
+    t = min(1.0, max(0.0, (v + 1.0) / NAIL_ROOT[1]))
+    return NAIL_ROOT[0] + (1.0 - NAIL_ROOT[0]) * t * t * (3.0 - 2.0 * t)
+
+
 def nails(surf: Surface, fr: Frame) -> Mesh:
     """The fingernails (BP8, the owner's playtest note 11: skin-only arms): a thin rounded plate on the back of each
     finger's last bone, from NAIL_SPAN of it to its tip, NAIL_WRAP degrees round either side; the thumb's faces away
@@ -728,8 +740,8 @@ def nails(surf: Surface, fr: Frame) -> Mesh:
             return up * math.cos(t) + side * math.sin(t)
 
         out.add(*surf.shell(origin, direction, NAIL_GRID[0], NAIL_GRID[1],
-                            lambda u, v: NAIL_THICK * _soft_box(u, v, 0.4) + 0.0001, NAIL_MATERIAL, smooth=1,
-                            lift=0.0002))
+                            lambda u, v: (NAIL_THICK * _soft_box(u, v, 0.4) + NAIL_EDGE) * _nail_root(v),
+                            NAIL_MATERIAL, smooth=1, lift=NAIL_LIFT))
     return out
 
 

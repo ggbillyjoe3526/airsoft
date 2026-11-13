@@ -95,6 +95,8 @@ PORE = 0.000030
 # The fine net's cell (m), and the mottling's two sizes.
 NET_CELL = 0.00085
 MOTTLE = (0.012, 0.004)
+# The palm's redder pads end between these distances (m) from the nearest finger's line.
+PAD_EDGE = (0.010, 0.024)
 ROUGH = {"back": 0.60, "palm": 0.64, "net": 0.10, "crease": 0.16, "flush": -0.05}
 # Hairs: how many, their length (m, from, to), and how strongly they draw.
 HAIRS = 3600
@@ -754,7 +756,9 @@ def paint(p: np.ndarray, n: np.ndarray, thumb: np.ndarray, hand: Hand) -> tuple:
     colour = mix(colour, tone("tip"), 0.40 * tip * (0.4 + 0.6 * front))
     colour = mix(colour, tone("vein"), VEIN_SHADE * vein)
     # The palm's pads (the heel of the thumb, the little finger's side, under the fingers) a little redder.
-    pads = front * on_hand * _smooth(0.42, 0.62, noise(p, 0.016, 91))
+    # They fade out toward each finger's root (`on_hand` alone ended them on a hard arc there).
+    pads = front * _smooth(PAD_EDGE[0], PAD_EDGE[1], nearest) * _smooth(-0.008, 0.0, along) \
+        * _smooth(0.42, 0.62, noise(p, 0.016, 91))
     colour = mix(colour, tone("pad"), 0.35 * pads)
     colour *= (1.0 + FORM_SHADE * np.clip(form, -1.0, 1.0))[:, None]
     crease = np.clip(crease, 0.0, 1.0)

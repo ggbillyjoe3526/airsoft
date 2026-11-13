@@ -69,9 +69,14 @@ FOREARM_CLEAR = float(os.environ.get("BL_FOREARM_CLEAR", "0.045"))
 CLEAR_COST = 20.0
 # How far a resting finger's last joint bends for each degree of its middle one (relaxed fingers curl together).
 TIP_COUPLE = 0.7
+# How much of a hold's `tip_cup` (degrees) each finger may turn about its own line at its knuckle as the hand cups
+# round a handguard: the palm arches from the ring finger out, the little finger's side the most.
+TIP_CUP = {"Middle": 0.4, "Ring": 0.75, "Pinky": 1.0}
 # The most a resting finger's knuckle and middle joint bend reaching its mark on a handguard, unless its spec says
 # (`tip_most`).
 TIP_MOST = (90.0, 100.0)
+# A `tips_behind` or `tip_reach` that limits nothing (m).
+NO_LIMIT = 9.0
 # Round a grip with a `thumb_at` mark (the pistols', and the rifle's: the owner, 2026-11-05, its thumb round the
 # grip) the thumb turns further at its root (degrees): across the back strap to the grip's far side, twisted so its
 # tip joint bends in toward it (the web's weights are smoothed for this, glove.smooth_web); that tip joint may bend up
@@ -173,13 +178,22 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # (2026-11-13): the ring and little fingers reached that mark knotted, their knuckles straight and their middle joints
 # shut to 100 degrees. So a knuckle may bend back a little (`tip_back`, degrees) and a middle joint closes no further
 # than `tip_most`'s second figure (TIP_MOST where a hold gives none): the fingers lie open along the handguard's
-# underside, each joint well under a right angle, their tips still under `tips_below`.
+# underside, each joint well under a right angle, their tips still under `tips_below`. The critic's second look
+# (2026-11-13): from the far side those open fingers floated beside the handguard, and from the eye a fingertip showed
+# past it at the hip. So the fingers hook up onto the right side together, their pads on its lower half (`tip_at`,
+# under `tips_below`), each turned about its own line toward the handguard as a cupped hand's are (`tip_cup`, degrees
+# at the little finger, TIP_CUP's share for the others), swung up to `tip_swing` to its mark, its last joint searched
+# on its own (`tip_most`'s third figure), no tip further forward than `tips_behind` (the handguard's front end) or
+# `tip_reach` ahead of its knuckle; and the solve counts against a pose the share of each finger the game's eye sees
+# past the replica (`game_eyes`, `sight.seen`; tests/unit/test_ha1_rifle_hold.gd holds it). The palm, the thumb and
+# the arm are where the owner approved them.
 GUARD = {"kind": "guard", "y": 0.200, "forward": 0.026, "depth": 0.034, "standoff": 0.0,
          "search": ((30, 30), (15, 15), (-10, -10)), "rise": 8.0, "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.030, "thumb_f": 0.035, "thumb_z": 0.060, "thumb_hug": 4.0,
-         "thumb_pull": 30.0, "thumb_wide": 0.0, "tips_below": 0.050, "plan": 30.0,
-         "upper": (-0.5, -0.8, 0.4), "sag": 12.0, "tip_at": (0.0275, 0.030, 0.030), "tip_swing": 8.0,
-         "tip_back": 15.0, "tip_most": (90.0, 45.0),
+         "thumb_pull": 30.0, "thumb_wide": 0.0, "tips_below": 0.058, "plan": 30.0,
+         "upper": (-0.5, -0.8, 0.4), "sag": 12.0, "tip_at": (0.0245, 0.025, 0.050), "tip_swing": 25.0,
+         "tip_back": 15.0, "tip_most": (90.0, 85.0, 60.0), "tips_behind": 0.272, "tip_cup": 25.0, "tip_reach": 0.040,
+         "pinky_drop": 0.0, "pinky_ahead": 0.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -255,19 +269,22 @@ AEG_RIGHT = dict(RIGHT, web=(0.042, -0.103, -0.056), index=(0.030, -0.031, -0.03
 SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030, -0.016),
                     pinky=(0.024, -0.085, -0.058), thumb_at=(-0.028, -0.060, 0.0), shoulder=(-0.04, -0.08, 0.03),
                     rolls=(-180.0, 174.0), thumb_turn=(-10.0, -10.0, 20.0, 40.0), index_turn=None,
-                    press=("Ring", "Pinky"))
+                    index_soft=True, press=("Middle", "Ring", "Pinky"),
+                    swing_search=(8.0, -8.0, 16.0, -16.0, 24.0, -24.0))
 # Its left hand as the AEG's, under the fore-end (narrower and lower than the AEG's handguard: `axis`, `radius`,
 # its top at 0.056) near its back, as far forward as the arm reaches, its turn searched (the fore-end is lower); the
 # owner, 2026-11-06: the ring and little fingers "pressed against the rifle", the thumb pressing on it. So the palm
 # sits further right than on the AEG (`forward`; the narrow fore-end leaves the knuckles 14-21 mm off its right side),
-# the fingertips reach higher up that side (`tip_at`), the little finger's lower (`tip_drop`, m below the others',
-# curled in under the fore-end rather than clawed out from it), and the thumb presses on the left side face just
-# above its centre line. The fifth look: 28 mm further back, just ahead of the magazine's housing (the magazine's
+# the fingertips reach higher up that side (`tip_at`; the little finger's aimed lower until the fingers hooked onto
+# the side, `pinky_drop`), and the thumb presses on the left side face just above its centre line. The fifth look: 28 mm further back, just ahead of the magazine's housing (the magazine's
 # front at y 0.171); any further and the housing holds the palm 1 cm off the fore-end. Under so narrow a fore-end a
-# middle joint closes no further than 25 degrees (`tip_most`): at the AEG's 45 the little finger still looped.
-SNIPER_GUARD = dict(GUARD, y=0.232, axis=(0.0, 0.030), radius=0.025, tips_below=0.036,
-                    tip_at=(0.0255, 0.030, 0.022), thumb_x=-0.028, thumb_z=0.045, forward=0.034,
-                    tip_drop={"Pinky": 0.015}, tip_most=(90.0, 25.0))
+# middle joint closed no further than 25 degrees; since the critic's second look the fingers hook up onto its right
+# side as the AEG's do (its side face runs from z 0.022 to 0.054: `tip_at`, `tips_below`), no tip more than 35 mm
+# ahead of its knuckle (`tip_reach`); the fore-end runs on well past the hand, so its front end limits nothing. The
+# little finger aims 15 mm further forward than the others (`pinky_ahead`): aimed as they are, it folded into a hook.
+SNIPER_GUARD = dict(GUARD, y=0.232, axis=(0.0, 0.030), radius=0.025, tips_below=0.050,
+                    tip_at=(0.0255, 0.020, 0.035), thumb_x=-0.028, thumb_z=0.045, forward=0.034,
+                    pinky_ahead=0.015, tip_most=(90.0, 85.0), tips_behind=NO_LIMIT, tip_reach=0.035)
 # The Compact SMG (CS1): its grip raked 30 degrees as the AEG's and its front where the AEG's is at the hand's height
 # (smg.py), but 12 mm deeper, so the web and the little finger's knuckle sit that much further back and the thumb
 # reaches round onto the grip's left side a little further back; its roll, thumb and trigger finger searched.
@@ -280,9 +297,11 @@ SMG_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.113, -0.056), pinky=(0.024, -0.074, -
 # bore the forearm passes into the magazine, further forward a fingertip shows past the handguard's front), and the
 # elbow hangs under the wrist's straight line (`sag`), which keeps the upper arm out of the view. The fifth look:
 # 7 mm further back, the cuff against the magazine's housing (any further and the arm turns 46 degrees and more off
-# the bore to pass it, across the view).
-SMG_GUARD = dict(GUARD, y=0.205, axis=(0.0, 0.072), radius=0.022, tips_below=0.074,
-                 tip_at=(0.0275, 0.030, 0.056), thumb_x=-0.028, thumb_z=0.080)
+# the bore to pass it, across the view). The fingers hook onto its right side face (z 0.064 to 0.080) behind its
+# front end (`tips_behind`), the little finger's mark 2 cm further forward (`pinky_ahead`).
+SMG_GUARD = dict(GUARD, y=0.205, axis=(0.0, 0.072), radius=0.022, tips_below=0.084,
+                 tip_at=(0.0235, 0.015, 0.072), thumb_x=-0.028, thumb_z=0.080, tip_most=(90.0, 85.0),
+                 tips_behind=0.277, tip_reach=NO_LIMIT, pinky_ahead=0.020)
 # The Pump Shotgun (SH2): its pistol grip is the AEG Rifle's own, in the AEG's place (shotgun.py builds it from
 # aeg.grip()), so the right hand holds it as the AEG's; its trigger sits in its own guard, so the trigger finger is
 # searched, and rests low on the blade (`trigger_at`): the blade's upper half is up inside the receiver's foot, and a
@@ -302,8 +321,8 @@ SHOTGUN_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.093, -0.038), index=(0.030, -0.02
                      index_turn=None, trigger_at=0.82, index_arc=(45.0, 0.0002, 1.2))
 SHOTGUN_PUMP = dict(GUARD, y=0.325, axis=(0.0, 0.030), radius=0.0203, tips_below=0.054,
                     tip_at=(0.0228, 0.005, 0.038), thumb_x=-0.024, thumb_z=0.038, thumb_f=0.050,
-                    tip_back=0.0, tip_most=TIP_MOST,
-                    search=((40, 80), (20, 50), (-40, 0)))
+                    tip_back=0.0, tip_most=TIP_MOST, tip_swing=8.0, tip_cup=0.0, tips_behind=NO_LIMIT,
+                    tip_reach=NO_LIMIT, search=((40, 80), (20, 50), (-40, 0)))
 # A foregrip fitted under the handguard (BP8, the owner's playtest note 6: "If a weapon has a grip attachment the
 # players left hand should hold it"): the left hand wraps the grip as the right hand wraps a pistol's, mirrored: its
 # palm on the grip's left side, the thumb's root (`web`) behind its back face, the index finger's knuckle high under
@@ -440,6 +459,18 @@ HOLDS = {
     "flash": Hold("../grenades/flash.glb", HELD_AT, Grip((0.0, -0.020, 0.03), 0.0, 0.040, 0.020), FLASH_RIGHT,
                   DOWN, HELD_TIP),
 }
+
+
+# The eyes a rifle's support hand is hidden from (`sight.seen`): the game's eye at the hip and that eye lifted and
+# moved right as the replica's bob and sway carry it (m, eye space).
+SEEN_EYES = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.015), (0.02, 0.0, 0.0))
+
+
+def game_eyes(hold: Hold) -> list:
+    """Where the game's eye stands in the space `hold` is solved in (SEEN_EYES)."""
+    rid = hold.file.rsplit("/", 1)[-1][:-4]
+    eye = hold.at - GAME_HIP.get(rid, hold.at)
+    return [eye + Vector(d) for d in SEEN_EYES]
 
 
 # How far ahead of the eye each replica sits aimed (ViewModelConfig.aim_forward), for the build's pictures (BL_PREVIEW).

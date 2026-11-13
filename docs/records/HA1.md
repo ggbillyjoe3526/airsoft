@@ -183,6 +183,32 @@ ATTEMPT_ROWS
   further than 45 (25 under the Sniper's narrow fore-end, where 45 still looped the little finger), so every joint
   stays well under a right angle (`test_no_finger_under_a_bare_handguard_is_knotted`) with the tips still under
   `tips_below`. The Pump Shotgun's hold keeps SH2's figures.
+- **The far-side fingers hook onto the handguard, hidden from the eye** (attempt 3; `GUARD` `tip_at`, `tip_cup`,
+  `tips_behind`, `tip_reach`, `Hand.seen`, `hold_tables.game_eyes`): the critic's second look found the open fingers
+  floating beside the handguard from the far side, and a fingertip showing past the AEG's handguard from the eye at
+  the hip. The four fingers now hook up onto the right side together, pads on its lower half, each turned a little
+  about its own line as a cupped hand's are, none past the handguard's front end (on the AEG's short handguard the
+  index and middle fingertips rest just behind it), the little finger's mark a little further forward on the Sniper
+  and the SMG (`pinky_ahead`: aimed as the others it folded into a hook); and the solve counts against a pose
+  the share of each finger that the game's eye (the hip place, 15 mm above it and 20 mm to its right) sees past the
+  replica. `test_no_left_finger_shows_past_the_replica_from_the_eye_at_the_hip` casts rays in Godot from the view's
+  origin at the skinned gloved and bare meshes' far-side finger vertices (it fails on attempt 2's model: 110 of the
+  AEG's 1,273 points showed). The palm, the thumb and the arm are where the owner approved them (a tilted palm
+  wrapped better but moved the thumb in his view, so it was dropped). The Pump Shotgun keeps SH2's marks and
+  settings; under the same check its index, middle and ring fingers close a few degrees further, and the test covers
+  it too. The foregrips' fists are untouched (the same bends in the build's log).
+- **The Sniper's right hand holds the stock's wrist** (attempt 3; `SNIPER_RIGHT` `index_soft`, `swing_search`,
+  `press`): the trigger finger lay straight under the guard, 2 cm short. Its coarse search missed the pocket inside
+  the guard (a gloved fingertip has 1 to 2 mm to spare there), so that search now forgives touching and the fine
+  steps walk to a clear pose: the pad rests 0.7 mm off the trigger. The middle finger, which no curl cleared at the
+  AEG's swing, is tried swung further (8 degrees found) and closes round the wrist under the guard with the ring and
+  little fingers.
+- **Palm and nails** (attempt 3; `skin.PAD_EDGE`, `glove.NAIL_ROOT`): the palm's pads fade out toward the fingers'
+  roots, was a hard arc at the index finger's base, and each nail thins to its root so it grows out of the skin. No
+  colour changed (the owner: "Keep the texture as is").
+- **The thumb against the photo** (attempt 3; `preview.REST_THUMB`, `hand_ratios.py … thumb`): `BL_REST` also draws
+  the hand with its thumb held out as the photo's, and the thumb from its web to its tip over the middle finger
+  measures 0.689 against the photo's 0.710 (-2.9 %).
 - **The bare hand against the owner's photo** (attempt 2; `hand_ratios.py`, `BL_REST`, `preview.rest_hand`): the
   critic asked for the hand flat from its back beside `hand-skin-photo.jpg` and five ratios within 10 %. Measured
   (model against photo, before): hand length to palm width -8.9 %, middle finger to palm length +2.2 %, index to ring
@@ -250,14 +276,9 @@ ATTEMPT_ROWS
 
 ## Known issues left
 
-- With no grip the rifles' left fingers lie open under the handguard, their tips along its far side under its top,
-  rather than wrapped up it, and reach past the SMG's narrow front (a bot close up shows it, your view never);
-  aimed, the Cyber's right thumb lies a little flatter than the GBB's; on the Angled Grip's short tall end the ring
+- Aimed, the Cyber's right thumb lies a little flatter than the GBB's; on the Angled Grip's short tall end the ring
   and little fingers close under its foot (`docs/KNOWN_ISSUES.md` › Graphics).
 - The skin's atlas has about 1,000 texels (of 1.27 million) claimed by two places on the hand, at the thumb's web; no
   seam shows in the pictures.
-- The Sniper Rifle's trigger finger lies straight along its trigger guard, 2 cm short of the trigger (it was as far
-  short, a little more curled, in attempt 1's model): from the stock's wrist the trigger is at the end of the
-  finger's reach. Your view never shows it; a bot close up does.
 - Working the Sniper's bolt, the right elbow steps out a few centimetres over two frames where the sleeve would
   touch the stock; the elbow is below the view.

@@ -9,6 +9,7 @@ import bpy
 from mathutils import Matrix, Quaternion, Vector
 from mathutils.bvhtree import BVHTree
 
+import sight
 from glove import FINGER_NAMES, HEEL, HEEL_TWIST, PARENT, Frame, Mesh, seg_dist
 
 # The thumb's first bone, whose heel bone (glove.HEEL) follows it.
@@ -30,6 +31,9 @@ THUMB_VERIFY = 800
 DEEP = 0.004
 # A trigger finger asked to arch (`Hand.index_arc`) bends this share of its middle joint's bend at its tip.
 ARC_TIP = 0.5
+# A finger turned about its own line at the knuckle (`Hand.onto`'s `cup`) keeps the turn only if it scores this much
+# better (m) than the smaller turn tried before it.
+CUP_GAIN = 0.0005
 # The rays' directions for that check: a point is inside when most first hits strike a face from behind.
 RAYS = (Vector((0.577, 0.577, 0.577)), Vector((-0.577, 0.577, -0.577)), Vector((0.577, -0.577, -0.577)))
 # How much of each finger's splay from the middle finger a hold takes out.
@@ -256,6 +260,15 @@ class Hand:
         # The height (eye space) no finger's glove may rise above: a support hand's fingers rest on the handguard's
         # side, their tips below its top (the critic: no tip showing over it from the left). None: no limit.
         self.tip_top = None
+        # Where the game's eye may stand as a support hand's fingers are laid (eye space) and the replica that hides
+        # them from it (`sight.seen`): no finger may show past the handguard's far side. Empty: not judged.
+        self.eyes, self.screen = (), None
+        # The replica's right (a direction and a point on its middle, eye space): only a finger's glove
+        # sight.SEEN_FAR m or more to that side of the middle is judged. None: all of it.
+        self.far = None
+        # How far forward a support hand's fingers may reach: a direction (eye space) and the furthest any of a
+        # finger's glove may lie along it (m), the handguard's front end. None: no limit.
+        self.front = None
         # The furthest left (eye space) the trigger finger's outer bones may reach (`onto`). None: no limit.
         self.index_left = None
         # How far the trigger finger's joints may bend reaching the trigger (degrees, base to tip; `onto`).
@@ -265,6 +278,8 @@ class Hand:
         # The bend its middle joint is drawn to and what each degree off it costs (m), so it arches (`onto`). None:
         # wherever its pad comes nearest.
         self.index_arc = None
+        # Whether the trigger finger's coarse search forgives passing into the replica (`onto_search`).
+        self.index_soft = False
         # How far down the trigger (a share of its height, top to tip) the trigger finger's pad rests.
         self.trigger_at = 0.55
         # The whole hand bone's glove (the knuckles and the heel of the thumb too), for seating it clear.
@@ -427,13 +442,13 @@ class Hand:
         return list(best[2:6]) + out[1:]
 
     def settle(self, name: str, start: tuple, col: Collider, span: int = 30, swing: float = 0.0,
-               root: bool = False, more: int = None) -> list:
+               root: bool = False, more: int = None, strict: bool = False) -> list:
         """Poses a finger at its authored bends `start` (degrees, base to tip; its base swung `swing` degrees
         sideways), then curls it further or opens it, its three joints together and the tip a little less, until it
         rests on the replica: the most curl within `span` of the authored pose that stays clear of it (given `more`,
         no more than that past it: a finger reaching round something wide, which a fist closed short of it would
         clear too). With `root`, its first bone may rest on the replica (a palm cupped round a handguard), never
-        pass into it."""
+        pass into it. With `strict`, None when no curl clears the replica (the caller then tries another swing)."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
 
@@ -460,6 +475,8 @@ class Hand:
                     lowest = (high, t)
         if lowest is not None:
             return [round(a) for a in apply(lowest[1])]
+        if strict:
+            return None
         print("  ! the %s finger can't clear the replica %s" % (name, [round(self.clearance(b, col) * 1000, 1)
                                                                     for b in bones]))
         return [round(a) for a in angles]
@@ -500,15 +517,19 @@ class Hand:
         return self.settle("Thumb", (0.0, bends[0], bends[1]), col, span)
 
     def onto(self, name: str, target: Vector, col: Collider, limits: tuple, swing: int = 20,
-             couple: float = 0.0, pin: tuple = None, back: int = 0) -> list:
+             couple: float = 0.0, pin: tuple = None, back: int = 0, cup: float = 0.0) -> list:
         """Bends a finger so its last bone's pad comes to `target` (the trigger) without passing into the replica: a
         search over its three bends and its base's swing sideways (up to `swing` degrees), coarse then fine. With
         `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched;
         its knuckle may then bend `back` degrees the other way (a finger laid flat along a surface the palm is
         tilted up to). Given `pin` (swing and three bends: a pose the owner approved), the finger takes it and no
-        search runs."""
+        search runs. With `cup` (degrees), the finger may also turn that far about its own line at its knuckle, as
+        the ring and little fingers' do when a hand cups round a bar (the palm's arch): none, half and all of it are
+        tried, either way, and the least that scores best is kept."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
+
+        turned = [0.0]
 
         def apply(lat: float, a: tuple) -> None:
             if couple:
@@ -516,7 +537,8 @@ class Hand:
             for k, ang in enumerate(a):
                 rot = Matrix.Rotation(math.radians(ang), 3, self.axis[bones[k]])
                 if k == 0:
-                    rot = Matrix.Rotation(math.radians(lat), 3, side_axis) @ rot
+                    rot = Matrix.Rotation(math.radians(lat), 3, side_axis) \
+                        @ Matrix.Rotation(math.radians(turned[0]), 3, Vector((0.0, 1.0, 0.0))) @ rot
                 self.rig.fk(bones[k], self.adduct[bones[k]] @ rot if bones[k] in self.adduct else rot)
 
         def score(lat: float, a: tuple) -> tuple:
@@ -540,7 +562,7 @@ class Hand:
                 arch = cost * (abs(a[1] - mid) + 0.5 * abs(a[2] - tip * mid))
             # Clear of the replica first, then the pad nearest the target; and never standing above `tip_top`, when
             # set (a support hand's fingertips kept under the handguard's top as the eye sees it).
-            over += self.over(name)
+            over += self.over(name) + sight.ahead(self, name) + sight.seen(self, name) * sight.SEEN_COST
             return pad + arch + over * 10.0 + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
 
         swing = int(swing)
@@ -554,7 +576,15 @@ class Hand:
             sc, clear = score(pin[0], tuple(pin[1:]))
             best = (sc, list(pin), clear)
         else:
-            best = self.onto_search(score, swing, limits, couple, int(back))
+            best, kept = None, 0.0
+            for share in ((0.0, 0.5, 1.0, -0.5, -1.0) if cup else (0.0,)):
+                turned[0] = cup * share
+                found = self.onto_search(score, swing, limits, couple, int(back))
+                if best is None or found[0] < best[0] - CUP_GAIN:
+                    best, kept = found, turned[0]
+            turned[0] = kept
+            if cup:
+                print("  %s finger cupped %.0f degrees" % (name, kept))
         apply(best[1][0], tuple(best[1][1:]))
         if couple:
             best[1][3] = best[1][2] * couple
@@ -569,16 +599,24 @@ class Hand:
     def onto_search(self, score, swing: int, limits: tuple, couple: float, back: int = 0) -> tuple:
         """`onto`'s search: a coarse grid of the finger's sideways swing and bends, then finer steps from the best,
         each within the bends allowed (a finger told to lie nearly straight stays so; a coupled one's knuckle from
-        `back` degrees the other way). The best (score, [swing, bends], clearance)."""
+        `back` degrees the other way). The best (score, [swing, bends], clearance). With `index_soft`, the coarse
+        grid forgives a pose for passing into the replica (it still pays for how deep): the finer steps then walk
+        from the nearest such pose to a clear one, where a clear pose is a pocket too small for the grid to land in
+        (a gloved fingertip inside a trigger guard)."""
         best = None
+        step_off = 1.0 if self.index_soft else 0.0
         for lat in sorted({-swing, 0, swing} | set(range(-swing, swing + 1, 10))):
             for a1 in sorted({-back} | set(range(0, limits[0] + 1, 10))) if couple else range(
                     self.index_from, limits[0] + 1, 10):
                 for a2 in range(0, limits[1] + 1, 10):
                     for a3 in range(0, 1 if couple else limits[2] + 1, 10):
                         sc, clear = score(lat, (a1, a2, a3))
+                        if clear < CONTACT:
+                            sc -= step_off
                         if best is None or sc < best[0]:
                             best = (sc, [lat, a1, a2, a3], clear)
+        if step_off and best[2] < CONTACT:
+            best = (best[0] + step_off, best[1], best[2])
         step = 4.0
         while step >= 1.0:
             moved = False

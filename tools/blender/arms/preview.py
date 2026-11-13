@@ -34,6 +34,10 @@ SHOW = tuple(v for v in os.environ.get("BL_PREVIEW_SHOW", "").split(",") if v)
 REST_SIZE = (1100, 1400)
 REST_FRAME = 1.45
 REST_FROM = 0.5
+# `rest_thumb.png`: the thumb's last two bones held out this many degrees from the middle finger's line. The line
+# hand_ratios.py measures, from the web to the tip, then lies about 16 degrees further out: the owner's photo holds it
+# at hand_ratios.PHOTO_THUMB_ANGLE on that measure.
+REST_THUMB = 52.0
 
 # BL_PREVIEW_HAND=L or R: the outside views look at that hand alone (a rifle's support hand is far from the other).
 LOOK_AT = os.environ.get("BL_PREVIEW_HAND", "")
@@ -135,9 +139,27 @@ def hold(folder: str, name: str, to_eye: Matrix, rig, objects: list, aim_forward
         o.hide_render = not o.hide_render
 
 
+def _thumb_out(rig, side: str, up: Vector, normal: Vector) -> None:
+    """Turns the resting thumb at its root so its last two bones' line lies flat in the hand's plane, REST_THUMB
+    degrees out from the middle finger's line."""
+    first, last = "Thumb1_" + side, "Thumb3_" + side
+    knuckle = rig.pose["Thumb2_" + side].translation
+    m = rig.pose[last]
+    tip = m.translation + m.to_3x3().col[1] * rig.length[last]
+    now = (tip - knuckle).normalized()
+    out = knuckle - rig.pose["Hand_" + side].translation
+    out = (out - up * out.dot(up) - normal * out.dot(normal)).normalized()
+    to = up * math.cos(math.radians(REST_THUMB)) + out * math.sin(math.radians(REST_THUMB))
+    rest = rig.rest[first].to_3x3()
+    rig.fk(first, rest.inverted() @ now.rotation_difference(to).to_matrix() @ rest)
+    rig.refresh(first)
+    rig.write()
+
+
 def rest_hand(folder: str, rig, gloved: list, bare: list, side: str = "L") -> None:
     """The bare hand of `side` as the model rests it, flat from its back and from its palm (no perspective, the
-    middle finger up, clear behind), as `rest_back.png` and `rest_palm.png` in `folder`: the framing of the owner's
+    middle finger up, clear behind), as `rest_back.png` and `rest_palm.png` in `folder`, and from its back with the
+    thumb held out as the photo's (`rest_thumb.png`): the framing of the owner's
     photo of a hand, for measuring the model's proportions against it (tools/blender/arms/README, HA1). `gloved`
     are the objects left out of the picture, `bare` the ones put in."""
     os.makedirs(folder, exist_ok=True)
@@ -157,7 +179,11 @@ def rest_hand(folder: str, rig, gloved: list, bare: list, side: str = "L") -> No
     middle = (wrist + tip) * 0.5
     scene = bpy.context.scene
     lamps = _lights()
-    for name, way in (("back", -normal), ("palm", normal)):
+    for name, way in (("back", -normal), ("palm", normal), ("thumb", -normal)):
+        if name == "thumb":
+            # The thumb held out flat to the side as the owner's photo holds it (REST_THUMB degrees from the middle
+            # finger's line), so its length can be measured there (hand_ratios.py ... thumb).
+            _thumb_out(rig, side, up, normal)
         data = bpy.data.cameras.new("Rest")
         data.type = "ORTHO"
         data.ortho_scale = (tip - wrist).length * REST_FRAME
@@ -173,7 +199,9 @@ def rest_hand(folder: str, rig, gloved: list, bare: list, side: str = "L") -> No
         scene.cycles.samples = SAMPLES
         scene.cycles.use_denoising = True
         scene.render.film_transparent = True
-        scene.render.resolution_x, scene.render.resolution_y = REST_SIZE
+        # The thumb held out needs a square picture (the same scale: the taller side sets it).
+        scene.render.resolution_x, scene.render.resolution_y = (REST_SIZE[1], REST_SIZE[1]) if name == "thumb" \
+            else REST_SIZE
         scene.render.resolution_percentage = 100
         scene.render.image_settings.file_format = "PNG"
         scene.render.image_settings.color_mode = "RGBA"
@@ -184,6 +212,9 @@ def rest_hand(folder: str, rig, gloved: list, bare: list, side: str = "L") -> No
         bpy.data.objects.remove(cam, do_unlink=True)
         bpy.data.cameras.remove(data)
     scene.render.film_transparent = False
+    rig.fk("Thumb1_" + side)
+    rig.refresh("Thumb1_" + side)
+    rig.write()
     for ob in lamps:
         data = ob.data
         bpy.data.objects.remove(ob, do_unlink=True)

@@ -1,6 +1,6 @@
 """Measure a hand's proportions in a picture and hold them against the owner's photo of a hand (HA1).
 
-    python3 tools/blender/arms/hand_ratios.py <image> <wrist row> [mirror]
+    python3 tools/blender/arms/hand_ratios.py <image> <wrist row> [mirror] [thumb]
 
 The picture shows one hand flat from its back, fingers up and the thumb to the right (`mirror` turns one with the
 thumb on the left), on a clear or a plain light ground. `<wrist row>` is the picture's row of the wrist's crease. For
@@ -49,6 +49,12 @@ HOLE_BESIDE = 15
 # The palm's width is taken this far under the lowest web (share of the picture's height).
 PALM_UNDER = 0.015
 NAMES = ("pinky", "ring", "middle", "index")
+# The thumb held out to the side (`thumb`): the photo's thumb length over its middle finger's, and its angle from
+# the middle finger's line (degrees); the thumb's tip is the middle of the hand's last THUMB_TIP_COLS columns.
+PHOTO_THUMB = 0.710
+PHOTO_THUMB_ANGLE = 67.6
+THUMB_TIP_COLS = 6
+THUMB_EDGE = 4
 
 
 def mask(path: str, mirror: bool) -> np.ndarray:
@@ -73,8 +79,9 @@ def run_at(a: np.ndarray, y: int, x: int) -> tuple:
     return int(r[0]), int(r[-1])
 
 
-def measure(path: str, wrist_y: int, mirror: bool) -> dict:
-    """The ratios of the hand in the picture at `path`, by PHOTO's names."""
+def measure(path: str, wrist_y: int, mirror: bool, middle_only: bool = False):
+    """The ratios of the hand in the picture at `path`, by PHOTO's names (or, with `middle_only`, its middle finger's
+    length in pixels)."""
     a = mask(path, mirror)
     h, w = a.shape
     cols = np.where(a.any(axis=0))[0]
@@ -126,6 +133,8 @@ def measure(path: str, wrist_y: int, mirror: bool) -> dict:
         else:
             root = ((webs[i - 1][0] + webs[i][0]) / 2.0, (webs[i - 1][1] + webs[i][1]) / 2.0)
         length[n] = float(np.hypot(tips[i][0] - root[0], tips[i][1] - root[1]))
+    if middle_only:
+        return length["middle"]
     mid_x = tips[2][0]
     web_low = max(y for _, y in webs)
     p0, p1 = run_at(a, web_low + int(PALM_UNDER * h), mid_x)
@@ -150,8 +159,47 @@ def measure(path: str, wrist_y: int, mirror: bool) -> dict:
     }
 
 
+def thumb(path: str, wrist_y: int, mirror: bool) -> dict:
+    """The thumb's ratio and its angle in a picture whose thumb is held out to the side, as the photo's: its length
+    from the web between it and the index finger (the lowest point of the outline's top edge between the index
+    finger's tip and the thumb's) to its tip (the hand's furthest point to the thumb's side), over the middle finger's
+    length; and the angle of that line from the middle finger's (degrees)."""
+    a = mask(path, mirror)
+    a[wrist_y:] = False
+    h, w = a.shape
+    # A photo's edge can leave a stray column.
+    a[:, :THUMB_EDGE] = a[:, -THUMB_EDGE:] = False
+    cols = np.where(a.any(axis=0))[0]
+    top = np.full(w, h, dtype=int)
+    for x in cols:
+        top[x] = np.argmax(a[:, x])
+    # The thumb's tip: the middle of the hand's last few columns to the right.
+    last = cols[-THUMB_TIP_COLS:]
+    tip = (float(last.mean()), float(np.mean([np.where(a[:, x])[0].mean() for x in last])))
+    # The index finger's tip: the highest point right of the picture's middle finger (the highest of all).
+    mid_x = int(cols[np.argmin(top[cols])])
+    k = TIP_SMOOTH
+    sm = np.convolve(top, np.ones(k) / k, mode="same")
+    index_x = next(x for x in range(mid_x + int(w * TIP_APART), cols[-1] - k)
+                   if sm[x] <= sm[x - k:x + k + 1].min() + 1e-6)
+    span = np.arange(index_x, int(tip[0]))
+    web_x = int(span[np.argmax(top[span])])
+    web = (float(web_x), float(top[web_x]))
+    length = float(np.hypot(tip[0] - web[0], tip[1] - web[1]))
+    middle = measure(path, wrist_y, mirror, True)
+    angle = float(np.degrees(np.arctan2(tip[0] - web[0], web[1] - tip[1])))
+    return {"thumb / middle finger": length / middle, "thumb's angle": angle}
+
+
 def main(args: list) -> int:
-    got = measure(args[0], int(args[1]), len(args) > 2)
+    if "thumb" in args[2:]:
+        got = thumb(args[0], int(args[1]), "mirror" in args[2:])
+        off = got["thumb / middle finger"] / PHOTO_THUMB - 1.0
+        print("%-36s %.3f  photo %.3f  %+5.1f %%  (held out %.0f degrees, the photo's %.0f)" % (
+            "thumb / middle finger", got["thumb / middle finger"], PHOTO_THUMB, 100.0 * off, got["thumb's angle"],
+            PHOTO_THUMB_ANGLE))
+        return 0 if abs(off) <= LIMIT else 1
+    got = measure(args[0], int(args[1]), "mirror" in args[2:])
     worst = 0.0
     for name, value in got.items():
         off = value / PHOTO[name] - 1.0

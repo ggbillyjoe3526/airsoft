@@ -2,8 +2,8 @@
 
 `arms.glb` (glTF binary): your own arms in the first-person view, in dark olive gloves and sleeves, holding the replica in
 hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools/blender/arms/arms.py .`, pip
-`bpy==5.2.3`; each hold's marks and costs are data in `hold_tables.py`, solved by `hold_solve.py`); drawn by
-`game/play/arms_view.gd` (ArmsView, under ReplicaView).
+`bpy==5.2.3`; each hold's marks and costs are data in `hold_tables.py`, solved by `hold_solve.py`; `sight.py` keeps a
+rifle's support fingers out of the eye's view); drawn by `game/play/arms_view.gd` (ArmsView, under ReplicaView).
 
 - **Space.** Metres, Blender +Y forward from the eye (at the origin), +Z up; exported +Y up, as every model here, so
   in Godot the eye looks along -z.
@@ -21,9 +21,10 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   about 2 minutes) and `python3 tools/blender/arms/hand_ratios.py <folder>/rest_back.png 1183` measures seven
   ratios and fails if any is more than 10 % off the photo's (hand length to palm width -6.7 %, middle finger to palm
   length +2.1 %, index to ring finger -2.6 %, little to middle finger -5.0 %, wrist to palm width -5.2 %, the
-  middle finger's width to its length +2.5 %, the index finger's width to the palm's -7.7 %). The MakeHuman base
-  mesh's arm and hand (CC0,
-  `tools/blender/arms/source/`) under a glove (skin + 1.1 mm, `glove.py`, raised over the hand's forms: the web
+  middle finger's width to its length +2.5 %, the index finger's width to the palm's -7.7 %). The same build draws
+  `rest_thumb.png`, the thumb held out as the photo holds it, and `hand_ratios.py <folder>/rest_thumb.png 1183 thumb`
+  measures the thumb from its web to its tip over the middle finger (-2.9 %). The MakeHuman base
+  mesh's arm and hand (CC0, `tools/blender/arms/source/`) under a glove (skin + 1.1 mm, `glove.py`, raised over the hand's forms: the web
   muscle, the thumb's and index finger's bones, the finger joints, with a crease across each) with one moulded knuckle
   shell over the four knuckles (domed, with a padded rim), a round pad on each finger's first section, a suede palm
   patch, a
