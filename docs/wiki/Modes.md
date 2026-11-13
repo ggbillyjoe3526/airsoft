@@ -53,8 +53,10 @@ A map needs a flagpole for Attack / Defend; the Match screen says when one hasn'
 ## Plant The Bomb
 
 One team carries a bomb to the other team's end and plants it at **Site A** or **Site B**; the other team keeps it
-out, or defuses it before it goes off. The bomb is a field prop, a timer box with a lamp and a buzzer: when it goes
-off it pops a cloud of dust and sounds its buzzer, and nobody is hit by it. The team you pick attacks first, and the
+out, or defuses it before it goes off. The bomb is a field prop: four grey-green blocks bound with silver tape, a
+keypad timer with an LCD and a lamp on top, and a red and a blue wire looping into the front end; carried, it rides on
+its side at the carrier's hip. When it goes off it pops a cloud of dust and sounds its buzzer, and nobody is hit by
+it. The team you pick attacks first, and the
 sides swap at half time. Every field has both sites.
 
 - **The bomb starts on the ground** just ahead of the attackers' start each round. Stand over it and **hold <!-- wiki:key use_door -->**
@@ -78,7 +80,9 @@ the code as the clock runs out gets up to <!-- wiki:config plant_config.max_over
 
 On the field each site has a ring on the floor and a big **A** or **B** over it. The ring takes the attackers' colour
 while the bomb is keyed in and once it is armed, and the defenders' while it is being defused. The bomb's lamp winks
-amber while it waits on the ground, flashes red with each beep once armed, and ends green when it is made safe.
+amber while it waits on the ground, flashes red with each beep once armed, and ends green when it is made safe. While
+someone defuses it, a pair of teal wire cutters lies open beside its wires. Whoever carries it wears it strapped at the
+left hip, so you can tell the carrier at a glance.
 
 A map needs bomb sites for Plant The Bomb; the Match screen says when one hasn't got them.
 

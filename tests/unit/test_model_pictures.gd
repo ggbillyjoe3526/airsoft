@@ -10,7 +10,7 @@ const PICTURED: Array[String] = ["replicas", "replicaParts", "powerSources", "gr
 ## the skyline's buildings, the practice range's targets and distance boards).
 ## The props are also in the fields' pictures (assets/maps/*.jpg, tools/eye_pictures.gd): re-render those after a prop
 ## changes (ASSETS.md).
-const MATCH_ONLY: Array[String] = ["arms", "characters", "effects", "props", "range", "skyline"]
+const MATCH_ONLY: Array[String] = ["arms", "bomb", "characters", "effects", "props", "range", "skyline"]
 
 var pool: Pool
 
