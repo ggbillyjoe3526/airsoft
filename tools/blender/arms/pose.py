@@ -249,6 +249,8 @@ class Hand:
         self.index_bends = (70, 90, 70)
         # The least its base may bend (degrees; below 0 it lifts off the frame's side).
         self.index_from = -10
+        # How far down the trigger (a share of its height, top to tip) the trigger finger's pad rests.
+        self.trigger_at = 0.55
         # The whole hand bone's glove (the knuckles and the heel of the thumb too), for seating it clear.
         whole = [hand_rest.inverted() @ sx(v) for v, w in zip(mesh.v, mesh.w) if w.get("Hand", 0.0) > 0.45]
         self.points["Hand_" + side] = [q for i, q in enumerate(whole) if i % max(1, len(whole) // 300) == 0]

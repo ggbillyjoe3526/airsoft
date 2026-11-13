@@ -171,15 +171,19 @@ GROOVE_PX = 1152.0
 GROOVE_PITCH = 64.0
 GROOVE_LEN = 57.0
 GROOVE_DEPTH = 0.0058
-# The grooves open into the stock's hollow, as the photos' do (they read as black slots): chambers each side of a
-# middle web (front, back px; each chamber's top and foot py, a shelf between the lower two rows; the web's half
-# thickness, the side wall's thickness and how far in from the side wall the lower chamber's leaning back wall
-# starts at its top, m).
+# The grooves open into the stock's hollow, as the photos' do (they read as black slots): one chamber across the
+# stock behind each of the upper two rows and the lowest (front, back px; each chamber's top and foot py, a shelf
+# between them; the side wall's thickness, m). What the slots show is the receiver extension, which runs the hollow's
+# whole length (to EXT_END_PX), and the rail under it (the one a real stock's latch pin locks into: its top and foot
+# py, its half width), both black aluminium: every slot reads black end to end from either side, where a polymer
+# wall behind them read grey (the critic, SH2). The last column is shorter, as the photos' (GROOVE_LAST, px).
 HOLLOW_PX = (1146.0, 1458.0)
 HOLLOW_PY = ((81.0, 111.8), (113.6, 127.0))
-HOLLOW_WEB = 0.0020
 HOLLOW_WALL = 0.0022
-HOLLOW_LEAN = 0.0020
+EXT_END_PX = 1456.0
+EXT_RAIL_PY = (104.0, 126.0)
+EXT_RAIL_HW = 0.0040
+GROOVE_LAST = 44.0
 # The sling loop hanging at the fin's toe (the photos' left side): its lug on the fin's front edge and the wire loop
 # through it (centre px, py; half width and height, m; the wire's radius).
 TOE_LOOP = (1437.5, 289.0, 0.0034, 0.0128, 0.0011)
@@ -666,8 +670,11 @@ def stock() -> list:
     slot, the latch lever under its front, and a ribbed butt pad."""
     out = []
     b = hs.Builder("Extension", ["Detail", "Metal"])
-    b.lathe([(Y(STOCK_PX[1] - 30), 0.0), (Y(STOCK_PX[1] - 30), EXT_R - 0.002), (Y(STOCK_PX[1] - 32), EXT_R),
+    b.lathe([(Y(EXT_END_PX), 0.0), (Y(EXT_END_PX), EXT_R - 0.002), (Y(EXT_END_PX - 2), EXT_R),
              (Y(NUT_PX[0] - 6), EXT_R), (Y(NUT_PX[0] - 6), 0.0)], "Detail", 24, centre=(0.0, 0.0, EXT_Z))
+    # The rail under it, inside the stock: what the lowest row of slots shows.
+    b.box((-EXT_RAIL_HW, Y(EXT_END_PX), Z(EXT_RAIL_PY[1])), (EXT_RAIL_HW, Y(HOLLOW_PX[0] + 4), Z(EXT_RAIL_PY[0])),
+          "Detail")
     # The lock nut against the tower, notched round its back.
     y0, y1 = Y(NUT_PX[1]), Y(NUT_PX[0])
     b.lathe([(y0, 0.0), (y0, TOWER_R - 0.0026), (y0 + 0.0010, TOWER_R - 0.0012), (y1 - 0.0052, TOWER_R - 0.0012),
@@ -703,7 +710,7 @@ def stock() -> list:
     weld(ob, f.build())
     cutters = [slot_cutter("c_sling", 1370, 1446, 133.5, 146.0, -0.03, 0.03)]
     c = hs.Builder("c_ext", ["Furniture"])
-    c.lathe([(Y(STOCK_PX[1] - 26), 0.0), (Y(STOCK_PX[1] - 26), EXT_R + 0.0004), (Y(STOCK_PX[0] - 30), EXT_R + 0.0004),
+    c.lathe([(Y(EXT_END_PX + 3), 0.0), (Y(EXT_END_PX + 3), EXT_R + 0.0004), (Y(STOCK_PX[0] - 30), EXT_R + 0.0004),
              (Y(STOCK_PX[0] - 30), 0.0)], "Furniture", 24, centre=(0.0, 0.0, EXT_Z))
     cutters.append(c.build())
     for sx in (-1, 1):
@@ -711,17 +718,13 @@ def stock() -> list:
             for k in range(5):
                 px = GROOVE_PX + GROOVE_PITCH * k
                 # Square-cornered (the body's bevel softens them): rounded corners cost 400 triangles over 30 slots.
-                cutters.append(box_cutter("c_gr", (sx * (STOCK_HW - GROOVE_DEPTH), Y(px + GROOVE_LEN), Z(py1)),
+                back = Y(px + (GROOVE_LAST if k == 4 else GROOVE_LEN))
+                cutters.append(box_cutter("c_gr", (sx * (STOCK_HW - GROOVE_DEPTH), back, Z(py1)),
                                           (sx * (STOCK_HW + 0.01), Y(px), Z(py0))))
-        # The hollow behind the slots. The upper two rows open onto the extension's underside; the lowest row's
-        # chamber has a back wall leaning out over it (facing down, as the extension's underside does), so no light
-        # falls on what the slot shows and it reads as dark as the two above.
-        x_web, x_wall = sx * HOLLOW_WEB, sx * (STOCK_HW - HOLLOW_WALL)
-        (top0, foot0), (top1, foot1) = HOLLOW_PY
-        cutters.append(box_cutter("c_hollow", (x_web, Y(HOLLOW_PX[1]), Z(foot0)), (x_wall, Y(HOLLOW_PX[0]), Z(top0))))
-        wedge = [(x_wall, Z(foot1)), (x_wall, Z(top1)), (x_wall - sx * HOLLOW_LEAN, Z(top1)), (x_web, Z(foot1))]
-        cutters.append(section_prism("c_hollow", wedge if sx > 0 else wedge[::-1], Y(HOLLOW_PX[1]), Y(HOLLOW_PX[0]),
-                                     "Furniture"))
+    # The hollow behind the slots, across the stock: the extension and its rail stand in it.
+    x_wall = STOCK_HW - HOLLOW_WALL
+    for top, foot in HOLLOW_PY:
+        cutters.append(box_cutter("c_hollow", (-x_wall, Y(HOLLOW_PX[1]), Z(foot)), (x_wall, Y(HOLLOW_PX[0]), Z(top))))
     hs.cut(ob, cutters)
     out.append(hs.finish(ob, 0.0011, 1))
 
