@@ -88,45 +88,74 @@ Departures from the concept (each so the field meets the 34 m line, or plays its
 
 ## Measures
 
-Bots only, Normal, 6v6, `tests/support/match_runner.gd`, sixteen seeds a mode:
+Bots only, Normal, 6v6, `tests/support/match_runner.gd`; Attack / Defend and Plant The Bomb over 32 seeds (8-seed
+blocks swing by 10 points or more), Elimination over 16:
 
 | Mode | Rounds decided | Result |
 |---|---|---|
-| Plant The Bomb | 118 | attackers 47 %; armed 36 % of rounds (Site A 81 % of plants); none held up |
-| Attack / Defend | 122 | attackers 44 %; first knock-out 20.8 s in, at 7.7 m (flag A 3 m west: 37 % of 125) |
-| Elimination | 123 | west end 46 %; first knock-out 15.3 s in, at 10.7 m; overtime 4 of 123 |
+| Attack / Defend | 234 | attackers 49 % ±3 (seeds 1 to 16: 52 % of 115); first knock-out 21 s in, at 8 m |
+| Plant The Bomb | 239 | attackers 40 % ±3 (seeds 1 to 16: 46 % of 126, seeds 17 to 32: 33 %); armed in 49 % of rounds, Site A 63 and Site B 54 of the plants |
+| Elimination | 119 | west end 52 % ±5; first knock-out 15 s in, at 11 m; overtime 4 |
 
-Attempt 1 (104 x 64 m, the Green full of cover): Plant The Bomb attackers 45 %, armed 74 %; Attack / Defend 49 %;
-Elimination west 46 %, first knock-out about 17 s in at 6 to 8 m.
+No bot was held up but one, once, in Elimination (seed 9 to 16 block). Plant The Bomb runs under its band on every
+field (PB1: Depot 37 %, Woodland 41 %, Subway 48 %); its fuse and defuse are PlantConfig's, not the map's.
 
-MB1's tools, before (attempt 1's map, `413a8ed`) and after (this one), Elimination 6v6, the same eight seeds
+Attempt 2 (same seeds, 16): Plant The Bomb 47 %, armed 36 % (Site A 81 % of plants); Attack / Defend 44 %;
+Elimination west 46 %. Attempt 1 (104 x 64 m, the Green full of cover): 45 %, 49 %, 46 %.
+
+What attempt 3 tried for Attack / Defend and Plant The Bomb (attackers' share; seeds in brackets), each on the one
+before unless said:
+
+| Layout | Attack / Defend | Plant The Bomb |
+|---|---|---|
+| Lanes through the Tavern and the Long House, a second door on each house | 39 % (32) | 31 % (16) |
+| The House yard's gate off Main Street shut, the defenders onto flag A through the Long House only | 68 % (16) | – |
+| ... with a gap from East Lane into the yard | 43 % (32) | 37 % (16) |
+| ... the gate a door, shut at the start | 38 % (16) | – |
+| ... the gate 14 m further west | 30 % (16) | – |
+| The Long House's east door at its south end, the gate shut | 58 % (32) | 36 % (16) |
+| ... the north lane back on the Back Lane, not through the Tavern | 57 % (32) | 44 % (32) |
+| ... and a door on the Bell house onto the Green (FieldStandard's walks: 57.6 and 58.6 m) | 77 % (32) | 54 % (32) |
+| ... and the House yard's gate back (this field) | 49 % (32) | 40 % (32) |
+| ... and the north and south lanes through the Forge and the Barn | 42 % (16) | 38 % (16) |
+
+The defenders' walk onto flag A decides Attack / Defend (30 m: about 40 %; 42 m: 57 %; 55 m: 68 %); a lane through
+the Tavern cost the attackers 10 points of Plant The Bomb; Site B moved 3 m west (34 %) or Site A 1.5 m (41 %)
+changed nothing measurable over 16 seeds. The lanes stay off the Forge and the Barn: through them the attackers lost
+about 10 points in both modes.
+
+MB1's tools, before (attempt 1's map, `413a8ed`) and after (attempt 3's), Elimination 6v6, the same eight seeds
 (`tools/map_heat.gd`, `tools/map_survey.gd`, `tools/maps/plan.py`; pictures in
 `/mnt/project-files/screenshots/stockade/mb1/`):
 
 | | Before (104 x 64 m) | After (104 x 76 m) |
 |---|---|---|
-| Rounds, west end won | 64, 48 % ±6 | 61, 48 % ±6 |
-| Round length, first hit | median 65 s; 17 s, from 6 m | median 68 s; 16 s, from 10 m |
-| Knock-out range | median 6 m, 90th 13 m; 77 % under 10 m | median 9 m, 90th 18 m; 57 % under 10 m |
-| Where people are hit | Green 42 %, Woodyard Road 20 %, Back Lane 16 %, the four houses and Arches 16 % | Green 34 %, Woodyard Road 27 %, Back Lane 25 %, Main Street 5 % |
-| The Green: stand points, open to | 763, 2.9 % of the points in sight range | 936, 10.2 % |
+| Rounds, west end won | 64, 48 % ±6 | 58, 53 % ±7 |
+| Round length, first hit | median 65 s; 17 s, from 6 m | median 66 s; 16 s, from 11 m |
+| Knock-out range | median 6 m, 90th 13 m; 77 % under 10 m | median 9 m, 90th 19 m; 57 % under 10 m |
+| Where people are hit | Green 42 %, Woodyard Road 20 %, Back Lane 16 %, the four houses and Arches 16 % | Green 40 %, Back Lane 22 %, Woodyard Road 11 %, Store 9 %, Main Street 5 %, Tavern 4 % |
+| The Green: stand points, open to | 763, 2.9 % of the points in sight range | 931, 10.3 % |
 | Longest standing line (survey, 1 m grid) | 33 m | 33 m |
-| Flag A, flag B: walk from end 0 / end 1 | 22 / 7 s, 23 / 10 s | 22 / 6 s, 25 / 10 s |
-| Overtime flag: end 0 / end 1 | 13.6 / 13.2 s | 13.5 / 14.2 s |
-| Hardly used (under 0.4 % of time) | Barn, Barn yard, Forge, Forge yard, Long House | Barn, Bell house, Forge, Orchard, Store, Tents, West Arch |
+| Flag A, flag B: walk from end 0 / end 1 | 22 / 7 s, 23 / 10 s | 22 / 6 s, 27 / 10 s |
+| Overtime flag: end 0 / end 1 | 13.6 / 13.2 s | 13.5 / 13.7 s |
+| Hardly used (under 0.4 % of time) | Barn, Barn yard, Forge, Forge yard, Long House | Barn, Bell house, Forge, Orchard, Tents, West Arch |
 
-The fights moved out of the houses onto the three ways and spread across them, at longer range; the Green is a
-square you are seen on, as the concept means. The houses off the Green are hardly fought in at Elimination (bots
-keep to their lanes); Plant The Bomb's Site A is the Long House, and the Orchard is a flank nobody takes yet.
+The fights moved out of the houses onto the three ways and the Green, at longer range; the Green is a square you are
+seen on, as the concept means. The Store and the Tavern are on routes now (13 % of the knock-outs, against none in
+attempt 2's after); the Forge and the Barn stay quiet at Elimination, behind the West camp's own lines, and the
+Orchard is a flank nobody takes yet. The attackers' walk to the flags is still 22 and 27 s against the concept's 15
+and 14: Attack / Defend came into its band through the routes the defenders and the East camp take (above), not by
+cutting the attackers' chicanes, which break lines over 34 m.
 
 ## Checks
 
-- `test_field_rules`, `test_field_layout`, `test_sk1_qa`, `test_dev_settings`, `test_nr1_qa` pass (65 tests);
-  `check.py`: no overlaps, no line over 34 m (its quick sweep: 33.8 m), every spot reached.
+- `test_field_rules`, `test_field_layout`, `test_sk1_qa`, `test_dev_settings`, `test_nr1_qa` pass (74 tests, 3 min
+  20 s headless); FieldMeasure's longest line 33.9 m; `check.py`: no overlaps, no line over 34 m.
 - QA: Pass, 16 tests of its own (`tests/unit/test_sk1_qa.gd`: loads clean, dev only, both lighting presets, sites,
   poles, flag and bomb start reached from both ends, no standable roof, no floor cut off; and in attempt 2 MB1's lane
-  rules as `test_mb1_layouts` checks the shipped fields, the 23 doors, the Orchard's gates, the Bell house's door and
-  a seeded bot match with no bot held up, about 190 s headless).
+  rules as `test_mb1_layouts` checks the shipped fields, the doors (26 in attempt 3, all open), the Orchard's gates,
+  the Bell house's doors and a seeded bot match with no bot held up; in attempt 3 four minutes of play, not a whole
+  match, which took about 190 s headless).
 - Performance: Pass. Map load 36 ms (Depot 8, Woodland 143), nav build 1.18 s (0.90, 3.3), 383 blocks against
   Woodland's 945, 26 lights within LightPools' 32; frame time at night on Low is on the checklist.
 
