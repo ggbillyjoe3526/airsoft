@@ -64,17 +64,15 @@ func test_the_cutters_stay_up_in_the_carriers_own_view_only_when_armed() -> void
 	assert_true(_cutters().visible)
 
 
-func test_the_cutters_snip_open_and_shut_symmetrically_and_a_zero_rate_holds_still() -> void:
+func test_the_cutters_hold_their_opening_however_long_the_defuse_runs() -> void:
 	_defusing()
 	var top := _cutters().find_child("CutterTop", true, false) as Node3D
 	var bottom := _cutters().find_child("CutterBottom", true, false) as Node3D
 	view.refresh(ps, 0, null, 1.0, false, 0.37)
-	assert_almost_eq(top.rotation.y, -bottom.rotation.y, 0.0001)
-	cfg.cutters_snips = 0.0
-	view.refresh(ps, 0, null, 1.0, false, 5.0)
 	var held := top.rotation.y
 	view.refresh(ps, 0, null, 1.0, false, 5.0)
-	assert_eq(top.rotation.y, held)
+	assert_eq(top.rotation.y, held, "laid down, they do not move")
+	assert_almost_eq(top.rotation.y, -bottom.rotation.y, 0.0001)
 
 
 func test_the_lamps_material_takes_each_states_colour() -> void:

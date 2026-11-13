@@ -1,6 +1,7 @@
 extends GutTest
 ## Plant The Bomb's models in PlantView (PB2): the bomb drawn from its model with its lamp tinted, its front turned to
-## whoever keys it in, and the wire cutters at its red wire, shown and snipping only while it is being made safe.
+## whoever keys it in, its straps shown only while carried, and the wire cutters laid open beside it only while it is
+## being made safe.
 
 var cfg := PlantViewConfig.new()
 var ps: PlantState
@@ -62,7 +63,7 @@ func test_every_surface_is_painted_in_the_shared_light_and_the_lamp_in_its_state
 	assert_true(view.materials().size() > 4, "the lamp, the rings and the models' paints prewarm")
 
 
-func test_the_cutters_show_only_while_someone_makes_it_safe_and_snip() -> void:
+func test_the_cutters_show_only_while_someone_makes_it_safe() -> void:
 	assert_not_null(_cutters())
 	view.refresh(ps, 0, null, 1.0, false, 0.01)
 	assert_false(_cutters().visible, "on the ground: no cutters")
@@ -73,18 +74,57 @@ func test_the_cutters_show_only_while_someone_makes_it_safe_and_snip() -> void:
 	ps.defuser = 4
 	view.refresh(ps, 0, null, 1.0, false, 0.0)
 	assert_true(_cutters().visible)
-	var top := _cutters().find_child("CutterTop", true, false) as Node3D
-	var first := top.rotation.y
-	view.refresh(ps, 0, null, 1.0, false, 0.25 / cfg.cutters_snips)
-	assert_ne(top.rotation.y, first, "the halves open and close")
-	assert_between(-top.rotation.y, 0.0, cfg.cutters_open + 0.001)
 	ps.defuser = -1
 	ps.status = PlantState.Status.DEFUSED
 	view.refresh(ps, 0, null, 1.0, false, 0.01)
 	assert_false(_cutters().visible, "made safe: put away")
 
 
-func test_the_cutters_tip_is_at_the_red_wire() -> void:
-	var cut := _bomb().find_child(PlantView.CUT_MARK, true, false) as Node3D
-	var tip := _cutters().transform * Vector3(0.0, 0.0, -PlantView.CUTTERS_TIP)
-	assert_almost_eq(tip.distance_to(cut.position), 0.0, 0.0005)
+func test_the_cutters_lie_open_on_the_floor_beside_the_bomb() -> void:
+	var top := _cutters().find_child("CutterTop", true, false) as Node3D
+	var bottom := _cutters().find_child("CutterBottom", true, false) as Node3D
+	assert_almost_eq(top.rotation.y, -cfg.cutters_open, 0.0001)
+	assert_almost_eq(bottom.rotation.y, cfg.cutters_open, 0.0001)
+	var lowest := INF
+	var cutters := AABB()
+	var first := true
+	for node in _cutters().find_children("*", "MeshInstance3D", true, false):
+		var m := node as MeshInstance3D
+		var box := _bomb().global_transform.affine_inverse() * m.global_transform * m.get_aabb()
+		cutters = box if first else cutters.merge(box)
+		first = false
+		lowest = minf(lowest, box.position.y)
+	assert_between(lowest, -0.001, 0.003, "flat on the floor the bomb stands on, not in the air")
+	var bomb := AABB()
+	first = true
+	for node in _bomb().find_children("*", "MeshInstance3D", true, false):
+		var m := node as MeshInstance3D
+		if _cutters().is_ancestor_of(m) or m.name == PlantView.CARRY_NODE:
+			continue
+		var box := _bomb().global_transform.affine_inverse() * m.global_transform * m.get_aabb()
+		bomb = box if first else bomb.merge(box)
+		first = false
+	var blocks := bomb.grow(-0.012)
+	assert_false(cutters.intersects(blocks), "beside it, not through it")
+	assert_lt(cutters.get_center().distance_to(bomb.get_center()), 0.3, "within reach of its wires")
+
+
+func test_the_carry_straps_show_only_while_it_is_carried_at_the_hip() -> void:
+	var carry := _bomb().find_child(PlantView.CARRY_NODE, true, false) as Node3D
+	assert_not_null(carry)
+	view.refresh(ps, 0, null, 1.0, false, 0.01)
+	assert_false(carry.visible, "on the ground: no straps")
+	var carrier := Character.new(3, 0, Vector3(4.0, 0.0, 2.0), 0.0, [ReplicaConfig.new()] as Array[ReplicaConfig])
+	carrier.prev_position = carrier.position
+	ps.status = PlantState.Status.CARRIED
+	ps.carrier = carrier.id
+	view.refresh(ps, 0, carrier, 1.0, false, 0.01)
+	assert_true(carry.visible)
+	var standing := view.prop().position.y
+	carrier.crouch_amount = 1.0
+	carrier.prev_crouch_amount = 1.0
+	view.refresh(ps, 0, carrier, 1.0, false, 0.01)
+	assert_almost_eq(view.prop().position.y, standing - cfg.carry_crouch_drop, 0.001, "lower with a crouched belt")
+	ps.planter = carrier.id
+	view.refresh(ps, 0, carrier, 1.0, false, 0.01)
+	assert_false(carry.visible, "set down to be keyed in: unstrapped")

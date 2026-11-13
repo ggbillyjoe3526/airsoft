@@ -80,7 +80,8 @@ the code as the clock runs out gets up to <!-- wiki:config plant_config.max_over
 On the field each site has a ring on the floor and a big **A** or **B** over it. The ring takes the attackers' colour
 while the bomb is keyed in and once it is armed, and the defenders' while it is being defused. The bomb's lamp winks
 amber while it waits on the ground, flashes red with each beep once armed, and ends green when it is made safe. While
-someone defuses it, a pair of teal wire cutters snips at its red wire.
+someone defuses it, a pair of teal wire cutters lies open beside its wires. Whoever carries it wears it strapped at the
+left hip, so you can tell the carrier at a glance.
 
 A map needs bomb sites for Plant The Bomb; the Match screen says when one hasn't got them.
 

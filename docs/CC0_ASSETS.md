@@ -222,15 +222,15 @@ bomb, `assets/models/grenades/<smoke|flash>.glb`, built by `tools/blender/grenad
 
 ### Plant The Bomb's models
 
-The bomb (PB2) on the ground, at its carrier's hip and armed in a site, and the wire cutters snipping at it while it
-is defused, both drawn by `PlantView`: `assets/models/bomb/bomb.glb` and `cutters.glb`, built by
+The bomb (PB2) on the ground, strapped at its carrier's hip and armed in a site, and the wire cutters laid open beside
+it while it is defused, both drawn by `PlantView`: `assets/models/bomb/bomb.glb` and `cutters.glb`, built by
 `tools/blender/bomb/bomb.py` from the owner's photos (`/mnt/project-files/art/references/plant-the-bomb/`).
 
 - **Space.** Metres, life size. The bomb's origin is the middle of its base, its length along the model's -Z (the
   wires' end at -Z, the antenna's at +Z); `PlantView` turns it half a turn. Its lamp is its own node, `Lamp`, whose
-  `Lamp` material the game swaps for the lamp's state colour; the empty `Cut` marks the red wire's loop at its
-  highest. The cutters lie flat, the pivot at the origin on the game's +Y axis, the jaws' tip 24.5 mm along -Z; each
-  half (`CutterTop`, `CutterBottom`) is its own node turning about its own Y, shut at rest.
+  `Lamp` material the game swaps for the lamp's state colour; its `Carry` node (straps and belt loops) shows only
+  while it is carried. The cutters lie flat, the pivot at the origin on the game's +Y axis, the jaws' tip 18.5 mm
+  along -Z; each half (`CutterTop`, `CutterBottom`) is its own node turning about its own Y, shut as built.
 - **Materials.** Plain colours, which the game paints in the shared light (`LookMaterials.paint`, lit by the floor's
   light like the other props). No letters or marks: the LCD shows ghost digits, the cutters' grip panels are blank.
   Each file names its materials' surfaces in its mesh's `surfaces` table.

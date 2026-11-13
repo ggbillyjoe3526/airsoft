@@ -2,8 +2,8 @@ extends SceneTree
 ## Pictures of Plant The Bomb for review (PB1): a whole PlaySession on a field, the bots standing at their starts, the
 ## bomb's state set by hand. First person with the HUD, as an attacker (the bomb on the ground at the start, carrying
 ## it in Site A, keying it in, the armed bomb) and as a defender (at the armed bomb, the kit at work); then the HUD
-## off and the camera free: the bomb (PB2's model) armed close up, the wire cutters at its wires, a bot carrying it at
-## the hip, and each site's ring and letter. Needs a
+## off and the camera free: the bomb (PB2's model) armed close up, the wire cutters laid open beside it, a bot carrying
+## it strapped at the hip (standing and crouched), and each site's ring and letter. Needs a
 ## display, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --path . --rendering-driver opengl3 \
 ##       -s res://tools/plant_pictures.gd -- <folder> [map id] [--graphics=high]
@@ -142,13 +142,13 @@ func _run() -> void:
 	view.refresh(ps, rs.attackers, null, 1.0, false, 0.0)
 	camera.look_at_from_position(_towards(bomb, start, 0.9) + Vector3(0.35, 0.5, 0.0), bomb + Vector3.UP * 0.06)
 	await _grab("the-bomb-armed-close-up")
-	# 8. Being made safe: the cutters at its red wire, part open.
+	# 8. Being made safe: the cutters laid open beside its wires.
 	ps.defuser = you.id
 	view.refresh(ps, rs.attackers, null, 1.0, false, 0.12)
 	camera.look_at_from_position(_towards(bomb, start, 0.55) + Vector3(0.25, 0.35, 0.0), bomb + Vector3.UP * 0.08)
-	await _grab("the-wire-cutters-at-the-bomb-close-up")
+	await _grab("the-wire-cutters-laid-beside-the-bomb-close-up")
 	ps.defuser = -1
-	# 9. Carried by a bot of the attackers, at its left hip.
+	# 9, 10. Carried by a bot of the attackers, strapped at its left hip, standing and crouched.
 	var bot: Character = null
 	for c in st.characters:
 		if c != you and c.team == rs.attackers:
@@ -162,8 +162,23 @@ func _run() -> void:
 		var ahead := Vector3(0.0, 0.0, -1.0).rotated(Vector3.UP, bot.yaw)
 		camera.look_at_from_position(bot.position + left * 1.6 + ahead * 0.9 + Vector3.UP * 1.3,
 				bot.position + left * 0.25 + Vector3.UP * 0.85)
-		await _grab("a-bot-carrying-the-bomb-at-its-hip")
-	# 10, 11. Each site from outside its ring.
+		await _grab("a-bot-carrying-the-bomb-strapped-at-its-hip")
+		bot.crouch_amount = 1.0
+		bot.prev_crouch_amount = 1.0
+		bot.low = true
+		_session.set_process(true)  # the figures pose the crouch (the play itself stays stopped: speed 0)
+		_session.speed = 0
+		await _frames(30)
+		_session.set_process(false)
+		_session._hands.visible = false
+		view.refresh(ps, rs.attackers, bot, 1.0, false, 0.0)
+		camera.look_at_from_position(bot.position + left * 1.5 + ahead * 0.9 + Vector3.UP * 1.0,
+				bot.position + left * 0.25 + Vector3.UP * 0.6)
+		await _grab("a-bot-crouched-carrying-the-bomb")
+		bot.crouch_amount = 0.0
+		bot.prev_crouch_amount = 0.0
+		bot.low = false
+	# 11, 12. Each site from outside its ring.
 	ps.status = PlantState.Status.DOWN
 	ps.carrier = -1
 	ps.position = start

@@ -2,7 +2,7 @@ class_name PlantView
 extends Node3D
 ## Plant The Bomb in the world (PB1): each site's ring on the floor at its radius and its letter over it, and the prop
 ## itself: on the ground where it lies, at its carrier's hip, or standing armed in a site, its lamp telling its state
-## (PlantViewConfig); the wire cutters at its wires, snipping, while someone makes it safe. Scenery only: no collider,
+## (PlantViewConfig); the wire cutters laid open beside it while someone makes it safe. Scenery only: no collider,
 ## so BBs pass through. Reads the round's PlantState; owns no rule. Built once a match; `refresh` changes only what
 ## moved or changed. The models (PB2) are painted in the shared light, lit as the floor under them.
 
@@ -10,15 +10,15 @@ const RING_LIFT := 0.025
 const EDGE_LIFT := 0.024
 ## The bomb and the cutters (tools/blender/bomb/bomb.py): the bomb's origin the middle of its base, its length along
 ## the model's Z with the wires' end at -Z, which the prop turns to face +Z (towards whoever keys it in, so its LCD
-## reads the right way up); its lamp the `Lamp` node's `Lamp` material, the cutters' place the `Cut` mark. The
-## cutters' two halves turn about their own Y on the pivot, shut at rest, the tip `CUTTERS_TIP` m along -Z.
+## reads the right way up); its lamp the `Lamp` node's `Lamp` material; its `Carry` node the straps and belt loops
+## shown only while someone carries it. The cutters' two halves turn about their own Y on the pivot, shut as built,
+## lying flat with their origin on the pivot, their tip along -Z.
 const BOMB_MODEL := "res://assets/models/bomb/bomb.glb"
 const CUTTERS_MODEL := "res://assets/models/bomb/cutters.glb"
 const LAMP_NODE := "Lamp"
 const LAMP_MATERIAL := "Lamp"
-const CUT_MARK := "Cut"
+const CARRY_NODE := "Carry"
 const CUTTER_HALVES: Array[String] = ["CutterTop", "CutterBottom"]
-const CUTTERS_TIP := 0.0245
 ## The prop carried rides on its side: turned a quarter about its long axis, its keypad out from the carrier's hip.
 const CARRIED_TIP := PI * 0.5
 ## The stream the pop's puffs are placed from: the same puffs every time.
@@ -28,9 +28,9 @@ var _cfg: PlantViewConfig = null
 var _teams: TeamConfig = null
 var _prop: Node3D = null
 var _lamp: StandardMaterial3D = null
-## The cutters (null when their model won't load) and their two halves.
+## The cutters (null when their model won't load) and the bomb's carry straps (null without them).
 var _cutters: Node3D = null
-var _halves: Array[Node3D] = []
+var _carry: Node3D = null
 var _paints: Array[ShaderMaterial] = []
 var _paint_colours: PackedColorArray = PackedColorArray()
 var _rings: Array[StandardMaterial3D] = []
@@ -99,7 +99,8 @@ func refresh(ps: PlantState, attackers: int, carrier: Character, fraction: float
 	elif carried:
 		var yaw := lerp_angle(carrier.prev_yaw, carrier.yaw, fraction)
 		var feet := carrier.prev_position.lerp(carrier.position, fraction)
-		var hang := _cfg.carry_at
+		var low := lerpf(carrier.prev_crouch_amount, carrier.crouch_amount, fraction)
+		var hang := _cfg.carry_at - Vector3(0.0, _cfg.carry_crouch_drop * low, 0.0)
 		# Left of the carrier's facing (-Z at yaw 0), tipped to hang from its handle.
 		_prop.position = feet + Vector3(-hang.x, hang.y, -hang.z).rotated(Vector3.UP, yaw)
 		_prop.rotation = Vector3(0.0, yaw, CARRIED_TIP)
@@ -110,7 +111,10 @@ func refresh(ps: PlantState, attackers: int, carrier: Character, fraction: float
 		if _lights != null and not _prop.position.is_equal_approx(_lit_at):
 			relight(_lights)
 	_show_lamp(_lamp_colour(ps))
-	_show_cutters(ps.status == PlantState.Status.PLANTED and ps.defuser >= 0)
+	if _cutters != null:
+		_cutters.visible = ps.status == PlantState.Status.PLANTED and ps.defuser >= 0
+	if _carry != null:
+		_carry.visible = carried and not keyed
 	for i in _rings.size():
 		var shown := _ring_state(ps, i)
 		if shown == _ring_shown[i]:
@@ -203,18 +207,6 @@ func _show_lamp(colour: Color) -> void:
 	_lamp.albedo_color = colour
 
 
-## The cutters snipping while someone works at the wires, at their place while shown; hidden otherwise.
-func _show_cutters(working: bool) -> void:
-	if _cutters == null:
-		return
-	_cutters.visible = working
-	if not working:
-		return
-	var open := _cfg.cutters_open * (0.5 + 0.5 * cos(TAU * _cfg.cutters_snips * _clock))
-	_halves[0].rotation.y = -open
-	_halves[1].rotation.y = open
-
-
 func _build_prop(cfg: PlantViewConfig) -> void:
 	_prop = Node3D.new()
 	_prop.name = "Prop"
@@ -242,23 +234,25 @@ func _build_prop(cfg: PlantViewConfig) -> void:
 			var own := lamp.mesh.surface_get_material(i)
 			if own != null and own.resource_name == LAMP_MATERIAL:
 				lamp.set_surface_override_material(i, _lamp)
+	_carry = bomb.find_child(CARRY_NODE, true, false) as Node3D
+	if _carry != null:
+		_carry.visible = false
 	var cutters := _model(CUTTERS_MODEL)
-	var cut := bomb.find_child(CUT_MARK, true, false) as Node3D
-	if cutters == null or cut == null:
-		if cutters != null:
-			cutters.free()
+	if cutters == null:
 		return
+	var halves: Array[Node3D] = []
 	for half in CUTTER_HALVES:
-		_halves.append(cutters.find_child(half, true, false) as Node3D)
-	if _halves.has(null):
-		_halves.clear()
+		halves.append(cutters.find_child(half, true, false) as Node3D)
+	if halves.has(null):
 		cutters.free()
 		return
+	halves[0].rotation.y = -cfg.cutters_open
+	halves[1].rotation.y = cfg.cutters_open
 	_cutters = cutters
 	_cutters.name = "Cutters"
 	_cutters.visible = false
-	var basis := Basis.looking_at(-cfg.cutters_from.normalized(), Vector3.UP)
-	_cutters.transform = Transform3D(basis, cut.position - basis * Vector3(0.0, 0.0, -CUTTERS_TIP))
+	_cutters.position = cfg.cutters_at
+	_cutters.rotation.y = cfg.cutters_turn
 	bomb.add_child(_cutters)
 
 

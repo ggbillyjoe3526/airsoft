@@ -8,14 +8,17 @@ A game prop, as airsoft fields use for bomb games: nothing in it works. Built fr
   three columns), a thin black antenna leaving the keypad's back and running under the back band, and a red and a blue
   wire leaving the keypad's front under the front band. From the other two photos: silver duct tape for the two bands
   (ref-1, its loose end on the right side), and the wires looping with slack over the front end into plugs in the top
-  blocks' ends (ref-3). Each block 56 x 50 x 270 mm; the bundle 112 x 100 x 270 mm, the keypad 84 x 107 x 15 mm on it.
-  The keypad's lamp (an LED by the LCD) is its own node, `Lamp`, which the game tints (PlantView: waiting, keyed,
-  armed, safe); the empty `Cut` marks the red wire's loop at its highest, where the game puts the cutters' tip.
+  blocks' ends (ref-3). Each block 53 x 57 x 270 mm; the bundle 107 x 116 x 270 mm, the keypad 59 x 100 x 15 mm on it
+  (green showing either side, as in the photo). The keypad's lamp (an LED in front of the keys) is its own node,
+  `Lamp`, which the game tints (PlantView: waiting, keyed, armed, safe). `Carry` is its own node too: a black webbing
+  strap over each band, each with a belt loop off the bottom past the left side, folded and snapped, which the game
+  shows only while someone carries the bomb on its side at the hip.
 - **cutters.glb** follows the teal-handled flush cutter photo (ref-1 of 02-defusal-tool): black oxide jaws tapering to
   a point with bright ground cutting edges, a lap joint round a socket-head pivot, black shanks into bowed teal dipped
-  grips, each with a blank raised panel (where the photo's maker name is) and a lanyard hole near its end. 130 mm long.
-  Two nodes, `CutterTop` and `CutterBottom`, each a half (jaw, shank and grip) with its origin on the pivot, so the
-  game opens and closes them by turning each about its own Z (glTF -Y... see below); at rest the jaws are shut.
+  grips, each with a blank raised panel (where the photo's maker name is) and a lanyard hole near its end. 122 mm long:
+  the jaws 18.5 mm from the pivot (0.15 of it), the grips 84 mm (0.69), as the photo measures. Each jaw's outer edge is
+  chamfered down to a thin, sharp tip. Two nodes, `CutterTop` and `CutterBottom`, each a half (jaw, shank and grip)
+  with its origin on the pivot, so the game opens them by turning each about its own up axis; as built they are shut.
 
 Space: Blender metres, +Z up. The bomb's origin is the middle of its base, its length along Y (+Y the front: the
 wires' end), so it sits on the ground at the origin. The cutters lie flat, their pivot at the origin, the jaws' tip
@@ -53,61 +56,67 @@ BUDGET = 10000  # triangles a file (docs/CC0_ASSETS.md › Size limits)
 
 # ------------------------------------------------------------------------------------------------------------- bomb
 # The blocks: each its half width, half height, side corners' radius and the ends' rounding (mm); the bundle two by two.
-BLOCK_HW = 27.6
-BLOCK_HH = 24.6
+BLOCK_HW = 26.5
+BLOCK_HH = 28.5
 BLOCK_R = 8.0
 BLOCK_LEN = 270.0
 BLOCK_END_R = 9.0
 BLOCK_SEG = 5          # each side corner's steps
 BLOCK_END_STEPS = 6    # each end's rounding steps
-BLOCK_PITCH = (28.0, 25.0)  # the blocks' centres from the bundle's middle line (x) and from its base (z, then 3x)
-BUNDLE_TOP = 3.0 * BLOCK_PITCH[1] + BLOCK_HH  # 99.6: the top blocks' top
-BUNDLE_HW = BLOCK_PITCH[0] + BLOCK_HW   # 55.6
+BLOCK_PITCH = (27.0, 29.0)  # the blocks' centres from the bundle's middle line (x) and from its base (z, then 3x)
+BUNDLE_TOP = 3.0 * BLOCK_PITCH[1] + BLOCK_HH  # 115.5: the top blocks' top
+BUNDLE_HW = BLOCK_PITCH[0] + BLOCK_HW   # 53.5
 # The tape bands (ref-1's silver duct tape at ref-2's straps' places): centre along Y and width (mm), the tape's
 # thickness, and how far the band stands off the blocks it is wound round.
-BANDS = ((70.0, 38.0), (-81.0, 38.0))
+BANDS = ((84.0, 32.0), (-84.0, 32.0))
 TAPE = 0.9
 TAPE_GAP = 0.6
 TAPE_R = BLOCK_R + TAPE_GAP
 TAPE_SEG = 6
 TAPE_STEP_TOP = 4.0    # the band's path steps on the top (finer: the antenna bump) and elsewhere (mm)
-TAPE_STEP = 12.0
+TAPE_STEP = 15.0
 TAPE_LAP = 0.35        # the loose end's layer over the band, on the right side between these heights (mm)
-TAPE_END = (14.0, 62.0)
+TAPE_END = (16.0, 72.0)
 TAPE_EAR = 1.4         # the loose end's lifted corner
 # The keypad timer (ref-2): plan half width, half length, corner radius; its middle along Y; height over the top.
-PAD_HW = 42.0
-PAD_HL = 53.5
+PAD_HW = 29.5
+PAD_HL = 50.0
 PAD_R = 6.0
 PAD_Y = -6.5
 PAD_H = 14.5
 PAD_CHAMFER = 1.6
 PLATE_INSET = 3.4      # the face plate's edge in from the housing's, its rise and corner radius
 PLATE_RISE = 0.6
-LCD = (-46.5, 66.0, 15.0)   # the LCD's middle along Y, width and height (mm)
+LCD = (-44.0, 46.0, 14.0)   # the LCD's middle along Y, width and height (mm)
 LCD_FRAME = 2.2
 LCD_RISE = 0.8
 DIGITS = 8
-DIGIT = (5.9, 10.4, 1.05, 0.12)  # a digit's width, height, stroke and slant (x per y)
+DIGIT = (4.0, 8.4, 0.85, 0.12)  # a digit's width, height, stroke and slant (x per y)
 KEYS = (3, 4)               # columns, rows
-KEY = (17.0, 11.6, 1.8, 2.6)   # width, height, corner radius, rise (mm)
-KEY_PITCH = (21.0, 15.0)
-KEY_FIRST_ROW = -20.5       # the first row's middle along Y (the LCD's side)
-LED = (-31.0, -32.0, 2.0)   # the lamp's x, y and radius (mm), on the face plate
+KEY = (12.0, 11.0, 1.6, 2.6)   # width, height, corner radius, rise (mm)
+KEY_PITCH = (14.5, 14.0)
+KEY_FIRST_ROW = -27.0       # the first row's middle along Y (the LCD's side)
+LED = (-16.0, 31.0, 2.0)    # the lamp's x, y and radius (mm), on the face plate in front of the keys
 # The wires: each its colour material and control points (mm), smoothed; the plugs they end in (ref-3) at the top
 # blocks' front ends.
 WIRE_R = 1.35
-WIRE_SIDES = 9
+WIRE_SIDES = 8
 PLUG_Y = BLOCK_LEN * 0.5
-PLUG = (22.0, 80.0)          # |x| and z of each plug's middle on the front end
+PLUG = (23.0, 92.0)          # |x| and z of each plug's middle on the front end
 ANTENNA_R = 1.25
-ANTENNA_X = 26.0
+ANTENNA_X = 21.0
+# The carry rig (shown only while someone carries it, on its side at the hip with its keypad out and its bottom to the
+# body): a webbing strap over each band, and from each a belt loop off the bottom face past the -X side (up while
+# carried) folding back over the belt and snapped shut. Strap width and thickness, its stand-off over the tape; the
+# loop's reach past the side, its fold's depth and its snap's radius (mm).
+STRAP = (24.0, 1.5, 1.4)
+LOOP = (46.0, 7.0, 3.6)
 
 
 
 def bomb_colours() -> None:
-    hs.material("Block", 0x6E786F, 0.78)
-    hs.material("Tape", 0xA7AAAB, 0.42, 0.15)
+    hs.material("Block", 0x434E46, 0.8)
+    hs.material("Tape", 0x75797B, 0.52, 0.1)
     hs.material("Case", 0x1A1B1D, 0.62)
     hs.material("Key", 0x2B2C2F, 0.72)
     hs.material("Screen", 0xBFCAB0, 0.3)
@@ -116,6 +125,8 @@ def bomb_colours() -> None:
     hs.material("WireRed", 0xB3241C, 0.45)
     hs.material("WireBlue", 0x1F4DAD, 0.45)
     hs.material("Plug", 0x141516, 0.7)
+    hs.material("Strap", 0x1C1D1E, 0.9)
+    hs.material("Snap", 0x6B6E70, 0.35, 0.8)
 
 
 def mm(x: float, y: float, z: float) -> Vector:
@@ -371,10 +382,67 @@ def build_bomb() -> list:
     print("bomb parts: " + ", ".join("%s %d" % (p.name, hs.tris(p)) for p in parts))
     body = hs.join("Bomb", parts)
     led = led_object(plate)
-    # The cutters' place: the red wire's loop at its highest, clear of the bundle.
-    red = wire_paths()[0][0]
-    hs.empty("Cut", tuple(mm(*max(red, key=lambda p: p[2]))))
-    return [body, led]
+    carry = carry_object()
+    return [body, led, carry]
+
+
+def strap_ring(lift: float, out: float) -> list:
+    """A strap's path round the bundle (x, z mm), `out` over the tape; its top `lift` higher (the antenna's bump)."""
+    gap = TAPE_GAP + TAPE + TAPE_LAP + out
+    hw, hh, cz = BUNDLE_HW + gap, BUNDLE_TOP * 0.5 + gap, BUNDLE_TOP * 0.5
+    return [(x, z + cz + (lift if z > 0.0 else 0.0)) for x, z in hs.rounded_rect(hw, hh, TAPE_R + gap, 2)]
+
+
+def carry_object() -> bpy.types.Object:
+    """The carry rig (`Carry`, its own object so the game shows it only while carried): a webbing strap over each
+    band and a belt loop from each, snapped."""
+    w, t, gap = STRAP
+    reach, fold, snap = LOOP
+    b = hs.Builder("Carry", [])
+    for yc, _ in BANDS:
+        lift = 2.0 * ANTENNA_R if yc < 0.0 else 0.0
+        inner = strap_ring(lift, gap)
+        outer = strap_ring(lift, gap + t)
+        rings = []
+        for ring in (inner, outer):
+            rings.append(([tuple(mm(x, yc - w * 0.5, z)) for x, z in ring],
+                          [tuple(mm(x, yc + w * 0.5, z)) for x, z in ring]))
+        bm = b.bm
+        vi = [[bm.verts.new(p) for p in side] for side in rings[0]]
+        vo = [[bm.verts.new(p) for p in side] for side in rings[1]]
+        faces = []
+        n = len(inner)
+        for i in range(n):
+            j = (i + 1) % n
+            faces.append(bm.faces.new((vo[0][i], vo[0][j], vo[1][j], vo[1][i])))
+            faces.append(bm.faces.new((vi[1][i], vi[1][j], vi[0][j], vi[0][i])))
+            faces.append(bm.faces.new((vi[0][i], vi[0][j], vo[0][j], vo[0][i])))
+            faces.append(bm.faces.new((vo[1][i], vo[1][j], vi[1][j], vi[1][i])))
+        bmesh.ops.recalc_face_normals(bm, faces=faces)
+        b._faces(faces, "Strap")
+        # The belt loop: flat on the strap under the bottom, out past the -X side, folded back over the belt.
+        z0 = -(TAPE_GAP + TAPE + TAPE_LAP + gap + t)
+        side = -(BUNDLE_HW + TAPE_GAP)
+        path = [(side + 22.0, z0), (side - reach, z0), (side - reach - fold * 0.45, z0 - fold * 0.5),
+                (side - reach, z0 - fold), (side - reach * 0.35, z0 - fold)]
+        loop = [[mm(x, yc + sy * w * 0.46, z) for x, z in path] for sy in (-1.0, 1.0)]
+        lo = [[bm.verts.new(p) for p in edge] for edge in loop]
+        hi = [[bm.verts.new(p - (Vector((t * MM, 0.0, 0.0)) if k == 2 else Vector((0.0, 0.0, t * MM))))
+               for k, p in enumerate(edge)] for edge in loop]  # each layer's outside: down, out at the fold
+        faces = []
+        for k in range(len(path) - 1):
+            faces.append(bm.faces.new((lo[0][k], lo[0][k + 1], lo[1][k + 1], lo[1][k])))
+            faces.append(bm.faces.new((hi[1][k], hi[1][k + 1], hi[0][k + 1], hi[0][k])))
+            faces.append(bm.faces.new((hi[0][k], hi[0][k + 1], lo[0][k + 1], lo[0][k])))
+            faces.append(bm.faces.new((lo[1][k], lo[1][k + 1], hi[1][k + 1], hi[1][k])))
+        faces.append(bm.faces.new((lo[0][-1], lo[1][-1], hi[1][-1], hi[0][-1])))
+        bmesh.ops.recalc_face_normals(bm, faces=faces)
+        b._faces(faces, "Strap")
+        # The snap through the loop's two layers, under the fold's free end.
+        sx = side - reach * 0.55
+        lathe_along(b, Vector((sx, yc, z0 - fold - t)), Vector((0.0, 0.0, -1.0)),
+                    [(0.0, snap), (0.6, snap), (1.0, snap * 0.7), (1.1, 0.0)], "Snap", 12)
+    return hs.finish(b.build(), bevel=0.0)
 
 
 def antenna_mm(b: hs.Builder) -> None:
@@ -428,27 +496,28 @@ def led_object(plate: float) -> bpy.types.Object:
 # ---------------------------------------------------------------------------------------------------------- cutters
 # Plan (x across, y along, mm; the pivot at the origin). One half: its jaw on +X ahead of the pivot, its shank and
 # grip on -X behind it; the other half is it turned half a turn about Y.
-JAW_EDGE = [(0.0, 6.5), (0.0, 11.0), (0.0, 16.0), (0.0, 21.0), (0.0, 24.5)]  # the cutting edge up to the tip
-JAW_OUTER = [(0.8, 24.3), (1.7, 23.2), (2.9, 20.2), (4.3, 15.4), (5.4, 10.5), (5.9, 6.2), (5.8, 2.93)]
-SHANK_INNER = [(1.2, -6.39), (0.4, -10.0), (-1.0, -18.0), (-2.2, -29.5)]
-SHANK_OUTER = [(-8.0, -29.5), (-7.6, -20.0), (-6.9, -10.0), (-6.0, -2.5)]
-PIVOT_R = 6.5
+JAW_EDGE = [(0.0, 5.6), (0.0, 9.0), (0.0, 12.5), (0.0, 16.0), (0.0, 18.5)]  # the cutting edge up to the tip
+JAW_OUTER = [(0.35, 18.4), (1.1, 17.3), (2.2, 15.0), (3.4, 11.8), (4.4, 8.4), (4.95, 5.2), (4.95, 2.62)]
+SHANK_INNER = [(1.0, -5.51), (0.35, -8.5), (-0.9, -15.0), (-1.9, -21.5)]
+SHANK_OUTER = [(-7.2, -21.5), (-6.8, -15.0), (-6.1, -8.0), (-5.2, -2.06)]
+PIVOT_R = 5.6
 CUT_T = 3.2             # half the jaws' thickness at the pivot; the jaw tapers to TIP_T at its tip
-TIP_T = 1.3
-NOSE_FROM = 9.0        # where the nose's bevels start (y, mm)
+TIP_T = 0.45
+NOSE_FROM = 6.5        # where the nose's bevels start (y, mm)
 LAP_GAP = 0.06          # the lap's clearance round the other half's disc (mm)
 PIVOT_SEGS = 44         # the pivot's circle's sides, and the outline's arcs at the same spacing
+CHAMFER = (1.3, 0.75)     # the jaw's outer chamfer: in from the root-to-tip line at the top (mm), and its drop per mm out
 EDGE_GRIND = 1.25       # the bright ground facet's width along the cutting edge
-GRIP_FROM = -27.0       # the grip's front end and its far end (y, mm)
+GRIP_FROM = -19.0       # the grip's front end and its far end (y, mm)
 GRIP_TO = -103.0
-GRIP_X = (-5.2, -14.5, 4.5)  # the grip's centre line: x at its front, at its end, and its outward bow
+GRIP_X = (-4.6, -14.5, 4.5)  # the grip's centre line: x at its front, at its end, and its outward bow
 GRIP_W = (7.2, 6.0, 6.6)     # half width in the plane: the front collar, the waist, the end
 GRIP_H = (5.0, 4.2, 4.5)     # half thickness the same
 GRIP_RINGS = 34
 GRIP_SECTION = 4             # each corner's steps of the section
 HOLE = (0.94, 1.35)          # the lanyard hole: how far along the grip, its radius (mm)
 PANEL = (0.2, 0.46, 3.0, 0.5)  # the blank raised panel: from, to (along the grip), half width, rise
-NUT = (3.9, 1.5)             # the pivot screw's head radius and height; the nut under it a little smaller
+NUT = (3.4, 1.4)             # the pivot screw's head radius and height; the nut under it a little smaller
 
 
 def cutter_colours() -> None:
@@ -501,6 +570,18 @@ def steel_half(name: str) -> bpy.types.Object:
         wedge.prism([(y * MM, sign * z * MM) for y, z in ((NOSE_FROM, CUT_T), (far, CUT_T - drop), (far, CUT_T + 9.0),
                                                            (NOSE_FROM, CUT_T + 9.0))], "x", -20.0 * MM, 20.0 * MM, "Oxide")
         cutters.append(wedge.build())
+    # The jaw's outer edge chamfered along its length (the ground cutting face of a flush cutter): a wedge laid along the
+    # line from the jaw's root to its tip, its face sloping down and out from CHAMFER in off that line.
+    (rx, ry), (tx, ty) = JAW_OUTER[-2], JAW_OUTER[0]
+    turn = math.atan2(-(tx - rx), ty - ry)
+    run = math.hypot(tx - rx, ty - ry)
+    inset, slope = CHAMFER
+    wedge = hs.Builder(name + "_chamfer", [])
+    wedge.prism([(-inset, CUT_T + 0.01), (4.0, CUT_T - (4.0 + inset) * slope), (4.0, CUT_T + 6.0), (-inset, CUT_T + 6.0)],
+                "y", -4.0, run + 6.0, "Oxide")
+    chamfer = wedge.build()
+    chamfer.data.transform(Matrix.Translation(mm(rx, ry, 0.0)) @ Matrix.Rotation(turn, 4, "Z") @ Matrix.Scale(MM, 4))
+    cutters.append(chamfer)
     lap = hs.Builder(name + "_lap", [])
     lap.lathe([(-CUT_T * 1.5 * MM, 0.0), (-CUT_T * 1.5 * MM, (PIVOT_R + LAP_GAP) * MM), (0.0, (PIVOT_R + LAP_GAP) * MM),
                (0.0, 0.0)], "Oxide", segments=PIVOT_SEGS, axis="z")
@@ -663,7 +744,6 @@ def build_cutters() -> list:
     bottom = build_half("CutterBottom", False)
     top.rotation_euler = (0.0, 0.0, -OPEN)
     bottom.rotation_euler = (0.0, 0.0, OPEN)
-    hs.empty("Tip", tuple(mm(0.0, JAW_EDGE[-1][1], 0.0)))
     return [top, bottom]
 
 
@@ -671,7 +751,8 @@ def build_cutters() -> list:
 
 SURFACES = {
     "bomb": {"Block": "polymer", "Tape": "polymer", "Case": "polymer", "Key": "rubber", "Screen": "polymer",
-             "Segment": "polymer", "Lamp": "polished", "WireRed": "polymer", "WireBlue": "polymer", "Plug": "rubber"},
+             "Segment": "polymer", "Lamp": "polished", "WireRed": "polymer", "WireBlue": "polymer", "Plug": "rubber",
+             "Strap": "rubber", "Snap": "bare"},
     "cutters": {"Oxide": "coated", "Ground": "bare", "Grip": "rubber"},
 }
 
