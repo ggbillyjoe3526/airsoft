@@ -1,0 +1,56 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_ha1_arms_fade.gd
+* test_at_the_hip_the_arms_wear_their_own_materials
+    5 Orphans
+        * [@PhysicalBoneSimulator3D@24:<PhysicalBoneSimulator3D#160507627727>]
+        * [@PhysicalBoneSimulator3D@22:<PhysicalBoneSimulator3D#160440518923>]
+        * [@PhysicalBoneSimulator3D@21:<PhysicalBoneSimulator3D#160406964531>]
+        * [@PhysicalBoneSimulator3D@23:<PhysicalBoneSimulator3D#160474073405>]
+        * [@PhysicalBoneSimulator3D@15:<PhysicalBoneSimulator3D#149736655218>]
+* test_a_rifles_arms_never_fade_and_are_never_hidden
+    3 Orphans
+        * [@PhysicalBoneSimulator3D@33:<PhysicalBoneSimulator3D#170339076605>]
+        * [@PhysicalBoneSimulator3D@38:<PhysicalBoneSimulator3D#175036697198>]
+        * [@PhysicalBoneSimulator3D@28:<PhysicalBoneSimulator3D#165490461478>]
+* test_a_pistols_hands_keep_their_tops_under_the_sight_line
+    2 Orphans
+        * [@PhysicalBoneSimulator3D@48:<PhysicalBoneSimulator3D#186076105259>]
+        * [@PhysicalBoneSimulator3D@43:<PhysicalBoneSimulator3D#181848247000>]
+* test_a_fading_copy_draws_as_the_material_it_copies
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@53:<PhysicalBoneSimulator3D#192250120831>]
+* test_skin_only_and_a_robots_arms_fade_too
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@58:<PhysicalBoneSimulator3D#199715981015>]
+* test_in_play_the_raised_sight_leaves_a_rifles_arms_whole_and_a_pistols_tops
+    2 Orphans
+        * [@PhysicalBoneSimulator3D@68:<PhysicalBoneSimulator3D#214110832316>]
+        * [@PhysicalBoneSimulator3D@63:<PhysicalBoneSimulator3D#208020703756>]
+3 orphans
+6/6 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 6
+Passing Tests         6
+Asserts             222
+Time              0.901s
+
+
+---- All tests passed! ----
+

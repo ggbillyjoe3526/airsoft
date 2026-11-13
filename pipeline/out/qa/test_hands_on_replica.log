@@ -1,0 +1,39 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_hands_on_replica.gd
+* test_the_arms_model_has_a_hold_for_every_replica
+* test_the_right_hand_holds_each_replica_as_the_arms_do
+* test_the_left_hand_holds_each_rifle_s_handguard_as_the_arms_do
+* test_a_pistol_is_held_in_one_hand_and_a_reload_lets_go
+* test_a_switch_lets_go_of_both
+* test_behind_a_fitted_grip
+* test_past_the_near_line_the_hand_holds_but_the_fingers_keep_the_clips
+* test_out_of_the_camera_s_view_the_hands_keep_the_clips
+* test_a_fast_turn_or_a_camera_cut_looks_at_the_view_at_once
+* test_in_view_is_a_cone_round_the_view_s_corners
+10/10 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                10
+Passing Tests        10
+Asserts             182
+Time              1.263s
+
+
+---- All tests passed! ----
+

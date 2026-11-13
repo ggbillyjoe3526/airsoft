@@ -1,0 +1,94 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bp8_arms.gd
+* test_a_fitted_grip_takes_the_left_hand
+    4 Orphans
+        * [@PhysicalBoneSimulator3D@18:<PhysicalBoneSimulator3D#201259485686>]
+        * [@PhysicalBoneSimulator3D@15:<PhysicalBoneSimulator3D#192803768888>]
+        * [@PhysicalBoneSimulator3D@25:<PhysicalBoneSimulator3D#210386291470>]
+        * [@PhysicalBoneSimulator3D@22:<PhysicalBoneSimulator3D#204682038083>]
+* test_without_a_grip_the_handguard_hold_stays
+    2 Orphans
+        * [@PhysicalBoneSimulator3D@32:<PhysicalBoneSimulator3D#221358589629>]
+        * [@PhysicalBoneSimulator3D@29:<PhysicalBoneSimulator3D#216610638337>]
+* test_a_grip_moves_only_the_left_hand
+* test_the_sniper_works_its_bolt_from_a_grip_hold_too
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@40:<PhysicalBoneSimulator3D#233253636956>]
+* test_each_reload_clip_lasts_as_the_replicas_own
+* test_a_pistols_left_hand_leaves_its_hold_for_the_reload_and_comes_back
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@53:<PhysicalBoneSimulator3D#261389027953>]
+* test_a_one_handed_replica_shows_its_left_hand_only_through_the_reload
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@58:<PhysicalBoneSimulator3D#268167023194>]
+* test_a_reload_in_play_drives_the_left_hand
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@63:<PhysicalBoneSimulator3D#275196677041>]
+* test_the_magazine_rides_in_the_left_hand
+    5 Orphans
+        * [@PhysicalBoneSimulator3D@77:<PhysicalBoneSimulator3D#298718333440>]
+        * [@PhysicalBoneSimulator3D@78:<PhysicalBoneSimulator3D#298735110822>]
+        * [@PhysicalBoneSimulator3D@69:<PhysicalBoneSimulator3D#289272761185>]
+        * [@PhysicalBoneSimulator3D@76:<PhysicalBoneSimulator3D#298701556645>]
+        * [@PhysicalBoneSimulator3D@75:<PhysicalBoneSimulator3D#298684779469>]
+* test_the_magazine_goes_into_and_out_of_the_hand_without_a_jump
+    5 Orphans
+        * [@PhysicalBoneSimulator3D@91:<PhysicalBoneSimulator3D#317961800233>]
+        * [@PhysicalBoneSimulator3D@90:<PhysicalBoneSimulator3D#317945023047>]
+        * [@PhysicalBoneSimulator3D@82:<PhysicalBoneSimulator3D#308499450615>]
+        * [@PhysicalBoneSimulator3D@89:<PhysicalBoneSimulator3D#317928246016>]
+        * [@PhysicalBoneSimulator3D@88:<PhysicalBoneSimulator3D#317911468849>]
+* test_only_the_hand_and_wrist_show_through_a_reload
+    13 Orphans
+        * [@PhysicalBoneSimulator3D@95:<PhysicalBoneSimulator3D#322659419830>]
+        * [@PhysicalBoneSimulator3D@100:<PhysicalBoneSimulator3D#409179522751>]
+        * [@PhysicalBoneSimulator3D@110:<PhysicalBoneSimulator3D#529304390328>]
+        * [@PhysicalBoneSimulator3D@105:<PhysicalBoneSimulator3D#471238445907>]
+        * [@PhysicalBoneSimulator3D@115:<PhysicalBoneSimulator3D#617384774770>]
+        * [@PhysicalBoneSimulator3D@120:<PhysicalBoneSimulator3D#705012174079>]
+        * [@PhysicalBoneSimulator3D@125:<PhysicalBoneSimulator3D#712931020105>]
+        * [@PhysicalBoneSimulator3D@130:<PhysicalBoneSimulator3D#797001649596>]
+        * [@PhysicalBoneSimulator3D@135:<PhysicalBoneSimulator3D#803947417132>]
+        * [@PhysicalBoneSimulator3D@140:<PhysicalBoneSimulator3D#889645436539>]
+        * [@PhysicalBoneSimulator3D@145:<PhysicalBoneSimulator3D#897497173723>]
+        * [@PhysicalBoneSimulator3D@150:<PhysicalBoneSimulator3D#981567803216>]
+        * [@PhysicalBoneSimulator3D@155:<PhysicalBoneSimulator3D#988446461886>]
+* test_a_reload_starts_from_the_hold
+    2 Orphans
+        * [@PhysicalBoneSimulator3D@160:<PhysicalBoneSimulator3D#1076879166483>]
+        * [@PhysicalBoneSimulator3D@165:<PhysicalBoneSimulator3D#1081610342222>]
+* test_skin_only_arms_switch_live
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@170:<PhysicalBoneSimulator3D#1088707104499>]
+* test_skin_only_keeps_a_one_handed_left_arm_hidden
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@175:<PhysicalBoneSimulator3D#1096005192711>]
+* test_the_dev_switch_is_off_by_default_and_saved
+* test_the_arms_stay_in_their_triangle_budget
+16/16 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                16
+Passing Tests        16
+Asserts            1025
+Time              1.74s
+
+
+---- All tests passed! ----
+

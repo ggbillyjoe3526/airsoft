@@ -1,0 +1,110 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_ha1_qa.gd
+* test_a_raise_outside_0_to_1_or_at_the_spans_ends_breaks_no_bone
+    6 Orphans
+        * [@PhysicalBoneSimulator3D@15:<PhysicalBoneSimulator3D#145223584138>]
+        * [@PhysicalBoneSimulator3D@20:<PhysicalBoneSimulator3D#150307080736>]
+        * [@PhysicalBoneSimulator3D@25:<PhysicalBoneSimulator3D#153947736708>]
+        * [@PhysicalBoneSimulator3D@30:<PhysicalBoneSimulator3D#158611802898>]
+        * [@PhysicalBoneSimulator3D@35:<PhysicalBoneSimulator3D#162168572786>]
+        * [@PhysicalBoneSimulator3D@40:<PhysicalBoneSimulator3D#166564203516>]
+* test_an_id_in_aim_slide_but_not_in_aim_tuck_slides_the_hand_and_moves_no_shoulder
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@45:<PhysicalBoneSimulator3D#172922768362>]
+* test_an_id_in_aim_tuck_but_not_in_aim_slide_tucks_and_the_hand_holds_still
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@50:<PhysicalBoneSimulator3D#180153748493>]
+* test_rifle_to_pistol_to_rifle_while_raised_leaves_no_slid_hand_or_moved_shoulder
+    8 Orphans
+        * [@PhysicalBoneSimulator3D@55:<PhysicalBoneSimulator3D#189934864723>]
+        * [@PhysicalBoneSimulator3D@76:<PhysicalBoneSimulator3D#206980516292>]
+        * [@PhysicalBoneSimulator3D@75:<PhysicalBoneSimulator3D#206963739077>]
+        * [@PhysicalBoneSimulator3D@69:<PhysicalBoneSimulator3D#205487344154>]
+        * [@PhysicalBoneSimulator3D@74:<PhysicalBoneSimulator3D#206946962011>]
+        * [@PhysicalBoneSimulator3D@77:<PhysicalBoneSimulator3D#206997293665>]
+        * [@PhysicalBoneSimulator3D@65:<PhysicalBoneSimulator3D#202081569400>]
+        * [@PhysicalBoneSimulator3D@61:<PhysicalBoneSimulator3D#198457690940>]
+* test_a_bomb_after_a_raised_rifle_is_posed_by_its_clip_alone
+    3 Orphans
+        * [@PhysicalBoneSimulator3D@89:<PhysicalBoneSimulator3D#213825620282>]
+        * [@PhysicalBoneSimulator3D@81:<PhysicalBoneSimulator3D#210352736845>]
+        * [@PhysicalBoneSimulator3D@85:<PhysicalBoneSimulator3D#211376147054>]
+* test_hide_and_show_while_raised_keeps_the_tuck_and_only_toggles_the_model
+    2 Orphans
+        * [@PhysicalBoneSimulator3D@94:<PhysicalBoneSimulator3D#221106932338>]
+        * [@PhysicalBoneSimulator3D@99:<PhysicalBoneSimulator3D#225838107478>]
+* test_the_snipers_bolt_clip_runs_with_the_sight_going_down_and_leaves_no_residue
+    2 Orphans
+        * [@PhysicalBoneSimulator3D@109:<PhysicalBoneSimulator3D#236575525544>]
+        * [@PhysicalBoneSimulator3D@104:<PhysicalBoneSimulator3D#231995345768>]
+* test_a_grip_hold_is_tucked_and_comes_back_whole
+    4 Orphans
+        * [@PhysicalBoneSimulator3D@114:<PhysicalBoneSimulator3D#242699209329>]
+        * [@PhysicalBoneSimulator3D@129:<PhysicalBoneSimulator3D#260801825742>]
+        * [@PhysicalBoneSimulator3D@119:<PhysicalBoneSimulator3D#249527536607>]
+        * [@PhysicalBoneSimulator3D@124:<PhysicalBoneSimulator3D#255164681202>]
+* test_no_residue_frame_after_frame_and_the_hand_keeps_the_clips_turn_while_raised
+    6 Orphans
+        * [@PhysicalBoneSimulator3D@134:<PhysicalBoneSimulator3D#268989106518>]
+        * [@PhysicalBoneSimulator3D@144:<PhysicalBoneSimulator3D#277377714618>]
+        * [@PhysicalBoneSimulator3D@159:<PhysicalBoneSimulator3D#289658636763>]
+        * [@PhysicalBoneSimulator3D@149:<PhysicalBoneSimulator3D#281957895042>]
+        * [@PhysicalBoneSimulator3D@139:<PhysicalBoneSimulator3D#273720282094>]
+        * [@PhysicalBoneSimulator3D@154:<PhysicalBoneSimulator3D#285531442175>]
+* test_pistol_and_cyber_have_both_hands_clips_in_the_model
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@164:<PhysicalBoneSimulator3D#294389811590>]
+* test_two_handed_pistol_hold_keeps_the_right_arm_but_the_thumb_and_the_thumb_lies_on_the_left_hand
+    4 Orphans
+        * [@PhysicalBoneSimulator3D@168:<PhysicalBoneSimulator3D#297913026991>]
+        * [@PhysicalBoneSimulator3D@172:<PhysicalBoneSimulator3D#298953214515>]
+        * [@PhysicalBoneSimulator3D@176:<PhysicalBoneSimulator3D#299976624718>]
+        * [@PhysicalBoneSimulator3D@180:<PhysicalBoneSimulator3D#301016812573>]
+* test_the_hint_reaches_its_values_at_the_spans_ends_and_the_arms_wear_their_own_again_at_0
+    2 Orphans
+        * [@PhysicalBoneSimulator3D@189:<PhysicalBoneSimulator3D#310277835162>]
+        * [@PhysicalBoneSimulator3D@184:<PhysicalBoneSimulator3D#306016422365>]
+* test_fading_copies_are_made_once_per_material_and_not_per_frame
+    3 Orphans
+        * [@PhysicalBoneSimulator3D@197:<PhysicalBoneSimulator3D#322374207962>]
+        * [@PhysicalBoneSimulator3D@198:<PhysicalBoneSimulator3D#322407762534>]
+        * [@PhysicalBoneSimulator3D@194:<PhysicalBoneSimulator3D#317978577713>]
+* test_every_rifle_hold_the_bots_copy_has_the_left_hand_forward_on_the_replica_and_near_it
+* test_the_model_as_imported_stays_in_its_budgets
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@202:<PhysicalBoneSimulator3D#330376940068>]
+* test_a_view_freed_with_the_sight_raised_leaves_no_orphans
+* test_every_rifle_and_foregrip_hold_has_the_left_wrist_nearly_straight
+* test_the_cyber_pistol_two_handed_hold_has_the_thumb_as_the_gbb_pistols_does
+* test_every_clip_the_game_looks_up_still_exists_in_the_model
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@239:<PhysicalBoneSimulator3D#370340268393>]
+* test_every_foregrip_hold_keeps_the_left_hand_on_the_replica_for_hold_and_reload
+1 orphans
+20/20 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                20
+Passing Tests        20
+Asserts            1657
+Time              1.65s
+
+
+---- All tests passed! ----
+

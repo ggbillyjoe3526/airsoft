@@ -1,0 +1,85 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_arms_view.gd
+* test_every_replica_has_a_hold
+    5 Orphans
+        * [@PhysicalBoneSimulator3D@22:<PhysicalBoneSimulator3D#160809617719>]
+        * [@PhysicalBoneSimulator3D@24:<PhysicalBoneSimulator3D#160943835449>]
+        * [@PhysicalBoneSimulator3D@21:<PhysicalBoneSimulator3D#160742508867>]
+        * [@PhysicalBoneSimulator3D@23:<PhysicalBoneSimulator3D#160876726597>]
+        * [@PhysicalBoneSimulator3D@15:<PhysicalBoneSimulator3D#150072199552>]
+* test_the_hold_mark_sits_on_the_replica_origin
+    5 Orphans
+        * [@PhysicalBoneSimulator3D@35:<PhysicalBoneSimulator3D#180455737009>]
+        * [@PhysicalBoneSimulator3D@36:<PhysicalBoneSimulator3D#180472514228>]
+        * [@PhysicalBoneSimulator3D@34:<PhysicalBoneSimulator3D#180438959798>]
+        * [@PhysicalBoneSimulator3D@37:<PhysicalBoneSimulator3D#180489291454>]
+        * [@PhysicalBoneSimulator3D@28:<PhysicalBoneSimulator3D#171026942679>]
+* test_the_arms_follow_the_replica
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@41:<PhysicalBoneSimulator3D#185488901836>]
+* test_the_hand_works_the_sniper_bolt_in_step
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@47:<PhysicalBoneSimulator3D#194498267607>]
+* test_a_clip_cutting_in_ends_the_bolts_working
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@52:<PhysicalBoneSimulator3D#202920430053>]
+* test_replicas_without_a_bolt_keep_their_hold_through_a_shot
+    3 Orphans
+        * [@PhysicalBoneSimulator3D@57:<PhysicalBoneSimulator3D#212550551947>]
+        * [@PhysicalBoneSimulator3D@62:<PhysicalBoneSimulator3D#218187696667>]
+        * [@PhysicalBoneSimulator3D@61:<PhysicalBoneSimulator3D#218154142450>]
+* test_switching_moves_the_arms
+    3 Orphans
+        * [@PhysicalBoneSimulator3D@66:<PhysicalBoneSimulator3D#224177162850>]
+        * [@PhysicalBoneSimulator3D@70:<PhysicalBoneSimulator3D#228589570692>]
+        * [@PhysicalBoneSimulator3D@69:<PhysicalBoneSimulator3D#228572793546>]
+* test_one_handed_replicas_hide_the_left_arm
+    5 Orphans
+        * [@PhysicalBoneSimulator3D@82:<PhysicalBoneSimulator3D#247799482038>]
+        * [@PhysicalBoneSimulator3D@80:<PhysicalBoneSimulator3D#247732373890>]
+        * [@PhysicalBoneSimulator3D@83:<PhysicalBoneSimulator3D#247833037395>]
+        * [@PhysicalBoneSimulator3D@74:<PhysicalBoneSimulator3D#238320355971>]
+        * [@PhysicalBoneSimulator3D@81:<PhysicalBoneSimulator3D#247765928722>]
+* test_a_replica_with_no_hold_shows_no_arms
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@87:<PhysicalBoneSimulator3D#252597766822>]
+* test_the_arms_draw_as_the_replica_does
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@92:<PhysicalBoneSimulator3D#259862301123>]
+* test_a_robot_wears_the_robot_colours
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@97:<PhysicalBoneSimulator3D#267395271167>]
+* test_every_arms_material_is_offered_to_the_prewarm
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@102:<PhysicalBoneSimulator3D#274659805694>]
+* test_the_arms_are_freed_with_the_view
+    1 Orphans
+        * [@PhysicalBoneSimulator3D@107:<PhysicalBoneSimulator3D#283216185017>]
+1 orphans
+13/13 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                13
+Passing Tests        13
+Asserts             129
+Time              1.269s
+
+
+---- All tests passed! ----
+
