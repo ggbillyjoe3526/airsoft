@@ -171,7 +171,7 @@ func test_bots_climb_out_of_the_pit_and_drop_into_it_on_their_way() -> void:
 
 
 func test_subway_pits_join_their_platforms_by_climbs_and_drops_and_no_other_map_climbs() -> void:
-	for id: String in ["depot", "range", "woodland", "subway"]:
+	for id: String in ["depot", "range", "woodland", "subway", "stockade"]:
 		var map := MapData.load_map(id, MapStyle.new(), tuning.rounds.team_size)
 		var level := MapLevel.new()
 		add_child(level)
@@ -233,7 +233,7 @@ func _prop_climbs(query: WorldQuery, vault: VaultConfig, names: Array[String]) -
 ## sofa, Subway's benches, the Range's long crate and sandbags), on every shipped map; Subway's platform edges are still
 ## climbed from the track.
 func test_no_map_s_prop_is_climbed_and_subway_s_platform_edge_is() -> void:
-	for id: String in ["depot", "range", "woodland", "subway"]:
+	for id: String in ["depot", "range", "woodland", "subway", "stockade"]:
 		var map := MapData.load_map(id, MapStyle.new(), tuning.rounds.team_size)
 		var level := MapLevel.new()
 		add_child(level)
