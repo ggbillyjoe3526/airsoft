@@ -51,8 +51,8 @@ AEG_PARTS = os.path.join(ROOT, "assets/models/replicaParts/aeg.glb")
 PARTS_OUT = os.environ.get("BL_PARTS_OUT") or os.path.join(ROOT, "assets/models/replicaParts/shotgun.glb")
 ARMATURE = "PumpShotgun"
 FPS = 60
-# The figures' copy (figure_copy.py): triangles per piece, 3,000 in all (the replica budget on a figure).
-FIGURE_TRIS = {"Figure": 2560, "Magazine": 240, "FlashHider": 200}
+# The figures' copy (figure_copy.py): triangles per piece, just under 3,000 in all (the replica budget on a figure).
+FIGURE_TRIS = {"Figure": 2552, "Magazine": 240, "FlashHider": 200}
 # Skip the wear bake (a quick look at the shapes): BL_NO_WEAR=1.
 NO_WEAR = bool(os.environ.get("BL_NO_WEAR"))
 
@@ -159,7 +159,7 @@ MAG_FOOT_PY = (210.0, 225.0)
 MAG_HW = 0.0140
 MAG_TOP = (0.0, Y(sum(MAG_PX) / 2.0), Z(MAG_TOP_PY))
 # The stock: its body round the extension (front, back), its top and underside, half width; the pad behind it.
-STOCK_PX = (1122.0, 1466.0)
+STOCK_PX = (1122.0, 1468.0)
 STOCK_TOP_PY = 35.0
 STOCK_FOOT_PY = 131.0
 STOCK_HW = 0.0185
@@ -178,12 +178,14 @@ GROOVE_DEPTH = 0.0058
 # py, its half width at each; drawn as a keel tapering down from the tube's flanks, so its sides face down as the
 # tube's do and take no light), both black aluminium: every slot reads black end to end from either side, where a
 # polymer wall or an upright rail behind them read grey (the critic, SH2). The five columns are equal and the last
-# runs to the butt pad's lip, as photo 4's (slots 59 to 60 px on a 64 px pitch, the last ending at 1466), so the
-# hollow, the extension and its rail run back to the pad too.
-HOLLOW_PX = (1146.0, 1468.0)
+# runs to the butt pad's lip, as photo 4's (slots 59 to 60 px on a 64 px pitch, the last ending at 1466): its cut
+# runs out of the body's back under the pad (GROOVE_OUT, px), and the hollow, the extension and its rail run back
+# into the pad too.
+HOLLOW_PX = (1146.0, 1472.0)
+GROOVE_OUT = 6.0
 HOLLOW_PY = ((81.0, 111.8), (113.6, 127.0))
 HOLLOW_WALL = 0.0022
-EXT_END_PX = 1465.0
+EXT_END_PX = 1467.0
 EXT_RAIL_PY = (98.0, 126.0)
 EXT_RAIL_HW = (0.0105, 0.0008)
 # The sling loop hanging at the fin's toe (the photos' left side): its lug on the fin's front edge and the wire loop
@@ -721,7 +723,8 @@ def stock() -> list:
             for k in range(5):
                 px = GROOVE_PX + GROOVE_PITCH * k
                 # Square-cornered (the body's bevel softens them): rounded corners cost 400 triangles over 30 slots.
-                cutters.append(box_cutter("c_gr", (sx * (STOCK_HW - GROOVE_DEPTH), Y(px + GROOVE_LEN), Z(py1)),
+                back = Y(px + GROOVE_LEN + (GROOVE_OUT if k == 4 else 0.0))
+                cutters.append(box_cutter("c_gr", (sx * (STOCK_HW - GROOVE_DEPTH), back, Z(py1)),
                                           (sx * (STOCK_HW + 0.01), Y(px), Z(py0))))
     # The hollow behind the slots, across the stock: the extension and its rail stand in it.
     x_wall = STOCK_HW - HOLLOW_WALL
