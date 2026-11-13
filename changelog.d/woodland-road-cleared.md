@@ -6,4 +6,3 @@
 - The pickup and the tyre stack are clear of the gravel.
 - At flag B the sawn boards now stand at the end of the shed, not beside the flagpole.
 - Woodpiles are 1.8 m tall. Only the camp gate screens are taller.
-- In Attack / Defend on Woodland the attackers now win more often against bots, about 7 rounds in 10. Flag B's defence is being worked on next.

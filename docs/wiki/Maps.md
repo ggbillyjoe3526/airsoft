@@ -135,6 +135,8 @@ defenders in the east camp.
 - **Attack / Defend** puts flag **A** in the Fort and flag **B** at the Sawmill ([Modes](Modes#attack--defend)); in
   Elimination's overtime the flag stands in the Clearing. The Fort is walled on its west side as well, with a firing
   window and a doorway, so flag A is fought for inside the walls; at the Sawmill a log stack stands beside flag B.
+  The two flags stand far apart, so a flag here takes longer to raise than on Depot (the table at the top of this
+  page), which gives the defenders at the other flag time to come across.
 
 ### Areas
 

@@ -1,59 +1,64 @@
-Task: MB2 · Woodland's Long road, cleared
-Attempt: 2 of 4
-Head: 85e3f5295b6438806e8ba1a352813a6de6a0db70 (checks passed on it; diff read as `git diff 65ee956 HEAD`)
+Task: MB3 · Woodland's flag takes 9 s to raise
+Attempt: 1 of 4
+Head: a63ac0e592a078e46ec0d41c8403ac0bc13d816a plus the uncommitted tree (the brief's partial checks ran on this tree)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept
+Score: 7/8 → Accept (all blocking checks pass, one non-blocking fails)
 
-Evidence for the passes (one line each):
-1. Crit. 1: tools/woodland/check.py:+61 and world.py:+157 enforce the rule, and check.py gives TOTAL 0 (re-run).
-   test_mb2_qa.gd +64 and +75 test the strip; +37 holds the six gate screens. Crit. 2: test_mb1_layouts.gd +186..218.
-   The critic's own raster check against the built JSON: 250 eye points on the strip west of the bend (out to ±2.4 m,
-   which covers QA's 2.5 m edge advisory) against 265 east of it saw 0 pairs, and 910 strip points saw 0 of flag B's
-   ring and post chests. The record's claim is honest. Crit. 3: the records recounted. Attack / Defend built 170/247 =
-   68.8 %, main 147/236 = 62.3 %. Elimination west end 114/240 decided = 47.5 % (the record writes 241; one round in
-   rc16d was a draw). Plant The Bomb 50/125 = 40 % against 48/117 = 41 %. rc16m gives the same rounds as rc16.
-   Crit. 4: no game/ file and no new asset. Crit. 5: the docs are covered, except as noted under 8.
-   The out-of-band 69 % is handled honestly and the handling is defensible. The owner ordered the clear road and was
-   told the figure, main still has the road he rejected, and ten measured layouts failed to win the points back.
-   KNOWN_ISSUES, DECISIONS, the record and the changelog note all state the figure. The next attempt at it is named
-   (flag B's posts or pole), but it has no task id yet: give it one.
-2. ARCHITECTURE has no Contracts entry for the Woodland generator or map_heat. map_heat.gd +176 adds a mode name and
-   keeps the old ones.
-3. No game code changed. map_heat.gd allocates per round in a dev tool, which is fine. Performance pooled +1.5 % over
-   four seeds.
-4. On main, test_nothing_stands_on_the_long_road fails on the three windthrows (`tag="roadblock"`, the old
-   layout.py:329-331). The sight test now walks the new strip.
-5. The tests are typed throughout, and every change is generator data or tests.
-6. The road bends round two solid spruce stands into a 7 m corridor with no bough over the gravel (the bend render
-   shows a clear strip), it uses no new model, and the tone is right. The 7-point Attack / Defend lean is a known
-   issue under crit. 3.
-7. Pass, with an advisory. tests/unit/test_mb2_qa.gd:10 and test_mb1_layouts.gd:84 hand-copy layout.py's ROAD, a
-   third and fourth copy that will drift silently when the road moves again. layout.py:440 is an unwrapped comment
-   line of about 150 chars.
+Evidence for the checks that pass:
+1. Criterion 1: match_options.gd +115/+123-128 sets the raise for Skirmish and Custom, and the 3 s hold is left alone.
+   Criterion 2: map_catalog.gd +28-31/+139 (RAISE_RANGE, _read_number keeps the default and warns). Criterion 3: I
+   recounted r9f* at 139 of 231 = 60.2 % ±3.2, seeds 1 to 32, inside 40 to 65. Criterion 4: Flag.step (flag.gd:100,
+   reached only from _step_flag_clock, round.gd:90) is the only reader. The overtime flag uses tuning.overtime. e9 and
+   ef seeds 1 and 2 give 15 identical rounds (I compared them). Criterion 5: wiki.py +395-412.
+2. No contract changed. The per-map raise follows the existing per-map round length (WR2, match_tuning), so it is in
+   the right place for Contract 6.
+3. Nothing changed on a per-frame path in game/. match_tuning runs once per match load. watch_flags
+   (match_runner.gd +570) loops over the poles with no allocation. Judging performance from the code without a bench
+   is acceptable for this diff.
+4. test_mb3_raise's flag test (Woodland's flag not up at 7 s, up at 9 s) and the WOODLAND_RAISE assert fail without
+   the feature. watch_flags fails to compile without it.
+5. Types and constants are in place. CustomRules.applied_to shares base.flag (custom_rules.gd:39), and the
+   `t.flag == base.flag` copy at +125 is what keeps the loaded tuning unwritten. QA's test pins it.
+6. It is the owner's own pick. Fun before realism holds. No in-game text says "7 s" (en.po's flag lines have no
+   number), so the game never contradicts itself. Leaving the in-game notice as a can-wait known issue is acceptable.
+7. Small focused edits. One nit: match_runner.gd:261 is a 153-character comment line left unwrapped by the reflow.
 
-Failed checks, with evidence:
-8. [judgment] changelog.d/map-layouts-reworked.md:8 (MB1's note, still unreleased) still reads "three fallen trees
-   across the Long road and a tall log stack across it at the Culvert". The next patch notes will announce the road
-   blocked and cleared in the same release. The figures in the docs also disagree with each other:
-   - The record's flag B line, "118 to 73 a hundred rounds; 123 to 75", doesn't match its own table's 269 to 167 over
-     247 rounds (109 to 68 a hundred) or 285 to 161 over 236 rounds (121 to 68).
-   - The sawn boards' duel is "54 to 32 over 250 rounds" in layout.py:+375, 21.6 to 12.8 a hundred, but "10 to 18 a
-     hundred rounds" in docs/records/MB2.md and DECISIONS.
+Failed checks:
+8. [judgment] The docs state the same measure two ways, which is what failed MB2's critic.
+   - KNOWN_ISSUES' Woodland Attack / Defend row still reads "69 % ±3 at 6v6 (247 rounds, 32 seeds)" for MB2's road,
+     then "68 % ±3 at 7 s" for the layout that shipped. It never says the hazel moved in between: 69 % is rc16 seeds
+     1 to 32 at 170 of 247, 68 % is r7f at 166 of 245.
+   - DECISIONS has the same split. MB2's entry says 69 % and 47 %, and MB3's new entry says "MB2's clear road …
+     68 % ±3 at 7 s".
+   - KNOWN_ISSUES' Woodland Hard row still opens "runs out the clock in 15.6 % ±3.2" and still says "with MB2's
+     cleared road, 47 % ±3". The new Elimination row says 41 % ±3 on the shipped layout. So the file gives 47 and 41
+     for the same layout, and the 15.6 % contradicts "0 of 118" in the same row.
+   - DECISIONS claims more than was measured: "Both poles fell alike, so it was no fault of flag B's cover". pole.py
+     gives A 72 % ±3 against B 65 % ±3, a heuristic the record itself says leans to the winners. The same row of
+     KNOWN_ISSUES still says "Flag B is still the softer site".
+   - The new Elimination row states the hazel as the cause outright, where the record says "6 points ±4.5 is not
+     proof".
 
-Must-fix before merge (non-blocking, but they are the player-facing notes):
-- Change MB1's Woodland clause in changelog.d/map-layouts-reworked.md to what ships, or drop it.
-- In each place, say what counts as "round flag B" (radius or area) and what the denominator is, then reconcile the
-  118/73 and 54/32 figures with the 10/18 one, or recount them.
-- Optional: make the two tests read layout.ROAD's points from one source, or at least name layout.py:288 as the
-  source, which test_mb1_layouts already does.
+Must-fix before the push (non-blocking, but cheap):
+- Rewrite the KNOWN_ISSUES Woodland Hard row's opening (15.6 % is history) and its "47 % ±3" (before the hazel
+  moved; 41 % now).
+- In the Attack / Defend row and in DECISIONS (MB2 and MB3 entries), label 69 % and 47 % as "before the hazel
+  moved", or replace them with the shipped figures.
+- Reduce "no fault of flag B's cover" to "A 72 %, B 65 %, by where the attackers stood", and mark the hazel cause as
+  likely.
+- Wrap match_runner.gd:261.
+- Run risk: low. Hard showed 0 of 114 timeouts at 9 s and Normal 0 of 231. test_woodland_attack_defend_at_easy
+  (STALLED_ROUNDS_MAX 0.25) is the one Woodland guard not yet run at 9 s. A larger top_flag only raises Depot's
+  flags-raised counts.
+
+Shipping before MB4 is defensible: the 41 % Elimination lean comes from MB2, the raise doesn't touch Elimination
+(checked on the same seeds), and it is filed as fix now for MB4. Seeds 1 to 48 give 41.5 % ±2.6, so the lean holds up
+with more seeds.
 
 Owner should test in the game:
-- Walk the Long road from the Truck bend through the S to the Culvert. Does it read as a forest road and not a trench
-  cut through spruce, and is the gravel visibly clear of boughs?
-- Stand at the S's west mouth and at its east mouth and check that neither looks through the bend.
-- Play Attack / Defend on Woodland as a defender at flag B: does B fall too easily (69 % to the attackers against
-  bots)?
-- Play Elimination on the south lane: are the fights close (median about 15 m), and is the fallen tree at the S's
-  east mouth useful cover?
-- Watch bots take the S in all three modes for snagging on the bends or on the spruce edges.
-- Look at the shed's east end: do the moved boards read as natural, and does flag B still feel defensible?
+- Attack on Woodland: whether 9 s on the rope plus the 3 s hold feels tense or just exposed and slow.
+- Defend Woodland from the far pole: whether you now get across in time to pull the flag down.
+- Depot right after Woodland: the raise is back to 7 s and the bar's speed reads correctly.
+- Custom on Woodland: the raise is 9 s and feels the same as in Skirmish.
+- Whether the slower bar on Woodland confuses you with no notice on the Match card.
+- Woodland Elimination: whether the east side's push over the Ridge's brow feels too strong (MB4's issue).

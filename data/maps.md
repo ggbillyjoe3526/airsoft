@@ -18,6 +18,10 @@ warning; a map with no row is not listed.
 - **Round** is the round's length in seconds a Skirmish there plays (Custom plays its own Round time switch): 90 to
   300 in 30 s steps, as that switch offers, or blank for the game's 150 (2:30). One that isn't keeps 2:30 with a
   warning.
+- **Raise (s)** is the seconds Attack / Defend's attackers take to raise a flag there (MB3): a whole or decimal
+  number from 3 to 20, or blank for the game's 7 (`game/config/flag_config.gd`). Skirmish and Custom both play it.
+  Woodland's is 9: its two sites are 77 m apart and a defender's way to a pole is long. One that isn't such a number
+  keeps the game's with a warning.
 - **Start mode** is the most a fire selector starts each round on there: `semi` or `burst` holds every replica that
   comes on full auto to its highest mode no higher (SEMI, then BURST, then AUTO), any replica now or added later, the
   bots' too; you can still switch to auto in the round. Blank or `auto` starts every replica as it comes, and a
@@ -34,9 +38,9 @@ warning; a map with no row is not listed.
 
 ## Maps
 
-| Id | Name | Kind | Tag | Min | Standard | Max | Round | Start mode | Wind (×) | Air (°C) | Blurb |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| depot | Depot | field | public | 5 | 6 | 8 |  | semi | 0 | 20 | An indoor airsoft hall: three lanes, two dark tunnels. |
-| woodland | Woodland | field | public | 5 | 6 | 8 | 180 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
-| subway | Subway | field | dev | 5 | 6 | 8 |  | semi | 0 | 14 | A closed metro station on three levels, from the ticket hall down to the trains. |
-| range | Range | range | public | 1 | 1 | 1 |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |
+| Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Start mode | Wind (×) | Air (°C) | Blurb |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| depot | Depot | field | public | 5 | 6 | 8 |  |  | semi | 0 | 20 | An indoor airsoft hall: three lanes, two dark tunnels. |
+| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
+| subway | Subway | field | dev | 5 | 6 | 8 |  |  | semi | 0 | 14 | A closed metro station on three levels, from the ticket hall down to the trains. |
+| range | Range | range | public | 1 | 1 | 1 |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |
