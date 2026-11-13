@@ -107,10 +107,13 @@ COL_RIVET = (40, 40, 42)
 COL_HOLE = (12, 12, 12)
 COL_VENT = (20, 20, 21)
 COL_STRAP = (30, 30, 31)
+EMPTY_COL, EMPTY_NRM, EMPTY_ORM = (60, 58, 52), (128, 128, 255), (255, 224, 0)  # the maps where nothing is drawn
 ROUGH = {"shell": 0.48, "cushion": 0.9, "rivet": 0.4, "dome": 0.56, "strap": 0.85}
 METAL_RIVET = 0.5
 
 TEX = 1024
+# The maps' side: the pads' own TEX px square at the top left, the rest the gear's baked charts (gear.py ATLAS, MQ3).
+MAP = 2048
 ATLAS_SCALE = 0.6  # texels per design pixel
 CUSHION_RECT = (25.0, -45.0, 925.0, 1240.0)  # design px: the cushion island, with room for the piping's UVs
 SHELL_RECT = (95.0, 120.0, 855.0, 1150.0)
@@ -196,7 +199,7 @@ def atlas_uv(x: float, y: float, island: str) -> tuple:
     rect, at = (CUSHION_RECT, CUSHION_AT) if island == "cushion" else (SHELL_RECT, SHELL_AT)
     px = at[0] + (x - rect[0]) * ATLAS_SCALE
     py = at[1] + (y - rect[1]) * ATLAS_SCALE
-    return px / TEX, 1.0 - py / TEX
+    return px / MAP, 1.0 - py / MAP
 
 
 # --- the limb's surface -----------------------------------------------------------------------------------------------
@@ -447,7 +450,7 @@ def strap(sheets: Sheets, fit: Fit, y: float, segments: int, buckle_too: bool) -
     section = [(half, STRAP_H), (-half, STRAP_H)]
     rings, ring_uvs, ring_hugs = [], [], []
     total = u_end - u_in
-    u0, u1, v0, v1 = STRAP_AT[0] / TEX, STRAP_AT[2] / TEX, 1 - STRAP_AT[3] / TEX, 1 - STRAP_AT[1] / TEX
+    u0, u1, v0, v1 = STRAP_AT[0] / MAP, STRAP_AT[2] / MAP, 1 - STRAP_AT[3] / MAP, 1 - STRAP_AT[1] / MAP
     # Three short segments at each end, where it leaves the buckle and goes under the cushion, the rest evenly round.
     ease = min(STRAP_HUG, total * 0.2)
     rest = max(1, segments - 6)
@@ -503,7 +506,7 @@ def buckle_outline() -> list:
 def buckle_uv(x: float, y: float) -> tuple:
     px = BUCKLE_AT[0] + 8 + x * 1000.0 * BUCKLE_PX_PER_MM
     py = (BUCKLE_AT[1] + BUCKLE_AT[3]) * 0.5 - y * 1000.0 * BUCKLE_PX_PER_MM
-    return px / TEX, 1.0 - py / TEX
+    return px / MAP, 1.0 - py / MAP
 
 
 def buckle(sheets: Sheets, fit: Fit, u: float, v: float, u_edge: float) -> None:
@@ -642,7 +645,7 @@ def textures(folder: str) -> dict:
     patch = ((xx >= bx0) & (xx < bx1) & (yy >= by0) & (yy < by1)).astype(np.float32)
     put(patch, COL_SHELL, ROUGH["shell"])
     h *= 1 - patch
-    to_px = lambda x, y: (buckle_uv(x, y)[0] * TEX, (1.0 - buckle_uv(x, y)[1]) * TEX)
+    to_px = lambda x, y: (buckle_uv(x, y)[0] * MAP, (1.0 - buckle_uv(x, y)[1]) * MAP)
     plate = buckle_outline()
     cx = sum(p[0] for p in plate) / len(plate)
     inner = [(cx + (x - cx) * 0.48, y * 0.48) for x, y in plate]
@@ -670,7 +673,7 @@ def textures(folder: str) -> dict:
     n /= np.linalg.norm(n, axis=2, keepdims=True)
     # The figure gear's swatch strip below the islands (BP6): its Gear surfaces draw with this material (gear.py
     # PADS_AT), so the figure keeps to its 8 materials. Flat and unshaded there: no height, no cavity.
-    assert gear.PADS_TEX == TEX
+    assert gear.PADS_TEX == TEX and gear.ATLAS == MAP
     gear_col, gear_orm = gear.pads_patch()
     y0, x0 = gear.PADS_AT[1] - gear.PADS_WRAP, gear.PADS_AT[0] - gear.PADS_WRAP
     rows, cols = gear_col.shape[:2]
@@ -680,11 +683,16 @@ def textures(folder: str) -> dict:
     rough[spot] = gear_orm[..., 1] / 255.0
     metal[spot] = gear_orm[..., 2] / 255.0
     paths = {}
-    for name, data in (("col", np.clip(col, 0, 255).astype(np.uint8)),
-                       ("nrm", ((n * 0.5 + 0.5) * 255).round().astype(np.uint8)),
-                       ("orm", np.dstack((np.full_like(h, 255), rough * 255, metal * 255)).round().astype(np.uint8))):
+    for name, data, empty in (
+            ("col", np.clip(col, 0, 255).astype(np.uint8), EMPTY_COL),
+            ("nrm", ((n * 0.5 + 0.5) * 255).round().astype(np.uint8), EMPTY_NRM),
+            ("orm", np.dstack((np.full_like(h, 255), rough * 255, metal * 255)).round().astype(np.uint8), EMPTY_ORM)):
         paths[name] = os.path.join(folder, "pads_%s.png" % name)
-        Image.fromarray(data).save(paths[name])
+        # The pads' square at the top left of the larger maps; gear.py bakes its charts into the rest.
+        whole = np.empty((MAP, MAP, 3), np.uint8)
+        whole[:] = empty
+        whole[:TEX, :TEX] = data
+        Image.fromarray(whole).save(paths[name])
     return paths
 
 
@@ -869,7 +877,7 @@ def main() -> None:
                               export_tangents=False, export_yup=True, export_apply=False)
     if os.environ.get("PADS_BLEND"):
         bpy.ops.wm.save_as_mainfile(filepath=os.environ["PADS_BLEND"])
-    print("spliced", ", ".join(splice_part.splice(FIGURE, part, PART)))
+    print("spliced", ", ".join(splice_part.splice(FIGURE, part, PART, take=(MATERIAL,))))
     with open(SIDECAR) as f:
         side = json.load(f)
     for name in names:

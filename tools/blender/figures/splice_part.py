@@ -214,7 +214,7 @@ class Builder:
         for i, made in enumerate(self.materials):
             if mat.get("name") and made.get("name") == mat.get("name"):
                 if not same_material(mat, made):
-                    print("splice_part: the part's %s differs from the figure's; the figure's is kept" % mat["name"])
+                    print("splice_part: two versions of %s differ; the first is kept" % mat["name"])
                 self._done[key] = i
                 return i
 
@@ -289,9 +289,10 @@ def joint_remapper(joints: list):
     return remap
 
 
-def splice(figure_path: str, part_path: str, prefix: str, out_path: str = "") -> list:
+def splice(figure_path: str, part_path: str, prefix: str, out_path: str = "", take: tuple = ()) -> list:
     """Splices every `prefix` node of `part_path` into `figure_path` (written to `out_path`, or in place); returns the
-    spliced node names."""
+    spliced node names. A material named in `take` is the part's to paint: its version (and its images) replaces the
+    figure's even where the figure's other meshes wear it (the pads' maps, which the gear draws with too)."""
     target, t_bin = read_glb(figure_path)
     part, p_bin = read_glb(part_path)
     joints = joint_map(target, part)
@@ -308,6 +309,9 @@ def splice(figure_path: str, part_path: str, prefix: str, out_path: str = "") ->
     skin_holder = next(i for i, n in enumerate(target["nodes"]) if "skin" in n and "mesh" in n)
     parent = next(i for i, n in enumerate(target["nodes"]) if skin_holder in n.get("children", []))
     out = Builder()
+    for index, mat in enumerate(part.get("materials", [])):
+        if mat.get("name") in take:
+            out.material(part, p_bin, index)
     replaced = {target["nodes"][by_name[n]]["mesh"] for n in names if n in by_name}
     mesh_map = {}
     # The figure's own meshes first, in their order, without the ones being replaced.
