@@ -26,8 +26,8 @@ cover and peeks over it, or round a tall corner by leaning; it never fires with 
 teammate could run to before the BBs pass (a sprinting bot also round its route's corners). Seeing someone with no
 shot at them (through glass or leaves) for `no_shot_move_after`, it goes round to them as to someone out of sight
 (BQ1). Within `close_awareness` a bush hides no one and leaves stop its fire only where a BB couldn't get through
-(BU1). Shot at, reloading or empty, it takes cover. With the enemy gone it searches where it was last seen or heard, sometimes flanking. At night
-it holds its lane points, hunts and takes hold cover out of the light pools.
+(BU1). Shot at, reloading or empty, it takes cover. With the enemy gone it searches where it was last seen or heard,
+sometimes flanking. At night it holds its lane points, hunts and takes hold cover out of the light pools.
 
 On Normal and Hard the team keeps a radio (BQ3, `BotRadio`): a bot that sees someone afresh tells its teammates within
 `BotSkill.share_radius` of them after `share_delay`, each taking it as a teammate's call heard there (not one fighting or

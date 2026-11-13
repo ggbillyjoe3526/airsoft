@@ -1,14 +1,18 @@
-Task: BU1 · head e7a3add · Verdict: Pass
-Run: none (no --perf run; the smoke test plays Depot, which has no bushes, and the brief says tools/check.sh owns the CPU) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and origin/main's code
-Metrics: not measured (judgment only). Node count, orphans, memory: unchanged by construction, the diff adds no nodes or resources.
-Regressions (> 10 % worse): none measured
+Task: MQ1B (attempt 3) · head 7499a89 · Verdict: Pass
+Run: no Godot run (the local gate is running); the committed cyber.glb parsed directly · budget: no baseline yet, judged against targets, the 40,000 / 3,000 triangle budgets and origin/main's glb
+Metrics (measured, from the glb JSON):
+- Triangles in the hands (Body + Magazine + Selector + Slide + Trigger): 38,706 / 40,000 (ok); attempt 2 38,646; main 37,824 (+2.3 %)
+- Figure copy (Figure + Figure_Magazine): 3,000 / 3,000 (ok, at the limit); main 3,000
+- File size: 1,361,544 B vs main 1,350,416 B (+0.8 %)
+- Body: 4 surfaces, materials 0-3 (same as main), 21,491 vertices (main 20,977, +2.4 %)
+- Magazine: 3 surfaces, materials 3/4/2 (same as main), 3,778 vertices (main 3,882, -2.7 %), 4,244 triangles (main 4,576)
+- Materials in the file: 6 (main 6); no new material, so no new shader prewarm needed
+Regressions (> 10 % worse): none
 Blocking findings: none
+- Nothing under game/ changed (git diff origin/main...HEAD lists 0 game/ paths); no runtime script, scene or config in the diff.
+- tools/model_studio.gd:54 calls RenderingServer.directional_shadow_atlas_set_size(SHADOW_MAP, true) inside the tool's own run. The only other mention of the tool in game/ is a doc comment in game/ui/studio_sky.gd:8. No game script, scene, export preset or CI step references it, so the call cannot reach the shipped game (judgment, by grep).
 Advisory:
-- game/ai/bot_combat.gd leaves_in_line (judgment): the close branch adds a Vector3 subtraction, a length(), two config reads and a Vector3 multiply-add. All are stack values with no heap allocation. Still one Foliage.depth() call per call, as before.
-- game/ai/bot_combat.gd leaves_in_line (judgment): depth() scans only the grid cells the line's box covers and returns early once past `limit`. The close line is under 2.5 m across and stops at leaf_stop_depth, so it is cheaper than or equal to the old far-line call.
-- Early-out for maps without foliage (null or empty) is kept first; Depot and other bush-free maps pay nothing.
-- leaves_in_line is called up to 3 times per bot per tick (shoot, _knee_has_shot, _line_of_fire_blocked). That was true before the change. Caching per tick is not needed at this cost.
-- Side effect (judgment): bots in a bush now shoot rather than stall. That means more BBs from pooled projectiles in those fights, which are already pooled.
-- No new Callable, lambda, timer, tween, signal or material; no prewarm or preset impact. Diff in game/ is code, comments and docs only.
-Fixes: none needed
-Unexplained: none. A Woodland --perf comparison on the owner's setup is welcome but not blocking.
+- The figure copy sits exactly on its 3,000 budget; any later rounding of the figure needs a trade-off elsewhere (judgment).
+- The hands are 1,294 triangles under budget, and Body alone is 30,318 (judgment). It is a per-draw cost on the owner's GPU only; frame time was not measured here.
+Fixes: none needed.
+Unexplained: none. Draw calls, frame times and orphan nodes were not re-measured because no game code changed since attempt 2's pass.
