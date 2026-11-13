@@ -357,14 +357,25 @@ static func _line_of_fire_blocked(b: Bot, w: BotWorld, eye: Vector3, dir: Vector
 
 
 ## True if the line from `eye` to `aim_point` runs through more bush than a bot shoots through (FO1): more than
-## foliage_fire_through of leaves. A bot can notice someone in a bush close by (close_awareness) and still have no shot
-## at them.
+## foliage_fire_through of leaves. At point blank (the aim point within close_awareness across, where a bush hides no
+## one) it holds fire only when a BB couldn't get through (BU1): more than leaf_stop_depth of leaves before the line
+## reaches the body, body_radius short of the aim point. Otherwise two foes in one bush see each other, neither shoots,
+## and each walks into the other.
 static func leaves_in_line(w: BotWorld, eye: Vector3, aim_point: Vector3) -> bool:
 	var leaves := w.query.foliage
 	if leaves == null or leaves.is_empty():
 		return false
-	var most := w.cfg.foliage_fire_through
-	return leaves.depth(eye, aim_point, most) > most
+	var close := w.cfg.close_awareness
+	var line := aim_point - eye
+	if line.x * line.x + line.z * line.z > close * close:
+		var most := w.cfg.foliage_fire_through
+		return leaves.depth(eye, aim_point, most) > most
+	var reach := line.length()
+	var body := w.tuning.hits.body_radius
+	if reach <= body:
+		return false
+	var stop := w.tuning.ballistics.leaf_stop_depth
+	return leaves.depth(eye, eye + line * ((reach - body) / reach), stop) > stop
 
 
 ## How far `b`'s BBs may stray off its aim line (m per m flown): friendly_spread_sigmas of the spread it shoots with now.
