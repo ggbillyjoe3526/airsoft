@@ -1,18 +1,15 @@
-Task: MQ1B (attempt 3) · head 7499a89 · Verdict: Pass
-Run: no Godot run (the local gate is running); the committed cyber.glb parsed directly · budget: no baseline yet, judged against targets, the 40,000 / 3,000 triangle budgets and origin/main's glb
-Metrics (measured, from the glb JSON):
-- Triangles in the hands (Body + Magazine + Selector + Slide + Trigger): 38,706 / 40,000 (ok); attempt 2 38,646; main 37,824 (+2.3 %)
-- Figure copy (Figure + Figure_Magazine): 3,000 / 3,000 (ok, at the limit); main 3,000
-- File size: 1,361,544 B vs main 1,350,416 B (+0.8 %)
-- Body: 4 surfaces, materials 0-3 (same as main), 21,491 vertices (main 20,977, +2.4 %)
-- Magazine: 3 surfaces, materials 3/4/2 (same as main), 3,778 vertices (main 3,882, -2.7 %), 4,244 triangles (main 4,576)
-- Materials in the file: 6 (main 6); no new material, so no new shader prewarm needed
+Task: HA1 · head b960370 · Verdict: Pass
+Run: --smoke --perf headless bot match (frames 1126 head / 1142 main; the smoke match has no seed flag), head and origin/main 65ee956 (worktree), one Godot at a time while tools/check.sh shared the 4 cores · budget: pipeline/perf-budget.json does not exist, no baseline yet; judged against targets and origin/main
+Metrics: nodes_max 2231 / 2227 (ok) · orphans_max 1051 / 1051 (same; steady 0 after the match, pre-existing) · draw calls 0 / 0 (headless, not measurable) · static memory and frame times: not measured (no GPU, shared cores; wall time 66 s head, not read as a regression)
 Regressions (> 10 % worse): none
 Blocking findings: none
-- Nothing under game/ changed (git diff origin/main...HEAD lists 0 game/ paths); no runtime script, scene or config in the diff.
-- tools/model_studio.gd:54 calls RenderingServer.directional_shadow_atlas_set_size(SHADOW_MAP, true) inside the tool's own run. The only other mention of the tool in game/ is a doc comment in game/ui/studio_sky.gd:8. No game script, scene, export preset or CI step references it, so the call cannot reach the shipped game (judgment, by grep).
 Advisory:
-- The figure copy sits exactly on its 3,000 budget; any later rounding of the figure needs a trade-off elsewhere (judgment).
-- The hands are 1,294 triangles under budget, and Body alone is 30,318 (judgment). It is a per-draw cost on the owner's GPU only; frame time was not measured here.
-Fixes: none needed.
-Unexplained: none. Draw calls, frame times and orphan nodes were not re-measured because no game code changed since attempt 2's pass.
+- game/play/arms_view.gd (aim, _draw_in): while the sight is raised, each frame does clear + AnimationPlayer.seek(update) + force_update_all_bone_transforms + 3 bone-pose sets (arms_tuck.gd:52-78). No heap allocation (Vector3, Basis, Quaternion are value types), but it is a skeleton re-evaluation per rendered frame, only on ADS and only with a non-zero aim_tuck/aim_slide (judgment). Cost on the 38,900-triangle skinned arms under Low is unmeasured; check on the owner's hardware.
+- game/play/arms_view.gd:~290 (aim): _cfg.aim_hint_below / aim_tuck.get(_on, ...) are Dictionary lookups per frame, no allocation; fine (judgment).
+- game/play/hands_motion.gd:step: allocation-free (Vector2/Vector3 values only; spring returns a Vector2 value). replica_view.gd now sets `transform` every frame, which dirties the node transform of the replica, arms and optic glass subtree; trivial (judgment).
+- game/play/arms_fade.gdshader: used only while the sight is raised on a pistol (aim_hands_hint), else the arms keep the StandardMaterial3D. It is a plain spatial shader with 4 texture reads (albedo, roughness, metallic, normal) and depth_prepass_alpha, which adds a second geometry pass over the arms (~39 k triangles) on those frames; same texture fetches as the BaseMaterial3D, so the fragment cost is about the same. Low-preset cost needs a rendered run (judgment). It has no quality-preset knob and needs none (shadows_disabled, no post).
+- Prewarm: ArmsView.materials() (arms_view.gd:379-390) now includes the fading copies, so ShaderPrewarm covers the new shader (no first-use hitch) (judgment, read).
+- Freed resources: fading ShaderMaterials are built once per model material in _dress and cached in _fading (bounded; freed with the ArmsView RefCounted). The toggle _faded flips swap materials only at the edges of the raise (hint > 0), not every frame. No new nodes, timers, tweens or connections added in the diff; node count is flat (judgment + measured).
+- Model: 5.9 MB file, 38,900 triangles drawn, 4 materials, 2K textures, within the stated arms budgets (as quoted in the brief; not re-measured here).
+Fixes: none required. If a rendered Low run on the owner's hardware shows an ADS hitch, first limit _draw_in's seek to frames where raise changed (arms_view.gd _draw_in).
+Unexplained: none (orphans_max 1051 is identical on origin/main, so not from this diff).
