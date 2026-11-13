@@ -1,10 +1,15 @@
 ### Stockade (Dev content)
 - New map Stockade, shown only with Dev content switched on in the Dev tab.
-- A plywood village inside a log fort, 104 by 64 metres. Attackers start in the west camp, defenders in the east.
-- Three ways across: the Back Lane, Main Street over the Green market, and the Woodyard Road, joined by two arches.
-- The Tavern and the Store, plus fenced courts and yards to fight through.
-- Plant The Bomb: Site A is indoors in the Long House, Site B is in the open Woodyard under its shed.
+- A plywood village inside a log fort, 104 by 76 metres. Attackers start in the west camp by its tents, defenders in the east camp.
+- Each camp sits behind a palisade with three gates.
+- Three ways across: the Back Lane in the north, Main Street in the middle, and the Woodyard Road in the south.
+- Main Street runs through the West Arch onto the open Green, with its campfire.
+- The Woodyard Road passes the fenced Orchard.
+- The Forge, the Barn, the Tavern and the Store stand round the Green, each with two doors, so each is a way through.
+- Fenced courts and yards sit between the buildings.
+- The Bell house stands across the east end of Main Street, with a door onto the street and one onto the Green.
+- Plant The Bomb: Site A is indoors in the Long House's west room. Site B is in the open Woodyard, under the Sawmill's shed.
 - Also plays Elimination and Attack / Defend.
-- Day and night, with two fires and lanterns at night.
+- Day and night: three fires and lanterns light it at night.
 - Close fights: replicas start on semi-auto, as on Depot.
 - Its picture shows on the Match page and the loading screen.
