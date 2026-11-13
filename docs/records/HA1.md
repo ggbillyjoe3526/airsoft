@@ -231,6 +231,10 @@ ATTEMPT_ROWS
   112 before; SH2's test asks 90 and a rifle's reach). In pictures from outside the two looked alike, but the finger
   is asked to arch anyway (45 degrees at its middle joint, a fifth more at its tip): 119 degrees together, the pad
   0.8 mm off its mark. `index_arc` takes the tip's share as an optional third value; the pistols keep a half.
+- **The Sniper's right thumb is fixed where it was** (attempt 2; `SNIPER_RIGHT` `thumb_turn`): searched afresh on the
+  re-proportioned hand it lay a little less far over the stock's wrist, and the full check run failed HG1's test of a
+  bot's thumb round the grip's left side (13 mm left of the middle, the test asks 15). Its turn is now the one the
+  solve found before, as the AEG's and the pistols' are held.
 - **The arms' build is three files** (attempt 2, the critic's check 7): `hold_tables.py` (each hold's marks, costs
   and limits), `hold_solve.py` (the hands placed and closed from them) and `arms.py` (the model, the clips and the
   export); the split moved code and changed none (the same build log from both).

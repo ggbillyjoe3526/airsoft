@@ -249,10 +249,12 @@ AEG_RIGHT = dict(RIGHT, web=(0.042, -0.103, -0.056), index=(0.030, -0.031, -0.03
 # its front strap (the index knuckle at its top, level with the trigger guard's back, the little finger's knuckle
 # 5.5 cm down and back along it, the thumb's root behind and right as on the AEG's grip) and the thumb over the
 # wrist's top onto its left side (the owner's photo 2, 2026-11-06); the shoulder higher than the AEG's (the
-# raked wrist otherwise bends the hand's wrist past 30 degrees).
+# raked wrist otherwise bends the hand's wrist past 30 degrees). HA1: its thumb's turn is fixed where the solve found
+# it on the hand before its proportions changed (`thumb_turn`): searched afresh on the new hand it lay 2 mm less far
+# round the wrist, and a bot's thumb fell short of the grip's left side (tests/unit/test_hands_on_replica.gd).
 SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030, -0.016),
                     pinky=(0.024, -0.085, -0.058), thumb_at=(-0.028, -0.060, 0.0), shoulder=(-0.04, -0.08, 0.03),
-                    rolls=(-180.0, 174.0), thumb_turn=None, index_turn=None,
+                    rolls=(-180.0, 174.0), thumb_turn=(-10.0, -10.0, 20.0, 40.0), index_turn=None,
                     press=("Ring", "Pinky"))
 # Its left hand as the AEG's, under the fore-end (narrower and lower than the AEG's handguard: `axis`, `radius`,
 # its top at 0.056) near its back, as far forward as the arm reaches, its turn searched (the fore-end is lower); the
