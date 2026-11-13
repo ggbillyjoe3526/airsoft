@@ -55,9 +55,13 @@ STITCH_PITCH = 0.0031     # m
 STITCH_ON = 0.70          # the share of a pitch the thread shows
 STITCH_HEIGHT = (-0.14, 0.26)   # mm: the needle's groove, the thread over it
 THREAD_GAIN = 1.42        # a thread's colour over its cloth's
-SWELL = (0.035, 0.9)      # m across, mm: cloth's slow swells
+SWELL = (0.035, 0.9, 0.035)   # m across, mm, share: cloth's slow swells, in the relief and in the colour
 MOTTLE = (0.045, 0.085)    # m across, share either way: cloth's uneven dye and dust
+FADE = (0.17, 0.075)       # m across, share either way: the broad patches a season's sun and dust leave
 SEAM_GRIME = (0.007, 0.18)   # m the dirt beside a seam fades over, the colour it takes at the seam
+SEAM_DUST = (0.028, 0.15)    # m, share: the wider, fainter band of dust that settles toward a panel's edges
+PANEL_TONE = 0.05          # share either way: one sewn panel beside the next, cut from the roll at another place
+SKY_FADE = 0.10            # share: cloth facing the sky is faded lighter, cloth facing the ground is dirtier
 EDGE_RUB = (0.0012, 1.07)  # m from a hard edge, the cloth's colour there (rubbed lighter)
 MOULD_GRAIN = (0.0006, 0.018)   # m, mm: a moulding's fine texture
 MOULD_EDGE = (0.0007, 1.16, -0.08)   # m from an edge, colour gain, roughness: a moulding's edges worn smooth
@@ -66,9 +70,13 @@ CORD_HEIGHT = 0.16
 ZIP_PITCH = 0.0018
 ZIP_HEIGHT = 0.2
 SHADOW_STEP = 2          # every this many pixels each way is asked how shut in it is
-SHADOW_SOFTEN = 2        # passes of a 3 px blur over the answers
-SHADOW_DEPTH = 0.72      # how much of the colour a fully shut-in pixel loses
-HIDDEN_SHADE = 0.5       # the share of the shade a hidden face keeps
+SHADOW_SOFTEN = 10       # passes of a 3 px blur over the answers, each chart on its own (about 2.6 px either way)
+RELAX_FLAT = math.radians(2.0)   # a chart whose faces all lie this near its plane is laid out as it projects
+RELAX_PASSES = 60        # at most, of easing a bent chart's triangles to their true shapes
+RELAX_DONE = 0.00002     # m: the passes stop when no corner moves further
+RELAX_LEAST = 0.02       # the least weight (a cotangent) an edge pulls with
+SHADOW_DEPTH = 0.66      # how much of the colour a fully shut-in pixel loses
+RELAX_HOLD = 1e-6        # the pull to where a corner started, in mean edge weights
 LEVEL_AT_MOST = 1.6      # the most a swatch's colour is lifted to keep its mean over the faces that show
 BIND_RIB = 0.0012        # m, the binding tape's ribs
 PIXELS_A_PITCH = 3.2     # the fewest pixels a pattern's pitch is drawn across
@@ -78,7 +86,8 @@ class Faces:
     """One family's faces as plain arrays. A corner is a face's use of a vertex; `key` says whose it is to the
     caller."""
 
-    def __init__(self, co, corner_vert, corner_shade, polys, poly_swatch, tris, tri_poly, poly_hidden=None):
+    def __init__(self, co, corner_vert, corner_shade, polys, poly_swatch, tris, tri_poly, poly_hidden=None,
+                 poly_soft=None):
         self.co = np.asarray(co, np.float64)                  # (V, 3) m
         self.corner_vert = np.asarray(corner_vert, np.int64)  # (C,)
         self.corner_shade = np.asarray(corner_shade, np.float64)  # (C,) the swatch's gradient there, 0-1
@@ -89,19 +98,21 @@ class Faces:
         # Faces nobody can see: something lies close over them.
         self.poly_hidden = (np.zeros(len(self.polys), bool) if poly_hidden is None
                             else np.asarray(poly_hidden, bool))
+        # Faces of soft rolled cloth: a bend between two of them is never a panel's edge.
+        self.poly_soft = (np.zeros(len(self.polys), bool) if poly_soft is None else np.asarray(poly_soft, bool))
 
     def save(self, path: str) -> None:
         np.savez_compressed(path, co=self.co, corner_vert=self.corner_vert, corner_shade=self.corner_shade,
                             polys=np.concatenate(self.polys), sizes=np.array([len(p) for p in self.polys]),
                             swatch=np.array(self.poly_swatch), tris=self.tris, tri_poly=self.tri_poly,
-                            hidden=self.poly_hidden)
+                            hidden=self.poly_hidden, soft=self.poly_soft)
 
     @staticmethod
     def load(path: str) -> "Faces":
         z = np.load(path)
         polys = np.split(z["polys"], np.cumsum(z["sizes"])[:-1])
         return Faces(z["co"], z["corner_vert"], z["corner_shade"], polys, [str(s) for s in z["swatch"]], z["tris"],
-                     z["tri_poly"], z["hidden"])
+                     z["tri_poly"], z["hidden"], z["soft"] if "soft" in z else None)
 
 
 class Layout:
@@ -109,6 +120,8 @@ class Layout:
 
     def __init__(self):
         self.px = None           # (C, 2) pixels from the image's top left
+        self.st = None           # (C, 2) m: where the corner lies on its chart laid flat, across and up its frame
+        self.panel = None        # (P,) the sewn panel (a smooth run of faces) each face belongs to
         self.poly_chart = None   # (P,)
         self.chart_frame = []    # (u, v, n) unit vectors: the pattern's across, up and out
         self.chart_swatch = []
@@ -249,6 +262,88 @@ def _cut_sparse(f: Faces, mine: list, normals: np.ndarray, area: np.ndarray) -> 
     return _cut_sparse(f, first, normals, area) + _cut_sparse(f, second, normals, area)
 
 
+def _relax(f: Faces, corners: np.ndarray, tris: np.ndarray, x: np.ndarray, y: np.ndarray) -> tuple:
+    """A bent chart laid flat without stretch: from where its corners project (x, y), every triangle is asked to
+    keep its own true shape, turned as it likes, and the corners are moved to agree as nearly as they can (as
+    rigid as possible, Liu and others 2008). A roll's faces, leaning away from the chart's plane, projected short:
+    their paint was stretched and drawn with fewer pixels. The result is turned back to lie as the projection did.
+    A chart that would fold keeps its projection."""
+    verts, local = np.unique(f.corner_vert[corners], return_inverse=True)
+    start = np.zeros((len(verts), 2))
+    start[local] = np.stack((x, y), axis=1)
+    tri = np.searchsorted(verts, f.corner_vert[tris])
+    p = f.co[verts[tri]]                                   # (T, 3, 3)
+    e1, e2 = p[:, 1] - p[:, 0], p[:, 2] - p[:, 0]
+    l1 = np.linalg.norm(e1, axis=1)
+    normal = np.cross(e1, e2)
+    twice = np.linalg.norm(normal, axis=1)
+    real = (twice > 1e-12) & (l1 > 1e-9)
+    if not real.any():
+        return x, y
+    tri, e1, e2, l1, twice = tri[real], e1[real], e2[real], l1[real], twice[real]
+    # Each triangle's own true shape, flat: its first corner at 0, its second along x.
+    own = np.zeros((len(tri), 3, 2))
+    own[:, 1, 0] = l1
+    own[:, 2, 0] = (e1 * e2).sum(axis=1) / l1
+    own[:, 2, 1] = twice / l1
+    # The weight of the edge opposite each corner: the corner's cotangent, kept above nothing so a blunt corner
+    # never pushes.
+    ends = ((1, 2), (2, 0), (0, 1))
+    weight = np.zeros((len(tri), 3))
+    for k, (i, j) in enumerate(ends):
+        a, b = own[:, i] - own[:, k], own[:, j] - own[:, k]
+        weight[:, k] = np.maximum((a * b).sum(axis=1) / np.maximum(np.abs(a[:, 0] * b[:, 1] - a[:, 1] * b[:, 0]), 1e-12),
+                                  RELAX_LEAST)
+    count = len(verts)
+    system = np.zeros((count, count))
+    for k, (i, j) in enumerate(ends):
+        np.add.at(system, (tri[:, i], tri[:, i]), weight[:, k])
+        np.add.at(system, (tri[:, j], tri[:, j]), weight[:, k])
+        np.add.at(system, (tri[:, i], tri[:, j]), -weight[:, k])
+        np.add.at(system, (tri[:, j], tri[:, i]), -weight[:, k])
+    hold = RELAX_HOLD * float(weight.mean())
+    system[np.arange(count), np.arange(count)] += hold      # a faint pull to where each corner started: one answer
+    solve = np.linalg.inv(system)
+    at = start.copy()
+    for _ in range(RELAX_PASSES):
+        # How each triangle is turned as the corners lie now.
+        cross = np.zeros(len(tri))
+        dot = np.zeros(len(tri))
+        for k, (i, j) in enumerate(ends):
+            now, was = at[tri[:, i]] - at[tri[:, j]], own[:, i] - own[:, j]
+            dot += weight[:, k] * (now * was).sum(axis=1)
+            cross += weight[:, k] * (was[:, 0] * now[:, 1] - was[:, 1] * now[:, 0])
+        size = np.maximum(np.hypot(dot, cross), 1e-20)
+        cs, sn = dot / size, cross / size
+        # Where the corners agree best with every triangle turned so.
+        right = hold * start
+        for k, (i, j) in enumerate(ends):
+            was = own[:, i] - own[:, j]
+            turned = np.stack((was[:, 0] * cs - was[:, 1] * sn, was[:, 0] * sn + was[:, 1] * cs), axis=1)
+            turned *= weight[:, k][:, None]
+            np.add.at(right, tri[:, i], turned)
+            np.add.at(right, tri[:, j], -turned)
+        moved = solve @ right
+        step = float(np.abs(moved - at).max())
+        at = moved
+        if step < RELAX_DONE:
+            break
+
+    def signed(q: np.ndarray) -> np.ndarray:
+        a, b, c = q[tri[:, 0]], q[tri[:, 1]], q[tri[:, 2]]
+        return (b[:, 0] - a[:, 0]) * (c[:, 1] - a[:, 1]) - (c[:, 0] - a[:, 0]) * (b[:, 1] - a[:, 1])
+
+    before, after = signed(start), signed(at)
+    if (np.sign(before) != np.sign(after)).any():
+        return x, y
+    # Turned and moved (never mirrored) to lie over the projection.
+    a0, b0 = at - at.mean(axis=0), start - start.mean(axis=0)
+    turn = math.atan2(float((a0[:, 0] * b0[:, 1] - a0[:, 1] * b0[:, 0]).sum()), float((a0 * b0).sum()))
+    cs, sn = math.cos(turn), math.sin(turn)
+    at = np.stack((a0[:, 0] * cs - a0[:, 1] * sn, a0[:, 0] * sn + a0[:, 1] * cs), axis=1) + start.mean(axis=0)
+    return at[local, 0], at[local, 1]
+
+
 def unwrap(f: Faces, regions: list) -> Layout:
     """Cuts the faces into charts and packs them into `regions` ((x0, y0, x1, y1) px, filled in turn)."""
     lay = Layout()
@@ -267,7 +362,7 @@ def unwrap(f: Faces, regions: list) -> Layout:
             if f.poly_swatch[a] == f.poly_swatch[b]:
                 near[a].append(b)
                 near[b].append(a)
-                soft = float(normals[a] @ normals[b]) >= math.cos(HARD_EDGE)
+                soft = float(normals[a] @ normals[b]) >= math.cos(HARD_EDGE) or (f.poly_soft[a] and f.poly_soft[b])
                 if soft:
                     smooth[_find(smooth, a)] = _find(smooth, b)
         if not soft:
@@ -283,6 +378,7 @@ def unwrap(f: Faces, regions: list) -> Layout:
             group_edge[root[p]] += np.linalg.norm(f.co[f.corner_vert[c0]] - f.co[f.corner_vert[c1]])
     width = 2.0 * group_area / np.maximum(group_edge, 1e-9)
     lay.stitched = (width >= PANEL_WIDTH)[root]
+    lay.panel = root
     # Charts: from the largest face left, across its neighbours within CHART_TURN of it.
     chart = np.full(count, -1)
     members = []
@@ -306,8 +402,12 @@ def unwrap(f: Faces, regions: list) -> Layout:
     for c, mine in enumerate(members):
         chart[mine] = c
     lay.poly_chart = chart
-    # Each chart flat along its own normal.
+    tri_chart = chart[f.tri_poly]
+    tri_order = np.argsort(tri_chart, kind="stable")
+    tri_from = np.searchsorted(tri_chart[tri_order], np.arange(len(members) + 1))
+    # Each chart flat along its own normal, a bent one then eased out to its true size.
     flat = np.zeros((len(f.corner_vert), 2))
+    lay.st = np.zeros((len(f.corner_vert), 2))
     sizes = []
     shrink = []
     lay.hard = {}
@@ -321,6 +421,10 @@ def unwrap(f: Faces, regions: list) -> Layout:
         lay.chart_frame.append((u, v, n))
         lay.chart_swatch.append(swatch)
         x, y = pts @ u, pts @ v
+        if float((normals[mine] @ n).min()) < math.cos(RELAX_FLAT):
+            x, y = _relax(f, corners, f.tris[tri_order[tri_from[c]:tri_from[c + 1]]], x, y)
+        lay.st[corners, 0] = x
+        lay.st[corners, 1] = y
         # Turned (never mirrored) to the angle its box is smallest at, its longer side across.
         best = None
         for step in range(BOX_TURNS):
@@ -388,9 +492,11 @@ def noise(p: np.ndarray, across: float, seed: int) -> np.ndarray:
 
 
 def raster(f: Faces, lay: Layout, size: int) -> dict:
-    """Each triangle drawn into the atlas: per pixel its face (-1 where empty), where it is in space and its shade."""
+    """Each triangle drawn into the atlas: per pixel its face (-1 where empty), where it is in space, where on its
+    chart laid flat (m) and its shade."""
     poly = np.full((size, size), -1, np.int64)
     pos = np.zeros((size, size, 3), np.float32)
+    st = np.zeros((size, size, 2), np.float32)
     shade = np.zeros((size, size), np.float32)
     co = f.co[f.corner_vert]
     for t, tri in enumerate(f.tris):
@@ -427,10 +533,12 @@ def raster(f: Faces, lay: Layout, size: int) -> dict:
         pa, pb, pc = co[tri]
         window = pos[y0:y1, x0:x1]
         window[take] = (wa[take, None] * pa + wb[take, None] * pb + wc[take, None] * pc).astype(np.float32)
+        ta, tb, tc = lay.st[tri]
+        st[y0:y1, x0:x1][take] = (wa[take, None] * ta + wb[take, None] * tb + wc[take, None] * tc).astype(np.float32)
         sa, sb, sc = f.corner_shade[tri]
         shade[y0:y1, x0:x1][take] = (wa[take] * sa + wb[take] * sb + wc[take] * sc).astype(np.float32)
         poly[y0:y1, x0:x1][take] = f.tri_poly[t]
-    return {"poly": poly, "pos": pos, "shade": shade}
+    return {"poly": poly, "pos": pos, "st": st, "shade": shade}
 
 
 def _edge_field(f: Faces, lay: Layout, drawn: dict, size: int) -> tuple:
@@ -479,7 +587,8 @@ def _bump(x: np.ndarray, at: float, half: float) -> np.ndarray:
 
 def _shadow(drawn: dict, lay: Layout, ys: np.ndarray, xs: np.ndarray, pid: np.ndarray, occlusion) -> np.ndarray:
     """How open each drawn pixel is to the sky (1 open, 0 shut in): asked of `occlusion` at every SHADOW_STEP-th
-    pixel each way, spread to the ones between and softened."""
+    pixel each way, spread to the ones between and softened, each chart on its own (a neighbour's shade never
+    bleeds across the gutter)."""
     size = drawn["poly"].shape[0]
     asked = (ys % SHADOW_STEP == 0) & (xs % SHADOW_STEP == 0)
     layer = np.ones((size, size), np.float32)
@@ -488,19 +597,23 @@ def _shadow(drawn: dict, lay: Layout, ys: np.ndarray, xs: np.ndarray, pid: np.nd
                                             lay.poly_normal[pid[asked]])
     known[ys[asked], xs[asked]] = True
     _spread(layer, known, SHADOW_STEP)
-    filled = drawn["poly"] >= 0
+    chart = np.full((size, size), -1, np.int64)
+    chart[ys, xs] = lay.poly_chart[pid]
+    shifts = []
+    for dy in (-1, 0, 1):
+        for dx in (-1, 0, 1):
+            src = (slice(max(dy, 0), size + min(dy, 0)), slice(max(dx, 0), size + min(dx, 0)))
+            dst = (slice(max(-dy, 0), size + min(-dy, 0)), slice(max(-dx, 0), size + min(-dx, 0)))
+            shifts.append((src, dst, ((chart[src] == chart[dst]) & (chart[dst] >= 0)).astype(np.float32)))
+    count = np.zeros((size, size), np.float32)
+    for _src, dst, same in shifts:
+        count[dst] += same
+    count = np.maximum(count, 1.0)
     for _ in range(SHADOW_SOFTEN):
         total = np.zeros_like(layer)
-        count = np.zeros_like(layer)
-        for dy in (-1, 0, 1):
-            for dx in (-1, 0, 1):
-                src_y = slice(max(dy, 0), size + min(dy, 0))
-                dst_y = slice(max(-dy, 0), size + min(-dy, 0))
-                src_x = slice(max(dx, 0), size + min(dx, 0))
-                dst_x = slice(max(-dx, 0), size + min(-dx, 0))
-                total[dst_y, dst_x] += layer[src_y, src_x] * filled[src_y, src_x]
-                count[dst_y, dst_x] += filled[src_y, src_x]
-        layer = np.where(count > 0, total / np.maximum(count, 1), layer)
+        for src, dst, same in shifts:
+            total[dst] += layer[src] * same
+        layer = total / count
     return layer[ys, xs].astype(np.float64)
 
 
@@ -518,9 +631,10 @@ def paint(f: Faces, lay: Layout, size: int, swatches: dict, shade_of, occlusion=
     p = drawn["pos"][ys, xs].astype(np.float64)
     names = sorted(set(lay.chart_swatch))
     which = np.array([names.index(s) for s in lay.chart_swatch])[chart]
-    frames = np.array([np.concatenate(fr) for fr in lay.chart_frame])[chart]
-    s = (p * frames[:, 0:3]).sum(axis=1)
-    t = (p * frames[:, 3:6]).sum(axis=1)
+    # The patterns run over each chart as it lies flat: on a flat chart that is where the pixel is in space along
+    # the chart's frame; on a bent one it follows the cloth round.
+    s = drawn["st"][ys, xs, 0].astype(np.float64)
+    t = drawn["st"][ys, xs, 1].astype(np.float64)
     far_map, along_map = _edge_field(f, lay, drawn, size)
     far = far_map[ys, xs].astype(np.float64)
     along = along_map[ys, xs].astype(np.float64)
@@ -533,7 +647,7 @@ def paint(f: Faces, lay: Layout, size: int, swatches: dict, shade_of, occlusion=
     # A pattern finer than the map can hold is drawn at the finest it can.
     finest = PIXELS_A_PITCH / lay.scale
     weave_pitch, web_pitch, cord_pitch = (max(x, finest) for x in (WEAVE_PITCH, WEB_PITCH, CORD_PITCH))
-    mottle = noise(p, MOTTLE[0], 11) * MOTTLE[1]
+    mottle = noise(p, MOTTLE[0], 11) * MOTTLE[1] + noise(p, FADE[0], 15) * FADE[1]
     fine = noise(p, 0.0011, 12)
 
     def of(group: set) -> np.ndarray:
@@ -549,6 +663,7 @@ def paint(f: Faces, lay: Layout, size: int, swatches: dict, shade_of, occlusion=
         h[cloth] += WEAVE_HEIGHT * yarn + 0.03 * fine[cloth] + SWELL[1] * swell
         # A weave drawn coarser than it is shows less in the colour, or it would read as a check.
         gain[cloth] *= 1.0 + WEAVE_SHADE * (WEAVE_PITCH / weave_pitch) ** 2 * yarn + mottle[cloth] + 0.03 * fine[cloth]
+        gain[cloth] *= 1.0 + SWELL[2] * swell
     web = of(WEB)
     if web.any():
         row = np.floor(t[web] / web_pitch)
@@ -596,16 +711,24 @@ def paint(f: Faces, lay: Layout, size: int, swatches: dict, shade_of, occlusion=
         gain[sewn] *= np.where(bound, BIND_GAIN + 0.04 * ribs, 1.0)
         # Dirt works into the cloth beside a seam and the open middle of a panel fades: each panel reads from afar.
         gain[sewn] *= 1.0 - SEAM_GRIME[1] * np.exp(-np.maximum(d - BIND_WIDTH, 0.0) / SEAM_GRIME[0]) * ~bound
+        gain[sewn] *= 1.0 - SEAM_DUST[1] * np.exp(-np.maximum(d - BIND_WIDTH, 0.0) / SEAM_DUST[0]) * ~bound
+        # One panel beside the next is never quite the same shade.
+        gain[sewn] *= 1.0 + PANEL_TONE * (2.0 * _hash(lay.panel[pid[sewn]], np.zeros(1, np.int64),
+                                                        np.zeros(1, np.int64), 41) - 1.0)
         groove = _bump(d, STITCH_AT, STITCH_WIDTH * 1.6)
         thread = _bump(d, STITCH_AT, STITCH_WIDTH) * ((along[sewn] / STITCH_PITCH) % 1.0 < STITCH_ON)
         h[sewn] += STITCH_HEIGHT[0] * groove + (STITCH_HEIGHT[1] - STITCH_HEIGHT[0]) * thread
         gain[sewn] *= (1.0 - 0.16 * groove) * (1.0 + (THREAD_GAIN - 1.0 + 0.16) * thread)
         gain[sewn] *= 1.0 + (EDGE_RUB[1] - 1.0) * roll * (d < EDGE_RUB[0])
+    # Cloth that faces the sky fades; what faces the ground keeps its dye and gathers dirt.
+    soft = cloth | web | loop
+    gain[soft] *= 1.0 + SKY_FADE * lay.poly_normal[pid[soft], 2]
     if occlusion is not None:
         open_sky = _shadow(drawn, lay, ys, xs, pid, occlusion)
-        # A face nothing sees keeps half the shade: what shows of it past an edge is dim, not a black hole.
-        depth = np.where(f.poly_hidden[pid], SHADOW_DEPTH * HIDDEN_SHADE, SHADOW_DEPTH)
-        gain *= 1.0 - depth * (1.0 - open_sky)
+        # Every pixel by how shut in it is itself, whatever its face: a face mostly under a pouch used to keep half
+        # the shade all over, and where it ran out past the pouch's edge it showed as a light patch with the face's
+        # own outline (the wavy band under the loop panel).
+        gain *= 1.0 - SHADOW_DEPTH * (1.0 - open_sky)
         # Dust and lint gather where the cloth is shut in.
         rough_add += 0.05 * (1.0 - open_sky)
     # The patterns, the grime and the shade together leave each swatch its colour: from afar a chart is the plain

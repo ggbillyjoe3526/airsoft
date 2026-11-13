@@ -94,7 +94,10 @@ COVER_SPREAD = 0.92      # the rays' share of the half space, from straight out 
 COVER_REACH = 0.3        # m
 COVER_LIFT = 0.0008      # m off the face the rays start
 GOLDEN_ANGLE = 2.39996323
-SHADE_RAYS = 12
+SHADE_RAYS = 32          # at each asked pixel, the set turned by its own angle: grain the softening evens out, where
+                         # one fixed set drew its own pattern as wavy bands
+SOFT_FACES = "soft"      # a face attribute: 1 on a soft roll's faces, whose bends are never panel edges
+SOFT_SHADE = 60.0        # degrees: the bends a soft roll is smooth shaded across
 SHADE_REACH = 0.13       # m: the shadow where a pouch meets the carrier, a strap lies on a bag (the body's is 0.12)
 
 
@@ -180,6 +183,19 @@ def shade(ob: bpy.types.Object, angle: float = 40.0) -> None:
     for p in ob.data.polygons:
         p.use_smooth = True
     ob.data.set_sharp_from_angle(angle=math.radians(angle))
+    soft = ob.data.attributes.get(SOFT_FACES)
+    if soft is not None:
+        # A soft roll's own bends are smooth up to SOFT_SHADE, whatever the rest of the part is split at.
+        me = ob.data
+        flags = [d.value for d in soft.data]
+        faces_of = {}
+        for p in me.polygons:
+            for key in p.edge_keys:
+                faces_of.setdefault(key, []).append(p)
+        for e in me.edges:
+            pair = faces_of.get(e.key, [])
+            if len(pair) == 2 and flags[pair[0].index] and flags[pair[1].index]:
+                e.use_edge_sharp = pair[0].normal.angle(pair[1].normal) > math.radians(SOFT_SHADE)
     mod = ob.modifiers.new("weighted", "WEIGHTED_NORMAL")
     mod.keep_sharp = True
     mod.weight = 50
@@ -925,8 +941,8 @@ def holster(lod: int) -> list:
 
 def dump_pouch(lod: int) -> list:
     """A rolled-up dump pouch (front view, foot at z=0): a soft roll under a flap with a hook tab."""
-    roll = soft_box("DumpRoll", 0.085, 0.034, 0.045, "coyote", 0.024, (0.016, 0.008, 0.0)[lod], (2, 1, 0)[lod],
-                    corner_seg=(2, 1, 0)[lod])
+    roll = soft_box("DumpRoll", 0.085, 0.034, 0.045, "coyote", 0.024, (0.016, 0.008, 0.0)[lod], (3, 1, 0)[lod],
+                    corner_seg=(5, 1, 0)[lod])
     if lod == 0:
         fit.subdivide_x(roll, 0.05)
         fit.pillow(roll, 0.007, -0.045 * 0.6)
@@ -937,6 +953,11 @@ def dump_pouch(lod: int) -> list:
             v.co.z -= 0.009 * (1.0 - u * u) * (1.0 - v.co.z / 0.034)
         else:
             v.co.y *= 1.0 - 0.12 * min(1.0, (v.co.z - 0.034) / 0.034)
+    if lod == 0:
+        # Rolled cloth has no panel edges: its bends are smooth shaded and take no binding or stitches (MQ3).
+        marks = roll.data.attributes.new(SOFT_FACES, "INT", "FACE")
+        for d in marks.data:
+            d.value = 1
     obs = [roll]
     if lod < 2:
         flap = builder("DumpFlap")
@@ -1435,11 +1456,12 @@ def strip_uv(fam: str, u: float, v: float) -> tuple:
 def gather(obs: list, fam: str) -> tuple:
     """The family's faces of `obs` for atlas.py, and whose each corner is: (object, loop index)."""
     import atlas
-    co, corner_vert, corner_shade, polys, swatch, tris, tri_poly, keys = [], [], [], [], [], [], [], []
+    co, corner_vert, corner_shade, polys, swatch, tris, tri_poly, keys, soft = [], [], [], [], [], [], [], [], []
     for ob in obs:
         me = ob.data
         me.calc_loop_triangles()
         uv = me.uv_layers.active.data
+        marks = me.attributes.get(SOFT_FACES)
         first = len(co)
         co.extend(tuple(v.co) for v in me.vertices)
         corner_of, poly_of = {}, {}
@@ -1457,11 +1479,12 @@ def gather(obs: list, fam: str) -> tuple:
                 keys.append((ob, li))
             polys.append(corners)
             swatch.append(name)
+            soft.append(bool(marks.data[p.index].value) if marks is not None else False)
         for t in me.loop_triangles:
             if t.polygon_index in poly_of:
                 tris.append([corner_of[li] for li in t.loops])
                 tri_poly.append(poly_of[t.polygon_index])
-    return atlas.Faces(co, corner_vert, corner_shade, polys, swatch, tris, tri_poly), keys
+    return atlas.Faces(co, corner_vert, corner_shade, polys, swatch, tris, tri_poly, poly_soft=soft), keys
 
 
 def cover_tree(obs: list) -> BVHTree:
@@ -1511,9 +1534,14 @@ def occlusion(tree: BVHTree):
 
     def ask(points, normals):
         out = np.ones(len(points))
+        # Each point's own turn of the ray set, from where it is (the same every build).
+        q = np.floor(np.asarray(points) * 20000.0).astype(np.int64)
+        mixed = (q[:, 0] * 73856093 ^ q[:, 1] * 19349663 ^ q[:, 2] * 83492791) & 0xFFFFFF
+        turns = mixed.astype(np.float64) / float(0x1000000) * math.tau
         for k in range(len(points)):
             n = Vector(normals[k])
             a = n.orthogonal().normalized()
+            a = (a * math.cos(turns[k]) + n.cross(a) * math.sin(turns[k])).normalized()
             b = n.cross(a)
             start = Vector(points[k]) + n * COVER_LIFT
             shut = 0.0

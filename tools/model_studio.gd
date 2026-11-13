@@ -184,7 +184,7 @@ func _team(model: Node3D, colour: Color) -> void:
 	var prefix := FigureConfig.new().team_material_prefix
 	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var mi := node as MeshInstance3D
-		for i in mi.mesh.get_surface_count():
+		for i: int in mi.mesh.get_surface_count():
 			var own := mi.mesh.surface_get_material(i) as BaseMaterial3D
 			if own == null or not own.resource_name.to_lower().begins_with(prefix):
 				continue
