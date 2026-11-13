@@ -5,7 +5,9 @@ extends VBoxContainer
 ## bomb, two side by side for two, no numbers, straight on the row with no plate of their own), and at the right of
 ## each row the key that takes it in hand (read once, when the rail is built). The one in hand has an accent edge and
 ## full brightness; the rest are dim, a bomb with none left dimmer. Nothing is lit while the replica is holstered. No
-## names. Rows are rebuilt only when what is lit or carried changes.
+## names. Rows are rebuilt only when what is lit or carried changes. Carrying Plant The Bomb's bomb (PB3, the owner's
+## ask) adds its row at the foot, its picture from its model and the Use key that sets it; the row is lit while it is
+## being set down and armed.
 
 ## A row's plate (px at 1080p): the picture's box, the key's width and size, the gap between rows and inside one.
 const ICON_SIZE := Vector2(112.0, 44.0)
@@ -25,6 +27,8 @@ const EMPTY_ALPHA := 0.25
 ## The input action that takes each row in hand: the replica slots, then the bombs (Grenade.Kind order from SMOKE).
 const SLOT_ACTIONS: Array[StringName] = [&"slot_1", &"slot_2"]
 const BOMB_ACTIONS: Array[StringName] = [&"throw_smoke", &"throw_flash"]
+## Plant The Bomb's bomb on the one watched: none, carried, or being set down and armed (its row lit).
+enum Carry { NONE, CARRIED, SETTING }
 
 var _pictures: ReplicaPictures = null
 var _plates: Array[PanelContainer] = []
@@ -43,6 +47,9 @@ var _shown_left: PackedInt32Array = PackedInt32Array()
 ## The most of each bomb kind seen carried: a kind never carried has no row (a loadout with 2 smoke and no flash shows
 ## the smoke row, two icons, and no flash row); one carried and thrown stays, dim at 0.
 var _carried: PackedInt32Array = PackedInt32Array()
+## Plant The Bomb's bomb's row (after the bombs'; -1: none built) and what it shows now.
+var _bomb_row: int = -1
+var _shown_carry: Carry = Carry.NONE
 
 
 ## Builds a row per replica in `replicas` (drawn in `paints`, one per slot) and one per bomb kind.
@@ -83,6 +90,15 @@ func setup(replicas: Array[ReplicaConfig], paints: Array[StringName], realistic:
 			glyphs.append(glyph)
 		_glyphs.append(glyphs)
 		_row(BOMB_ACTIONS[kind], side)
+	var bomb := TextureRect.new()
+	bomb.custom_minimum_size = ICON_SIZE
+	bomb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bomb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	bomb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bomb.texture = _pictures.bomb_texture(PICTURE_SIDE)
+	_bomb_row = _plates.size()
+	_row(PlayerInput.USE_DOOR, bomb)
+	_plates[_bomb_row].visible = false
 
 
 func _row(action: StringName, icon: Control) -> void:
@@ -124,9 +140,11 @@ static func key_text(action: StringName) -> String:
 	return KeyNames.of_action(action)
 
 
-## The row in hand (replica slots first, then the bombs), or -1 for none: a bomb in hand, else the replica unless it is
-## holstered.
-static func lit_row(a: Armament, hand: Grenades.Hand, slots: int) -> int:
+## The row in hand (replica slots first, then the bombs, then Plant The Bomb's), or -1 for none: Plant The Bomb's bomb
+## being set, a bomb in hand, else the replica unless it is holstered.
+static func lit_row(a: Armament, hand: Grenades.Hand, slots: int, carry: Carry = Carry.NONE) -> int:
+	if carry == Carry.SETTING:
+		return slots + BOMB_ACTIONS.size()
 	if hand != null and hand.readied != Grenade.Kind.NONE:
 		return slots + hand.readied - Grenade.Kind.SMOKE
 	if a.holstered or a.active < 0 or a.active >= slots:
@@ -134,10 +152,10 @@ static func lit_row(a: Armament, hand: Grenades.Hand, slots: int) -> int:
 	return a.active
 
 
-## Follows what is in hand and the bombs left, rebuilding a row only on a change.
-func refresh(a: Armament, hand: Grenades.Hand = null) -> void:
-	var lit := lit_row(a, hand, _slots)
-	var changed := lit != _shown_lit
+## Follows what is in hand, the bombs left and Plant The Bomb's bomb (`carry`), rebuilding a row only on a change.
+func refresh(a: Armament, hand: Grenades.Hand = null, carry: Carry = Carry.NONE) -> void:
+	var lit := lit_row(a, hand, _slots, carry)
+	var changed := lit != _shown_lit or carry != _shown_carry
 	for kind in BOMB_ACTIONS.size():
 		var left := hand.left(Grenade.Kind.SMOKE + kind) if hand != null else 0
 		_carried[kind] = maxi(_carried[kind], left)
@@ -146,10 +164,13 @@ func refresh(a: Armament, hand: Grenades.Hand = null) -> void:
 	if not changed:
 		return
 	_shown_lit = lit
+	_shown_carry = carry
 	for i in _plates.size():
 		var on := i == lit
 		var left := -1
-		if i >= _slots:
+		if i == _bomb_row:
+			_plates[i].visible = carry != Carry.NONE
+		elif i >= _slots:
 			left = _shown_left[i - _slots]
 			_plates[i].visible = _carried[i - _slots] > 0
 			# one icon per bomb carried (up to the row's room); a spent kind keeps one, dim
@@ -161,9 +182,14 @@ func refresh(a: Armament, hand: Grenades.Hand = null) -> void:
 			alpha = EMPTY_ALPHA
 		# self_modulate, not modulate: the panel's icons keep their own alpha (HudStyle.restyle fades backgrounds only).
 		_icons[i].self_modulate.a = alpha
-		if i >= _slots:
+		if i >= _slots and i != _bomb_row:
 			for n in BOMB_ICONS_MAX:
 				(_glyphs[i - _slots][n] as Control).self_modulate.a = alpha
+
+
+## Whether Plant The Bomb's bomb's row shows (for tests).
+func bomb_shown() -> bool:
+	return _bomb_row >= 0 and _plates[_bomb_row].visible
 
 
 ## How many rows are showing (a bomb kind never carried has none), for tests, and the row now lit.

@@ -125,7 +125,7 @@ func striped() -> bool:
 func notch_rect(i: int) -> Rect2:
 	var gap := HudStyle.GAUGE_NOTCH_GAP
 	var w := (_track_width() - gap * (_notches - 1)) / _notches
-	var x0 := HudStyle.GAUGE_PAD + HudStyle.GAUGE_LABEL_WIDTH
+	var x0 := _track_x0()
 	return Rect2(x0 + i * (w + gap), size.y * TRACK_TOP, w, size.y * TRACK_HEIGHT)
 
 
@@ -140,14 +140,19 @@ func notches_filled() -> int:
 
 
 func _track_width() -> float:
-	return size.x - HudStyle.GAUGE_LABEL_WIDTH - HudStyle.GAUGE_PAD * 2.0 - HudStyle.GAUGE_HEIGHT
+	return size.x - _track_x0() - HudStyle.GAUGE_PAD - HudStyle.GAUGE_HEIGHT
+
+
+## Where the track starts: past the word's column and a gap.
+static func _track_x0() -> float:
+	return HudStyle.GAUGE_PAD + HudStyle.GAUGE_LABEL_WIDTH + HudStyle.GAUGE_LABEL_GAP
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
 		# The flag at the top end, built once for the size: a short mast and a pennant.
 		var h := size.y
-		var fx := HudStyle.GAUGE_PAD + HudStyle.GAUGE_LABEL_WIDTH + _track_width() + HudStyle.GAUGE_PAD
+		var fx := _track_x0() + _track_width() + HudStyle.GAUGE_PAD
 		_mast = Rect2(fx, h * MAST_TOP, MAST_WIDTH, h * MAST_HEIGHT)
 		_pennant[0] = Vector2(fx + MAST_WIDTH, h * MAST_TOP)
 		_pennant[1] = Vector2(fx + MAST_WIDTH + PENNANT_LENGTH, h * (MAST_TOP + PENNANT_HEIGHT * 0.5))
@@ -168,7 +173,7 @@ func _draw() -> void:
 			_notch_stripes[i].set_rect(notch)
 			_notch_stripes[i].draw(self)
 	# Where the flag is: a white line through the track.
-	var at := HudStyle.GAUGE_PAD + HudStyle.GAUGE_LABEL_WIDTH + _track_width() * maxf(_progress, 0.0)
+	var at := _track_x0() + _track_width() * maxf(_progress, 0.0)
 	draw_rect(Rect2(at - LINE_WIDTH * 0.5, h * LINE_TOP, LINE_WIDTH, h * LINE_HEIGHT), GameTheme.TEXT)
 	if _bomb:
 		_case.paint(self, GameTheme.TEXT, GameTheme.BAD, GameTheme.BG)

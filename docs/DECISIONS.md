@@ -830,6 +830,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   hit in a lift on the landing the car last stood at, never in the shaft. The bot that fetches a bomb from the ground
   is the nearest on its storey, or the nearest of all with none there, and it keeps the job until one on the bomb's
   storey is nearer: level distance says nothing between bots a storey off. Measures: `docs/records/PB1.md`.
+- **No animations on Plant The Bomb's bomb (owner, 2026-11-13, PB3).** He turned down animated hands on the bomb
+  ("That's awful"): the player sets it on the ground, holds Use with a progress bar on screen, and carries it as a
+  "weapon" in the weapon rail; a bot setting it "just crouch[es], no weapon equipped near the bomb"; once anyone arms
+  it, "BOMB ARMED" shows under the score bar. Claude's defaults, his to change: the replica is put away for planting
+  and defusing alike and drawn again after (`PlantConfig.redraw_scale`); the player is not made to crouch; the bomb
+  is set `PlantConfig.set_ahead` (0.55 m) in front of the feet, short of a wall and inside the site's ring, so it is
+  in sight when you look down a little (it is about 70° below a level view); its rail row is keyed with Use. Record: `docs/records/PB3.md`.
 - **A field's layout is judged on its play record (owner, 2026-11-12, MB1).** He asked for every field to be analysed
   like a Counter-Strike or Valorant map (sight lines, chokes, heat maps, cover, every piece placed on purpose) and
   changed, with one rule: no new model or sound; a field may be resized or cut if balance wants it ("Balance and

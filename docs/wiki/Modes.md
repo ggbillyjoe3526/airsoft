@@ -64,13 +64,15 @@ sides swap at half time. Every field has both sites.
   seconds, then one of them takes it and plants it without you
   ([Bots](Bots#bots-in-plant-the-bomb)). A carrier who is hit drops it where they stood, for any attacker to pick up.
 - **Planting:** stand inside a site's ring with the bomb and hold <!-- wiki:key use_door --> for
-  **<!-- wiki:config plant_config.plant_time --> seconds**. You kneel, your replica is down and you can't shoot while
-  you do; let go or step out and you start again. A code beeps as it is keyed in, and anyone within about <!-- wiki:config sound_config.plant_work_reach -->
+  **<!-- wiki:config plant_config.plant_time --> seconds**. You set the bomb on the ground just in front of you and
+  your replica is put away while you key it in, so you can't shoot; let go or step out and you start again, and your
+  replica comes back. Bots crouch beside it, no weapon in hand. While you carry the bomb it shows as a row in your
+  weapon rail ([HUD](HUD-and-Minimap#the-weapon-rail)), lit while you set it. A code beeps as it is keyed in, and anyone within about <!-- wiki:config sound_config.plant_work_reach -->
   m hears it.
-- **Armed**, the bomb goes off after **<!-- wiki:config plant_config.fuse_time --> seconds**, beeping faster as its
+- **Armed**, **BOMB ARMED** shows under the score bar for everyone, and the bomb goes off after **<!-- wiki:config plant_config.fuse_time --> seconds**, beeping faster as its
   time runs down. The round's clock stops mattering: only the fuse counts now.
 - **Defusing:** a defender within reach of the armed bomb holds <!-- wiki:key use_door --> for
-  **<!-- wiki:config plant_config.defuse_time --> seconds**. Past half way the work is kept: let go after that and
+  **<!-- wiki:config plant_config.defuse_time --> seconds**, replica put away as for planting. Past half way the work is kept: let go after that and
   the next try starts from half.
 
 **Attackers win** when the bomb goes off, or by taking out every defender at any time. **Defenders win** by defusing

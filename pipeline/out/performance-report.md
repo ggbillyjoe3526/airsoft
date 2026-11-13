@@ -1,18 +1,16 @@
-Task: MQ1B (attempt 3) · head 7499a89 · Verdict: Pass
-Run: no Godot run (the local gate is running); the committed cyber.glb parsed directly · budget: no baseline yet, judged against targets, the 40,000 / 3,000 triangle budgets and origin/main's glb
-Metrics (measured, from the glb JSON):
-- Triangles in the hands (Body + Magazine + Selector + Slide + Trigger): 38,706 / 40,000 (ok); attempt 2 38,646; main 37,824 (+2.3 %)
-- Figure copy (Figure + Figure_Magazine): 3,000 / 3,000 (ok, at the limit); main 3,000
-- File size: 1,361,544 B vs main 1,350,416 B (+0.8 %)
-- Body: 4 surfaces, materials 0-3 (same as main), 21,491 vertices (main 20,977, +2.4 %)
-- Magazine: 3 surfaces, materials 3/4/2 (same as main), 3,778 vertices (main 3,882, -2.7 %), 4,244 triangles (main 4,576)
-- Materials in the file: 6 (main 6); no new material, so no new shader prewarm needed
-Regressions (> 10 % worse): none
+Task: PB3 · head 1a9bf361 · Verdict: Pass
+Run: no --perf bot run (tools/check.sh owns the machine and a second run collides); static diff review only · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the diff
+Metrics: not measured this pass (node count, orphans, static memory, script time and draw calls unmeasured).
+Regressions (> 10 % worse): none measured
 Blocking findings: none
-- Nothing under game/ changed (git diff origin/main...HEAD lists 0 game/ paths); no runtime script, scene or config in the diff.
-- tools/model_studio.gd:54 calls RenderingServer.directional_shadow_atlas_set_size(SHADOW_MAP, true) inside the tool's own run. The only other mention of the tool in game/ is a doc comment in game/ui/studio_sky.gd:8. No game script, scene, export preset or CI step references it, so the call cannot reach the shipped game (judgment, by grep).
+ - simulation.gd per-character loop (judgment): the two rays (Plant.room_ahead, Plant.floor_at) run only for the carrier holding Use before arming starts, into one reused RayHit (_set_hit). No Array, Dictionary or String is built per tick. Vector3 temporaries are stack values.
+ - Plant.hands_on (judgment): bool checks per character per tick. put_down and bring_up run only on edges.
+ - weapon_rail.gd:511 refresh (judgment): rows are rebuilt only when lit or carry changes. HudPlant.rail_carry is an enum compare per HUD frame with no allocation.
+ - replica_pictures.gd:224 bomb_texture (judgment): built once (the _bomb_shot null guard), UPDATE_ONCE, same SubViewport rig and parent as the grenade shots. It is freed with the pictures node, so there is no new orphan path. weapon_rail.gd:98 calls it once in setup.
+ - plant_view.gd refresh (judgment): only reads ps.set_at and ps.facing. No allocation.
 Advisory:
-- The figure copy sits exactly on its 3,000 budget; any later rounding of the figure needs a trade-off elsewhere (judgment).
-- The hands are 1,294 triangles under budget, and Body alone is 30,318 (judgment). It is a per-draw cost on the owner's GPU only; frame time was not measured here.
-Fixes: none needed.
-Unexplained: none. Draw calls, frame times and orphan nodes were not re-measured because no game code changed since attempt 2's pass.
+ - replica_pictures.gd:239 (judgment): the bomb rig is never queue_freed on its own. Part shots are, so it is the same as the grenade shots. It is fine if ReplicaPictures is freed with the HUD, so confirm the orphan count in the next --perf run.
+ - simulation.gd (judgment): floor_at runs every tick while Use is held with the bomb. A second cast is cheap, but it could be cached while the carrier is still.
+ - The bomb picture is a new SubViewport with its own World3D. The first render can hitch, and the prewarm list has no entry for it (judgment, rendered hardware only). It draws once at HUD setup, not mid-round.
+Fixes: none required.
+Unexplained: none

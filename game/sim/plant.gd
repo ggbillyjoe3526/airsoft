@@ -51,6 +51,17 @@ static func site_at(ps: PlantState, at: Vector3, cfg: PlantConfig) -> int:
 	return -1
 
 
+## `at` drawn in flat onto site `i`'s ring when it lies past it: a bomb set down at a site's edge stands inside it.
+static func _in_site(ps: PlantState, i: int, at: Vector3, cfg: PlantConfig) -> Vector3:
+	var s := ps.sites[i]
+	var r := ps.radii[i] if i < ps.radii.size() else cfg.site_radius
+	var off := Vector2(at.x - s.x, at.z - s.z)
+	if off.length_squared() <= r * r:
+		return at
+	off = off.normalized() * r
+	return Vector3(s.x + off.x, at.y, s.z + off.y)
+
+
 ## The site nearest `at` (flat); -1 with none.
 static func nearest_site(ps: PlantState, at: Vector3) -> int:
 	var best := -1
@@ -63,11 +74,61 @@ static func nearest_site(ps: PlantState, at: Vector3) -> int:
 	return best
 
 
+## Puts `c`'s hands on the device (`on`: arming or disarming it this tick) or takes them off (PB3): its replica is put
+## away as for a throw (Armament.put_down) when they go on, and drawn again (at redraw_scale) when they come off, unless
+## it was away already or `c` is out of play. Returns `on`.
+static func hands_on(c: Character, on: bool, cfg: PlantConfig, events: SimEvents) -> bool:
+	if on and not c.hands_on_bomb:
+		c.hands_on_bomb = true
+		c.bomb_was_holstered = c.armament.holstered
+		c.armament.put_down()
+	elif not on and c.hands_on_bomb:
+		c.hands_on_bomb = false
+		if not c.bomb_was_holstered and Elimination.is_in_play(c):
+			c.armament.bring_up(c.id, events, cfg.redraw_scale)
+	return on
+
+
 ## Whether `c` (in play) is close enough to the bomb where it lies or stands armed to work on it: within `reach` flat,
 ## its feet within reach_height of it.
 static func in_reach(ps: PlantState, c: Character, reach: float, cfg: PlantConfig) -> bool:
 	return Elimination.is_in_play(c) and absf(c.position.y - ps.position.y) <= cfg.reach_height \
 			and _flat_squared(c.position, ps.position) <= reach * reach
+
+
+## Where the bomb is set down by someone whose feet are at `feet`, facing `facing` (yaw): set_ahead in front of them,
+## or set_clear short of anything `room` m ahead (PB3).
+static func set_down(feet: Vector3, facing: float, cfg: PlantConfig, room: float = INF) -> Vector3:
+	return feet + Vector3(-sin(facing), 0.0, -cos(facing)) * clampf(room - cfg.set_clear, 0.0, cfg.set_ahead)
+
+
+## The room ahead of `feet` facing `facing` (m): to the first thing set_ray_height over them within set_ahead and
+## set_clear (`query`'s ray, into `hit`), or INF.
+static func room_ahead(feet: Vector3, facing: float, cfg: PlantConfig, query: WorldQuery, hit: RayHit) -> float:
+	if query == null or hit == null:
+		return INF
+	var from := feet + Vector3(0.0, cfg.set_ray_height, 0.0)
+	var reach := cfg.set_ahead + cfg.set_clear
+	if not query.ray(from, from + Vector3(-sin(facing), 0.0, -cos(facing)) * reach, hit):
+		return INF
+	return Vector2(hit.position.x - from.x, hit.position.z - from.z).length()
+
+
+## Where the bomb goes down for a carrier whose feet are at `feet`, facing `facing`, with `room` m clear ahead: set_down,
+## drawn in onto the ring of the site they stand in.
+static func set_spot(ps: PlantState, feet: Vector3, facing: float, cfg: PlantConfig, room: float = INF) -> Vector3:
+	var at := set_down(feet, facing, cfg, room)
+	var site := site_at(ps, feet, cfg)
+	return _in_site(ps, site, at, cfg) if site >= 0 else at
+
+
+## The floor's height under `at` (a ray down from set_drop over it to set_drop under it): INF with no floor there (a
+## ledge), NAN with no world to ask.
+static func floor_at(at: Vector3, cfg: PlantConfig, query: WorldQuery, hit: RayHit) -> float:
+	if query == null or hit == null:
+		return NAN
+	var drop := Vector3(0.0, cfg.set_drop, 0.0)
+	return hit.position.y if query.ray(at + drop, at - drop, hit) else INF
 
 
 ## Seconds between beeps with `fuse_left` s of fuse to run.
@@ -120,12 +181,20 @@ static func _step_carried(ps: PlantState, characters: Array[Character], cfg: Pla
 	if ps.planter != carrier.id:
 		ps.planter = carrier.id
 		ps.planting = 0.0
+		ps.facing = carrier.yaw
+		ps.set_at = set_spot(ps, carrier.position, ps.facing, cfg, ps.set_room)
+		# On the floor found there; with none (a ledge ahead) at the carrier's feet, never in the air.
+		if is_inf(ps.set_floor):
+			ps.set_at = carrier.position
+		elif not is_nan(ps.set_floor):
+			ps.set_at.y = ps.set_floor
 		ps.site = site
 		_cue(events, Cue.ARMING, carrier.id, ps.position, site)
 	ps.planting = minf(1.0, ps.planting + dt / maxf(cfg.plant_time, SLACK))
 	if ps.planting < 1.0 - SLACK:
 		return
 	ps.status = PlantState.Status.PLANTED
+	ps.position = ps.set_at
 	ps.site = site
 	ps.carrier = -1
 	ps.planter = -1
