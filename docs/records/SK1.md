@@ -28,7 +28,7 @@ Bomb (PB1). He picked from three ideas at 17:54: "Build both Stockade and Stacks
   Sawmill's shed (31, 21). Attack / Defend's poles stand at (30, -9.5) and (32.5, 25.6), Elimination's overtime flag on the
   Green beside the fire.
 - **Built by a script** (`tools/stockade/`): `layout.py` holds the buildings, walls, doors, roofs, ends, lanes, sites,
-  areas and lights; `cover.py` every piece of cover; `build_map.py` writes `data/maps/stockade.json` (381 blocks: 175
+  areas and lights; `cover.py` every piece of cover; `build_map.py` writes `data/maps/stockade.json` (382 blocks: 176
   plywood, 83 palisade and fence, 61 logs and cordwood, 29 crates, 4 drums, 3 barrels, 2 sofas, 2 tyres, 1 sandbag
   wall, 21 trees; 26 doors, all open at the start, 26 lights); `check.py` checks overlaps and, on MB1's sight raster
   (`tools/maps/los.py`, `plan.py`), the long standing lines, each confirmed by an exact box test (the raster lets a
@@ -67,9 +67,12 @@ Departures from the concept (each so the field meets the 34 m line, or plays its
   DECISIONS › Maps and modes). Woodland's watch tower put a standing eye at 5 m: it saw over every 2.6 m wall, 3,839
   lines over 34 m, the longest 65 m to the attackers' gate. The house (6 x 9 m) stands across Main Street's east end,
   a door onto the street behind and one onto the Green, off each other's line, its stock stacked between them.
-- **Fenced courts and yards.** The concept leaves the ground between the houses open; plywood fences with one gate
-  each make the North, House, South and Store courts, the Forge, Barn, House and Shed yards, so the outer lanes stay
-  lanes and the courts are rooms of their own.
+- **Fenced courts and yards.** The concept leaves the ground between the houses open; plywood fences make the North,
+  House, South and Store courts and the Forge, Barn, House and Shed yards, so the outer lanes stay lanes. Each court
+  has one gate on its outer way and its alley onto the Green, and the doors of the houses round it, so every court is
+  a cross-route between an outer way and the Green; in attempt 3 the Forge (the Back Lane to the Forge yard and Main
+  Street) and the Barn (the Woodyard Road to the Barn yard and Main Street) are ways through as well. Second gates in
+  the courts' outer fences, tried in attempt 3, lined up with the house doors into lines over 34 m.
 - **The Orchard behind a palisade** with two gates (x -29 and 7), its trees in two overlapping rows, a short woodpile
   either side of each gate on the road; the camps' south gates open onto the Woodyard Road, not the Orchard.
 - **Chicanes of cordwood and palisade stubs** every 12 to 13 m down the Back Lane, the Woodyard Road and East Lane,
