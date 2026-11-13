@@ -60,6 +60,11 @@ Bots only, Normal, 6v6, `tests/support/match_runner.gd`, sixteen seeds a mode:
 
 - `test_field_rules` and `test_field_layout` pass for Stockade; `check.py`: no overlaps, no line over 34 m, every
   spot reached.
+- QA: Pass, 7 tests of its own (`tests/unit/test_sk1_qa.gd`: loads clean at 6 and 8 a side, dev only, both lighting
+  presets, sites, poles, flag and bomb start on walkable floor and reached from both ends, no standable roof, no
+  floor cut off).
+- Performance: Pass by comparison with the shipped fields (450 blocks against Woodland's 945, 25 lights within
+  LightPools' 32); frame time at night on Low is on the checklist.
 
 ## Left for the owner
 
