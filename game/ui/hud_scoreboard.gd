@@ -36,6 +36,8 @@ var _sub := ""
 var _tips: bool = false
 ## Attack / Defend's longest overtime (s), for the heading's OT countdown.
 var _max_overtime: float = 0.0
+## The most a plant under way at the buzzer may run on in Plant The Bomb (PlantConfig.max_overtime).
+var _plant_overtime: float = 0.0
 ## What the board last showed: the numbers' version, the round, the clock's second and who was in play (bits by id).
 var _shown_version: int = -1
 var _shown_round: int = -1
@@ -44,13 +46,15 @@ var _shown_in_play: int = -1
 var _filled_at: float = 0.0
 
 
-func setup(cfg: HudConfig, teams: TeamConfig, mate_colour: Color, max_overtime: float) -> void:
+func setup(cfg: HudConfig, teams: TeamConfig, mate_colour: Color, max_overtime: float,
+		plant_overtime: float = -1.0) -> void:
 	name = "HudScoreboard"
 	_cfg = cfg
 	_teams = teams
 	for key in teams.names:
 		_team_names.append(HudStyle.caps(key))
 	_max_overtime = max_overtime
+	_plant_overtime = plant_overtime if plant_overtime >= 0.0 else max_overtime
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_theme_constant_override("separation", 0)
 	visible = false
@@ -100,7 +104,8 @@ func update(state: GameState, stats: MatchStats, you: Character, show: bool) -> 
 	var rs := state.round_state
 	# In overtime (Attack / Defend's at the rope, Elimination's at the flag) the clock stands at 0 and the OT countdown
 	# runs instead (as the score bar shows).
-	var overtime := HudStyle.overtime_clock(rs, _max_overtime)
+	var overtime := HudStyle.overtime_clock(rs, _plant_overtime if rs.mode == RoundState.Mode.PLANT_THE_BOMB
+			else _max_overtime)
 	var second := -1 - overtime if overtime >= 0 else ceili(rs.clock)
 	var in_play := 0
 	for c in state.characters:
@@ -134,8 +139,11 @@ static func tip_for(number: int) -> StringName:
 func _fill(state: GameState, stats: MatchStats, you: Character, second: int) -> void:
 	var rs := state.round_state
 	_table.begin("")
+	# Overtime, or in Plant The Bomb the armed bomb's fuse
+	var over_key := "HUD_BOARD_ROUND_BOMB" if rs.mode == RoundState.Mode.PLANT_THE_BOMB and rs.plant.planted() \
+			else "HUD_BOARD_ROUND_OT"
 	var when := tr("HUD_BOARD_ROUND_LEFT") % [rs.number, HudStyle.clock_text(second)] if second >= 0 \
-			else tr("HUD_BOARD_ROUND_OT") % [rs.number, HudStyle.clock_text(-1 - second)]
+			else tr(over_key) % [rs.number, HudStyle.clock_text(-1 - second)]
 	_table.heading(_map_name, _sub, when.to_upper())
 	for i in 2:
 		var side := you.team if i == 0 else 1 - you.team

@@ -680,6 +680,15 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
 - [ ] **Raise the flag.** Stand in the painted ring at the pole for 5 seconds; the strip under the score shows how far
   up it is and a marker shows the pole. Sides swap after round 4.
 
+### Plant The Bomb (PB1)
+
+- [ ] **Plant it.** Attacking, take the bomb from the ground at your start (hold Use), carry it into Site A's or
+  Site B's ring and hold Use until the gauge is full; then keep the defenders off it until the fuse runs out.
+- [ ] **Leave it.** Walk off without the bomb: a teammate takes it after a few seconds and the bots plant on their own,
+  the carrier going in last. A carrier who is hit drops it for the next attacker.
+- [ ] **Make it safe.** Defending, hold Use at the armed bomb until the gauge is full; past half way the work is
+  kept. Your bots leave it to you while you are near, until the fuse is nearly too short.
+
 ### Custom matches and rules
 
 Play › Match. The Rules row comes first: Skirmish (the standard match) or Custom, which
@@ -1574,6 +1583,45 @@ model until its own is built, and the pump, shot and shell sounds are stand-ins 
 - [ ] **Frame rate.** A 6v6 with Dev content on, when several Clearer bots fire at once (three BBs and three puffs a
   pull each): does the frame rate hold as it does without them? (The performance review's note: only your PC can
   show it.)
+
+## What the bombs and power sources are made of (MQ2B)
+
+A match on Depot with a smoke and a flash bomb; then Customise › Power and the Loadout.
+
+- [ ] **The smoke bomb in your hand.** Its sleeve has a soft gloss like printed film; under your thumb you can see a
+  green stencilled word and a pale one (bold glyphs that spell nothing); the cap is matte plastic; the lever is
+  matte black, its arm one sheet with small nicks in its two edges and two long pressed ribs side by side down it,
+  and no white shine on its top bend.
+- [ ] **The flash bomb in your hand.** A dead matte card tube: a pale band under the violet one, a violet block and
+  the top two glyphs of a pale word beside the ring, over your thumb, a column of small square tiles next to it; on the cap six small vents
+  round the hole and six pale ticks between them. Its key ring looks as before and doesn't sparkle.
+- [ ] **Do they read as labels?** From arm's length the print should look like a printed label, not like a ruler
+  or a barcode, and never like real words or a brand.
+- [ ] **In the light.** Walk from sun into shade holding each bomb: it darkens with the replica, with no hard patch
+  crossing it, and nothing flickers as you turn.
+- [ ] **Thrown.** A bomb in the air, lying on the ground or in a bot's hand looks as it did.
+- [ ] **Menu pictures.** The gas bottle is a glossy can, its cap a little narrower and its shoulder rounder than
+  before, its label laid out as a real can's (a broad chevron of the gas's colour; inside it a truly round
+  emblem, a pale ring round a disc of the gas's colour; four pale slanted bars over the chevron's point; a
+  coloured bar, five bulleted lines, two blocks of fine print, a pale panel and a last coloured bar at the
+  foot); the LiPo has white lines and a red block on its side; the Standard Battery's stickers are matte
+  paper on glossy red film, with a yellow one by its leads; each spring is painted wire in its own colour. Nothing
+  has gone black or blown out.
+
+## What the figures' gear is made of (MQ3)
+
+Stand beside a teammate at the start of a round, or watch one from the dead zone, on High or Ultra.
+
+- [ ] **The plate carrier up close.** The team-colour cloth shows a fine weave, the webbing rows their ticks, the
+  loop panel a soft pile, and the edges a bound tape with stitching beside it; the pouches sit in a soft shade on
+  the carrier instead of floating on it.
+- [ ] **Belt, holster, pack and radio.** The holster and the buckles look like moulded polymer, the belt like
+  webbing, the pack's zips and cord like zips and cord; nothing looks stretched, smeared or cut by a seam. The
+  rolled pouch on the right hip is round, its weave the same size all the way round.
+- [ ] **At range nothing changed.** Alpha's blue and Beta's orange carriers read at 30 m as before, and a figure
+  walking away shows no jump in colour where its detail drops.
+- [ ] **Knee and elbow pads** look as before.
+- [ ] **Frame rate** with both teams in view is as before on every preset.
 
 ## Reporting what you find
 

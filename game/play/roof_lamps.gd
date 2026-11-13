@@ -91,6 +91,20 @@ func light_of(lamp: int) -> SpotLight3D:
 	return _lights[at] if at >= 0 else null
 
 
+## Lamp `lamp`'s light shone in `colour` (sRGB) instead of the roof's (SM1: the station's lamps inside a train's cars).
+func recolour(lamp: int, colour: Color) -> void:
+	var spot := light_of(lamp)
+	if spot != null:
+		spot.light_color = colour
+
+
+## Lamp `lamp`'s light kept off the render layers `layers` (SM1: a car's lamps off the station's walls beyond it).
+func leave_out(lamp: int, layers: int) -> void:
+	var spot := light_of(lamp)
+	if spot != null:
+		spot.light_cull_mask &= ~layers
+
+
 ## A flickering lamp's light at `level` (0 to 1) of its strength, as RoofView steps it (only when it changes).
 func set_flicker(lamp: int, level: float) -> void:
 	var spot := light_of(lamp)

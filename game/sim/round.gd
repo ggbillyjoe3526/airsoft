@@ -5,7 +5,10 @@ class_name Round
 ## map's spot (OvertimeFlag), and the first team to touch it wins; untouched for OvertimeConfig.time, or on a map with no
 ## spot, it is a draw too. Attack / Defend (RoundState.mode): the attackers also win by raising their flag on the pole
 ## (Flag), and the time-out goes to the defenders, after up to FlagConfig.max_overtime while the attackers still work
-## the rope. After RoundConfig.reset_delay (or, with RoundState.hold_next, at end_wait) everyone respawns for the next
+## the rope. Plant The Bomb (PB1): the attackers carry the bomb to a site and arm it (Plant); armed, it goes off when
+## its fuse runs out, which wins them the round, unless the defenders disarm it first, and wiping the attackers out no
+## longer ends the round; before it is armed the time-out goes to the defenders, after up to PlantConfig.max_overtime
+## while the carrier is arming it. After RoundConfig.reset_delay (or, with RoundState.hold_next, at end_wait) everyone respawns for the next
 ## round, until a team has wins_needed wins and a lead of win_by: the match is over until start_match. Ends swap after
 ## half_time_after decided rounds, so an uneven map is fair over a match. start_match sets a match up before the first
 ## tick; step runs once a tick and allocates nothing.
@@ -67,7 +70,10 @@ static func step(rs: RoundState, characters: Array[Character], ends: Array[MapEn
 	var alpha_out := alpha > 0 and alpha_in_play == 0
 	var beta_out := beta > 0 and beta_in_play == 0
 	rs.clock = maxf(0.0, rs.clock - dt)
-	if alpha_out or beta_out:
+	if rs.mode == RoundState.Mode.PLANT_THE_BOMB and rs.attackers >= 0:
+		_step_plant(rs, characters, tuning, events, dt, alpha_out if rs.attackers == 0 else beta_out,
+				beta_out if rs.attackers == 0 else alpha_out)
+	elif alpha_out or beta_out:
 		var winner := -1 if alpha_out and beta_out else (1 if alpha_out else 0)
 		_end_round(rs, winner, GameEvent.RoundEnd.ELIMINATED, tuning.rounds, events)
 	elif rs.mode == RoundState.Mode.ATTACK_DEFEND:
@@ -87,6 +93,38 @@ static func _step_flag_clock(rs: RoundState, characters: Array[Character], tunin
 	if rs.clock > 0.0:
 		return
 	if Flag.rope_worked(rs.flags) and rs.overtime < tuning.flag.max_overtime:
+		rs.overtime += dt
+	else:
+		_end_round(rs, 1 - rs.attackers, GameEvent.RoundEnd.TIME, tuning.rounds, events)
+
+
+## Plant The Bomb: the defenders wiped out lose the round at once; the attackers wiped out lose it only with the bomb
+## not yet armed (both at once then is a draw). Otherwise the device is stepped: gone off, the attackers win; disarmed,
+## the defenders. With the bomb not armed at the buzzer the defenders win, unless the carrier is arming it: then it
+## plays on until the plant ends or max_overtime has run.
+static func _step_plant(rs: RoundState, characters: Array[Character], tuning: SimTuning, events: SimEvents,
+		dt: float, attackers_out: bool, defenders_out: bool) -> void:
+	var ps := rs.plant
+	var armed := ps.planted()
+	if defenders_out and attackers_out and not armed:
+		_end_round(rs, -1, GameEvent.RoundEnd.ELIMINATED, tuning.rounds, events)
+		return
+	if defenders_out:
+		_end_round(rs, rs.attackers, GameEvent.RoundEnd.ELIMINATED, tuning.rounds, events)
+		return
+	if attackers_out and not armed:
+		_end_round(rs, 1 - rs.attackers, GameEvent.RoundEnd.ELIMINATED, tuning.rounds, events)
+		return
+	match Plant.step(ps, characters, rs.attackers, tuning.plant, events, dt):
+		Plant.Outcome.WENT_OFF:
+			_end_round(rs, rs.attackers, GameEvent.RoundEnd.WENT_OFF, tuning.rounds, events)
+			return
+		Plant.Outcome.DEFUSED:
+			_end_round(rs, 1 - rs.attackers, GameEvent.RoundEnd.DEFUSED, tuning.rounds, events)
+			return
+	if rs.clock > 0.0 or ps.planted():
+		return
+	if ps.planter >= 0 and rs.overtime < tuning.plant.max_overtime:
 		rs.overtime += dt
 	else:
 		_end_round(rs, 1 - rs.attackers, GameEvent.RoundEnd.TIME, tuning.rounds, events)
@@ -123,6 +161,7 @@ static func run_clock_out(rs: RoundState) -> bool:
 		return false
 	rs.clock = 0.0
 	rs.overtime = INF
+	Plant.run_out(rs.plant)
 	if rs.overtime_flag.up:
 		rs.overtime_flag.cut = true # its time left kept: the round's table counts what was played
 	else:
@@ -130,8 +169,11 @@ static func run_clock_out(rs: RoundState) -> bool:
 	return true
 
 
-## The most a round in `mode` can run past its clock (s): Attack / Defend's rope overtime, or Elimination's flag.
+## The most a round in `mode` can run past its clock (s): Attack / Defend's rope overtime, Elimination's flag, or Plant
+## The Bomb's plant under way at the buzzer and then its whole fuse.
 static func longest_overtime(tuning: SimTuning, mode: RoundState.Mode) -> float:
+	if mode == RoundState.Mode.PLANT_THE_BOMB:
+		return tuning.plant.max_overtime + tuning.plant.fuse_time
 	return tuning.flag.max_overtime if mode == RoundState.Mode.ATTACK_DEFEND else tuning.overtime.time
 
 
@@ -146,11 +188,11 @@ static func end_wait(rs: RoundState) -> bool:
 
 
 ## The end of the map (0 or 1) `team` starts from in round `number`. Elimination: Alpha at RoundConfig.first_end,
-## Beta at the other. Attack / Defend: the attackers at end 0, the defenders at end 1 by the pole. Either way swapped
-## after half_time_after rounds.
+## Beta at the other. Attack / Defend and Plant The Bomb: the attackers at end 0, the defenders at end 1 by the pole or
+## the sites. Either way swapped after half_time_after rounds.
 static func team_end(team: int, number: int, rounds: RoundConfig, mode: RoundState.Mode = RoundState.Mode.ELIMINATION,
 		first_attackers: int = 0) -> int:
-	if mode == RoundState.Mode.ATTACK_DEFEND:
+	if RoundState.has_sides(mode):
 		return 0 if team == attackers_in_round(number, rounds, first_attackers) else 1
 	var alpha_end := rounds.first_end if number <= rounds.half_time_after else 1 - rounds.first_end
 	return alpha_end if team == 0 else 1 - alpha_end
@@ -219,11 +261,14 @@ static func simulate(rs: RoundState, characters: Array[Character], tuning: SimTu
 		var top := Flag.highest(rs.flags)
 		var up := rs.flags[top].progress if top >= 0 else 0.0
 		weight[rs.attackers] *= 1.0 + cfg.simulate_flag_lead * up
+	elif rs.mode == RoundState.Mode.PLANT_THE_BOMB and rs.attackers >= 0 and rs.plant.planted():
+		# An armed bomb favours the attackers, and with nobody of theirs left it is still theirs unless disarmed.
+		weight[rs.attackers] = maxf(weight[rs.attackers], 1.0) * (1.0 + tuning.plant.simulate_planted_lead)
 	var total := weight[0] + weight[1]
 	var winner := 0 if total <= 0.0 or rng.randf() * total < weight[0] else 1
 	if total <= 0.0:
 		# nobody in play on either side: as the clock would leave it, the defenders' or a draw
-		winner = 1 - rs.attackers if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0 else -1
+		winner = 1 - rs.attackers if rs.sided() and rs.attackers >= 0 else -1
 	_end_round(rs, winner, GameEvent.RoundEnd.SIMULATED, cfg, events)
 	return winner
 
@@ -256,9 +301,9 @@ static func _start_round(rs: RoundState, characters: Array[Character], ends: Arr
 	rs.timer = 0.0
 	rs.hold_next = false
 	rs.overtime = 0.0
-	rs.attackers = attackers_in_round(number, tuning.rounds, rs.first_attackers) \
-			if rs.mode == RoundState.Mode.ATTACK_DEFEND else -1
+	rs.attackers = attackers_in_round(number, tuning.rounds, rs.first_attackers) if rs.sided() else -1
 	rs.reset_flags()
+	rs.plant.reset()
 	rs.overtime_flag.reset(tuning.overtime)
 	place_teams(rs, characters, ends, tuning)
 	for c in characters:

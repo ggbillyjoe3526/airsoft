@@ -2,9 +2,9 @@ class_name FieldMapOverlay
 extends Control
 ## Over the full-screen map's field (FM1, FM2): what never moves on it, laid out once per size, storey and round, and the
 ## pointer. Each end's start in the colour of the team starting there and the dead zones hatched grey, the doors, the
-## flags' letters (Attack / Defend) or the overtime flag's spot (Elimination), the named areas' words with none covering
-## another (bigger areas first; one with no room is left out), the compass and a scale bar; then the pointer while you
-## can ping. Redrawn only when something on it moved; a frame allocates nothing.
+## flags' letters (Attack / Defend), the bomb sites' letters (Plant The Bomb) or the overtime flag's spot (Elimination),
+## the named areas' words with none covering another (bigger areas first; one with no room is left out), the compass and
+## a scale bar; then the pointer while you can ping. Redrawn only when something on it moved; a frame allocates nothing.
 
 ## The pointer's ring's points, and its dark ink: this much wider than the ring, and round the dot (px).
 const POINTER_ARC_POINTS := 32
@@ -41,6 +41,8 @@ var storey_floor: float = 0.0
 var _flags_on: bool = false
 var _overtime_on: bool = false
 var _overtime_up: bool = false
+## Whether Plant The Bomb's sites show (PB1): the flags' ring and lettered badge at each.
+var _sites_on: bool = false
 var _end_colours := PackedColorArray([Color.WHITE, Color.WHITE])
 var _end_words := PackedStringArray(["", ""])
 
@@ -60,6 +62,7 @@ var _word_big := PackedByteArray()
 ## Laid out: the flags (px), the overtime spot (px), the starts and dead zones (px boxes), the hatch (px, pairs), the
 ## doors (px, pairs), the compass's foot and the scale bar's left end (px).
 var _flags_px := PackedVector2Array()
+var _sites_px := PackedVector2Array()
 var _overtime_px := Vector2.ZERO
 var _starts_px: Array[Rect2] = []
 var _dead_px: Array[Rect2] = []
@@ -102,6 +105,7 @@ func setup(cfg: MinimapConfig, marks: FieldMapMarks) -> void:
 		var s := cfg.map_area_big_size if big else cfg.map_area_size
 		_word_sizes[i] = f.get_string_size(marks.words[i].name, HORIZONTAL_ALIGNMENT_LEFT, -1, s)
 	_flags_px.resize(marks.flags.size())
+	_sites_px.resize(marks.sites.size())
 	_starts_px.resize(marks.starts.size())
 	_dead_px.resize(marks.dead_zones.size())
 	_start_words.resize(marks.starts.size())
@@ -121,6 +125,15 @@ func set_round(flags: bool, overtime: bool, overtime_up: bool, end_colours: Pack
 	_overtime_up = overtime_up
 	_end_colours = end_colours
 	_end_words = end_words
+	laid_out = false
+
+
+## Whether Plant The Bomb's sites show (PB1), each as a flag's ring and badge with its letter A or B. Lays out again
+## only when it changes.
+func set_sites(on: bool) -> void:
+	if on == _sites_on:
+		return
+	_sites_on = on
 	laid_out = false
 
 
@@ -150,6 +163,11 @@ func _lay_out(view: HudMinimap.View, mid: Vector2) -> void:
 		if _flags_on:
 			blocked.append(_badge_box(_flags_px[i]))
 			blocked.append(_ring_box(_flags_px[i]))
+	for i in _marks.sites.size():
+		_sites_px[i] = mid + view.panel_of(_marks.sites[i])
+		if _sites_on:
+			blocked.append(_badge_box(_sites_px[i]))
+			blocked.append(_ring_box(_sites_px[i]))
 	_overtime_px = mid + view.panel_of(_marks.overtime)
 	if _overtime_on and _marks.has_overtime:
 		blocked.append(_ring_box(_overtime_px))
@@ -274,6 +292,9 @@ func _draw() -> void:
 	if _flags_on:
 		for i in _flags_px.size():
 			_draw_flag(_flags_px[i], Flag.LETTERS[i] if i < Flag.LETTERS.size() else "")
+	if _sites_on:
+		for i in _sites_px.size():
+			_draw_flag(_sites_px[i], Plant.LETTERS[i] if i < Plant.LETTERS.size() else "")
 	if _overtime_on and _marks.has_overtime:
 		var a := 1.0 if _overtime_up else _cfg.map_overtime_alpha
 		draw_arc(_overtime_px, _cfg.map_flag_ring, 0.0, TAU, RING_POINTS, Color(GameTheme.WARN, a),

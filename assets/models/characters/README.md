@@ -21,7 +21,9 @@
   `tools/blender/figures/pads.py` and spliced into `human.glb`; they ride the shins and forearms rigidly.
 - The human's gear (`Kit*`, `Kit_Pack*`, `Kit_Radio*`, BL12) is built by `tools/blender/figure-gear/gear.py` and spliced
   into `human.glb` by node name (`splice.py`), leaving the body, heads and clips as they are; rerun it after any other
-  rebuild of the file.
+  rebuild of the file. Its full-detail pieces are unwrapped into charts and painted from the model (`atlas.py`, MQ3):
+  the team-colour parts into `human_teamgear_*`, the rest into `human_pads_*` round the pads' own square, so run
+  `pads.py` first when both are rebuilt. The lower levels draw plain colours from a strip in the same maps.
 - Godot extracted each figure's textures beside it on import (`*_col`, `*_nrm`, `*_orm`); commit them with their
   `.import` files.
 - A CC0 figure can replace them later: node names, team colours, scale, the size budget and where to find CC0

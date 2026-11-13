@@ -36,7 +36,7 @@ Godot keeps those as the mesh's `extras` metadata, and the game reads the table 
 import bpy
 
 # The kinds, by index: game/config/replica_surfaces.gd KINDS, in the same order (the files hold the index).
-KINDS = ("polymer", "steel", "aluminium", "wood", "rubber", "bare", "coated", "polished")
+KINDS = ("polymer", "steel", "aluminium", "wood", "rubber", "bare", "coated", "polished", "card")
 SLOTS = 16
 DEFAULT = "polymer"
 ATTR = "Surface"

@@ -12,6 +12,7 @@ import json
 import struct
 
 FLOAT, UINT, USHORT, UBYTE = 5126, 5125, 5123, 5121
+WEBP, WEBP_EXT = "image/webp", "EXT_texture_webp"
 ARRAY_BUFFER, ELEMENT_ARRAY_BUFFER = 34962, 34963
 
 
@@ -80,18 +81,64 @@ def _bytes(weights: tuple) -> tuple:
     return tuple(q)
 
 
+def _mime(data: bytes) -> str:
+    return WEBP if data[:4] == b"RIFF" and data[8:12] == b"WEBP" else "image/png"
+
+
+def _image_slots(gltf: dict, material: str) -> dict:
+    """{"col" | "nrm" | "orm": image index} of the material named."""
+    mat = next(m for m in gltf["materials"] if m.get("name") == material)
+    refs = {"col": mat.get("pbrMetallicRoughness", {}).get("baseColorTexture"), "nrm": mat.get("normalTexture"),
+            "orm": mat.get("pbrMetallicRoughness", {}).get("metallicRoughnessTexture")}
+    out = {}
+    for slot, ref in refs.items():
+        if ref is None:
+            continue
+        tex = gltf["textures"][ref["index"]]
+        out[slot] = tex.get("extensions", {}).get(WEBP_EXT, tex).get("source")
+    return out
+
+
+def images_of(path: str, material: str) -> dict:
+    """The bytes of the images the material named draws with, by slot (col, nrm, orm)."""
+    gltf, binary = read(path)
+    out = {}
+    for slot, image in _image_slots(gltf, material).items():
+        view = gltf["bufferViews"][gltf["images"][image]["bufferView"]]
+        start = view.get("byteOffset", 0)
+        out[slot] = bytes(binary[start:start + view["byteLength"]])
+    return out
+
+
+def _repaint(gltf: dict, w: _Writer, material: str, images: dict) -> None:
+    """Swaps the bytes of a material's images (by slot) for new ones of the same kind; the old ones are collected."""
+    slots = _image_slots(gltf, material)
+    for slot, data in images.items():
+        image = gltf["images"][slots[slot]]
+        if image["mimeType"] != _mime(data):
+            raise ValueError("%s %s: the new image is %s, the file's %s" % (material, slot, _mime(data),
+                                                                            image["mimeType"]))
+        image["bufferView"] = w.view(data)
+
+
 def _set_material(gltf: dict, w: _Writer, mat: dict) -> int:
-    """Adds (or replaces, by name) a material; `mat` holds name, roughness/metallic factors and PNG bytes for
-    `col` and optionally `orm`."""
+    """Adds (or replaces, by name) a material; `mat` holds name, roughness/metallic factors and image bytes (PNG or
+    WebP, told apart by their first bytes) for `col` and optionally `nrm` and `orm` (whose red is occlusion unless `occlusion` is False)."""
     textures = gltf.setdefault("textures", [])
     images = gltf.setdefault("images", [])
     samplers = gltf.setdefault("samplers", [])
     if not samplers:
         samplers.append({"magFilter": 9729, "minFilter": 9987})
 
-    def texture(name: str, png: bytes) -> int:
-        images.append({"name": name, "mimeType": "image/png", "bufferView": w.view(png)})
-        textures.append({"sampler": 0, "source": len(images) - 1})
+    def texture(name: str, data: bytes) -> int:
+        images.append({"name": name, "mimeType": _mime(data), "bufferView": w.view(data)})
+        if _mime(data) == WEBP:
+            textures.append({"sampler": 0, "extensions": {WEBP_EXT: {"source": len(images) - 1}}})
+            for key in ("extensionsUsed", "extensionsRequired"):
+                if WEBP_EXT not in gltf.setdefault(key, []):
+                    gltf[key].append(WEBP_EXT)
+        else:
+            textures.append({"sampler": 0, "source": len(images) - 1})
         return len(textures) - 1
 
     m = {"name": mat["name"], "pbrMetallicRoughness": {"baseColorTexture": {"index": texture(mat["col_name"],
@@ -99,9 +146,12 @@ def _set_material(gltf: dict, w: _Writer, mat: dict) -> int:
     for key, field in (("metallic", "metallicFactor"), ("roughness", "roughnessFactor")):
         if key in mat:
             m["pbrMetallicRoughness"][field] = mat[key]
+    if mat.get("nrm") is not None:
+        m["normalTexture"] = {"index": texture(mat["nrm_name"], mat["nrm"])}
     if mat.get("orm") is not None:
         m["pbrMetallicRoughness"]["metallicRoughnessTexture"] = {"index": texture(mat["orm_name"], mat["orm"])}
-        m["occlusionTexture"] = {"index": m["pbrMetallicRoughness"]["metallicRoughnessTexture"]["index"]}
+        if mat.get("occlusion", True):
+            m["occlusionTexture"] = {"index": m["pbrMetallicRoughness"]["metallicRoughnessTexture"]["index"]}
     mats = gltf.setdefault("materials", [])
     for i, old in enumerate(mats):
         if old.get("name") == mat["name"]:
@@ -112,9 +162,10 @@ def _set_material(gltf: dict, w: _Writer, mat: dict) -> int:
 
 
 def splice(path_in: str, path_out: str, meshes: dict, materials: list, skin: int = 0, sibling: str = "Kit",
-           drop: list = ()) -> dict:
+           drop: list = (), repaint: dict = None) -> dict:
     """Replaces the mesh of each node named in `meshes` (adding the node beside `sibling` when missing) and deletes
-    the nodes named in `drop`.
+    the nodes named in `drop`. `repaint` ({material: {slot: bytes}}) swaps the images of materials already in the
+    file.
 
     meshes: {node name: [primitive]} where a primitive is a dict with "material" (a name in `materials` or already in
     the file), "positions", "normals", "uvs" (lists of tuples, glTF space), "joints" (bone names, 4 per vertex),
@@ -126,6 +177,8 @@ def splice(path_in: str, path_out: str, meshes: dict, materials: list, skin: int
     mat_index = {m.get("name"): i for i, m in enumerate(gltf.get("materials", []))}
     for mat in materials:
         mat_index[mat["name"]] = _set_material(gltf, w, mat)
+    for name, images in (repaint or {}).items():
+        _repaint(gltf, w, name, images)
     by_name = {n.get("name"): i for i, n in enumerate(gltf["nodes"])}
     report = {}
     for name, prims in meshes.items():

@@ -265,6 +265,8 @@ FLAG_A = (55.0, -38.5)
 FLAG_B = (49.0, 38.5)
 OT_FLAG = (-3.0, 1.0)
 FLAGS = [FLAG_A, FLAG_B]
+# Plant The Bomb (PB1): the sites, A first, each (x, z, radius m; 0 the game's usual): A in the Fort, B at the Sawmill.
+BOMB_SITES = [(FLAG_A[0], FLAG_A[1], 0), (FLAG_B[0], FLAG_B[1], 0)]
 
 # West camp: a log palisade with three gates; a screen inside each gate so no line reaches a spawn point
 walls("palisade", [(-88, -14), (-72, -14), (-72, 20), (-88, 20)],

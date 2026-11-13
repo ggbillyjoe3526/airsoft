@@ -111,6 +111,11 @@ static func points(map: MapData) -> Dictionary[String, Vector3]:
 		out["the flag"] = map.pole
 	if map.has_overtime_flag:
 		out["the overtime flag"] = map.overtime_flag
+	# Plant The Bomb (PB1): the sites the file names, and where the bomb lies as a round starts.
+	for i in map.bomb_sites.size():
+		out["bomb site %s" % Plant.LETTERS[i]] = map.bomb_sites[i]
+	if map.has_bomb_sites:
+		out["the bomb's start"] = map.bomb_start_ahead(SimTuning.load_default().plant.start_ahead)
 	return out
 
 
@@ -126,7 +131,7 @@ static func on_floor(map: MapData, nav: NavGrid) -> Result:
 			off.append(says)
 	if not off.is_empty():
 		return Result.new(FieldStandard.ON_FLOOR, Status.FAIL, _list(off) + ".")
-	return Result.new(FieldStandard.ON_FLOOR, Status.PASS, "All %d spawns, dead-zone spots, lane points and flags stand on walkable floor."
+	return Result.new(FieldStandard.ON_FLOOR, Status.PASS, "All %d spawns, dead-zone spots, lane points, flags and bomb sites stand on walkable floor."
 			% all.size())
 
 

@@ -363,6 +363,59 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var flag_guard_radius: float = 6.0
 @export var flag_guard_threat_distance: float = 10.0
 
+@export_group("Plant The Bomb")
+## The player comes first (owner, 2026-11-12). On the attackers' team the bots leave a bomb on the ground to the player
+## for this long (s) from the round's GO, or from when it was dropped with the player near it ...
+@export var plant_player_first: float = 6.0
+## ... unless, at the start, the player is already this far from it (m): they left it for the bots.
+@export var plant_player_left: float = 10.0
+## A dropped bomb is the player's first only while they are within this of it (m); otherwise a bot fetches it
+## plant_drop_wait s after it fell.
+@export var plant_player_near: float = 12.0
+@export var plant_drop_wait: float = 1.0
+## The bot fetching the bomb waits this far from it (m) until the bots may take it, clear of the player's reach.
+@export var plant_wait_distance: float = 2.5
+## The defenders' bots know the bomb is being armed once one of their team in play is within this of it (m): what the
+## keypad's beeps carry (SoundConfig's reach for them); the nearest `retakers` of them then go for the planter.
+@export var plant_heard: float = 20.0
+## With this much of the round left or less (s) and the bomb not armed, the attackers stop sweeping their lanes and
+## make for the site.
+@export var plant_rush_clock: float = 40.0
+## The carrier goes in last: its lane swept, it holds there until plant_escorts of its team in play (or all that are
+## left) are within plant_escort_radius (m) of the site's middle, or it has held plant_carrier_wait s.
+@export var plant_escorts: int = 2
+@export var plant_escort_radius: float = 14.0
+@export var plant_carrier_wait: float = 10.0
+## The carrier arms the bomb once it stands within flag_arrive plus this (m) of its spot in the site.
+@export var plant_settle_slack: float = 0.4
+## The carrier looks for crouch cover to arm the bomb behind within the site's radius less this (m), so the spot is
+## inside the site.
+@export var plant_spot_inset: float = 1.0
+## A carrier this far along arming it (0 to 1) keeps arming whoever comes into view; before that it lets go and fights.
+@export var plant_commit: float = 0.6
+## The same for the bot disarming it.
+@export var defuse_commit: float = 0.7
+## On the defenders' team no bot disarms the bomb while the player is in play within this of it (m) ...
+@export var plant_player_claim: float = 15.0
+## ... until the fuse leaves only what the defuse still needs plus this (s): then the nearest bot takes it.
+@export var plant_takeover_margin: float = 4.0
+## Where every defender's lane ends nearer one site, this share of the defending bots guard the other site itself
+## from the round's start (rounded down; BotPlant._post_defenders), so neither site stands open.
+@export var plant_site_guard_share: float = 0.5
+## Whoever has both hands on the bomb (arming or disarming it) is made out through smoke by a bot within this of them
+## (m, level): the keys and the kit give their user away at close range (BotPlant.given_away). The player's too.
+@export var plant_gives_away: float = 5.0
+## The player is near the bomb (for taking it up and for disarming it) only within this of its height (m): a storey
+## above or below it (Subway's are 9 m apart) they are no nearer than the stairs, and the bots don't wait for them.
+## The same for the bots: one on the bomb's storey fetches it before one that is not (BotPlant.on_bomb_level).
+@export var plant_player_level: float = 2.5
+## The bot disarming keeps its hands on it whoever it sees once the fuse leaves only the defuse plus this (s).
+@export var plant_no_time: float = 1.5
+## While the player carries the bomb, the bots make for the site the player is within this of (m) and nearer to than
+## the planned one by plant_site_margin (m).
+@export var plant_follow_site: float = 30.0
+@export var plant_site_margin: float = 6.0
+
 @export_group("Overtime flag")
 ## Elimination's overtime flag (OV2; the browser game's botsSquad.ts OVERTIME): each bot sets off for its foot after its
 ## skill's overtime_reaction (a touch wins); one that watches the flag first (bots.md) guards it from cover as an

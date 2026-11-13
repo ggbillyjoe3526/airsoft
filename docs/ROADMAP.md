@@ -40,6 +40,9 @@ in `docs/PROCESS.md`.
   own model from his photos, SH2). And a
   new map (2026-11-10): Subway, a closed metro station on three levels, from his concept v2: its greybox as Dev
   content (MT1, done), then its working lifts (MT2, done), its CC0 materials (MT3, done), then its models and lamps.
+  And a third mode (2026-11-12): Plant The Bomb on every field (PB1: the attackers plant at Site A or B, the
+  defenders make it safe), with a dev-only field built for it to follow, Stockade (a second, Stacks, was scrapped
+  the same day at the owner's word).
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
   Access to the public.
   Themed updates follow (Replica, Modes, Maps, Progression and any more), up to 1.0, the full launch. See
@@ -187,7 +190,7 @@ Elimination); the rest follows in later Dev builds.
 - **Comfort, accessibility and squad orders** (owner, 2026-10-03, second batch): the basic comfort and accessibility
   settings, desktop basics (pause when the window loses focus, window modes and fullscreen, graphics problems
   handled), and three orders for your bot teammates.
-- **Modes:** the two that exist, Elimination and Attack / Defend.
+- **Modes:** Elimination and Attack / Defend, and Plant The Bomb (owner, 2026-11-12, PB1).
 - **Field:** Depot, reworked to the field checklist below.
 - **Foundations:** magazines and reloads, a BB physics pass, and movement and positioning.
 
@@ -218,7 +221,7 @@ The owner sorted every feature in the game and on this roadmap into Keep (in Bet
   reworked), the Tournament and Pro CQB rule sets (the Modes Update, folded into the field rule presets). The Retro
   pixel filter, once 0.5, went public in the browser game's 0.1 Dev 5 (M96).
 - **Cut:** Neon Heights (owner, 2026-10-29: the game is Depot and Woodland), supply weekends and events, the Tone
-  mapping choice, tracer BBs as their own option (glowing BBs do it), Bomb, Intel grab, Free-for-all (battle royale is
+  mapping choice, tracer BBs as their own option (glowing BBs do it), Intel grab, Free-for-all (battle royale is
   the owner's exception, 2026-10-06), the overshooting rule, gear that only changes looks as its own system (it joins
   kit looks), a separate progression plan (the levels are the progression), and the ideas listed under Declined in
   `docs/IDEAS.md`.

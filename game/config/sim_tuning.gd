@@ -29,6 +29,7 @@ const DEFAULT_PATH := "res://game/config/sim_tuning.tres"
 @export var doors: DoorConfig = DoorConfig.new()
 @export var lifts: LiftConfig = LiftConfig.new()
 @export var lasers: LaserConfig = LaserConfig.new()
+@export var plant: PlantConfig = PlantConfig.new()
 
 
 ## The game's tuning (sim_tuning.tres), or the built-in values with a warning if it can't be loaded.

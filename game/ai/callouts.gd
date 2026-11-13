@@ -26,7 +26,8 @@ const TEAM_EVENTS: Array[int] = [
 	CalloutsFile.Event.DOWN, CalloutsFile.Event.LAST_ONE, CalloutsFile.Event.TAGGED, CalloutsFile.Event.RAISING,
 	CalloutsFile.Event.FLAG, CalloutsFile.Event.OVERTIME, CalloutsFile.Event.PING_GOING,
 	CalloutsFile.Event.PING_WATCHING, CalloutsFile.Event.COVER_ME, CalloutsFile.Event.WATCH_JOIN,
-	CalloutsFile.Event.WATCH_REST,
+	CalloutsFile.Event.WATCH_REST, CalloutsFile.Event.BOMB, CalloutsFile.Event.BOMB_ARMED,
+	CalloutsFile.Event.BOMB_DOWN,
 ]
 ## The answers to a player's ping and the asks and answers for a magazine: a personality's Talks (×) never makes them
 ## less likely.
@@ -92,6 +93,8 @@ var orders: SquadOrderBook = null
 var _watch_answered: int = 0
 ## You (the player's character): the bots on your team ask for you (BQ2). Null: nobody asks.
 var you: Character = null
+## How far the keys of a bomb being armed carry to a defender (m): BotConfig.plant_heard, set by the controller (PB1).
+var bomb_heard: float = 0.0
 var _file: CalloutsFile = null
 var _cfg: CalloutConfig = null
 var _areas: Array[MapAreas.Area] = []
@@ -233,11 +236,54 @@ func _on_event(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
 			if _far_from_you(e.position):
 				var ask := CalloutsFile.Event.COVER_ME if you.team == attackers else CalloutsFile.Event.NEED_HELP
 				_offer_from_team(you.team, ask, -1, e.position, bots, area_of(e.position), 0, 0, e.position)
+		GameEvent.Kind.PLANT:
+			_on_plant_cue(e, state, bots)
 		GameEvent.Kind.OVERTIME:
 			# Elimination's overtime flag went up (OV2): on each team, the bot nearest it says so, naming its area.
 			var area := area_of(e.position)
 			for t in TEAMS:
 				_offer_from_team(t, CalloutsFile.Event.OVERTIME, -1, e.position, bots, area, 0, 0)
+
+
+## Plant The Bomb (PB1), each naming the site ("A site") or the area: the bot keying the code in says Planting, and a
+## defender within earshot of the keys (BotConfig.plant_heard, the nearest) says Bomb; armed, the attacker nearest it
+## says Bomb armed; a bot starting to make it safe says Defusing; and the attacker nearest a bomb dropped by a carrier
+## who was hit says Bomb down. A player's own work is never called for them.
+func _on_plant_cue(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
+	var attackers := state.round_state.attackers
+	if attackers < 0 or attackers >= TEAMS:
+		return
+	var area := area_of(e.position)
+	var own := _bot_index(bots, e.actor)
+	match e.value:
+		Plant.Cue.ARMING:
+			if own >= 0:
+				_offer(attackers, CalloutsFile.Event.PLANTING, own, bots, area, 0, 0, -1)
+			var near := _nearest_within(1 - attackers, e.position, bomb_heard, bots)
+			if near >= 0:
+				_offer(1 - attackers, CalloutsFile.Event.BOMB, near, bots, area, 0, 0, -1)
+		Plant.Cue.PLANTED:
+			_offer_from_team(attackers, CalloutsFile.Event.BOMB_ARMED, -1, e.position, bots, area, 0, 0)
+		Plant.Cue.DEFUSING:
+			if own >= 0:
+				_offer(1 - attackers, CalloutsFile.Event.DEFUSING, own, bots, "", 0, 0, -1)
+		Plant.Cue.DROPPED:
+			_offer_from_team(attackers, CalloutsFile.Event.BOMB_DOWN, -1, e.position, bots, area, 0, 0)
+
+
+## The bot of `team` that may speak nearest `at`, within `reach` m of it (flat); -1 when none is.
+func _nearest_within(team: int, at: Vector3, reach: float, bots: Array[Bot]) -> int:
+	var best := reach
+	var found := -1
+	for i in bots.size():
+		var c := bots[i].character
+		if c.team != team or not _may_speak(i, bots):
+			continue
+		var d := Vector2(c.position.x - at.x, c.position.z - at.z).length()
+		if d <= best:
+			best = d
+			found = i
+	return found
 
 
 ## A hit on the other team: Down with how many are left, or Last one (naming where when the team saw them lately),

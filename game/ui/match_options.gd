@@ -6,34 +6,36 @@ extends RefCounted
 
 const MODE_ELIMINATION := "elimination"
 const MODE_ATTACK_DEFEND := "attack_defend"
+const MODE_PLANT_THE_BOMB := "plant_the_bomb"
 const MODE_PRACTICE := "practice"
 ## The mode picked first, and taken first wherever the picked one can't be played there (BP8, owner: Attack / Defend);
 ## a map without a pole falls back to the first of MODES it hosts.
 const DEFAULT_MODE := MODE_ATTACK_DEFEND
 ## Every mode, in the order the cards show them, top to bottom (owner, 2026-11-10: Attack / Defend first, then
-## Elimination, then Practice).
-const MODES: PackedStringArray = ["attack_defend", "elimination", "practice"]
+## Elimination, then Practice; PB1, owner 2026-11-12: Plant The Bomb third, before Practice).
+const MODES: PackedStringArray = ["attack_defend", "elimination", "plant_the_bomb", "practice"]
 ## The modes that are built; the others show greyed with a LATER tag.
-const BUILT_MODES: PackedStringArray = ["attack_defend", "elimination", "practice"]
-## The tag a mode card carries on a map that doesn't host it (a translation key): Elimination and Attack / Defend say
-## FIELDS ONLY on the range. Every map hosts Practice.
+const BUILT_MODES: PackedStringArray = ["attack_defend", "elimination", "plant_the_bomb", "practice"]
+## The tag a mode card carries on a map that doesn't host it (a translation key): Elimination, Attack / Defend and
+## Plant The Bomb say FIELDS ONLY on the range. Every map hosts Practice.
 const FIELDS_ONLY_KEY := "MENU_FIELDS_ONLY"
-## The modes that need a map with a flagpole (MapData.has_pole).
-const POLE_MODES: PackedStringArray = ["attack_defend"]
+## The modes that need a map with a flagpole (MapData.has_pole): Plant The Bomb's sites default to the poles.
+const POLE_MODES: PackedStringArray = ["attack_defend", "plant_the_bomb"]
 ## The words of a mode: its name and its line (translation keys).
 const MODE_NAME: Dictionary[String, String] = {
-	"elimination": "MODE_ELIMINATION", "attack_defend": "MODE_ATTACK_DEFEND", "practice": "MODE_PRACTICE",
+	"elimination": "MODE_ELIMINATION", "attack_defend": "MODE_ATTACK_DEFEND", "plant_the_bomb": "MODE_PLANT_THE_BOMB",
+	"practice": "MODE_PRACTICE",
 }
 const MODE_BLURB: Dictionary[String, String] = {
 	"elimination": "MODE_ELIMINATION_BLURB", "attack_defend": "MODE_ATTACK_DEFEND_BLURB",
-	"practice": "MODE_PRACTICE_BLURB",
+	"plant_the_bomb": "MODE_PLANT_THE_BOMB_BLURB", "practice": "MODE_PRACTICE_BLURB",
 }
 ## The modes a map of each kind hosts (data/maps.md's Kind): every field hosts Elimination, Attack / Defend (only with a
-## flagpole) and Practice (M94: targets where the other team would play), the range Practice alone. Values are plain
-## Arrays: Godot 4.7.2 keeps a const Dictionary[K, PackedStringArray]'s values as Arrays and can crash reading one by a
-## variable key (GraphicsTable's pattern).
+## flagpole), Plant The Bomb (likewise) and Practice (M94: targets where the other team would play), the range Practice
+## alone. Values are plain Arrays: Godot 4.7.2 keeps a const Dictionary[K, PackedStringArray]'s values as Arrays and can
+## crash reading one by a variable key (GraphicsTable's pattern).
 const KIND_MODES: Dictionary[StringName, Array] = {
-	&"field": ["attack_defend", "elimination", "practice"],
+	&"field": ["attack_defend", "elimination", "plant_the_bomb", "practice"],
 	&"range": ["practice"],
 }
 ## The rule sets (concepts `rules-skirmish.png`, `rules-custom.png`): Skirmish plays the round tuning as it is, Custom
@@ -73,9 +75,8 @@ static func modes_offered(map: MapCatalog.Entry) -> PackedStringArray:
 static func mode_pickable(mode: String, map: MapCatalog.Entry, has_pole: bool) -> bool:
 	return BUILT_MODES.has(mode) and modes_offered(map).has(mode) and (has_pole or not POLE_MODES.has(mode))
 
-
-## The words on a mode card that the picked `map` doesn't host: FIELDS ONLY on the range's Elimination and Attack /
-## Defend; "" for a mode the map hosts (or no map).
+## The words on a mode card that the picked `map` doesn't host: FIELDS ONLY on the range's Elimination, Attack / Defend
+## and Plant The Bomb; "" for a mode the map hosts (or no map).
 static func only_tag_key(mode: String, map: MapCatalog.Entry) -> String:
 	if map == null or modes_offered(map).has(mode):
 		return ""

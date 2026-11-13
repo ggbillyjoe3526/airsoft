@@ -1,0 +1,601 @@
+extends GutTest
+## Plant The Bomb's bots (PB1, game/ai/bot_plant.gd): the sites as the bots' flags, who fetches the bomb and when (the
+## player first), which site is in play, who goes back to an armed bomb and who disarms it (the player first, until
+## the fuse leaves no time), and when a bot's hands go on it.
+
+const SITE_A := Vector3(30.0, 0.0, -12.0)
+const SITE_B := Vector3(30.0, 0.0, 12.0)
+const START := Vector3(-30.0, 0.0, 0.0)
+const PLAYER := 0
+
+var w: BotWorld
+var rs: RoundState
+var cs: Array[Character] = []
+var cmd := PlayerCommand.new()
+
+
+## Three a side: team 0 attacks from the west (ids 0 to 2), team 1 defends (3 to 5). `player` (an id, or -1) is driven
+## by no bot.
+func _world(player: int = -1) -> void:
+	w = BotWorld.new()
+	w.cfg = BotConfig.load_default()
+	w.tuning = SimTuning.new()
+	w.mode = RoundState.Mode.PLANT_THE_BOMB
+	w.attackers = 0
+	w.planner = RoundPlanner.new(7)
+	w.planner.spawn_centre = [Vector3(-30.0, 0.0, 0.0), Vector3(40.0, 0.0, 0.0)]
+	w.planner.attack_dir = [Vector2(1.0, 0.0), Vector2(-1.0, 0.0)]
+	w.planner.attack_flag = 0
+	rs = RoundState.new()
+	rs.mode = RoundState.Mode.PLANT_THE_BOMB
+	rs.attackers = 0
+	rs.plant.set_sites(PackedVector3Array([SITE_A, SITE_B]), PackedFloat32Array(), w.tuning.plant.site_radius)
+	rs.plant.start = START
+	rs.plant.reset()
+	cs = []
+	w.bots = []
+	var loadout: Array[ReplicaConfig] = []
+	for id in 6:
+		var team := 0 if id < 3 else 1
+		var at := Vector3(-32.0 - id, 0.0, float(id)) if team == 0 else Vector3(38.0, 0.0, float(id) * 4.0 - 16.0)
+		var c := Character.new(id, team, at, 0.0, loadout)
+		cs.append(c)
+		if id != player:
+			w.bots.append(Bot.new(c, id + 1, w.cfg.skill, 6))
+	w.characters = cs
+	BotPlant.sync(w, rs)
+
+
+func _bot(id: int) -> Bot:
+	return w.bot_of(cs[id])
+
+
+func _arm(site: int) -> void:
+	rs.plant.status = PlantState.Status.PLANTED
+	rs.plant.site = site
+	rs.plant.position = rs.plant.sites[site] + Vector3(1.0, 0.0, 0.0)
+	rs.plant.fuse_left = w.tuning.plant.fuse_time
+	rs.plant.carrier = -1
+	BotPlant.sync(w, rs)
+
+
+func test_the_sites_stand_in_for_the_poles_and_the_drawn_one_is_in_play() -> void:
+	_world()
+	assert_eq(w.flags.size(), 2)
+	assert_eq(w.flags[0].position, SITE_A)
+	assert_eq(w.flags[1].position, SITE_B)
+	assert_eq(w.flag_index, 0)
+	w.planner.attack_flag = 1
+	BotPlant.sync(w, rs)
+	assert_eq(w.plant_site, 1)
+	assert_same(w.flag, w.flags[1])
+	assert_eq(w.flags[1].progress, 0.0, "nothing armed: nothing for the defenders to go back to")
+
+
+func test_an_armed_bomb_is_the_site_in_play_where_it_stands() -> void:
+	_world()
+	_arm(1)
+	assert_eq(w.flag_index, 1, "though A was drawn")
+	assert_eq(w.flags[1].position, rs.plant.position, "the bots go to the bomb, not the site's middle")
+	assert_eq(w.flags[1].progress, 1.0)
+	rs.plant.defuser = 4
+	BotPlant.sync(w, rs)
+	assert_eq(w.flags[1].status, FlagState.Status.LOWERING)
+
+
+func test_the_defenders_learn_of_the_keys_only_within_earshot() -> void:
+	_world()
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 1
+	rs.plant.position = SITE_A
+	rs.plant.site = 0
+	rs.plant.planter = 1
+	rs.plant.planting = 0.3
+	for id: int in [3, 4, 5]:
+		cs[id].position = SITE_A + Vector3(w.cfg.plant_heard + 2.0, 0.0, 0.0)
+	BotPlant.sync(w, rs)
+	assert_eq(w.flags[0].progress, 0.0, "nobody near enough to hear")
+	cs[4].position = SITE_A + Vector3(w.cfg.plant_heard - 2.0, 0.0, 0.0)
+	BotPlant.sync(w, rs)
+	assert_almost_eq(w.flags[0].progress, 0.3, 0.001)
+	assert_eq(w.flags[0].status, FlagState.Status.RAISING)
+	cs[4].status = Character.Status.OUT
+	BotPlant.sync(w, rs)
+	assert_eq(w.flags[0].progress, 0.0, "one out of play hears nothing")
+
+
+func test_the_nearest_free_attacker_fetches_the_bomb_and_nobody_once_it_is_carried() -> void:
+	_world()
+	cs[1].position = START + Vector3(1.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(1).fetcher)
+	assert_false(_bot(0).fetcher or _bot(2).fetcher)
+	assert_false(_bot(3).fetcher, "never a defender")
+	_bot(1).order = SquadOrder.Kind.HOLD
+	BotPlant.plan(w)
+	assert_false(_bot(1).fetcher, "one under a squad order does what it was asked")
+	assert_true(_bot(0).fetcher or _bot(2).fetcher)
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 2
+	BotPlant.plan(w)
+	for id in 3:
+		assert_false(_bot(id).fetcher)
+	assert_true(_bot(2).raiser, "the carrier is the one who goes in")
+	assert_false(_bot(0).raiser)
+
+
+func test_a_bot_on_the_bombs_storey_fetches_it_before_a_nearer_one_a_storey_off() -> void:
+	_world()
+	var storey := w.cfg.plant_player_level + 6.0
+	rs.plant.position = START + Vector3(0.0, storey, 0.0)
+	cs[0].position = START + Vector3(1.0, 0.0, 0.0)
+	cs[1].position = START + Vector3(30.0, storey, 0.0)
+	cs[2].position = START + Vector3(4.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(1).fetcher, "30 m off on its storey, not 1 m off under it")
+	assert_false(_bot(0).fetcher or _bot(2).fetcher)
+
+
+func test_the_one_fetching_a_bomb_a_storey_off_is_kept_whoever_passes_nearer() -> void:
+	_world()
+	var storey := w.cfg.plant_player_level + 6.0
+	rs.plant.position = START + Vector3(0.0, storey, 0.0)
+	cs[0].position = START + Vector3(3.0, 0.0, 0.0)
+	cs[1].position = START + Vector3(8.0, 0.0, 0.0)
+	cs[2].position = START + Vector3(40.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(0).fetcher)
+	# It walks off to the stairs, away from the bomb as the crow flies, and another comes to stand under it.
+	cs[0].position = START + Vector3(25.0, 0.0, 0.0)
+	cs[1].position = START
+	BotPlant.plan(w)
+	assert_true(_bot(0).fetcher, "the job is not swapped between two bots neither of whom is on its storey")
+	assert_false(_bot(1).fetcher)
+	cs[2].position = START + Vector3(35.0, storey, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(2).fetcher, "one who is on its storey takes over")
+	cs[0].position = START + Vector3(1.0, storey, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(0).fetcher, "and on the same storey the nearer by the margin")
+	cs[0].status = Character.Status.OUT
+	BotPlant.plan(w)
+	assert_true(_bot(2).fetcher, "the one going is out: the next")
+
+
+func test_a_fetcher_has_not_come_to_a_bomb_it_stands_under() -> void:
+	_world()
+	var storey := w.cfg.plant_player_level + 6.0
+	rs.plant.position = START + Vector3(0.0, storey, 0.0)
+	cs[1].position = START
+	BotPlant.plan(w)
+	assert_true(_bot(1).fetcher)
+	cmd.reset()
+	BotMovement._flag(_bot(1), w, cmd, 1.0 / 60.0)
+	assert_false(cmd.crouch, "under it is not at it")
+	cs[1].position = START + Vector3(0.0, storey, 0.0)
+	cmd.reset()
+	BotMovement._flag(_bot(1), w, cmd, 1.0 / 60.0)
+	assert_true(cmd.crouch, "beside it on its storey it waits low")
+
+
+func test_with_no_player_attacking_the_bots_take_the_bomb_at_once() -> void:
+	_world()
+	assert_true(BotPlant.may_take(w))
+
+
+func test_the_bots_leave_the_bomb_to_the_player_at_the_start() -> void:
+	_world(PLAYER)
+	cs[PLAYER].position = START + Vector3(-3.0, 0.0, 0.0)
+	w.plant_down_at = 0.0
+	w.time = 1.0
+	assert_false(BotPlant.may_take(w), "the player stands by it")
+	w.time = w.cfg.plant_player_first - 0.1
+	assert_false(BotPlant.may_take(w))
+	w.time = w.cfg.plant_player_first + 0.1
+	assert_true(BotPlant.may_take(w), "they had their time")
+	w.time = 1.0
+	cs[PLAYER].position = START + Vector3(w.cfg.plant_player_left + 1.0, 0.0, 0.0)
+	assert_true(BotPlant.may_take(w), "the player walked off without it")
+	cs[PLAYER].position = START
+	cs[PLAYER].status = Character.Status.OUT
+	assert_true(BotPlant.may_take(w), "a player out of play has no claim")
+
+
+func test_a_dropped_bomb_is_left_to_a_player_near_it() -> void:
+	_world(PLAYER)
+	rs.plant.moved = true
+	rs.plant.position = Vector3(10.0, 0.0, 0.0)
+	w.plant_down_at = 20.0
+	w.time = 20.0 + w.cfg.plant_drop_wait + 0.1
+	cs[PLAYER].position = rs.plant.position + Vector3(w.cfg.plant_player_near - 1.0, 0.0, 0.0)
+	assert_false(BotPlant.may_take(w))
+	cs[PLAYER].position = rs.plant.position + Vector3(w.cfg.plant_player_near + 1.0, 0.0, 0.0)
+	assert_true(BotPlant.may_take(w), "the player is not near: a bot takes it after a moment")
+	w.time = 20.0 + w.cfg.plant_drop_wait - 0.1
+	assert_false(BotPlant.may_take(w), "not the instant it falls")
+
+
+func test_a_fetcher_waits_with_its_hands_off_until_it_may_take_it() -> void:
+	_world(PLAYER)
+	cs[PLAYER].position = START + Vector3(-2.0, 0.0, 0.0)
+	cs[1].position = START + Vector3(0.5, 0.0, 0.0)
+	w.time = 1.0
+	BotPlant.plan(w)
+	assert_true(_bot(1).fetcher)
+	cmd.reset()
+	BotPlant.act(_bot(1), w, cmd)
+	assert_false(cmd.interact)
+	w.time = w.cfg.plant_player_first + 1.0
+	BotPlant.act(_bot(1), w, cmd)
+	assert_true(cmd.interact)
+	cmd.reset()
+	BotPlant.act(_bot(2), w, cmd)
+	assert_false(cmd.interact, "only the fetcher")
+
+
+func test_the_carrier_arms_once_settled_in_the_site_and_commits() -> void:
+	_world()
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 1
+	BotPlant.plan(w)
+	var b := _bot(1)
+	b.mode = Bot.Mode.FLAG
+	b.flag_guard = false
+	b.flag_goal = SITE_A + Vector3(1.0, 0.0, 0.0)
+	cs[1].position = SITE_A + Vector3(3.0, 0.0, 0.0)
+	cmd.reset()
+	BotPlant.act(b, w, cmd)
+	assert_false(cmd.interact, "inside the site but not at its spot yet")
+	cs[1].position = b.flag_goal
+	BotPlant.act(b, w, cmd)
+	assert_true(cmd.interact)
+	assert_true(cmd.crouch)
+	assert_false(cmd.fire)
+	# Pulled into a fight part way: under plant_commit it lets go, past it it finishes.
+	b.mode = Bot.Mode.FIGHT
+	rs.plant.planter = 1
+	rs.plant.planting = w.cfg.plant_commit - 0.1
+	cmd.reset()
+	BotPlant.act(b, w, cmd)
+	assert_false(cmd.interact)
+	rs.plant.planting = w.cfg.plant_commit + 0.1
+	BotPlant.act(b, w, cmd)
+	assert_true(cmd.interact)
+	cs[1].position = SITE_A + Vector3(w.tuning.plant.site_radius + 2.0, 0.0, 0.0)
+	cmd.reset()
+	BotPlant.act(b, w, cmd)
+	assert_false(cmd.interact, "never outside a site")
+
+
+func test_every_free_defender_goes_back_to_an_armed_bomb_and_the_nearest_disarms_it() -> void:
+	_world()
+	_arm(0)
+	cs[4].position = rs.plant.position + Vector3(3.0, 0.0, 0.0)
+	_bot(5).order = SquadOrder.Kind.HOLD
+	BotPlant.plan(w)
+	assert_true(_bot(3).retake and _bot(4).retake)
+	assert_eq(_bot(3).retake_pole, 0)
+	assert_false(_bot(5).retake, "one under a squad order stays")
+	assert_true(_bot(4).defuser)
+	assert_false(_bot(3).defuser)
+	assert_true(BotPlant.wants_site(_bot(3), w))
+	assert_true(BotPlant.guards(_bot(3), w), "the others cover the one on the bomb")
+	assert_false(BotPlant.guards(_bot(4), w))
+	assert_true(BotPlant.wants_site(_bot(1), w), "the attackers hold the armed bomb")
+	assert_true(BotPlant.guards(_bot(1), w))
+
+
+func test_the_one_disarming_puts_its_hands_on_in_reach_and_finishes_past_the_commit() -> void:
+	_world()
+	_arm(0)
+	cs[4].position = rs.plant.position + Vector3(1.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	var b := _bot(4)
+	b.mode = Bot.Mode.FLAG
+	cmd.reset()
+	BotPlant.act(b, w, cmd)
+	assert_true(cmd.interact)
+	b.mode = Bot.Mode.FIGHT
+	cmd.reset()
+	BotPlant.act(b, w, cmd)
+	assert_false(cmd.interact, "a fight comes first while there is time")
+	rs.plant.defuser = 4
+	rs.plant.defusing = w.cfg.defuse_commit + 0.05
+	BotPlant.act(b, w, cmd)
+	assert_true(cmd.interact, "nearly done: it finishes")
+	rs.plant.defusing = 0.0
+	rs.plant.fuse_left = w.tuning.plant.defuse_time + w.cfg.plant_no_time - 0.1
+	cmd.reset()
+	BotPlant.act(b, w, cmd)
+	assert_true(cmd.interact, "no time for anything else")
+	cs[4].position = rs.plant.position + Vector3(w.tuning.plant.defuse_reach + 1.0, 0.0, 0.0)
+	cmd.reset()
+	BotPlant.act(b, w, cmd)
+	assert_false(cmd.interact, "out of reach")
+
+
+func test_the_bots_leave_the_defuse_to_a_player_near_the_bomb_until_the_fuse_is_short() -> void:
+	_world(3)
+	w.attackers = 0
+	_arm(0)
+	var you := cs[3]
+	you.position = rs.plant.position + Vector3(w.cfg.plant_player_claim - 1.0, 0.0, 0.0)
+	assert_false(BotPlant.may_defuse(w))
+	BotPlant.plan(w)
+	assert_false(_bot(4).defuser or _bot(5).defuser)
+	assert_true(_bot(4).retake, "they still come back and cover")
+	var takeover := w.tuning.plant.defuse_time + w.cfg.plant_takeover_margin
+	rs.plant.fuse_left = takeover + 0.5
+	assert_false(BotPlant.may_defuse(w))
+	rs.plant.fuse_left = takeover - 0.5
+	assert_true(BotPlant.may_defuse(w), "the fuse leaves a bot only just time")
+	BotPlant.plan(w)
+	assert_true(_bot(4).defuser or _bot(5).defuser)
+	# With the player's own hands on it the bots never take over.
+	rs.plant.defuser = you.id
+	rs.plant.defusing = 0.2
+	assert_false(BotPlant.may_defuse(w))
+	rs.plant.defuser = -1
+	rs.plant.fuse_left = w.tuning.plant.fuse_time
+	you.position = rs.plant.position + Vector3(w.cfg.plant_player_claim + 2.0, 0.0, 0.0)
+	assert_true(BotPlant.may_defuse(w), "a player nowhere near has no claim")
+	you.position = rs.plant.position + Vector3(1.0, w.cfg.plant_player_level + 1.0, 0.0)
+	assert_true(BotPlant.may_defuse(w), "nor one a storey over it")
+	you.position = rs.plant.position + Vector3(1.0, w.cfg.plant_player_level - 0.5, 0.0)
+	assert_false(BotPlant.may_defuse(w), "a step up is still beside it")
+	you.position = rs.plant.position
+	you.status = Character.Status.OUT
+	assert_true(BotPlant.may_defuse(w), "nor one out of play")
+
+
+## Defenders 3 to 5 dealt `lane`s (an index each into w.lanes), each to hold its lane's last point.
+func _deal(lanes: Array[int]) -> void:
+	for i in lanes.size():
+		var b := _bot(3 + i)
+		cs[3 + i].end = 1
+		b.reset(lanes[i], 1, 0.0, w.cfg)
+
+
+func test_a_site_no_defender_s_lane_ends_at_gets_guards_of_its_own() -> void:
+	_world()
+	# Every lane ends by site A (as Subway's do): B would stand open.
+	w.lanes = [PackedVector3Array([START, SITE_A + Vector3(4.0, 0.0, 2.0)]),
+			PackedVector3Array([START, SITE_A + Vector3(6.0, 0.0, 9.0)]),
+			PackedVector3Array([START, SITE_A + Vector3(2.0, 0.0, -3.0)])]
+	_deal([0, 1, 2])
+	BotPlant.plan(w)
+	assert_eq(_bot(4).site_guard, 1, "the one whose post lies nearest B guards it")
+	assert_eq(_bot(3).site_guard, -1)
+	assert_eq(_bot(5).site_guard, -1, "half of three, rounded down: one")
+	assert_true(BotPlant.wants_site(_bot(4), w), "at its site from the round's start")
+	assert_true(BotPlant.guards(_bot(4), w), "in cover by it, not standing on it")
+	assert_eq(BotFlag.pole_of(_bot(4), w), 1)
+	assert_false(BotPlant.wants_site(_bot(3), w), "the others hold their lanes")
+	# The bomb armed at A: its guard goes back with the rest.
+	_arm(0)
+	BotPlant.plan(w)
+	assert_eq(BotFlag.pole_of(_bot(4), w), 0)
+	assert_true(BotPlant.wants_site(_bot(4), w))
+
+
+func test_with_a_post_by_each_site_nobody_is_moved() -> void:
+	_world()
+	w.lanes = [PackedVector3Array([START, SITE_A + Vector3(4.0, 0.0, 2.0)]),
+			PackedVector3Array([START, Vector3(34.0, 0.0, 1.0)]),
+			PackedVector3Array([START, SITE_B + Vector3(4.0, 0.0, -2.0)])]
+	_deal([0, 1, 2])
+	BotPlant.plan(w)
+	for id: int in [3, 4, 5]:
+		assert_eq(_bot(id).site_guard, -1)
+		assert_false(BotPlant.wants_site(_bot(id), w))
+
+
+func test_site_guards_are_dealt_afresh_each_round() -> void:
+	_world()
+	w.lanes = [PackedVector3Array([START, SITE_A + Vector3(4.0, 0.0, 2.0)])]
+	_deal([0, 0, 0])
+	BotPlant.plan(w)
+	assert_eq(_bot(3).site_guard + _bot(4).site_guard + _bot(5).site_guard, -1, "one of the three guards B")
+	# Next round the lanes cover both sites: last round's guard holds its lane again.
+	w.lanes = [PackedVector3Array([START, SITE_A]), PackedVector3Array([START, SITE_B])]
+	_deal([0, 1, 0])
+	var events := SimEvents.new()
+	events.add(GameEvent.Kind.ROUND_START)
+	BotPlant.observe(w, events, 0.0)
+	BotPlant.plan(w)
+	for id: int in [3, 4, 5]:
+		assert_eq(_bot(id).site_guard, -1)
+
+
+func test_the_bots_follow_a_player_carrying_the_bomb_to_the_other_site() -> void:
+	_world(PLAYER)
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = PLAYER
+	cs[PLAYER].position = Vector3(0.0, 0.0, 0.0)
+	BotPlant.sync(w, rs)
+	assert_eq(w.plant_site, 0, "in the middle the drawn site stands")
+	cs[PLAYER].position = SITE_B + Vector3(-w.cfg.plant_follow_site + 2.0, 0.0, 0.0)
+	BotPlant.sync(w, rs)
+	assert_eq(w.plant_site, 1, "closing on B: the bots come too")
+	assert_eq(w.planner.attack_flag, 1, "and B is kept for the round")
+	cs[PLAYER].position = Vector3(0.0, 0.0, 0.0)
+	BotPlant.sync(w, rs)
+	assert_eq(w.plant_site, 1)
+
+
+func test_a_bomb_dropped_by_the_other_site_moves_the_plan_there() -> void:
+	_world()
+	var events := SimEvents.new()
+	var e := events.add(GameEvent.Kind.PLANT)
+	e.value = Plant.Cue.DROPPED
+	e.position = SITE_B + Vector3(-4.0, 0.0, 0.0)
+	BotPlant.observe(w, events, 12.0)
+	assert_eq(w.planner.attack_flag, 1)
+	assert_eq(w.plant_down_at, 12.0)
+	w.planner.attack_flag = 0
+	events.clear()
+	e = events.add(GameEvent.Kind.PLANT)
+	e.value = Plant.Cue.DROPPED
+	e.position = START + Vector3(5.0, 0.0, 9.0)
+	BotPlant.observe(w, events, 14.0)
+	assert_eq(w.planner.attack_flag, 0, "dropped in its own half, the plan stands")
+
+
+func test_attackers_go_in_once_their_lane_is_swept_or_the_clock_runs_short() -> void:
+	_world()
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 1
+	BotPlant.plan(w)
+	var b := _bot(0)
+	w.round_clock = w.cfg.plant_rush_clock + 30.0
+	assert_false(BotPlant.wants_site(b, w))
+	b.lane_done = true
+	assert_true(BotPlant.wants_site(b, w))
+	b.lane_done = false
+	w.round_clock = w.cfg.plant_rush_clock - 1.0
+	assert_true(BotPlant.wants_site(b, w), "short of time, everyone goes")
+	assert_false(BotPlant.wants_site(_bot(3), w), "a defender holds its post while nothing is armed")
+
+
+func test_the_carrier_goes_in_last_once_its_escort_is_by_the_site_or_it_has_waited() -> void:
+	_world()
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 1
+	w.round_clock = w.cfg.plant_rush_clock + 30.0
+	w.time = 20.0
+	var carrier := _bot(1)
+	carrier.lane_done = true
+	BotPlant.plan(w)
+	assert_true(carrier.raiser)
+	assert_false(BotPlant.wants_site(carrier, w), "its lane swept, but nobody of its team is by the site yet")
+	cs[0].position = SITE_A + Vector3(-w.cfg.plant_escort_radius + 1.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_false(BotPlant.wants_site(carrier, w), "one of the two it waits for")
+	cs[2].position = SITE_A + Vector3(0.0, 0.0, w.cfg.plant_escort_radius - 1.0)
+	BotPlant.plan(w)
+	assert_true(BotPlant.wants_site(carrier, w), "both in: it goes")
+	cs[0].position = START
+	cs[2].position = START
+	BotPlant.plan(w)
+	assert_true(BotPlant.wants_site(carrier, w), "kept once given")
+	# Another carrier starts over, and goes after plant_carrier_wait s whoever is there.
+	rs.plant.carrier = 2
+	var next := _bot(2)
+	next.lane_done = true
+	BotPlant.plan(w)
+	assert_false(BotPlant.wants_site(next, w))
+	w.time += w.cfg.plant_carrier_wait - 0.5
+	BotPlant.plan(w)
+	assert_false(BotPlant.wants_site(next, w))
+	w.time += 1.0
+	BotPlant.plan(w)
+	assert_true(BotPlant.wants_site(next, w), "waited long enough")
+
+
+func test_the_last_attacker_carries_straight_in() -> void:
+	_world()
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 1
+	w.round_clock = w.cfg.plant_rush_clock + 30.0
+	cs[0].status = Character.Status.OUT
+	cs[2].status = Character.Status.OUT
+	_bot(1).lane_done = true
+	BotPlant.plan(w)
+	assert_true(BotPlant.wants_site(_bot(1), w), "nobody left to wait for")
+
+
+func test_a_bomb_taken_up_in_the_defenders_half_is_carried_straight_on() -> void:
+	_world()
+	var events := SimEvents.new()
+	var e := events.add(GameEvent.Kind.PLANT)
+	e.value = Plant.Cue.DROPPED
+	e.position = SITE_A + Vector3(-6.0, 0.0, 0.0)
+	BotPlant.observe(w, events, 30.0)
+	events.clear()
+	e = events.add(GameEvent.Kind.PLANT)
+	e.value = Plant.Cue.PICKED_UP
+	e.actor = 2
+	e.position = SITE_A + Vector3(-6.0, 0.0, 0.0)
+	BotPlant.observe(w, events, 34.0)
+	assert_true(_bot(2).lane_done, "its lane is behind it")
+	assert_false(_bot(1).lane_done)
+	# From the start line, its carrier still sweeps its lane.
+	_world()
+	events.clear()
+	e = events.add(GameEvent.Kind.PLANT)
+	e.value = Plant.Cue.PICKED_UP
+	e.actor = 1
+	e.position = START
+	BotPlant.observe(w, events, 1.0)
+	assert_false(_bot(1).lane_done)
+
+
+func test_an_attacker_who_hears_the_kit_leaves_its_cover_for_the_bomb() -> void:
+	_world()
+	_arm(0)
+	var near := _bot(0)
+	var far := _bot(2)
+	cs[0].position = rs.plant.position + Vector3(-w.cfg.plant_heard + 2.0, 0.0, 0.0)
+	cs[2].position = rs.plant.position + Vector3(-w.cfg.plant_heard - 2.0, 0.0, 0.0)
+	assert_true(BotPlant.guards(near, w), "armed and quiet: it guards from cover")
+	rs.plant.defuser = 4
+	assert_false(BotPlant.guards(near, w), "the kit is at work within earshot")
+	assert_true(BotPlant.guards(far, w), "out of earshot")
+
+
+func test_the_armed_bombs_guards_split_between_the_other_site_and_the_defenders_start() -> void:
+	_world()
+	_arm(0)
+	assert_eq(BotPlant.watch_point(_bot(0), w), SITE_B, "the first attacker in play watches the other site")
+	assert_eq(BotPlant.watch_point(_bot(1), w), w.planner.spawn_centre[1], "the next the defenders' start")
+	assert_eq(BotPlant.watch_point(_bot(2), w), SITE_B)
+	cs[0].status = Character.Status.OUT
+	assert_eq(BotPlant.watch_point(_bot(1), w), SITE_B, "the turns are among those still in play")
+
+
+## A bot's eyes in the test world: an open floor and one smoke cloud, grown, with its middle at `at`.
+func _smoke(at: Vector3) -> void:
+	var box := BoxWorld.new(w.tuning.body)
+	box.add_floor(120.0, 80.0)
+	w.query = box
+	var g := Grenade.new()
+	g.launch(Grenade.Kind.SMOKE, 0, at, Vector3.ZERO)
+	g.resting = true
+	g.popped = true
+	g.smoking = w.tuning.grenades.smoke_grow + 1.0
+	w.grenades = [g]
+
+
+func test_the_kit_gives_the_one_disarming_away_through_smoke_at_close_range() -> void:
+	_world()
+	_arm(0)
+	var bomb := rs.plant.position
+	_smoke(bomb)
+	cs[4].position = bomb + Vector3(1.0, 0.0, 0.0)
+	cs[0].position = bomb + Vector3(-2.0, 0.0, 0.0)
+	cs[0].yaw = BotAim.look_yaw(cs[0].position, cs[4].position)
+	assert_eq(BotSenses.visible_part(cs[0], cs[4], w), 0.0, "in the cloud, hands off: unseen at 3 m")
+	rs.plant.defuser = 4
+	assert_gt(BotSenses.visible_part(cs[0], cs[4], w), 0.0, "the kit at work 3 m off gives its user away")
+	cs[0].position = bomb + Vector3(-w.cfg.plant_gives_away - 0.5, 0.0, 0.0)
+	assert_eq(BotSenses.visible_part(cs[0], cs[4], w), 0.0, "further off the smoke hides them as anyone")
+	cs[5].position = bomb + Vector3(1.0, 0.0, 1.0)
+	cs[0].position = bomb + Vector3(-2.0, 0.0, 0.0)
+	assert_eq(BotSenses.visible_part(cs[0], cs[5], w), 0.0, "and whoever stands by with hands off stays hidden")
+
+
+func test_the_keys_give_the_one_arming_away_through_smoke_and_a_wall_still_hides_them() -> void:
+	_world()
+	var site := rs.plant.sites[0]
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 1
+	rs.plant.position = site
+	_smoke(site)
+	cs[1].position = site
+	cs[3].position = site + Vector3(3.0, 0.0, 0.0)
+	cs[3].yaw = BotAim.look_yaw(cs[3].position, cs[1].position)
+	assert_eq(BotSenses.visible_part(cs[3], cs[1], w), 0.0, "carrying it through the cloud: unseen")
+	rs.plant.planter = 1
+	assert_gt(BotSenses.visible_part(cs[3], cs[1], w), 0.0, "keying it in 3 m off: made out")
+	(w.query as BoxWorld).add_box(site + Vector3(1.5, 1.5, 0.0), Vector3(0.2, 3.0, 6.0))
+	assert_eq(BotSenses.visible_part(cs[3], cs[1], w), 0.0, "a wall between hides them all the same")
