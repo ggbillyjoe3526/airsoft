@@ -1,12 +1,13 @@
 # PB3 · The bomb with no animations
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-13 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-13 | 1 | Opus 5.5 (build thread) | ✓ | 6/8 Retry | HOLSTERED note and carry line while setting; BOMB ARMED touched the track; floor looked for before the ring's pull, a ledge left it in the air |
+| 2026-11-13 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
@@ -32,4 +33,5 @@
 
 ## Known issues left
 
-- None.
+- With no floor ahead (a ledge) the bomb goes at the feet, out of sight in first person; a shorter reach first
+  could keep it in view (rare, can wait).
