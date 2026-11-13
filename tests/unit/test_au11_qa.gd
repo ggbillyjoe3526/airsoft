@@ -12,6 +12,8 @@ func _wav(cue: String, n: int) -> AudioStreamWAV:
 ## The source file's peak: the imported stream is ADPCM, so its data is no PCM to measure.
 func _peak(cue: String, n: int) -> float:
 	var d := FileAccess.get_file_as_bytes("%s%s_%d.wav" % [SoundConfig.CUE_DIR, cue, n])
+	# The cue tools write the plain 44-byte header: its data chunk starts at byte 36.
+	assert_eq(d.slice(36, 40).get_string_from_ascii(), "data", "%s_%d has a 44-byte header" % [cue, n])
 	var peak := 0.0
 	for i in range(44, d.size() - 1, 2):
 		peak = maxf(peak, absf(float(d.decode_s16(i))) / 32768.0)

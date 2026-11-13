@@ -457,9 +457,10 @@ DEFUSE_FROM = 1.1
 DEFUSE_S = 6.0
 # The bomb put down: each of his set-downs from DROP_LEAD s before its thump (his hand on the box before it is left
 # out, so the thump comes with the event), at most DROP_S s. The bomb picked up (a stand-in until he records it): his
-# set-down's lighter second knock, PICKUP_S of it, a little higher.
+# set-down's lighter second knock (at least DROP_GAP s after its thump), PICKUP_S of it, a little higher.
 DROP_LEAD = 0.03
 DROP_S = 1.2
+DROP_GAP = 0.15
 PICKUP_S = 0.3
 PICKUP_PITCH = 1.1
 
@@ -812,7 +813,7 @@ def build(folder):
     drops = Source.get(folder, "plant-the-bomb/placing_bomb.wav")
     downs, lifts = [], []
     for start, end in drops.takes:
-        thump, knock = (start + t for t in two_hits(drops.a[int(start * RATE):int(end * RATE)], SHELL_GAP))
+        thump, knock = (start + t for t in two_hits(drops.a[int(start * RATE):int(end * RATE)], DROP_GAP))
         downs.append(cut(drops.a, thump - DROP_LEAD, DROP_S, drops.floor, 0.3))
         lifts.append(shape(drops.a[int((knock - PRE_ROLL) * RATE):int((knock + PICKUP_S) * RATE)].copy(), 0.4))
     put("plant_drop", downs, -12.4)
