@@ -5,6 +5,8 @@ extends Control
 ## the pole. Seen through cover; kept inside the screen's edges; hidden within HudConfig.flag_marker_hide_within. With
 ## the pole off the screen's side or behind you it is pinned to that side instead (concept `minimap-attack.png`): a
 ## chevron pointing there, "FLAG · 7 M", on the left under the minimap and its caption so it never sits behind them.
+## Plant The Bomb (PB1) points the same marker at the bomb and its sites, with the bomb's carry case and its own title
+## ("BOMB", "SITE A", "BOMB A": set_title, use_bomb).
 
 const GAP := 8
 const TAIL := Vector2(18.0, 11.0)
@@ -33,10 +35,12 @@ var _edge_chevron: Chevron = null
 var _edge_distance: Label = null
 var _pinned: bool = false
 var _side: int = 0 # where a pinned plate sits: -1 left, 1 right (0 while it is over the pole or hidden)
-## Both plates' titles ("FLAG", or "FLAG A" on a map with two poles), and the letter they carry.
+## Both plates' titles ("FLAG", or "FLAG A" on a map with two poles), and the letter they carry; `_named` is whether a
+## title was set by set_title (Plant The Bomb's) rather than from the letter.
 var _title: Label = null
 var _edge_title: Label = null
 var _letter: String = ""
+var _named: bool = false
 
 
 ## The chevron on a pinned plate: a yellow triangle pointing left or right.
@@ -147,11 +151,32 @@ func place(camera: Camera3D, pole: Vector3, show: bool, area: Vector2, pin: Vect
 ## Names the pole `letter` on both plates ("FLAG A", AB1), or with "" just "FLAG"; the text changes only when the
 ## letter does.
 func set_letter(letter: String) -> void:
-	if letter == _letter:
+	if letter == _letter and not _named:
 		return
 	_letter = letter
+	_named = false
 	_title.text = HudStyle.caps("HUD_FLAG") if letter.is_empty() else (tr("HUD_FLAG_NAMED") % letter).to_upper()
 	_edge_title.text = _title.text
+
+
+## Titles both plates `words` ("BOMB", "SITE A", Plant The Bomb's) instead of the flag's; the text changes only when it
+## does.
+func set_title(words: String) -> void:
+	if _named and words == _title.text:
+		return
+	_named = true
+	_title.text = words
+	_edge_title.text = words
+
+
+## The marker over Plant The Bomb's bomb and sites: the carry case in place of the flag (PB1), or the flag again.
+func use_bomb(on: bool) -> void:
+	_glyph.bomb = on
+
+
+## Whether the plate carries the bomb's carry case, for tests.
+func bomb_sign() -> bool:
+	return _glyph.bomb
 
 
 ## Where a plate pinned to a side sits: -1 on the left, 1 on the right, 0 when it is not pinned (or hidden).

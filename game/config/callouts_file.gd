@@ -24,7 +24,7 @@ const ANY := "any"
 enum Event {
 	CONTACT, CONTACTS, HEARD, DOWN, LAST_ONE, TAGGED, RELOADING, PUSHING, FLANKING, CHECKING, HOLDING, RAISING, FLAG,
 	OVERTIME, PING_GOING, PING_WATCHING, NEED_MAG, MAG_COMING, MAG_THANKS, NEED_HELP, GO_ROUND, COVER_ME,
-	WATCH_JOIN, WATCH_REST,
+	WATCH_JOIN, WATCH_REST, PLANTING, BOMB, BOMB_ARMED, DEFUSING, BOMB_DOWN,
 }
 ## What a line may fill in: the named area, how many were seen, how many are left.
 enum Fill { AREA, COUNT, LEFT }
@@ -32,12 +32,13 @@ enum Fill { AREA, COUNT, LEFT }
 const EVENT_NAMES: PackedStringArray = [
 	"Contact", "Contacts", "Heard", "Down", "Last one", "Tagged", "Reloading", "Pushing", "Flanking", "Checking",
 	"Holding", "Raising", "Flag", "Overtime", "Going to your ping", "Watching your ping", "Need a mag", "Mag coming",
-	"Thanks for the mag", "Need help", "Go round", "Cover me", "Watching with you", "Leaving it to you",
+	"Thanks for the mag", "Need help", "Go round", "Cover me", "Watching with you", "Leaving it to you", "Planting",
+	"Bomb", "Bomb armed", "Defusing", "Bomb down",
 ]
 const EVENT_FILLS: Array[PackedInt32Array] = [
 	[Fill.AREA], [Fill.COUNT, Fill.AREA], [Fill.AREA], [Fill.LEFT], [Fill.AREA], [], [], [Fill.AREA], [Fill.AREA],
 	[Fill.AREA], [Fill.AREA], [], [], [Fill.AREA], [Fill.AREA], [Fill.AREA], [], [], [], [Fill.AREA], [Fill.AREA], [],
-	[Fill.AREA], [Fill.AREA],
+	[Fill.AREA], [Fill.AREA], [Fill.AREA], [Fill.AREA], [Fill.AREA], [], [Fill.AREA],
 ]
 const FILL_NAMES: PackedStringArray = ["area", "count", "left"]
 ## Numbers to twelve in words, as a sentence starts and inside one; past twelve, the digits.

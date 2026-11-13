@@ -101,6 +101,13 @@ seeds the browser game used, so they sound as they did.
   loudness), the chime, the button and the buzzer still synthesised placeholders from `tools/lift_sounds.py` at a 0.7
   peak; their levels are SoundConfig's `lift_gain` and `lift_button_gain`. To re-render the placeholders: `python3
   tools/lift_sounds.py`, then `godot --headless --path . --import`.
+- `cues/plant_pickup_1.wav`, `plant_drop_1`, `plant_arming_1`, `plant_armed_1`, `plant_beep_1`, `plant_defusing_1`,
+  `plant_defused_1`, `plant_went_off_1` (PB1): Plant The Bomb's bomb (taken up, dropped, its code keyed in for the
+  3.5 s a plant takes, armed, the fuse's beep, the kit at work for the 6 s a defuse takes, made safe, gone off as a
+  prop does: a pop and a buzzer), all synthesised placeholders from `tools/plant_sounds.py` at a 0.7 peak until the
+  owner records them; their levels and reaches are SoundConfig's `plant_*`. The keys and the kit play from the bomb
+  and are cut when the hands come off (SimAudio). To re-render: `python3 tools/plant_sounds.py`, then `godot
+  --headless --path . --import`.
 - `cues/boltCycle_<n>.wav` (1 to 3): recorded since AU2 (the pistol's slide), his rifle bolt since AU6; the
   synthesised draft (SN1) renders with `tools/render_bolt.gd` to a folder named after `--`.
 - Not baked in: the room reverb and distance muffling, which were applied live; in Godot they belong to the audio buses

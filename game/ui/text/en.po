@@ -3809,3 +3809,110 @@ msgstr "Field"
 
 msgid "MENU_MATCH_LINE"
 msgstr "Pick a field, a mode and who you play with"
+
+# Plant The Bomb (PB1): a game prop at an airsoft site, a timer box with a siren; never a real explosive.
+msgid "MODE_PLANT_THE_BOMB"
+msgstr "Plant The Bomb"
+
+msgid "MODE_PLANT_THE_BOMB_BLURB"
+msgstr "Plant the bomb at Site A or B, or defuse it in time."
+
+# The round's start banner under "Round 3 · Attack" / "Round 3 · Defend", and the screen reader's line.
+msgid "HUD_PLANT_THE_BOMB"
+msgstr "Plant the bomb"
+
+msgid "HUD_HOLD_SITE"
+msgstr "Hold site %s"
+
+msgid "HUD_HOLD_SITES"
+msgstr "Hold sites %s and %s"
+
+# The banner when the bomb is armed (%s: the site's letter) and the line under it for each side.
+msgid "HUD_BOMB_PLANTED_AT"
+msgstr "Bomb planted at %s"
+
+msgid "HUD_BOMB_PLANTED_ATTACK"
+msgstr "Keep them off it until it goes off"
+
+msgid "HUD_BOMB_PLANTED_DEFEND"
+msgstr "Defuse it before it goes off"
+
+# A round's end stamps: the line under WON / LOST, and a clock run out with nothing planted.
+msgid "HUD_BOMB_WENT_OFF"
+msgstr "Bomb went off"
+
+msgid "HUD_BOMB_DEFUSED"
+msgstr "Bomb defused"
+
+msgid "HUD_BOMB_NO_PLANT"
+msgstr "Time's up · nothing planted"
+
+# The board's heading while the bomb is armed.
+msgid "HUD_BOARD_ROUND_BOMB"
+msgstr "Round %d · bomb %s"
+
+# The gauge under the score bar: the bomb being armed, being defused, and armed with nobody on it ("Bomb A").
+msgid "HUD_BOMB_PLANTING"
+msgstr "Planting"
+
+msgid "HUD_BOMB_DEFUSING"
+msgstr "Defusing"
+
+msgid "HUD_BOMB_NAMED"
+msgstr "Bomb %s"
+
+# The marker: over the bomb, and over a site ("Site A").
+msgid "HUD_BOMB_MARKER"
+msgstr "Bomb"
+
+msgid "HUD_SITE_NAMED"
+msgstr "Site %s"
+
+# The prompt under the crosshair (%s: the Use key as bound), and the quiet line while you carry the bomb.
+msgid "HUD_BOMB_PICK_UP"
+msgstr "Hold %s · pick up the bomb"
+
+msgid "HUD_BOMB_PLANT"
+msgstr "Hold %s · plant the bomb"
+
+msgid "HUD_BOMB_DEFUSE"
+msgstr "Hold %s · defuse"
+
+msgid "HUD_BOMB_CARRYING"
+msgstr "You have the bomb"
+
+# The feed's lines after a name ("Rook picked up the bomb"); %s is the site's letter.
+msgid "HUD_BOMB_FEED_PICKED_UP"
+msgstr "picked up the bomb"
+
+msgid "HUD_BOMB_FEED_DROPPED"
+msgstr "dropped the bomb"
+
+msgid "HUD_BOMB_FEED_PLANTED"
+msgstr "planted the bomb at %s"
+
+msgid "HUD_BOMB_FEED_DEFUSED"
+msgstr "defused the bomb"
+
+# The screen reader's line for those: a name, then the feed's words.
+msgid "HUD_SR_BOMB"
+msgstr "%s %s"
+
+# The full-screen map's header (%s: the sites' letters) and its key.
+msgid "MAP_GOAL_PLANT"
+msgstr "You attack: plant the bomb at %s"
+
+msgid "MAP_GOAL_PLANT_ONE"
+msgstr "You attack: plant the bomb"
+
+msgid "MAP_GOAL_DEFUSE"
+msgstr "You defend: keep the bomb off %s, or defuse it"
+
+msgid "MAP_GOAL_DEFUSE_ONE"
+msgstr "You defend: keep the bomb off the site, or defuse it"
+
+msgid "MAP_KEY_SITE"
+msgstr "Bomb site"
+
+msgid "MAP_KEY_BOMB"
+msgstr "The bomb"

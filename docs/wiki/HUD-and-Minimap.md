@@ -9,7 +9,11 @@ where your team is. It always reflects the real state of the match. Much of it c
 One rounded bar: each team's score in its colour with pips filling toward the win, the round clock, the round number
 and the target ("FIRST TO 5").
 Your team is always on the left in its own colour (Alpha blue, Beta orange), even after the ends swap at half time.
-In Attack / Defend it adds **ATK** and **DEF** tags and the **FLAG** gauge, and "OT" on the clock in overtime. Big
+In Attack / Defend it adds **ATK** and **DEF** tags and the **FLAG** gauge, and "OT" on the clock in overtime. In
+Plant The Bomb it has the same tags; once the bomb is armed the clock turns to the accent colour and counts the fuse,
+and a **BOMB A** (or **B**) gauge under it fills as someone defuses it. While you key the bomb in, the gauge reads
+**PLANTING**. A prompt under the crosshair says when holding Use picks the bomb up, plants it or defuses it, and a
+marker points to the site your team is making for, or to the bomb once it is down or armed. Big
 slanted banners call the round start, half time with the ends swapped, and who took the round or the match.
 
 ## The replica panel
@@ -113,7 +117,8 @@ Top left, the minimap shows the field from above:
   after a few seconds. Steps carry about <!-- wiki:config minimap_config.step_reach --> m and shots about <!-- wiki:config minimap_config.shot_reach --> m. One heard on another storey shows fainter.
 - The area you stand in is named at the top, with the map and round under it.
 - In Attack / Defend the pole (both on Depot) shows while the round is live, and your Hold Here spot shows as a
-  diamond.
+  diamond. In Plant The Bomb each site shows as a yellow ring with its letter, and the bomb where it lies or stands
+  armed.
 - Your team's pings show as the same ring or diamond, on the minimap's edge when they are off it, and the overtime
   flag as a chequered flag at its spot.
 - **Rotating** (the default) turns the field so the way you look is up; **Fixed** keeps north up. Pick it in
@@ -134,7 +139,8 @@ On top of what the minimap shows (you, your teammates, your Hold Here, Go There 
 other team only where your side heard them) the map marks what never moves:
 
 - **The flags:** in Attack / Defend each flag has a yellow ring and its letter, **A** or **B**. In Elimination a faint
-  ring marks where the overtime flag will rise, solid once it is up.
+  ring marks where the overtime flag will rise, solid once it is up. In Plant The Bomb the rings are the bomb sites,
+  and the bomb is marked too.
 - **Each team's start**, boxed in the colour of the team starting there (they swap at half time), and the **dead
   zones**, hatched grey.
 - **Doors**, as short wood-coloured bars across their doorways.

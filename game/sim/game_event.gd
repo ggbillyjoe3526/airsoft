@@ -51,6 +51,7 @@ enum Kind {
 	ROUND_COUNT, ## the round's start countdown reached value whole seconds left (3, 2, 1): everyone is held until GO.
 	ROUND_GO, ## the start countdown is over (or there is none): the round's clock and everyone's hands are free.
 	LIFT, ## lift target's (WorldQuery's order) cue value (Lifts.Cue) at stop value2, at position (a button, its doorway or its car), from actor's press (its last caller; -1 none); heard out to reach through walls (Lifts, MT2).
+	PLANT, ## Plant The Bomb's device did value (Plant.Cue) at position, by actor (-1 none): value2 its site (-1 none), or for a BEEP the fuse left in tenths of a second (PB1).
 }
 
 ## RATTLE: a rattling magazine (ReplicaConfig.rattles) while walking or moving crouched, otherwise silent.
@@ -58,7 +59,8 @@ enum Footstep { RUN, SPRINT, LAND, RATTLE }
 ## CAPTURED: Attack / Defend's flag raised (the attackers win). OVERTIME_FLAG: Elimination's overtime flag touched
 ## (the toucher's team wins).
 ## SIMULATED: a skipped round decided at once by a roll (Round.simulate, BP8).
-enum RoundEnd { ELIMINATED, TIME, CAPTURED, OVERTIME_FLAG, SIMULATED }
+## DEFUSED: Plant The Bomb's bomb disarmed (the defenders win). WENT_OFF: its fuse ran out (the attackers win).
+enum RoundEnd { ELIMINATED, TIME, CAPTURED, OVERTIME_FLAG, SIMULATED, DEFUSED, WENT_OFF }
 ## A SHOT's value2 for a laser (Dev › Lasers, LZ1); 0 for a BB.
 const SHOT_LASER := 1
 ## A PING's value for one placed on the full-screen map (FM1).

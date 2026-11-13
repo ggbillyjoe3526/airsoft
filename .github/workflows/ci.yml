@@ -166,6 +166,41 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  # Plant The Bomb's guards (PB1): whole bot matches a field, the bots fetching, arming and disarming the bomb on their
+  # own; a job a field.
+  plant-guards:
+    name: Match guards, Plant The Bomb, ${{ matrix.part.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        part:
+          - { name: "Depot", test: depot_plays, log: plant-guards-1 }
+          - { name: "Woodland", test: woodland_plays, log: plant-guards-2 }
+          - { name: "Subway", test: subway_plays, log: plant-guards-3 }
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          status: ${{ env.GODOT_STATUS }}
+
+      - name: Match guards (tests/guards/test_plant_guards.gd, ${{ matrix.part.name }})
+        run: tools/match_guards.sh test_plant_guards ${{ matrix.part.test }}
+        env:
+          GUARDS_LOG: ${{ matrix.part.log }}.log
+
+      - name: Keep the log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.part.log }}-log
+          path: ${{ matrix.part.log }}.log
+          if-no-files-found: ignore
+          retention-days: 14
+
   # The callouts' guards (CO1): every field played with and without the callouts, every map's calls kept to the pace.
   callout-guards:
     name: Callout guards (every map)

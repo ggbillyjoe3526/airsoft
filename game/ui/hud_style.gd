@@ -69,7 +69,7 @@ const OT_SIZE := 24
 const OT_GAP := 8.0
 const GAUGE_HEIGHT := 28.0
 const GAUGE_LABEL_SIZE := 12
-const GAUGE_LABEL_WIDTH := 58.0
+const GAUGE_LABEL_WIDTH := 72.0
 const GAUGE_NOTCH_GAP := 3.0
 const GAUGE_PAD := 10.0
 const WARNING_SIZE := 30
@@ -214,39 +214,77 @@ static func side_round_sub(number: int, half_time_after: int, attacking: bool) -
 	return caps("HUD_TAKE_FLAG" if attacking else "HUD_HOLD_POLE")
 
 
+## Plant The Bomb's round start under the same title: "PLANT THE BOMB" for the attackers, "HOLD SITES A AND B" ("HOLD
+## SITE A" on a map with one) for the defenders, or half time. `sites` is how many sites the map has.
+static func plant_round_sub(number: int, half_time_after: int, attacking: bool, sites: int) -> String:
+	var half := round_sub(number, half_time_after)
+	if not half.is_empty():
+		return half
+	if attacking:
+		return caps("HUD_PLANT_THE_BOMB")
+	if sites < 2:
+		return (TranslationServer.translate(&"HUD_HOLD_SITE") % Plant.LETTERS[0]).to_upper()
+	return (TranslationServer.translate(&"HUD_HOLD_SITES") % [Plant.LETTERS[0], Plant.LETTERS[1]]).to_upper()
+
+
+## The banner when the bomb is armed in site `site`: "BOMB PLANTED AT A", and the line under it for the attackers
+## (`attacking`) or the defenders.
+static func bomb_planted_title(site: int) -> String:
+	var letter: String = Plant.LETTERS[clampi(site, 0, Plant.MOST - 1)]
+	return (TranslationServer.translate(&"HUD_BOMB_PLANTED_AT") % letter).to_upper()
+
+
+static func bomb_planted_sub(attacking: bool) -> String:
+	return caps("HUD_BOMB_PLANTED_ATTACK" if attacking else "HUD_BOMB_PLANTED_DEFEND")
+
+
 ## A round's end by a flag: Attack / Defend's by the flag or the clock, "FLAG RAISED" / "ALPHA TAKE THE ROUND", or
 ## "DEFENDED" / "TIME'S UP · BETA HELD THE POLE"; Elimination's overtime flag touched, "FLAG TOUCHED" / "ALPHA TAKE THE
-## ROUND".
+## ROUND". Plant The Bomb's (`bomb`): "BOMB WENT OFF" / "BOMB DEFUSED", or the clock run out with nothing planted,
+## "DEFENDED" / "TIME'S UP · NOTHING PLANTED".
 static func flag_round_won(reason: GameEvent.RoundEnd) -> String:
 	match reason:
 		GameEvent.RoundEnd.CAPTURED:
 			return caps("HUD_FLAG_RAISED")
 		GameEvent.RoundEnd.OVERTIME_FLAG:
 			return caps("HUD_FLAG_TOUCHED")
+		GameEvent.RoundEnd.WENT_OFF:
+			return caps("HUD_BOMB_WENT_OFF")
+		GameEvent.RoundEnd.DEFUSED:
+			return caps("HUD_BOMB_DEFUSED")
 	return caps("HUD_DEFENDED")
 
 
-static func flag_round_sub(reason: GameEvent.RoundEnd, team_name_key: String) -> String:
-	var won := reason == GameEvent.RoundEnd.CAPTURED or reason == GameEvent.RoundEnd.OVERTIME_FLAG
+static func flag_round_sub(reason: GameEvent.RoundEnd, team_name_key: String, bomb: bool = false) -> String:
+	var won := reason == GameEvent.RoundEnd.CAPTURED or reason == GameEvent.RoundEnd.OVERTIME_FLAG \
+			or reason == GameEvent.RoundEnd.WENT_OFF or reason == GameEvent.RoundEnd.DEFUSED
+	if bomb and reason == GameEvent.RoundEnd.TIME:
+		return caps("HUD_BOMB_NO_PLANT")
 	var key := &"HUD_ROUND_WON" if won else &"HUD_HELD_POLE"
 	return (TranslationServer.translate(key) % TranslationServer.translate(team_name_key)).to_upper()
 
 
-## Whether a round that ended for `reason` in `mode` ended by a flag (flag_round_won's lines): Attack / Defend's other
-## than by eliminations or a simulated skip (BP8), or Elimination's overtime flag touched.
+## Whether a round that ended for `reason` in `mode` ended by a flag (flag_round_won's lines): Attack / Defend's and
+## Plant The Bomb's other than by eliminations or a simulated skip (BP8), or Elimination's overtime flag touched.
 static func ended_by_flag(mode: RoundState.Mode, reason: GameEvent.RoundEnd) -> bool:
 	if reason == GameEvent.RoundEnd.OVERTIME_FLAG:
 		return true
-	return mode == RoundState.Mode.ATTACK_DEFEND and reason != GameEvent.RoundEnd.ELIMINATED \
+	return RoundState.has_sides(mode) and reason != GameEvent.RoundEnd.ELIMINATED \
 			and reason != GameEvent.RoundEnd.SIMULATED
 
 
 ## The overtime seconds the clock shows after "OT" while the live round in `rs` is in overtime, or -1 when it isn't:
 ## Attack / Defend's once time has run out while the attackers work the rope (`max_overtime` less what was played), or
-## Elimination's while the overtime flag stands (its time left). The score bar and the scoreboard's heading both read it.
+## Elimination's while the overtime flag stands (its time left). Plant The Bomb's is the fuse's whole seconds left once
+## the bomb is armed, else the overtime of a plant under way at the buzzer, as the rope's. The score bar and the
+## scoreboard's heading both read it.
 static func overtime_clock(rs: RoundState, max_overtime: float) -> int:
 	if not rs.is_live():
 		return -1
+	if rs.mode == RoundState.Mode.PLANT_THE_BOMB:
+		if rs.plant.planted():
+			return maxi(0, ceili(rs.plant.fuse_left))
+		return overtime_left(rs.overtime, max_overtime) if rs.clock <= 0.0 and rs.overtime > 0.0 else -1
 	if rs.mode == RoundState.Mode.ATTACK_DEFEND:
 		return overtime_left(rs.overtime, max_overtime) if rs.clock <= 0.0 and rs.overtime > 0.0 else -1
 	return maxi(0, ceili(rs.overtime_flag.left)) if rs.overtime_flag.up else -1
@@ -259,7 +297,7 @@ static func overtime_left(overtime: float, max_overtime: float) -> int:
 
 ## The round's stamp from your side: WON, LOST or DRAW (`winner` -1), and the line under it: "ROUND 4 · ALPHA TAKE
 ## THE ROUND", "ROUND 3 · FLAG RAISED · ALPHA TAKE THE ROUND" ("FLAG TOUCHED" at the overtime flag), or a draw's
-## "ROUND 5 · THE ROUND IS PLAYED AGAIN".
+## "ROUND 5 · THE ROUND IS PLAYED AGAIN". Plant The Bomb's (`bomb`): "ROUND 2 · BOMB WENT OFF · ALPHA TAKE THE ROUND".
 static func round_stamp(winner: int, your_team: int) -> String:
 	if winner < 0:
 		return caps("HUD_ROUND_DRAW")
@@ -267,12 +305,12 @@ static func round_stamp(winner: int, your_team: int) -> String:
 
 
 static func round_stamp_sub(number: int, winner: int, team_name_key: String, by_flag: bool,
-		reason: GameEvent.RoundEnd) -> String:
+		reason: GameEvent.RoundEnd, bomb: bool = false) -> String:
 	var head := round_title(number)
 	if winner < 0:
 		return "%s · %s" % [head, caps("HUD_ROUND_DRAW_SUB")]
 	if by_flag:
-		return "%s · %s · %s" % [head, flag_round_won(reason), flag_round_sub(reason, team_name_key)]
+		return "%s · %s · %s" % [head, flag_round_won(reason), flag_round_sub(reason, team_name_key, bomb)]
 	if reason == GameEvent.RoundEnd.SIMULATED:
 		return "%s · %s · %s" % [head, caps("HUD_SIMULATED"), round_won(team_name_key)]
 	return "%s · %s" % [head, round_won(team_name_key)]
