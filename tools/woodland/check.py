@@ -31,7 +31,7 @@ def fern_mask(f):
     return (u / rx) ** 2 + (v / rz) ** 2 <= 1.0
 
 
-road = L.rd < 2.5 + 0.3
+road = L.rd < L.ROAD_HALF + 0.3
 bed = L.sd < L.BED_W + L.BANK + 0.3
 deck_m = ~np.isnan(Wd.OVER_FLOOR)
 flag_m = np.zeros_like(road)
@@ -58,10 +58,13 @@ for p in solid:
     if p["kind"] in ("bush", "palisade"):
         continue
     m = pmask(p)
-    if (m & (L.rd < 2.5)).any() and p["tag"] != "roadblock":  # the fallen trees block the Long road on purpose (MB1)
+    if (m & (L.rd < L.ROAD_HALF)).any():  # the road is clear (the owner, 2026-11-12, MB2)
         note("piece", f"{p['kind']} at ({p['cx']:.1f}, {p['cz']:.1f}) is on the road")
     if (m & (L.sd < L.BED_W + L.BANK)).any():
         note("piece", f"{p['kind']} at ({p['cx']:.1f}, {p['cz']:.1f}) is in the stream bed or bank")
+if (Wd.thicket_mask & (L.rd < L.ROAD_CLEAR)).any():
+    xs, zs = GX[Wd.thicket_mask & (L.rd < L.ROAD_CLEAR)], GZ[Wd.thicket_mask & (L.rd < L.ROAD_CLEAR)]
+    note("piece", f"a thicket is on the road near ({xs.mean():.1f}, {zs.mean():.1f})")
 # 3. pieces overlapping each other (walls of one building excepted)
 for a in range(len(solid)):
     for b in range(a + 1, len(solid)):
