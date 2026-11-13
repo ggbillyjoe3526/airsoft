@@ -14,6 +14,7 @@ clear." This record is the cleared road.
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | build thread | ✓ | 7/8 Accept | the owner's ruling: nothing on the road (the stack and spruce stood on it) |
 | 2026-11-13 | 2 | build thread | ✓ | 7/8 Accept | – |
+| 2026-11-13 | 2, after CI | build thread | ✓ | – | a night guard failed on the push: one hazel moved (Verified) |
 
 ## What changed
 
@@ -107,7 +108,8 @@ Attack / Defend's attackers 40 to 65 %. The first and last rows are the same 32 
   the least that shuts the diagonal through it with the spruce off the gravel (at 11 m a 68 m line ran through).
 - **Attack / Defend goes to the owner as a known issue, not as a blocker.** The road he rejected, with a stack
   across it, is what `main` has now; the cleared road is his ruling, and flag B was the softer site before it
-  (`docs/KNOWN_ISSUES.md`). Next, as MB3: flag B's defender posts or its pole, measured at 32 seeds from the start.
+  (`docs/KNOWN_ISSUES.md`). Next, as MB3: a 9 s flag raise on Woodland alone (the owner's pick, 2026-11-13; 7 s
+  elsewhere). More seeds after the reviews showed both poles fall equally often, so flag B's posts are not it.
 - **The road test's criterion is unchanged** (no chest in the ring or at the posts from the road west of the
   Culvert); what it samples is the new road's strip, not a box round the old one.
 - **The road's puddle stays** (west of the Truck bend, 1.1 m off the centre line, on `main` before MB1): it is the
@@ -136,15 +138,27 @@ Attack / Defend's attackers 40 to 65 %. The first and last rows are the same 32 
   ways, and MB1's unreleased note still saying the road is blocked. Both are fixed in this push (the recount found
   that "a flag goes up in 40 % of rounds" had read flag A's height alone; the bullet above gives the rounds won by
   a flag).
+- **After the first push, a night guard failed** (Woodland, Elimination at Normal, seed 14: 16 bot seconds held up
+  against 10 allowed). Two opposing bots stood inside MB1's Brow hazel at (-16.3, -40.5), 0.7 m off the north lane
+  where the squads first meet, each with no shot through the leaves and each walking into the other. The bush moved
+  2.3 m north along its row to (-16.3, -38.2), 2.5 m off the lane; the bots' rule is unchanged and is a known issue
+  (Bots). Run again on the moved bush, all passing: the five night guard
+  jobs (56 matches; Elimination at Normal 123 rounds over 16 seeds), Plant The Bomb's Woodland guard, the callout
+  guards, the low-BBs guard, the smoke test and the 117 unit test files that use Woodland (1,472 tests); QA read it
+  (the map's one change is that bush; its edge is 2.53 m off the lane; no test or rule forbids its place).
+  The performance agent and the critic read the head before it (one bush, no code).
+  The figures above were measured with the bush in its old place; MB3 measures the field again.
 - **Not verified, for the owner's play:** how the bend looks and plays from the eye, and whether flag B falls too
   easily. The play checks are on the Dev 3 checklist.
 
 ## Known issues left
 
-- Woodland's Attack / Defend is outside its band at 69 % ±3 (`docs/KNOWN_ISSUES.md`, Maps). Next as MB3.
+- Woodland's Attack / Defend is outside its band at 69 % ±3 (`docs/KNOWN_ISSUES.md`, Maps). Next as MB3: the 9 s raise.
 - The match tally's flag height follows the first pole only (`MatchRunner`'s `top_flag` reads `RoundState.flag`), so
   on a field with two poles "how often a flag went up" must be read from the rounds won by a flag, and which pole it
   was is not recorded. MB1's record and its DECISIONS entry quote the first pole's figure as "a flag goes up";
   recount with MB3, where the tally can name the pole. Can wait.
+- Two opposing bots inside one bush hold their fire and walk into each other (`docs/KNOWN_ISSUES.md`, Bots). The
+  one bush where it showed has moved off the lane; any other bush can still do it. A bots task, not a map's.
 - The two road tests carry their own copies of `layout.py`'s `ROAD` (the critic's advisory): when the road moves,
   they move with it by hand. Can wait.

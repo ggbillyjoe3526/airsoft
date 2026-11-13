@@ -515,7 +515,9 @@ BUSHES = [
     (-16.5, -52.6, 1.3, "Brow hazel"),        # the Ridge's brow: a front row with two ways through,
     (-16.3, -50.1, 1.3, "Brow hazel"),
     (-16.3, -47.5, 1.3, "Brow hazel"),
-    (-16.3, -40.5, 1.3, "Brow hazel"),
+    # MB2: this one stood at z -40.5, 0.7 m off the north lane where the squads first meet: two opposing bots ended
+    # inside it with no shot through the leaves and walked into each other (KNOWN_ISSUES, Bots). 2.5 m off now.
+    (-16.3, -38.2, 1.3, "Brow hazel"),
     (-16.3, -36.0, 1.3, "Brow hazel"),
     (-20.4, -45.2, 1.3, "Brow hazel"),        # and a back row 4 m behind, across each of them from the Tower's side
     (-20.4, -42.8, 1.3, "Brow hazel"),
