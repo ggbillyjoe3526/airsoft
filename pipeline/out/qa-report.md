@@ -1,8 +1,8 @@
-Task: HA1 · QA commit 5e73df1 · Verdict: Pass
+Task: HA1 · QA commit 6a91274 (re-run 4, on d7f9f9a) · Verdict: Pass
 
 Re-run 3, delta d5fede4..53fe4f0 (shotgun aim entries, merges, grips thumb). Delta itself is clean; one HA1 bug found that my earlier Pass missed.
 
-Blocking
+Blocking in re-run 3, fixed in d7f9f9a and verified in re-run 4 (last line)
 - game/play/arms_tuck.gd:38-41 (clear) with game/play/arms_view.gd:309-324 (_draw_in): clear resets only UpperArm_L's position. Forearm_L's local position is keyed by no clip, so each aimed frame's tuck stays in the bone and the next frame's draw_in reads it back: the error feeds on itself. Hold the sight up 5 s (300 frames) and lower it: the hip pose is not the clip's (fingertip centimetres off at 10 s: shotgun 2 cm, AEG 8 cm, sniper 7 cm; hand 1-2 mm) and stays so until the hold is re-posed. Applies to every rifle incl. the new shotgun entries. Repeated aimed pumps add ~13 um each (same cause). Fix: clear also resets Forearm_L (and Hand_L) position to rest.
 
 Advisory
