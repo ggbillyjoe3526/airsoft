@@ -520,8 +520,8 @@ GRIP_TO = -103.0
 GRIP_X = (-4.6, -14.5, 4.5)  # the grip's centre line: x at its front, at its end, and its outward bow
 GRIP_W = (7.2, 6.0, 6.6)     # half width in the plane: the front collar, the waist, the end
 GRIP_H = (5.0, 4.2, 4.5)     # half thickness the same
-GRIP_RINGS = 52
-GRIP_SECTION = 5             # each corner's steps of the section
+GRIP_RINGS = 56
+GRIP_SECTION = 6             # each corner's steps of the section
 HOLE = (0.94, 1.35)          # the lanyard hole: how far along the grip, its radius (mm)
 NUT = (3.4, 1.4)             # the pivot screw's head radius and height; the nut under it a little smaller
 
@@ -552,7 +552,13 @@ def jaw_outline() -> list:
     a_from = a_shank_out if a_shank_out > 0 else a_shank_out + TAU
     pts += arc(a_from, a_edge, int(PIVOT_SEGS * (a_from - a_edge) / TAU))
     pts += JAW_EDGE
-    return pts
+    out = []  # no point twice (an arc's end on a listed point would leave a zero-length side the cut tears at)
+    for p in pts:
+        if not out or math.hypot(p[0] - out[-1][0], p[1] - out[-1][1]) > 0.05:
+            out.append(p)
+    if math.hypot(out[0][0] - out[-1][0], out[0][1] - out[-1][1]) <= 0.05:
+        out.pop()
+    return out
 
 
 def half_thickness(y: float) -> float:
@@ -563,18 +569,19 @@ def half_thickness(y: float) -> float:
 
 
 def steel_half(name: str) -> bpy.types.Object:
-    """One half's steel: the outline at full thickness; the nose bevelled flat top and bottom to its tip; the lap cut
-    away under the pivot's circle (its lower half, a hair wider), so the other half's lap turns in it."""
-    b = hs.Builder(name, [])
-    b.prism([(x * MM, y * MM) for x, y in jaw_outline()], "z", -CUT_T * MM, CUT_T * MM, "Oxide")
-    ob = b.build()
+    """One half's steel: the outline at full thickness; the nose bevelled flat top and bottom to its tip; the lap (the
+    lower half under the pivot's circle, a hair wider) left out, so the other half's lap turns in it."""
+    ob = lapped_steel(name)
     cutters = []
     far = JAW_EDGE[-1][1] + 10.0
     drop = (CUT_T - TIP_T) * (far - NOSE_FROM) / (JAW_EDGE[-1][1] - NOSE_FROM)
     for sign in (1.0, -1.0):
         wedge = hs.Builder(name + "_nose", [])
-        wedge.prism([(y * MM, sign * z * MM) for y, z in ((NOSE_FROM, CUT_T), (far, CUT_T - drop), (far, CUT_T + 9.0),
-                                                           (NOSE_FROM, CUT_T + 9.0))], "x", -20.0 * MM, 20.0 * MM, "Oxide")
+        # The plane carried 2 mm back past NOSE_FROM (above the face there), so it crosses the face cleanly.
+        back = NOSE_FROM - 2.0
+        rise = CUT_T + 2.0 * drop / (far - NOSE_FROM)
+        wedge.prism([(y * MM, sign * z * MM) for y, z in ((back, rise), (far, CUT_T - drop), (far, CUT_T + 9.0),
+                                                           (back, CUT_T + 9.0))], "x", -20.0 * MM, 20.0 * MM, "Oxide")
         cutters.append(wedge.build())
     # The jaw's outer edge chamfered along its length (the ground cutting face of a flush cutter): a wedge laid along the
     # line from the jaw's root to its tip, its face sloping down and out from CHAMFER in off that line.
@@ -583,22 +590,112 @@ def steel_half(name: str) -> bpy.types.Object:
     run = math.hypot(tx - rx, ty - ry)
     inset, slope = CHAMFER
     wedge = hs.Builder(name + "_chamfer", [])
-    wedge.prism([(-inset, CUT_T + 0.01), (4.0, CUT_T - (4.0 + inset) * slope), (4.0, CUT_T + 6.0), (-inset, CUT_T + 6.0)],
-                "y", -4.0, run + 6.0, "Oxide")
+    wedge.prism([(-inset - 1.5, CUT_T + 1.5 * slope), (4.0, CUT_T - (4.0 + inset) * slope), (4.0, CUT_T + 6.0),
+                 (-inset - 1.5, CUT_T + 6.0)], "y", -4.0, run + 6.0, "Oxide")  # its plane crosses the top cleanly
     chamfer = wedge.build()
     chamfer.data.transform(Matrix.Translation(mm(rx, ry, 0.0)) @ Matrix.Rotation(turn, 4, "Z") @ Matrix.Scale(MM, 4))
     cutters.append(chamfer)
-    lap = hs.Builder(name + "_lap", [])
-    lap.lathe([(-CUT_T * 1.5 * MM, 0.0), (-CUT_T * 1.5 * MM, (PIVOT_R + LAP_GAP) * MM), (0.0, (PIVOT_R + LAP_GAP) * MM),
-               (0.0, 0.0)], "Oxide", segments=PIVOT_SEGS, axis="z", start=math.pi / PIVOT_SEGS)  # off the outline's corners
-    cutters.append(lap.build())
-    hs.cut(ob, cutters)
+    cut_each(ob, cutters)
     ob.data.validate()
     unneedle(ob)
     # Every face flat but the pivot's round walls, smooth (no bevel: at its size it only split the walls into faces
     # that weighted normals striped and fanned the flat faces).
     round_pivot_walls(ob)
     return ob
+
+
+def lapped_steel(name: str) -> bpy.types.Object:
+    """The outline at full thickness with its lap built in, not cut: under the pivot's circle (a hair wider than the
+    pivot) only the upper half, so the other half's lap turns there. Built point for point, every face sharing its
+    neighbours' corners, where a cut left slivers along the circle that folded when mended."""
+    rim = PIVOT_R + LAP_GAP
+    ring = [(rim * math.cos(TAU * (k + 0.5) / PIVOT_SEGS), rim * math.sin(TAU * (k + 0.5) / PIVOT_SEGS))
+            for k in range(PIVOT_SEGS)]  # half a step off the outline's arc corners
+    pts = jaw_outline()
+    out: list = []  # (point, on the circle)
+    for i, a in enumerate(pts):
+        b = pts[(i + 1) % len(pts)]
+        out.append((a, False))
+        for c in circle_crossings(a, b, rim):
+            out.append((c, True))
+    n = len(out)
+    inside = [math.hypot(*((out[i][0][0] + out[(i + 1) % n][0][0]) / 2, (out[i][0][1] + out[(i + 1) % n][0][1]) / 2))
+              < rim for i in range(n)]  # the side after each point lies in the circle
+    bm = bmesh.new()
+    def vert(p: tuple, z: float) -> bmesh.types.BMVert:
+        return bm.verts.new(mm(p[0], p[1], z))
+    top = [vert(p, CUT_T) for p, _ in out]
+    mid = [vert(p, 0.0) if on or inside[i] or inside[i - 1] else None for i, (p, on) in enumerate(out)]
+    low = [vert(p, -CUT_T) if on or not inside[i] or not inside[i - 1] else None for i, (p, on) in enumerate(out)]
+    faces = [bm.faces.new(top)]
+    for i in range(n):
+        j = (i + 1) % n
+        if inside[i]:
+            faces.append(bm.faces.new((mid[i], mid[j], top[j], top[i])))
+        else:
+            ring_i = [low[i], low[j]] + ([mid[j]] if out[j][1] else []) + [top[j], top[i]]
+            faces.append(bm.faces.new(ring_i + ([mid[i]] if out[i][1] else [])))
+    # Each stretch of the circle inside the steel, from where the outline goes into the circle round (anticlockwise)
+    # to where it last came out: its points (low, mid), end to end.
+    enters = [i for i in range(n) if out[i][1] and inside[i]]
+    exits = [i for i in range(n) if out[i][1] and not inside[i]]
+    arcs = {}
+    for e in enters:
+        x = max((k for k in exits if k < e), default=max(exits))
+        a0 = math.atan2(out[e][0][1], out[e][0][0])
+        span = (math.atan2(out[x][0][1], out[x][0][0]) - a0) % TAU
+        gap = 0.1 / rim
+        between = sorted(((math.atan2(q[1], q[0]) - a0) % TAU, q) for q in ring)
+        stretch = [(low[e], mid[e])] + [(vert(q, -CUT_T), vert(q, 0.0)) for t, q in between if gap < t < span - gap]
+        stretch.append((low[x], mid[x]))
+        for (l0, m0), (l1, m1) in zip(stretch, stretch[1:]):
+            faces.append(bm.faces.new((l0, l1, m1, m0)))
+        arcs[e] = (x, stretch)
+    # The underside: each piece outside the circle, from an exit along the outline to the next entry, back by its arc.
+    for e, (x, stretch) in arcs.items():
+        loop = [low[k % n] for k in range(x, x + ((e - x) % n) + 1)]
+        faces.append(bm.faces.new(loop + [lv for lv, _ in stretch[1:-1]]))
+    # The lap's face: the outline's runs inside the circle, each joined to the next by that next entry's arc, reversed.
+    loop = []
+    order = sorted(enters)
+    for k, e in enumerate(order):
+        x = min((q for q in exits if q > e), default=min(exits))
+        loop += [mid[q % n] for q in range(e, e + ((x - e) % n) + 1)]
+        nxt = order[(k + 1) % len(order)]
+        loop += [mv for _, mv in reversed(arcs[nxt][1][1:-1])]
+    faces.append(bm.faces.new(loop))
+    bmesh.ops.recalc_face_normals(bm, faces=faces)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.append(surface.material("Oxide"))
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(ob)
+    return ob
+
+
+def circle_crossings(a: tuple, b: tuple, r: float) -> list:
+    """Where the side from `a` to `b` (mm) crosses the circle of radius `r` about the pivot, in order from `a`."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    qa, qb, qc = dx * dx + dy * dy, 2.0 * (a[0] * dx + a[1] * dy), a[0] * a[0] + a[1] * a[1] - r * r
+    disc = qb * qb - 4.0 * qa * qc
+    if disc <= 0.0:
+        return []
+    root = math.sqrt(disc)
+    ts = sorted(((-qb - root) / (2.0 * qa), (-qb + root) / (2.0 * qa)))
+    return [(a[0] + dx * t, a[1] + dy * t) for t in ts if 1e-3 < t < 1.0 - 1e-3]
+
+
+def cut_each(ob: bpy.types.Object, cutters: list) -> None:
+    """`ob` less each closed cutter in turn with the manifold solver (closed in, closed out: the exact solver's
+    self-intersecting cut left cracks where the overlapping cutters met), the cutters then deleted."""
+    for c in cutters:
+        mod = ob.modifiers.new("cut", "BOOLEAN")
+        mod.operation = "DIFFERENCE"
+        mod.solver = "MANIFOLD"
+        mod.object = c
+        hs.apply_modifiers(ob)
+        bpy.data.objects.remove(c, do_unlink=True)
 
 
 NEEDLE = (2.0, 0.002)  # a needle triangle: its longest edge over this (mm), its area under this times that squared
@@ -615,8 +712,9 @@ def unneedle(ob: bpy.types.Object) -> None:
     bm.from_mesh(ob.data)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)  # a lathe's points on its axis, one point again
     bmesh.ops.dissolve_degenerate(bm, dist=2e-6, edges=bm.edges)
+    weld_t_junctions(bm)
     tris(bm)
-    for _ in range(200):
+    for _ in range(1000):
         needle = None
         for f in bm.faces:
             e = max(f.edges, key=lambda x: x.calc_length())
@@ -637,8 +735,40 @@ def unneedle(ob: bpy.types.Object) -> None:
             bmesh.ops.pointmerge(bm, verts=[cut, corner], merge_co=corner.co)
         bmesh.ops.dissolve_degenerate(bm, dist=2e-6, edges=bm.edges)
         tris(bm)
+    weld_t_junctions(bm)
+    bmesh.ops.dissolve_degenerate(bm, dist=1e-6, edges=bm.edges)  # no flat sliver for an exporter to drop
+    tris(bm)
     bm.to_mesh(ob.data)
     bm.free()
+
+
+def weld_t_junctions(bm: bmesh.types.BMesh, within: float = 1e-6) -> None:
+    """Each open edge with another open edge's corner lying on it (within `within` m) split there and welded to that
+    corner, so the faces either side share their points and no crack shows between them."""
+    for _ in range(400):
+        found = None
+        open_edges = [e for e in bm.edges if e.is_boundary]
+        corners = {v for e in open_edges for v in e.verts}
+        for e in open_edges:
+            a, b = e.verts
+            ab = b.co - a.co
+            span = ab.length_squared
+            if span < 1e-14:
+                continue
+            for v in corners:
+                if v is a or v is b:
+                    continue
+                t = (v.co - a.co).dot(ab) / span
+                if 0.001 < t < 0.999 and (a.co + ab * t - v.co).length < within:
+                    found = (e, a, t, v)
+                    break
+            if found:
+                break
+        if found is None:
+            return
+        e, a, t, v = found
+        _, cut = bmesh.utils.edge_split(e, a, t)
+        bmesh.ops.pointmerge(bm, verts=[cut, v], merge_co=v.co)
 
 
 def round_pivot_walls(ob: bpy.types.Object) -> None:
@@ -771,24 +901,40 @@ def section_ring(x: float, y: float, nx: float, ny: float, hw: float, hh: float,
     return [tuple(mm(x + nx * u, y + ny * u, z + w)) for u, w in pts]
 
 
-def pivot_hardware(b: hs.Builder, top: bool) -> None:
-    """The pivot: a domed socket head on the top half's face, a flat round nut on the other's (under it)."""
+def pivot_hardware(b: hs.Builder) -> None:
+    """The pivot: a domed socket head on the half's outer face (the other half, this one turned over, shows its own
+    under the tool)."""
     r, h = NUT
     face = CUT_T
-    if top:
-        prof = [(face - 0.1, r), (face + 0.3, r), (face + h * 0.7, r - 0.5), (face + h, r - 1.4), (face + h, 1.65)]
-        b.lathe([(z * MM, rr * MM) for z, rr in prof], "Oxide", segments=40, axis="z", cap=False)
-        hexagon = [(1.4 * math.cos(TAU * k / 6 + math.pi / 6), 1.4 * math.sin(TAU * k / 6 + math.pi / 6))
-                   for k in range(6)]
-        rim = [b.bm.verts.new(mm(1.65 * math.cos(TAU * k / 6 + math.pi / 6), 1.65 * math.sin(TAU * k / 6 + math.pi / 6),
-                                 face + h)) for k in range(6)]
-        bottom = [b.bm.verts.new(mm(x, y, face + h - 1.2)) for x, y in hexagon]
-        faces = [b.bm.faces.new((rim[k], rim[(k + 1) % 6], bottom[(k + 1) % 6], bottom[k])) for k in range(6)]
-        b._faces(faces, "Oxide")
-        b._faces([b.bm.faces.new(list(reversed(bottom)))], "Hole")
-    else:
-        prof = [(face - 0.1, r - 0.4), (face + 0.9, r - 0.4), (face + 1.1, r - 0.9), (face + 1.1, 0.0)]
-        b.lathe([(z * MM, rr * MM) for z, rr in prof], "Oxide", segments=40, axis="z", cap=False)
+    # A closed head: its underside capped, its top's inner ring bridged straight to the hex socket's rim.
+    prof = [(face - 0.1, r), (face + 0.3, r), (face + h * 0.7, r - 0.5), (face + h, r - 1.4), (face + h, 1.75)]
+    segs = 42  # a multiple of the hexagon's six sides
+    rings = [[mm(rr * math.cos(TAU * k / segs), rr * math.sin(TAU * k / segs), z) for k in range(segs)]
+             for z, rr in prof]
+    bm = b.bm
+    verts = [[bm.verts.new(p) for p in ring] for ring in rings]
+    faces = [bm.faces.new(list(reversed(verts[0])))]
+    for lo, hi in zip(verts, verts[1:]):
+        faces += [bm.faces.new((lo[k], lo[(k + 1) % segs], hi[(k + 1) % segs], hi[k])) for k in range(segs)]
+    # The socket: a ring on the hexagon under each of the top's points (seen from the axis), walls down to its
+    # floor, so the head's top meets it point for point.
+    def on_hex(t: float, rc: float) -> tuple:
+        r = rc * math.cos(math.pi / 6) / math.cos((t % (math.pi / 3)) - math.pi / 6)
+        return r * math.cos(t), r * math.sin(t)
+    rim = [bm.verts.new(mm(*on_hex(TAU * k / segs, 1.65), face + h)) for k in range(segs)]
+    floor = [bm.verts.new(mm(*on_hex(TAU * k / segs, 1.4), face + h - 1.2)) for k in range(segs)]
+    top = verts[-1]
+    for k in range(segs):
+        m = (k + 1) % segs
+        faces.append(bm.faces.new((top[k], top[m], rim[m], rim[k])))
+        faces.append(bm.faces.new((rim[k], rim[m], floor[m], floor[k])))
+    bmesh.ops.recalc_face_normals(bm, faces=faces)
+    b._faces(faces, "Oxide")
+    f = bm.faces.new(floor)
+    f.normal_update()
+    if f.normal.z < 0.0:
+        f.normal_flip()
+    b._faces([f], "Hole")
 
 
 def build_half(name: str, top: bool) -> bpy.types.Object:
@@ -796,7 +942,7 @@ def build_half(name: str, top: bool) -> bpy.types.Object:
     b = hs.Builder(name + "_parts", [])
     ground_edge(b)
     grip(b)
-    pivot_hardware(b, True)
+    pivot_hardware(b)
     built = b.build()
     unneedle(built)
     parts = hs.finish(built, bevel=0.0)

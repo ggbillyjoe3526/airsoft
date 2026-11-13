@@ -1,14 +1,15 @@
 # PB2 · The bomb and the wire cutters
 
-**Review:** 3 attempts · critic pending · qa Pass · performance Pass
+**Review:** 4 attempts · critic pending · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-13 | 1 | Opus 5.5 (build thread) | ✓ | Retry 7/8 | 1 (proportions against the photo, cutters floating, carry not attached, pale in game) |
-| 2026-11-13 | 2 | Opus 5.5 (build thread) | ✓ | Retry 7/8 | 1 (the cutters: needle triangles at the jaw, a striped pivot side, the grip panel read as a crack, blunt tips) |
-| 2026-11-13 | 3 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-13 | 2 | Opus 5.5 (build thread) | partial | Retry 7/8 | 1 (the cutters: needle triangles at the jaw, a striped pivot side, the grip panel read as a crack, blunt tips) |
+| 2026-11-13 | 3 | Opus 5.5 (build thread) | partial | Retry 7/8 | 1 (the cutters: open edges and T-junctions where the lap was cut, a hairline at the pivot) |
+| 2026-11-13 | 4 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -17,7 +18,7 @@
   (the tan one). Grey-green, not black or tan: it reads on every field's floor and is neither team's colour. No words
   anywhere: the LCD shows ghost seven-segment digits.
 - **The cutters follow the teal flush cutters**, not the red wire stripper: the photo is of a wire snipper, its pointed
-  head reads at the wire, and teal stays clear of Beta's orange and the red wire. The maker's name is a blank panel.
+  head reads at the wire, and teal stays clear of Beta's orange and the red wire. Plain grips: no maker's panel, which read as a crack.
 - **10,000 triangles a file** (docs/CC0_ASSETS.md › Size limits), a replica part's budget: one bomb and one pair of cutters
   in a match, seen close while keyed in or defused. Plain colours, painted in the shared light like the other props.
 - **The cutters lie open on the floor by the wires' end while anyone defuses** (a decision card offered the owner this,
