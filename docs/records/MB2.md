@@ -1,6 +1,6 @@
 # MB2 · Woodland's Long road, cleared
 
-**Review:** critic @@CRITIC@@ · qa @@QA@@ · performance @@PERF@@
+**Review:** 2 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 MB1 laid three fallen trees and a log stack across Woodland's Long road, the stack a gate screen's 2.8 m, and put its
 height to the owner on a decision card. The owner (2026-11-12): "Lower it to 1.8 m". The first build of this task did
@@ -13,7 +13,7 @@ clear." This record is the cleared road.
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | build thread | ✓ | 7/8 Accept | the owner's ruling: nothing on the road (the stack and spruce stood on it) |
-| 2026-11-13 | 2 | build thread | @@CHECKS@@ | @@CRITIC@@ | – |
+| 2026-11-13 | 2 | build thread | ✓ | 7/8 Accept | – |
 
 ## What changed
 
@@ -116,8 +116,35 @@ Attack / Defend's attackers 40 to 65 %. The first and last rows are the same 32 
 
 ## Verified
 
-@@VERIFIED@@
+- `python3 tools/woodland/build_map.py` writes the committed JSON (960 blocks); `python3 tools/woodland/check.py`:
+  `TOTAL 0`, with its new road rules (no piece inside 2.5 m of the centre line, no thicket inside 3.5 m).
+- `tools/check.sh`'s gates on the head with PB1's `main` merged in: gdlint, the changelog notes, the wiki check, the
+  seven unit test parts (6,437 tests, none failing, two pending for want of a display as on `main`), the smoke test
+  and the licence notices. After the last merge of `main` (SH2, MQ3B: models only) the gates but the full unit suite
+  ran again, with the tests that read the road, the areas, the props and the wear marks; CI runs the whole suite.
+- The play records after merging PB1's `main`: eight seeds of Elimination and of Attack / Defend give the same
+  rounds and knock-outs as before it.
+- QA: Pass. It added four tests to `tests/unit/test_mb2_qa.gd` (no bush on the strip, the tyre tracks on the road,
+  a place name along the whole road, a seeded match in each of the three modes with no bot held up) and scanned the
+  JSON against the whole road: only the culvert's own deck, walls and kerbs are within 2.5 m of the centre line.
+- Performance: Pass. `team_bench`, Woodland 8v8, 120 s a run, seeds 1 to 4, one run at a time: tick and views
+  4.63 ms a frame against `main`'s layout's 4.56 (+1.5 %). Its first reading, 30 s of seed 1, was +19 %; seed 1 is
+  the one seed where the new layout is dearer (+12 % at 120 s), seeds 2 and 3 are cheaper.
+- Critic: 7/8 Accept. It recounted the records (170 of 247, 147 of 236, 114 of 240 decided, 50 of 125) and ran its
+  own sight check: 250 eye points on the strip west of the bend against 265 east of it see no pair, and 910 strip
+  points see none of flag B's ring or post chests. Its failed check was the docs' figures: one count stated two
+  ways, and MB1's unreleased note still saying the road is blocked. Both are fixed in this push (the recount found
+  that "a flag goes up in 40 % of rounds" had read flag A's height alone; the bullet above gives the rounds won by
+  a flag).
+- **Not verified, for the owner's play:** how the bend looks and plays from the eye, and whether flag B falls too
+  easily. The play checks are on the Dev 3 checklist.
 
 ## Known issues left
 
-@@KNOWN@@
+- Woodland's Attack / Defend is outside its band at 69 % ±3 (`docs/KNOWN_ISSUES.md`, Maps). Next as MB3.
+- The match tally's flag height follows the first pole only (`MatchRunner`'s `top_flag` reads `RoundState.flag`), so
+  on a field with two poles "how often a flag went up" must be read from the rounds won by a flag, and which pole it
+  was is not recorded. MB1's record and its DECISIONS entry quote the first pole's figure as "a flag goes up";
+  recount with MB3, where the tally can name the pole. Can wait.
+- The two road tests carry their own copies of `layout.py`'s `ROAD` (the critic's advisory): when the road moves,
+  they move with it by hand. Can wait.
