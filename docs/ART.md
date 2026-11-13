@@ -314,7 +314,9 @@ arms, figures and replicas use (steps 23 and 28).
   Sunlit Concrete's realistic multicam, khaki and olive (about a quarter saturation, SL4), so SL4 left it as it is.
   Up close the gear is drawn as what it is made of (MQ3): woven cordura, webbing, loop pile, bound and stitched
   edges, moulded polymer buckles and holster, with the shade of one piece on another painted in. The colours are the
-  swatches', so the team cue at range is unchanged.
+  swatches', so the team cue at range is unchanged. The headwear, the team arm bands and the boots are drawn used
+  the same way (MQ3B): scuffed helmet paint, grained rails, faded and sweat-marked cloth, a chipped mesh mask, ribbed
+  elastic bands, brushed suede with creases and lugged soles. Worn, never ruined: a weekend player's kit.
 - **Detail.** This is a desktop game, so figures, arms and replicas are modelled at high quality, with LODs carrying
   less at range (owner, 2026-10-18). The budgets are in `docs/CC0_ASSETS.md` › Size limits.
 
