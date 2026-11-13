@@ -114,9 +114,11 @@ const DEPTH_SLACK := 3.5
 const DEEPEST := 6.0
 ## The farthest a defender post (a lane's last two points) may stand from the nearest pole (m).
 const POST_REACH := 30.0
-const DOORS_TOTAL := 23
-const DOORS_SHUT := 3
+const DOORS_TOTAL := 26
+const DOORS_SHUT := 0
 const ORCHARD_GATES: Array[float] = [-29.0, 7.0]
+## Four minutes of a seeded bot match, not the whole match (the balance runs play whole ones).
+const MATCH_SECONDS := 240.0
 
 
 func _centre(e: int) -> Vector3:
@@ -197,7 +199,8 @@ func test_defender_posts_stand_within_reach_of_a_pole() -> void:
 
 # ---- Doors, gates, the Bell house ----
 
-func test_stockade_has_twenty_three_doors_three_of_them_shut() -> void:
+## Every door starts the round open: the Long House's east door is the defenders' way onto flag A (SK1 attempt 3).
+func test_stockade_has_twenty_six_doors_all_open() -> void:
 	assert_eq(map.doors.size(), DOORS_TOTAL)
 	var shut := 0
 	for d in map.doors:
@@ -246,25 +249,26 @@ func test_the_orchards_two_gates_are_walkable_and_reached_from_both_ends() -> vo
 			assert_true(_reached(map.ends[e].spawns[0].position, Vector3(gx, 0.0, 36.0)), "end %d reaches inside the Orchard by x=%.1f" % [e, gx])
 
 
-func test_the_bell_house_has_one_door_and_its_inside_is_reached() -> void:
+## Two doors, off each other's line (the street behind, the Green), a crate stack between them (SK1 attempt 3).
+func test_the_bell_house_has_two_doors_and_its_inside_is_reached() -> void:
 	var box := Rect2(12.0, -4.5, 6.0, 9.0)
 	var inside := 0
 	for d in map.doors:
 		if box.grow(0.5).has_point(Vector2(d.center.x, d.center.z)):
 			inside += 1
-	assert_eq(inside, 1, "doors on the Bell house")
-	var c := Vector3(15.0, 0.0, 0.0)
-	assert_true(nav.is_walkable_at(c), "the house's middle is walkable")
+	assert_eq(inside, 2, "doors on the Bell house")
+	var c := Vector3(15.0, 0.0, -2.5)
+	assert_true(nav.is_walkable_at(c), "the way round its stock is walkable")
 	for e in 2:
 		assert_true(_reached(map.ends[e].spawns[0].position, c), "end %d reaches the Bell house" % e)
 
 
-## A seeded bot match: it finishes, BBs land, no bot is held up.
-func test_a_seeded_bot_match_finishes_with_no_bot_held_up() -> void:
+## The first rounds of a seeded bot match: rounds end, BBs land, no bot is held up.
+func test_a_seeded_bot_match_plays_rounds_with_no_bot_held_up() -> void:
 	var runner := MatchRunner.new(self, "stockade")
-	var t := runner.play(11, 1800.0)
+	var t := runner.play(11, MATCH_SECONDS)
 	runner.free_level()
 	gut.p("stockade: %d rounds, %d hits, held up %d, stayed home %d" % [t.rounds.size(), t.hits, t.held_up, t.stayed_home])
-	assert_true(t.finished, "the match is won")
+	assert_gt(t.rounds.size(), 1, "rounds end")
 	assert_gt(t.hits, 0, "BBs land")
 	assert_eq(t.held_up, 0, "no bot held up")

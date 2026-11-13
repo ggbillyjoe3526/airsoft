@@ -63,7 +63,7 @@ log(fx + 3.3, fz - 2.5, fx + 4.0, fz + 2.5)
 # are come out of round them and nobody sees from one alley into another across the Green.
 crates(-12.6, -8.15, -10.3, -5.85)         # and the concept's four, one either side of each long diagonal
 cordwood(6.2, -8.7, BELL[0] - 3.0 + 0.01, -7.0)
-crates(8.85, 5.85, 11.15, 8.15)
+crates(8.85, 5.85, 11.75, 8.15)
 cordwood(-13.2, 6.6, -9.2, 7.8)
 crates(-13.45, -11.8, -10.0 + 0.01, -10.65)
 cordwood(8.0 - 0.01, -11.8, BELL[0] - 3.0 - 1.5, -10.6)
@@ -85,17 +85,18 @@ cordwood(CAMP_X - PAL_T / 2 - 2.74, 27.6, CAMP_X - PAL_T / 2 + 0.01, 28.8)
 # ------------------------------------------------------------------ the Bell house
 bx, bz = BELL
 sandbags(bx - 6.5, bz - 1.6, bx - 5.7, bz + 1.6)   # a low wall on the Green before it, to crouch behind
-barrels(bx + 1.0, bz + 2.6)                        # inside, by its door on the street
+barrels(bx + 1.0, bz - 3.85)                       # inside, by its door on the street
+crates(bx - 1.1, bz - 1.0, bx + 0.05, bz + 3.6)    # its stock, stacked between its two doors
 
 # ------------------------------------------------------------------ the Woodyard (Site B, flag B)
 cordwood(19.0, 12.0, 29.5, 13.4)        # its north rows, on the yard before the Long House
 cordwood(31.5, 12.0, LANE_X + 0.01, 13.4)
 cordwood(19.0, 16.0, 20.4, 24.0)        # the west screen
-cordwood(19.0, 27.0, 23.5, 28.4)          # its south row along the Woodyard Road, its gate at the west end
-cordwood(25.5, 27.0, LANE_X + 0.01, 28.4)
+cordwood(19.0, 27.0, 22.5, 28.4)          # its south row along the Woodyard Road, its gate at the west end
+cordwood(26.5, 27.0, LANE_X + 0.01, 28.4)
 crates(21.4, 23.0, 22.55, 26.45)           # a stack inside each of its west gates from the Store's court
 crates(21.4, 15.0, 22.55, 17.3)
-cordwood(25.4, 28.4 - 0.01, 26.6, 31.5)    # and a stack out into the road from it
+cordwood(27.3, 28.4 - 0.01, 28.5, 31.5)    # and a stack out into the road from it
 box("log", SHED[0] - 3.2, SHED[1] - 5.2, SHED[0] + 3.2, SHED[1] - 4.2, BOARDS, dress="boards")   # along its north side
 box("log", SHED[0] + 0.5, SHED[1] + 1.0, SHED[0] + 4.5, SHED[1] + 2.4, BENCH, dress="sawbench")  # under the roof
 crates(26.6, 18.6, 27.8, 19.75, top=LOW)
@@ -127,6 +128,7 @@ crates(-4.15, 13.4, -1.85, 14.55)           # the Store's shelves of goods behin
 crates(1.85, 13.4, 4.15, 14.55)
 crates(-0.6, 15.4, 0.55, 18.85)             # and the counter down the middle of the shop
 crates(4.5, 21.0, 6.8, 22.15, top=LOW)
+crates(0.0, 24.2, 2.3, 26.5)                 # its stock in the back room, between the side door and the yard door
 drums(-6.0, 23.0)
 crates(-18.6, -10.4, -17.45, -8.1)           # the north hut's stores, between its two doors
 crates(-18.6, -1.73, -17.45, 1.72)           # stores stacked in the Arch, so no line runs through its two ends

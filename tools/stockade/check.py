@@ -1,14 +1,15 @@
-"""Stockade's quick checks (SK1), before the game's own field checks: blocks standing inside each other, the longest
-standing sight lines (a 2D look at eye height: the field is flat), each end's walks, and a plan picture.
+"""Stockade's quick checks (SK1), before the game's own field checks: blocks standing inside each other (the layout's
+boxes, before they are written), then, on the written map file, the longest standing sight lines between places to
+stand, by MB1's sight raster (tools/maps/los.py). Its pictures and report come from tools/maps/plan.py.
 
-    python3 tools/stockade/check.py [plan.png]
+    python3 tools/stockade/build_map.py && python3 tools/stockade/check.py [step m]
+    python3 tools/maps/plan.py stockade --out <dir>          # the plan picture
 
-Needs numpy; the picture needs Pillow. The game's FieldChecks are the judge (tests/unit/test_field_rules.gd,
-test_field_layout.gd); this is the fast look while placing cover."""
+Needs numpy. The game's FieldChecks are the judge (tests/unit/test_field_rules.gd, test_field_layout.gd: its sight
+measure stands at eye height on the nav grid's own cells, and finds threads a coarser grid misses); this is the fast
+look while placing cover."""
 from __future__ import annotations
 
-import heapq
-import math
 import os
 import sys
 
@@ -16,25 +17,27 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(HERE, "..", "maps"))
 import layout as L  # noqa: E402
+import los  # noqa: E402
+import plan as P  # noqa: E402
 
-EYE = 1.64          # BodyConfig.stand_eye_height + rest_gap
-RES = 0.125         # the sight raster (m)
 LIMIT = 34.0        # FieldStandard.LONGEST_SIGHTLINE
 SEAM = 0.025        # FieldStandard.SEAM_SLACK
-BODY = 0.4          # a body's half width, for the walks
-SPRINT = 6.0        # m/s, about
 
 
 def all_boxes() -> list[dict]:
+    """Every solid box of the layout: its blocks, the trees' trunks, the doors that start a round shut
+    (MapLevel._add_doors; an open one swings clear) and the roofs."""
     out = list(L.boxes)
     for (x, z, rad, model, height) in L.TREES:
         out.append({"kind": "tree", "x1": x - rad, "z1": z - rad, "x2": x + rad, "z2": z + rad, "y1": -L.SINK,
                     "y2": height, "dress": model})
-    for d in L.DOORS:   # a door that starts the round shut is solid (MapLevel._add_doors); an open one swings clear
+    for d in L.DOORS:
         if d["shut"]:
-            out.append({"kind": "door", "x1": d["x"] - d["sx"] / 2, "z1": d["z"] - d["sz"] / 2, "x2": d["x"] + d["sx"] / 2,
-                        "z2": d["z"] + d["sz"] / 2, "y1": 0.0, "y2": L.WALL, "dress": "door"})
+            out.append({"kind": "door", "x1": d["x"] - d["sx"] / 2, "z1": d["z"] - d["sz"] / 2,
+                        "x2": d["x"] + d["sx"] / 2, "z2": d["z"] + d["sz"] / 2, "y1": 0.0, "y2": L.WALL,
+                        "dress": "door"})
     for t in L.ROOF_TILES:
         out.append({"kind": "plywood", "x1": t["x1"], "z1": t["z1"], "x2": t["x2"], "z2": t["z2"], "y1": t["y"],
                     "y2": t["y"] + L.ROOF_T, "dress": "roof"})
@@ -42,10 +45,12 @@ def all_boxes() -> list[dict]:
 
 
 def overlaps(boxes: list[dict]) -> list[str]:
+    """Pairs of boxes sharing more than FieldStandard.SEAM_SLACK each way (pieces that meet run 1 cm into each other)."""
     out = []
     for i, a in enumerate(boxes):
         for b in boxes[i + 1:]:
-            if (min(a["x2"], b["x2"]) - max(a["x1"], b["x1"]) > SEAM and min(a["z2"], b["z2"]) - max(a["z1"], b["z1"]) > SEAM
+            if (min(a["x2"], b["x2"]) - max(a["x1"], b["x1"]) > SEAM
+                    and min(a["z2"], b["z2"]) - max(a["z1"], b["z1"]) > SEAM
                     and min(a["y2"], b["y2"]) - max(a["y1"], b["y1"]) > SEAM):
                 out.append("%s %s at (%.1f, %.1f) stands in %s %s at (%.1f, %.1f)" % (
                     a["kind"], a.get("dress", ""), (a["x1"] + a["x2"]) / 2, (a["z1"] + a["z2"]) / 2,
@@ -53,173 +58,58 @@ def overlaps(boxes: list[dict]) -> list[str]:
     return out
 
 
-def raster(boxes: list[dict], res: float, test) -> np.ndarray:
-    nx, nz = int(2 * L.W / res), int(2 * L.H / res)
-    g = np.zeros((nx, nz), bool)
-    for b in boxes:
-        if not test(b):
+def blocked(boxes: list[dict], ax: float, az: float, bx: float, bz: float, eye: float = los.EYE) -> bool:
+    """Whether a box stands across the eye-high segment from (ax, az) to (bx, bz): the exact test behind the raster,
+    which lets a line slip diagonally past the corner of a wall thinner than its cells. Stockade's ground is flat."""
+    for k in boxes:
+        if not k["y1"] < eye < k["y2"]:
             continue
-        i1, i2 = int(math.floor((b["x1"] + L.W) / res + 1e-6)), int(math.ceil((b["x2"] + L.W) / res - 1e-6))
-        j1, j2 = int(math.floor((b["z1"] + L.H) / res + 1e-6)), int(math.ceil((b["z2"] + L.H) / res - 1e-6))
-        g[max(i1, 0):max(i2, 0), max(j1, 0):max(j2, 0)] = True
-    return g
+        t0, t1 = 0.0, 1.0
+        for (p, q, lo, hi) in ((ax, bx, k["x1"], k["x2"]), (az, bz, k["z1"], k["z2"])):
+            d = q - p
+            if abs(d) < 1e-9:
+                if not lo <= p <= hi:
+                    t0 = 2.0
+                    break
+                continue
+            u, v = sorted(((lo - p) / d, (hi - p) / d))
+            t0, t1 = max(t0, u), min(t1, v)
+            if t0 > t1:
+                break
+        if t0 <= t1:
+            return True
+    return False
 
 
-def rays(boxes: list[dict]) -> tuple:
-    """From every place to stand on a 1.5 m grid, how far each ray (every half degree) runs clear at eye height:
-    the points, the rays' directions and the clear lengths (points x rays)."""
-    solid = raster(boxes, RES, lambda b: b["y1"] < EYE < b["y2"])
-    body = np.array([(b["x1"] - BODY, b["z1"] - BODY, b["x2"] + BODY, b["z2"] + BODY) for b in boxes
-                     if b["y1"] < 1.7 and b["y2"] > 0.35])
-    nx, nz = solid.shape
-    pts = [(x, z) for x in np.arange(-L.W + 0.75, L.W, 1.5) for z in np.arange(-L.H + 0.75, L.H, 1.5)
-           if not ((body[:, 0] < x) & (x < body[:, 2]) & (body[:, 1] < z) & (z < body[:, 3])).any()]
-    p = np.array(pts)
-    angles = np.radians(np.arange(0, 360, 0.5))
-    dx, dz = np.cos(angles), np.sin(angles)
-    free = np.zeros((len(p), len(angles)))
-    alive = np.ones((len(p), len(angles)), bool)
-    step = RES
-    d = 0.0
-    while alive.any() and d < 120.0:
-        d += step
-        x = p[:, 0:1] + dx[None, :] * d
-        z = p[:, 1:2] + dz[None, :] * d
-        i = ((x + L.W) / RES).astype(int)
-        j = ((z + L.H) / RES).astype(int)
-        inside = (i >= 0) & (i < nx) & (j >= 0) & (j < nz)
-        hit = ~inside | solid[np.clip(i, 0, nx - 1), np.clip(j, 0, nz - 1)]
-        alive &= ~hit
-        free[alive] = d
-    return p, dx, dz, free
-
-
-def sight_lines(boxes: list[dict], count: int = 400) -> list[tuple]:
-    p, dx, dz, free = rays(boxes)
-    lines = []
-    order = np.dstack(np.unravel_index(np.argsort(-free, axis=None), free.shape))[0]
-    seen: list[tuple] = []
-    for (k, a) in order:
-        ln = free[k, a]
-        if ln <= LIMIT or len(lines) >= count:
-            break
-        x1, z1 = p[k]
-        x2, z2 = x1 + dx[a] * ln, z1 + dz[a] * ln
-        key = (round((x1 + x2) / 8), round((z1 + z2) / 8), round(math.degrees(math.atan2(z2 - z1, x2 - x1)) % 180 / 12))
-        if key in seen:
+def long_lines(sight: los.Sight, boxes: list[dict], step: float) -> list[tuple[float, float, float, float, float]]:
+    """Each stand point's longest clear standing line over LIMIT to a stand point (both on a `step` grid): the raster
+    finds the candidates, the exact box test keeps the ones nothing stands across."""
+    xs, zs = sight.stand_points(step)
+    out = []
+    for k in range(len(xs)):
+        d = np.hypot(xs[k + 1:] - xs[k], zs[k + 1:] - zs[k])
+        far = np.nonzero(d > LIMIT)[0] + k + 1
+        if far.size == 0:
             continue
-        seen.append(key)
-        lines.append((ln, x1, z1, x2, z2))
-    return lines, float(free.max())
-
-
-def walk_grid(boxes: list[dict]) -> np.ndarray:
-    res = 0.25
-    g = np.zeros((int(2 * L.W / res), int(2 * L.H / res)), bool)
-    for b in boxes:
-        if b["y1"] >= 1.7 or b["y2"] <= 0.35:
-            continue
-        i1 = int(math.floor((b["x1"] - BODY + L.W) / res))
-        i2 = int(math.ceil((b["x2"] + BODY + L.W) / res))
-        j1 = int(math.floor((b["z1"] - BODY + L.H) / res))
-        j2 = int(math.ceil((b["z2"] + BODY + L.H) / res))
-        g[max(i1, 0):max(i2, 0), max(j1, 0):max(j2, 0)] = True
-    return g
-
-
-def walk_from(grid: np.ndarray, x: float, z: float) -> np.ndarray:
-    res = 0.25
-    nx, nz = grid.shape
-    dist = np.full(grid.shape, np.inf)
-    s = (int((x + L.W) / res), int((z + L.H) / res))
-    dist[s] = 0.0
-    heap = [(0.0, s)]
-    steps = [(1, 0, 1.0), (-1, 0, 1.0), (0, 1, 1.0), (0, -1, 1.0), (1, 1, 1.4142), (1, -1, 1.4142), (-1, 1, 1.4142),
-             (-1, -1, 1.4142)]
-    while heap:
-        d, (i, j) = heapq.heappop(heap)
-        if d > dist[i, j]:
-            continue
-        for di, dj, c in steps:
-            a, b = i + di, j + dj
-            if 0 <= a < nx and 0 <= b < nz and not grid[a, b] and d + c * res < dist[a, b]:
-                dist[a, b] = d + c * res
-                heapq.heappush(heap, (d + c * res, (a, b)))
-    return dist
-
-
-def at(dist: np.ndarray, x: float, z: float) -> float:
-    return float(dist[int((x + L.W) / 0.25), int((z + L.H) / 0.25)])
-
-
-def picture(boxes: list[dict], lines: list[tuple], path: str) -> None:
-    from PIL import Image, ImageDraw
-    s = 12
-    im = Image.new("RGB", (int(2 * L.W * s), int(2 * L.H * s)), (150, 170, 120))
-    dr = ImageDraw.Draw(im)
-    colours = {"plywood": (196, 160, 110), "fence": (110, 80, 50), "log": (140, 100, 60), "crate": (200, 180, 120),
-               "tree": (40, 90, 40), "sandbags": (170, 160, 130), "thicket": (30, 70, 30)}
-
-    def px(x: float, z: float) -> tuple[float, float]:
-        return ((x + L.W) * s, (z + L.H) * s)
-    for (x1, x2, z1, z2) in L.FLOORS:
-        dr.rectangle([px(x1, z1), px(x2, z2)], fill=(215, 200, 170))
-    for b in sorted(boxes, key=lambda b: b["y2"]):
-        if b.get("dress") == "roof":
-            continue
-        c = colours.get(b["kind"], (120, 120, 120))
-        if b["y2"] < EYE:
-            c = tuple(int(v * 0.6 + 100) for v in c)
-        if b["y1"] > EYE:
-            dr.rectangle([px(b["x1"], b["z1"]), px(b["x2"], b["z2"])], outline=(90, 90, 200))
-            continue
-        dr.rectangle([px(b["x1"], b["z1"]), px(b["x2"], b["z2"])], fill=c, outline=(40, 30, 20))
-    for d in L.DOORS:
-        dr.rectangle([px(d["x"] - d["sx"] / 2, d["z"] - d["sz"] / 2), px(d["x"] + d["sx"] / 2, d["z"] + d["sz"] / 2)],
-                     fill=(40, 160, 60) if not d["shut"] else (200, 60, 40))
-    for (x, z, r) in L.BOMB_SITES:
-        r = r or 4.5
-        dr.ellipse([px(x - r, z - r), px(x + r, z + r)], outline=(230, 200, 30), width=3)
-    for (x, z) in L.FLAGS + [L.OT_FLAG]:
-        dr.ellipse([px(x - 0.4, z - 0.4), px(x + 0.4, z + 0.4)], fill=(255, 255, 255), outline=(0, 0, 0))
-    for (x, z) in L.SPAWNS_W + L.SPAWNS_E:
-        dr.ellipse([px(x - 0.3, z - 0.3), px(x + 0.3, z + 0.3)], fill=(60, 60, 220))
-    for k, lane in enumerate(getattr(L, "LANE_PATHS", {}).values()):
-        dr.line([px(x, z) for (x, z) in lane], fill=[(200, 40, 40), (40, 40, 200), (160, 40, 160)][k % 3], width=2)
-    for (ln, x1, z1, x2, z2) in lines:
-        dr.line([px(x1, z1), px(x2, z2)], fill=(255, 0, 0), width=1)
-    for x in range(int(-L.W), int(L.W) + 1, 10):
-        dr.text(px(x, -L.H + 0.2), str(x), fill=(0, 0, 0))
-    for z in range(int(-L.H), int(L.H) + 1, 10):
-        dr.text(px(-L.W + 0.2, z), str(z), fill=(0, 0, 0))
-    im.save(path)
+        ok = sight.sees(xs[k], zs[k], xs[far], zs[far])
+        seen = [j for j in far[ok] if not blocked(boxes, xs[k], zs[k], xs[j], zs[j])]
+        if seen:
+            j = max(seen, key=lambda j: np.hypot(xs[j] - xs[k], zs[j] - zs[k]))
+            out.append((float(np.hypot(xs[j] - xs[k], zs[j] - zs[k])), xs[k], zs[k], xs[j], zs[j]))
+    return sorted(out, reverse=True)
 
 
 def main() -> None:
+    step = float(sys.argv[1]) if len(sys.argv) > 1 else 1.5
     boxes = all_boxes()
     bad = overlaps(boxes)
     for line in bad[:20]:
         print("OVERLAP", line)
-    lines, longest = sight_lines(boxes)
-    for (ln, x1, z1, x2, z2) in lines:
+    lines = long_lines(los.Sight(P.Field("stockade")), boxes, step)
+    for (ln, x1, z1, x2, z2) in lines[:20]:
         print("LINE %.1f m: (%.1f, %.1f) to (%.1f, %.1f)" % (ln, x1, z1, x2, z2))
-    grid = walk_grid(boxes)
-    west = walk_from(grid, *L.SPAWNS_W[3])
-    east = walk_from(grid, *L.SPAWNS_E[3])
-    rows = [("the overtime flag", L.OT_FLAG), ("flag A", L.FLAG_A), ("flag B", L.FLAG_B),
-            ("site A", L.BOMB_SITES[0][:2]), ("site B", L.BOMB_SITES[1][:2])]
-    for name, (x, z) in rows:
-        a, d = at(west, x, z), at(east, x, z)
-        print("WALK %-18s attackers %5.1f m (%4.1f s)  defenders %5.1f m (%4.1f s)  x%.2f" % (
-            name, a, a / SPRINT, d, d / SPRINT, a / max(d, 0.1)))
-    cut = [(x, z) for (x, z) in L.SPAWNS_W + L.SPAWNS_E + [L.DEAD_W, L.DEAD_E] + L.FLAGS + [L.OT_FLAG]
-           if not math.isfinite(at(west, x, z))]
-    for (x, z) in cut:
-        print("UNREACHED (%.1f, %.1f)" % (x, z))
-    print("TOTAL %d overlaps, %d lines over %.0f m (longest %.1f m), %d spots unreached" % (
-        len(bad), len(lines), LIMIT, longest, len(cut)))
-    if len(sys.argv) > 1:
-        picture(boxes, lines, sys.argv[1])
+    print("TOTAL %d overlaps, %d stand points with a line over %.0f m (longest %.1f m)" % (
+        len(bad), len(lines), LIMIT, lines[0][0] if lines else 0.0))
 
 
 if __name__ == "__main__":

@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-13 | 1 | build thread | pass | Retry 5/8 | dropped the concept's Bell tower, Tents, Orchard, campfire and 76 m depth unrecorded; the Green filled with 53 tall pieces; no MB1 before and after |
-| 2026-11-13 | 2 | build thread | pass | pending | – |
+| 2026-11-13 | 2 | build thread | pass | Retry 4/8 | Attack / Defend 44 % (under Normal's 45 to 55) and Site B hardly planted; houses off every route; MB1 figures quoted from a map with lines over 34 m; `check.py` copied MB1's tools |
+| 2026-11-13 | 3 | build thread | pass | pending | – |
 
 ## Goal
 
@@ -23,27 +24,35 @@ Bomb (PB1). He picked from three ideas at 17:54: "Build both Stockade and Stacks
   West camp by its two Tents, the defenders in the East camp, each behind a palisade with three gates. Three ways run
   west to east: the Back Lane (north), Main Street through the West Arch onto the Green and its campfire, the
   Woodyard Road (south) past the Orchard. The Forge, Barn, Tavern and Store stand round the Green as the concept has
-  them. Site A is indoors, the Long House at the north-east (30, -22); Site B the open Woodyard under the Sawmill's
-  shed (31, 21). Attack / Defend's poles stand at (30, -9.5) and (32.5, 25.6), Elimination's overtime flag on the
+  them. Site A is indoors, the Long House's west room at the north-east (26, -21); Site B the open Woodyard under the
+  Sawmill's shed (31, 21). Attack / Defend's poles stand at (30, -9.5) and (32.5, 25.6), Elimination's overtime flag on the
   Green beside the fire.
 - **Built by a script** (`tools/stockade/`): `layout.py` holds the buildings, walls, doors, roofs, ends, lanes, sites,
-  areas and lights; `cover.py` every piece of cover; `build_map.py` writes `data/maps/stockade.json` (383 blocks: 179
-  plywood, 83 palisade and fence, 61 logs and cordwood, 27 crates, 4 drums, 3 barrels, 2 sofas, 2 tyres, 1 sandbag
-  wall, 21 trees; 23 doors, 26 lights); `check.py` checks overlaps, sight lines and walks and draws a plan; `hot.py`
-  finds hot spots.
+  areas and lights; `cover.py` every piece of cover; `build_map.py` writes `data/maps/stockade.json` (381 blocks: 175
+  plywood, 83 palisade and fence, 61 logs and cordwood, 29 crates, 4 drums, 3 barrels, 2 sofas, 2 tyres, 1 sandbag
+  wall, 21 trees; 26 doors, all open at the start, 26 lights); `check.py` checks overlaps and, on MB1's sight raster
+  (`tools/maps/los.py`, `plan.py`), the long standing lines, each confirmed by an exact box test (the raster lets a
+  line slip past the corner of a wall thinner than its 25 cm cells: three such 35 to 37 m lines, all blocked).
 - **Only the game's models** (PropDressConfig): plywood walls and headers, hut roofs, the palisade, cordwood, crates,
   fallen logs, sandbags, drums, barrels, the sofa, tractor tyres, the Sawmill's shed, sawbench and boards, oaks and
   bushes; the woods' ambience; a day and a night preset with three fires and 23 lanterns.
 - **The open Green:** 27 x 28 m between the houses, its middle 16 m clear but for the campfire's four log benches
   (0.6 m, crouch cover) and a sandbag wall before the Bell house. Its only tall pieces are the concept's four stacks
   at its corners, a screen in each alley's mouth and a crate stack in the Tavern's corner (9; attempt 1 had 53).
-- **Sight lines** under FieldStandard's 34 m everywhere: 33.5 m by the game's own measure (FieldMeasure.sightline, as
+- **Sight lines** under FieldStandard's 34 m everywhere: 33.9 m by the game's own measure (FieldMeasure.sightline, as
   `test_field_layout` runs it). Long lines were found through lined-up doors, windows and fence gaps, and broken by
   moving the opening or by a piece of furniture in the room (a crate stack, the Tavern's shelves), never by cover
   dropped where a line ran. Pieces that meet run 1 cm into each other (within FieldStandard.SEAM_SLACK) so no line
   slips along a seam. `check.py`'s stand points now keep a body's clearance from every piece, as FieldMeasure's do.
-- **Lanes** laid as MB1 asks: one point either side of the middle, 3 m (Back Lane), 6 m (the Green) and 3.5 m (the
-  Woodyard Road) deep both ways, the last two points the Attack / Defend posts at each flag.
+- **Lanes** laid as MB1 asks: one point either side of the middle, 3 m (Back Lane), 6 m (the Green) and 3.5 m deep
+  both ways, the last two points the Attack / Defend posts at each flag. The south lane runs through the Store, in
+  at its yard door and out at its east door, then over the Store court into the Woodyard's west gate.
+- **Routes through the houses (attempt 3):** the Forge, Barn, Tavern and Store have a second door each, so every
+  house on the Green is a way through, not a room off it. The defenders reach flag A through the Long House (its east
+  door off East Lane, its south doors onto the House yard); the House yard has no gate from Main Street. The Bell house
+  has a door onto the Green as well as the street, the two off each other's line with its stock between them, so the
+  East camp reaches the Green as fast as the West camp (FieldStandard: 57.6 and 58.6 m to the overtime flag; without
+  that door 72.9 m, 27 % apart, a failed check).
 
 ## Defaults taken
 
@@ -57,8 +66,8 @@ Departures from the concept (each so the field meets the 34 m line, or plays its
 
 - **A Bell house in place of the Bell tower** (the owner's ruling, 2026-11-13: "Leave the tower out";
   DECISIONS › Maps and modes). Woodland's watch tower put a standing eye at 5 m: it saw over every 2.6 m wall, 3,839
-  lines over 34 m, the longest 65 m to the attackers' gate. The house (6 x 9 m, one door to the east) stands across
-  Main Street's east end, so the street is walked round it through its two yards.
+  lines over 34 m, the longest 65 m to the attackers' gate. The house (6 x 9 m) stands across Main Street's east end,
+  a door onto the street behind and one onto the Green, off each other's line, its stock stacked between them.
 - **Fenced courts and yards.** The concept leaves the ground between the houses open; plywood fences with one gate
   each make the North, House, South and Store courts, the Forge, Barn, House and Shed yards, so the outer lanes stay
   lanes and the courts are rooms of their own.
@@ -68,7 +77,10 @@ Departures from the concept (each so the field meets the 34 m line, or plays its
   and five woodpiles in each camp, from either side by turns.
 - **The West Arch** is a dog-leg between its two huts with a crate stack in the middle; the concept's huts have one
   door each, these two (one onto the Arch, one onto the yard behind).
-- **East Lane** runs behind a plywood fence from the House and Shed yards, Main Street its one way in.
+- **East Lane** runs behind a plywood fence from the House and Shed yards, Main Street and the Long House's east
+  door its ways in.
+- **Site A in the Long House's west room** (26, -21), not on the partition's doorway (30, -22): with the east door
+  the defenders' way onto flag A, a site on the doorway was theirs the moment they came in.
 - **Doors and windows moved** where two lined up into a line over 34 m (the Store's partition doorway to the east end,
   the Forge's front door and back window, the West Arch huts' doors, the Long House's west room given a crate stack).
 - **Flag A in the House yard** before the Long House, between a crate stack and a woodpile (MB1: as Depot's flags

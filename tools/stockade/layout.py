@@ -229,11 +229,10 @@ STREET = 4.5     # Main Street's half width at the West Arch
 
 # The Forge (north-west) and the Barn (south-west), as the concept stands them: the Barn the bigger, nearer the Green.
 FORGE = (-36.0, -29.0, -24.0, -18.0)
-building(*FORGE, [("e", -23.0, DOOR_W, "door"), ("s", -33.0, DOOR_W, "door"), ("n", -33.0, DOOR_W, "shut"),
-                  ("n", -26.0, 2.0, "window")])
+building(*FORGE, [("e", -23.0, DOOR_W, "door"), ("s", -27.0, DOOR_W, "door"), ("n", -33.0, DOOR_W, "door")])
 BARN = (-37.0, 14.0, -23.0, 27.0)
 building(*BARN, [("e", 15.5, DOOR_W, "door"), ("e", 21.0, DOOR_W, "door"), ("n", -35.0, DOOR_W, "door"),
-                 ("s", -33.0, DOOR_W, "shut"), ("s", -35.0, 2.0, "window")])
+                 ("s", -26.0, DOOR_W, "door"), ("s", -35.0, 2.0, "window")])
 # The Barn's stalls: a partition across it, its doorway at the west end.
 wall_z(-29.0 - T / 2, 14.0 + T, 27.0 - T, [(16.5, DOOR_W, "gap")])
 wall_z(-24.0, -18.0, -15.0 - T)   # the Forge's east face run on, and a fence to the north hut's corner: the Forge
@@ -257,11 +256,12 @@ wall_z(-15.0 - T, -STREET, 1.5)
 # ------------------------------------------------------------------ the Tavern north of the Green, the Store south
 TAVERN = (-10.0, -29.0, 8.0, -15.0)
 building(*TAVERN, [("w", -27.5, DOOR_W, "door"), ("e", -17.5, DOOR_W, "door"), ("s", -1.0, DOOR_W, "door"),
-                   ("s", -6.0, 2.0, "window"), ("s", 4.0, 2.0, "window"), ("n", 3.0, 2.0, "window")])
+                   ("s", -6.0, 2.0, "window"), ("s", 4.0, 2.0, "window"), ("n", 3.0, DOOR_W, "door")])
 # A front room on the Green and a back room on the Back Lane, the doorway between them off to the east.
 wall_x(-20.0 - T / 2, -10.0 + T, 8.0 - T, [(5.0, DOOR_W, "gap")])
 STORE = (-8.0, 13.0, 8.0, 27.0)
-building(*STORE, [("w", 18.5, DOOR_W, "door"), ("e", 23.0, DOOR_W, "door"), ("n", -3.0, 2.0, "window"),
+building(*STORE, [("w", 18.5, DOOR_W, "door"), ("e", 23.0, DOOR_W, "door"), ("s", -5.0, DOOR_W, "door"),
+                  ("n", -3.0, 2.0, "window"),
                   ("n", 3.0, 2.0, "window")])
 wall_x(20.0 - T / 2, -8.0 + T, 8.0 - T, [(5.0, DOOR_W, "gap")])
 # Wings at the two buildings' front corners and fences across the alleys' mouths: the Green is a square framed by
@@ -293,13 +293,18 @@ wall_x(27.0 - T, 8.0, 19.0, [(9.5, 2.5, "gap")])
 # ------------------------------------------------------------------ east of the Green: the Bell house and the sites
 BELL = (15.0, 0.0)
 # The Bell house in the concept's Bell tower's place (the owner, 2026-11-13: leave the tower out; from 3.4 m up it saw
-# over every roof to the attackers' gate): a plywood hut across Main Street's east end, its one door on the street
-# behind, so the street is walked round it, never seen down. It spans the street 1 cm into each of its fences.
-building(BELL[0] - 3.0, -STREET - 0.01, BELL[0] + 3.0, STREET + 0.01, [("e", BELL[1], DOOR_W, "door")])
-# Site A, the Long House: two rooms, four doors; the partition's doorway is the site's middle.
+# over every roof to the attackers' gate): a plywood hut across Main Street's east end, spanning the street 1 cm into
+# each of its fences. A door on the street behind and one onto the Green, off its line, a crate stack between them
+# (cover.py), so the street is walked through it and never seen down: the East camp's way to the Green, as long as
+# the West camp's (the field's middle and overtime flag ask it, FieldStandard).
+building(BELL[0] - 3.0, -STREET - 0.01, BELL[0] + 3.0, STREET + 0.01,
+         [("e", BELL[1], DOOR_W, "door"), ("w", BELL[1] + 2.0, DOOR_W, "door")])
+# Site A, the Long House: two rooms, four doors. The House yard has no gate from Main Street, so the defenders come
+# onto flag A from East Lane through the Long House's east door and out by its south ones (SK1 attempt 3: through a
+# gate off Main Street they held the yard's mouth before the attackers reached it, 39 % for the attackers).
 LONG = (22.0, -29.0, 38.0, -15.0)
 building(*LONG, [("w", -26.0, DOOR_W, "door"), ("s", 26.5, DOOR_W, "door"), ("s", 35.0, DOOR_W, "door"),
-                 ("e", -24.0, DOOR_W, "shut"), ("n", 25.0, 2.0, "window"), ("n", 36.0, 2.0, "window")])
+                 ("e", -16.8, DOOR_W, "door"), ("n", 25.0, 2.0, "window"), ("n", 36.0, 2.0, "window")])
 wall_z(30.0 - T / 2, -29.0 + T, -15.0 - T, [(-22.0, 3.0, "gap")])
 # Site B, the Woodyard: the Sawmill's open shed (its six posts and roof are one model, 10 x 6 m as modelled).
 SHED = (31.0, 21.0)
@@ -315,8 +320,8 @@ wall_z(BELL[0] - 3.0, STREET, 13.0)
 LANE_X = 38.0
 wall_z(LANE_X - T, -15.0, -STREET)
 wall_z(LANE_X - T, STREET, 12.0)
-# Main Street east of the Bell house, between the yards' fences, a gate into each yard off to one side.
-wall_x(-STREET - T, BELL[0] + 3.0 - 0.01, LANE_X - T, [(34.0, 2.5, "gap")])
+# Main Street east of the Bell house, between the yards' fences: a gate into the Shed yard, none into the House yard.
+wall_x(-STREET - T, BELL[0] + 3.0 - 0.01, LANE_X - T)
 wall_x(STREET, BELL[0] + 3.0 - 0.01, LANE_X - T, [(25.5, 2.5, "gap")])
 
 FLAG_A = (30.0, -9.5)      # Attack / Defend's poles: before the Long House, and in the Woodyard by the road
@@ -324,18 +329,20 @@ FLAG_B = (32.5, 25.6)
 FLAGS = [FLAG_A, FLAG_B]
 OT_FLAG = (0.0, -5.0)      # Elimination's: on the Green, beside the campfire
 FIRE = (0.0, 0.0)
-# Plant The Bomb's sites (x, z, radius m; 0 the game's usual): A in the Long House, B under the Woodyard's shed.
-BOMB_SITES = [(30.0, -22.0, 0), (SHED[0], SHED[1], 0)]
+# Plant The Bomb's sites (x, z, radius m; 0 the game's usual): A in the Long House's west room, B under the
+# Woodyard's shed.
+BOMB_SITES = [(26.0, -21.0, 0), (SHED[0], SHED[1], 0)]
 
 # The bots' lanes, West camp to East camp: the Back Lane to flag A, Main Street over the Green and round the Bell house
-# to flag A, the Woodyard Road to flag B. A defender holds its lane's last point or the one before (RoundPlanner).
+# to flag A, the Woodyard Road and through the Store to flag B. A defender holds its lane's last point or the one
+# before (RoundPlanner).
 LANES = {
     "n": [(-48.5, -9.0), (-43.4, -26.0), (-38.0, -34.0), (-27.0, -31.0), (-14.0, -32.5), (-3.0, -32.0), (3.0, -32.0),
           (12.0, -33.5), (18.5, -27.0), (22.0, -12.0), (30.0, -9.5)],
     "m": [(-48.5, 0.0), (-46.5, -6.5), (-43.3, -1.5), (-36.0, 0.0), (-24.5, -2.5), (-16.5, -2.5), (-13.0, 3.0),
           (-6.0, -3.0), (6.0, -3.0), (11.2, -9.7), (11.2, -13.3), (14.0, -9.0), (21.0, -8.0), (30.0, -12.3)],
-    "s": [(-48.5, 9.0), (-43.4, 26.0), (-38.0, 31.5), (-34.0, 28.3), (-20.5, 33.0), (-10.0, 28.3), (-3.5, 33.0),
-          (3.5, 33.0), (14.0, 28.3), (24.5, 29.5), (24.5, 24.5), (32.5, 25.6)],
+    "s": [(-48.5, 9.0), (-43.4, 26.0), (-38.0, 31.5), (-34.0, 28.3), (-20.5, 33.0), (-10.0, 28.3), (-5.0, 29.5),
+          (-3.5, 24.5), (3.5, 23.0), (14.0, 22.0), (24.5, 24.5), (32.5, 25.6)],
 }
 # The areas, as the callouts and the map name them: boxes (x1, x2, z1, z2), the first that holds a spot naming it.
 AREAS = [

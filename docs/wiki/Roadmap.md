@@ -31,7 +31,8 @@ The rest of this wiki describes all of it.
   three BBs a pull for corners and doorways, with a pump between pulls, and a new map: Subway, a closed metro
   station on three levels, from the ticket hall down escalators, stairs and working lifts to the platforms, the
   trains and the tunnels, tiled, terrazzo-floored and lamp-lit, its shots ringing off the tiles (both in
-  development).
+  development). A test map for the developers, Stockade, a plywood village inside a log fort with an indoor site
+  and an open woodyard, is in development for trying out Plant The Bomb; it is not offered to players.
 
 ### Then: the rest of the art pass
 
