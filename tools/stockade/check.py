@@ -31,6 +31,10 @@ def all_boxes() -> list[dict]:
     for (x, z, rad, model, height) in L.TREES:
         out.append({"kind": "tree", "x1": x - rad, "z1": z - rad, "x2": x + rad, "z2": z + rad, "y1": -L.SINK,
                     "y2": height, "dress": model})
+    for d in L.DOORS:   # a door that starts the round shut is solid (MapLevel._add_doors); an open one swings clear
+        if d["shut"]:
+            out.append({"kind": "door", "x1": d["x"] - d["sx"] / 2, "z1": d["z"] - d["sz"] / 2, "x2": d["x"] + d["sx"] / 2,
+                        "z2": d["z"] + d["sz"] / 2, "y1": 0.0, "y2": L.WALL, "dress": "door"})
     for t in L.ROOF_TILES:
         out.append({"kind": "plywood", "x1": t["x1"], "z1": t["z1"], "x2": t["x2"], "z2": t["z2"], "y1": t["y"],
                     "y2": t["y"] + L.ROOF_T, "dress": "roof"})

@@ -1,24 +1,26 @@
-"""Stockade's layout as data (SK1): a plywood village inside a log fort, 104 x 64 m on flat ground. The attackers
-(end 0) start in the West camp, the defenders in the East camp; three ways run west to east (the Back Lane, Main
-Street through the Green, the Woodyard Road) and the Arches, the Tavern, the Store and the yards join them. Site A is
-indoors (the Long House), Site B the open Woodyard under its shed.
+"""Stockade's layout as data (SK1): the owner's concept 1 (concepts/new-map-ptb/idea-1-stockade-plan.png), a plywood
+village inside a log fort, 104 x 76 m on flat ground. The attackers (end 0) start in the West camp by the Tents, the
+defenders in the East camp; three ways run west to east (the Back Lane, Main Street to the Green, the Woodyard Road
+past the Orchard) and the West Arch, the Tavern and the Store look onto the open Green and its campfire. The Bell tower
+stands between the sites. Site A is indoors (the Long House), Site B the open Woodyard under its shed.
 
 Everything is an axis-aligned box on the ground (y = 0): `boxes` (what build_map.py writes as blocks), `DOORS`,
 `ROOF_TILES`, and the field's ends, lanes, flags, sites, areas and lights. x runs east, z south. Built only from
 models the game already has (PropDressConfig): plywood walls and headers, hut roofs, the palisade, cordwood, crates,
-fallen logs, sandbags, drums, barrels, the sofa, the Sawmill's shed, sawbench and boards, trees and spruces.
+fallen logs, sandbags, drums, barrels, the sofa, Woodland's watch tower (the Bell tower), the Sawmill's shed, sawbench
+and boards, trees and bushes.
 
     python3 tools/stockade/check.py     # overlaps, sight lines, walks, a plan picture
     python3 tools/stockade/build_map.py # writes data/maps/stockade.json
 """
 from __future__ import annotations
 
-W, H = 52.0, 32.0           # the field's half size (m)
+W, H = 52.0, 38.0           # the field's half size (m): the concept's 104 x 76
 T = 0.3                     # a plywood wall's thickness (Depot's)
 WALL = 2.6                  # and its height: the plywood kit's own
 SILL, LINTEL = 1.0, 2.1     # a window's opening
 ROOF_T = 0.15               # a roof block (the hut roofs are modelled inside it)
-SINK = 0.3                  # every block reaches this far under the ground
+SINK = 0.0                  # the ground is flat: every block stands on it at its model's own height
 PAL_T = 0.4                 # the palisade's thickness
 PAL_OUT, PAL_IN = 3.2, 2.8  # the fort's wall and the camps' inner walls (m high)
 TALL = 2.4                  # a cordwood stack nobody sees over
@@ -166,6 +168,34 @@ def tree(x: float, z: float, model: str, height: float) -> None:
     TREES.append((x, z, rad, model, height))
 
 
+BUSHES: list[tuple[float, float, float, float]] = []  # x, z, radius, height (foliage: looked through, walked through)
+
+
+def bush(x: float, z: float, radius: float = 1.0, height: float = 1.2) -> None:
+    BUSHES.append((x, z, radius, height))
+
+
+def tower(cx: float, cz: float) -> None:
+    """Woodland's watch tower (one model, fitted over all its blocks), as the Bell tower: a 4 x 4 m platform at 3.4 m on
+    four posts, a 1.1 m parapet open on the east where its stair comes up, a roof, and the stair (1 in 2) off the east
+    side. Its parts are Woodland's blocks, stood on flat ground."""
+    top, deck = 3.4, 0.2
+    box("floor", cx - 2.0, cz - 2.0, cx + 2.0, cz + 2.0, top, top - deck, surface="wood", dress="watch_tower")
+    box("ramp", cx + 2.0, cz - 0.6, cx + 2.0 + 2.0 * top + 0.2, cz + 0.6, top, 0.0, rise="-x", surface="wood",
+        dress="watch_tower")
+    box("plywood", cx - 2.4, cz - 2.4, cx + 2.4, cz + 2.4, 5.75, 5.6, dress="watch_tower")
+    for px in (-2.0, 2.0):
+        for pz in (-2.0, 2.0):
+            box("log", cx + px - 0.15, cz + pz - 0.15, cx + px + 0.15, cz + pz + 0.15, top - deck, 0.0,
+                dress="watch_tower")
+    rail = top + 1.1
+    for pz in (-2.0, 2.0):
+        box("plywood", cx - 2.25, cz + pz - 0.25, cx + 2.0, cz + pz + 0.25, rail, top, dress="watch_tower")
+    box("plywood", cx - 2.25, cz - 1.75, cx - 1.75, cz + 1.75, rail, top, dress="watch_tower")
+    for pz in (-1.175, 1.175):
+        box("plywood", cx + 1.5, cz + pz - 0.575, cx + 2.0, cz + pz + 0.575, rail, top, dress="watch_tower")
+
+
 # ------------------------------------------------------------------ the fort's wall, and the two camps
 palisade(-W - PAL_T, -H - PAL_T, W + PAL_T, -H, PAL_OUT)
 palisade(-W - PAL_T, H, W + PAL_T, H + PAL_T, PAL_OUT)
@@ -173,12 +203,17 @@ palisade(-W - PAL_T, -H, -W, H, PAL_OUT)
 palisade(W, -H, W + PAL_T, H, PAL_OUT)
 
 CAMP_X = 42.0                                   # the camps' inner walls
-GATES = ((-31.0, -27.0), (-2.5, 2.5), (27.0, 31.0))  # their three gates: the Back Lane, Main Street, the Woodyard Road
+ORCHARD_Z = 34.0                                # the Orchard's fence (south of the Woodyard Road)
+GATES = ((-35.5, -30.5), (-2.5, 2.5), (29.5, ORCHARD_Z))  # their three gates: the Back Lane, Main Street, the Woodyard Road
+
+
+def _xz(x: tuple[float, float], z: tuple[float, float]) -> tuple[float, float, float, float]:
+    return (x[0], z[0], x[1], z[1])
 
 
 def camp(s: int) -> None:
-    """A camp behind its inner wall (s -1 west, 1 east): a screen inside the middle gate and four tall woodpiles, two
-    reaching in from the fort's wall and two from the inner wall, so nobody sees the length of it."""
+    """A camp behind its inner wall (s -1 west, 1 east): a screen inside the middle gate and five tall woodpiles reaching
+    in from the fort's wall and from the inner wall by turns, so nobody sees the length of it."""
     def xs(a: float, b: float) -> tuple[float, float]:
         return (min(s * a, s * b), max(s * a, s * b))
     wx1, wx2 = xs(CAMP_X - PAL_T / 2, CAMP_X + PAL_T / 2)
@@ -187,154 +222,171 @@ def camp(s: int) -> None:
         palisade(wx1, z, wx2, g1)
         z = g2
     palisade(wx1, z, wx2, H)
-    cordwood(*_xz(xs(44.4, 45.6), (-4.0, 4.0)), top=PAL_IN)          # the middle gate's screen
-    cordwood(*_xz(xs(CAMP_X + PAL_T / 2, 48.5), (-9.6, -8.4)), top=PAL_IN)
-    cordwood(*_xz(xs(45.5, W), (-19.6, -18.4)), top=PAL_IN)
-    cordwood(*_xz(xs(45.5, W), (8.4, 9.6)), top=PAL_IN)
-    cordwood(*_xz(xs(CAMP_X + PAL_T / 2, 48.5), (18.4, 19.6)), top=PAL_IN)
-    crates(*_xz(xs(50.2, 51.4), (22.0, 24.0)), top=LOW)
-    crates(*_xz(xs(42.6, 43.8), (11.5, 13.5)))
-
-
-def _xz(x: tuple[float, float], z: tuple[float, float]) -> tuple[float, float, float, float]:
-    return (x[0], z[0], x[1], z[1])
+    cordwood(*_xz(xs(44.4, 45.6), (-5.5, 5.5)), top=PAL_IN)          # the middle gate's screen
+    cordwood(*_xz(xs(CAMP_X + PAL_T / 2, 50.0), (-12.6, -11.4)), top=PAL_IN)
+    cordwood(*_xz(xs(44.5, W), (-22.6, -21.4)), top=PAL_IN)
+    cordwood(*_xz(xs(CAMP_X + PAL_T / 2, 50.0), (11.4, 12.6)), top=PAL_IN)
+    cordwood(*_xz(xs(44.5, W), (21.4, 22.6)), top=PAL_IN)
+    cordwood(*_xz(xs(49.2, W), (-0.6, 0.6)), top=PAL_IN)
 
 
 camp(-1)
 camp(1)
+EDGE = CAMP_X - PAL_T / 2  # the camps' inner walls' village faces
+
+# The Tents: two small huts in the West camp's corners, a door each onto the camp.
+building(-50.6, -32.0, -45.4, -27.0, [("e", -29.5, DOOR_W, "door")], eaves=(0.3, 0.3, 0.3, 0.3))
+building(-50.6, 27.0, -45.4, 32.0, [("e", 29.5, DOOR_W, "door")], eaves=(0.3, 0.3, 0.3, 0.3))
 
 SPAWNS_W = [(-48.5, -7.0 + 2.0 * i) for i in range(8)]   # the attackers (end 0)
 SPAWNS_E = [(48.5, -7.0 + 2.0 * i) for i in range(8)]    # the defenders
-DEAD_W = (-50.0, -14.0)
-DEAD_E = (50.0, -14.0)
+DEAD_W = (-49.0, -18.0)
+DEAD_E = (49.0, -18.0)
 BOMB_START = (-46.2, 6.2)
 
-# ------------------------------------------------------------------ the village: west of the Green
-LANE = 26.0      # the Back Lane and the Woodyard Road lie beyond this
-YARD = 14.0      # the buildings' fronts on the yards and the Green
-STREET = 4.0     # Main Street's half width
-EDGE = CAMP_X - PAL_T / 2  # the camps' inner walls' village faces
+# ------------------------------------------------------------------ the village west of the Green
+STREET = 4.5     # Main Street's half width at the West Arch
 
-# The Forge (north) and the Barn (south), each with its yard on Main Street behind a plywood fence.
-building(-EDGE, -LANE, -29.0, -YARD, [("n", -35.5, DOOR_W, "door"), ("s", -33.0, DOOR_W, "shut"),
-                                         ("e", -22.5, DOOR_W, "door"), ("n", -31.5, 2.0, "window"),
-                                         ("s", -38.5, 2.0, "window")], eaves=(0.0, 0.3, 0.3, 0.3))
-building(-EDGE, YARD, -29.0, LANE, [("s", -35.5, DOOR_W, "door"), ("n", -33.0, DOOR_W, "shut"),
-                                      ("e", 22.5, DOOR_W, "door"), ("s", -31.5, 2.0, "window"),
-                                      ("n", -38.5, 2.0, "window")], eaves=(0.0, 0.3, 0.3, 0.3))
-# Each is two rooms: a partition across it, its doorway at the west end, so no line runs door to door through it.
-PART = 20.0 - T / 2
-wall_x(-PART - T, -EDGE + T, -29.0 - T, [(-39.5, DOOR_W, "gap")])
-wall_x(PART, -EDGE + T, -29.0 - T, [(-39.5, DOOR_W, "gap")])
-wall_x(-STREET - T, -EDGE, -22.0, [(-34.75, 2.5, "gap")])
-wall_x(STREET, -EDGE, -22.0, [(-29.75, 2.5, "gap")])
-# The West Arch: a hut either side of Main Street's mouth on the Green, each a way through from its square.
-ARCH = (STREET + T, STREET + T + 6.0)   # the huts' z, either side
-building(-22.0, -ARCH[1], -16.0, -ARCH[0], [("n", -20.2, DOOR_W, "door"), ("s", -17.8, DOOR_W, "door"),
-                                              ("e", -8.6, 1.8, "window")])
-building(-22.0, ARCH[0], -16.0, ARCH[1], [("n", -20.2, DOOR_W, "door"), ("s", -17.8, DOOR_W, "door"),
-                                            ("e", 6.0, 1.8, "window")])
+# The Forge (north-west) and the Barn (south-west), as the concept stands them: the Barn the bigger, nearer the Green.
+FORGE = (-36.0, -29.0, -24.0, -18.0)
+building(*FORGE, [("e", -23.0, DOOR_W, "door"), ("s", -33.0, DOOR_W, "door"), ("n", -33.0, DOOR_W, "shut"),
+                  ("n", -26.0, 2.0, "window")])
+BARN = (-37.0, 14.0, -23.0, 27.0)
+building(*BARN, [("e", 15.5, DOOR_W, "door"), ("e", 21.0, DOOR_W, "door"), ("n", -35.0, DOOR_W, "door"),
+                 ("s", -33.0, DOOR_W, "shut"), ("s", -35.0, 2.0, "window")])
+# The Barn's stalls: a partition across it, its doorway at the west end.
+wall_z(-29.0 - T / 2, 14.0 + T, 27.0 - T, [(16.5, DOOR_W, "gap")])
+wall_z(-24.0, -18.0, -15.0 - T)   # the Forge's east face run on, and a fence to the north hut's corner: the Forge
+wall_x(-15.0 - T, -24.0, -21.0)   # yard is shut off from the North court but through the Forge or the hut
+# The West Arch: a hut either side of Main Street's mouth on the Green, each a way through, a window onto the Green.
+ARCH_N = (-21.0, -15.0, -15.0, -STREET)
+ARCH_S = (-21.0, STREET, -15.0, 13.0)
+building(*ARCH_N, [("n", -16.4, DOOR_W, "door"), ("s", -19.6, DOOR_W, "door")])
+building(*ARCH_S, [("n", -19.6, DOOR_W, "door"), ("s", -16.4, DOOR_W, "door")])
 
-# ------------------------------------------------------------------ the Green, the Tavern north of it, the Store south
-building(-9.0, -LANE, 9.0, -YARD, [("n", 6.0, DOOR_W, "door"), ("s", -3.0, DOOR_W, "door"),
-                                     ("w", -17.5, DOOR_W, "door"), ("e", -22.5, DOOR_W, "shut"),
-                                     ("s", 5.0, 2.4, "window"), ("n", -4.5, 2.0, "window")])
-building(-9.0, YARD, 9.0, LANE, [("s", -6.0, DOOR_W, "door"), ("n", 3.0, DOOR_W, "door"),
-                                   ("e", 17.5, DOOR_W, "door"), ("w", 22.5, DOOR_W, "shut"),
-                                   ("n", -5.0, 2.4, "window"), ("s", 4.5, 2.0, "window")])
-# Each has a front room on the Green and a back room on its lane, the doorway between them off to one side; and a
-# plywood wing at each front corner, which ends the long look along the building fronts.
-wall_x(-PART - T, -9.0 + T, 9.0 - T, [(-6.5, DOOR_W, "gap")])
-wall_x(PART, -9.0 + T, 9.0 - T, [(6.5, DOOR_W, "gap")])
-WING = YARD - ARCH[1]      # as far out as the Arch huts' corners (3.7 m)
-for wx in (-9.0 - T, 9.0):
-    wall_z(wx, -YARD, -YARD + WING)
-    wall_z(wx, YARD - WING, YARD)
-# Fences shut most of each alley's mouth on the Green; the gaps north and south never line up.
-wall_x(-YARD - T, -16.0, -11.5)
-wall_x(-YARD - T, 11.5, 16.0)
-wall_x(YARD, -13.5, -9.0)
-wall_x(YARD, 9.0, 13.5)
-# The four courts between the buildings: a fence along each outer lane with one gap, and one along the building
-# fronts, so a court is a room of its own and the lanes are lanes.
-wall_x(-LANE, -29.0, -9.0, [(-26.0, 2.5, "gap")])
-wall_x(-LANE, 9.0, 24.0, [(21.5, 2.5, "gap")])
-wall_x(LANE - T, -29.0, -9.0, [(-27.5, 2.5, "gap")])
-wall_x(LANE - T, 9.0, 22.0, [(11.0, 2.5, "gap")])
-wall_x(-YARD - T, -29.0, -20.5)
-wall_x(YARD, -29.0, -20.5)
-wall_x(-YARD - T, 20.5, 24.0)
-# A screen stands in each Arch's mouth: Main Street is walked round it, never seen through.
-wall_z(-19.0 - T / 2, -2.0, 2.0)
-wall_z(19.0 - T / 2, -2.0, 2.0)
-# Main Street's mouths: two crate stacks each, so nobody sees the street's length across the Green.
-crates(-15.5, -STREET - T, -14.3, 0.6)
-crates(-11.5, -0.6, -10.3, STREET + T)
-crates(14.3, -0.6, 15.5, STREET + T + 1.15)   # a cell longer: the slit past the East Arch hut's corner
-crates(10.3, -STREET - T, 11.5, 0.6)
+# The yards on Main Street: a plywood fence along the street, one gate each, and the Arch's screen in its mouth.
+wall_x(-STREET - T, -EDGE, -21.0, [(-27.0, 2.5, "gap")])
+wall_x(STREET, -EDGE, -21.0, [(-38.0, 2.5, "gap")])
 
-# ------------------------------------------------------------------ east of the Green: the East Arch and the sites
-building(16.0, -ARCH[1], 22.0, -ARCH[0], [("n", 17.8, DOOR_W, "door"), ("s", 20.2, DOOR_W, "door"),
-                                           ("w", -6.0, 1.8, "window")])
-building(16.0, ARCH[0], 22.0, ARCH[1], [("n", 17.8, DOOR_W, "door"), ("s", 20.2, DOOR_W, "door"),
-                                         ("w", 8.6, 1.8, "window")])
-# Site A, the Long House: two rooms, four doors.
-LONG = (24.0, -LANE, 38.0, -YARD)
-building(*LONG, [("n", 27.5, DOOR_W, "door"), ("w", -18.0, DOOR_W, "door"), ("s", 34.5, DOOR_W, "door"),
-                 ("e", -21.0, DOOR_W, "shut"), ("n", 36.3, 2.0, "window"), ("s", 27.5, 2.0, "window")])
-wall_z(31.0 - T / 2, -LANE + T, -YARD - T, [(-20.0, 3.0, "gap")])
-wall_x(-STREET - T, 22.0, EDGE, [(30.25, 2.5, "gap")])
-wall_x(STREET, 22.0, EDGE, [(33.75, 2.5, "gap")])
+# The Arch's gates: a plywood wall across each half of Main Street, at the huts' west and east faces, overlapping by
+# three metres, so the street dog-legs through the Arch and nobody sees down it from the Green, nor across the Green
+# from the street.
+wall_z(-21.0, -1.5, STREET)
+wall_z(-15.0 - T, -STREET, 1.5)
+
+# ------------------------------------------------------------------ the Tavern north of the Green, the Store south
+TAVERN = (-10.0, -29.0, 8.0, -15.0)
+building(*TAVERN, [("w", -27.5, DOOR_W, "door"), ("e", -17.5, DOOR_W, "door"), ("s", -1.0, DOOR_W, "door"),
+                   ("s", -6.0, 2.0, "window"), ("s", 4.0, 2.0, "window"), ("n", 3.0, 2.0, "window")])
+# A front room on the Green and a back room on the Back Lane, the doorway between them off to the east.
+wall_x(-20.0 - T / 2, -10.0 + T, 8.0 - T, [(5.0, DOOR_W, "gap")])
+STORE = (-8.0, 13.0, 8.0, 27.0)
+building(*STORE, [("w", 18.5, DOOR_W, "door"), ("e", 23.0, DOOR_W, "door"), ("n", -3.0, 2.0, "window"),
+                  ("n", 3.0, 2.0, "window")])
+wall_x(20.0 - T / 2, -8.0 + T, 8.0 - T, [(5.0, DOOR_W, "gap")])
+# Wings at the two buildings' front corners and fences across the alleys' mouths: the Green is a square framed by
+# its houses, come into by Main Street, the four alleys and the Bell tower's yard.
+for wx in (-10.0, 8.0 - T):
+    wall_z(wx, -15.0, -11.0)
+for wx in (-8.0, 8.0 - T):
+    wall_z(wx, 9.0, 13.0)
+wall_x(-15.0 - T, -15.0, -12.5)             # the alleys' fences, in line with the house fronts
+wall_x(-15.0 - T, 10.5, 22.0)
+wall_x(13.0, -15.0, -12.5)
+wall_x(13.0, 10.5, 19.0)
+
+# The Orchard's fence: a palisade along the Woodyard Road's south side, two gates into the trees behind it.
+palisade(-EDGE, ORCHARD_Z, -26.0 - 1.25, ORCHARD_Z + PAL_T)
+palisade(-26.0 + 1.25, ORCHARD_Z, 10.0 - 1.25, ORCHARD_Z + PAL_T)
+palisade(10.0 + 1.25, ORCHARD_Z, EDGE, ORCHARD_Z + PAL_T)
+
+# The courts' fences on the outer lanes: a plywood fence with one gate each, so a court is a yard of its own and the
+# lanes are lanes.
+wall_x(-29.0, -EDGE, -36.0, [(-37.7, 2.5, "gap")])
+wall_x(-29.0, -24.0, -10.0, [(-17.5, 2.5, "gap")])
+wall_x(-29.0, 8.0, 22.0, [(18.5, 2.5, "gap")])
+wall_x(27.0 - T, -EDGE, -37.0, [(-39.5, 2.5, "gap")])
+wall_x(27.0 - T, -23.0, -8.0, [(-18.0, 2.5, "gap")])
+wall_x(27.0 - T, 8.0, 19.0, [(9.5, 2.5, "gap")])
+
+# ------------------------------------------------------------------ east of the Green: the Bell tower and the sites
+BELL = (15.0, 0.0)
+BELL_TOWER = False    # the owner's call (SK1): from 3.4 m up it sees over every roof to the attackers' gate
+if BELL_TOWER:
+    tower(*BELL)
+else:
+    # The Bell house in its place: a plywood hut across Main Street's east end, its one door on the street behind, so
+    # the street is walked round it, never seen down.
+    # It spans the street 1 cm into each of its fences, so no line slips between them.
+    building(BELL[0] - 3.0, -STREET - 0.01, BELL[0] + 3.0, STREET + 0.01, [("e", BELL[1], DOOR_W, "door")])
+# Site A, the Long House: two rooms, four doors; the partition's doorway is the site's middle.
+LONG = (22.0, -29.0, 38.0, -15.0)
+building(*LONG, [("w", -26.0, DOOR_W, "door"), ("s", 26.5, DOOR_W, "door"), ("s", 35.0, DOOR_W, "door"),
+                 ("e", -24.0, DOOR_W, "shut"), ("n", 25.0, 2.0, "window"), ("n", 36.0, 2.0, "window")])
+wall_z(30.0 - T / 2, -29.0 + T, -15.0 - T, [(-22.0, 3.0, "gap")])
 # Site B, the Woodyard: the Sawmill's open shed (its six posts and roof are one model, 10 x 6 m as modelled).
-SHED = (32.0, 15.0)
+SHED = (31.0, 21.0)
 for px in (-5.0, 0.0, 5.0):
     for pz in (-3.0, 3.0):
         box("log", SHED[0] + px - 0.15, SHED[1] + pz - 0.15, SHED[0] + px + 0.15, SHED[1] + pz + 0.15, 3.2,
             dress="sawmill_shed")
 box("plywood", SHED[0] - 5.5, SHED[1] - 3.5, SHED[0] + 5.5, SHED[1] + 3.5, 3.35, 3.2, dress="sawmill_shed")
+# The yards behind the Bell: a fence from each woodpile beside it towards the houses, a way left open at each end.
+wall_z(BELL[0] - 3.0, -11.8, -STREET)
+wall_z(BELL[0] - 3.0, STREET, 13.0)
+# East Lane: the defenders' way between the sites, behind a plywood fence, hidden from the Green.
+LANE_X = 38.0
+wall_z(LANE_X - T, -15.0, -STREET)
+wall_z(LANE_X - T, STREET, 12.0)
+# Main Street east of the Bell house, between the yards' fences, a gate into each yard off to one side.
+wall_x(-STREET - T, BELL[0] + 3.0 - 0.01, LANE_X - T, [(34.0, 2.5, "gap")])
+wall_x(STREET, BELL[0] + 3.0 - 0.01, LANE_X - T, [(25.5, 2.5, "gap")])
 
-FLAG_A = (30.5, -9.0)      # Attack / Defend's poles: in the Long House's yard and beside the shed
-FLAG_B = (32.0, 21.5)
+FLAG_A = (30.0, -9.5)      # Attack / Defend's poles: before the Long House, and in the Woodyard by the road
+FLAG_B = (32.5, 25.6)
 FLAGS = [FLAG_A, FLAG_B]
-OT_FLAG = (0.0, 0.0)
+OT_FLAG = (0.0, -5.0)      # Elimination's: on the Green, beside the campfire
+FIRE = (0.0, 0.0)
 # Plant The Bomb's sites (x, z, radius m; 0 the game's usual): A in the Long House, B under the Woodyard's shed.
-BOMB_SITES = [(31.0, -20.0, 0), (SHED[0], SHED[1], 0)]
+BOMB_SITES = [(30.0, -22.0, 0), (SHED[0], SHED[1], 0)]
 
-# The bots' lanes, West camp to East camp: the Back Lane to flag A, Main Street to its east end between the two
-# sites, the Woodyard Road to flag B. A defender holds its lane's last point or the one before (RoundPlanner).
+# The bots' lanes, West camp to East camp: the Back Lane to flag A, Main Street over the Green to the Bell tower, the
+# Woodyard Road to flag B. A defender holds its lane's last point or the one before (RoundPlanner).
 LANES = {
-    "n": [(-47.0, -12.0), (-46.5, -29.0), (-36.0, -29.0), (-24.8, -27.2), (-20.5, -31.0), (-10.0, -29.0),
-          (-5.5, -28.5), (5.5, -30.0), (15.5, -27.3), (19.6, -31.0), (21.5, -27.0), (22.0, -23.5), (19.4, -17.5),
-          (18.5, -11.0), (24.0, -11.0), (30.5, -9.5)],
-    "m": [(-48.5, 0.0), (-46.5, -5.3), (-43.3, -1.5), (-40.0, 0.0), (-35.0, 2.5), (-29.5, -2.5), (-23.0, -1.5),
-          (-20.6, -3.0), (-17.0, 1.2), (-12.6, -1.6), (-6.0, -4.0), (0.0, -2.4), (6.0, 4.0), (12.6, 2.2), (17.0, -1.6),
-          (20.6, 3.0), (24.0, 0.0), (29.5, 2.6), (35.5, 0.0)],
-    "s": [(-47.0, 12.0), (-46.5, 29.0), (-36.0, 29.0), (-25.0, 27.2), (-21.0, 31.0), (-10.0, 29.0), (-2.0, 30.8),
-          (2.0, 27.2), (9.0, 29.0), (14.0, 27.2), (18.6, 31.0), (24.0, 28.0), (30.5, 26.0), (32.0, 22.0)],
+    "n": [(-47.0, -14.0), (-46.5, -33.0), (-36.0, -33.0), (-24.0, -32.0), (-12.0, -31.5), (0.0, -31.0), (8.0, -31.5),
+          (17.0, -31.0), (19.0, -22.0), (22.0, -12.0), (30.0, -9.5)],
+    "m": [(-48.5, 0.0), (-46.5, -5.3), (-43.3, -1.5), (-38.0, 0.0), (-30.0, 2.5), (-24.0, 0.0), (-19.0, -3.0),
+          (-13.0, 0.0), (-6.0, -5.5), (6.0, -5.0), (13.0, 0.0), (16.0, -8.0), (30.0, -12.0)],
+    "s": [(-47.0, 14.0), (-46.5, 33.0), (-36.0, 33.0), (-24.0, 32.0), (-10.0, 32.5), (6.0, 32.5), (17.0, 32.5),
+          (25.0, 33.0), (31.0, 31.5), (31.0, 27.0)],
 }
-# The areas, as the callouts and the map name them: boxes (x1, x2, z1, z2) tiling the whole fort.
+# The areas, as the callouts and the map name them: boxes (x1, x2, z1, z2), the first that holds a spot naming it.
 AREAS = [
+    ("Tents", -51.0, -45.0, -32.5, -26.5), ("Tents", -51.0, -45.0, 26.5, 32.5),
     ("West camp", -W, -CAMP_X, -H, H), ("East camp", CAMP_X, W, -H, H),
-    ("Back Lane", -CAMP_X, CAMP_X, -H, -LANE), ("Woodyard Road", -CAMP_X, CAMP_X, LANE, H),
-    ("Forge", -CAMP_X, -29.0, -LANE, -YARD), ("Forge court", -29.0, -9.0, -LANE, -YARD),
-    ("Tavern", -9.0, 9.0, -LANE, -YARD), ("Tavern court", 9.0, 24.0, -LANE, -YARD),
-    ("Long House", 24.0, CAMP_X, -LANE, -YARD),
-    ("Forge yard", -CAMP_X, -22.0, -YARD, -STREET), ("House yard", 22.0, CAMP_X, -YARD, -STREET),
-    ("West Arch", -22.0, -16.0, -YARD, YARD), ("East Arch", 16.0, 22.0, -YARD, YARD),
-    ("Green", -16.0, 16.0, -YARD, YARD),
-    ("West street", -CAMP_X, -22.0, -STREET, STREET), ("East street", 22.0, CAMP_X, -STREET, STREET),
-    ("Barn yard", -CAMP_X, -22.0, STREET, YARD), ("Barn", -CAMP_X, -29.0, YARD, LANE),
-    ("Barn court", -29.0, -9.0, YARD, LANE), ("Store", -9.0, 9.0, YARD, LANE),
-    ("Store court", 9.0, 22.0, YARD, LANE), ("Woodyard", 22.0, CAMP_X, STREET, LANE),
+    ("Bell tower", 16.0, 30.5, -2.5, 2.5),
+    ("Forge", FORGE[0], FORGE[2], FORGE[1], FORGE[3]), ("Barn", BARN[0], BARN[2], BARN[1], BARN[3]),
+    ("Tavern", TAVERN[0], TAVERN[2], TAVERN[1], TAVERN[3]), ("Store", STORE[0], STORE[2], STORE[1], STORE[3]),
+    ("Long House", LONG[0], LONG[2], LONG[1], LONG[3]),
+    ("West Arch", ARCH_N[0], ARCH_N[2], ARCH_N[1], ARCH_N[3]), ("West Arch", ARCH_S[0], ARCH_S[2], ARCH_S[1], ARCH_S[3]),
+    ("Woodyard", 19.0, LANE_X, 12.0, 30.6), ("East Lane", LANE_X, CAMP_X, -29.0, 30.5),
+    ("Back Lane", -CAMP_X, CAMP_X, -H, -29.0),
+    ("North court", -24.0, -10.0, -29.0, -17.0), ("House court", 8.0, 22.0, -29.0, -15.0),
+    ("South court", -23.0, -8.0, 15.0, 25.0), ("Store court", 8.0, 19.0, 13.0, 25.0),
+    ("Orchard", -20.0, 18.0, 33.0, H), ("Woodyard Road", -CAMP_X, CAMP_X, 25.0, H),
+    ("Green", -16.0, 16.0, -17.0, 15.0),
+    ("House yard", 16.0, LANE_X, -15.0, 0.0), ("Shed yard", 16.0, LANE_X, 0.0, 12.0),
+    ("Main Street", -CAMP_X, -16.0, -STREET, STREET),
+    ("Forge yard", -CAMP_X, -16.0, -29.0, -STREET), ("Barn yard", -CAMP_X, -16.0, STREET, 25.0),
 ]
-# Night's lights: a fire in each camp and on the Green's edge, lanterns by the doors that matter (x, z, kind).
-LIGHTS = [(-47.0, 14.5, "fire"), (47.0, 14.5, "fire"),
-          (-35.5, -27.2, "lantern"), (-27.8, -22.5, "lantern"), (-10.2, -17.5, "lantern"), (-3.0, -12.9, "lantern"),
-          (6.0, -27.2, "lantern"), (27.5, -27.2, "lantern"), (22.8, -18.0, "lantern"), (34.5, -12.9, "lantern"),
-          (-35.5, 27.2, "lantern"), (-27.8, 22.5, "lantern"), (3.0, 12.9, "lantern"), (10.2, 17.5, "lantern"),
-          (-6.0, 27.2, "lantern"), (-19.0, -3.2, "lantern"), (19.0, 3.2, "lantern"), (-11.0, -8.0, "lantern"),
-          (11.0, 8.0, "lantern"), (27.0, 12.2, "lantern"), (37.0, 17.8, "lantern"), (-43.0, 0.0, "lantern"),
-          (43.0, 0.0, "lantern"), (-30.0, 5.2, "lantern"), (30.0, -5.2, "lantern")]
+# Night's lights: a fire in each camp and the Green's campfire, lanterns by the doors that matter (x, z, kind).
+LIGHTS = [(-47.0, 18.0, "fire"), (47.0, 18.0, "fire"), (FIRE[0], FIRE[1], "fire"),
+          (-35.2, -22.0, "lantern"), (-24.0, -21.5, "lantern"), (-23.0, 19.0, "lantern"), (-30.0, 13.2, "lantern"),
+          (-19.0, -11.2, "lantern"), (-19.0, 11.2, "lantern"), (-10.8, -24.0, "lantern"), (-1.0, -16.2, "lantern"),
+          (8.8, -22.0, "lantern"), (-8.8, 18.0, "lantern"), (8.8, 22.0, "lantern"), (21.2, -20.0, "lantern"),
+          (26.5, -14.2, "lantern"), (35.0, -14.2, "lantern"), (24.0, 1.4, "lantern"), (31.0, 17.0, "lantern"),
+          (31.0, 25.0, "lantern"), (40.0, -10.0, "lantern"), (40.0, 10.0, "lantern"), (-44.6, -29.5, "lantern"),
+          (-44.6, 29.5, "lantern"), (-43.0, 0.0, "lantern"), (43.0, 0.0, "lantern")]
 
-# ------------------------------------------------------------------ cover, lane by lane (check.py's lines placed these)
-import cover  # noqa: E402,F401  (adds to `boxes` and TREES)
+# ------------------------------------------------------------------ cover, place by place
+import cover  # noqa: E402,F401  (adds to `boxes`, TREES and BUSHES)

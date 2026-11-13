@@ -38,6 +38,9 @@ def block(b: dict) -> dict:
     dress = b.get("dress", KIND_DRESS.get(b["kind"]))
     if dress is not None:
         out["dress"] = dress
+    for key in ("surface", "rise"):   # a floor's or a ramp's (the Bell tower's platform and stair)
+        if key in b:
+            out[key] = b[key]
     return out
 
 
@@ -51,6 +54,11 @@ def blocks() -> list[dict]:
         out.append(block({"kind": "tree", "x1": x - rad, "x2": x + rad, "z1": z - rad, "z2": z + rad, "y1": -L.SINK,
                           "y2": height, "dress": model}))
     return out
+
+
+def foliage() -> list[dict]:
+    """The Orchard's and the lanes' bushes: looked and walked through (BushView), never a block."""
+    return [{"x": r(x), "y": 0, "z": r(z), "radius": rad, "height": h} for (x, z, rad, h) in L.BUSHES]
 
 
 def spot(x: float, z: float) -> dict:
@@ -96,19 +104,20 @@ def path(points: list) -> list[dict]:
 
 def ground_paint() -> dict:
     """Grass, with the ways worn to earth and gravel and the buildings' board floors."""
-    e, y, st, ln = L.EDGE, L.YARD, L.STREET, L.LANE
+    e, st = L.EDGE, L.STREET
     patches = [
-        {"surface": "earth", "box": [-L.W, -L.CAMP_X, -L.H, L.H]},
+        {"surface": "earth", "box": [-L.W, -L.CAMP_X, -L.H, L.H]},                 # the camps
         {"surface": "earth", "box": [L.CAMP_X, L.W, -L.H, L.H]},
-        {"surface": "gravel", "path": path([(-L.CAMP_X, 0.0), (L.CAMP_X, 0.0)]), "width": 2 * st},
-        {"surface": "earth", "path": path([(-L.CAMP_X, -(ln + L.H) / 2), (L.CAMP_X, -(ln + L.H) / 2)]), "width": 4.0},
-        {"surface": "earth", "path": path([(-L.CAMP_X, (ln + L.H) / 2), (L.CAMP_X, (ln + L.H) / 2)]), "width": 4.0},
-        {"surface": "earth", "box": [-e, -22.0, -y, -st]},
-        {"surface": "earth", "box": [-e, -22.0, st, y]},
-        {"surface": "earth", "box": [22.0, e, -y, -st]},
-        {"surface": "earth", "box": [22.0, e, st, ln]},     # the Woodyard's sawdust
-        {"surface": "gravel", "path": path([(-12.5, -y), (-12.5, y)]), "width": 5.0},
-        {"surface": "gravel", "path": path([(12.5, -y), (12.5, y)]), "width": 5.0},
+        {"surface": "gravel", "path": path([(-L.CAMP_X, 0.0), (-15.0, 0.0)]), "width": 2 * st},   # Main Street
+        {"surface": "gravel", "path": path([(16.0, 0.0), (L.CAMP_X, 0.0)]), "width": 2 * st},
+        {"surface": "earth", "path": path([(-L.CAMP_X, -33.5), (L.CAMP_X, -33.5)]), "width": 5.0},  # the Back Lane
+        {"surface": "earth", "path": path([(-L.CAMP_X, 30.5), (L.CAMP_X, 30.5)]), "width": 5.0},   # the Woodyard Road
+        {"surface": "earth", "box": [L.LANE_X, e, -29.0, 27.0]},                     # East Lane
+        {"surface": "earth", "box": [19.0, L.LANE_X, 12.0, 27.0]},                   # the Woodyard's sawdust
+        {"surface": "earth", "box": [-e, -21.0, -18.0, -st]},                       # the Forge's yard
+        {"surface": "earth", "box": [-e, -21.0, st, 14.0]},                         # the Barn's
+        {"surface": "earth", "box": [16.0, L.LANE_X, -15.0, -st]},                   # before the Long House
+        {"surface": "earth", "path": path([(-6.0, 0.0), (6.0, 0.0)]), "width": 8.0},  # worn round the campfire
     ]
     for (x1, x2, z1, z2) in L.FLOORS:
         patches.append({"surface": "wood", "box": [r(x1), r(x2), r(z1), r(z2)]})
@@ -162,6 +171,7 @@ def main() -> None:
                                              "exposureScale": 1.55}}},
         "terrain": terrain(),
         "ground": ground_paint(),
+        "foliage": foliage(),
         "lights": lights(),
         "ambience": "woods",
         "dressing": dressing(),

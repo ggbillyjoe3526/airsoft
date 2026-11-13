@@ -72,13 +72,13 @@ func test_sites_poles_flag_and_bomb_start_are_on_floor_both_ends_reach() -> void
 
 
 func test_every_spawn_and_dead_zone_spot_is_walkable_and_reaches_the_other_end() -> void:
-	var other: Vector3 = map.ends[1].spawns[0].position
 	for e in 2:
 		for list: Array in [map.ends[e].spawns, map.ends[e].dead_zone]:
 			for sp: SpawnPoint in list:
 				assert_true(nav.is_walkable_at(sp.position), "%s walkable" % sp.position)
 		var d: SpawnPoint = map.ends[e].dead_zone[0]
-		assert_true(_reached(d.position, other) or e == 1, "dead zone %d joins the field" % e)
+		var other: Vector3 = map.ends[1 - e].spawns[0].position
+		assert_true(_reached(d.position, other), "dead zone %d reaches the other end's spawn" % e)
 
 
 func test_nobody_stands_above_the_ground_so_no_roof_is_walkable() -> void:
