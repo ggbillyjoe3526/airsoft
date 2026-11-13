@@ -54,9 +54,11 @@ class RoundTally:
 	var first_hit_range: float = -1.0
 	## Each character's farthest distance from this round's spawn (m, level).
 	var farthest: PackedFloat32Array = PackedFloat32Array()
-	## Attack / Defend: the team attacking (-1 in Elimination), and how far the flag got up (0 to 1).
+	## Attack / Defend: the team attacking (-1 in Elimination), how far the highest flag got up (0 to 1) and which pole
+	## it was on (0 is flag A; -1 while no flag has left the ground). MB3: it followed flag A alone.
 	var attackers: int = -1
 	var top_flag: float = 0.0
+	var top_pole: int = -1
 	## Elimination: the overtime flag went up this round (OV1).
 	var overtime: bool = false
 	## Plant The Bomb (PB1): when the bomb was first picked up and when it was armed (s into the round, -1 if never),
@@ -255,9 +257,9 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 
 ## The round tuning a match on `map_id` plays in the guards and the balance report: `base` (the loaded tuning by
 ## default) where the map offers its team size and has no round length of its own, else a copy at the map's standard
-## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game) and its round length, as a Skirmish there
-## plays (MatchOptions.match_tuning): Woodland at 6 a side and 3:00. With `picked` (a Custom size, TS1), that size
-## where the map offers it, else its standard.
+## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game), its round length and its flag raise
+## time, as a Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00 and a 9 s raise. With
+## `picked` (a Custom size, TS1), that size where the map offers it, else its standard.
 static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -> SimTuning:
 	var t := base if base != null else SimTuning.load_default()
 	var entry := MapCatalog.shared().find(map_id)
@@ -265,12 +267,15 @@ static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -
 		return t
 	var length := MatchOptions.round_time(entry, null, t.rounds.round_time)
 	var size := entry.team_size_for(picked if picked > 0 else t.rounds.team_size)
-	if size == t.rounds.team_size and t.rounds.round_time == length:
+	var raise := MatchOptions.raise_time(entry, t.flag.raise_time)
+	if size == t.rounds.team_size and t.rounds.round_time == length and t.flag.raise_time == raise:
 		return t
 	var sized := t.duplicate() as SimTuning
 	sized.rounds = t.rounds.duplicate() as RoundConfig
 	sized.rounds.team_size = size
 	sized.rounds.round_time = length
+	sized.flag = t.flag.duplicate() as FlagConfig
+	sized.flag.raise_time = raise
 	return sized
 
 
@@ -561,11 +566,19 @@ static func held_up_sample(ring: PackedVector3Array, errands: PackedInt32Array, 
 	return true
 
 
+## The highest any of `flags` has got this round, and its pole, into `r` (every pole's flag, not flag A's alone).
+static func watch_flags(flags: Array[FlagState], r: RoundTally) -> void:
+	for i in flags.size():
+		if flags[i].progress > r.top_flag:
+			r.top_flag = flags[i].progress
+			r.top_pole = i
+
+
 ## The tick's heights, air time and distances from spawn, for everyone still in play. Distances only while the round
 ## is live: between rounds the ends may swap, so a spawn moves before its character does.
 func _watch(state: GameState, t: MatchTally, r: RoundTally) -> void:
 	var live := state.round_state.is_live()
-	r.top_flag = maxf(r.top_flag, state.round_state.flag.progress)
+	watch_flags(state.round_state.flags, r)
 	r.top_defuse = maxf(r.top_defuse, state.round_state.plant.defusing)
 	for c in state.characters:
 		if c.position.y < map.kill_y + 1.0:

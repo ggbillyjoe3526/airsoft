@@ -25,6 +25,10 @@ const WIND_COLUMN := "Wind (×)"
 const AIR_COLUMN := "Air (°C)"
 const WIND_RANGE := Vector2(0.0, 2.0)
 const AIR_RANGE := Vector2(-10.0, 40.0)
+## The flag's raise time column, optional (MB3): the seconds Attack / Defend's attackers take to raise a flag there
+## (FlagConfig.raise_time). Blank keeps the flag tuning's.
+const RAISE_COLUMN := "Raise (s)"
+const RAISE_RANGE := Vector2(3.0, 20.0)
 const START_MODES: Dictionary[String, ReplicaConfig.FireMode] = {
 	"": ReplicaConfig.FireMode.AUTO,
 	"auto": ReplicaConfig.FireMode.AUTO,
@@ -55,6 +59,10 @@ class Entry:
 	## air's temperature by day (°C; NAN: the air replicas are rated in, BallisticsConfig.air_temperature).
 	var wind: float = 1.0
 	var air: float = NAN
+	## The seconds Attack / Defend's attackers take to raise a flag here (MB3: Woodland 9, its sites are 77 m apart and
+	## a defender's way to the pole is long), 0 for the flag tuning's own (FlagConfig.raise_time). Skirmish and Custom
+	## both play it: Custom has no switch for it.
+	var raise_time: float = 0.0
 
 	## The field's air (°C) by day: its own, else `rated`.
 	func air_or(rated: float) -> float:
@@ -128,6 +136,7 @@ static func parse(text: String) -> MapCatalog:
 			_read_start_mode(e, row, at, m.problems, table)
 			e.wind = _read_number(row, WIND_COLUMN, WIND_RANGE, e.wind, at, m.problems, table)
 			e.air = _read_number(row, AIR_COLUMN, AIR_RANGE, e.air, at, m.problems, table)
+			e.raise_time = _read_number(row, RAISE_COLUMN, RAISE_RANGE, e.raise_time, at, m.problems, table)
 			m.entries.append(e)
 	for column in SIZE_COLUMNS:
 		if not table.has_column(column):

@@ -602,7 +602,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   east end; Beta starts in the west. Attack / Defend follows the pick.
 - **Attack / Defend is the flag mode, named so Capture the Flag can be its own mode later (owner, 2026-10-01).** Standing
   within 1.6 m of the pole for 7 s raises the flag, and it must then stay up for 3 s to win: no longer an instant win
-  (BP8, owner 2026-11-08: longer raise and hold; was 5 s and none; tuned on the balance report). Defenders at the
+  (BP8, owner 2026-11-08: longer raise and hold; was 5 s and none; tuned on the balance report). A field may set
+  its own raise (`data/maps.md`, Raise): Woodland's is 9 s (owner, 2026-11-13, MB3 below). Defenders at the
   pole pull it down, and a defender on the rope restarts the hold. A time-out wins for the defenders; overtime lasts
   at most 15 s if attackers are on the rope, or a raised flag is held, at the buzzer. The
   pole is visual only: no collider, and BBs pass through.
@@ -871,7 +872,19 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   track's corner he now wins it 15 to 13), and the verge stack west of the road mouth is turned across the verge to keep the bend,
   55 m off and 0.9 m higher, off the pole's ring. Bots, 6v6, Normal, the same 32 seeds: the west end takes 47 % ±3
   of Elimination's rounds (48 % ±3 for MB1's road; band 45 to 55) and the attackers 69 % ±3 of Attack / Defend's
-  (62 % ±3 for MB1's road; band 40 to 65, so outside it: `docs/KNOWN_ISSUES.md`).
+  (62 % ±3 for MB1's road; band 40 to 65, so outside it: `docs/KNOWN_ISSUES.md`). Both were measured before one
+  Brow hazel moved off the north lane at the end of MB2; with it moved the west end takes 41 % ±3 and the attackers
+  68 % ±3 on the same seeds (MB3).
+- **Woodland's flag takes 9 s to raise (owner, 2026-11-13, MB3).** His pick on the card "Make the flag take longer
+  to raise on Woodland, to help its defenders?": "9 s on Woodland (7 s now)", over 8 s, leaving it, and moving both
+  flags. Every other field keeps BP8's 7 s, and the 3 s hold is the same everywhere. A field's raise is its Raise
+  cell in `data/maps.md` (3 to 20 s, blank for the game's), played by Skirmish and Custom alike; no menu sets it.
+  Why Woodland: its poles are 77 m apart, the attackers all go for one of them, and only the two defenders posted
+  there are near it, so 7 s was up before the others arrived. On the field as MB2 left it (its hazel moved) the
+  attackers took 68 % ±3 of rounds at 7 s (245 rounds, seeds 1 to 32, band 40 to 65 %) and take 60 % ±3 at 9 s
+  (231). By the pole the attackers stood nearer in a round's last 15 s they won 72 % ±3 at flag A and 65 % ±3 at
+  flag B (64 seeds, 7 s), so flag B's cover was not it, and sending more defenders to pull a flag down
+  (`BotConfig.retakers` 3 or 4 for 2) moved it by less than the noise (`docs/records/MB3.md`).
 - **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the

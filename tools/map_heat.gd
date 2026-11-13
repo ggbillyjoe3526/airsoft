@@ -59,6 +59,7 @@ func _run() -> void:
 			rounds.append({
 				"seed": seed_value, "winner": r.winner, "reason": r.reason, "seconds": snappedf(r.seconds, 0.1),
 				"alpha_end": r.alpha_end, "attackers": r.attackers, "top_flag": snappedf(r.top_flag, 0.01),
+				"pole": r.top_pole,
 				"first_hit_time": snappedf(r.first_hit_time, 0.1), "first_hit_range": snappedf(r.first_hit_range, 0.1),
 				"overtime": r.overtime, "planted_at": snappedf(r.planted_at, 0.1), "site": r.site,
 				"top_defuse": snappedf(r.top_defuse, 0.01),
