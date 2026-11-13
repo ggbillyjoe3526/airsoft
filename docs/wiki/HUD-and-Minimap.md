@@ -11,8 +11,8 @@ and the target ("FIRST TO 5").
 Your team is always on the left in its own colour (Alpha blue, Beta orange), even after the ends swap at half time.
 In Attack / Defend it adds **ATK** and **DEF** tags and the **FLAG** gauge, and "OT" on the clock in overtime. In
 Plant The Bomb it has the same tags; once the bomb is armed the clock turns to the accent colour and counts the fuse,
-and a **BOMB A** (or **B**) gauge under it fills as someone defuses it. While you key the bomb in, the gauge reads
-**PLANTING**. A prompt under the crosshair says when holding Use picks the bomb up, plants it or defuses it, and a
+and a gauge under it reads **BOMB ARMED**, whichever team armed it, and fills as someone defuses it (**DEFUSING**).
+While you key the bomb in, the gauge reads **PLANTING**. A prompt under the crosshair says when holding Use picks the bomb up, plants it or defuses it, and a
 marker points to the site your team is making for, or to the bomb once it is down or armed. Big
 slanted banners call the round start, half time with the ends swapped, and who took the round or the match.
 
@@ -28,7 +28,9 @@ Turning the hop-up dial shows its setting here for a moment.
 
 Bottom right, just above the ammo panel, a picture of each thing you carry with the key that takes it in hand at the
 right of its row: your two replicas (1 and 2), then your smoke (4) and flash (5) bombs, one icon for each bomb you
-carry (two icons side by side for two), with no numbers. A bomb you never carried has no row. The one in your hand is
+carry (two icons side by side for two), with no numbers. A bomb you never carried has no row. In Plant The Bomb, while
+you carry the bomb it has a row of its own at the bottom, keyed with Use (<!-- wiki:key use_door -->), lit while you
+set it, and gone once it is armed or dropped. The one in your hand is
 bright with a pale accent edge; the rest are dim, and a bomb you have thrown stays as one dim icon. Nothing is lit while your
 replica is holstered. The notes above the ammo panel (RELOADING, a bomb in hand, the hop-up readout) show above the
 rail, so it never moves. The pictures come from the models

@@ -1086,7 +1086,7 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 	if not a.replicas.is_empty():
 		_replica.refresh(a, c.grenades)
 		if _rail != null:
-			_rail.refresh(a, c.grenades)
+			_rail.refresh(a, c.grenades, HudPlant.rail_carry(state.round_state, c))
 		if a.active != _hop_slot and _hop_left > 0.0:
 			_hop_left = 0.0
 			_replica.hide_hop()
@@ -1445,8 +1445,7 @@ func _update_plant(rs: RoundState, in_play: bool) -> void:
 				HudPlant.Gauge.DEFUSING:
 					_gauge.set_word(HudStyle.caps("HUD_BOMB_DEFUSING"))
 				_:
-					var letter: String = Plant.LETTERS[clampi(rs.plant.site, 0, Plant.MOST - 1)]
-					_gauge.set_word((tr("HUD_BOMB_NAMED") % letter).to_upper())
+					_gauge.set_word(HudStyle.caps("HUD_BOMB_ARMED"))
 		var team := HudPlant.gauge_team(rs, g)
 		_gauge.set_flag(HudPlant.gauge_fill(rs, g), _teams.colours[team], team == HudStyle.STRIPED_TEAM)
 	var own := in_play and _watching_name.is_empty()

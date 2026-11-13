@@ -3851,12 +3851,16 @@ msgstr "Time's up · nothing planted"
 msgid "HUD_BOARD_ROUND_BOMB"
 msgstr "Round %d · bomb %s"
 
-# The gauge under the score bar: the bomb being armed, being defused, and armed with nobody on it ("Bomb A").
+# The gauge under the score bar: the bomb being armed, being defused, and armed with nobody on it (whoever armed it,
+# either team's: PB3, the owner's ask). A marker over the bomb where it is armed ("Bomb A").
 msgid "HUD_BOMB_PLANTING"
 msgstr "Planting"
 
 msgid "HUD_BOMB_DEFUSING"
 msgstr "Defusing"
+
+msgid "HUD_BOMB_ARMED"
+msgstr "Bomb armed"
 
 msgid "HUD_BOMB_NAMED"
 msgstr "Bomb %s"

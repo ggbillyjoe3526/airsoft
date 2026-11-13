@@ -62,14 +62,15 @@ const BANNER_PAD := Vector4(80.0, 20.0, 80.0, 20.0)
 const BANNER_RULE := 4.0
 const BANNER_SUB_GAP := 8
 ## Attack / Defend: the ATK / DEF tags over the team blocks (height, type size), "OT" before the clock (size, gap), the
-## flag gauge under the bar (height, type size, the gap between notches) and its warning (type size, padding).
+## flag gauge under the bar (height, type size, its word's column: wide enough for BOMB ARMED, PB3; the gap between
+## notches) and its warning (type size, padding).
 const TAG_HEIGHT := 18.0
 const TAG_SIZE := 12
 const OT_SIZE := 24
 const OT_GAP := 8.0
 const GAUGE_HEIGHT := 28.0
 const GAUGE_LABEL_SIZE := 12
-const GAUGE_LABEL_WIDTH := 72.0
+const GAUGE_LABEL_WIDTH := 96.0
 const GAUGE_NOTCH_GAP := 3.0
 const GAUGE_PAD := 10.0
 const WARNING_SIZE := 30

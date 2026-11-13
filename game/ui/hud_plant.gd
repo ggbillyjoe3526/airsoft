@@ -44,6 +44,14 @@ static func carrying(rs: RoundState, player: Character) -> bool:
 			and Elimination.is_in_play(player)
 
 
+## Plant The Bomb's bomb on the weapon rail of `c` (PB3, the owner's ask): carried, being set down and armed, or none.
+static func rail_carry(rs: RoundState, c: Character) -> WeaponRail.Carry:
+	if rs.mode != RoundState.Mode.PLANT_THE_BOMB or rs.plant.status != PlantState.Status.CARRIED \
+			or rs.plant.carrier != c.id:
+		return WeaponRail.Carry.NONE
+	return WeaponRail.Carry.SETTING if rs.plant.planter == c.id else WeaponRail.Carry.CARRIED
+
+
 ## What the gauge reads: the bomb being armed (status CARRIED, a planter on it), being disarmed (PLANTED, a defuser on
 ## it), or armed with nobody on it; hidden otherwise.
 static func gauge(rs: RoundState) -> Gauge:

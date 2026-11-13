@@ -1,7 +1,7 @@
 extends GutTest
 ## Plant The Bomb in a real match (PB1, PlaySession): the mode reads the map's sites and puts the bomb down in front
-## of the attackers, the bomb and its sites are drawn and the pole is not, holding Use takes the bomb up and lowers the
-## replica while the hands are on it, and every field hosts the mode.
+## of the attackers, the bomb and its sites are drawn and the pole is not, holding Use takes the bomb up and puts the
+## replica away while the hands are on it, and every field hosts the mode.
 
 var session: PlaySession = null
 

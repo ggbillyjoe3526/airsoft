@@ -1,9 +1,11 @@
 extends SceneTree
 ## Pictures of Plant The Bomb for review (PB1): a whole PlaySession on a field, the bots standing at their starts, the
 ## bomb's state set by hand. First person with the HUD, as an attacker (the bomb on the ground at the start, carrying
-## it in Site A, keying it in, the armed bomb) and as a defender (at the armed bomb, the kit at work); then the HUD
-## off and the camera free: the bomb (PB2's model) armed close up, the wire cutters laid open beside it, a bot carrying
-## it strapped at the hip (standing and crouched), and each site's ring and letter. Needs a
+## it in Site A with its row in the weapon rail, keying it in with the replica put away, the armed bomb and BOMB ARMED
+## under the score bar) and as a defender (at the armed bomb, the kit at work); then the HUD off and the camera free:
+## the bomb (PB2's model) armed close up, the wire cutters laid open beside it, a bot carrying it strapped at the hip
+## (standing and crouched), a bot crouched setting it with its replica away (PB3), and each site's ring and letter.
+## Needs a
 ## display, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --path . --rendering-driver opengl3 \
 ##       -s res://tools/plant_pictures.gd -- <folder> [map id] [--graphics=high]
@@ -104,15 +106,16 @@ func _run() -> void:
 	var edge := _towards(site, start, ps.radii[0] + 3.0)
 	_stand(edge, site + Vector3.UP * 1.0)
 	await _grab("first-person-attacker-carrying-the-bomb-to-site-A")
-	# 3. Keying it in, half way: the gauge, the replica lowered.
+	# 3. Keying it in, half way: the gauge, the replica put away, the bomb's row lit in the rail (PB3).
 	var spot := _towards(site, start, 1.0)
-	_stand(spot, spot + (site - spot).normalized() * 0.9 + Vector3.UP * 0.1)
+	_stand(spot, spot + (site - spot).normalized() * 1.0)
 	Input.action_press(PlayerInput.USE_DOOR)
 	await _until(func() -> bool: return ps.planting >= 0.5 or ps.planted())
 	await _grab("first-person-attacker-planting-half-way")
 	# 4. Armed: seen from a few metres back, the fuse on the clock.
 	await _until(func() -> bool: return ps.planted())
 	Input.action_release(PlayerInput.USE_DOOR)
+	await _until(func() -> bool: return not you.armament.holstered)  # drawn again (PB3)
 	ps.fuse_left = cfg.fuse_time
 	var bomb := ps.position
 	_stand(_towards(bomb, start, 3.5), bomb + Vector3.UP * 0.1)
@@ -175,10 +178,26 @@ func _run() -> void:
 		camera.look_at_from_position(bot.position + left * 1.5 + ahead * 0.9 + Vector3.UP * 1.0,
 				bot.position + left * 0.25 + Vector3.UP * 0.6)
 		await _grab("a-bot-crouched-carrying-the-bomb")
+		# 11. The same bot setting it (PB3): crouched at it, its replica put away.
+		ps.planter = bot.id
+		ps.facing = bot.yaw
+		ps.set_at = Plant.set_down(bot.position, bot.yaw, cfg)
+		Plant.hands_on(bot, true, cfg, st.events)
+		_session.set_process(true)
+		_session.speed = 0
+		await _frames(30)
+		_session.set_process(false)
+		_session._hands.visible = false
+		camera.look_at_from_position(bot.position + left * 1.8 + ahead * 1.4 + Vector3.UP * 1.2,
+				bot.position + Vector3.UP * 0.6)
+		view.refresh(ps, rs.attackers, bot, 1.0, false, 0.0)
+		await _grab("a-bot-crouched-setting-the-bomb-replica-away")
+		Plant.hands_on(bot, false, cfg, st.events)
+		ps.planter = -1
 		bot.crouch_amount = 0.0
 		bot.prev_crouch_amount = 0.0
 		bot.low = false
-	# 11, 12. Each site from outside its ring.
+	# 12, 13. Each site from outside its ring.
 	ps.status = PlantState.Status.DOWN
 	ps.carrier = -1
 	ps.position = start

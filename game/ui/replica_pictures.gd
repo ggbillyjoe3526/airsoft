@@ -14,6 +14,8 @@ const MODEL_DIR := "res://assets/models/replicas/"
 const POWER_DIR := "res://assets/models/powerSources/"
 ## A bomb's picture's longer side (px) when nobody asks for another.
 const GRENADE_LONG_SIDE := 128
+## Plant The Bomb's bomb is drawn turned this far (rad) about its length, its keypad towards the eye.
+const BOMB_TIP := 0.6
 ## The picture's longer side (px); the other follows the replica's shape. A part's picture is smaller.
 const LONG_SIDE := 1024
 const PART_LONG_SIDE := 384
@@ -66,6 +68,8 @@ var _part_shots: Dictionary[String, Shot] = {}
 var _power_shots: Dictionary[String, Shot] = {}
 ## The bombs' pictures by Grenade.Kind.
 var _grenade_shots: Dictionary[int, Shot] = {}
+## Plant The Bomb's bomb's picture (null until asked for, or without its model).
+var _bomb_shot: Shot = null
 ## The longer side of a replica's picture (px): a page that shows replicas small asks for less.
 var replica_side: int = LONG_SIDE
 
@@ -212,6 +216,30 @@ func grenade_texture(kind: int, long_side: int = GRENADE_LONG_SIDE) -> Texture2D
 			return null
 		_grenade_shots[kind] = shot
 	return shot.port.get_texture()
+
+
+## The picture of Plant The Bomb's bomb (PlantView.BOMB_MODEL) on its side, its keypad turned BOMB_TIP towards the
+## eye, without its carry straps; null without its model, `long_side` px on its longer side (the first call's stays).
+## Drawn once. Needs to be in the tree.
+func bomb_texture(long_side: int = GRENADE_LONG_SIDE) -> Texture2D:
+	if _bomb_shot == null:
+		var scene := load(PlantView.BOMB_MODEL) as PackedScene if ResourceLoader.exists(PlantView.BOMB_MODEL) else null
+		if scene == null:
+			return null
+		var holder := Node3D.new()
+		holder.name = "Model"
+		var tipped := Node3D.new()
+		tipped.rotation.z = -BOMB_TIP
+		holder.add_child(tipped)
+		var model := scene.instantiate() as Node3D
+		tipped.add_child(model)
+		var carry := model.find_child(PlantView.CARRY_NODE, true, false) as Node3D
+		if carry != null:
+			carry.visible = false
+		_bomb_shot = _rig(holder, long_side, "Bomb")
+		_bomb_shot.bare_extent = _bomb_shot.extent
+		_bomb_shot.port.render_target_update_mode = SubViewport.UPDATE_ONCE
+	return _bomb_shot.port.get_texture()
 
 
 ## The model file of a bomb of `kind` (GrenadeView.MODELS, the match's), or "" when it has none.

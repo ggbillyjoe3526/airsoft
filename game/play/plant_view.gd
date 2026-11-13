@@ -90,12 +90,13 @@ func refresh(ps: PlantState, attackers: int, carrier: Character, fraction: float
 	_clock += delta
 	_flash_left = maxf(0.0, _flash_left - delta)
 	var carried := ps.status == PlantState.Status.CARRIED and carrier != null
-	# Being keyed in, it is on the ground at its carrier's feet, where it will stand armed: in your own view too.
+	# Being keyed in, it is on the ground in front of its carrier, where it will stand armed (PlantState.set_at), its
+	# front to them: in your own view too. Armed, it stays so.
 	var keyed := carried and ps.planter == carrier.id
 	_prop.visible = keyed or not (carried and hidden_carried)
 	if keyed:
-		_prop.position = carrier.prev_position.lerp(carrier.position, fraction)
-		_prop.rotation = Vector3(0.0, lerp_angle(carrier.prev_yaw, carrier.yaw, fraction), 0.0)
+		_prop.position = ps.set_at
+		_prop.rotation = Vector3(0.0, ps.facing, 0.0)
 	elif carried:
 		var yaw := lerp_angle(carrier.prev_yaw, carrier.yaw, fraction)
 		var feet := carrier.prev_position.lerp(carrier.position, fraction)
@@ -106,7 +107,7 @@ func refresh(ps: PlantState, attackers: int, carrier: Character, fraction: float
 		_prop.rotation = Vector3(0.0, yaw, CARRIED_TIP)
 	else:
 		_prop.position = ps.position
-		_prop.rotation = Vector3.ZERO
+		_prop.rotation = Vector3(0.0, ps.facing if ps.status != PlantState.Status.DOWN else 0.0, 0.0)
 		# Put down somewhere new, it takes the light there.
 		if _lights != null and not _prop.position.is_equal_approx(_lit_at):
 			relight(_lights)

@@ -31,7 +31,14 @@ extends Resource
 ## `beep_fast` s as it runs out.
 @export var beep_slow: float = 1.0
 @export var beep_fast: float = 0.12
-## Arming and disarming take both hands: the replica stays down this long (s) after letting go.
-@export var hands_back: float = 0.4
+## Arming and disarming take both hands (PB3, the owner's ask): the replica is put away while they do and drawn again
+## after, at this times its own draw time.
+@export var redraw_scale: float = 1.0
+## Keyed in, it is set down this far (m) ahead of its carrier's feet, in sight below the view (PB3); nearer with a wall
+## or anything ahead of them, its middle at least set_clear (m: half its length and a hair) short of it (a ray at
+## set_ray_height over their feet).
+@export var set_ahead: float = 0.55
+@export var set_clear: float = 0.16
+@export var set_ray_height: float = 0.06
 ## A skipped round simulated (Round.simulate): an armed bomb multiplies the attackers' chance by one plus this.
 @export var simulate_planted_lead: float = 1.5

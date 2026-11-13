@@ -83,9 +83,6 @@ var _jolt: float = 0.0
 var _hit_age: float = -1.0
 var _sway: Vector2 = Vector2.ZERO
 var _carry: float = 0.0
-## Both hands are on something else (Plant The Bomb's prop being keyed or made safe, PB1): the replica is carried low,
-## as on a sprint. Set each frame before `update`.
-var hands_busy: bool = false
 ## Seconds left that a shot holds it up out of the sprint carry.
 var _fire_hold: float = 0.0
 ## How far into the holster it is (0 in hand, 1 put away); kept through a draw from the holster, which rises from it.
@@ -269,9 +266,9 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	_fire_hold = maxf(0.0, _fire_hold - delta)
 	var firing := _fire_hold > 0.0
 	var carry_rate := _cfg.sprint_fire_raise if firing else _cfg.carry_time
-	# Up onto a ledge (CL1) it is carried low too: a hand is on the edge; and with both hands on the bomb (PB1).
+	# Up onto a ledge (CL1) it is carried low too: a hand is on the edge.
 	var climbing := c.vault.active and c.vault.climb
-	_carry = move_toward(_carry, 1.0 if (c.sprinting or climbing or hands_busy) and not firing else 0.0,
+	_carry = move_toward(_carry, 1.0 if (c.sprinting or climbing) and not firing else 0.0,
 			delta / carry_rate)
 	pos.y -= _cfg.sprint_drop * _carry
 	rot.y += _cfg.sprint_tilt * 0.5 * _carry

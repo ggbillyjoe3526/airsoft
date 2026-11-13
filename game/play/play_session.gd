@@ -1442,7 +1442,6 @@ func _process(delta: float) -> void:
 	# Inspect (IN1): your own replica, while you are in play and looking through your own eyes.
 	if _input.take_inspect() and watched == player and Elimination.is_in_play(player):
 		_hands.inspect()
-	_hands.hands_busy = _plant != null and Plant.busy(state.round_state.plant, player)
 	_hands.update(player, _input.view_yaw, _input.view_pitch, _eyes.global_position, look, delta,
 			aim if watched == player else player.aim_raise)
 	# Through your own scope only the figures its glass shows take the zoomed detail (BP7); the view round it keeps its own.

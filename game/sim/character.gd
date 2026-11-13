@@ -116,6 +116,10 @@ var dazzle_left: float = 0.0
 var dazzle_total: float = 0.0
 ## Use held this tick, in play (PlayerCommand.interact; PB1): hands for Plant The Bomb's device (Plant).
 var using: bool = false
+## Both hands on Plant The Bomb's device now (PB3: the replica put away meanwhile), and whether the replica was away
+## already when they went on (then it stays away after).
+var hands_on_bomb: bool = false
+var bomb_was_holstered: bool = false
 
 
 func _init(character_id: int = 0, character_team: int = 0, spawn: Vector3 = Vector3.ZERO, facing: float = 0.0,
@@ -206,6 +210,8 @@ func respawn() -> void:
 	prev_lean = 0.0
 	vault.cancel()
 	fire_lockout = 0.0
+	hands_on_bomb = false
+	bomb_was_holstered = false
 	status = Status.ALIVE
 	status_time = 0.0
 	hit_by = -1
