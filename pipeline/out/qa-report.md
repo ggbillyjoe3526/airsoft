@@ -1,17 +1,17 @@
-Task: none (MB1) · QA commit 1ba134c (tests unchanged; re-verified at head 85bcc67) · Verdict: Pass
+Task: BU1 · QA commit (this commit) · Verdict: Pass
 
-Blocking
-- none. The earlier fault (Subway north lane stops 1.1 m against 15 m about the middle) is fixed: layout.py LANES "n" now has (3.5,-7.0) and (12.4,-7.5), 4.45 m either side of x 7.95; test_subway_lanes_have_a_point_either_side_of_the_middle_about_equally_deep_for_both_ends passes.
-Advisory (unchanged, still true)
-- Woodland's middle lane ends at (58, 4.5) in the east camp's Back yard, 35 m from the nearest pole: by design per the record; pinned as an exemption in the defender-post test.
-- Depot's and Woodland's middle lanes read inside the 3.5 m slack I pinned.
-- Exit-time leak warnings and ExpectedError lines in test_baked_light are its deliberate mismatch cases.
+Blocking: none. Advisory: none found.
 
-Change since the last report (85bcc67): Woodland's north lane stops moved off the North bridge's deck ends ((-2.8,-41.5) west, (-6.4,-41.6) east), Subway's north lane gained two stops; both JSONs rebuilt. No test changed; the existing lane-depth, reachability and seeded-match tests cover both.
+Tests added (tests/unit/test_bu1_qa.gd, 5 tests, 11 asserts, 1.4 s):
+- :20 thin bush fired through at exactly close_awareness, held at +0.02 m · boundary of the flat-distance check · old rule holds the ~0.56 m of leaves (> 0.25), so the first assert fails without the feature.
+- :32 line straight up/down (flat 0 m) · counts only leaves before the body; line shorter than a body never held · old rule would hold the 0.5 m case.
+- :40 three small bushes in a row add up past leaf_stop_depth, one thin bush is fired through · old rule holds the single bush.
+- :48 verdict equals leaf depth to body_radius short, standing and fully crouched shooter at point blank · exercises the new formula; old rule disagrees for the thick-bush case.
+- :88 sim shoot-out at 0.5/0.65/0.8/1.0 m in one bush · wherever the rule fires (0.5, 0.65), a hit lands within 20 s, so BBs are not wasted in the leaves (bb_step stops at leaf_stop_depth; body hit is tested before the stop). Checked by logic, not by stubbing the fix.
 
-Tests (tests/unit/test_mb1_layouts.gd, 9 tests, added earlier; each was checked against origin/main's data, see the earlier run: the lane-depth, flag-B post, Subway flag B and sight-line tests fail on main).
+Regressions run, all green: test_bu1_point_blank_bush 4/4, test_bushes 39/39, test_bot_angles 16/16, test_night_sight 12/12, every test_bp8* file (no failures; pipeline/out/qa/bu1-bp8.txt).
 
-Runs at head, one file each, -gdir= -gtest: test_mb1_layouts 9/9, 124 s; test_woodland_layout 17/17, 57 s; test_wg2_woodland_models 8/8; test_bot_lifts 8/8 (Subway lifts). Loaded machine.
-tools/woodland/check.py: TOTAL 0. Subway and Woodland build_map.py ran earlier in this session: git status of data/maps was empty (JSON matches its scripts); not rerun on the coordinator's instruction.
+Hot path: the new branch uses only locals, floats and Vector3 values (no arrays, no dictionaries, no new nodes); the same one depth() call as before.
+Friendly fire: leaves_in_line only judges leaves; the teammate-in-line checks are separate (_line_of_fire_blocked) and untouched. Not separately tested.
 
-Not covered: tools/check.sh, the full suite and the smoke test (skipped by instruction); win share (balance); dev tools. Note: two stray whole-suite runs I started by mistake (missing -gdir=) were left to end by themselves.
+Not tested: full Woodland night seed 14 match (the thread's check.sh / smoke run), a teammate standing in the bush beside the target, lean at point blank (lean moves the eye, covered by the same formula).
