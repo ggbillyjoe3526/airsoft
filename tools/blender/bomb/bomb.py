@@ -15,7 +15,7 @@ A game prop, as airsoft fields use for bomb games: nothing in it works. Built fr
   shows only while someone carries the bomb on its side at the hip.
 - **cutters.glb** follows the teal-handled flush cutter photo (ref-1 of 02-defusal-tool): black oxide jaws tapering to
   a point with bright ground cutting edges, a lap joint round a socket-head pivot, black shanks into bowed teal dipped
-  grips, each with a blank raised panel (where the photo's maker name is) and a lanyard hole near its end. 122 mm long:
+  grips, plain (the photo's maker panel left off), each with a lanyard hole near its end. 122 mm long:
   the jaws 18.5 mm from the pivot (0.15 of it), the grips 84 mm (0.69), as the photo measures. Each jaw's outer edge is
   chamfered down to a thin, sharp tip. Two nodes, `CutterTop` and `CutterBottom`, each a half (jaw, shank and grip)
   with its origin on the pivot, so the game opens them by turning each about its own up axis; as built they are shut.
@@ -355,6 +355,13 @@ def plugs(b: hs.Builder) -> None:
                      (PLUG_Y + 11.6, 1.6)], "Plug", 16)
 
 
+def clean(b: hs.Builder) -> bpy.types.Object:
+    """`b`'s object, triangulated without needles and shaded (its edges as built: no bevel)."""
+    ob = b.build()
+    unneedle(ob)
+    return hs.finish(ob, bevel=0.0)
+
+
 def build_bomb() -> list:
     hs.reset()
     bomb_colours()
@@ -363,22 +370,22 @@ def build_bomb() -> list:
     for cx in (-BLOCK_PITCH[0], BLOCK_PITCH[0]):
         for cz in (BLOCK_PITCH[1], 3.0 * BLOCK_PITCH[1]):
             block(b, cx, cz)
-    parts.append(hs.finish(b.build(), bevel=0.0))
+    parts.append(clean(b))
     b = hs.Builder("Tape", [])
     for i, (yc, w) in enumerate(BANDS):
         band(b, yc, w, bump=(yc < 0.0), seed=1.7 + i * 2.3)
-    parts.append(hs.finish(b.build(), bevel=0.0))
+    parts.append(clean(b))
     b = hs.Builder("Keypad", [])
     plate = keypad(b, BUNDLE_TOP)
-    parts.append(hs.finish(b.build(), bevel=0.0))  # chamfered as built
+    parts.append(clean(b))  # chamfered as built
     b = hs.Builder("Wires", [])
     for path, mat in wire_paths():
         sweep(b, path, WIRE_R, mat, sides=WIRE_SIDES)
     plugs(b)
-    parts.append(hs.finish(b.build(), bevel=0.0))
+    parts.append(clean(b))
     b = hs.Builder("Antenna", [])
     antenna_mm(b)
-    parts.append(hs.finish(b.build(), bevel=0.0))
+    parts.append(clean(b))
     print("bomb parts: " + ", ".join("%s %d" % (p.name, hs.tris(p)) for p in parts))
     body = hs.join("Bomb", parts)
     led = led_object(plate)
@@ -442,7 +449,7 @@ def carry_object() -> bpy.types.Object:
         sx = side - reach * 0.55
         lathe_along(b, Vector((sx, yc, z0 - fold - t)), Vector((0.0, 0.0, -1.0)),
                     [(0.0, snap), (0.6, snap), (1.0, snap * 0.7), (1.1, 0.0)], "Snap", 12)
-    return hs.finish(b.build(), bevel=0.0)
+    return clean(b)
 
 
 def antenna_mm(b: hs.Builder) -> None:
@@ -489,7 +496,7 @@ def led_object(plate: float) -> bpy.types.Object:
     dome = [(plate + 0.4 + r * 0.75 * math.sin(0.5 * math.pi * k / 6), r * math.cos(0.5 * math.pi * k / 6))
             for k in range(7)]
     lathe_along(b, base, up, [(plate + 0.2, r)] + dome, "Lamp", 20)
-    ob = hs.finish(b.build(), bevel=0.0)
+    ob = clean(b)
     return ob
 
 
@@ -497,15 +504,15 @@ def led_object(plate: float) -> bpy.types.Object:
 # Plan (x across, y along, mm; the pivot at the origin). One half: its jaw on +X ahead of the pivot, its shank and
 # grip on -X behind it; the other half is it turned half a turn about Y.
 JAW_EDGE = [(0.0, 5.6), (0.0, 9.0), (0.0, 12.5), (0.0, 16.0), (0.0, 18.5)]  # the cutting edge up to the tip
-JAW_OUTER = [(0.35, 18.4), (1.1, 17.3), (2.2, 15.0), (3.4, 11.8), (4.4, 8.4), (4.95, 5.2), (4.95, 2.62)]
+JAW_OUTER = [(0.15, 18.45), (1.1, 17.3), (2.2, 15.0), (3.4, 11.8), (4.4, 8.4), (4.95, 5.2), (4.95, 2.62)]
 SHANK_INNER = [(1.0, -5.51), (0.35, -8.5), (-0.9, -15.0), (-1.9, -21.5)]
 SHANK_OUTER = [(-7.2, -21.5), (-6.8, -15.0), (-6.1, -8.0), (-5.2, -2.06)]
 PIVOT_R = 5.6
 CUT_T = 3.2             # half the jaws' thickness at the pivot; the jaw tapers to TIP_T at its tip
-TIP_T = 0.45
+TIP_T = 0.2
 NOSE_FROM = 6.5        # where the nose's bevels start (y, mm)
 LAP_GAP = 0.06          # the lap's clearance round the other half's disc (mm)
-PIVOT_SEGS = 44         # the pivot's circle's sides, and the outline's arcs at the same spacing
+PIVOT_SEGS = 72         # the pivot's circle's sides, and the outline's arcs at the same spacing
 CHAMFER = (1.3, 0.75)     # the jaw's outer chamfer: in from the root-to-tip line at the top (mm), and its drop per mm out
 EDGE_GRIND = 1.25       # the bright ground facet's width along the cutting edge
 GRIP_FROM = -19.0       # the grip's front end and its far end (y, mm)
@@ -513,10 +520,9 @@ GRIP_TO = -103.0
 GRIP_X = (-4.6, -14.5, 4.5)  # the grip's centre line: x at its front, at its end, and its outward bow
 GRIP_W = (7.2, 6.0, 6.6)     # half width in the plane: the front collar, the waist, the end
 GRIP_H = (5.0, 4.2, 4.5)     # half thickness the same
-GRIP_RINGS = 34
-GRIP_SECTION = 4             # each corner's steps of the section
+GRIP_RINGS = 52
+GRIP_SECTION = 5             # each corner's steps of the section
 HOLE = (0.94, 1.35)          # the lanyard hole: how far along the grip, its radius (mm)
-PANEL = (0.2, 0.46, 3.0, 0.5)  # the blank raised panel: from, to (along the grip), half width, rise
 NUT = (3.4, 1.4)             # the pivot screw's head radius and height; the nut under it a little smaller
 
 
@@ -584,22 +590,109 @@ def steel_half(name: str) -> bpy.types.Object:
     cutters.append(chamfer)
     lap = hs.Builder(name + "_lap", [])
     lap.lathe([(-CUT_T * 1.5 * MM, 0.0), (-CUT_T * 1.5 * MM, (PIVOT_R + LAP_GAP) * MM), (0.0, (PIVOT_R + LAP_GAP) * MM),
-               (0.0, 0.0)], "Oxide", segments=PIVOT_SEGS, axis="z")
+               (0.0, 0.0)], "Oxide", segments=PIVOT_SEGS, axis="z", start=math.pi / PIVOT_SEGS)  # off the outline's corners
     cutters.append(lap.build())
     hs.cut(ob, cutters)
-    hs.finish(ob, bevel=0.00028, segments=2)
-    ob.data.validate()  # the bevel leaves two faces doubled where the nose's bevel meets the tip
+    ob.data.validate()
+    unneedle(ob)
+    # Every face flat but the pivot's round walls, smooth (no bevel: at its size it only split the walls into faces
+    # that weighted normals striped and fanned the flat faces).
+    round_pivot_walls(ob)
     return ob
+
+
+NEEDLE = (2.0, 0.002)  # a needle triangle: its longest edge over this (mm), its area under this times that squared
+
+
+def unneedle(ob: bpy.types.Object) -> None:
+    """Triangulates `ob` into well-shaped triangles (not fanned into needles by the exporter), then mends each needle
+    left (a corner lying almost on the far edge, where a cut met an arc): the far edge split under that corner and the
+    two welded, so the sliver goes and its neighbours share the corner."""
+    def tris(bm: bmesh.types.BMesh) -> None:
+        bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 3], quad_method="BEAUTY",
+                              ngon_method="BEAUTY")
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)  # a lathe's points on its axis, one point again
+    bmesh.ops.dissolve_degenerate(bm, dist=2e-6, edges=bm.edges)
+    tris(bm)
+    for _ in range(200):
+        needle = None
+        for f in bm.faces:
+            e = max(f.edges, key=lambda x: x.calc_length())
+            length = e.calc_length()
+            if length > NEEDLE[0] * MM and f.calc_area() < NEEDLE[1] * length * length:
+                needle = (f, e)
+                break
+        if needle is None:
+            break
+        f, e = needle
+        corner = next(v for v in f.verts if v not in e.verts)
+        a, b = e.verts
+        along = (corner.co - a.co).dot(b.co - a.co) / (b.co - a.co).length_squared
+        if not 0.01 < along < 0.99:
+            bmesh.ops.collapse(bm, edges=[min(f.edges, key=lambda x: x.calc_length())])
+        else:
+            _, cut = bmesh.utils.edge_split(e, a, along)
+            bmesh.ops.pointmerge(bm, verts=[cut, corner], merge_co=corner.co)
+        bmesh.ops.dissolve_degenerate(bm, dist=2e-6, edges=bm.edges)
+        tris(bm)
+    bm.to_mesh(ob.data)
+    bm.free()
+
+
+def round_pivot_walls(ob: bpy.types.Object) -> None:
+    """The steel's upright sides smooth (split at their corners), its flat faces flat; the pivot's round walls (the
+    boss's side, the lap's step: an upright face with every corner within reach of PIVOT_R off the axis) each corner
+    given the radial normal there, sharp where they meet the rest, so the cylinder reads smooth however the cut split
+    its sides and no blend crosses into the faces beside it."""
+    me = ob.data
+    near = (PIVOT_R - 0.4) * MM, (PIVOT_R + 0.4) * MM
+    walls = set()
+    for poly in me.polygons:
+        upright = abs(poly.normal.z) < 0.2
+        on_wall = all(near[0] < math.hypot(me.vertices[v].co.x, me.vertices[v].co.y) < near[1] for v in poly.vertices)
+        poly.use_smooth = upright  # the outline's curved sides smooth too, split at their corners by angle
+        if upright and on_wall:
+            walls.add(poly.index)
+    me.set_sharp_from_angle(angle=hs.SHARP_ANGLE)
+    # Where a round wall meets the outline's sides the edge is sharp, so neither shading blends into the other.
+    faces_of: dict = {}
+    for poly in me.polygons:
+        for key in poly.edge_keys:
+            faces_of.setdefault(key, []).append(poly.index)
+    sharp = {key for key, fs in faces_of.items() if len({f in walls for f in fs}) > 1}
+    for edge in me.edges:
+        if edge.key in sharp:
+            edge.use_edge_sharp = True
+    normals = [Vector(n.vector) for n in me.corner_normals]
+    for poly in me.polygons:
+        if poly.index not in walls:
+            continue
+        for li in poly.loop_indices:
+            co = me.vertices[me.loops[li].vertex_index].co
+            radial = Vector((co.x, co.y, 0.0)).normalized()
+            normals[li] = radial if radial.dot(poly.normal) > 0.0 else -radial
+    me.normals_split_custom_set(normals)
+
+
+def outer_x(y: float) -> float:
+    """The jaw's outer edge's x at `y` (mm), along JAW_OUTER."""
+    pts = sorted(JAW_OUTER, key=lambda p: p[1])
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        if y0 <= y <= y1:
+            return x0 + (x1 - x0) * (y - y0) / max(y1 - y0, 1e-9)
+    return pts[-1][0] if y > pts[-1][1] else pts[0][0]
 
 
 def ground_edge(b: hs.Builder) -> None:
     """The cutting edge's bright ground facet on the top face, a strip along the edge sloping to it."""
     bm = b.bm
-    ys = [JAW_EDGE[0][1] + 0.6] + [y for _, y in JAW_EDGE[1:-1]] + [JAW_EDGE[-1][1] - 0.5]
+    ys = [JAW_EDGE[0][1] + 0.6] + [y for _, y in JAW_EDGE[1:-1]] + [JAW_EDGE[-1][1] - 1.0]
     lo, hi = [], []
     for y in ys:
         t = half_thickness(y)
-        w = EDGE_GRIND * (0.55 + 0.45 * t / CUT_T)
+        w = min(EDGE_GRIND * (0.55 + 0.45 * t / CUT_T), 0.6 * outer_x(y))  # inside the jaw's outline to its tip
         lo.append(bm.verts.new(mm(0.02, y, t * 0.5)))
         hi.append(bm.verts.new(mm(w, y, t + 0.03)))
     faces = [bm.faces.new((lo[i], lo[i + 1], hi[i + 1], hi[i])) for i in range(len(ys) - 1)]
@@ -633,8 +726,8 @@ def grip_size(s: float) -> tuple:
 
 
 def grip(b: hs.Builder) -> None:
-    """One half's teal dipped grip: a rounded section swept along the bowed centre line, its end domed; the blank
-    raised panel on its top; the lanyard hole through it near the end (a dark disc each side)."""
+    """One half's teal dipped grip: a rounded section swept along the bowed centre line, its end domed; the lanyard
+    hole through it near the end (a dark disc each side). Plain: the photo's maker panel is left off."""
     rings = []
     end_steps = 5
     stations = [k / GRIP_RINGS for k in range(GRIP_RINGS + 1)]
@@ -660,31 +753,8 @@ def grip(b: hs.Builder) -> None:
     hw, hh = grip_size(0.0)
     lip = section_ring(x - ax * 0.6, y - ay * 0.6, nx, ny, hw - 1.4, hh - 1.4, 0.0)
     b.loft([lip] + rings, "Grip")
-    # The raised blank panel on the top, along the grip between PANEL's two stations.
-    s0, s1, pw, rise = PANEL
-    lo, hi = [], []
-    steps = 8
-    for k in range(steps + 1):
-        s = s0 + (s1 - s0) * k / steps
-        (x, y), (nx, ny) = grip_frame(s)
-        _, hh = grip_size(s)
-        lo.append((x, y, nx, ny, hh))
-    bm = b.bm
-    top_l = [bm.verts.new(mm(x - nx * pw, y - ny * pw, hh + rise)) for x, y, nx, ny, hh in lo]
-    top_r = [bm.verts.new(mm(x + nx * pw, y + ny * pw, hh + rise)) for x, y, nx, ny, hh in lo]
-    bot_l = [bm.verts.new(mm(x - nx * (pw + 0.5), y - ny * (pw + 0.5), hh - 0.4)) for x, y, nx, ny, hh in lo]
-    bot_r = [bm.verts.new(mm(x + nx * (pw + 0.5), y + ny * (pw + 0.5), hh - 0.4)) for x, y, nx, ny, hh in lo]
-    faces = []
-    for k in range(steps):
-        faces.append(bm.faces.new((top_l[k], top_r[k], top_r[k + 1], top_l[k + 1])))
-        faces.append(bm.faces.new((bot_l[k], top_l[k], top_l[k + 1], bot_l[k + 1])))
-        faces.append(bm.faces.new((top_r[k], bot_r[k], bot_r[k + 1], top_r[k + 1])))
-    faces.append(bm.faces.new((bot_l[0], bot_r[0], top_r[0], top_l[0])))
-    faces.append(bm.faces.new((top_l[-1], top_r[-1], bot_r[-1], bot_l[-1])))
-    for f in faces:
-        f.normal_update()
-    b._faces(faces, "Grip")
     # The lanyard hole: a dark disc on the top and the bottom.
+    bm = b.bm
     s, r = HOLE
     (x, y), _ = grip_frame(s)
     _, hh = grip_size(s)
@@ -707,7 +777,7 @@ def pivot_hardware(b: hs.Builder, top: bool) -> None:
     face = CUT_T
     if top:
         prof = [(face - 0.1, r), (face + 0.3, r), (face + h * 0.7, r - 0.5), (face + h, r - 1.4), (face + h, 1.65)]
-        b.lathe([(z * MM, rr * MM) for z, rr in prof], "Oxide", segments=32, axis="z", cap=False)
+        b.lathe([(z * MM, rr * MM) for z, rr in prof], "Oxide", segments=40, axis="z", cap=False)
         hexagon = [(1.4 * math.cos(TAU * k / 6 + math.pi / 6), 1.4 * math.sin(TAU * k / 6 + math.pi / 6))
                    for k in range(6)]
         rim = [b.bm.verts.new(mm(1.65 * math.cos(TAU * k / 6 + math.pi / 6), 1.65 * math.sin(TAU * k / 6 + math.pi / 6),
@@ -718,7 +788,7 @@ def pivot_hardware(b: hs.Builder, top: bool) -> None:
         b._faces([b.bm.faces.new(list(reversed(bottom)))], "Hole")
     else:
         prof = [(face - 0.1, r - 0.4), (face + 0.9, r - 0.4), (face + 1.1, r - 0.9), (face + 1.1, 0.0)]
-        b.lathe([(z * MM, rr * MM) for z, rr in prof], "Oxide", segments=32, axis="z", cap=False)
+        b.lathe([(z * MM, rr * MM) for z, rr in prof], "Oxide", segments=40, axis="z", cap=False)
 
 
 def build_half(name: str, top: bool) -> bpy.types.Object:
@@ -727,7 +797,9 @@ def build_half(name: str, top: bool) -> bpy.types.Object:
     ground_edge(b)
     grip(b)
     pivot_hardware(b, True)
-    parts = hs.finish(b.build(), bevel=0.0)
+    built = b.build()
+    unneedle(built)
+    parts = hs.finish(built, bevel=0.0)
     print("%s parts: steel %d, grip and hardware %d" % (name, hs.tris(steel), hs.tris(parts)))
     ob = hs.join(name, [steel, parts])
     if not top:
