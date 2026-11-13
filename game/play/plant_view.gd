@@ -239,7 +239,8 @@ func _build_prop(cfg: PlantViewConfig) -> void:
 	if lamp != null:
 		lamp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		for i in lamp.mesh.get_surface_count():
-			if lamp.mesh.surface_get_material(i).resource_name == LAMP_MATERIAL:
+			var own := lamp.mesh.surface_get_material(i)
+			if own != null and own.resource_name == LAMP_MATERIAL:
 				lamp.set_surface_override_material(i, _lamp)
 	var cutters := _model(CUTTERS_MODEL)
 	var cut := bomb.find_child(CUT_MARK, true, false) as Node3D
