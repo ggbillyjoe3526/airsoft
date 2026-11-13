@@ -152,6 +152,10 @@ OPEN_FIRST = 0.5
 KEEP_SLACK = 0.01
 KEEP_CUFF = 0.065
 KEEP_STEP = 0.125
+# The replica cants up as the change starts and ends, lifting the arm with it: where the hand drawn CLEAR off its hold
+# still shows more arm than that, it draws CLEAR_MORE of CLEAR further at a time, at most CLEAR_TRIES times.
+CLEAR_MORE = 0.25
+CLEAR_TRIES = 4
 EASE_TURN = 1.5
 EASE_BACK = 0.0008
 EASE_SWING = 2.0
@@ -676,13 +680,29 @@ class MagChange:
             return self.pose(between(dip_m, carried(at["back"]), (f - dip_out) / (at["back"] - dip_out), Vector()),
                              turns)
 
-        cleared = Matrix.Translation(self.clear) @ held_hand
         open_turns = self.opened(held_turns)
         open_turns.update({b: held_turns[b] for b in self.fingers if b.startswith("Thumb")})
         # A finger hooked round a corner (a pinky curled under the handguard) would open into it: it stays closed.
         self.now, self.elbow, self.most = 0, None, None
         self.pose(held_hand, open_turns, held_pole, 0.0)
         self.most = max(KEEP_CUFF, self.arm_shown() + KEEP_SLACK)
+        # Drawn off the hold: as far as CLEAR, or further where the arm would show more than the hold's (CLEAR_MORE),
+        # as the hand leaves and as it comes back.
+        cleared = Matrix.Translation(self.clear) @ held_hand
+        for k in range(CLEAR_TRIES + 1):
+            cleared = Matrix.Translation(self.clear * (1.0 + CLEAR_MORE * k)) @ held_hand
+            shown = 0.0
+            for f in (clear_at, back_at):
+                self.now, self.elbow = f, None
+                self.pose(cleared, open_turns, held_pole, 0.0)
+                shown = max(shown, self.arm_shown())
+            if shown <= self.most:
+                break
+        if os.environ.get("BL_DEBUG"):
+            print("   drawn off the hold %.0f mm: %.3f m of the arm shows (the hold's most %.3f)" % (
+                (cleared.translation - held_hand.translation).length * 1000.0, shown, self.most))
+        self.now, self.elbow = 0, None
+        self.pose(held_hand, open_turns, held_pole, 0.0)
         self.rig.write()
         for b in pose.clipping(self.moving, self.frame)[1]:
             finger = b.split("_")[0][:-1]

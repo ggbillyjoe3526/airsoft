@@ -263,8 +263,14 @@ func test_only_the_hand_and_wrist_show_through_a_reload() -> void:
 			var c := Character.new(0, 0, Vector3.ZERO, 0.0, [ReplicaStats.load_replica(id)] as Array[ReplicaConfig])
 			hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
 			# No more than the approved hold shows, where it shows a sliver of sleeve at the screen's edge; your right
-			# arm too, the replica canted in it.
+			# arm too, the replica canted in it. A foregrip's fist shows less arm than the replica's own hold (HA1:
+			# the straight forearm beside the rifle), and the magazine is changed the same way from either, so the
+			# replica's own hold sets the limit there too.
 			var most := ARM_CUFF if cfg.one_hand.has(id) else maxf(ARM_CUFF, _arm_shown(hands) + HOLD_SLACK)
+			if grip != &"":
+				var plain := _hands([id])
+				plain.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
+				most = maxf(most, _arm_shown(plain) + HOLD_SLACK)
 			var most_right := maxf(ARM_CUFF, _arm_shown(hands, "R") + HOLD_SLACK)
 			var clip := _anim(hands).get_animation(hands._arms.reload_clip())
 			var track := clip.find_track(NodePath("%s:Forearm_L" % _skeleton_path(hands)), Animation.TYPE_ROTATION_3D)

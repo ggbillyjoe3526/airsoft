@@ -188,7 +188,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   forearm/wrist for the rifle hold is bent in an unnatural way. The arm and wrist should be straight" (the support
   arm lies on the hand's own line, close along the rifle: `arms.py` `GUARD` `upper`); a pistol's left hand is
   "pressed against the handle/grip", no gap seen over the sights; and the "Cyber pistol should have same grip as gbb
-  pistol", its thumb sticking out as the GBB's does (`CYBER_RIGHT`). Defaults taken: the bots
+  pistol", its thumb sticking out as the GBB's does (`CYBER_RIGHT`). His fourth look: "Wrists are slightly too
+  thick holding rifles" (half of the earlier thickening stands), "The thumb should be resting against the replica"
+  (it lies up on the handguard's side), and "With a vertical grip the index finger should be under the replica and
+  around the grip. Angled grip should be held similar to the vertical grip" (both a fist round the grip:
+  `VERTICAL_LEFT`, `ANGLED_LEFT`). Defaults taken: the bots
   stay one-handed on pistols (HG1 below; they copy `<id>_Hold`), and the pistols keep their hip place of 2026-11-06.
   His reference pictures are other games' and set hand placement and framing only; the art is our own.
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands

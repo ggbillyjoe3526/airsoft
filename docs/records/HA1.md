@@ -48,17 +48,38 @@ ATTEMPT_ROWS
   it: 7 cm forward a fingertip showed past its front, 5 cm forward the sleeve needs 37 degrees to pass the
   magazine, so that is its hold (`SMG_GUARD` `search`), and its elbow hangs 10 degrees under the wrist's line
   (`sag`), without which the upper arm came into the view's foot.
-- **The same straight arm on a foregrip** (`GRIP_LEFT` `upper` and `turn`, `GRIP_PIVOT`, `ANGLED_LEFT` `search`): on
-  the vertical grip the wrist bent 37 to 38 degrees. A fist round an upright grip with a straight wrist has its
-  forearm level and along the bore, through the magazine, so the hand's marks are turned about the grip's middle:
-  tilted 30 degrees, as a hand holds a hammer, so the forearm rises 29 degrees to it, and swung 35, so it comes from
-  the left 22 degrees off the bore (a 25 by 25 turn left the thumb in the grip). On the angled grip the hand sits 6 cm
-  behind the mount, where only a hand turned 50 degrees and pitched 30 keeps the sleeve off the magazine and the palm
-  out of the grip on both rifles, so its search is pinned there (the forearm 56 to 58 degrees off the bore, the wrist
-  straight; it was 19 to 24 degrees bent).
-- **A fuller wrist** (`glove.WRIST_FULL`, `wrist_full`; the owner: "too thin at the wrist"): the wrist measured 50 by
-  39 mm against a hand 85 wide; it is widened a fifth and thickened an eighth between the cuff and the heel of the
-  hand, and the sleeve stands 10.5 mm off the arm at its cuff (was 8).
+- **A fist round each foregrip** (`GRIP_LEFT` `upper`, `turn` and `press`, `VERTICAL_LEFT`, `ANGLED_LEFT`): the
+  third look asked for the straight arm, which on a fist round an upright grip runs level along the bore, through
+  the magazine, so the hand's marks are turned about the grip's middle (`pivot`): tilted, as a hand holds a hammer,
+  so the forearm rises to it, and swung 35 degrees, so it comes from the left. The first cut (tilted 30, the index
+  knuckle 18 mm under the rail and 5 mm off the grip's side) left the index finger no room: it lay open up the
+  handguard's side, and the angled grip was held as a handguard, its arm 65 degrees off the bore. The owner's fourth
+  look: "With a vertical or angled grip the hand is very bad. With a vertical grip the index finger should be under
+  the replica and around the grip. Angled grip should be held similar to the vertical grip". Now both are a fist: the
+  index knuckle about 30 mm under the rail and 12 mm off the grip's side (a finger's thickness, room to turn round
+  its front), the index and middle fingers closed until they touch, the ring and little fingers at and under its foot,
+  the thumb round its back. The vertical grip (64 mm since MQ2) is tilted 20 degrees (forearm rising 20, 24 off the
+  bore); the angled grip's tall end is held the same way, tilted 12, because its raked front and rail plate leave
+  the index less room. The wrist stays straight (under 1 degree) on both.
+- **The thumb on the handguard** (`thumb_f`, `thumb_z`, `thumb_hug`; the owner's fourth look: "The thumb should be
+  resting against the replica"): it reached 55 mm forward along the handguard's lower left edge, its tip past the
+  handguard's front, so from the eye it stood beside the rifle. It lies 35 mm forward and 5 mm higher, up on the side
+  face, held close along its length.
+- **The wrist's size** (`glove.WRIST_FULL`, `wrist_full`; the owner: "too thin at the wrist", then of the fix:
+  "Wrists are slightly too thick holding rifles"): the wrist measured 50 by 39 mm against a hand 85 wide; widened a
+  fifth and thickened an eighth with the sleeve's cuff 10.5 mm off the arm (was 8) it read too thick, so half of that
+  stands: a tenth wider, 6.5% thicker, the cuff 9.2 mm off.
+- **Bots hold a bare rifle where the arms do** (`FigureView.support_mark`): the figures' left hand was held no
+  further forward than the grip's mount, which the arms' hold was always behind. The straight arm's hand sits ahead
+  of it on the AEG, and the bots' hand was drawn 5.5 cm back off the arms' finger marks. With no grip fitted there is
+  now no limit (the arms' hold is built against the replica); behind a fitted grip it moves back as before.
+- **A reload keeps the arm's show to the hold's** (`magazine.KEEP_*`, `MagChange.arm_shown`): leaving the hold the
+  elbow kept the hold's own place while the hand dropped, which swung a straight forearm up into view. The elbow now
+  goes toward the solved one until no more of the arm shows than the hold showed, and where the replica's cant still
+  lifts the arm past that the hand draws further down off the hold (9 cm on the AEG, 6 was the rule:
+  `CLEAR_MORE`). A foregrip's fist shows less arm than the replica's own hold, and the magazine is carried the same
+  way from either, so `test_bp8_arms`'s limit for a foregrip's reload is the replica's own hold's; the aimed elbow
+  test's limit is 2 cm in (was 3), the straight arm's elbow already lying close to the rifle at the hip.
 - **Pistols in both hands** (`<id>_two_Hold`, `<id>_two_Reload`; `ArmsView.TWO_HANDS`, `clip_base`): the left hand wraps
   the right hand's fingers (`SUPPORT_LEFT`), solved against the pistol and the right arm as posed. The owner's second
   look: "The pistol grip shows the players left hand fingers ... They should be resting on top of the right hand and out
@@ -141,10 +162,8 @@ ATTEMPT_ROWS
 
 ## Known issues left
 
-- With the Angled Grip on the AEG your left arm comes in 65 degrees off the bore; the SMG's far-side fingertips stand
-  1 to 2 cm off the narrow front of its handguard (a bot close up shows it, your view never); aimed, the Cyber's
-  right thumb lies a little flatter than the GBB's (`docs/KNOWN_ISSUES.md` › Graphics).
-- MQ2's attachments pull request lengthens the Vertical Grip (64 mm under the rail, 53 now) and the Pump Shotgun adds
-  a sixth hold: whichever merges after this one rebuilds `arms.glb` from the merged scripts.
+- The SMG's far-side fingertips stand 1 to 2 cm off the narrow front of its handguard (a bot close up shows it,
+  your view never); aimed, the Cyber's right thumb lies a little flatter than the GBB's; on the Angled Grip's short
+  tall end the ring and little fingers close under its foot (`docs/KNOWN_ISSUES.md` › Graphics).
 - The skin's atlas has about 530 texels (of 1.46 million) claimed by two places on the hand, at the thumb's web; no
   seam shows in the pictures.

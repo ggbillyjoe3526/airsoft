@@ -44,7 +44,9 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
     thumb wrapped round the grip's left side; the left hand under the handguard toward its front, the forearm in
     one straight line with it running up beside the rifle 30 degrees off the bore (HA1, the owner: "the arm and
     wrist should be straight"), fingers closed under its right side out of the eye's sight ("only the thumb of the
-    left hand"), thumb along its left side.
+    left hand"), thumb up on its left side face ("resting against the replica"). With a Vertical or Angled Grip
+    fitted the left hand is a fist round the grip, the index finger under the handguard and round the grip's front
+    (the owner's fourth look), the forearm rising to it with the wrist straight.
   - Pistols (`pistol`, `cyber`): held high in the right hand, the web of the hand on the back strap under the
     beavertail, the fingers closed up under the trigger guard with the little finger on the grip, the thumb forward
     along the frame's left side under the slide. `<id>_Hold` lowers the left arm (the bots' one-handed hold);
