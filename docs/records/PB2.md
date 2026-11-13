@@ -1,6 +1,6 @@
 # PB2 · The bomb and the wire cutters
 
-**Review:** 8 attempts · critic pending · qa Pass · performance Pass
+**Review:** 8 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -13,7 +13,7 @@
 | 2026-11-13 | 5 | Opus 5.5 (build thread) | ✓ | Retry 7/8 | 1 (specks along the seam where the closed jaws met) |
 | 2026-11-13 | 6 | Opus 5.5 (build thread) | ✓ | Retry 7/8 | 1 (a pinhole of light through the pivot below the screw) |
 | 2026-11-13 | 7 | Opus 5.5 (build thread) | partial | Retry 7/8 | 1 (a bright hairline down the crease where the lap begins) |
-| 2026-11-13 | 8 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-13 | 8 | Opus 5.5 (build thread) | ✓ | Accept 8/8 | – |
 
 ## Decisions
 
