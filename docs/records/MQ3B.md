@@ -60,10 +60,10 @@ team colour. Its mean is 0.88 of white in the map (0.77 in linear light): on ave
 darker than the flat colour it was, which is the ribs' valleys, the grime and the shade the bake put under the arm.
 
 - **References:** the owner's photos these parts were modelled from (BL10, BL11), `ref_images.zip` ›
-  `clothes/highcut_helmet` (eleven, among them `Helmet-MICH-High-Cut-Tactical(4)`), `clothes/baseball_cap` (five,
-  among them `Screenshot 2026-11-04 122905`), `clothes/boonie_hat` (seven, among them `boonie_olive_3`),
-  `clothes/goggles` (six), `clothes/mesh_face_mask` (six, among them `6031-tn_1___43521`) and `player/figure`
-  (seventeen, among them `EK7A5361` and `bbqhqxirl3db1`). What the paint takes from them: the mask's edge bound in
+  `clothes/highcut_helmet` (ten, among them `Helmet-MICH-High-Cut-Tactical(4)`), `clothes/baseball_cap` (four,
+  among them `Screenshot 2026-11-04 122905`), `clothes/boonie_hat` (six, among them `boonie_olive_3`),
+  `clothes/goggles` (five), `clothes/mesh_face_mask` (five, among them `6031-tn_1___43521`) and `player/figure`
+  (sixteen, among them `EK7A5361` and `bbqhqxirl3db1`). What the paint takes from them: the mask's edge bound in
   woven tape and sewn through; the cap's and the boonie's ripstop with rows of stitching round the brim; moulded
   rails and cups against a painted shell; suede boots with a rubber toe cap and a lugged sole; an elastic band round
   the upper arm. The wear (fade, sweat, dust, scuffs, chips) is what a season's use leaves on such kit and is in none
