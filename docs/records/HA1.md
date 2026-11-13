@@ -142,6 +142,10 @@ ATTEMPT_ROWS
   off the pump and out of view by the time the sight is up (SH2 left this to HA1: "aimed, the left fingertips show
   beside the receiver"); its hold is built by this task's guard method (wrist 11 degrees, nothing passing), and
   `test_sh2_qa.gd` now expects the other long replicas' hold marks where their holds are solved, not at the hip.
+  QA's third run found the drawing in left its places in the forearm and hand bones, which no clip keys, so each
+  aimed frame read the last one's back: after 10 s aimed the fingertips sat 2 to 8 cm off the hold at the hip.
+  `ArmsTuck.clear` now rests all three bones' places and sizes before the clip poses them
+  (`test_ha1_shotgun.gd` holds the sight up for seconds on every rifle).
 - **Aimed, a pistol keeps the tops of the hands** (`aim_hands_hint`, `aim_hint_span` 0.3 to 0.8 of the raise,
   `aim_hint_below` 80 to 120 mm under the sight line; `ArmsFade`, `arms_fade.gdshader`): what lies below fades, so
   only the top of the hands shows under the slide (the owner picked this from pictures, over whole solid hands and

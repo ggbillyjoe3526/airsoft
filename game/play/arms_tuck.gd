@@ -20,12 +20,15 @@ const REACH_MOST := 0.999
 var _upper: int = -1
 var _fore: int = -1
 var _hand: int = -1
+## The three of them, for `clear`.
+var _bones: PackedInt32Array = PackedInt32Array()
 
 
 func _init(skeleton: Skeleton3D) -> void:
 	_upper = skeleton.find_bone(UPPER)
 	_fore = skeleton.find_bone(FORE)
 	_hand = skeleton.find_bone(HAND)
+	_bones = PackedInt32Array([_upper, _fore, _hand])
 
 
 ## False for a skeleton without the left arm's bones: nothing moves.
@@ -33,11 +36,16 @@ func fits() -> bool:
 	return _upper >= 0 and _fore >= 0 and _hand >= 0
 
 
-## Puts the shoulder back where the skeleton rests it, for a clip that doesn't key it: call before the clip poses the
-## skeleton again.
+## Puts the arm's three bones back where the skeleton rests them (their places and sizes; the clips key only their
+## turns), so nothing of the last frame's drawing in is read back by the next: call before the clip poses the
+## skeleton again. Left in the bones, a sight held up for seconds walked the hand off its hold (QA, HA1).
 func clear(skeleton: Skeleton3D) -> void:
-	if fits():
-		skeleton.set_bone_pose_position(_upper, skeleton.get_bone_rest(_upper).origin)
+	if not fits():
+		return
+	for bone: int in _bones:
+		var rest := skeleton.get_bone_rest(bone)
+		skeleton.set_bone_pose_position(bone, rest.origin)
+		skeleton.set_bone_pose_scale(bone, rest.basis.get_scale())
 
 
 ## Draws the arm of `skeleton`, posed by its clip, in: the shoulder moved by `shift`, the hand by `slide` (turned as
