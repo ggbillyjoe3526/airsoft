@@ -270,3 +270,183 @@ func test_a_repeated_swap_to_the_shotgun_and_back_leaves_no_nodes_behind() -> vo
 		view.on_shot()
 		view.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
 	assert_eq(Performance.get_monitor(Performance.OBJECT_NODE_COUNT), before, "shots add no nodes")
+
+
+# --- attempt 2: the hold's place, the stock out of the aimed view, the toe loop, budgets ---
+
+const NEAR := 0.05
+const ARM_CUFF := 0.07
+const ARM_R := 0.02
+const HOLD_SLACK := 0.015
+const ARM_SAMPLES := 24
+const UPPER_FROM := 0.4
+## The sling loop (tools/blender/replicas/shotgun.py TOE_LOOP): centre z (m, behind the origin), lowest point y.
+const TOE_Z := 0.2616
+const TOE_Y_LOW := -0.0626
+const TRIS_HANDS := 40000
+const TRIS_FIGURE := 3000
+
+
+func _hands(id: StringName) -> ReplicaView:
+	var hands := ReplicaView.new()
+	add_child_autofree(hands)
+	hands.setup(ViewModelConfig.new(), [ReplicaStats.load_replica(id)] as Array[ReplicaConfig], BoxWorld.new())
+	return hands
+
+
+func _character(id: StringName) -> Character:
+	return Character.new(0, 0, Vector3.ZERO, 0.0, [ReplicaStats.load_replica(id)] as Array[ReplicaConfig])
+
+
+func _step(hands: ReplicaView, c: Character, aim: float, frames: int = 90) -> void:
+	for i in frames:
+		hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, aim)
+
+
+## The body mesh's vertices in the replica's own space.
+func _body_vertices(model: Node3D) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	var inv := model.global_transform.affine_inverse()
+	for n: Node in model.find_children("Body", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var to_model := inv * mi.global_transform
+		for s in mi.mesh.get_surface_count():
+			var verts := mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX] as PackedVector3Array
+			for v in verts:
+				out.append(to_model * v)
+	return out
+
+
+func _tris(root: Node, skip: String) -> int:
+	var total := 0
+	for n: Node in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.mesh == null or mi.name.begins_with(skip) or (skip != "" and mi.get_parent().name == skip):
+			continue
+		total += mi.mesh.get_faces().size() / 3
+	return total
+
+
+func test_the_arms_hold_mark_is_where_the_view_holds_the_shotgun() -> void:
+	var cfg := ViewModelConfig.new()
+	var arms := _scene(ARMS)
+	var mark := arms.find_child("Hold_shotgun", true, false) as Node3D
+	var hip: Vector3 = cfg.hip[&"shotgun"]
+	assert_almost_eq(mark.global_position, hip, Vector3.ONE * 1e-4, "the hold is built for the hip place")
+	for id: StringName in [&"aeg", &"sniper", &"smg"]:
+		var other := arms.find_child("Hold_%s" % id, true, false) as Node3D
+		assert_almost_eq(other.global_position, cfg.hip.get(id, cfg.hip_default), Vector3.ONE * 1e-4, "%s" % id)
+
+
+func test_aimed_with_no_optic_no_stock_is_in_front_of_the_near_plane_on_screen() -> void:
+	var hands := _hands(&"shotgun")
+	var c := _character(&"shotgun")
+	_step(hands, c, 1.0)
+	var held: ReplicaView.Held = hands._held[0]
+	var rear := held.rear_sight
+	var model := held.root.get_child(0) as Node3D
+	var to_eye := hands.global_transform.affine_inverse() * model.global_transform
+	var tan_h := tan(deg_to_rad(ViewConfig.new().horizontal_fov_16x9) * 0.5)
+	var shown := 0
+	var rail_back := INF
+	for v in _body_vertices(model):
+		var p := to_eye * v
+		if v.z > rear.z + 0.05:
+			var depth := -p.z
+			if depth >= NEAR and absf(p.x / (depth * tan_h)) < 1.0 and absf(p.y / (depth * tan_h * 9.0 / 16.0)) < 1.0:
+				shown += 1
+		elif v.y > rear.y - 0.012:
+			rail_back = minf(rail_back, -p.z)
+	assert_eq(shown, 0, "no vertex of the stock (behind the receiver) is on screen aimed")
+	assert_gt(rail_back, NEAR, "the top rail is not clipped by the near plane")
+
+
+func test_the_top_rail_stays_past_the_near_plane_through_the_raise_and_the_kick() -> void:
+	var hands := _hands(&"shotgun")
+	var c := _character(&"shotgun")
+	var held: ReplicaView.Held = hands._held[0]
+	for aim: float in [0.0, 0.25, 0.5, 0.75, 1.0]:
+		_step(hands, c, aim)
+		for shots in 6:
+			hands.on_shot()
+			_step(hands, c, aim, 1)
+			var to_eye := hands.global_transform.affine_inverse() * (held.root.get_child(0) as Node3D).global_transform
+			var rear_eye: Vector3 = to_eye * held.rear_sight
+			assert_gt(-rear_eye.z, NEAR, "aim %.2f, shot %d: the rear sight past the near plane" % [aim, shots])
+
+
+func test_the_model_has_its_toe_loop_hung_below_the_stock_and_stays_in_budget() -> void:
+	var model := _scene(MODEL)
+	var low := INF
+	for v in _body_vertices(model):
+		if absf(v.x) < 0.006 and absf(v.z - TOE_Z) < 0.006:
+			low = minf(low, v.y)
+	assert_almost_eq(low, TOE_Y_LOW, 0.003, "the sling loop's wire reaches its lowest point at the toe")
+	assert_lt(_tris(model, "Figure"), TRIS_HANDS, "triangles in the hands")
+	var figure := model.find_child(ReplicaParts.FIGURE_NODE, true, false) as Node3D
+	var fig := 0
+	for n: Node in figure.find_children("*", "MeshInstance3D", true, false) + [figure]:
+		var mi := n as MeshInstance3D
+		if mi != null and mi.mesh != null:
+			fig += mi.mesh.get_faces().size() / 3
+	assert_lt(fig, TRIS_FIGURE, "triangles on a figure")
+
+
+## The left forearm's shown reach (m from the wrist) on a 16:9 screen as the hands are posed now (test_bp8_arms).
+func _arm_shown(hands: ReplicaView) -> float:
+	var skeleton := hands._arms._skeleton
+	skeleton.force_update_all_bone_transforms()
+	var joints: Array[Vector3] = []
+	for bone: String in ["UpperArm_L", "Forearm_L", "Hand_L"]:
+		joints.append(skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone(bone)).origin)
+	var tan_h := tan(deg_to_rad(ViewConfig.new().horizontal_fov_16x9) * 0.5)
+	var shown := 0.0
+	for part in 2:
+		var a := joints[part].lerp(joints[part + 1], UPPER_FROM if part == 0 else 0.0)
+		var b := joints[part + 1]
+		for k in ARM_SAMPLES + 1:
+			var q := a.lerp(b, k / float(ARM_SAMPLES))
+			var from_wrist := q.distance_to(joints[1]) + joints[1].distance_to(joints[2]) if part == 0 \
+					else q.distance_to(joints[2])
+			var p := hands.global_transform.affine_inverse() * q
+			var depth := -p.z
+			if depth < NEAR:
+				continue
+			var edge := ARM_R / (depth * tan_h)
+			if absf(p.x / (depth * tan_h)) < 1.0 + edge and absf(p.y / (depth * tan_h * 9.0 / 16.0)) < 1.0 + edge * 16.0 / 9.0:
+				shown = maxf(shown, from_wrist)
+	return shown
+
+
+func test_at_the_hip_the_shotguns_left_forearm_shows_no_more_than_the_rifles_holds() -> void:
+	var worst := 0.0
+	for id: StringName in [&"aeg", &"smg", &"sniper"]:
+		var hands := _hands(id)
+		_step(hands, _character(id), 0.0, 30)
+		worst = maxf(worst, _arm_shown(hands))
+	var hands := _hands(&"shotgun")
+	_step(hands, _character(&"shotgun"), 0.0, 30)
+	assert_lt(_arm_shown(hands), maxf(ARM_CUFF, worst) + HOLD_SLACK, "left forearm shown at the hip")
+
+
+func test_a_reload_shows_no_shotgun_forearm_past_the_cuff() -> void:
+	var hands := _hands(&"shotgun")
+	var c := _character(&"shotgun")
+	_step(hands, c, 0.0, 30)
+	var hold := _arm_shown(hands)
+	var time := c.armament.replica().reload_time
+	for k in 21:
+		c.armament.reload_left = maxf(time * (1.0 - k / 20.0), 1e-4)
+		hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
+		assert_lt(_arm_shown(hands), maxf(ARM_CUFF, hold + HOLD_SLACK), "reload at %d/20" % k)
+
+
+func test_pump_hold_view_leaves_no_nodes_after_the_view_is_freed() -> void:
+	var before := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
+	for i in 3:
+		var hands := ReplicaView.new()
+		add_child(hands)
+		hands.setup(ViewModelConfig.new(), [ReplicaStats.load_replica(&"shotgun")] as Array[ReplicaConfig], BoxWorld.new())
+		_step(hands, _character(&"shotgun"), 1.0, 3)
+		hands.free()
+	assert_eq(Performance.get_monitor(Performance.OBJECT_NODE_COUNT), before, "no nodes left")
