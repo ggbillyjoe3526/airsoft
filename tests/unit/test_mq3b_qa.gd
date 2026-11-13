@@ -208,3 +208,76 @@ func test_the_boonie_crown_climbs_its_tile_ring_by_ring_as_the_cloth_rises() -> 
 			assert_gte(mean, last - 0.0005, "%s: t %.3f sits no lower than the ring below" % [level, t])
 			last = mean
 		assert_gt(rows[rows.size() - 1], 0.95, "%s: the shoulder reaches the tile's top" % level)
+
+
+## The ear cups: the wall's strip and the laid-flat face tile (strip, face), in px from the left and bottom.
+const CUP_TILES := {
+	"Head_HighCut": [Rect2(0, 64, 512, 64), Rect2(1152, 896, 128, 128)],
+	"Head_Cap": [Rect2(0, 128, 512, 64), Rect2(1280, 896, 128, 128)],
+}
+## The atlas rectangle no tile owns (from the left and bottom): no triangle may sample it.
+const SPARE_TILE := Rect2(1408, 896, 128, 128)
+const SEAM_TOLERANCE := 0.0002
+
+
+static func _key(v: Vector3) -> Vector3i:
+	return Vector3i(roundi(v.x / SEAM_TOLERANCE), roundi(v.y / SEAM_TOLERANCE), roundi(v.z / SEAM_TOLERANCE))
+
+
+static func _in_tile(uv: Vector2, tile: Rect2) -> bool:
+	var y := float(MAP) - uv.y * MAP
+	var x := uv.x * MAP
+	return x >= tile.position.x - 0.5 and x <= tile.end.x + 0.5 and y >= tile.position.y - 0.5 and y <= tile.end.y + 0.5
+
+
+func test_every_cup_face_tile_meets_its_wall_strip_with_no_gap_at_every_level() -> void:
+	var root := _human()
+	for head: String in CUP_TILES:
+		var tiles: Array = CUP_TILES[head]
+		for level in LEVELS:
+			var mesh := _mesh(root, head + level)
+			var arrays := mesh.surface_get_arrays(_surface(mesh, "Headwear"))
+			var uv := arrays[Mesh.ARRAY_TEX_UV] as PackedVector2Array
+			var vertex := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+			var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+			var wall := {}
+			var edges := {}
+			var face_triangles := 0
+			for i in range(0, index.size(), 3):
+				var first := index[i]
+				if _in_tile(uv[first], tiles[0]):
+					for k in 3:
+						wall[_key(vertex[index[i + k]])] = true
+				elif _in_tile(uv[first], tiles[1]):
+					face_triangles += 1
+					for k in 3:
+						var a := _key(vertex[index[i + k]])
+						var b := _key(vertex[index[i + (k + 1) % 3]])
+						var edge := [a, b] if a < b else [b, a]
+						edges[edge] = int(edges.get(edge, 0)) + 1
+			assert_gt(face_triangles, 8, "%s%s: the cup face draws from its flat tile" % [head, level])
+			var open := 0
+			var seam := 0
+			for edge: Array in edges:
+				if edges[edge] != 1:
+					continue
+				seam += 1
+				if not (wall.has(edge[0]) and wall.has(edge[1])):
+					open += 1
+			assert_gt(seam, 4, "%s%s: the face has an outer edge" % [head, level])
+			assert_eq(open, 0, "%s%s: every outer edge of the face lies on the wall strip's ring (no gap)" % [head, level])
+
+
+func test_no_head_triangle_samples_the_spare_atlas_rectangle() -> void:
+	var root := _human()
+	for head in HEADS:
+		for level in LEVELS:
+			var mesh := _mesh(root, head + level)
+			var uv := mesh.surface_get_arrays(_surface(mesh, "Headwear"))[Mesh.ARRAY_TEX_UV] as PackedVector2Array
+			var hits := 0
+			for p in uv:
+				var y := float(MAP) - p.y * MAP
+				if p.x * MAP > SPARE_TILE.position.x + 0.5 and p.x * MAP < SPARE_TILE.end.x - 0.5 \
+						and y > SPARE_TILE.position.y + 0.5 and y < SPARE_TILE.end.y - 0.5:
+					hits += 1
+			assert_eq(hits, 0, "%s%s: nothing samples the spare rectangle" % [head, level])

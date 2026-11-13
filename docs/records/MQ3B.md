@@ -76,7 +76,7 @@ darker than the flat colour it was, which is the ribs' valleys, the grime and th
   any of them.
 - **The face is unchanged** (FA1's four looks, in their cells of the atlas, byte for byte from the same painter).
   It is small on screen behind goggles or glasses; the critic's and the owner's notes on it are in FA1.
-- **No mesh changed**: the heads' triangles (the largest 8,992 / 3,192 / 896), the body's (33,458), every UV island
+- **No mesh changed**: the heads' triangles (the largest, the boonie's, 8,958 / 3,192 / 896), the body's (33,458), every UV island
   of the body and every weight are as they were. On the heads only UVs changed: the five moved parts', and the
   boonie crown's (its wall's rings laid by their distance over the cloth, its top laid flat). The new seams split
   339 vertices over the head meshes (105,524 in the file, 105,185 before), with no triangle added. `tests/unit/test_figure_body.gd`'s counts hold.
