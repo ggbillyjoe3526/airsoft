@@ -880,8 +880,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   55 m off and 0.9 m higher, off the pole's ring. Bots, 6v6, Normal, the same 32 seeds: the west end takes 47 % ±3
   of Elimination's rounds (48 % ±3 for MB1's road; band 45 to 55) and the attackers 69 % ±3 of Attack / Defend's
   (62 % ±3 for MB1's road; band 40 to 65, so outside it: `docs/KNOWN_ISSUES.md`). Both were measured before one
-  Brow hazel moved off the north lane at the end of MB2; with it moved the west end takes 41 % ±3 and the attackers
-  68 % ±3 on the same seeds (MB3).
+  Brow hazel moved off the north lane at the end of MB2; with it moved the west end took 41 % ±3 and the attackers
+  68 % ±3 on the same seeds (MB3). MB4 put the hazel back once BU1 had bots in one bush shoot it out: it is the
+  west's screen at the Ridge's brow, and the west end takes 47.6 % ±3.2 again.
 - **Woodland's flag takes 9 s to raise (owner, 2026-11-13, MB3).** His pick on the card "Make the flag take longer
   to raise on Woodland, to help its defenders?": "9 s on Woodland (7 s now)", over 8 s, leaving it, and moving both
   flags. Every other field keeps BP8's 7 s, and the 3 s hold is the same everywhere. A field's raise is its Raise
