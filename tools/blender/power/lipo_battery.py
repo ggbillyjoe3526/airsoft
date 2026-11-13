@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402  first: it brings bmesh and mathutils with it
 import hardsurface as hs  # noqa: E402
 import leads  # noqa: E402
+import surface  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
@@ -62,9 +63,27 @@ BALANCE_PATH = ((0.0, -3.0, -4.5), (0.0, 5.0, -5.5), (0.0, 10.0, -12.0), (0.0, 6
                 (0.0, -18.0, -23.0))
 SPAN_STEPS = 5
 
+# The label's print on the face the camera sees (MQ2B), no letters: a heading and three lines of small print in the
+# line's white, and a caution block in the band's red with a white bar across it, by the lead end. Each (from, to mm
+# from the far end; from, to mm up the face; material), PRINT_LIFT mm proud of the shrink (INK_LIFT more for the bar).
+PRINT = (
+    (30.0, 64.0, 2.0, 5.2, "Line"), (30.0, 78.0, -0.2, 0.6, "Line"), (30.0, 70.0, -2.2, -1.4, "Line"),
+    (30.0, 56.0, -4.2, -3.4, "Line"), (96.0, 112.0, -4.4, 4.4, "Band"),
+)
+PRINT_BAR = (99.0, 109.0, -0.7, 0.7, "Line")
+PRINT_LIFT = 0.08
+INK_LIFT = 0.04
+
 CASE, BAND, LINE = "Case", "Band", "Line"
 RED, BLACK, YELLOW, BLUE = "Lead", "LeadBlack", "LeadYellow", "LeadBlue"
 PLUG, SOCKET, BALANCE, SLOT = "Plug", "Socket", "BalancePlug", "Slot"
+
+
+# What each material is made of (surface.py, MQ2B): glossy shrink film and its print, matte silicone leads (polymer:
+# the rubber kind's coarse grain reads as a braid on a wire), moulded plugs. The plugs' dark sockets stay as the file
+# has them.
+SURFACES = {CASE: "coated", BAND: "coated", LINE: "coated", RED: "polymer", BLACK: "polymer", YELLOW: "polymer",
+            BLUE: "polymer", PLUG: "polymer", BALANCE: "polymer"}
 
 
 def materials() -> None:
@@ -113,6 +132,15 @@ def body(b: hs.Builder) -> None:
         b.loft(rings[k:k + 2], mat, cap0=k == 0, cap1=k == len(rings) - 2)
 
 
+def printed(b: hs.Builder) -> None:
+    """The label's print: flat blocks on the +X face."""
+    bm = b.bm
+    for k, (y0, y1, z0, z1, mat) in enumerate(PRINT + (PRINT_BAR,)):
+        x = (THICK * 0.5 + PRINT_LIFT + (INK_LIFT if k == len(PRINT) else 0.0)) * MM
+        quad = [bm.verts.new((x, y * MM, z * MM)) for y, z in ((y0, z0), (y1, z0), (y1, z1), (y0, z1))]
+        b._faces([bm.faces.new(quad)], mat)
+
+
 def lead_path(points: tuple) -> list:
     return leads.sample([Vector((x * MM, (LENGTH + y) * MM, z * MM)) for x, y, z in points], SPAN_STEPS)
 
@@ -144,6 +172,7 @@ def build() -> bpy.types.Object:
     materials()
     b = hs.Builder("Lipo", [CASE])
     body(b)
+    printed(b)
     main_lead(b)
     balance_lead(b)
     ob = b.build()
@@ -156,6 +185,9 @@ def build() -> bpy.types.Object:
 if __name__ == "__main__":
     hs.reset()
     lipo = build()
+    surface.name([lipo], SURFACES)
+    surface.only_tables()
     bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", export_yup=True, export_animations=False,
-            export_draco_mesh_compression_enable=False, export_cameras=False, export_lights=False)
+            export_draco_mesh_compression_enable=False, export_cameras=False, export_lights=False,
+            export_extras=True)
     print("Lipo: %d triangles; wrote %s (%d bytes)" % (hs.tris(lipo), OUT, os.path.getsize(OUT)))

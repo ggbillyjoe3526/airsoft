@@ -4,11 +4,12 @@ class_name Vault
 ## land past it) takes the body over it in one short, committed move instead of a jump. The body rises onto the top and
 ## crosses it on a path the CharacterMover follows, so it never passes through anything, then falls off the far side and
 ## lands as from a jump. A ledge of the same heights whose flat top runs on at least climb_depth (a platform's edge from
-## the track, CL1), a floor's (climb_kinds) and never a prop's, is climbed instead: the body rises onto it the same way
-## and steps on until it stands on the top. Meanwhile the replica is carried (no firing, aiming or reloading starts;
-## fire is held fire_lockout after it), the body tucks (a crouch: eyes, hit volume and figure follow it) and the view
-## turns freely. Presses made during it are kept for after it (BP5). The obstacle is found with level rays only, a
-## climb's top's kind from the level's block list (WorldQuery), so the rule is the same for the player and the bots.
+## the track, CL1; or over open space, its lip found higher up: SM1's open cab), a floor's (climb_kinds) and never a
+## prop's, is climbed instead: the body rises onto it the same way and steps on until it stands on the top. Meanwhile
+## the replica is carried (no firing, aiming or reloading starts; fire is held fire_lockout after it), the body tucks (a
+## crouch: eyes, hit volume and figure follow it) and the view turns freely. Presses made during it are kept for after
+## it (BP5). The obstacle is found with level rays only, a climb's top's kind from the level's block list (WorldQuery),
+## so the rule is the same for the player and the bots.
 ## Allocation-free.
 
 ## Scratch for the level rays (used only within one call).
@@ -59,8 +60,11 @@ static func plan(feet: Vector3, way: Vector2, speed: float, cfg: VaultConfig, bo
 	var floor_y := feet.y - body.rest_gap
 	var r := body.radius
 	# Its face, within reach of the body.
-	var face := _cast(query, Vector3(feet.x, floor_y + cfg.face_probe, feet.z), Vector3(dx, 0.0, dz),
-			r + cfg.reach + maxf(0.0, speed) * cfg.reach_per_speed)
+	var reach := r + cfg.reach + maxf(0.0, speed) * cfg.reach_per_speed
+	var face := _cast(query, Vector3(feet.x, floor_y + cfg.face_probe, feet.z), Vector3(dx, 0.0, dz), reach)
+	if face < 0.0:
+		# open under it: a ledge over open space, its lip higher up
+		face = _cast(query, Vector3(feet.x, floor_y + cfg.overhang_probe, feet.z), Vector3(dx, 0.0, dz), reach)
 	if face < r * 0.5:
 		return false
 	# A line just over the highest top a vault takes: open until anything taller (the obstacle itself when it is cover,

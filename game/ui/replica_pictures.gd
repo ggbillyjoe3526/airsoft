@@ -250,22 +250,30 @@ func _make_model(path: String, material: String, colour: Color, tip: float, long
 	return shot
 
 
-## Paints the `material` material in `colour` and holds metal back, on this mesh alone.
+## Paints the `material` material in `colour` and holds metal back, on this mesh alone; a material the mesh names a
+## kind for (MQ2B, ReplicaSurfaces.named) is drawn on that surface instead, in its own colour or `colour`.
 func _restyle(mesh: MeshInstance3D, material: String, colour: Color) -> void:
 	if mesh.mesh == null:
 		return
+	var named := ReplicaSurfaces.named(mesh.mesh)
 	for i in mesh.mesh.get_surface_count():
 		var m := mesh.get_active_material(i) as BaseMaterial3D
 		if m == null:
 			continue
+		var shown: Material = null
 		if m.resource_name == material:
 			var painted := m.duplicate() as BaseMaterial3D
 			painted.albedo_color = colour
-			mesh.set_surface_override_material(i, painted)
-		elif m.metallic > MAX_METALNESS:
+			shown = painted
+		var material_name := StringName(m.resource_name)
+		if named.has(material_name):
+			shown = ReplicaPaint.own_surface(shown if shown != null else m, named[material_name])
+		elif shown == null and m.metallic > MAX_METALNESS:
 			var dull := m.duplicate() as BaseMaterial3D
 			dull.metallic = MAX_METALNESS
-			mesh.set_surface_override_material(i, dull)
+			shown = dull
+		if shown != null and shown != m:
+			mesh.set_surface_override_material(i, shown)
 
 
 func _part_shot(key: StringName, slot: StringName, part: StringName) -> Shot:

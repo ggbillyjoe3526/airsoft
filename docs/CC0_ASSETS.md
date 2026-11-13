@@ -144,8 +144,9 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
 - **Surfaces (MQ1, owner 2026-11-12: "made out of metal (steel/aluminium), polymer, wood").** A material's name says
   which paint colour a face takes, not what it is made of, so every face of the hands' meshes also says its surface
   kind: `polymer`, `steel`, `aluminium`, `wood`, `rubber`, `bare` (bright unpainted steel), `coated` (metal under
-  a thick baked coat that keeps its colour in any light: the Cyber Pistol's white shell) or `polished` (bright metal
-  in its own colour: a brass or stainless barrel's crown, MQ2), in that order
+  a thick baked coat that keeps its colour in any light: the Cyber Pistol's white shell), `polished` (bright metal
+  in its own colour: a brass or stainless barrel's crown, MQ2) or `card` (card and paper, dead matte: a bomb's wound
+  tube, a paper sticker, MQ2B), in that order
   (`game/config/replica_surfaces.gd` KINDS and `tools/blender/replicas/surface.py` KINDS, never reordered). It rides
   in the vertex colours (glTF COLOR_0): white, the kind in the alpha as `index / 16`; alpha 1 is "none", which a face
   of a material the game doesn't paint keeps (rubber, a lens) and a file with no colours reads everywhere (then a
@@ -189,9 +190,12 @@ replicas). Each power source, by its pool ID, is drawn from one file.
 
 - **Space.** Metres, life size, any way up: the picture frames whatever shows, from the same studio view as the
   replicas'. A file can be tipped for its picture (the stick batteries are tipped up their lead end).
-- **Materials.** Plain colours, drawn as the file sets them but kept low in metalness (the studio has no reflections).
-  A material named `Label` is painted in the power source's own `label` colour, so one gas bottle draws Green, Red and
-  Black Gas.
+- **Materials.** Plain colours. A material named `Label` is painted in the power source's own `label` colour, so one
+  gas bottle draws Green, Red and Black Gas. Each file names what its materials are made of in its mesh's `surfaces`
+  table, as a replica's part does (Surfaces, above; MQ2B): a can's baked coat, a pack's glossy shrink film, paper
+  stickers, matte leads, moulded plugs, a spring's painted wire, each drawn on that surface in its own colour or the
+  label's. A material the table leaves out (a plug's dark socket) is drawn as the file sets it, kept low in metalness.
+  Print is blocks and bars, never letters.
 - **Budget.** 120 KB and 6,000 triangles a file (raised from 60 KB and 1,500 in BL7, 2026-11-05, so the models
   follow the owner's photos: the bottle's ribbed cap, the spring's round coils, the leads' round wires). No textures.
 - **Built by** `tools/blender/power/`: `gas_bottle.py`, `lipo_battery.py`, `standard_battery.py` (wires and plugs in
@@ -205,9 +209,15 @@ bomb, `assets/models/grenades/<smoke|flash>.glb`, built by `tools/blender/grenad
 - **Space.** Metres, life size, one mesh. The long axis is up (Blender +Z, the game's +Y) through the origin, which is
   the middle of the bomb's body; the game spins it about that point in flight and lays it on its side when it rests,
   its +X side up (the smoke's lever), lifted by the model's own lowest reach (`GrenadeView.LIE`).
-- **Materials.** Plain colours, drawn as the file sets them. The material named `Kind` is painted in the bomb's own
-  colour (`GrenadeView.BODY_COLOURS`: green smoke, violet flash), so the model matches the HUD's bomb icons. No
-  colour within 20° of a team's hue, as for every prop.
+- **Materials.** Plain colours. The material named `Kind` is painted in the bomb's own colour
+  (`GrenadeView.BODY_COLOURS`: green smoke, violet flash), so the model matches the HUD's bomb icons. No colour
+  within 20° of a team's hue, as for every prop. Each file names what its materials are made of in its mesh's
+  `surfaces` table (Surfaces, above; MQ2B): the smoke's sleeve a glossy printed film (`coated`), its cap moulded, its
+  lever matte black paint over sheet steel (`polymer`: the film is what shows); the flash a card tube under paper
+  (`card`). In your hand and in the menus' pictures a bomb is
+  drawn on those surfaces; thrown, lying and in a figure's hand it stays plain, as the figures' replicas do. The
+  bright wire (a rivet, the key ring) and the dark holes are left out of the table. Print is blocks and bars, never
+  letters.
 - **Budget.** 200 KB, 5,500 triangles a file. No textures.
 
 ## Blender, step by step

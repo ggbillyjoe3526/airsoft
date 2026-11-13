@@ -1571,6 +1571,30 @@ model until its own is built, and the pump, shot and shell sounds are stand-ins 
   pull each): does the frame rate hold as it does without them? (The performance review's note: only your PC can
   show it.)
 
+## What the bombs and power sources are made of (MQ2B)
+
+A match on Depot with a smoke and a flash bomb; then Customise › Power and the Loadout.
+
+- [ ] **The smoke bomb in your hand.** Its sleeve has a soft gloss like printed film; under your thumb you can see a
+  green stencilled word and a pale one (bold glyphs that spell nothing); the cap is matte plastic; the lever is
+  matte black, its arm one sheet with small nicks in its two edges and two long pressed ribs side by side down it,
+  and no white shine on its top bend.
+- [ ] **The flash bomb in your hand.** A dead matte card tube: a pale band under the violet one, a violet block and
+  the top two glyphs of a pale word beside the ring, over your thumb, a column of small square tiles next to it; on the cap six small vents
+  round the hole and six pale ticks between them. Its key ring looks as before and doesn't sparkle.
+- [ ] **Do they read as labels?** From arm's length the print should look like a printed label, not like a ruler
+  or a barcode, and never like real words or a brand.
+- [ ] **In the light.** Walk from sun into shade holding each bomb: it darkens with the replica, with no hard patch
+  crossing it, and nothing flickers as you turn.
+- [ ] **Thrown.** A bomb in the air, lying on the ground or in a bot's hand looks as it did.
+- [ ] **Menu pictures.** The gas bottle is a glossy can, its cap a little narrower and its shoulder rounder than
+  before, its label laid out as a real can's (a broad chevron of the gas's colour; inside it a truly round
+  emblem, a pale ring round a disc of the gas's colour; four pale slanted bars over the chevron's point; a
+  coloured bar, five bulleted lines, two blocks of fine print, a pale panel and a last coloured bar at the
+  foot); the LiPo has white lines and a red block on its side; the Standard Battery's stickers are matte
+  paper on glossy red film, with a yellow one by its leads; each spring is painted wire in its own colour. Nothing
+  has gone black or blown out.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

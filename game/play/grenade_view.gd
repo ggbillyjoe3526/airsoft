@@ -134,6 +134,7 @@ func setup(count: int, cfg: GrenadeConfig, night: bool) -> void:
 		var paint := StandardMaterial3D.new()
 		paint.albedo_color = BODY_COLOURS[kind]
 		paint.roughness = BODY_ROUGHNESS
+		paint.resource_name = KIND_MATERIAL
 		var mesh := _kind_mesh(kind, paint)
 		_meshes.append(mesh)
 		_lie_reach.append(-(_lying() * mesh.get_aabb()).position.y)
@@ -248,8 +249,10 @@ func setup_arms(cfg: ViewModelConfig, kind: int) -> void:
 		var parts := _split(_meshes[k], PIN_MATERIALS[k] if k < PIN_MATERIALS.size() else "")
 		_held_meshes.append(parts[0])
 		_pin_meshes.append(parts[1])
-		_held_paint.append(_paint(parts[0], pressed, cfg.depth_scale))
-		_pin_paint.append(_paint(parts[1], pressed, cfg.depth_scale))
+		# In your hand a bomb is made of what its model says (MQ2B: card, polymer, steel); thrown, it stays plain.
+		var named := ReplicaSurfaces.named(_meshes[k])
+		_held_paint.append(_paint(parts[0], named, pressed, cfg.depth_scale))
+		_pin_paint.append(_paint(parts[1], named, pressed, cfg.depth_scale))
 		_pin_middle.append(parts[1].get_aabb().get_center() if parts[1] != null else Vector3.ZERO)
 	_held.mesh = null
 	_held_kind = Grenade.Kind.NONE
@@ -608,8 +611,10 @@ static func _split(mesh: Mesh, pin: String) -> Array[Mesh]:
 	return out
 
 
-## `mesh`'s surfaces' materials with the depth pressed to `scale` (one copy for each material, kept in `pressed`).
-static func _paint(mesh: Mesh, pressed: Dictionary[Material, Material], scale: float) -> Array[Material]:
+## `mesh`'s surfaces' materials with the depth pressed to `scale` (one copy for each of the model's materials, kept in
+## `pressed`), each one `named` gives a kind (ReplicaSurfaces.named) drawn on that surface in its own colour (MQ2B).
+static func _paint(mesh: Mesh, named: Dictionary[StringName, int], pressed: Dictionary[Material, Material],
+		scale: float) -> Array[Material]:
 	var out: Array[Material] = []
 	if mesh == null:
 		return out
@@ -619,7 +624,9 @@ static func _paint(mesh: Mesh, pressed: Dictionary[Material, Material], scale: f
 			out.append(null)
 			continue
 		if not pressed.has(own):
-			pressed[own] = _pressed(own, scale)
+			var material_name := StringName(own.resource_name)
+			var shown: Material = ReplicaPaint.own_surface(own, named[material_name]) if named.has(material_name) else own
+			pressed[own] = _pressed(shown, scale)
 		out.append(pressed[own])
 	return out
 
@@ -634,12 +641,17 @@ func arms() -> ArmsView:
 	return _arms
 
 
-## A copy of `own` with its depth pressed towards the eye to `scale` (ViewModelConfig.depth_scale, as your arms' and the
-## replica's) and no shadow falling on it; `own` itself when it can't be pressed.
-static func _pressed(own: Material, scale: float) -> Material:
-	var base := own as BaseMaterial3D
+## `shown` with its depth pressed towards the eye to `scale` (ViewModelConfig.depth_scale, as your arms' and the
+## replica's) and no shadow falling on it: a copy of a model's material, or this view's own surface of one
+## (ReplicaPaint.own_surface) pressed as it stands, as the replica in your hands is; `shown` itself when it can't be
+## pressed.
+static func _pressed(shown: Material, scale: float) -> Material:
+	if ReplicaPaint.is_surface(shown):
+		(shown as ShaderMaterial).set_shader_parameter(&"z_clip_scale", minf(scale, 1.0))
+		return shown
+	var base := shown as BaseMaterial3D
 	if base == null:
-		return own
+		return shown
 	var copy := base.duplicate() as BaseMaterial3D
 	copy.disable_receive_shadows = true
 	if scale < 1.0:
