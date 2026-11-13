@@ -105,7 +105,7 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   Sniper Rifle and the Cyber Pistol from the pistol's), one dry click for every replica (the pistol's, owner
   2026-11-05), the pistol's slide locking back, BBs on metal, wood, glass, plastic, cardboard and players, the gear,
   the props, the doors, the whistle, the shot timer and the ping. Since AU3 they also stand in, labelled placeholders,
-  for cues until he records them (25 at AU3, 13 at AU8, 9 at AU9, 5 since AU10; the script's `--placeholders` lists them), and the
+  for cues until he records them (25 at AU3, 13 at AU8, 9 at AU9, 5 at AU10, 6 since AU11; the script's `--placeholders` lists them), and the
   whistle is a pea whistle the script synthesises (his takes set aside).
   His second batch (AU5, 2026-11-04, 30 recordings: footsteps on a solid floor, concrete, gravel and leaves,
   clothes and keys, a holster, a strap swung up, a vault, a BB on goggles, a tap, a steel target, glass, a switch, a
@@ -124,6 +124,11 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   whir under it, and Subway's background (`tunnel`). His
   rifle shot, SMG motor and tray are kept in the raw folder, unused (owner, 2026-11-11: he kept the Sniper Rifle's
   first shot and the SMG's stand-ins).
+  His batch of 2026-11-13 (AU11, 7 recordings: a pump stroke, a shell popped off and clicked home, a box set down, a
+  keypad, a kitchen timer, a defusal with a beep, and a prop going off) gives the Pump Shotgun's pump and shell and
+  Plant The Bomb's bomb put down (and picked up, a stand-in), its code keyed in, the fuse's beep, the defusal, made safe
+  and going off (`plant-the-bomb/` and `shotgun/` in the raw folder). The shotgun's shot is the Sniper Rifle's (owner,
+  2026-11-13).
   Owner-made for the game; same licence as the code. To re-cut: `python3 tools/cut_recordings.py <raw folder>`,
   then `godot --headless --path . --import`.
 - **Sounds:** the rest of the sounds and 4 ambience loops are still rendered from the browser game's synthesis

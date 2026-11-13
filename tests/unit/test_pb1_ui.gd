@@ -231,7 +231,7 @@ func test_the_gauge_reads_planting_and_fills_with_the_arming_in_the_attackers_co
 	assert_eq(gauge.notches_filled(), 11)
 
 
-func test_the_gauge_reads_defusing_in_the_defenders_colour_and_keeps_the_checkpoint_as_bomb_a() -> void:
+func test_the_gauge_reads_defusing_in_the_defenders_colour_and_keeps_the_checkpoint_as_bomb_armed() -> void:
 	_plant_hud()
 	var ps := _arm(1)
 	ps.defuser = 2
@@ -246,12 +246,12 @@ func test_the_gauge_reads_defusing_in_the_defenders_colour_and_keeps_the_checkpo
 	ps.defusing = tuning.plant.defuse_checkpoint
 	_update()
 	assert_true(gauge.visible, "armed, nobody on it")
-	assert_eq(gauge.label_text(), "BOMB B", "the site it stands in")
+	assert_eq(gauge.label_text(), "BOMB ARMED", "under the score bar for everyone once armed (PB3, the owner's ask)")
 	assert_eq(gauge.notches_filled(), 6, "the kept progress")
 	ps.defusing = 0.0
 	ps.site = 0
 	_update()
-	assert_eq(gauge.label_text(), "BOMB A")
+	assert_eq(gauge.label_text(), "BOMB ARMED", "whichever site")
 	assert_eq(gauge.notches_filled(), 0)
 	ps.status = PlantState.Status.DEFUSED
 	_update()
@@ -293,6 +293,14 @@ func test_the_gauges_new_words_fit_its_label_column() -> void:
 	_update()
 	await wait_process_frames(2)
 	assert_lte(label.get_combined_minimum_size().x, HudStyle.GAUGE_LABEL_WIDTH + 1.0, "PLANTING in its column")
+	ps.planter = -1
+	ps.carrier = -1
+	ps.status = PlantState.Status.PLANTED
+	_update()
+	await wait_process_frames(2)
+	assert_eq(hud.flag_gauge().label_text(), "BOMB ARMED")
+	assert_lte(label.get_combined_minimum_size().x, HudStyle.GAUGE_LABEL_WIDTH,
+			"BOMB ARMED in its column, no overflow into the gap before the track (PB3)")
 
 
 # --- banners and the round's end ---
@@ -372,7 +380,7 @@ func test_the_prompt_offers_each_job_to_the_player_who_can_do_it() -> void:
 	rs.plant.planter = 0
 	_update()
 	assert_eq(prompt.text(), "", "already arming it")
-	assert_eq(prompt.quiet_text(), "YOU HAVE THE BOMB")
+	assert_eq(prompt.quiet_text(), "", "setting it down: the PLANTING gauge says it, not the quiet line (PB3)")
 	# a teammate carries it: nothing for you
 	rs.plant.carrier = 1
 	rs.plant.planter = -1

@@ -336,7 +336,18 @@ func test_its_sounds_are_there_with_a_pump_of_its_own() -> void:
 			assert_true(ResourceLoader.exists("%s%s_%d.wav" % [SoundConfig.CUE_DIR, cue, n + 1]), "%s_%d" % [cue, n + 1])
 	for n in 3:
 		assert_true(ResourceLoader.exists("%scycle_shotgun_%d.wav" % [SoundConfig.CUE_DIR, n + 1]), "its pump")
-	assert_false(ResourceLoader.exists("%spower_shotgun_1.wav" % SoundConfig.CUE_DIR), "a spring thump, no power part")
+	for n in 5:
+		assert_true(ResourceLoader.exists("%spower_shotgun_%d.wav" % [SoundConfig.CUE_DIR, n + 1]),
+				"the Sniper Rifle's spring run-up with its shot (owner, 2026-11-13)")
+
+
+func test_its_shot_is_the_sniper_rifles() -> void:
+	# The owner's ruling (2026-11-13): the shotgun's shot reuses the Sniper Rifle's, its spring run-up too.
+	for n in 5:
+		for part: String in ["shot", "power"]:
+			var mine := load("%s%s_shotgun_%d.wav" % [SoundConfig.CUE_DIR, part, n + 1]) as AudioStreamWAV
+			var sniper := load("%s%s_spring_%d.wav" % [SoundConfig.CUE_DIR, part, n + 1]) as AudioStreamWAV
+			assert_eq(mine.data, sniper.data, "%s_%d" % [part, n + 1])
 
 
 func test_it_is_drawn_held_and_fitted_by_its_own_model() -> void:

@@ -27,9 +27,18 @@ var on_lift: bool = false
 var moved: bool = false
 ## The site it is being armed in or stands armed in (an index into `sites`), or -1.
 var site: int = -1
-## Who is arming it (-1 nobody) and how far along (0 to 1).
+## Who is arming it (-1 nobody) and how far along (0 to 1), and the way they faced as they began (yaw, rad): it is
+## set down set_ahead in front of their feet (`set_at`, PB3), its front to them, and stands armed there.
 var planter: int = -1
 var planting: float = 0.0
+var facing: float = 0.0
+var set_at: Vector3 = Vector3.ZERO
+## The room ahead of its carrier's feet (m, to the first thing set_ray_height over the floor; INF: open), measured by
+## the simulation each tick the carrier holds Use before arming starts (Plant.room_ahead): it is set short of it.
+var set_room: float = INF
+## ... and the floor's height where it would be set, from a ray down there (Plant.floor_at), so on a slope it lies on
+## the ground, not over or under it (INF: no floor there, it goes at the carrier's feet; NAN: not measured).
+var set_floor: float = NAN
 ## Seconds of fuse left once armed.
 var fuse_left: float = 0.0
 ## Who is disarming it (-1 nobody) and how far along (0 to 1).
@@ -50,6 +59,10 @@ func reset() -> void:
 	site = -1
 	planter = -1
 	planting = 0.0
+	facing = 0.0
+	set_at = start
+	set_room = INF
+	set_floor = NAN
 	fuse_left = 0.0
 	defuser = -1
 	defusing = 0.0

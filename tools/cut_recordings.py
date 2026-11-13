@@ -327,6 +327,16 @@ def loudest_windows(a, n, seconds, fade=0.3):
     return out
 
 
+def two_hits(x, gap):
+    """When (s) the loudest moment of `x` is, and its loudest moment at least `gap` s after it: a shell's pop off and
+    its click home, a box's thump and its lighter knock."""
+    e = env(x, 0.002)
+    first = int(np.argmax(e))
+    later = e.copy()
+    later[:first + int(gap / 0.002)] = 0.0
+    return first * 0.002, int(np.argmax(later)) * 0.002
+
+
 def mix(*parts):
     n = max(len(p) for p in parts)
     return sum(np.pad(p, (0, n - len(p))) for p in parts)
@@ -418,14 +428,41 @@ LIFT_RIDE_S = 3.2
 # Subway's background (2026-11-11): his tunnel's phone rumble sits under this (Hz).
 TUNNEL_RUMBLE_HZ = 60.0
 BOLT_READY = 1.25
-# The Pump Shotgun's stand-ins (SH1): pulls a second with the spring it comes with (stats.md), and how far the
-# sniper's shot is pitched down and his bolt up for its thump and its pump.
+# The Pump Shotgun's pump (SH1, his shotgun_reload of 2026-11-13): pulls a second with the spring it comes with
+# (stats.md), and its cue over its model's Fire clip (tools/blender/replicas/shotgun.py CLIPS, s): the clip's length,
+# and when the pump reaches the back and is home again.
 SHOTGUN_RATE = 1.7
-SHOTGUN_SHOT_PITCH = 0.8
-SHOTGUN_PUMP_PITCH = 1.15
-# The pump's cue over its model's Fire clip (tools/blender/replicas/shotgun.py CLIPS, s): the clip's length, and
-# when the pump reaches the back and is home again.
 SHOTGUN_PUMP = (1.0, 0.44, 0.84)
+# His shell pulled off and pushed home (shotgun_shell_load, five takes): each take's pop off, from SHELL_LEAD s before
+# it, is the shell out; its click home, at least SHELL_GAP s after the pop, is the shell in, SHELL_IN_S of it.
+SHELL_LEAD = 0.2
+SHELL_GAP = 0.15
+SHELL_IN_S = 0.35
+# Plant The Bomb (PB1), his batch of 2026-11-13 (plant-the-bomb/): each key he pressed (a beep, then the key let go),
+# KEY_S of it from KEY_LEAD s before its beep, back to back, so his seven keys fill the plant's 3.5 s
+# (PlantConfig.plant_time); found where the beep's band (KEY_BAND Hz) rises KEY_RISE dB to within KEY_WITHIN dB of
+# its loudest (the keys let go are clicks, quieter in that band).
+KEY_S = 0.5
+KEY_LEAD = 0.05
+KEY_BAND = (1800.0, 2300.0)
+KEY_RISE = 20.0
+KEY_WITHIN = 8.0
+# The fuse's beep: his kitchen timer's first beep, FUSE_BEEP_S of it (its tone, not its ring), short enough for the
+# fuse's fastest gap (PlantConfig.beep_fast, 0.12 s).
+FUSE_BEEP_S = 0.11
+# His defusal (defusing_bomb): its tool work from its first take (DEFUSE_FROM s), as long as the defuse
+# (PlantConfig.defuse_time, DEFUSE_S; SimAudio cuts it when the hands come off); its last take, a click, a held beep
+# and a click off, is the bomb made safe.
+DEFUSE_FROM = 1.1
+DEFUSE_S = 6.0
+# The bomb put down: each of his set-downs from DROP_LEAD s before its thump (his hand on the box before it is left
+# out, so the thump comes with the event), at most DROP_S s. The bomb picked up (a stand-in until he records it): his
+# set-down's lighter second knock (at least DROP_GAP s after its thump), PICKUP_S of it, a little higher.
+DROP_LEAD = 0.03
+DROP_S = 1.2
+DROP_GAP = 0.15
+PICKUP_S = 0.3
+PICKUP_PITCH = 1.1
 
 
 def bolt(x, length=0.85, back_at=0.50, home_at=0.71):
@@ -538,21 +575,26 @@ def build(folder):
     put("boltCycle", [bolt(s, 0.85 * k, 0.50 * k, 0.71 * k)
                       for s in pick(folder, [("sniper_bolt.wav", None)], 1.0, 0.1)[:3]], -14.0)
 
-    # Pump Shotgun (SH1, stand-ins until the owner records them: audio/record-next.md): the sniper's shot from where
-    # it bursts out, lower, shorter and softer (a hollow spring thump: three light BBs, not one hard crack) with no
-    # run-up before it; his bolt, a little higher and lighter, as the pump, its two knocks where its model's Fire clip
-    # (SHOTGUN_PUMP, stretched to the pump's 1.7 a second) has the pump back and home; its box of a shell the lowest
-    # of the magazine clicks.
-    shotgun_shot = "a hollow spring thump: a closed stapler hit with your palm, or a plastic tub's lid snapped shut"
-    put("shot_shotgun", variants(from_onsets(fire, bursts, 0.30), 5, SHOTGUN_SHOT_PITCH), -18.5, shotgun_shot)
+    # Pump Shotgun (SH1): its shot is the Sniper Rifle's, shot and spring run-up alike (owner, 2026-11-13: "reuse the
+    # sniper rifle shot sound"); his pump (shotgun_reload, 2026-11-13), its two knocks moved to where its model's Fire
+    # clip (SHOTGUN_PUMP, stretched to the pump's 1.7 a second) has the pump back and home; his shell (a marker's cap)
+    # popped off as the shell out and clicked home as the shell in.
+    put("shot_shotgun", cues["shot_spring"][0], -16.8)
+    put("power_shotgun", cues["power_spring"][0], -27.3)
     k = (1.0 / SHOTGUN_RATE) / BOLT_CYCLE_END
-    put("cycle_shotgun", [bolt(resample(s, SHOTGUN_PUMP_PITCH), SHOTGUN_PUMP[0] * k, SHOTGUN_PUMP[1] * k,
-                               SHOTGUN_PUMP[2] * k)
-                          for s in pick(folder, [("sniper_bolt.wav", None)], 1.0, 0.1)[:3]], -16.0,
-        "the pump back and forward: a door bolt slid back and home, or one stroke of a bike pump")
-    shell = "its shell pulled out and pushed in: an AA battery out of a torch and back in until it clicks"
-    put("magOut_shotgun", variants(cover_off, 5, 0.75), -30.6, shell)
-    put("magIn_shotgun", variants(cover_on, 5, 0.75), -26.9, shell)
+    put("cycle_shotgun", [bolt(s, SHOTGUN_PUMP[0] * k, SHOTGUN_PUMP[1] * k, SHOTGUN_PUMP[2] * k)
+                          for s in variants(pick(folder, [("shotgun/shotgun_reload.wav", None)], 1.0, 0.1), 3)],
+        -16.0)
+    shells = Source.get(folder, "shotgun/shotgun_shell_load.wav")
+    shell_out, shell_in = [], []
+    for start, end in shells.takes:
+        pop, click = two_hits(shells.a[int(start * RATE):int(end * RATE)], SHELL_GAP)
+        e = env(shells.a[int((start + pop) * RATE):int((start + click) * RATE)], 0.002)
+        split = start + pop + int(np.argmin(e)) * 0.002
+        shell_out.append(shape(shells.a[int((start + pop - SHELL_LEAD) * RATE):int(split * RATE)].copy(), 0.2))
+        shell_in.append(shape(shells.a[int(split * RATE):int((split + SHELL_IN_S) * RATE)].copy(), 0.3))
+    put("magOut_shotgun", shell_out, -30.6)
+    put("magIn_shotgun", shell_in, -26.9)
 
     # Cyber Pistol (electric pistol): a short whir of his electric toothbrush a little under its own pitch (owner,
     # 2026-11-04: "i prefer the cyber pistol with the toothbrush", over the motor's) under a small crack, 3 dB up, with
@@ -758,6 +800,36 @@ def build(folder):
     beep = pick(folder, [("beep.wav", None)], 0.3, 0.25)[0]
     put("count_beep", [shape(resample(beep, 0.5)[:int(0.2 * RATE)], 0.3)], -28.7)
     put("ping_pip", [shape(resample(beep, 0.27)[:int(0.08 * RATE)], 0.4)], -5.0)
+
+    # Plant The Bomb (PB1), his batch of 2026-11-13 (plant-the-bomb/), each at the level its synthesised stand-in had,
+    # so SoundConfig's plant gains hold (the keys and the beep, his clicked keys and timer against the stand-ins' square
+    # waves, 4.5 and 0.9 dB under theirs: as loud as they go under the peak cap). His storage box set down
+    # (placing_bomb, three takes) from its thump as the bomb put down, and the lighter knock after each set-down a
+    # little higher as the bomb taken up (a stand-in); both play quieter in the game (SoundConfig.plant_handle_gain;
+    # owner, 2026-11-13: "make it quieter"). His keypad (button_press): his seven keys back to back (KEY_S each), the
+    # code keyed in. His kitchen timer's first beep (bomb_timer) as the fuse's. His defusal (defusing_bomb): the tool
+    # work, and its last take as the bomb made safe. His bomb going off (bomb_explosion) whole, to where it fades out.
+    # Armed stays tools/plant_sounds.py's (nothing recorded for it yet).
+    drops = Source.get(folder, "plant-the-bomb/placing_bomb.wav")
+    downs, lifts = [], []
+    for start, end in drops.takes:
+        thump, knock = (start + t for t in two_hits(drops.a[int(start * RATE):int(end * RATE)], DROP_GAP))
+        downs.append(cut(drops.a, thump - DROP_LEAD, DROP_S, drops.floor, 0.3))
+        lifts.append(shape(drops.a[int((knock - PRE_ROLL) * RATE):int((knock + PICKUP_S) * RATE)].copy(), 0.4))
+    put("plant_drop", downs, -12.4)
+    put("plant_pickup", variants(lifts, 3, PICKUP_PITCH), -17.3, "the bomb picked up: a toolbox or tub lifted by its "
+        "handle off a hard floor")
+    keys = Source.get(folder, "plant-the-bomb/button_press.wav").a
+    band = high_pass(low_pass(keys, KEY_BAND[1]), KEY_BAND[0])
+    code = [shape(keys[int((t - KEY_LEAD) * RATE):int((t - KEY_LEAD + KEY_S) * RATE)].copy(), 0.06)
+            for t in onsets(band, KEY_RISE, KEY_S * 0.6, within=KEY_WITHIN)]
+    put("plant_arming", [np.concatenate(code)], -8.9)
+    timer = Source.get(folder, "plant-the-bomb/bomb_timer.wav")
+    put("plant_beep", [timer.take(0, FUSE_BEEP_S, 0.15)], -5.3)
+    kit = Source.get(folder, "plant-the-bomb/defusing_bomb.wav")
+    put("plant_defusing", [fixed(kit.a[int(DEFUSE_FROM * RATE):], DEFUSE_S, 0.3)], -20.9)
+    put("plant_defused", [kit.take(len(kit.takes) - 1, 1.6, 0.2)], -5.4)
+    put("plant_went_off", [pick(folder, [("plant-the-bomb/bomb_explosion.wav", None)], 7.0, 0.3)[0]], -12.5)
     return cues
 
 

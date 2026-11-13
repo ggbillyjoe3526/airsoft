@@ -24,7 +24,8 @@ extends RefCounted
 ## The lifts' cars move first, before anyone (Lifts, MT2): each character then rises or falls with the car it rides
 ## before it moves, and a Use press takes a lift's button in reach before a door; each match and round starts with the
 ## cars at their start stops. Use held is a hand for Plant The Bomb's device (Plant, PB1): whoever is arming or
-## disarming it is held still, crouched, its replica down, and the device is stepped with the round flow.
+## disarming it is held still, its replica put away until it lets go (Plant.hands_on; a bot crouches there, PB3), and
+## the device is stepped with the round flow.
 
 var tuning: SimTuning = null
 var query: WorldQuery = null
@@ -61,10 +62,12 @@ var _after_vault: PlayerCommand = PlayerCommand.new()
 var _throwing: PlayerCommand = PlayerCommand.new()
 ## Followed with a bomb in hand: a trigger pull its throw, the trigger and sights let go (Grenades.ready_command).
 var _readied: PlayerCommand = PlayerCommand.new()
-## Followed with both hands on Plant The Bomb's device (Plant.busy): the view, crouched, Use still held.
+## Followed with both hands on Plant The Bomb's device (Plant.busy): the view, a crouch if asked, Use still held.
 var _working: PlayerCommand = PlayerCommand.new()
 ## Where a ping's view met the field (one at a time).
 var _ping_hit: RayHit = RayHit.new()
+## The ray ahead of a carrier about to key the bomb in (Plant.room_ahead).
+var _set_hit: RayHit = RayHit.new()
 
 
 func _init(sim_tuning: SimTuning, world: WorldQuery, character_mover: CharacterMover, map_ends: Array[MapEnd],
@@ -168,14 +171,18 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			# held still until GO: the view follows the mouse, nothing else does
 			_held.reset(cmd.yaw, cmd.pitch)
 			cmd = _held
-		# Hands on Plant The Bomb's device (PB1): arming or disarming it, it kneels there with its replica down.
+		# Hands on Plant The Bomb's device (PB1, PB3): arming or disarming it, it holds still with its replica away.
 		c.using = in_play and cmd.interact
-		if c.using and Plant.busy(state.round_state.plant, c):
+		var ps := state.round_state.plant
+		if c.using and ps.status == PlantState.Status.CARRIED and ps.carrier == c.id and ps.planter != c.id:
+			ps.set_room = Plant.room_ahead(c.position, c.yaw, tuning.plant, query, _set_hit)
+			ps.set_floor = Plant.floor_at(Plant.set_spot(ps, c.position, c.yaw, tuning.plant, ps.set_room),
+					tuning.plant, query, _set_hit)
+		if Plant.hands_on(c, c.using and Plant.busy(ps, c), tuning.plant, state.events):
 			_working.reset(cmd.yaw, cmd.pitch)
-			_working.crouch = true
+			_working.crouch = cmd.crouch
 			_working.interact = true
 			cmd = _working
-			c.fire_lockout = maxf(c.fire_lockout, tuning.plant.hands_back)
 		# The torch's thumb switch works through a vault too (the vault's own command drops other presses until its end).
 		var toggle_torch := in_play and cmd.toggle_torch
 		# The trigger as the controller pulls it, before a vault, a bomb in hand or a throw holds or lets it go.

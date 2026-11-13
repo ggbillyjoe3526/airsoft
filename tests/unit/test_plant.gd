@@ -186,7 +186,8 @@ func test_the_carrier_arms_it_in_a_site_by_holding_use() -> void:
 	_run(cfg.plant_time * 0.5)
 	assert_eq(ps.status, PlantState.Status.PLANTED)
 	assert_eq(ps.site, 0)
-	assert_eq(ps.position, SITE_A + Vector3(3.9, 0.0, 0.0), "armed where the carrier knelt")
+	assert_almost_eq(ps.position, Plant.set_down(SITE_A + Vector3(3.9, 0.0, 0.0), cs[0].yaw, cfg), Vector3.ONE * 1e-5,
+			"armed where the carrier set it down, in front of them (PB3)")
 	assert_almost_eq(ps.fuse_left, cfg.fuse_time, 0.001)
 	assert_false(Plant.busy(ps, cs[0]), "hands free again")
 	assert_eq(cues, [Plant.Cue.PICKED_UP, Plant.Cue.ARMING, Plant.Cue.PLANTED])

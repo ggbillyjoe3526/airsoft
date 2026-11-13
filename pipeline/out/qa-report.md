@@ -1,16 +1,17 @@
-Task: HA1 · QA commit 9d19b41 · Verdict: Pass
+Task: PB3 · QA commit cadff13e · Verdict: Pass
 
 Blocking: none.
-Advisory: none new.
+Advisory:
+- game/sim/plant.gd:100 set_down uses the planter's feet y; on stairs/slopes the point 0.55 m ahead can float or sink slightly (not testable without a display). KNOWN_ISSUES candidate.
+- game/sim/plant.gd:167 set_at is fixed once when arming begins; the planter walking off the spot is not an issue (they must stay in the site), but a lift site is not covered.
 
-Reviewed git diff ec22685..44287ad (arms.glb, build tools, one test file; no game/ change). Delta checked against the brief:
-- Holds that should not move: the build thread's run of test_sh2_qa, test_ha1_grips, test_ha1_qa, test_ha1_qa2, test_hands_on_replica, test_bp8_arms(_qa) and test_ha1_arms_fade (119 tests) covers the shotgun pump, grips, pistols, bots' copies, reloads/bolt/pump clips and ArmsTuck; I did not rerun them (one Godot rule) and found nothing in the delta that bypasses them.
-- Budget: the existing 40,000-triangle and 8 MB checks (test_ha1_qa, test_bp8_arms) sit in the files that passed; glb is 6.48 MB.
-- Eye test soundness (the brief's question): it judges every third far-side finger vertex of HandSurface_L and Skin_L (gloved and bare), asserting more than 50 points per mesh and per replica. Sound, but sampling was untested.
+Tests added (tests/unit/test_pb3_qa.gd, 6, all pass; each fails on origin/main: hands_on_bomb, set_at, Carry, rail_carry do not exist there):
+- test_a_carrier_hit_mid_plant_drops_it_at_rest_not_where_it_would_stand · Plant.step with the carrier OUT mid-arm · drop position is ps.rest, planter cleared
+- test_a_new_attempt_measures_the_set_down_afresh · stop and restart arming with new yaw/room · set_at and facing re-taken
+- test_the_set_down_stands_at_the_carriers_height · set_at.y equals feet y (step/lift)
+- test_a_bots_carry_never_lights_the_players_rail · HudPlant.rail_carry for a bot carrier or armed bomb is NONE (the HUD's c is always the player)
+- test_a_rail_without_a_bomb_row_ignores_the_carry_without_error · SETTING lights the bomb row, NONE hides it
+- test_in_a_session_hands_on_the_bomb_put_the_replica_away_and_a_crouch_is_not_forced · PlaySession depot: pick up, key at site, replica holstered, no forced crouch, set_at within set_ahead, replica drawn on letting go
 
-Test added:
-- tests/unit/test_ha1_rifle_hold.gd:256 · test_the_eye_check_catches_a_fingertip_that_shows_and_holds_at_every_vertex · (a) a point placed above each replica from the hip eye must count as shown, proving _seen can fail; (b) all far-side finger vertices (step 1, not 3) of both looks on aeg, sniper, smg, shotgun are hidden. Checked: first draft put the probe beside the replica and _seen returned 0 (the probe was hidden), so the probe assertion does discriminate; it was moved above. Part (b) cannot fail without the feature by stubbing alone; against the previous model the existing test already fails (110 points), and (b) is the same check, denser.
-- _finger_points gained an optional step parameter (default unchanged).
-
-Counts: test_ha1_rifle_hold.gd 9 tests, 131 asserts, all passing.
-Not tested: how the fingers look in play at the hip (needs a display; owner's list), the full suite and smoke test (build thread's one run).
+Checked by reading (no defect): respawn clears hands_on_bomb/bomb_was_holstered; an OUT character gets hands_on(false) with no redraw; a readied grenade keeps the replica away (bomb_was_holstered); weapon switch is blocked by the _working command; set_room is re-measured every tick before planter is set; Elimination returns NONE.
+Suite counts: test_pb3_qa 6/6 passing. Full suite and tools/check.sh not run by me (running in background). Not tested: BOMB ARMED gauge fit at 96 px in a real window, window modes, stairs visuals (need a display).
