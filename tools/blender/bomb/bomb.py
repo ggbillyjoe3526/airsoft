@@ -515,6 +515,8 @@ NOSE_FROM = 6.5        # where the nose's bevels start (y, mm)
 LAP_GAP = -0.02         # the lap's wall against the other half's disc (mm): a hair inside it, so they overlap, no slit
 LAP_DEEP = 0.02         # the lap's roof a hair under the middle, so the halves overlap there too and no seam shows
 LAP_REACH = 0.0015      # where the lower half ends: just outside the outline's arcs, so only the jaw and shank pass it
+LAP_END_MAX = 0.05      # the lap's ends (mm across at most): shaded as the side they end, not lit on their own
+LAP_SNAP = 0.01         # a crossing this near an outline corner (mm) is taken at the corner, so no sliver of side
 PIVOT_SEGS = 72         # the pivot's circle's sides, and the outline's arcs at the same spacing
 CHAMFER = (1.3, 0.75)     # the jaw's outer chamfer: in from the root-to-tip line at the top (mm), and its drop per mm out
 GRIND = (1.0, 0.15)     # the cutting edge's ground facet: its width on the top face, its depth at the edge (mm)
@@ -631,6 +633,18 @@ def lapped_steel(name: str) -> bpy.types.Object:
         out.append((a, False))
         for c in circle_crossings(a, b, rim):
             out.append((c, True))
+    # A crossing a hair from one of the outline's corners (the jaw's flat side ends on the circle) would leave a sliver
+    # of side microns wide, edge-on, catching the light as a bright line: the corner itself is the crossing.
+    for i in range(len(out) - 1, -1, -1):
+        p, on = out[i]
+        if not on:
+            continue
+        for k in ((i - 1) % len(out), (i + 1) % len(out)):
+            q, q_on = out[k]
+            if not q_on and math.hypot(p[0] - q[0], p[1] - q[1]) < LAP_SNAP:
+                out[k] = (q, True)
+                del out[i]
+                break
     n = len(out)
     inside = [math.hypot(*((out[i][0][0] + out[(i + 1) % n][0][0]) / 2, (out[i][0][1] + out[(i + 1) % n][0][1]) / 2))
               < rim for i in range(n)]  # the side after each point lies in the circle
@@ -872,6 +886,23 @@ def round_pivot_walls(ob: bpy.types.Object) -> None:
                 continue  # the roof's middle: hidden, any normal
             radial.normalize()
             normals[li] = radial if poly.index in roof or radial.dot(poly.normal) > 0.0 else -radial
+    # Where the lap begins, its wall turns in from the outline to LAP_GAP: an upright end a few hundredths of a mm wide,
+    # facing along the circle. Shaded as itself it catches the light as a bright line down the crease, so it takes the
+    # normal of the outline's side it ends (the face beside it), and reads as part of that side.
+    for poly in me.polygons:
+        if poly.index in walls or poly.index in flat or not all(
+                near[0] < math.hypot(me.vertices[v].co.x, me.vertices[v].co.y) < near[1] for v in poly.vertices):
+            continue
+        xy = [Vector((me.vertices[v].co.x, me.vertices[v].co.y)) for v in poly.vertices]
+        if max((a - b).length for a in xy for b in xy) > LAP_END_MAX * MM:
+            continue
+        beside = [f for key in poly.edge_keys for f in faces_of[key]
+                  if f != poly.index and f not in walls and f not in flat]
+        if not beside:
+            continue
+        side = max(beside, key=lambda f: me.polygons[f].area)
+        for li in poly.loop_indices:
+            normals[li] = Vector(me.polygons[side].normal)
     me.normals_split_custom_set(normals)
 
 

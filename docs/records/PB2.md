@@ -1,6 +1,6 @@
 # PB2 · The bomb and the wire cutters
 
-**Review:** 7 attempts · critic pending · qa Pass · performance Pass
+**Review:** 8 attempts · critic pending · qa Pass · performance Pass
 
 ## Attempts
 
@@ -12,7 +12,8 @@
 | 2026-11-13 | 4 | Opus 5.5 (build thread) | partial | Retry 7/8 | 1 (a hairline where the ground strip clipped the jaw's chamfer) |
 | 2026-11-13 | 5 | Opus 5.5 (build thread) | ✓ | Retry 7/8 | 1 (specks along the seam where the closed jaws met) |
 | 2026-11-13 | 6 | Opus 5.5 (build thread) | ✓ | Retry 7/8 | 1 (a pinhole of light through the pivot below the screw) |
-| 2026-11-13 | 7 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-13 | 7 | Opus 5.5 (build thread) | partial | Retry 7/8 | 1 (a bright hairline down the crease where the lap begins) |
+| 2026-11-13 | 8 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -37,6 +38,7 @@
 - **The halves lap at the pivot like real cutters** (attempt 7): each half's outline is cut where it crosses the other
   half's pivot disc, the lap walls sit a hair inside that disc and its roof 0.02 mm under the centre line, with radial
   normals on the walls and roof, so no light shows through the pivot and no edge pokes past the other half's arc.
+  Where the lap begins, its end (0.02 mm wide) is shaded as the side it ends, so it does not light up as a line.
 - **Carried, it rides on its side at the left hip, keypad out, strapped to the belt**: the model's `Carry` node (a
   webbing strap over each band, a belt loop from each, snapped) shows only while carried (`carry_at` 0.19, 0.9, 0.04 m;
   0.3 m lower fully crouched, `carry_crouch_drop`).
