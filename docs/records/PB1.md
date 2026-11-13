@@ -99,6 +99,10 @@ before the push), the storey-wise fetcher in:
 | Woodland | 117 | 41 % | 76 % (A 45 %) | 43 | 1 | 47 | 26 | 0 |
 | Subway | 122 | 48 % | 85 % (A 41 %) | 47 | 1 | 58 | 16 | 39 |
 
+Subway again after SM1's modelled trains landed (main at 699f914, merged before the push), same seeds: 124 rounds,
+53 % to the attackers, armed 85 % (A 44 %), 42 made safe, 1 gone off, none on the clock, 33 held up and at most 6 in a
+match.
+
 The same sixteen seeds on the layouts the mode was built and reviewed on (main at f990ce4), which the last three
 bullets below quote: Depot 122 rounds, 41 % to the attackers, armed 64 % (A 56 %), 29 made safe; Woodland 127, 57 %,
 66 % (A 37 %), 30; Subway 108, 41 %, 79 % (A 51 %), 42, 136 held up. None went off there. MB1's Woodland (the Fort's
