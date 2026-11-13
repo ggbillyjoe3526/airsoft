@@ -1,12 +1,12 @@
 # CI3 · Woodland's Hard night guards in two jobs
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-13 | 1 | Opus 5.5 (build thread) | see Checks | pending | – |
+| 2026-11-13 | 1 | Opus 5.5 (build thread) | see Checks | Accept 7/8 | – (8: the Normal jobs' risk only in the record: a known issues row added) |
 
 ## Goal
 
@@ -35,7 +35,7 @@ machine alike:
 | `godot --headless --import` from a clean `.godot/` | 52 s | 74 s | +22 s a job, the new maps' compression |
 | `elimination_at_hard` (8 seeds, `tools/match_guards.sh`) | 723 s | 712 s | the same matches: 61 rounds, 0 on time, 2 to the overtime flag, 15 knocks on both |
 
-The matches themselves did not slow; the import costs about 20 s more a job. CI's own times for the Hard job were
+The matches themselves did not slow; the import costs about 22 s more a job. CI's own times for the Hard job were
 21 min 28 s on #336's main run and over 29 min 52 s on #337's: GitHub's runners vary by about half again for the same
 work (CI2 measured 702 s and 1,020 s for one unit part), and a 21-minute job has no room for that. Each half now
 runs about half of it.
@@ -54,4 +54,5 @@ runs about half of it.
 
 - "Woodland, Elimination at Normal" took 28 min 33 s on #337's main run (17 min 17 s on #336's). It is 16 seeds of
   one test, so it cannot be split in `ci.yml` alone; if it is cancelled at the limit, split its seeds in two tests
-  (document).
+  (document: a `docs/KNOWN_ISSUES.md` Release row). If GitHub's branch rules ever required the old check name by
+  name, they need the two new names (none in the repo lists required checks).
