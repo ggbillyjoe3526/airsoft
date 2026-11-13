@@ -27,6 +27,8 @@ void fragment() {
 
 var _mesh: MeshInstance3D = null
 var _lamps: MultiMeshInstance3D = null
+## Each lamp fitting's middle, in the MultiMesh's order (hide_lamps_in).
+var _lamp_at: PackedVector3Array = PackedVector3Array()
 ## The lamps as real lights (Graphics › Lamp light), or null on a roof with none.
 var _lights: RoofLamps = null
 var _bays: Array[MultiMeshInstance3D] = []
@@ -137,6 +139,26 @@ func materials() -> Array[Material]:
 ## The lamps' real lights, or null on a roof with none.
 func lamp_lights() -> RoofLamps:
 	return _lights
+
+
+## Hides the lamp fittings hanging inside any of `boxes` (SM1: a train's cars, lit by their own lamp strips), keeping
+## their lights, shone in `colour` (sRGB) when it is given (the cars' own cool white, the owner, 2026-11-12) and kept
+## off the render layers `unlit` (the station's surface beyond the car's sides, StationSurface.LAYER); how many it hid.
+func hide_lamps_in(boxes: Array[AABB], colour: Color = Color(0.0, 0.0, 0.0, 0.0), unlit: int = 0) -> int:
+	if _lamps == null:
+		return 0
+	var hidden := 0
+	for i in _lamp_at.size():
+		for box in boxes:
+			if box.has_point(_lamp_at[i]):
+				_lamps.multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ZERO), _lamp_at[i]))
+				if colour.a > 0.0 and _lights != null:
+					_lights.recolour(i, colour)
+				if unlit != 0 and _lights != null:
+					_lights.leave_out(i, unlit)
+				hidden += 1
+				break
+	return hidden
 
 
 ## How many lamps hang under it (for tests).
@@ -276,6 +298,7 @@ func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]
 		var place := lamp_place(map, cfg, bays, i, drop)
 		var under := place.origin.y + lamp.get_aabb().position.y
 		mm.set_instance_transform(i, place)
+		_lamp_at.append(place.origin)
 		mm.set_instance_custom_data(i, lens_tint(map.roof_lamp_states[i] if i < map.roof_lamp_states.size()
 				else MapData.LAMP_WORKING, cfg))
 		spots.append(Vector3(place.origin.x, under, place.origin.z))

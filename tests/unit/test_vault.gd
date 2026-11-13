@@ -145,6 +145,19 @@ func test_a_climb_ends_standing_on_the_top_past_the_edge() -> void:
 	assert_gt(v.end, 0.45, "slower than a vault's hop")
 
 
+func test_climbs_a_ledge_over_open_space_found_at_its_lip() -> void:
+	# SM1: the open cab's floor over the space under the train's end, its lip 0.75 to 0.9 m, open under it
+	var lip := [Vector3(0.0, 0.825, -0.7 - 3.0), Vector3(6.0, 0.15, 6.0)]
+	var v := VaultState.new()
+	assert_true(plan([floor_box(), lip], 0.0, feet, v), "found at overhang_probe")
+	assert_true(v.climb)
+	assert_almost_eq(v.top_y, 0.9, 1e-4)
+	var high := [Vector3(0.0, 0.925, -0.7 - 3.0), Vector3(6.0, 0.05, 6.0)]
+	assert_false(plan([floor_box(), high]), "a lip wholly over overhang_probe is not found")
+	var shelf := [Vector3(0.0, 0.825, -0.7 - 0.25), Vector3(6.0, 0.15, 0.5)]
+	assert_true(plan([floor_box(), shelf]), "a thin shelf over open space is vaulted, as a wall would be")
+
+
 func test_climbs_only_a_flat_open_ledge() -> void:
 	var bench := [Vector3(0.0, 1.1, -1.9), Vector3(6.0, 0.4, 0.6)]
 	assert_false(plan([floor_box(), platform(0.9), bench]), "something standing on the top within climb_depth")

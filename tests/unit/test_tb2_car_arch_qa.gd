@@ -39,6 +39,14 @@ func _floor(m: MapData, x: float, z: float, y_max: float) -> float:
 	return best
 
 
+## Whether a solid block (not a ramp) holds `p`.
+func _solid_at(m: MapData, p: Vector3) -> bool:
+	for b in m.blocks:
+		if b.kind != &"ramp" and _box(b).has_point(p):
+			return true
+	return false
+
+
 func test_a_player_can_stand_in_a_car_under_the_arch_but_near_its_sides_only_crouched() -> void:
 	var body := BodyConfig.new()
 	var m := _map()
@@ -50,6 +58,8 @@ func test_a_player_can_stand_in_a_car_under_the_arch_but_near_its_sides_only_cro
 			if m.station.style_at(Vector3(x, 1.5, z)) != &"train":
 				continue
 			var f := _floor(m, x, z, 1.2)
+			if _solid_at(m, Vector3(x, f + 1.0, z)):
+				continue   # inside the car's side (a window's glass, SM1): nobody stands there
 			var head := _ceiling(m, x, z, f + 0.05) - f
 			checked += 1
 			assert_gte(head, body.crouch_height, "a crouched body fits in the car at x %.1f z %.1f (%.2f m)" % [x, z, head])

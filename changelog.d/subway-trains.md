@@ -1,0 +1,11 @@
+### Subway trains are real metro cars
+- Both Subway trains are now metro cars: clean white with an orange stripe under the windows and a curved roof.
+- Doors are tall and curve into the roof; windows are deep and rounded.
+- Inside, seats line the walls with padded backs, and poles and grab rails hang in the aisle.
+- Cool white lamp strips light the cars, a few of them flicker, and white lamps sit on the cab fronts.
+- Gangways are open between cars, and a tool cart sits in the south train's aisle.
+- Wheels and bogies show under each end of both trains.
+- The platform side's windows and door glass are see-through: you and the bots see in and out, but BBs, bodies and grenades stop on it.
+- The south train's open cab is the way out onto the track: drop down, and press Jump to climb back up.
+- Each cab stands in its tunnel, and the tunnel carries on past its corners.
+- The seats are low cover you can crouch behind.
