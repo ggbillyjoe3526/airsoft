@@ -423,6 +423,9 @@ BOLT_READY = 1.25
 SHOTGUN_RATE = 1.7
 SHOTGUN_SHOT_PITCH = 0.8
 SHOTGUN_PUMP_PITCH = 1.15
+# The pump's cue over its model's Fire clip (tools/blender/replicas/shotgun.py CLIPS, s): the clip's length, and
+# when the pump reaches the back and is home again.
+SHOTGUN_PUMP = (1.0, 0.44, 0.84)
 
 
 def bolt(x, length=0.85, back_at=0.50, home_at=0.71):
@@ -537,13 +540,14 @@ def build(folder):
 
     # Pump Shotgun (SH1, stand-ins until the owner records them: audio/record-next.md): the sniper's shot from where
     # it bursts out, lower, shorter and softer (a hollow spring thump: three light BBs, not one hard crack) with no
-    # run-up before it; his bolt, a little higher and lighter, as the pump, its two knocks where the stand-in model's
-    # Fire clip (the Sniper Rifle's, stretched to the pump's 1.7 a second) has the handle back and home; its box of a
-    # shell the lowest of the magazine clicks.
+    # run-up before it; his bolt, a little higher and lighter, as the pump, its two knocks where its model's Fire clip
+    # (SHOTGUN_PUMP, stretched to the pump's 1.7 a second) has the pump back and home; its box of a shell the lowest
+    # of the magazine clicks.
     shotgun_shot = "a hollow spring thump: a closed stapler hit with your palm, or a plastic tub's lid snapped shut"
     put("shot_shotgun", variants(from_onsets(fire, bursts, 0.30), 5, SHOTGUN_SHOT_PITCH), -18.5, shotgun_shot)
     k = (1.0 / SHOTGUN_RATE) / BOLT_CYCLE_END
-    put("cycle_shotgun", [bolt(resample(s, SHOTGUN_PUMP_PITCH), 0.85 * k, 0.50 * k, 0.71 * k)
+    put("cycle_shotgun", [bolt(resample(s, SHOTGUN_PUMP_PITCH), SHOTGUN_PUMP[0] * k, SHOTGUN_PUMP[1] * k,
+                               SHOTGUN_PUMP[2] * k)
                           for s in pick(folder, [("sniper_bolt.wav", None)], 1.0, 0.1)[:3]], -16.0,
         "the pump back and forward: a door bolt slid back and home, or one stroke of a bike pump")
     shell = "its shell pulled out and pushed in: an AA battery out of a torch and back in until it clicks"

@@ -115,6 +115,11 @@ func _run() -> void:
 		if f.size() > 5:
 			# The shot kicks the replica as it goes (on_shot), the BB that long on.
 			hands.on_shot()
+			# Its Fire clip that long on too (a bolt or a pump part way through its cycle, your hand on it): the clip
+			# runs on the tree's time, which a still picture doesn't pass.
+			var anim: AnimationPlayer = hands._held[hands._active].anim
+			if anim != null and anim.is_playing():
+				anim.advance(f[5].to_float())
 			hands.update(c, yaw, pitch, at, look, f[5].to_float(), aim)
 			var off := f[6].to_float() if f.size() > 6 else 0.0
 			bbs = _shot(port, play, tuning, c, at, look.rotated(Vector3.UP, deg_to_rad(off)), hands, f[5].to_float())

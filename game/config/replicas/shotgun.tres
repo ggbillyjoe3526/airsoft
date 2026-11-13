@@ -24,4 +24,3 @@ hip_spread = 0.7
 bolt_action = true
 shot_bbs = 3
 pattern_deg = 1.2
-model = &"sniper"

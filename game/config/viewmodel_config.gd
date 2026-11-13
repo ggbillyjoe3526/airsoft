@@ -7,7 +7,8 @@ extends Resource
 ## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06); the
 ## rifles sit near and low, so the left hand on the handguard shows and the right hand lies under the view's bottom
 ## edge (HA1, the owner); the Compact SMG, a shorter replica, sits lower and further off than they do, which draws it
-## at their size and angle (the owner: "too high. It should be a similar angle and scale to the rifles"). The arms
+## at their size and angle (the owner: "too high. It should be a similar angle and scale to the rifles"). The Pump
+## Shotgun has its own place, the hand out on its pump showing no more forearm than the rifles' (SH2). The arms
 ## model (tools/blender/arms/arms.py HOLDS) is built for these places.
 @export var hip: Dictionary[StringName, Vector3] = {
 	&"aeg": Vector3(0.1, -0.135, -0.19),
@@ -15,12 +16,15 @@ extends Resource
 	&"cyber": Vector3(0.05, -0.07, -0.34),
 	&"sniper": Vector3(0.1, -0.135, -0.19),
 	&"smg": Vector3(0.1, -0.165, -0.24),
+	&"shotgun": Vector3(0.12, -0.21, -0.21),
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
 ## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it (the
-## pistols near enough that the forearm drops out of view under the hand).
+## pistols near enough that the forearm drops out of view under the hand; the Pump Shotgun, which has no sights and is
+## aimed along its top rail, near enough that its stock is behind the eye and you look over the receiver's back end:
+## SH2).
 @export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.25, &"cyber": -0.25,
-		&"sniper": -0.2, &"smg": -0.15}
+		&"sniper": -0.2, &"smg": -0.15, &"shotgun": -0.09}
 @export var aim_forward_default: float = -0.25
 ## Aimed, a rifle's hands are out of the view (HA1, the owner: never faded; "at most a small tip of the players left
 ## hand thumb"): the replica hides them. As the sight comes up your left shoulder moves this far (m, the replica's
@@ -121,24 +125,26 @@ extends Resource
 ## a little, so their grips' base sits over a third of the way up the screen (your left hand seen taking the magazine
 ## out and seating the fresh one) while your right forearm stays below it. The SMG comes up less than the AEG (CS2):
 ## its deeper grip holds your hands lower, and at the AEG's lift your left forearm shows past the wrist.
+## The Pump Shotgun comes out less and no nearer (SH2): your left hand starts far forward on its pump, and at the
+## AEG's move your forearm shows past the wrist on the way to the shell and back.
 @export var reload_cant_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.6, 0.0, -0.25),
 		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3),
-		&"smg": Vector3(0.6, 0.0, -0.25)}
+		&"smg": Vector3(0.6, 0.0, -0.25), &"shotgun": Vector3(0.6, 0.0, -0.25)}
 @export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.08, 0.04, 0.06),
 		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0),
-		&"smg": Vector3(0.06, 0.04, 0.06)}
+		&"smg": Vector3(0.06, 0.04, 0.06), &"shotgun": Vector3(0.04, 0.04, 0.0)}
 ## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share
 ## at the end (a rifle's magazine is out of the well in the first quarter: the cant is there by then, BP8); others ease
 ## in and out as one bell, sin(PI * share).
 @export var reload_rise: Dictionary[StringName, float] = {&"aeg": 0.15, &"sniper": 0.15, &"pistol": 0.2, &"cyber": 0.2,
-		&"smg": 0.15}
+		&"smg": 0.15, &"shotgun": 0.15}
 ## Your left hand carries the magazine from this share of a replica's reload to this one (x, y; BP8): it takes the old
 ## one as the replica's clip starts it down, takes it down out of view, brings the fresh one up in hand and lets go as
 ## it slides home, the magazine going where the hand goes (MagazineCarry). The arms' build keys the hand's catch and
 ## let-go at these shares (tools/blender/arms/magazine.py), so each is a whole frame of the clip (60 a second).
 @export var reload_carry: Dictionary[StringName, Vector2] = {&"aeg": Vector2(0.1111, 0.6759),
 		&"sniper": Vector2(0.1111, 0.6759), &"pistol": Vector2(0.1389, 0.5694), &"cyber": Vector2(0.1515, 0.5909),
-		&"smg": Vector2(0.1111, 0.6759)}
+		&"smg": Vector2(0.1111, 0.6759), &"shotgun": Vector2(0.1111, 0.6759)}
 ## Working a bolt at the hip (BP7, row 17): while the arms' bolt clip runs, the replica is canted toward the eye
 ## so the right hand stays on screen (rad at the clip's middle: muzzle up, roll, turn; m: lift, inward), eased in and out
 ## over the clip as a bell and drawn less as the sight comes up (none aimed); Reduced motion draws its reload_cant share.
@@ -147,6 +153,9 @@ extends Resource
 @export var bolt_turn: float = 0.0
 @export var bolt_lift: float = 0.0
 @export var bolt_inward: float = 0.035
+## A replica listed here is canted this share of that while its arms work it (others all of it): the Pump Shotgun
+## only rocks a little as its pump comes back, its left hand on the pump in view already (SH2).
+@export var work_cant: Dictionary[StringName, float] = {&"shotgun": 0.25}
 ## A bolt-action replica's Fire clip has its bolt home and turned down this far in (s: sniper.py's keys); a shot plays
 ## the clip stretched so that moment lands as the replica can fire again (its fire rate with its parts: the Sniper
 ## Rifle's 1.25 s, 1.39 s with the M150), and the arms' bolt clip with it (BP7, row 19).
@@ -252,6 +261,9 @@ extends Resource
 	# Side on as the AEG: the cocking handle pulled back, flicked up into its notch, held, then slapped down and home.
 	&"smg": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), RIFLE_TURN, RIFLE_SHIFT,
 			PackedFloat32Array([0.18, 0.23, 0.69, 0.73]), [&"selector", &"torchClick", &"dryFire", &"selector"]),
+	# Side on and held close as the Sniper Rifle (it is as long); nothing moves, your left hand stays on the pump.
+	&"shotgun": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), LONG_TURN, LONG_SHIFT,
+			PackedFloat32Array(), []),
 }
 @export var inspect_pose_default: InspectPose = InspectPose.make(2.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]),
 		RIFLE_TURN, RIFLE_SHIFT, PackedFloat32Array(), [])

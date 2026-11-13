@@ -4,7 +4,7 @@ extends GutTest
 ## windows (ViewModelConfig).
 
 const DIR := "res://assets/models/replicaParts/"
-const FILES: Array[String] = ["aeg", "pistol", "cyber", "sniper", "smg"]
+const FILES: Array[String] = ["aeg", "pistol", "cyber", "sniper", "smg", "shotgun"]
 const PART_TRIS := 10000
 ## A parts file's cap: 4 MiB since RW2 (3 MiB since BL8b), as the attachments (2.0 MB of the AEG's), the separate
 ## magazines (MAG1) with their wear mask and its UV layer (RW2) and the barrels (BA1) all land in the same file, about

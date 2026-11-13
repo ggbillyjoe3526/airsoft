@@ -1020,10 +1020,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   spread 0.7; two new stats.md columns, **BBs per shot 3** and **Pattern 1.2°** (each BB that far off the shot's line,
   an even triangle with the first straight up, each with its own scatter; one hit is still one hit). A Clearer bot
   kit (red dot, rushers and flankers); bots hold their pull past about 29 m, where the pattern is wider than a body.
-  Its own sound profile `shotgun`, stand-ins from his sniper and magazine recordings until he records them. Until its
-  own model (his photos came the same day: no sights from the photos, the other replicas' quality, the steel,
-  aluminium and polymer surfaces of MQ1) it is drawn, held and pictured as the Sniper Rifle, whose bolt is worked
-  where the pump will be, and its side rail (the Red Laser) comes with that model.
+  Its own sound profile `shotgun`, stand-ins from his sniper and magazine recordings until he records them.
+  **Its model (SH2)** is from his five photos of the same day: "Do not include the sights seen on these replicas.
+  Make the quality of the model the same as the other replica models. Use the correct materials and textures
+  (metals, polymer)", and it follows the model-quality work (MQ1's steel, aluminium and polymer surfaces). So it has
+  **no iron sights**: with no optic it is aimed along its top rail. A top rail for any optic and a short rail each
+  side (the Red Laser left, the Weapon Torch right); in first person your left hand holds the pump and rides it back
+  and home after each pull. His photos show two builds of the replica; **photo 4 (the flat left side with the M4
+  stock) is the one traced**, with photo 3 for its depth and photo 5 for its right side. Photos 1 and 2 show a
+  different pump and grip and are used only for the muzzle, the shell and the receiver's top.
 - **The GBB Pistol shoots 0.70 J and the Compact SMG 0.85 J (owner, 2026-11-12, PH2).** "Increase gbb pistol to 0.7J
   and SMG to 0.85J", after PH1's audit found the pistol's 0.52 J below a real green-gas pistol's. This replaces CS1's
   0.75 J and the pistol's 0.52 J. **Each keeps its job through its hop-up, not its energy** (the default taken to his

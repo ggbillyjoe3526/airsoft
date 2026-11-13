@@ -8,8 +8,9 @@ extends RefCounted
 ## never edited. In the hands and on the menus' pictures a painted part is drawn on its surface (MQ1:
 ## replica_surface.gdshader, what ReplicaSurfaces says its faces are made of: steel and aluminium reflect under the
 ## paint, polymer is matte and grained, wood shows its figure), and a model that carries a wear mask (RW1: the hands'
-## meshes of the AEG Rifle, the GBB Pistol and the Compact SMG, its `<model>_wear.png` as their materials' ao_texture;
-## tools/blender/replicas/wear.py) wears it lightly used too (faint scratches, rubbed edges, grime in the recesses).
+## meshes of the AEG Rifle, the GBB Pistol, the Compact SMG and the Pump Shotgun, its `<model>_wear.png` as their
+## materials' ao_texture; tools/blender/replicas/wear.py) wears it lightly used too (faint scratches, rubbed edges,
+## grime in the recesses).
 ## The caller asks for it plain for the figures' copies, which are seen from far off and merged by their plain paints
 ## (HeldMerge): those keep the flat paints.
 

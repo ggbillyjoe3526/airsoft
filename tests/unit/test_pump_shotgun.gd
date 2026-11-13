@@ -75,7 +75,7 @@ func test_it_is_a_dev_spring_rifle_in_the_pool_with_the_snipers_springs() -> voi
 	assert_eq(it.display_name, "Pump Shotgun")
 	assert_eq(it.key, &"shotgun")
 	assert_true(it.is_dev(), "Dev content until the owner says make it public")
-	for tag: String in ["rifle", "spring", "top-rail"]:
+	for tag: String in ["rifle", "spring", "top-rail", "side-rail"]:
 		assert_true(it.tags.has(tag), tag)
 	for tag: String in ["under-rail", "barrel-mount", "aeg-mag", "muzzle-thread", "electric", "gas"]:
 		assert_false(it.tags.has(tag), "no %s" % tag)
@@ -280,7 +280,7 @@ func test_it_takes_the_optics_and_the_springs_and_nothing_else_yet() -> void:
 	assert_true(rules.equip(l, Loadout.Slot.PRIMARY, SHOTGUN), "on offer with Dev content")
 	assert_true(rules.set_part(l, SHOTGUN, &"optic", SCOPE), "a scope on its top rail")
 	assert_true(rules.set_part(l, SHOTGUN, &"optic", RED_DOT))
-	assert_false(rules.set_part(l, SHOTGUN, &"laser", RED_LASER), "its side rail comes with its own model")
+	assert_true(rules.set_part(l, SHOTGUN, &"laser", RED_LASER), "its side rail (SH2)")
 	assert_true(rules.set_part(l, SHOTGUN, &"light", TORCH), "the Weapon Torch fits any rifle")
 	assert_false(rules.set_part(l, SHOTGUN, &"muzzle", SILENCER), "three barrels: no thread")
 	assert_false(rules.set_part(l, SHOTGUN, &"grip", VERTICAL), "the pump is the grip")
@@ -339,11 +339,45 @@ func test_its_sounds_are_there_with_a_pump_of_its_own() -> void:
 	assert_false(ResourceLoader.exists("%spower_shotgun_1.wav" % SoundConfig.CUE_DIR), "a spring thump, no power part")
 
 
-func test_it_is_drawn_as_the_sniper_rifle_until_its_own_model() -> void:
+func test_it_is_drawn_held_and_fitted_by_its_own_model() -> void:
 	var r := _shotgun()
-	assert_eq(r.model_id(), &"sniper", "the stand-in: its bolt is worked where the pump will be")
-	assert_eq(ReplicaConfig.model_of(&"shotgun"), &"sniper")
-	assert_true(ResourceLoader.exists("res://assets/models/replicas/%s.glb" % r.model_id()))
+	assert_eq(r.model, &"", "no stand-in any more (SH2)")
+	assert_eq(r.model_id(), &"shotgun", "drawn as itself")
+	assert_eq(ReplicaConfig.model_of(&"shotgun"), &"shotgun")
+	assert_true(ResourceLoader.exists("res://assets/models/replicas/shotgun.glb"), "its own model")
+	var c := Character.new(1, 0, Vector3.ZERO, 0.0, [r] as Array[ReplicaConfig])
+	var view := ReplicaView.new()
+	add_child_autofree(view)
+	view.setup(ViewModelConfig.new(), c.armament.replicas, BoxWorld.new())
+	var held: ReplicaView.Held = view._held[0]
+	assert_eq(held.id, &"shotgun", "held and posed as itself")
+	assert_not_null(held.muzzle, "its model loaded, with its muzzle")
+	assert_not_null(held.anim)
+	for clip: StringName in [&"Fire", &"Reload", &"Selector", &"Inspect"]:
+		assert_true(held.anim.has_animation(clip), "its %s clip" % clip)
+	var taken := ReplicaParts.take(&"shotgun", {&"optic": &"redDot", &"laser": &"redLaser", &"light": &"weaponTorch"},
+			false)
+	for slot: StringName in [&"optic", &"laser", &"light"]:
+		assert_true(taken.has(slot), "its %s from its own parts file" % slot)
+	for n: Node3D in taken.values():
+		n.free()
+
+
+func test_its_model_keeps_the_replica_contract_and_has_no_sights() -> void:
+	var model := (load("res://assets/models/replicas/shotgun.glb") as PackedScene).instantiate() as Node3D
+	for node: String in ["Body", "Magazine", "FlashHider", "Pump", "Trigger", "Figure", "Figure_Magazine",
+			"Figure_FlashHider", "Muzzle", "BarrelEnd", "FrontSight", "RearSight", "MagWell", "OpticMount", "TorchMount"]:
+		assert_not_null(model.find_child(node, true, false), node)
+	assert_null(model.find_child("Sights", true, false), "no sights of its own (owner, 2026-11-12)")
+	assert_null(model.find_child("Figure_Sights", true, false))
+	var muzzle := model.find_child("Muzzle", true, false) as Node3D
+	var end := model.find_child("BarrelEnd", true, false) as Node3D
+	assert_lt(end.position.z, 0.0, "the barrel's end ahead of the origin (-z forward)")
+	assert_lt(muzzle.position.z, end.position.z, "the muzzle ahead of the barrel's end")
+	var rear := model.find_child("RearSight", true, false) as Node3D
+	var front := model.find_child("FrontSight", true, false) as Node3D
+	assert_almost_eq(rear.position.y, front.position.y, 1e-4, "the sight line along its rail, parallel to the bore")
+	model.free()
 
 
 func test_a_bot_holds_a_pull_past_its_pattern_and_never_waits_to_settle() -> void:
