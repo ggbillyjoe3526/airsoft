@@ -1,9 +1,10 @@
 """Stockade's cover (SK1), place by place, as the owner's concept 1 stands it: the Green's campfire ring and its four
-stacks, the Bell tower's sandbags, the Woodyard's woodpiles, the lanes' trees, logs and palisade stubs, and what the
+stacks, the Bell's sandbags, the Woodyard's woodpiles, the lanes' trees, logs and palisade stubs, and what the
 rooms are furnished with. Imported by layout.py once the buildings stand; adds to its `boxes`, TREES and BUSHES. Every
 piece is a prop the game already models, at the size its model was built to (PropDressConfig; tools/woodland/layout.py
 for the Sawmill's)."""
-from layout import BELL, BELL_TOWER, CAMP_X, CRATES, EDGE, FIRE, H, LANE_X, LOW, ORCHARD_GATES, PAL_IN, PAL_T, SHED, T, box, bush, cordwood, crates, log, \
+from layout import BELL, CAMP_X, CRATES, EDGE, FIRE, H, LANE_X, LOW, ORCHARD_GATES, PAL_IN, PAL_T, SHED, T, \
+    box, bush, cordwood, crates, log, \
     sandbags, tree
 
 TYRES, TYRE = 1.7, 0.85     # a stack of tractor tyres, and one lying flat
@@ -75,20 +76,16 @@ for z in (-12.0, 12.0):
     cordwood(-EDGE - 0.01, z - 0.6, -36.0 if z < 0 else -37.0, z + 0.6)
 # East Lane's crate stacks, by turns from its fence and from the camp's wall, as the concept has them.
 for (z, west) in ((-19.0, False), (-7.0, True), (7.0, False), (20.0, True)):
-    x1 = (LANE_X - 0.01 if z < 12.0 else 37.1) if west else CAMP_X - PAL_T / 2 - 2.74   # past the fence: off the Woodyard's corner
+    # past the fence's end, off the Woodyard's corner
+    x1 = (LANE_X - 0.01 if z < 12.0 else 37.1) if west else CAMP_X - PAL_T / 2 - 2.74
     cordwood(x1, z - 0.6, x1 + 2.75, z + 0.6)
-cordwood(CAMP_X - PAL_T / 2 - 2.74, 27.6, CAMP_X - PAL_T / 2 + 0.01, 28.8)   # and one at its south end, off the camp gate
+# and one at its south end, off the camp's gate
+cordwood(CAMP_X - PAL_T / 2 - 2.74, 27.6, CAMP_X - PAL_T / 2 + 0.01, 28.8)
 
-# ------------------------------------------------------------------ the Bell tower, or the Bell house in its place
+# ------------------------------------------------------------------ the Bell house
 bx, bz = BELL
-if BELL_TOWER:
-    cordwood(bx - 4.0, bz - 6.0, bx - 2.2, bz - 1.9)   # its woodpiles, where the concept has sandbags
-    cordwood(bx - 4.0, bz + 1.9, bx - 2.2, bz + 6.0)
-    cordwood(bx - 1.8, bz - 1.8, bx + 1.8, bz + 1.8)   # and wood stacked under its platform
-    sandbags(bx - 6.5, bz - 1.6, bx - 5.7, bz + 1.6)
-else:
-    sandbags(bx - 6.5, bz - 1.6, bx - 5.7, bz + 1.6)   # a low wall on the Green before it, to crouch behind
-    barrels(bx - 2.4, bz + 2.6)                        # inside, by its door on the street
+sandbags(bx - 6.5, bz - 1.6, bx - 5.7, bz + 1.6)   # a low wall on the Green before it, to crouch behind
+barrels(bx + 1.0, bz + 2.6)                        # inside, by its door on the street
 
 # ------------------------------------------------------------------ the Woodyard (Site B, flag B)
 cordwood(19.0, 12.0, 29.5, 13.4)        # its north rows, on the yard before the Long House
@@ -172,7 +169,7 @@ for gx in ORCHARD_GATES:
         cordwood(min(x1, x1 + side * 1.2), 32.6, max(x1, x1 + side * 1.2), 34.0 + 0.01)
 # The Orchard: two staggered rows of trees behind its fence, so nobody sees along it either.
 for k, x in enumerate(range(-38, 41, 6)):
-    oak(float(x), 35.23 if k % 2 == 0 else 36.9, 7.0 + (k % 3))   # rows overlapping and the near one 2 cm into the fence
+    oak(float(x), 35.23 if k % 2 == 0 else 36.9, 7.0 + (k % 3))   # the rows overlap, the near one 2 cm into the fence
 oak(-48.0, 35.0, 12.0)
 oak(46.0, 34.0, 12.0)
 for (x, z) in ((-10.0, 29.0), (6.0, 29.5), (-35.0, 36.8), (11.0, 35.3), (-25.0, 36.8), (44.0, -22.0), (44.0, 20.0)):

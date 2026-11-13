@@ -29,7 +29,7 @@ STEP = 0.35        # lower than this is walked over
 RUN = 4.2          # m/s, a bot's run
 END_COLOURS = ["#e8742a", "#2a7fe8"]   # end 0 (the west / street end), end 1
 END_NAMES = {"depot": ["West (Staging)", "East (Loading bay)"], "woodland": ["West camp", "East camp"],
-             "subway": ["Street (ticket hall)", "Tunnel"]}
+             "subway": ["Street (ticket hall)", "Tunnel"], "stockade": ["West camp", "East camp"]}
 REASONS = ["everyone out", "time", "flag raised", "overtime flag", "simulated"]
 
 

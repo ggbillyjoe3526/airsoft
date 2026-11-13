@@ -1,14 +1,15 @@
 """Stockade's layout as data (SK1): the owner's concept 1 (concepts/new-map-ptb/idea-1-stockade-plan.png), a plywood
 village inside a log fort, 104 x 76 m on flat ground. The attackers (end 0) start in the West camp by the Tents, the
 defenders in the East camp; three ways run west to east (the Back Lane, Main Street to the Green, the Woodyard Road
-past the Orchard) and the West Arch, the Tavern and the Store look onto the open Green and its campfire. The Bell tower
-stands between the sites. Site A is indoors (the Long House), Site B the open Woodyard under its shed.
+past the Orchard) and the West Arch, the Tavern and the Store look onto the open Green and its campfire. The Bell house
+stands across Main Street between the sites, where the concept had its Bell tower (the owner left the tower out).
+Site A is indoors (the Long House), Site B the open Woodyard under its shed.
 
 Everything is an axis-aligned box on the ground (y = 0): `boxes` (what build_map.py writes as blocks), `DOORS`,
 `ROOF_TILES`, and the field's ends, lanes, flags, sites, areas and lights. x runs east, z south. Built only from
 models the game already has (PropDressConfig): plywood walls and headers, hut roofs, the palisade, cordwood, crates,
-fallen logs, sandbags, drums, barrels, the sofa, Woodland's watch tower (the Bell tower), the Sawmill's shed, sawbench
-and boards, trees and bushes.
+fallen logs, sandbags, drums, barrels, the sofa, the Sawmill's shed, sawbench and
+boards, trees and bushes.
 
     python3 tools/stockade/check.py     # overlaps, sight lines, walks, a plan picture
     python3 tools/stockade/build_map.py # writes data/maps/stockade.json
@@ -175,27 +176,6 @@ def bush(x: float, z: float, radius: float = 1.0, height: float = 1.2) -> None:
     BUSHES.append((x, z, radius, height))
 
 
-def tower(cx: float, cz: float) -> None:
-    """Woodland's watch tower (one model, fitted over all its blocks), as the Bell tower: a 4 x 4 m platform at 3.4 m on
-    four posts, a 1.1 m parapet open on the east where its stair comes up, a roof, and the stair (1 in 2) off the east
-    side. Its parts are Woodland's blocks, stood on flat ground."""
-    top, deck = 3.4, 0.2
-    box("floor", cx - 2.0, cz - 2.0, cx + 2.0, cz + 2.0, top, top - deck, surface="wood", dress="watch_tower")
-    box("ramp", cx + 2.0, cz - 0.6, cx + 2.0 + 2.0 * top + 0.2, cz + 0.6, top, 0.0, rise="-x", surface="wood",
-        dress="watch_tower")
-    box("plywood", cx - 2.4, cz - 2.4, cx + 2.4, cz + 2.4, 5.75, 5.6, dress="watch_tower")
-    for px in (-2.0, 2.0):
-        for pz in (-2.0, 2.0):
-            box("log", cx + px - 0.15, cz + pz - 0.15, cx + px + 0.15, cz + pz + 0.15, top - deck, 0.0,
-                dress="watch_tower")
-    rail = top + 1.1
-    for pz in (-2.0, 2.0):
-        box("plywood", cx - 2.25, cz + pz - 0.25, cx + 2.0, cz + pz + 0.25, rail, top, dress="watch_tower")
-    box("plywood", cx - 2.25, cz - 1.75, cx - 1.75, cz + 1.75, rail, top, dress="watch_tower")
-    for pz in (-1.175, 1.175):
-        box("plywood", cx + 1.5, cz + pz - 0.575, cx + 2.0, cz + pz + 0.575, rail, top, dress="watch_tower")
-
-
 # ------------------------------------------------------------------ the fort's wall, and the two camps
 palisade(-W - PAL_T, -H - PAL_T, W + PAL_T, -H, PAL_OUT)
 palisade(-W - PAL_T, H, W + PAL_T, H + PAL_T, PAL_OUT)
@@ -204,7 +184,7 @@ palisade(W, -H, W + PAL_T, H, PAL_OUT)
 
 CAMP_X = 42.0                                   # the camps' inner walls
 ORCHARD_Z = 34.0                                # the Orchard's fence (south of the Woodyard Road)
-GATES = ((-35.5, -30.5), (-2.5, 2.5), (29.5, ORCHARD_Z))  # their three gates: the Back Lane, Main Street, the Woodyard Road
+GATES = ((-35.5, -30.5), (-2.5, 2.5), (29.5, ORCHARD_Z))  # the camps' gates: Back Lane, Main Street, Woodyard Road
 
 
 def _xz(x: tuple[float, float], z: tuple[float, float]) -> tuple[float, float, float, float]:
@@ -285,7 +265,7 @@ building(*STORE, [("w", 18.5, DOOR_W, "door"), ("e", 23.0, DOOR_W, "door"), ("n"
                   ("n", 3.0, 2.0, "window")])
 wall_x(20.0 - T / 2, -8.0 + T, 8.0 - T, [(5.0, DOOR_W, "gap")])
 # Wings at the two buildings' front corners and fences across the alleys' mouths: the Green is a square framed by
-# its houses, come into by Main Street, the four alleys and the Bell tower's yard.
+# its houses, come into by Main Street, the four alleys and the Bell house's yards.
 for wx in (-10.0, 8.0 - T):
     wall_z(wx, -15.0, -11.0)
 for wx in (-8.0, 8.0 - T):
@@ -310,16 +290,12 @@ wall_x(27.0 - T, -EDGE, -37.0, [(-39.5, 2.5, "gap")])
 wall_x(27.0 - T, -23.0, -8.0, [(-18.0, 2.5, "gap")])
 wall_x(27.0 - T, 8.0, 19.0, [(9.5, 2.5, "gap")])
 
-# ------------------------------------------------------------------ east of the Green: the Bell tower and the sites
+# ------------------------------------------------------------------ east of the Green: the Bell house and the sites
 BELL = (15.0, 0.0)
-BELL_TOWER = False    # the owner's call (SK1): from 3.4 m up it sees over every roof to the attackers' gate
-if BELL_TOWER:
-    tower(*BELL)
-else:
-    # The Bell house in its place: a plywood hut across Main Street's east end, its one door on the street behind, so
-    # the street is walked round it, never seen down.
-    # It spans the street 1 cm into each of its fences, so no line slips between them.
-    building(BELL[0] - 3.0, -STREET - 0.01, BELL[0] + 3.0, STREET + 0.01, [("e", BELL[1], DOOR_W, "door")])
+# The Bell house in the concept's Bell tower's place (the owner, 2026-11-13: leave the tower out; from 3.4 m up it saw
+# over every roof to the attackers' gate): a plywood hut across Main Street's east end, its one door on the street
+# behind, so the street is walked round it, never seen down. It spans the street 1 cm into each of its fences.
+building(BELL[0] - 3.0, -STREET - 0.01, BELL[0] + 3.0, STREET + 0.01, [("e", BELL[1], DOOR_W, "door")])
 # Site A, the Long House: two rooms, four doors; the partition's doorway is the site's middle.
 LONG = (22.0, -29.0, 38.0, -15.0)
 building(*LONG, [("w", -26.0, DOOR_W, "door"), ("s", 26.5, DOOR_W, "door"), ("s", 35.0, DOOR_W, "door"),
@@ -351,8 +327,8 @@ FIRE = (0.0, 0.0)
 # Plant The Bomb's sites (x, z, radius m; 0 the game's usual): A in the Long House, B under the Woodyard's shed.
 BOMB_SITES = [(30.0, -22.0, 0), (SHED[0], SHED[1], 0)]
 
-# The bots' lanes, West camp to East camp: the Back Lane to flag A, Main Street over the Green and round the Bell house to flag A, the
-# Woodyard Road to flag B. A defender holds its lane's last point or the one before (RoundPlanner).
+# The bots' lanes, West camp to East camp: the Back Lane to flag A, Main Street over the Green and round the Bell house
+# to flag A, the Woodyard Road to flag B. A defender holds its lane's last point or the one before (RoundPlanner).
 LANES = {
     "n": [(-48.5, -9.0), (-43.4, -26.0), (-38.0, -34.0), (-27.0, -31.0), (-14.0, -32.5), (-3.0, -32.0), (3.0, -32.0),
           (12.0, -33.5), (18.5, -27.0), (22.0, -12.0), (30.0, -9.5)],

@@ -896,6 +896,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the
   north lane has one stop 4.45 m either side of the field's middle. No block moved.
+- **Stockade has no Bell tower (owner, 2026-11-13, SK1).** Concept 1's tower, built from Woodland's watch tower, put a
+  standing eye 5 m up that saw over every 2.6 m wall (3,839 lines over 34 m, the longest 65 m to the attackers' gate).
+  Asked whether to keep it, he chose "Leave the tower out": a one-door Bell house stands across Main Street's east end
+  in its place.
 
 ## Replicas, Loadout and levels
 

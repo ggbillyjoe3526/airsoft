@@ -38,7 +38,7 @@ def block(b: dict) -> dict:
     dress = b.get("dress", KIND_DRESS.get(b["kind"]))
     if dress is not None:
         out["dress"] = dress
-    for key in ("surface", "rise"):   # a floor's or a ramp's (the Bell tower's platform and stair)
+    for key in ("surface", "rise"):   # a floor's or a ramp's, when a block has them
         if key in b:
             out[key] = b[key]
     return out
