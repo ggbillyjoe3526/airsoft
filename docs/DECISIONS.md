@@ -867,8 +867,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   57 m from the Sawmill's road mouth to it; the Truck bend to flag B was one 60 m line). The south lane's two stops
   are at the bend's east mouth and the Culvert's west head. At flag B the sawn boards moved from the pole's north
   side to the shed's east end (beside the pole they hid whoever raised the flag from the defenders coming back, and
-  the defender behind them lost his duel with the pole 10 to 18 a hundred rounds; from the Back track's corner he now
-  wins it 15 to 13), and the verge stack west of the road mouth is turned across the verge to keep the bend,
+  the defender behind them lost his duel with the pole 10 to 18 a hundred rounds, 24 knock-outs to 43; from the Back
+  track's corner he now wins it 15 to 13), and the verge stack west of the road mouth is turned across the verge to keep the bend,
   55 m off and 0.9 m higher, off the pole's ring. Bots, 6v6, Normal, the same 32 seeds: the west end takes 47 % ±3
   of Elimination's rounds (48 % ±3 for MB1's road; band 45 to 55) and the attackers 69 % ±3 of Attack / Defend's
   (62 % ±3 for MB1's road; band 40 to 65, so outside it: `docs/KNOWN_ISSUES.md`).

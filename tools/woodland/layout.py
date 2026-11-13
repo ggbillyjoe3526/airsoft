@@ -63,7 +63,8 @@ ROAD = [(-90, 24), (-66, 27), (-48, 33), (-34, 42), (-26, 45.5), (-20.5, 52.3), 
         (-8.3, 46), (-6.3, 42.4), (-3.5, 42.4), (-0.8, 45), (3, 48.3), (14, 48.3), (22, 43.6), (32, 40), (44, 33), (48, 31)]
 ROAD_CULVERT = ROAD.index((3, 48.3))  # the straight the culvert sits under starts here
 ROAD_HALF = 2.5   # the gravel strip's half width (m): no piece and no thicket block reaches inside it (check.py)
-ROAD_CLEAR = 3.5  # a thicket's cells keep this far off the road's centre line (m): its 1 m blocks and its boughs stay off the gravel
+# A thicket's cells keep this far off the road's centre line (m): its 1 m blocks and its boughs stay off the gravel.
+ROAD_CLEAR = 3.5
 HOLLOW = [(23, -3), (29, -11), (35, -19), (42, -25)]
 BERM = [(-23, -16.5), (-7, -13.5)]
 SLIDES = [(1.7, -55.0), (-3.0, -26.0), (9.5, 0.5), (11.5, 21.0), (10.0, 56.5)]  # gentle banks, a way in and out of every stretch of the bed
@@ -412,8 +413,8 @@ rect("logstack", 46.4, 37.2, 1.6, 3.0, 0)                    # MB1: shuts the ga
 rect("lowcrates", 64.0, 30.0, 2.0, 1.0, 90)
 # MB2: the sawn boards stand along the shed's east end (v3 had them along its north side, 5 m from the pole). There
 # they hid whoever raised flag B from the defenders coming back from the Back yard, and the defender who stood behind
-# them lost his duel with the pole 54 to 32 over 250 rounds. Cover at a pole serves the raiser as much as the holder
-# (docs/records/MB2.md).
+# them lost his duel with the pole 24 knock-outs to 43 over 236 rounds. Cover at a pole serves the raiser as much as
+# the holder (docs/records/MB2.md).
 rect("logstack", 62.3, 36.0, 1.0, 6.4, 0, top=2.0, tag="boards")
 rect("logstack", 51.6, 30.6, 4.4, 1.4, 63)          # v3: where the road ends: it can't look on into B's back yard
 
@@ -600,8 +601,9 @@ LANE_PATHS = {
           (43.2, 1.0), (58, 4.5)],
     # MB2: the south lane keeps to the road, through its S between the Road stands (the road is clear: MB1's lane left
     # it for the north verge at a fallen tree and came back onto it past the stack). Its stops either side of the
-    # field's middle are the culvert's two heads. Its last two points are flag B's defenders: one behind the crates north of the road mouth, off the road's line
-    # with a view of the pole, one behind the stack beside it. In the road mouth, at (44, 35), the forward defender
+    # field's middle (x -0.2 along the spawn line) are the bend's east mouth and the Culvert's west head. Its last two
+    # points are flag B's defenders: one behind the crates north of the road mouth, off the road's line with a view of
+    # the pole, one behind the stack beside it. In the road mouth, at (44, 35), the forward defender
     # was shot from the Culvert's stack, 25 m off, before a fight reached the flag: 80 of the 175 knock-outs the
     # attackers scored round the pole, and they won 64 % of the rounds (55 % with him behind the crates).
     "s": [(-77, 21), (-66, 27), (-48, 33), (-34, 42), (-26, 45.5), (-14.5, 55.6), (-8.3, 46),

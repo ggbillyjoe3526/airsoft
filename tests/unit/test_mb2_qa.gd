@@ -4,9 +4,10 @@ extends GutTest
 ## gate screens stand taller than a woodpile's 1.8 m.
 
 const SIDE := 8
-## The Long road's centreline between the camps' gates (tools/woodland/layout.py, ROAD), the gravel strip's half width
-## that everything keeps out of (m; layout.py ROAD_HALF), and how far a block may stand over the road's surface before
-## it counts (the culvert's deck and walls are the road).
+## The Long road's centreline between the camps' gates (a copy of tools/woodland/layout.py's ROAD without its two end
+## legs inside the camps: when the road moves, this and test_mb1_layouts' ROAD_WEST move with it), the gravel strip's
+## half width that everything keeps out of (m; layout.py ROAD_HALF), and how far a block may stand over the road's
+## surface before it counts (the culvert's deck and walls are the road).
 const ROAD: Array[Vector2] = [Vector2(-66, 27), Vector2(-48, 33), Vector2(-34, 42), Vector2(-26, 45.5),
 		Vector2(-20.5, 52.3), Vector2(-16, 55.6), Vector2(-13, 55.6), Vector2(-10.3, 52), Vector2(-8.3, 46),
 		Vector2(-6.3, 42.4), Vector2(-3.5, 42.4), Vector2(-0.8, 45), Vector2(3, 48.3), Vector2(14, 48.3), Vector2(22, 43.6),

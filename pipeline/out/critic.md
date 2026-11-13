@@ -1,42 +1,59 @@
-Task: MB2 · Woodland's road stack at a woodpile's 1.8 m
-Attempt: 1 of 4
-Head: 763c0a5124121c843316dab03f38ae6ffa283b95 (checks passed on it; performance ran on 99930c3, and 763c0a5 only adds
-docs/records/MB2.md and pipeline/out/performance.md, so its Pass stands)
+Task: MB2 · Woodland's Long road, cleared
+Attempt: 2 of 4
+Head: 85e3f5295b6438806e8ba1a352813a6de6a0db70 (checks passed on it; diff read as `git diff 65ee956 HEAD`)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept (one non-blocking check failed, judgment)
+Score: 7/8 → Accept
 
-Evidence for the passes:
-- Check 1, criterion 1: `tools/woodland/layout.py` drops `top=2.8`. In the map JSON the stack's block is 2.162 m tall
-  with its centre at y 0.649 (it was 3.162 m), and `test_mb2_qa.gd` holds "only the six camp gate screens stand
-  taller".
-- Check 1, criterion 2: the THICKETS polygon builds as a thicket block x 21.3..23.0, z 39..45, 5.37 m tall.
-  `test_mb1_layouts.gd`'s new test fails without it; the ray test is the one already on main.
-- Check 1, criterion 3: the play records recounted. Elimination's west end: y18 111/235 = 47.2 %, w16 98/236 =
-  41.5 %, v15 115/239 = 48.1 %. Attackers in Attack / Defend: y18 70/130 = 53.8 %, w16 74/121, v15 69/117. All match
-  the record's table and are inside the bands.
-- Check 1, criteria 4 and 5: nothing under game/ changes, no new model or sound, the three docs are updated.
-- Check 6: the spruce passes as an honest reading of "Lower it to 1.8 m": the woodpile stands 1.8 m and the field's
-  own thicket language closes the line, as the card's "cover it another way" allowed. In practice the 2.8 m wall is
-  back as a 5 m one at the same spot, dressed as trees, and the stack is no longer the east's cover. The owner should
-  judge this in play.
+Evidence for the passes (one line each):
+1. Crit. 1: tools/woodland/check.py:+61 and world.py:+157 enforce the rule, and check.py gives TOTAL 0 (re-run).
+   test_mb2_qa.gd +64 and +75 test the strip; +37 holds the six gate screens. Crit. 2: test_mb1_layouts.gd +186..218.
+   The critic's own raster check against the built JSON: 250 eye points on the strip west of the bend (out to ±2.4 m,
+   which covers QA's 2.5 m edge advisory) against 265 east of it saw 0 pairs, and 910 strip points saw 0 of flag B's
+   ring and post chests. The record's claim is honest. Crit. 3: the records recounted. Attack / Defend built 170/247 =
+   68.8 %, main 147/236 = 62.3 %. Elimination west end 114/240 decided = 47.5 % (the record writes 241; one round in
+   rc16d was a draw). Plant The Bomb 50/125 = 40 % against 48/117 = 41 %. rc16m gives the same rounds as rc16.
+   Crit. 4: no game/ file and no new asset. Crit. 5: the docs are covered, except as noted under 8.
+   The out-of-band 69 % is handled honestly and the handling is defensible. The owner ordered the clear road and was
+   told the figure, main still has the road he rejected, and ten measured layouts failed to win the points back.
+   KNOWN_ISSUES, DECISIONS, the record and the changelog note all state the figure. The next attempt at it is named
+   (flag B's posts or pole), but it has no task id yet: give it one.
+2. ARCHITECTURE has no Contracts entry for the Woodland generator or map_heat. map_heat.gd +176 adds a mode name and
+   keeps the old ones.
+3. No game code changed. map_heat.gd allocates per round in a dev tool, which is fine. Performance pooled +1.5 % over
+   four seeds.
+4. On main, test_nothing_stands_on_the_long_road fails on the three windthrows (`tag="roadblock"`, the old
+   layout.py:329-331). The sight test now walks the new strip.
+5. The tests are typed throughout, and every change is generator data or tests.
+6. The road bends round two solid spruce stands into a 7 m corridor with no bough over the gravel (the bend render
+   shows a clear strip), it uses no new model, and the tone is right. The 7-point Attack / Defend lean is a known
+   issue under crit. 3.
+7. Pass, with an advisory. tests/unit/test_mb2_qa.gd:10 and test_mb1_layouts.gd:84 hand-copy layout.py's ROAD, a
+   third and fourth copy that will drift silently when the road moves again. layout.py:440 is an unwrapped comment
+   line of about 150 chars.
 
-Failed check:
-8. [judgment] The docs misstate what the evidence shows.
-   - `docs/DECISIONS.md` and the THICKETS comment in `tools/woodland/layout.py` give 41 % to the bare lowered stack;
-     it is the run with a stack added at flag B's yard. The bare stack was never match-measured.
-   - `layout.py` cites MB1's "1,531 of 55,625 lines"; the record gives 1,485 for the bare lowered stack and 350 for
-     the test's own count. One figure, labelled.
-   - `layout.py` still calls the stack "the east end's hard cover over the dip", now false.
-   - The record's Known issues left names a tight south passage with no `docs/KNOWN_ISSUES.md` row, and its width
-     disagrees with QA's measure and with `test_mb2_qa.gd`'s message.
+Failed checks, with evidence:
+8. [judgment] changelog.d/map-layouts-reworked.md:8 (MB1's note, still unreleased) still reads "three fallen trees
+   across the Long road and a tall log stack across it at the Culvert". The next patch notes will announce the road
+   blocked and cleared in the same release. The figures in the docs also disagree with each other:
+   - The record's flag B line, "118 to 73 a hundred rounds; 123 to 75", doesn't match its own table's 269 to 167 over
+     247 rounds (109 to 68 a hundred) or 285 to 161 over 236 rounds (121 to 68).
+   - The sawn boards' duel is "54 to 32 over 250 rounds" in layout.py:+375, 21.6 to 12.8 a hundred, but "10 to 18 a
+     hundred rounds" in docs/records/MB2.md and DECISIONS.
 
-Must-fix (in this pull request, no retry needed): the four above.
+Must-fix before merge (non-blocking, but they are the player-facing notes):
+- Change MB1's Woodland clause in changelog.d/map-layouts-reworked.md to what ships, or drop it.
+- In each place, say what counts as "round flag B" (radius or area) and what the denominator is, then reconcile the
+  118/73 and 54/32 figures with the 10/18 one, or recount them.
+- Optional: make the two tests read layout.ROAD's points from one source, or at least name layout.py:288 as the
+  source, which test_mb1_layouts already does.
 
 Owner should test in the game:
-- From the hump on the Long road west of the Culvert: does the 1.8 m stack with 5 m spruce right behind it read as a
-  lowered woodpile, or as the old tall wall dressed up?
-- As the east, push up the road: is the stand's corner at (24, 45) usable cover?
-- Walk the south way round the stand (about x 22, z 45.5) at a sprint: do you snag between the spruce and the verge
-  stack?
-- Is the spruce the same green and density as the Ford's thickets, with no hard box edge where it meets the stack?
-- At flag B as a defender: is the pole still safe from the road, and does B still feel soft?
+- Walk the Long road from the Truck bend through the S to the Culvert. Does it read as a forest road and not a trench
+  cut through spruce, and is the gravel visibly clear of boughs?
+- Stand at the S's west mouth and at its east mouth and check that neither looks through the bend.
+- Play Attack / Defend on Woodland as a defender at flag B: does B fall too easily (69 % to the attackers against
+  bots)?
+- Play Elimination on the south lane: are the fights close (median about 15 m), and is the fallen tree at the S's
+  east mouth useful cover?
+- Watch bots take the S in all three modes for snagging on the bends or on the spruce edges.
+- Look at the shed's east end: do the moved boards read as natural, and does flag B still feel defensible?

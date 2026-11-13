@@ -53,7 +53,7 @@ clear." This record is the cleared road.
 Seeded 6v6 bot matches at Normal (`tools/map_heat.gd`) and the game's ray. Bands: Elimination's ends 45 to 55 %,
 Attack / Defend's attackers 40 to 65 %. The first and last rows are the same 32 seeds.
 
-| Layout | Elimination, west end | Attack / Defend, attackers | Round flag B, attackers to defenders |
+| Layout | Elimination, west end | Attack / Defend, attackers | Knock-outs within 12 m of flag B's pole, attackers' to defenders' |
 |---|---|---|---|
 | MB1 on `main`: fallen trees and a 2.8 m stack across the road | 48 % ±3 (239 rounds, 32 seeds) | 62 % ±3 (236, 32) | 285 to 161 |
 | Attempt 1: the stack at 1.8 m, spruce behind it | 47 % ±3 (235, 32) | 54 % ±4 (130, 16) | 156 to 127 |
@@ -64,24 +64,30 @@ Attack / Defend's attackers 40 to 65 %. The first and last rows are the same 32 
 - **A straight clear road is out of band both ways.** With nothing on it the only things that end its line are its
   own bends between solid stands: a 1.8 m piece on the verge in the dip hides nobody from the higher west side. The
   south lane's median knock-out went to 32 m, and the west end, shot crossing the open, took 42 %.
-- **The double bend ends the line, and Elimination is even again** (47 % ±3; the south lane 329 knock-outs to 336,
-  at a median 15 m). No two points of the strip either side of the bend see each other. The longest lines left along
+- **The double bend ends the line, and Elimination is even again** (47 % ±3: the west end won 114 of 241 rounds,
+  the east 126, one was drawn; the south lane 329 knock-outs to 336, at a median 15 m). No two points of the strip either side of the bend see each other. The longest lines left along
   the strip: 63 m from the west camp's gate down to the bend, 57 m from the Sawmill's road mouth to it (MB1's road
   was one 60 m line from the Truck bend to flag B before its pieces).
-- **Attack / Defend is outside its band: 69 % ±3, and 62 % ±3 for `main` on the same seeds.** Seven points ±4. A
-  flag goes up in 40 % of rounds (37 %), and of the rounds where none does the attackers win 56 % (49 %). Round
-  flag B itself the count is `main`'s (118 knock-outs to 73 a hundred rounds; 123 to 75); the attackers' gain is on
-  the east ground between the two sites (96 to 62; 70 to 83), where the defenders coming back to B meet them. The
-  one thing the records show of why: on the clear road the attackers shoot from the pole 1 to 2 s sooner (the 10th,
-  50th and 90th percentile of their shots from it 34, 42 and 51 s; 35, 44 and 53 s on `main`).
+- **Attack / Defend is outside its band: 69 % ±3, and 62 % ±3 for `main` on the same seeds.** Seven points ±4. `main`'s
+  figures follow in brackets.
+  - The attackers win by a flag: 165 of 247 rounds end with one raised and held (143 of 236) and 5 by knock-outs
+    alone (4). The match tally follows flag A's height only (`RoundState.flag`): A was fully up in 84 of the 165
+    (74 of the 143), which leaves about 81 won at flag B (69), a third of all rounds at each site on both layouts.
+  - Knock-outs by where the target stood, a hundred rounds, the attackers' to the defenders': within 12 m of flag
+    B's pole 109 to 68 (121 to 68); within 12 m of flag A's 102 to 92 (100 to 90); on the east ground outside both
+    rings (east of x 20) 116 to 213 (85 to 244). The attackers' gain is on that ground, on the way to the sites,
+    not at the poles.
+  - The attackers' knock-outs from within 4 m of flag B's pole come 2 to 4 s sooner (their 10th, 50th and 90th
+    percentile 35, 42 and 53 s; 37, 46 and 55 s).
 - **Ten layouts of flag B's cover were played, 16 seeds each and the last two 32** (`pipeline/out/mb1/rc5` to
   `rc16`, kept out of the repository): cover for the forward defender's flank, a wider view for the defenders coming
   back round the thicket,
   less cover for the attackers at the road mouth, at the bend and beside the pole. They read 61 to 70 %, and a
   16-seed reading is ±4, so none is shown to help. One change is kept on its own evidence: the sawn boards. Beside
   the pole they hid the raiser from the defenders coming back, and the defender who stood behind them lost his duel
-  with the pole 10 to 18 a hundred rounds on `main`; with the boards at the shed's east end he stands at the Back
-  track's corner and wins it 15 to 13.
+  with the pole 10 to 18 a hundred rounds on `main` (the defender in the 4 m square behind the boards against
+  attackers within 4 m of the pole: 24 knock-outs to 43 in 236 rounds); with the boards at the shed's east end he
+  stands at the Back track's corner and wins it 15 to 13 (38 to 32 in 247).
 - **Plant The Bomb is unmoved:** the attackers win 40 % ±4 (125 rounds, seeds 1 to 16; armed in 67 %) on the built
   layout and 41 % ±5 (117; 76 %) on `main`'s, the same seeds (PB1 merged while this was measured; `tools/map_heat.gd`
   takes `bomb` as a mode for it). The Elimination and Attack / Defend records above were played before that merge:
@@ -101,7 +107,7 @@ Attack / Defend's attackers 40 to 65 %. The first and last rows are the same 32 
   the least that shuts the diagonal through it with the spruce off the gravel (at 11 m a 68 m line ran through).
 - **Attack / Defend goes to the owner as a known issue, not as a blocker.** The road he rejected, with a stack
   across it, is what `main` has now; the cleared road is his ruling, and flag B was the softer site before it
-  (`docs/KNOWN_ISSUES.md`). Next: flag B's defender posts or its pole, measured at 32 seeds from the start.
+  (`docs/KNOWN_ISSUES.md`). Next, as MB3: flag B's defender posts or its pole, measured at 32 seeds from the start.
 - **The road test's criterion is unchanged** (no chest in the ring or at the posts from the road west of the
   Culvert); what it samples is the new road's strip, not a box round the old one.
 - **The road's puddle stays** (west of the Truck bend, 1.1 m off the centre line, on `main` before MB1): it is the
