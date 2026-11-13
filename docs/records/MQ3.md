@@ -7,7 +7,7 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Fable 5.2 (model quality thread) | ✓ | Retry 7/8 | The contact shade read as a wavy, blotchy band (12 rays at every second pixel, two passes of blur); the rolled dump pouch's paint was stretched round its flat facets; a light wedge on the pack's side; the whole figure hardly differed from before at a few metres; no reference photos named |
-| 2026-11-13 | 2 | Fable 5.2 (model quality thread) | ✓ | Accept 8/8 | – |
+| 2026-11-13 | 2 | Fable 5.2 (model quality thread) | ✓ (the first run failed on `test_figure_body.gd`'s count of the figure's triangles, 58,868; set to the rounder pouch's 59,058 and run again) | Accept 8/8 | – |
 
 ## What changed
 
@@ -53,6 +53,7 @@ softened within each chart (ten passes), and a normal map made from the same hei
 - **The rolled dump pouch** is rounder (its outline's corners in five steps, its roll's edge in three) and its
   roll is smooth shaded with no bound edge across it: its faces are marked soft, a soft bend is never a panel
   edge. This is the one mesh that changed: `Kit` 10,288 triangles at full detail (10,098 before; budget 10,300).
+  `tests/unit/test_figure_body.gd` holds the figure's count at each distance: 59,058 at full detail (58,868).
 
 - **Where it is drawn.** The team-colour parts (`TeamGear`) have 2048 maps of their own, `human_teamgear_col`,
   `_nrm` and `_orm` (233 charts at 0.42 mm a pixel). The rest (`Pads` material, which the gear has shared with the
