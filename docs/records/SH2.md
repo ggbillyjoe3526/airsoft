@@ -7,7 +7,7 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | build thread | ✓ 6,132 of 6,134 (2 pending, as on main) | 7/8 Retry | check 1: the stock's grooves were hairlines and its toe loop missing; the forearm showed at the hip; nothing gated the wrist; aimed, the stock filled the view's foot |
-| 2026-11-12 | 2 | build thread | ✓ | 8/8 Accept | – |
+| 2026-11-13 | 2 | build thread | ✓ 6,205 of 6,207 (2 pending, as on main) | 8/8 Accept | – |
 
 ## Decisions
 
@@ -39,6 +39,9 @@
 - **The replica rocks a quarter as much while pumped** (`work_cant` 0.25): the hand is on the pump, and the bolt
   action's full cant would swing the pump out of it.
 - **Inspect** turns the replica over and moves nothing on it.
+- **Main's reworked attachments** (MQ2, merged during attempt 2: the vertical grip 64 mm) came in before this: the
+  shotgun's parts file and the whole arms model were rebuilt on them, so the other rifles' foregrip holds are built
+  for the longer grip too.
 - **The pump's two knocks** were cut again to its own model's pump (back at 0.44 and home at 0.84 of the cycle).
 - **The side rail** (the Red Laser left, the Weapon Torch right) joined `data/pool.md` with the model.
 
