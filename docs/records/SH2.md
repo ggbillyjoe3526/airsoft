@@ -19,7 +19,7 @@
   photo 5 for its right side; photos 1 and 2 show a different pump and grip and gave only the muzzle, the shell and
   the receiver's top. The pistol grip is the AEG Rifle's own, in the AEG's place, so the right hand's hold is the
   AEG's. Left off: the sights (his word), the photos' torch, the orange tip, every marking.
-- **37,900 triangles in the hands, 2,998 on a figure.** Steel barrel, tube and cap; aluminium receiver, rails and
+- **37,700 triangles in the hands, 2,992 on a figure.** Steel barrel, tube and cap; aluminium receiver, rails and
   receiver extension; polymer pump, grip, stock and shell; a 2K wear mask as the AEG Rifle's (RW1), imported VRAM
   compressed as the other replicas' (the performance review's note; a test pins it for every replica now).
 - **No iron sights.** With no optic the eye sits on a line 9.5 mm over the top rail (5 mm at first: the stock's comb
