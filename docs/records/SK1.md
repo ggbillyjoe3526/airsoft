@@ -158,8 +158,9 @@ cutting the attackers' chicanes, which break lines over 34 m.
   match, which took about 190 s headless). Attempt 3, QA: Pass; the Tavern's north door moved 0.5 m off the Back
   Lane's woodpile its open leaf folded over; the Barn's east door's leaf still folds 10 cm over the woodpile at the
   Barn's corner (moving either opened a 39 m line; cosmetic, nobody is blocked).
-- Performance: Pass. Map load 36 ms (Depot 8, Woodland 143), nav build 1.18 s (0.90, 3.3), 383 blocks against
-  Woodland's 945, 26 lights within LightPools' 32; frame time at night on Low is on the checklist.
+- Performance: Pass. Attempt 3: map load 37 ms (Depot 7 to 10, Woodland 141 to 151), nav build 1.09 s (0.98, 3.5),
+  382 blocks against Woodland's 960, 26 lights within LightPools' 32, `test_sk1_qa` 127 s alone (16 tests); frame time
+  at night on Low is on the checklist.
 
 ## Left for the owner
 
