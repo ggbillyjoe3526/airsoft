@@ -1,6 +1,6 @@
 # SH2 · The Pump Shotgun's own model, first-person hold and pump
 
-**Review:** attempt 4 in review
+**Review:** 4 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,7 +9,7 @@
 | 2026-11-12 | 1 | build thread | ✓ 6,132 of 6,134 (2 pending, as on main) | 7/8 Retry | check 1: the stock's grooves were hairlines and its toe loop missing; the forearm showed at the hip; nothing gated the wrist; aimed, the stock filled the view's foot |
 | 2026-11-13 | 2 | build thread | ✓ 6,205 of 6,207 (2 pending, as on main) | 7/8 Retry | check 1: a bot's trigger finger stuck out to reach the trigger; the stock's last column of slots showed the tube's end and a grey floor |
 | 2026-11-13 | 3 | build thread | ✓ 6,433 of 6,435 (2 pending, as on main) | 7/8 Retry | check 1 (measured): the stock's last column of slots was cut 0.78 of the others' length; photo 4's five are equal |
-| 2026-11-13 | 4 | build thread | in review | in review | – |
+| 2026-11-13 | 4 | build thread | ✓ 6,452 of 6,454 (2 pending, as on main) | 8/8 Accept | – |
 
 ## Decisions
 
