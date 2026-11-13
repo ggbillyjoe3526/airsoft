@@ -3,8 +3,10 @@
 - Your right hand stays below the screen, and the Compact SMG sits at the same angle and size as the rifles.
 - With a Vertical Grip or Angled Grip fitted, your left hand is a fist round the grip.
 - Pistols are held tight in both hands, the left wrapped round the right; the Cyber Pistol is held like the GBB Pistol.
+- Pistols sit nearer and larger at the hip, about a third bigger on screen; the reload moves to match.
 - On a pistol reload your left hand lets go, changes the magazine and comes back.
 - Raise the sights and a rifle's hands leave the view; with a pistol only the tops of your hands show under the slide.
 - Gloves, sleeves and bare hands (Settings › Dev › Skin-only arms) are remodelled and repainted in more detail.
+- Bare hands (Settings › Dev › Skin-only arms) have real hand proportions, a slimmer thumb, short nails, and knuckles and veins that show in the light.
 - First-person motion is smoother: a gentle bob as you walk, breathing at rest, a lean into strafes, a dip on landing and an eased drop when you sprint.
 - Bots still hold pistols in one hand; with a rifle and no grip, their left hand holds where yours does.
