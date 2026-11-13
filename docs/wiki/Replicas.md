@@ -6,11 +6,11 @@ whatever it came from.
 
 You carry two at once, a primary and a sidearm, picked in your [Loadout](Loadout). In play you see your own arms, in
 dark olive gloves and sleeves, holding the one in your hands. A rifle sits low and near at the hip, so you see your
-left hand under the handguard, its thumb along the near side and its forearm running up beside the rifle in one
-straight line, and your right hand stays below the screen. A pistol
+left hand under the handguard just ahead of the magazine, its thumb along the near side and its forearm running
+up beside the rifle, and your right hand stays below the screen. A pistol
 is held tight in both hands, the left wrapped round the right, a little right of the middle of the screen. Raise the
 sight and your hands leave the view: a rifle hides them behind itself, and only the top of them shows under a
-pistol's slide. With a grip fitted your left hand closes round the grip, the index finger under the handguard.
+pistol's slide. With a grip fitted your left hand closes round the grip, high under the handguard.
 
 The replica moves with you: it bobs with your steps, rises and falls a little as you breathe, leans into a strafe,
 dips when you land and flicks lightly with each shot. With the sight raised it holds almost still, and **Reduced
