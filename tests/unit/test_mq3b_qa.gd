@@ -14,6 +14,8 @@ const HEADWEAR_TRIANGLES := {
 	"Head_Boonie": 7276, "Head_Boonie_LOD1": 2412, "Head_Boonie_LOD2": 780,
 }
 ## The strip and block tiles (px from the atlas's left and bottom), as in head_textures.py.
+## The boonie crown tile in image pixels (x from the left, y from the top).
+const CROWN_TILE := Rect2(1024, 1024, 512, 256)
 const TILES: Array[Rect2] = [
 	Rect2(0, 64, 512, 64), Rect2(0, 128, 512, 64), Rect2(0, 192, 256, 64), Rect2(256, 192, 256, 64),
 	Rect2(1024, 384, 512, 64), Rect2(1024, 448, 512, 64),
@@ -168,3 +170,34 @@ func test_body_surfaces_refuses_a_file_it_has_painted_and_leaves_it_alone() -> v
 	assert_true(str(output).contains("painted already"), "and says why")
 	assert_eq(FileAccess.get_md5(copy), before, "the file is untouched")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(copy))
+
+
+func test_the_boonie_crown_climbs_its_tile_ring_by_ring_as_the_cloth_rises() -> void:
+	var root := _human()
+	for level in LEVELS:
+		var mesh := _mesh(root, "Head_Boonie" + level)
+		var at := _surface(mesh, "Headwear")
+		var arrays := mesh.surface_get_arrays(at)
+		var uv := arrays[Mesh.ARRAY_TEX_UV] as PackedVector2Array
+		var vertex := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var heights := {}
+		for i in uv.size():
+			var px := uv[i] * float(MAP)
+			if px.x < CROWN_TILE.position.x or px.x > CROWN_TILE.end.x or px.y < CROWN_TILE.position.y or px.y > CROWN_TILE.end.y:
+				continue
+			var t := snappedf((CROWN_TILE.end.y - px.y) / CROWN_TILE.size.y, 0.0005)
+			if not heights.has(t):
+				heights[t] = []
+			(heights[t] as Array).append(vertex[i].y)
+		var rows: Array = heights.keys()
+		rows.sort()
+		assert_gte(rows.size(), 6, "Body%s: the crown's rings" % level)
+		var last := -INF
+		for t: float in rows:
+			var mean := 0.0
+			for y: float in heights[t]:
+				mean += y
+			mean /= float((heights[t] as Array).size())
+			assert_gte(mean, last - 0.0005, "%s: t %.3f sits no lower than the ring below" % [level, t])
+			last = mean
+		assert_gt(rows[rows.size() - 1], 0.95, "%s: the top fan reaches the tile's top" % level)

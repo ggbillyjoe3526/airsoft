@@ -1624,8 +1624,9 @@ four heads differ.
   no rings or swirls on them.
 - [ ] **Mesh mask.** Its paint is chipped to bare steel in places and its edge is bound in woven tape with a stitch
   row.
-- [ ] **Team arm bands.** Ribbed elastic with a hem at each edge, in exactly the team's blue or orange: not darker,
-  not greyer than the carrier beside it.
+- [ ] **Team arm bands.** Ribbed elastic with a hem at each edge, read at once as the team's blue or orange in sun
+  and in shade at 10 to 30 m. The ribs and shading leave them about a fifth darker on average than the flat colour
+  they were: say if they look dim.
 - [ ] **Boots.** Soft suede with creases across the top of the foot only (none running down the sides), a scuffed
   toe cap and lugs cut into the sole's side.
 - [ ] **At range nothing changed.** A figure 30 m away reads as before, with no shimmer on the arm bands or the
