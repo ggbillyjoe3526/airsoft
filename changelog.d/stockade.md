@@ -11,5 +11,4 @@
 - Plant The Bomb: Site A is indoors in the Long House's west room. Site B is in the open Woodyard, under the Sawmill's shed.
 - Also plays Elimination and Attack / Defend.
 - Day and night: three fires and lanterns light it at night.
-- Close fights: replicas start on semi-auto, as on Depot.
 - Its picture shows on the Match page and the loading screen.

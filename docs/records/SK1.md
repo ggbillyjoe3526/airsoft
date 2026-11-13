@@ -58,7 +58,8 @@ Bomb (PB1). He picked from three ideas at 17:54: "Build both Stockade and Stacks
 
 Claude's, each the owner's to change:
 
-- Dev content, 6v6 standard, semi-auto start like Depot (close fights).
+- Dev content, 6v6 standard; replicas start on their own selector, as on Woodland (an outdoor field: NA1's semi start
+  is for indoor ones).
 - Site A indoors, Site B in the open, so the two sites ask for different plays.
 - Day by default, a night preset with fires and lanterns.
 
