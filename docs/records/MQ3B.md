@@ -54,8 +54,10 @@ and paints only those pixels (270,156 of the 2048 square):
 | Soles | a plain slab | lugs cut into the tread's side all round, a paler worn bottom edge, dried dust |
 
 The arm band now draws the body's colour map (white under the team colour the game paints), so its ribs, grime and
-the body's baked occlusion show on it; before it had no colour map. Its mean under the team colour is 0.97, neutral
-grey, so Alpha's blue and Beta's orange are as they were.
+the body's baked occlusion show on it; before it had no colour map. The map is neutral grey there (red, green and
+blue equal), so the hue is Alpha's blue and Beta's orange as before, and the ribs' crests in the open are the full
+team colour. Its mean is 0.88 of white in the map (0.77 in linear light): on average the band is about a fifth
+darker than the flat colour it was, which is the ribs' valleys, the grime and the shade the bake put under the arm.
 
 - **References:** the owner's photos these parts were modelled from (BL10, BL11), `ref_images.zip` ›
   `clothes/highcut_helmet` (eleven, among them `Helmet-MICH-High-Cut-Tactical(4)`), `clothes/baseball_cap` (five,
@@ -69,8 +71,9 @@ grey, so Alpha's blue and Beta's orange are as they were.
 - **The face is unchanged** (FA1's four looks, in their cells of the atlas, byte for byte from the same painter).
   It is small on screen behind goggles or glasses; the critic's and the owner's notes on it are in FA1.
 - **No mesh changed**: the heads' triangles (the largest 8,992 / 3,192 / 896), the body's (33,458), every UV island
-  of the body and every weight are as they were. On the heads only the UVs of the five moved parts changed.
-  `tests/unit/test_figure_body.gd`'s counts hold.
+  of the body and every weight are as they were. On the heads only the UVs of the five moved parts changed; their
+  new seams split 391 vertices over the nine head meshes (105,576 in the file, 105,185 before), with no triangle
+  added. `tests/unit/test_figure_body.gd`'s counts hold.
 - **No game code changed.** The band's material keeps its name; `FigureModels.team_material` copies it and sets its
   colour as before, and the copy keeps the map (a test holds this).
 - **Lower detail levels** draw the same maps, so the body's far levels show the band's and boots' paint as far as a
@@ -107,6 +110,10 @@ grey, so Alpha's blue and Beta's orange are as they were.
   maps touches only the pixels of the parts it paints. After any later rebuild of the body, run it again.
 - **The arm band takes the body's colour map** (default): without one it could only be lit, never shaded or
   dirtied. No ninth material and no new map: it is the map the cloth beside it already draws.
+- **The band's mean is 0.88 of white, no brighter** (default): white is the map's ceiling, so a brighter mean
+  flattens the ribs (at 0.88, 6 % of the band's pixels are at white; at 0.92, 21 %; at 0.94, 29 %). The team
+  colours stay full at the crests; if the owner finds the bands dim in play, `BAND_MEAN` lifts them at the ribs'
+  cost.
 - **Patterns no finer than the map can hold** (MQ3's rule): the body's atlas is 1.3 mm a pixel there, so the band's
   ribs are 4.3 mm apart (a real band's are nearer 2) and its stitches are a dotted row.
 - **The heads' maps are lossless** (default): the line down the back of the high cut came from three things, fixed
@@ -122,6 +129,11 @@ grey, so Alpha's blue and Beta's orange are as they were.
 
 ## Known issues left
 
+- The body's maps also changed in the empty atlas within 4 px of the painted parts (the margin a mip level needs)
+  and, by more than 30 of 255, in 330 normal-map pixels at the painted parts' borders under the cloth beside them
+  (QA); neither shows.
+- At the farthest level the high cut's and the cap's mesh masks keep no triangle on the binding's tile (decimation),
+  so the tape is not drawn there.
 - The whole figure from far off reads as before (`mq3b-7`): this is a pass for a figure within a few metres.
 - The band's ribs and the boots' creases are coarse beside the gear's weave (1.3 mm a pixel against 0.42): the body
   shares one 2048 atlas. Finer needs the body's atlas split in two, which is a rebake.

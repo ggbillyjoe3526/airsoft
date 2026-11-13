@@ -62,7 +62,7 @@ BAND_VALLEY = 0.13                   # share of the colour a rib's valley loses
 BAND_GRIME = (0.035, 0.09)           # m across, share: handled, dusty patches
 BAND_SEAM = 0.18                     # share of the colour lost in the needle holes between two stitches
 BAND_HEM_LIGHT = 0.05                # share: the folded hems, doubled cloth, a little paler
-BAND_MEAN = 0.97                     # the band's mean under the team colour: the colour stays the team's own
+BAND_MEAN = 0.97                     # the band's mean before the bake's occlusion: its crests stay full white
 BAND_ROUGH = (0.72, 0.10)            # the ribs' crowns, how much rougher the valleys are
 
 # The boots.
