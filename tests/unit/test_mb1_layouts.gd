@@ -11,16 +11,17 @@ const MAPS: Array[String] = ["depot", "woodland", "subway"]
 const DEPTH_SLACK := 3.5
 ## The farthest a lane's last two points (the defender posts) may stand from the nearest flag (m).
 const POST_REACH := 30.0
-## Woodland's Long road west of the Culvert (x from, x to, z from, z to; its hump is x -13 to -3), flag B's pole,
-## the ring a body stands in to raise or hold it, its two defender posts, and the chest below the eye (m).
-const ROAD_WEST := Rect2(-30.0, 40.0, 44.0, 12.0)
-const HUMP_X := Vector2(-13.0, -3.0)
+## Woodland's Long road from the west camp's gate to the Culvert (its centreline, tools/woodland/layout.py ROAD; the
+## strip is walked 2 m either side of it), flag B's pole, the ring a body stands in to raise or hold it, its two
+## defender posts, and the chest below the eye (m).
+const ROAD_WEST: Array[Vector2] = [Vector2(-66, 27), Vector2(-48, 33), Vector2(-34, 42), Vector2(-26, 45.5),
+		Vector2(-20.5, 52.3), Vector2(-16, 55.6), Vector2(-13, 55.6), Vector2(-10.3, 52), Vector2(-8.3, 46),
+		Vector2(-6.3, 42.4), Vector2(-3.5, 42.4), Vector2(-0.8, 45), Vector2(3, 48.3), Vector2(8, 48.3)]
+const ROAD_SIDE := 2.0
 const POLE_B := Vector2(49.0, 38.5)
 const POLE_RING := 1.5
 const POSTS_B: Array[Vector2] = [Vector2(44.6, 29.8), Vector2(49.0, 37.0)]
 const CHEST_BELOW_EYE := 0.3
-## Woodland's log stack across the Long road, where the lane leaves the Culvert (its centre).
-const ROAD_STACK := Vector2(20.5, 42.0)
 
 var tuning: SimTuning = SimTuning.load_default()
 var style: MapStyle = PlayTuning.load_default().map_style
@@ -174,8 +175,8 @@ func test_subway_flag_b_stands_on_the_north_platform_floor_clear_of_every_block(
 	assert_eq(hit.size(), 0, "no block in a standing body at the flag: %s" % [hit])
 
 
-## The road's stack at the Culvert is a woodpile's 1.8 m (the owner, 2026-11-12) and the hump, 2.1 m over the dip it
-## stands in, looks over it: the young spruce against the stack's east face is what keeps the road off the ring.
+## The Long road is clear of pieces (the owner, 2026-11-12, MB2): west of the Culvert it bends in an S between the two
+## Road stands, and that S, not a piece on the road, keeps its strip off flag B's pole ring and posts.
 func test_woodland_long_road_does_not_see_flag_b_pole_ring_or_posts() -> void:
 	var m := maps["woodland"]
 	var level := MapLevel.new()
@@ -185,58 +186,36 @@ func test_woodland_long_road_does_not_see_flag_b_pole_ring_or_posts() -> void:
 	var hit := RayHit.new()
 	var nav := navs["woodland"]
 	var eye := tuning.body.stand_eye_height
-	var ring: Array[Vector3] = []
+	var targets: Array[Vector3] = []
 	for dx: float in [-POLE_RING, -POLE_RING * 0.5, 0.0, POLE_RING * 0.5, POLE_RING]:
 		for dz: float in [-POLE_RING, -POLE_RING * 0.5, 0.0, POLE_RING * 0.5, POLE_RING]:
-			ring.append(_chest(nav, POLE_B.x + dx, POLE_B.y + dz, eye))
-	var posts: Array[Vector3] = []
+			targets.append(_chest(nav, POLE_B.x + dx, POLE_B.y + dz, eye))
+	var ring_count := targets.size()
 	for p: Vector2 in POSTS_B:
-		posts.append(_chest(nav, p.x, p.y, eye))
+		targets.append(_chest(nav, p.x, p.y, eye))
 	var ring_seen := 0
 	var posts_seen := 0
-	var x := ROAD_WEST.position.x
-	while x <= ROAD_WEST.end.x:
-		var z := ROAD_WEST.position.y
-		while z <= ROAD_WEST.end.y:
-			var from := Vector3(x, nav.floor_at(Vector3(x, 50.0, z)) + eye, z)
-			for t: Vector3 in ring:
-				if not q.ray(from, t, hit):
-					ring_seen += 1
-			if x >= HUMP_X.x and x <= HUMP_X.y:
-				for t: Vector3 in posts:
-					if not q.ray(from, t, hit):
-						posts_seen += 1
-			z += 1.0
-		x += 1.0
+	var from_count := 0
+	for i in ROAD_WEST.size() - 1:
+		var a := ROAD_WEST[i]
+		var b := ROAD_WEST[i + 1]
+		var side := (b - a).normalized().orthogonal() * ROAD_SIDE
+		var steps := int(ceilf(a.distance_to(b)))
+		for k in steps:
+			var c := a.lerp(b, float(k) / float(steps))
+			for p: Vector2 in [c - side, c, c + side]:
+				var from := Vector3(p.x, nav.floor_at(Vector3(p.x, 50.0, p.y)) + eye, p.y)
+				from_count += 1
+				for t in targets.size():
+					if not q.ray(from, targets[t], hit):
+						if t < ring_count:
+							ring_seen += 1
+						else:
+							posts_seen += 1
 	level.free()
+	assert_gt(from_count, 250, "the road's strip is sampled")
 	assert_eq(ring_seen, 0, "the Long road west of the Culvert sees a chest in flag B's pole ring")
-	assert_eq(posts_seen, 0, "the Long road's hump sees a chest at one of flag B's defender posts")
-
-
-## MB2: the stack across the Long road at the Culvert is a woodpile's 1.8 m (the owner, 2026-11-12: "Lower it to
-## 1.8 m"), and spruce stands against the whole of its east face, over twice its height.
-func test_woodland_road_stack_is_a_woodpile_high_with_spruce_against_its_east_face() -> void:
-	var m := maps["woodland"]
-	var stack: MapData.Block = null
-	for b in m.blocks:
-		if b.dress == &"cordwood" and absf(b.center.x - ROAD_STACK.x) < 0.1 and absf(b.center.z - ROAD_STACK.y) < 0.1:
-			stack = b
-	assert_not_null(stack, "the log stack across the Long road at the Culvert")
-	if stack == null:
-		return
-	var top := stack.center.y + stack.size.y * 0.5
-	var tall := top - PropLayout.ground_at(m, stack.center.x, stack.center.z, top)
-	assert_almost_eq(tall, 1.8, 0.05, "the road's stack stands a woodpile's 1.8 m")
-	var east := stack.center.x + stack.size.x * 0.5
-	var spruce: MapData.Block = null
-	for b in m.blocks:
-		if b.kind == &"thicket" and absf(b.center.x - b.size.x * 0.5 - east) < 0.05:
-			if (b.center.z - b.size.z * 0.5 <= stack.center.z - stack.size.z * 0.5 + 0.05
-					and b.center.z + b.size.z * 0.5 >= stack.center.z + stack.size.z * 0.5 - 0.05):
-				spruce = b
-	assert_not_null(spruce, "spruce against the whole east face of the road's stack")
-	if spruce != null:
-		assert_gt(spruce.center.y + spruce.size.y * 0.5, top + tall, "the spruce stands over twice the stack")
+	assert_eq(posts_seen, 0, "the Long road west of the Culvert sees a chest at one of flag B's defender posts")
 
 
 func _chest(nav: NavGrid, x: float, z: float, eye: float) -> Vector3:

@@ -101,9 +101,10 @@ defenders in the east camp.
   beyond the fence a far wood of spruce spires in uneven clumps and gaps. A grassy floor, the weathered violet pickup wreck and teal crates carry
   the colour, with nothing near a team's blue or orange. Every crown starts over head height.
 - **Three lanes, three ranges:** no lane is shot from end to end. A hazel hedge on the Ridge's brow, fallen trees
-  and a log stack at the North bridge's two heads, three fallen trees lying across the Long road, a log stack across
-  it past the Culvert with young spruce grown up behind it, and two spruce thickets on the Ford's east bank break the
-  long lines. The road is close work from tree to tree, the Clearing a mid-range fight, with a fallen tree in its
+  and a log stack at the North bridge's two heads, the Long road's double bend between two stands of spruce west of
+  the Culvert, and two spruce thickets on the Ford's east bank break the long lines. Nothing stands on the road
+  itself: its woodpiles and its one fallen tree are on the verges. The road is close work through the bend and a
+  longer look from the Culvert up to the Sawmill, the Clearing a mid-range fight, with a fallen tree in its
   middle and the Ford and its ramp, 5 m wide, up to Hut row, and the north lane over the bridge is the long one.
 - **Few walls:** cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres,
   wooden crates, the violet pickup wreck and the trunks of the trees themselves, and the camps and the field's edge are

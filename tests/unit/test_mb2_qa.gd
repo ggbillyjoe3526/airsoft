@@ -1,13 +1,19 @@
 extends GutTest
-## MB2 (QA): Woodland's road stack lowered to a woodpile's 1.8 m with spruce against its east face. The stand leaves
-## the south lane walkable round it, and only the six camp gate screens still stand 2.8 m.
+## MB2: Woodland's Long road is clear (the owner, 2026-11-12: "I don't want woodpiles over the road ... The road
+## should be clear"). Nothing stands on its strip between the camps, it is walked end to end, and only the six camp
+## gate screens stand taller than a woodpile's 1.8 m.
 
 const SIDE := 8
-## The stack's centre, the stand's box (x from, x to, z from, z to) and the south lane's points either side of it.
-const ROAD_STACK := Vector2(20.5, 42.0)
-const STAND := Rect2(21.3, 39.0, 1.7, 6.0)
-const LANE_WEST := Vector3(20.6, 0.0, 46.4)
-const LANE_EAST := Vector3(24.5, 0.0, 43.8)
+## The Long road's centreline between the camps' gates (tools/woodland/layout.py, ROAD), the gravel strip's half width
+## that everything keeps out of (m; layout.py ROAD_HALF), and how far a block may stand over the road's surface before
+## it counts (the culvert's deck and walls are the road).
+const ROAD: Array[Vector2] = [Vector2(-66, 27), Vector2(-48, 33), Vector2(-34, 42), Vector2(-26, 45.5),
+		Vector2(-20.5, 52.3), Vector2(-16, 55.6), Vector2(-13, 55.6), Vector2(-10.3, 52), Vector2(-8.3, 46),
+		Vector2(-6.3, 42.4), Vector2(-3.5, 42.4), Vector2(-0.8, 45), Vector2(3, 48.3), Vector2(14, 48.3), Vector2(22, 43.6),
+		Vector2(32, 40), Vector2(44, 33)]
+const CLEAR_HALF := 2.5
+const OVER_ROAD := 0.3
+const STEP := 0.5
 ## The gate screens stand 2.8 m; every other cordwood stack 1.8 m.
 const GATE_SCREENS := 6
 const CAMP_X := 70.0
@@ -46,33 +52,43 @@ func test_only_the_six_camp_gate_screens_stand_taller_than_a_woodpile() -> void:
 	assert_eq(count, GATE_SCREENS, "the gate screens stand 2.8 m")
 
 
-func test_nothing_but_the_stack_and_the_stand_stands_in_the_culvert_stand_box() -> void:
-	var box := STAND.grow(0.4)
-	var other := PackedStringArray()
+func _road_points() -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for i in ROAD.size() - 1:
+		var steps := int(ceilf(ROAD[i].distance_to(ROAD[i + 1]) / STEP))
+		for k in steps:
+			var p := ROAD[i].lerp(ROAD[i + 1], float(k) / float(steps))
+			out.append(Vector3(p.x, nav.floor_at(Vector3(p.x, 50.0, p.y)), p.y))
+	return out
+
+
+func test_nothing_stands_on_the_long_road() -> void:
+	var on_road := PackedStringArray()
+	var points := _road_points()
 	for b in map.blocks:
-		var r := Rect2(b.center.x - b.size.x * 0.5, b.center.z - b.size.z * 0.5, b.size.x, b.size.z)
-		if not r.intersects(box):
-			continue
-		var is_stack := b.dress == &"cordwood" and absf(b.center.x - ROAD_STACK.x) < 0.1
-		if not (is_stack or b.kind == &"thicket"):
-			other.append("%s %s" % [b.kind, b.center])
-	assert_eq(other.size(), 0, "blocks cut by the stand: %s" % [other])
-	for p in map.poles:
-		assert_false(box.has_point(Vector2(p.x, p.z)), "a flag in the stand")
-	for e in map.ends:
-		for s in e.spawns:
-			assert_false(box.has_point(Vector2(s.position.x, s.position.z)), "a spawn in the stand")
+		var box := Rect2(b.center.x - b.size.x * 0.5, b.center.z - b.size.z * 0.5, b.size.x, b.size.z)
+		var top := b.center.y + b.size.y * 0.5
+		for p in points:
+			var near := Vector2(clampf(p.x, box.position.x, box.end.x), clampf(p.z, box.position.y, box.end.y))
+			if near.distance_to(Vector2(p.x, p.z)) < CLEAR_HALF and top > p.y + OVER_ROAD:
+				on_road.append("%s %s at %s" % [b.kind, b.dress, b.center])
+				break
+	assert_eq(on_road.size(), 0, "blocks standing on the Long road's strip: %s" % [on_road])
 
 
-func test_the_south_lane_is_walked_round_the_stand_between_its_two_points() -> void:
-	var from := Vector3(LANE_WEST.x, nav.floor_at(Vector3(LANE_WEST.x, 50.0, LANE_WEST.z)), LANE_WEST.z)
-	var to := Vector3(LANE_EAST.x, nav.floor_at(Vector3(LANE_EAST.x, 50.0, LANE_EAST.z)), LANE_EAST.z)
+func test_the_long_road_is_walked_end_to_end_on_its_strip() -> void:
+	var shut := PackedStringArray()
+	for p in _road_points():
+		if is_nan(p.y) or not nav.is_walkable_at(p + Vector3(0.0, 0.6, 0.0)):
+			shut.append("(%.1f, %.1f)" % [p.x, p.z])
+	assert_eq(shut.size(), 0, "the road's centreline is not walkable at %s" % [shut])
+	var points := _road_points()
 	var route := PackedVector3Array()
-	assert_true(nav.find_route(from, to, route, true), "a route from the lane's west point to its east point")
-	assert_true(nav.find_route(to, from, route, true), "and back")
-	var open := PackedStringArray()
-	for z: float in [45.4, 45.6, 45.8, 46.0, 46.2]:
-		for x: float in [21.0, 22.0, 23.0]:
-			if not nav.is_walkable_at(Vector3(x, nav.floor_at(Vector3(x, 50.0, z)) + 0.6, z)):
-				open.append("(%.1f, %.1f)" % [x, z])
-	assert_eq(open.size(), 0, "the gap south of the stand (1.8 m between the faces) is walkable, blocked at %s" % [open])
+	assert_true(nav.find_route(points[0], points[points.size() - 1], route, true), "a route along the road")
+	var length := 0.0
+	for i in route.size() - 1:
+		length += route[i].distance_to(route[i + 1])
+	var straight := 0.0
+	for i in ROAD.size() - 1:
+		straight += ROAD[i].distance_to(ROAD[i + 1])
+	assert_lt(length, straight * 1.1, "the way from end to end is the road itself, not a way round")

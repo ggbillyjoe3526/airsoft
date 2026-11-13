@@ -54,7 +54,16 @@ def smoothstep(a, b, v):
 # ------------------------------------------------------------------ paths
 STREAM = [(3, -62), (1, -51), (-1, -46), (-1, -37), (-5, -29), (-5, -21), (0, -11), (7, -3), (12, 6), (13, 16),
           (10, 26), (7, 36), (8, 43), (8, 54), (16, 62)]  # game build: north-south under both crossings
-ROAD = [(-90, 24), (-66, 27), (-48, 33), (-34, 42), (-18, 49), (-3, 51), (2, 48.3), (14, 48.3), (22, 43.6), (32, 40), (44, 33), (48, 31)]
+# MB2 (the owner, 2026-11-12: "I don't want woodpiles over the road ... The road should be clear"): nothing stands on
+# the road, so the road itself breaks its long line. West of the culvert it swings south round one stand of spruce and
+# back north round another (THICKETS, "the Road stands"): nobody sees through the S from either side, and the road's
+# 5 m strip is clear from camp to camp (check.py, test_mb2_qa). The longest line along the strip is 63 m, from the
+# west camp's gate down to the S, and 57 m from the Sawmill's road mouth to it; from the dip at the culvert 33 to 44 m.
+ROAD = [(-90, 24), (-66, 27), (-48, 33), (-34, 42), (-26, 45.5), (-20.5, 52.3), (-16, 55.6), (-13, 55.6), (-10.3, 52),
+        (-8.3, 46), (-6.3, 42.4), (-3.5, 42.4), (-0.8, 45), (3, 48.3), (14, 48.3), (22, 43.6), (32, 40), (44, 33), (48, 31)]
+ROAD_CULVERT = ROAD.index((3, 48.3))  # the straight the culvert sits under starts here
+ROAD_HALF = 2.5   # the gravel strip's half width (m): no piece and no thicket block reaches inside it (check.py)
+ROAD_CLEAR = 3.5  # a thicket's cells keep this far off the road's centre line (m): its 1 m blocks and its boughs stay off the gravel
 HOLLOW = [(23, -3), (29, -11), (35, -19), (42, -25)]
 BERM = [(-23, -16.5), (-7, -13.5)]
 SLIDES = [(1.7, -55.0), (-3.0, -26.0), (9.5, 0.5), (11.5, 21.0), (10.0, 56.5)]  # gentle banks, a way in and out of every stretch of the bed
@@ -71,8 +80,8 @@ def _cross(p1, p2, q1, q2):
 
 
 # v3: the culvert sits exactly where the road crosses the stream, square to the road
-CULVERT = tuple(round(v, 2) for v in _cross(ROAD[6], ROAD[7], STREAM[12], STREAM[13]))
-CUL_ROT = math.degrees(math.atan2(ROAD[7][1] - ROAD[6][1], ROAD[7][0] - ROAD[6][0]))
+CULVERT = tuple(round(v, 2) for v in _cross(ROAD[ROAD_CULVERT], ROAD[ROAD_CULVERT + 1], STREAM[12], STREAM[13]))
+CUL_ROT = math.degrees(math.atan2(ROAD[ROAD_CULVERT + 1][1] - ROAD[ROAD_CULVERT][1], ROAD[ROAD_CULVERT + 1][0] - ROAD[ROAD_CULVERT][0]))
 # the pipe runs square under the road (the bed meets it 15 degrees off, well inside its 3.8 m floor)
 _pd = (-math.sin(math.radians(CUL_ROT)), math.cos(math.radians(CUL_ROT)))
 CUL_HALF = 3.0  # headwalls 3 m either side of the road's centre line: road 5 m + a 0.5 m kerb each side
@@ -91,7 +100,7 @@ KNOLL_H = gauss(31, 19, 6.5, 4.6, 3.4, flat=1.3)
 h += KNOLL_H                                                # the Knoll (between Hut row and B)
 h += gauss(-62, 44, 16, 10, 1.6)                            # south-west swell along the road
 h += gauss(25, 1, 5.5, 9, 1.9, flat=1.3)                    # Hut rise: Hut row sits on a low crest (breaks the mid line)
-h += gauss(-12, 42, 8, 8, 2.4, flat=1.2)                    # Road hump: the road climbs over it between Truck bend and the Long road
+h += gauss(-17, 42, 7, 7, 2.2, flat=1.2)                    # Road hump: the road climbs round its south side between Truck bend and the Long road
 h += gauss(70, 44, 14, 10, -0.6)                            # a low dip south-east of B
 h += 0.18 * np.sin(GX / 9.0) * np.cos(GZ / 11.0)            # gentle undulation everywhere
 
@@ -368,30 +377,25 @@ rect("logpile", 46.0, -4.0, 4.0, 1.0, 90)
 # ------------------------------------------------------------------ SOUTH LANE: Road west > Truck bend > Long road > Culvert > Log stacks > B
 rect("logpile", -57.5, 34.6, 5.0, 1.0, 18)                  # v3: off the road, on its south verge
 rect("tyre", -46.0, 39.0, 1.7, 1.7)
-rect("truck", -34.4, 46.7, 5.4, 2.1, 30)                      # the pickup, parked on the verge at the Truck bend
-rect("tyrestack", -26.0, 41.0, 1.8, 1.8)
-rect("logpile", -4.0, 55.0, 5.0, 1.0, 0)
-# MB1: the Long road was one 60 m line from the Truck bend to B, and the Road hump, 2.5 m over the road east of the
-# stream, was a skyline to all of it. Three trees are down across it. The first lies on the hump's top (was a log
-# there), the only place a 2.2 m root plate stands over a line from the low road to someone on the hump: it is the
-# west end's hard cover, and the way past is its south end. The second, 4 m on, lies across the south half and shuts
-# the lines round that end, so the way turns north between the two. The third, in the dip, lies across the north
-# half and turns the way back south to the culvert. Nobody sees both ends of the road at once.
-rect("windthrow", -11.5, 44.0, 8.5, 2.0, 90, top=2.2, tag="roadblock")
-rect("windthrow", -6.0, 50.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")
-rect("windthrow", 1.6, 44.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")   # was a low crate at (1, 45.5)
-rect("logstack", -24.0, 54.0, 5.0, 1.6, 0)
+rect("truck", -34.4, 47.0, 5.4, 2.1, 30)                      # the pickup, parked on the verge at the Truck bend
+rect("tyrestack", -28.0, 40.0, 1.8, 1.8)
+# MB1: the Long road was one 60 m line from the Truck bend to B, and the Road hump was a skyline to all of it; three
+# trees lay across it and a stack stood on it. MB2 (the owner, 2026-11-12: "The road should be clear"): nothing
+# stands on the road's 5 m strip. The road's S between the Road stands (ROAD, THICKETS) ends the line now. One tree
+# is down on the north verge at the S's east mouth, from the thicket to the road's edge: the west end's hard cover
+# over the dip.
+rect("windthrow", 2.4, 40.4, 4.5, 2.0, 90, top=2.2)   # was a low crate at (1, 45.5)
+rect("logstack", -30.0, 54.0, 5.0, 1.6, 0)
 rect("logstack", 25.0, 47.6, 6.0, 1.6, -20)          # Log stacks (on the verge: breaks the Truck bend to B line)
-# MB1: cordwood across the road where the lane leaves the culvert, 30 m from the fallen tree on the hump that is
-# the west end's cover. A woodpile's 1.8 m (the owner, 2026-11-12, MB2: "Lower it to 1.8 m"; it stood a gate
-# screen's 2.8 m). The hump stands 2.1 m over the dip and looks over a woodpile, so the stand of young spruce against
-# its east face (THICKETS, "the Culvert stand") is what shuts the road now, and the east's hard cover over the dip
-# is that stand's south corner at (24, 45). 3.5 m further east the stack was the attackers' cover 25 m from the
-# flag, and they won 71 % of 126 rounds.
-rect("logstack", 20.5, 42.0, 1.6, 6.0, 0, tag="roadblock")
+# MB2: cordwood on the inside of the road's bend east of the culvert, off the road (MB1 stood it across the road):
+# the east end's hard cover over the dip, 13 m from the fallen tree that is the west's.
+rect("logstack", 14.8, 41.4, 1.6, 6.0, 0)
 rect("logstack", 29.7, 35.9, 5.0, 1.6, -25)
 rect("tyre", 19.0, 39.0, 1.7, 1.7)
-rect("logstack", 36.5, 42.3, 5.0, 1.6, -30)          # v3: along the verge, off the road
+# MB2: turned across the south verge, clear of the gravel (v3 laid it along the verge). The road's S, 55 m off and
+# 0.9 m higher, looks over the bend's stack and saw the south edge of the pole's ring through the gap between this
+# stack and the road mouth's (158 lines); turned, it shuts that.
+rect("logstack", 37.4, 42.4, 1.6, 4.2, 0)
 
 # ------------------------------------------------------------------ B SITE: the Sawmill (open shed, log stacks, sawdust yard)
 SHED = (56.0, 36.0, 10.0, 6.0)  # cx, cz, sx, sz: open sides, roof at 3.2 m, posts
@@ -399,12 +403,16 @@ rect("logpile", 56.0, 36.0, 8.0, 1.4, 0, top=1.2, tag="sawbench")  # sawbench + 
 rect("logstack", 44.0, 44.5, 7.0, 1.6, 0)
 rect("logstack", 60.5, 45.0, 1.6, 6.0, 0)
 rect("crates", 42.5, 29.4, 2.0, 2.0, 15)                      # v3: off the road
-rect("logstack", 43.0, 39.0, 5.0, 1.6, -30)          # v3: B's road mouth, south verge: the Truck bend can't see through the Sawmill
+rect("logstack", 43.0, 39.0, 5.0, 1.6, -30)          # v3: B's road mouth, south verge
 rect("tyre", 49.5, 44.8, 1.7, 1.7)
 rect("crates", 52.5, 40.95, 2.4, 2.6, 10)                     # yard crates: the road can't see deep into B
 rect("logstack", 46.4, 37.2, 1.6, 3.0, 0)                    # MB1: shuts the gap the pole was seen through from the Long road, 60 m off
 rect("lowcrates", 64.0, 30.0, 2.0, 1.0, 90)
-rect("logstack", 53.0, 34.0, 6.4, 1.0, 0, top=2.0, tag="boards")  # v3: sawn boards stacked along the shed's north side: no road line through B
+# MB2: the sawn boards stand along the shed's east end (v3 had them along its north side, 5 m from the pole). There
+# they hid whoever raised flag B from the defenders coming back from the Back yard, and the defender who stood behind
+# them lost his duel with the pole 54 to 32 over 250 rounds. Cover at a pole serves the raiser as much as the holder
+# (docs/records/MB2.md).
+rect("logstack", 62.3, 36.0, 1.0, 6.4, 0, top=2.0, tag="boards")
 rect("logstack", 51.6, 30.6, 4.4, 1.4, 63)          # v3: where the road ends: it can't look on into B's back yard
 
 # ------------------------------------------------------------------ links (beyond the stream, ridge and road)
@@ -441,8 +449,7 @@ THICKETS = [  # polygons (x, z)
     [(-14, 22), (-4, 18), (5, 22), (5, 37), (-4, 40.5), (-15, 36)],                         # T6 between Clearing and the Long road
     [(40, 14), (54, 13), (62, 18), (60, 25), (48, 25), (40, 21)],                         # T7 between Hut row and B
     [(-90, -62), (90, -62), (90, -55), (40, -56), (20, -57), (-10, -55), (-50, -57), (-90, -54)],  # north edge
-    [(-90, 62), (90, 62), (90, 56), (50, 54), (25, 58), (-5, 56), (-40, 55), (-70, 52), (-90, 50)],  # south edge
-    [(-24, 56), (-8, 54), (-12, 60), (-26, 60)],
+    [(-90, 62), (90, 62), (90, 56), (50, 54), (25, 58), (-5, 56), (-15, 57.5), (-40, 55), (-70, 52), (-90, 50)],  # south edge
     [(64, -60), (90, -60), (90, -26), (78, -26), (70, -36), (66, -48)],                    # north-east corner behind the Fort
     [(-90, -54), (-74, -52), (-80, -34), (-90, -30)],                                      # north-west corner
     [(66, 50), (90, 46), (90, 62), (66, 62)],                                              # south-east corner
@@ -462,14 +469,11 @@ THICKETS = [  # polygons (x, z)
     [(15.0, 2.0), (17.2, 2.0), (17.4, 8.6), (15.2, 8.6)],
     [(17.4, -3.2), (19.4, -3.2), (19.4, 2.8), (17.4, 2.8)],
     [(-90, 30), (-80, 32), (-82, 40), (-90, 40)],
-    # MB2: the Culvert stand, young spruce grown up against the east face of the road's log stack. The stack is a
-    # woodpile's 1.8 m (the owner, 2026-11-12), and over that the Long road's hump, 2.1 m above the dip, sees a chest
-    # in the ring round flag B's pole 60 m off (along 1,485 of 55,625 lines by the game's ray), and the east's squad
-    # walking up behind the stack shoots the west's on the hump from 30 to 40 m. With the pole's line shut at the flag
-    # by a stack on the yard's south-west side, the west end won 41 % of 236 Elimination rounds (48 % of 239 with the
-    # road's stack at 2.8 m); with this stand, 47 % of 235. It stands where the stack's top metre did
-    # (test_mb1_layouts).
-    [(21.3, 39.0), (22.4, 39.0), (22.4, 45.0), (21.3, 45.0)],
+    # MB2: the Road stands. The road is clear (the owner, 2026-11-12), so two stands of spruce beside it end its long
+    # line: one on the Road hump, inside the bend where the road swings south, one from the south edge, inside the
+    # bend where it swings back north. Each keeps ROAD_CLEAR off the road's centre line (world.py).
+    [(-22, 46), (-17, 53), (-12, 53), (-8, 44), (-8, 40), (-12, 36), (-20, 39)],
+    [(-13, 58), (-11, 53), (-8, 44.5), (-1.5, 44.5), (1.5, 51.5), (2, 58)],
 ]
 WINDTHROW = [
     (-44.0, -26.0, 7.0, 2.2, 35),    # Pine slope, splits the climb
@@ -503,7 +507,6 @@ BUSHES = [
     (-58.0, -10.0, 1.2, "Pine bush"),   # Pine slope foot: a hidden peek at the Birch gap
     (-30.5, 1.0, 1.3, "Woodpile bush"),  # a standing hide at the Woodpile's open north end
     (12.5, -44.5, 1.2, "Tower bush"),   # under the Tower's west side
-    (-19.0, 41.0, 1.3, "Hump bush"),    # top of the Road hump
     (39.0, 31.0, 1.2, "Sawmill bush"),
     # MB1: hazel screens. Leaves hide and stop BBs but are walked through, so each is a soft wall with a way through it.
     (-16.5, -52.6, 1.3, "Brow hazel"),        # the Ridge's brow: a front row with two ways through,
@@ -524,7 +527,6 @@ BUSHES = [
     (22.2, -4.9, 1.2, "Hut hazel"),           # the Hut rise's crest at the head of the Ford's ramp: on the rise, so they
     (22.0, -7.2, 1.2, "Hut hazel"),           # hide who stands behind them from the Clearing below
     (21.4, -9.4, 1.2, "Hut hazel"),
-    (1.6, 39.4, 1.1, "Verge hazel"),          # between the thicket and the fallen tree on the Long road's north verge
 ]
 for (x, z, r, _) in BUSHES:
     circ("bush", x, z, r, top=1.7)
@@ -562,8 +564,8 @@ AREAS = [  # name, lane, polygon
     ("Hut row", "m", [(16, -10), (44, -8), (46, 12), (18, 12)]),
     ("Back yard", "m", [(44, -8), (72, -6), (72, 12), (46, 12)]),
     ("Road west", "s", [(-72, 20), (-60, 22), (-40, 30), (-36, 40), (-46, 44), (-68, 34), (-72, 30)]),
-    ("Truck bend", "s", [(-36, 32), (-14, 36), (-14, 54), (-30, 54), (-40, 44)]),
-    ("Long road", "s", [(-14, 38), (6, 38), (6, 54), (-14, 54)]),
+    ("Truck bend", "s", [(-36, 32), (-14, 36), (-14, 58), (-30, 58), (-40, 44)]),   # MB2: both reach the road's south bend
+    ("Long road", "s", [(-14, 38), (6, 38), (6, 58), (-14, 58)]),
     ("Log stacks", "s", [(18, 32), (38, 28), (40, 50), (20, 54)]),
     ("B site", "s", [(40, 28), (66, 26), (66, 48), (40, 50)]),
     ("Back track", "end", [(62, 14), (72, 14), (76, 30), (66, 30)]),
@@ -594,14 +596,15 @@ LANE_PATHS = {
     "m": [(-74, 4), (-52, 4), (-38, 0.5), (-26, -2.5), (-19, -2.0), (-6, 2), (-0.6, -1.6), (1.6, 1.7),
           (9.5, 0.5), (15.5, -3.6), (20.6, -5.0), (22.4, 0.4), (22.6, 3.4), (31.2, 2.2), (36.5, 2.4), (40.5, 4.2),
           (43.2, 1.0), (58, 4.5)],
-    # MB1: the south lane leaves the road for its north verge at the fallen tree and comes back onto it past the stack.
-    # Its last two points are flag B's defenders: one behind the crates north of the road mouth, off the road's line
+    # MB2: the south lane keeps to the road, through its S between the Road stands (the road is clear: MB1's lane left
+    # it for the north verge at a fallen tree and came back onto it past the stack). Its stops either side of the
+    # field's middle are the culvert's two heads. Its last two points are flag B's defenders: one behind the crates north of the road mouth, off the road's line
     # with a view of the pole, one behind the stack beside it. In the road mouth, at (44, 35), the forward defender
     # was shot from the Culvert's stack, 25 m off, before a fight reached the flag: 80 of the 175 knock-outs the
     # attackers scored round the pole, and they won 64 % of the rounds (55 % with him behind the crates).
-    "s": [(-77, 21), (-66, 27), (-48, 33), (-34, 42), (-18, 49), (-11.5, 49.8), (-8.8, 47.2), (-6.2, 45.3),
-          (-2.2, 45.4), (2, 49.4), (14, 48.3),
-          (20.6, 46.4), (24.5, 43.8), (32, 40), (44.6, 29.8), (49, 37)],
+    "s": [(-77, 21), (-66, 27), (-48, 33), (-34, 42), (-26, 45.5), (-14.5, 55.6), (-8.3, 46),
+          (-2.6, 43.3), (2.3, 47.7), (14, 48.3),
+          (22, 43.6), (32, 40), (44.6, 29.8), (49, 37)],
 }
 
 
@@ -613,7 +616,7 @@ def build_tree_list(seed=7):
     rnd = random.Random(seed)
     trees = []
     hero = [(-12.0, -2.5, 0.9), (-41.0, 0.7, 0.85), (-24.0, 5.2, 0.8), (-46.0, 6.0, 0.8), (1.5, 12.0, 0.85), (-33.0, -2.0, 0.8), (-58.0, -2.0, 0.8), (40.0, -44.0, 0.85),
-            (24.0, -8.0, 0.8), (-36.0, 30.0, 0.85), (-6.0, 40.5, 0.8), (35.0, 30.5, 0.85), (-30.0, -46.0, 0.7),
+            (24.0, -8.0, 0.8), (-36.0, 30.0, 0.85), (-1.0, 40.3, 0.8), (35.0, 30.5, 0.85), (-30.0, -46.0, 0.7),
             (-8.0, -47.0, 0.7), (60.0, 20.0, 0.75), (68.0, -40.0, 0.8), (-60.0, 36.0, 0.8), (46.0, 12.0, 0.8),
             (16.0, 30.0, 0.75), (-18.0, -38.0, 0.7), (6.0, -30.0, 0.7)]
     for x, z, r in hero:

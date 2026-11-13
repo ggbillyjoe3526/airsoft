@@ -154,6 +154,7 @@ def add_sight(mask, lo, hi, band=0):
 thicket_mask = np.zeros((NX, NZ), bool)
 for poly in L.THICKETS:
     thicket_mask |= in_poly(GX, GZ, poly)
+thicket_mask &= L.rd >= L.ROAD_CLEAR  # MB2: the road is clear (the owner, 2026-11-12): no spruce on its gravel
 walk_block |= thicket_mask
 add_sight(thicket_mask, h - 1, h + 5.0)
 

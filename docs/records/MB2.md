@@ -1,90 +1,106 @@
-# MB2 · Woodland's road stack at a woodpile's 1.8 m
+# MB2 · Woodland's Long road, cleared
 
-**Review:** critic Accept 7/8 · qa Pass · performance Pass
+**Review:** critic @@CRITIC@@ · qa @@QA@@ · performance @@PERF@@
 
-MB1 built the log stack across Woodland's Long road at the Culvert a gate screen's 2.8 m and put its height to the
-owner on a decision card, since he had asked for the woodpiles "less tall" (2026-11-09). The owner (2026-11-12):
-"Lower it to 1.8 m". The card's option read: all woodpiles match the less-tall ask, flag B's south side is covered
-another way, and the field is measured again.
+MB1 laid three fallen trees and a log stack across Woodland's Long road, the stack a gate screen's 2.8 m, and put its
+height to the owner on a decision card. The owner (2026-11-12): "Lower it to 1.8 m". The first build of this task did
+that and stood young spruce behind the stack (attempt 1 below; pushed, reviewed, never merged). Shown it, the owner
+(2026-11-13, 00:31): "I don't want woodpiles over the road. Also, are the trees on the road? The road should be
+clear." This record is the cleared road.
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | build thread | ✓ (the 101 files that read Woodland; CI runs the suite) | 7/8 Accept | – |
-
-The critic's failed check (8, judgment) was four wordings, fixed in the same pull request as it asked: the 41 % belongs
-to the layout with a stack at flag B's yard, not to the bare lowered stack; one labelled line count; the stack is no
-longer the east's cover; the tight passage has its `docs/KNOWN_ISSUES.md` row and one width.
+| 2026-11-12 | 1 | build thread | ✓ | 7/8 Accept | the owner's ruling: nothing on the road (the stack and spruce stood on it) |
+| 2026-11-13 | 2 | build thread | @@CHECKS@@ | @@CRITIC@@ | – |
 
 ## What changed
 
-- `tools/woodland/layout.py`, `data/maps/woodland.json` (946 blocks, were 945):
-  the road stack `rect("logstack", 20.5, 42.0, 1.6, 6.0)` drops its `top=2.8` and stands 1.8 m. A stand of young
-  spruce, "the Culvert stand" (`THICKETS`), is planted against its east face: 1.7 m deep, the stack's 6 m wide, 5 m
-  tall. A thicket is solid: nothing sees, shoots or walks through it. No new model, no new sound.
-- `tests/unit/test_mb1_layouts.gd`: the road stack stands 1.8 m with spruce against the whole of its east face,
-  over twice its height; the Long road's line onto flag B's pole ring and posts stays shut (both fail without the
-  spruce: the ring is seen along 350 of the test's own, coarser lines).
-- `docs/wiki/Maps.md`, `docs/DECISIONS.md` › Maps and modes, `docs/KNOWN_ISSUES.md` (the two Woodland rows).
+- `tools/woodland/layout.py`, `world.py`, `check.py`, `build_map.py`, `data/maps/woodland.json` (@@BLOCKS@@ blocks,
+  945 on `main`):
+  - **Nothing on the road.** The three fallen trees and the stack across the road are gone (`tag="roadblock"` with
+    them), and attempt 1's Culvert stand. `ROAD_HALF = 2.5`: no piece reaches inside the 5 m gravel strip.
+    `ROAD_CLEAR = 3.5`: a thicket's cells keep that far off the centre line, so its 1 m blocks and its boughs stay
+    off the gravel (`world.py` clips every thicket; `check.py` fails on either). The pickup and one verge stack,
+    0.1 to 0.2 m inside the strip's edge on `main`, moved 0.3 m off it.
+  - **The road bends.** `ROAD` swings south round one stand of spruce and back north round another west of the
+    Culvert ("the Road stands", `THICKETS`), 7 m between them. The Road hump moved 5 m west and dropped 0.2 m; the
+    road climbs round its south side. One hand-placed pine stood on the new bend and moved 5 m east.
+  - **Pieces beside it.** One fallen tree lies on the north verge at the bend's east mouth (the west end's cover
+    over the dip); the stack that stood across the road stands inside the road's bend east of the Culvert (the
+    east's cover); the Truck bend's tyre stack and south verge stack moved clear of the new line.
+  - **The south lane** keeps to the road. Its two stops are 2.6 and 2.5 m either side of the field's middle, at the
+    bend's east mouth and the Culvert's west head.
+  - **Flag B.** The sawn boards stand along the shed's east end, not its north side beside the pole. The verge
+    stack west of the road mouth is turned across the verge.
+  - **Place names:** the Truck bend's and the Long road's areas reach the road's south bend. **Tyre tracks:** the
+    pickup's follow the new road, in two arcs.
+- `tests/unit/test_mb2_qa.gd`: nothing stands within 2.5 m of the road's centre line between the camps; the road
+  is walked end to end on its strip; only the six camp gate screens stand taller than a woodpile.
+- `tests/unit/test_mb1_layouts.gd`: the road's strip west of the Culvert (its centre line and 2 m either side)
+  sees no chest in flag B's pole ring or at its posts; attempt 1's stack test is gone with the stack.
+- `docs/wiki/Maps.md`, `docs/DECISIONS.md` › Maps and modes, `docs/KNOWN_ISSUES.md` (the two Woodland rows; the
+  tight-passage row is gone with the passage).
 
-## Why the stack could not just be lowered
+## What a clear road does, measured
 
-The road's hump stands 2.1 m over the dip the stack is in, so a standing eye on it looks over anything 1.8 m tall.
-Measured with seeded 6v6 bot matches at Normal (`tools/map_heat.gd`, the same 32 seeds each) and the game's ray:
+Seeded 6v6 bot matches at Normal (`tools/map_heat.gd`) and the game's ray. Bands: Elimination's ends 45 to 55 %,
+Attack / Defend's attackers 40 to 65 %. The first and last rows are the same 32 seeds.
 
-| Layout | Elimination, west end | Attack / Defend, attackers | The road sees flag B's pole ring |
+| Layout | Elimination, west end | Attack / Defend, attackers | Round flag B, attackers to defenders |
 |---|---|---|---|
-| MB1: the stack at 2.8 m | 48 % ±3 (239 rounds) | 59 % ±5 (117, 16 seeds) | along no line |
-| 1.8 m, a stack closing the south-west of flag B's yard | 41 % ±3 (236) | 61 % ±4 (121, 16 seeds) | along no line |
-| 1.8 m, spruce behind it (built) | 47 % ±3 (235) | 54 % ±4 (130, 16 seeds) | along no line |
+| MB1 on `main`: fallen trees and a 2.8 m stack across the road | 48 % ±3 (239 rounds, 32 seeds) | 62 % ±3 (236, 32) | 285 to 161 |
+| Attempt 1: the stack at 1.8 m, spruce behind it | 47 % ±3 (235, 32) | 54 % ±4 (130, 16) | 156 to 127 |
+| Clear and straight, pieces on the verges | 42 % ±5 (16 seeds) | 67 % ±4 (16) | 158 to 71 |
+| Clear, bent between the stands (the first bend) | 48 % ±5 (107, 16) | 64 % ±4 (129, 16) | 167 to 87 |
+| **Built** | **47 % ±3 (241, 32)** | **69 % ±3 (247, 32)** | **269 to 167** |
 
-Bands: 45 to 55 % and 40 to 65 %.
-
-- **Lowered and nothing else,** the road west of the Culvert sees a chest in the ring round flag B's pole along
-  1,485 of 55,625 lines, out to 63 m.
-- **A stack at flag B** (a 3.9 m woodpile between the yard's road-mouth stack and its south one) shut that line, and
-  the first 16 seeds read 41 %, the next 16 42 %: out of band. The knock-outs show why. The east's squad, walking
-  up the road 2 to 12 m behind the stack, shot the west's over it as it crossed the hump, 30 to 40 m off (21 of the
-  west's 222 losses on the hump, 1 of 215 at 2.8 m): the first knock-outs of the round, 20 to 27 s in. And flag B's
-  attackers scored 155 to the defenders' 79 round the pole (138 to 94 at 2.8 m).
-- **Spruce against the stack's east face** stands where the stack's top metre was and shuts both lines at once, so
-  the yard keeps MB1's shape. The stack is no longer the east's cover: its east face is in the spruce, and the
-  east's corner post moves 2 m back, from the stack's end to the stand's (24, 45),
-  and takes 20 of the west's hump losses, not 41. Round flag B the attackers score 156 to the defenders' 127, round
-  flag A 130 to 135.
-
-Eight-seed blocks of Elimination on one layout ran from 34 to 55 %, so nothing here is read from fewer than 16
-seeds, and the choice between layouts from 32.
+- **A straight clear road is out of band both ways.** With nothing on it the only things that end its line are its
+  own bends between solid stands: a 1.8 m piece on the verge in the dip hides nobody from the higher west side. The
+  south lane's median knock-out went to 32 m, and the west end, shot crossing the open, took 42 %.
+- **The double bend ends the line, and Elimination is even again** (47 % ±3; the south lane 329 knock-outs to 336,
+  at a median 15 m). No two points of the strip either side of the bend see each other. The longest lines left along
+  the strip: 63 m from the west camp's gate down to the bend, 57 m from the Sawmill's road mouth to it (MB1's road
+  was one 60 m line from the Truck bend to flag B before its pieces).
+- **Attack / Defend is outside its band: 69 % ±3, and 62 % ±3 for `main` on the same seeds.** Seven points ±4. A
+  flag goes up in 40 % of rounds (37 %), and of the rounds where none does the attackers win 56 % (49 %). Round
+  flag B itself the count is `main`'s (118 knock-outs to 73 a hundred rounds; 123 to 75); the attackers' gain is on
+  the east ground between the two sites (96 to 62; 70 to 83), where the defenders coming back to B meet them. The
+  one thing the records show of why: on the clear road the attackers shoot from the pole 1 to 2 s sooner (the 10th,
+  50th and 90th percentile of their shots from it 34, 42 and 51 s; 35, 44 and 53 s on `main`).
+- **Ten layouts of flag B's cover were played, 16 seeds each and the last two 32** (`pipeline/out/mb1/rc5` to
+  `rc16`, kept out of the repository): cover for the forward defender's flank, a wider view for the defenders coming
+  back round the thicket,
+  less cover for the attackers at the road mouth, at the bend and beside the pole. They read 61 to 70 %, and a
+  16-seed reading is ±4, so none is shown to help. One change is kept on its own evidence: the sawn boards. Beside
+  the pole they hid the raiser from the defenders coming back, and the defender who stood behind them lost his duel
+  with the pole 10 to 18 a hundred rounds on `main`; with the boards at the shed's east end he stands at the Back
+  track's corner and wins it 15 to 13.
+- **The eight-seed blocks of one layout ran from 59 to 74 %** in Attack / Defend, so the built layout and `main` are
+  each read from 32 seeds, and attempt 1's 54 % was as much luck as layout.
 
 ## Decisions
 
-- **Spruce, not a taller pile.** The owner's ruling is about woodpiles; the field's thickets are 5 m everywhere,
-  and young spruce grown up behind a stack left at a road's edge is what a wood does. Told to the owner with the
-  result; by the heights (not built) a root plate's 2.2 m shuts the hump's line only for an eye within 5 m of it.
-- **The yard stack is not kept.** With the spruce it shut nothing more, and it leaned flag B further to the
-  attackers.
-- **Measured on MB1's merged head and again on `main` with SH1 and MQ2:** the bots' matches are the same round for
-  round (the 16 seeds run on both gave identical records), so the figures above stand for the head.
-- **The map card is not rendered again:** it looks north-east from (35, -25), away from the Culvert.
+- **The road bends; no piece screens it.** The owner's ruling leaves the road's own shape and what stands beside it.
+  Spruce is the field's one solid screen and is already its edge and its thickets: no new model, no new sound.
+- **Spruce keeps off the gravel as well,** 3.5 m from the centre line, though the ruling named woodpiles and trees
+  on the road: boughs over the strip would read as trees on it.
+- **The boards moved, not removed:** `test_props` holds every Woodland model to a place on the field, and the east
+  end of the shed is out of every line onto the pole from the defenders' side.
+- **The bend's two apexes are 13 m apart across the road's line and 7 m of clear ground runs between the stands:**
+  the least that shuts the diagonal through it with the spruce off the gravel (at 11 m a 68 m line ran through).
+- **Attack / Defend goes to the owner as a known issue, not as a blocker.** The road he rejected, with a stack
+  across it, is what `main` has now; the cleared road is his ruling, and flag B was the softer site before it
+  (`docs/KNOWN_ISSUES.md`). Next: flag B's defender posts or its pole, measured at 32 seeds from the start.
+- **The road test's criterion is unchanged** (no chest in the ring or at the posts from the road west of the
+  Culvert); what it samples is the new road's strip, not a box round the old one.
+- **The map card is not rendered again:** it looks north-east from (35, -25), away from the road.
 
 ## Verified
 
-- `python3 tools/woodland/build_map.py` writes the committed JSON; `python3 tools/woodland/check.py`: `TOTAL 0`.
-- gdlint, the changelog notes, the wiki check, the smoke test and the licence notices pass on the head.
-- Unit tests: the 101 files that read Woodland, 1,270 of 1,271 (one pending for want of a display, as on `main`);
-  `test_mb1_layouts` 10 of 10, and its road test and the new stack test both fail with the spruce taken out. CI runs
-  the whole suite and the match guards.
-- QA: Pass. It added `tests/unit/test_mb2_qa.gd`: only the six camp gate screens stand taller than a woodpile;
-  nothing but the stack and the stand is in the stand's box; the south lane is walked round the stand both ways.
-- Performance: Pass. A full Woodland session (8v8, 1,800 frames, headless, two runs a side) reads tick and views
-  6.1 ms mean on the head and 6.2 ms on `main`, under Low's 16.7 ms. Draw calls are not measured headless: the
-  stand's spruces are instances of the meshes every thicket shares.
-- **Not verified, for the owner's play:** how the lower stack with spruce behind it looks and plays from the road.
-  The play check is on the Dev 3 checklist.
+@@VERIFIED@@
 
 ## Known issues left
 
-- The way round the stand's south end is tight: for 1 m of its length the spruce and the verge's log stack stand
-  1.8 m apart, 1.2 to 1.5 m of it walkable (QA; a body passes). MB1's stack left 1.9 m at the same corner, and the
-  south lane's figures above are measured through it. A row in `docs/KNOWN_ISSUES.md`, can wait.
+@@KNOWN@@
