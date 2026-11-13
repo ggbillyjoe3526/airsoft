@@ -503,7 +503,8 @@ def led_object(plate: float) -> bpy.types.Object:
 # ---------------------------------------------------------------------------------------------------------- cutters
 # Plan (x across, y along, mm; the pivot at the origin). One half: its jaw on +X ahead of the pivot, its shank and
 # grip on -X behind it; the other half is it turned half a turn about Y.
-JAW_EDGE = [(0.0, 5.6), (0.0, 9.0), (0.0, 12.5), (0.0, 16.0), (0.0, 18.5)]  # the cutting edge up to the tip
+EDGE_LAP = 0.03         # each cutting edge past the centre line, so the closed jaws overlap inside the steel, no seam
+JAW_EDGE = [(-EDGE_LAP, y) for y in (5.6, 9.0, 12.5, 16.0, 18.5)]  # the cutting edge up to the tip
 JAW_OUTER = [(0.15, 18.45), (1.1, 17.3), (2.2, 15.0), (3.4, 11.8), (4.4, 8.4), (4.95, 5.2), (4.95, 2.62)]
 SHANK_INNER = [(1.0, -5.51), (0.35, -8.5), (-0.9, -15.0), (-1.9, -21.5)]
 SHANK_OUTER = [(-7.2, -21.5), (-6.8, -15.0), (-6.1, -8.0), (-5.2, -2.06)]
@@ -704,8 +705,10 @@ def grind_wedge(name: str, sign: float) -> bpy.types.Object:
     wedge = hs.Builder(name + "_grind", [])
     z0 = CUT_T - depth
     # Steep past the edge (x < 0), so it never bites the pivot's round face where that reaches past the edge's line.
-    wedge.prism([(x, sign * z) for x, z in ((-1.0, CUT_T + 1.0), (0.0, z0), (width + 1.0, z0 + sx * (width + 1.0)),
-                                            (width + 1.0, CUT_T + 6.0), (-1.0, CUT_T + 6.0))],
+    past = -EDGE_LAP - 0.07  # the facet carried a little past the edge, then steep
+    wedge.prism([(x, sign * z) for x, z in ((past - 1.0, CUT_T + 1.0), (past, z0 + sx * past),
+                                            (width + 1.0, z0 + sx * (width + 1.0)), (width + 1.0, CUT_T + 6.0),
+                                            (past - 1.0, CUT_T + 6.0))],
                 "y", NOSE_FROM - 2.0, JAW_EDGE[-1][1] + 2.0, "Oxide")
     ob = wedge.build()
     shear = Matrix.Identity(4)
@@ -834,7 +837,8 @@ def round_pivot_walls(ob: bpy.types.Object) -> None:
         for key in poly.edge_keys:
             faces_of.setdefault(key, []).append(poly.index)
     sharp = {key for key, fs in faces_of.items() if len({f in walls for f in fs}) > 1}
-    # Round every flat face too (the angle and the custom normals shade every face smooth), so no corner's normal is shared across one (they would blend at a shallow crease).
+    # Every flat face's edges sharp too (the angle and the custom normals shade every face smooth), so no corner's
+    # normal is shared across a shallow crease and blends it.
     sharp |= {key for key, fs in faces_of.items() if any(f in flat for f in fs)}
     for edge in me.edges:
         if edge.key in sharp:
@@ -996,7 +1000,7 @@ SURFACES = {
     "bomb": {"Block": "polymer", "Tape": "polymer", "Case": "polymer", "Key": "rubber", "Screen": "polymer",
              "Segment": "polymer", "Lamp": "polished", "WireRed": "polymer", "WireBlue": "polymer", "Plug": "rubber",
              "Strap": "rubber", "Snap": "bare"},
-    "cutters": {"Oxide": "coated", "Ground": "bare", "Grip": "rubber"},
+    "cutters": {"Oxide": "coated", "Ground": "polished", "Grip": "rubber"},
 }
 
 
