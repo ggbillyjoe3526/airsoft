@@ -53,8 +53,8 @@ func test_figures_have_their_clips_and_sidecars() -> void:
 
 func test_every_sound_loads_and_loops_loop() -> void:
 	var cues := _files("res://assets/audio/cues", "wav")
-	assert_eq(cues.size(), 476,
-			"the salvage's 362 (the city's calls went with Neon Heights, the motor spin-up and spin-down with BP4), the whistle's 6, the pip, the bombs' 12 (SF1), the doors' 6 (DO1), the spring rifle's cocking 3 (SN1), the BBs on glass, plastic and cardboard 15 and the slide lock 3 (AU2), the doors' second takes 4 (AU5), less the 15 of three replicas' own dry clicks (AU8: one for all), the laser's 5 (LZ1), the Compact SMG's shot, motor and magazines 20 (CS1), the lifts' 6 (MT2), the stream's splashes and plops 20 (WS1), the lift's two rides 2 (AU10), the Pump Shotgun's 18 (its shot, its pump and its shell out and in, SH1), Plant The Bomb's 8 (PB1)")
+	assert_eq(cues.size(), 485,
+			"the salvage's 362 (the city's calls went with Neon Heights, the motor spin-up and spin-down with BP4), the whistle's 6, the pip, the bombs' 12 (SF1), the doors' 6 (DO1), the spring rifle's cocking 3 (SN1), the BBs on glass, plastic and cardboard 15 and the slide lock 3 (AU2), the doors' second takes 4 (AU5), less the 15 of three replicas' own dry clicks (AU8: one for all), the laser's 5 (LZ1), the Compact SMG's shot, motor and magazines 20 (CS1), the lifts' 6 (MT2), the stream's splashes and plops 20 (WS1), the lift's two rides 2 (AU10), the Pump Shotgun's 18 (its shot, its pump and its shell out and in, SH1), Plant The Bomb's 8 (PB1), the shotgun's 5 power parts and the bomb's 4 second pick-ups and drops (AU11)")
 	for path: String in cues:
 		var s := load(path) as AudioStreamWAV
 		assert_true(s != null and s.get_length() > 0.0, path)
