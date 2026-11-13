@@ -382,11 +382,12 @@ rect("windthrow", -6.0, 50.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")
 rect("windthrow", 1.6, 44.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")   # was a low crate at (1, 45.5)
 rect("logstack", -24.0, 54.0, 5.0, 1.6, 0)
 rect("logstack", 25.0, 47.6, 6.0, 1.6, -20)          # Log stacks (on the verge: breaks the Truck bend to B line)
-# MB1: cordwood across the road where the lane leaves the culvert: the east end's hard cover over the dip, as the
-# fallen tree on the hump is the west end's, 30 m apart. A woodpile's 1.8 m (the owner, 2026-11-12, MB2: "Lower it to
-# 1.8 m"; it stood a gate screen's 2.8 m). The hump stands 2.1 m over the dip and looks over a woodpile, so the stand
-# of young spruce against its east face (THICKETS, "the Culvert stand") is what shuts the road now. 3.5 m further
-# east the stack is the attackers' cover 25 m from the flag, and they won 71 % of 126 rounds.
+# MB1: cordwood across the road where the lane leaves the culvert, 30 m from the fallen tree on the hump that is
+# the west end's cover. A woodpile's 1.8 m (the owner, 2026-11-12, MB2: "Lower it to 1.8 m"; it stood a gate
+# screen's 2.8 m). The hump stands 2.1 m over the dip and looks over a woodpile, so the stand of young spruce against
+# its east face (THICKETS, "the Culvert stand") is what shuts the road now, and the east's hard cover over the dip
+# is that stand's south corner at (24, 45). 3.5 m further east the stack was the attackers' cover 25 m from the
+# flag, and they won 71 % of 126 rounds.
 rect("logstack", 20.5, 42.0, 1.6, 6.0, 0, tag="roadblock")
 rect("logstack", 29.7, 35.9, 5.0, 1.6, -25)
 rect("tyre", 19.0, 39.0, 1.7, 1.7)
@@ -462,10 +463,12 @@ THICKETS = [  # polygons (x, z)
     [(17.4, -3.2), (19.4, -3.2), (19.4, 2.8), (17.4, 2.8)],
     [(-90, 30), (-80, 32), (-82, 40), (-90, 40)],
     # MB2: the Culvert stand, young spruce grown up against the east face of the road's log stack. The stack is a
-    # woodpile's 1.8 m (the owner, 2026-11-12), and over that the Long road's hump, 2.1 m above the dip, saw a chest
-    # in the ring round flag B's pole 60 m off along 1,531 of 55,625 lines, and the east's squad walking up behind the
-    # stack shot the west's on the hump from 30 to 40 m: the west end won 41 % of 236 Elimination rounds (48 % of 239
-    # with the stack at 2.8 m). The spruce stands where the stack's top metre did (the game's ray; test_mb1_layouts).
+    # woodpile's 1.8 m (the owner, 2026-11-12), and over that the Long road's hump, 2.1 m above the dip, sees a chest
+    # in the ring round flag B's pole 60 m off (along 1,485 of 55,625 lines by the game's ray), and the east's squad
+    # walking up behind the stack shoots the west's on the hump from 30 to 40 m. With the pole's line shut at the flag
+    # by a stack on the yard's south-west side, the west end won 41 % of 236 Elimination rounds (48 % of 239 with the
+    # road's stack at 2.8 m); with this stand, 47 % of 235. It stands where the stack's top metre did
+    # (test_mb1_layouts).
     [(21.3, 39.0), (22.4, 39.0), (22.4, 45.0), (21.3, 45.0)],
 ]
 WINDTHROW = [

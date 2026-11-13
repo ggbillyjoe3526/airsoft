@@ -833,13 +833,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Woodland's road stack is a woodpile's 1.8 m, with spruce behind it (owner, 2026-11-12, MB2).** MB1 built the
   stack across the Long road at the Culvert a gate screen's 2.8 m and put its height to the owner: "Lower it to
   1.8 m". Every woodpile and cordwood stack on the field is now 1.8 m (his 2026-11-09 ruling); only the camps' gate
-  screens stand 2.8 m. Bare, the lower stack let the road's hump, 2.1 m over the dip, see a chest by flag B's pole
-  60 m off, and let the east's squad walking up behind it shoot the west's on the hump from 30 to 40 m: the west end
-  won 41 % ±3 of 236 Elimination rounds (48 % ±3 of 239 at 2.8 m, the same 32 seeds). So young spruce stands against
-  the stack's east face, a stand 1.7 m deep and as wide as the stack: a thicket, which nothing sees or walks
-  through, where the stack's top metre was. With it the west end takes 47 % ±3 of 235 rounds and the attackers
-  54 % ±4 of 130 Attack / Defend rounds (59 % ±5 at 2.8 m). A stack closing the south-west side of flag B's yard was tried first: it shut the line
-  onto the pole, but not the one onto the hump.
+  screens stand 2.8 m. The road's hump, 2.1 m over the dip, looks over the lower stack: at a chest by flag B's pole
+  60 m off (along 1,485 of 55,625 lines by the game's ray), and it is looked at, by the east's squad walking up
+  behind the stack, from 30 to 40 m. A stack closing the south-west side of flag B's yard was tried first: it shut
+  the line onto the pole but not the one onto the hump, and the west end won 41 % ±3 of 236 Elimination rounds (48 %
+  ±3 of 239 at 2.8 m, the same 32 seeds). So young spruce stands against the road stack's east face, a stand 1.7 m
+  deep and as wide as the stack: a thicket, which nothing sees or walks through, where the stack's top metre was.
+  With it the west end takes 47 % ±3 of 235 rounds and the attackers 54 % ±4 of 130 Attack / Defend rounds (59 % ±5
+  at 2.8 m). The east's cover over the dip is now the stand's south corner, 2 m behind the stack's.
 - **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the

@@ -1,6 +1,6 @@
 # MB2 · Woodland's road stack at a woodpile's 1.8 m
 
-**Review:** (the critic's verdict goes here) · qa Pass · performance Pass
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 MB1 built the log stack across Woodland's Long road at the Culvert a gate screen's 2.8 m and put its height to the
 owner on a decision card, since he had asked for the woodpiles "less tall" (2026-11-09). The owner (2026-11-12):
@@ -11,7 +11,11 @@ another way, and the field is measured again.
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | build thread | ✓ (the 101 files that read Woodland; CI runs the suite) | (pending) | – |
+| 2026-11-12 | 1 | build thread | ✓ (the 101 files that read Woodland; CI runs the suite) | 7/8 Accept | – |
+
+The critic's failed check (8, judgment) was four wordings, fixed in the same pull request as it asked: the 41 % belongs
+to the layout with a stack at flag B's yard, not to the bare lowered stack; one labelled line count; the stack is no
+longer the east's cover; the tight passage has its `docs/KNOWN_ISSUES.md` row and one width.
 
 ## What changed
 
@@ -21,7 +25,7 @@ another way, and the field is measured again.
   tall. A thicket is solid: nothing sees, shoots or walks through it. No new model, no new sound.
 - `tests/unit/test_mb1_layouts.gd`: the road stack stands 1.8 m with spruce against the whole of its east face,
   over twice its height; the Long road's line onto flag B's pole ring and posts stays shut (both fail without the
-  spruce: the ring is seen along 350 of the test's lines).
+  spruce: the ring is seen along 350 of the test's own, coarser lines).
 - `docs/wiki/Maps.md`, `docs/DECISIONS.md` › Maps and modes, `docs/KNOWN_ISSUES.md` (the two Woodland rows).
 
 ## Why the stack could not just be lowered
@@ -45,7 +49,8 @@ Bands: 45 to 55 % and 40 to 65 %.
   west's 222 losses on the hump, 1 of 215 at 2.8 m): the first knock-outs of the round, 20 to 27 s in. And flag B's
   attackers scored 155 to the defenders' 79 round the pole (138 to 94 at 2.8 m).
 - **Spruce against the stack's east face** stands where the stack's top metre was and shuts both lines at once, so
-  the yard keeps MB1's shape. The east's corner post moves 2 m back, from the stack's end to the stand's (24, 45),
+  the yard keeps MB1's shape. The stack is no longer the east's cover: its east face is in the spruce, and the
+  east's corner post moves 2 m back, from the stack's end to the stand's (24, 45),
   and takes 20 of the west's hump losses, not 41. Round flag B the attackers score 156 to the defenders' 127, round
   flag A 130 to 135.
 
@@ -80,6 +85,6 @@ seeds, and the choice between layouts from 32.
 
 ## Known issues left
 
-- The way round the stand's south end is 1.8 m wide for 1.7 m, between the spruce and the verge's log stack (QA: a
-  body passes, tight). MB1's stack left 1.9 m at the same corner; the south lane's figures above are measured through
-  it. Can wait.
+- The way round the stand's south end is tight: for 1 m of its length the spruce and the verge's log stack stand
+  1.8 m apart, 1.2 to 1.5 m of it walkable (QA; a body passes). MB1's stack left 1.9 m at the same corner, and the
+  south lane's figures above are measured through it. A row in `docs/KNOWN_ISSUES.md`, can wait.

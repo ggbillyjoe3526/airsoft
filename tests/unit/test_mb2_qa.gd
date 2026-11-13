@@ -75,4 +75,4 @@ func test_the_south_lane_is_walked_round_the_stand_between_its_two_points() -> v
 		for x: float in [21.0, 22.0, 23.0]:
 			if not nav.is_walkable_at(Vector3(x, nav.floor_at(Vector3(x, 50.0, z)) + 0.6, z)):
 				open.append("(%.1f, %.1f)" % [x, z])
-	assert_eq(open.size(), 0, "the 1.8 m gap south of the stand is walkable, blocked at %s" % [open])
+	assert_eq(open.size(), 0, "the gap south of the stand (1.8 m between the faces) is walkable, blocked at %s" % [open])
