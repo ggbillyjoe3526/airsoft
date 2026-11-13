@@ -1680,8 +1680,10 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 - [ ] **The goggles' lenses** are a thin dark tint on all four heads: the eyes show clearly through them, with no
   grey haze.
 - [ ] **Through the goggles and under the helmets, cap and hat** nothing pokes through a lens or the balaclava, from
-  the front and from the side, and from the side the eye is not a flat disc with a white rim.
-- [ ] **At 10 to 20 m** a face still reads as eyes and brows in the opening, with no shimmer as the bot moves,
+  the front and from the side, and from the side at 1 m the eye sits under the brow (not stuck on, not in a hole).
+  On the full-cut helmet, no skin or lid edge shows by the hem at the lower outer lid.
+- [ ] **At 10 to 40 m** a face still reads as eyes and brows in the opening, with no shimmer or ragged dark ring
+  round the eyes as the bot moves,
   and none along the opening's lower hem on the cap (look at 1 m too).
 
 ## Reporting what you find

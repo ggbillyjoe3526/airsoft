@@ -1,14 +1,14 @@
 # MQ3C · The figures' faces drawn as real ones
 
-**Review:** pending
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-13 | 1 | Fable 5.2 (model quality thread) | pass | Retry 7/8 | Against the reference photo the eyes were too small and too far apart (a gap of 1.6 eye widths, the photo's about 1.0), the brows too thin and too high, the pupils grey (66 of 255) with no glint, a white line along the lower lid, no inner corner, and the lids' 14 sides showed |
-| 2026-11-13 | 2 | Fable 5.2 (model quality thread) | pass | Retry 7/8 | All of attempt 1's list met but the brows: still 0.19 and 0.18 of the eye's width over the lid and thick against the photo's 0.27 (the goggles' frame hid their top), measured on the picture the eyes were 0.84 of a width apart, not 1.03; the glint sat on a lighter square, a lighter stripe ran under the upper lashes, the white ended in a sharp point, and in profile the eye had no brow over it |
-| 2026-11-13 | 3 | Fable 5.2 (model quality thread) | pending | pending | – |
+| 2026-11-13 | 1 | Fable 5.2 (model quality thread) | pass (6,475 tests) | Retry 7/8 | Against the reference photo the eyes were too small and too far apart (a gap of 1.6 eye widths, the photo's about 1.0), the brows too thin and too high, the pupils grey (66 of 255) with no glint, a white line along the lower lid, no inner corner, and the lids' 14 sides showed |
+| 2026-11-13 | 2 | Fable 5.2 (model quality thread) | pass (6,479 tests) | Retry 7/8 (near miss, judgment) | All of attempt 1's list met but the brows: still 0.19 and 0.18 of the eye's width over the lid and thick against the photo's 0.27 (the goggles' frame hid their top), measured on the picture the eyes were 0.84 of a width apart, not 1.03; the glint sat on a lighter square, a lighter stripe ran under the upper lashes, the white ended in a sharp point, and in profile the eye had no brow over it |
+| 2026-11-13 | 3 | Fable 5.2 (model quality thread) | pass (6,482 tests) | Accept 8/8 | – |
 
 ## What changed
 
@@ -138,6 +138,8 @@ files, `mq3c-1-eyes-front.jpg` to `mq3c-5-side-and-far-levels.jpg`.
   eyes; on the cap it is 0.23 mm under the hem that lies on it (as built since FA1, not pierced). A shimmer there
   at range is possible in theory; it is on the play checks. `test_mq3c_qa3.gd` holds the clearances (the lens at
   least 13.6 mm from the skin, no skin through the knit).
+- The critic's leftovers, for a later polish: at four times the size play shows, the caruncle reads as a round disc
+  with a polygon's edge; the lowest level's painted eye has a ragged dark outline.
 - In profile the eye lies under a ridge of 3 mm, not a real brow's 8 to 10: more would stand into the eyewear's
   room, and a deeper socket steepens the step under the eye.
 
