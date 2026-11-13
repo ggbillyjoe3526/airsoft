@@ -5,7 +5,7 @@
 - Three ways across: the Back Lane in the north, Main Street in the middle, and the Woodyard Road in the south.
 - Main Street runs through the West Arch onto the open Green, with its campfire.
 - The Woodyard Road passes the fenced Orchard.
-- The Forge, the Barn, the Tavern and the Store stand round the Green, each with two doors, so each is a way through.
+- The Forge and the Barn by the West Arch, and the Tavern and the Store on the Green, each have more than one door, so each is a way through.
 - Fenced courts and yards sit between the buildings.
 - The Bell house stands across the east end of Main Street, with a door onto the street and one onto the Green.
 - Plant The Bomb: Site A is indoors in the Long House's west room. Site B is in the open Woodyard, under the Sawmill's shed.

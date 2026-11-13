@@ -1,6 +1,6 @@
 # SK1 · Stockade, a dev-only field built for Plant The Bomb
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,8 @@
 |---|---|---|---|---|---|
 | 2026-11-13 | 1 | build thread | pass | Retry 5/8 | dropped the concept's Bell tower, Tents, Orchard, campfire and 76 m depth unrecorded; the Green filled with 53 tall pieces; no MB1 before and after |
 | 2026-11-13 | 2 | build thread | pass | Retry 4/8 | Attack / Defend 44 % (under Normal's 45 to 55) and Site B hardly planted; houses off every route; MB1 figures quoted from a map with lines over 34 m; `check.py` copied MB1's tools |
-| 2026-11-13 | 3 | build thread | pass | pending | – |
+| 2026-11-13 | 3 | build thread | pass | Retry 6/8 | the Forge, Barn and courts still hardly fought in; test fixtures committed by mistake; DECISIONS and the changelog note stale |
+| 2026-11-13 | 4 | build thread | pass | Accept 7/8 | – (the changelog note's door count fixed before merge) |
 
 ## Goal
 
