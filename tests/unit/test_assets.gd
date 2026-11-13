@@ -31,7 +31,7 @@ func test_every_model_loads() -> void:
 				assert_not_null(node, path)
 				node.free()
 			count += 1
-	assert_eq(count, 16, "two figures, five replicas, five part sets, four power sources (the Compact SMG's model and parts, CS2)")
+	assert_eq(count, 18, "two figures, six replicas, six part sets, four power sources (the Pump Shotgun's model and parts, SH2)")
 
 
 func test_figures_have_their_clips_and_sidecars() -> void:

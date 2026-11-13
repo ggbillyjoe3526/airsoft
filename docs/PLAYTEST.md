@@ -1542,8 +1542,8 @@ Customise's turntable and the replica in your hands, in black and in a bold colo
 
 ## The Pump Shotgun (SH1)
 
-Dev content: tick Settings › Dev › Dev content (level 12; Dev unlocks it at any level). It wears the Sniper Rifle's
-model until its own is built, and the pump, shot and shell sounds are stand-ins cut from other recordings.
+Dev content: tick Settings › Dev › Dev content (level 12; Dev unlocks it at any level). Its pump, shot and shell
+sounds are stand-ins cut from other recordings; its model's own checks are in the next section.
 
 - [ ] **Three BBs a pull.** On the Range pick the Pump Shotgun and fire at a wall from 10 m: three BBs leave together
   as an even triangle about a hand and a half apart (one on top), and the triangle is twice as wide at 20 m. The
@@ -1560,8 +1560,8 @@ model until its own is built, and the pump, shot and shell sounds are stand-ins 
 - [ ] **One hit is one hit.** A pull that lands two or three BBs on a bot is one hit: one tick, one "HIT!".
 - [ ] **Springs.** The Armoury offers it the Sniper Rifle's M140 and M150 springs (the M130 is the one it comes with):
   each reaches a little further, pumps slower and kicks more; the M150 is louder. No batteries or gas fit.
-- [ ] **Parts.** Every optic fits the top rail and the Weapon Torch fits (drawn where the Sniper Rifle carries it for
-  now). No grip, silencer, barrel or magazine part fits. The Red Laser waits for its own model's side rail.
+- [ ] **Parts.** Every optic fits the top rail, the Red Laser the left side rail and the Weapon Torch the right one.
+  No grip, silencer, barrel or magazine part fits.
 - [ ] **The Loadout sheet** shows "1.7 × 3" for its rate and a Pattern row (1.2°) no other replica has.
 - [ ] **Bots.** With Dev content on, some bots carry it (the Clearer kit, a Red Dot and two flashes): they push and
   flank, fire one pull at a time and hold their fire at long range.
@@ -1570,6 +1570,33 @@ model until its own is built, and the pump, shot and shell sounds are stand-ins 
 - [ ] **Frame rate.** A 6v6 with Dev content on, when several Clearer bots fire at once (three BBs and three puffs a
   pull each): does the frame rate hold as it does without them? (The performance review's note: only your PC can
   show it.)
+
+## The Pump Shotgun's model (SH2)
+
+Its own model, from the owner's photos, with no sights on it (his word), and your left hand on the pump.
+
+- [ ] **The model.** In the Armoury turn it over (Y): a plain barrel over a tube with a fluted cap, a round ribbed
+  pump, a boxy receiver with a holed top cover and a rail, a short rail each side, the box shell ahead of the trigger
+  guard, a pistol grip and a six-position stock with three rows of slots through each side and a sling loop at its
+  toe. No sights anywhere. The barrel and tube shine as steel; the pump,
+  grip and stock are matt polymer, a shade lighter in black. Does it stand beside the AEG Rifle and the Compact SMG
+  in quality? Each paint scheme reads on it.
+- [ ] **At the hip.** Your left hand holds the pump from below, your right the grip; only your hand and wrist show,
+  no forearm across the screen. It is held a little nearer you and lower than the other rifles (the pump is further
+  forward than a handguard): does it sit well beside them, or look too big?
+- [ ] **The pump.** After each pull the pump comes back and goes home with your hand on it, in time with its two
+  knocks, and it is home as the next pull is ready. The replica only rocks a little.
+- [ ] **Aimed with no optic.** You look over the back of the receiver and along the top rail, the BBs landing round
+  the rail's far end; the stock is behind your eye, out of view. Can you place a pull at 10 m and 20 m this way?
+  (It has no sights by your ruling; a low bead or a notch is a small change if you want one.)
+- [ ] **Aimed through each optic.** The Red Dot, the 2x and the variable scope sit on the rail and are centred; your
+  hands stay out of the glass.
+- [ ] **The reload.** Your left hand leaves the pump, takes the shell off, brings a fresh one up and pushes it home,
+  then goes back to the pump; it never passes through the receiver.
+- [ ] **Laser and torch.** The Red Laser sits on the left side rail and the Weapon Torch on the right; the dot and
+  the beam start from them.
+- [ ] **Bots.** A bot with the Clearer kit holds it at the shoulder with a hand on the pump and carries it on the
+  backpack when the pistol is out.
 
 ## What the bombs and power sources are made of (MQ2B)
 
@@ -1609,6 +1636,30 @@ Stand beside a teammate at the start of a round, or watch one from the dead zone
   walking away shows no jump in colour where its detail drops.
 - [ ] **Knee and elbow pads** look as before.
 - [ ] **Frame rate** with both teams in view is as before on every preset.
+
+## Headwear, arm bands and boots up close (MQ3B)
+
+Stand beside teammates at the start of a round, or watch from the dead zone, on High or Ultra. Look at several: the
+four heads differ.
+
+- [ ] **Helmets.** The grey high cut's paint is scuffed and scratched with dust low down, its rails and ear cups look
+  like moulded plastic; the coyote full cut's cover is faded on top with dust by its seams. No line runs down the
+  back of either.
+- [ ] **Cap and boonie.** The cloth is unevenly faded, with a sweat-dark band just above the boonie's hat band; the
+  headset's band over the cap is padded and stitched. They look worn, not dirty or ruined. From above (a crouched
+  or prone bot) the boonie's top is a flat panel with a square weave, no star or pinch at its middle.
+- [ ] **Ear cups** (the helmets' ear defenders, the cap's headset) read as moulded plastic from a metre away, with
+  no rings or swirls on them.
+- [ ] **Mesh mask.** Its paint is chipped to bare steel in places and its edge is bound in woven tape with a stitch
+  row.
+- [ ] **Team arm bands.** Ribbed elastic with a hem at each edge, read at once as the team's blue or orange in sun
+  and in shade at 10 to 30 m. The ribs and shading leave them about a fifth darker on average than the flat colour
+  they were: say if they look dim.
+- [ ] **Boots.** Soft suede with creases across the top of the foot only (none running down the sides), a scuffed
+  toe cap and lugs cut into the sole's side.
+- [ ] **At range nothing changed.** A figure 30 m away reads as before, with no shimmer on the arm bands or the
+  soles as it walks.
+- [ ] **Faces** look as before.
 
 ## Reporting what you find
 

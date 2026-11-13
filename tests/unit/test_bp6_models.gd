@@ -4,7 +4,7 @@ extends GutTest
 ## round a grip turns a plate whole instead of shearing it into shards, while the shoulders keep body.py's blended
 ## weights (tools/blender/figures/body_weights.py; owner 2026-11-07: he preferred 33fa48b's shoulder to the easing).
 
-const REPLICAS := ["aeg", "sniper", "cyber", "smg"]
+const REPLICAS := ["aeg", "sniper", "cyber", "smg", "shotgun"]
 ## The GBB Pistol keeps 7 (docs/KNOWN_ISSUES.md): its unpainted pair, the grip's tiling stipple and the BB, can't share.
 const OVER := {"pistol": 7}
 const REPLICA_MOST := 6
