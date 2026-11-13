@@ -1,6 +1,6 @@
 # PB2 · The bomb and the wire cutters
 
-**Review:** 4 attempts · critic pending · qa Pass · performance Pass
+**Review:** 5 attempts · critic pending · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,7 +9,8 @@
 | 2026-11-13 | 1 | Opus 5.5 (build thread) | ✓ | Retry 7/8 | 1 (proportions against the photo, cutters floating, carry not attached, pale in game) |
 | 2026-11-13 | 2 | Opus 5.5 (build thread) | partial | Retry 7/8 | 1 (the cutters: needle triangles at the jaw, a striped pivot side, the grip panel read as a crack, blunt tips) |
 | 2026-11-13 | 3 | Opus 5.5 (build thread) | partial | Retry 7/8 | 1 (the cutters: open edges and T-junctions where the lap was cut, a hairline at the pivot) |
-| 2026-11-13 | 4 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-13 | 4 | Opus 5.5 (build thread) | partial | Retry 7/8 | 1 (a hairline where the ground strip clipped the jaw's chamfer) |
+| 2026-11-13 | 5 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -28,6 +29,8 @@
   taller than wide end on (53 x 57 mm), bands 32 mm wide set 35 mm in from each end, the keypad 0.37 of the length;
   cutters' jaws 0.15 of the length, head 0.09, grips 0.69. Blocks a darker grey-green and the tape a duller silver,
   checked under Depot's light.
+- **The cutting edges are ground into the steel on both faces** (1 mm wide, 0.15 mm deep at the edge), not laid on as
+  a strip, so the closed jaws meet level in a shallow V; every flat face of the steel is shaded flat.
 - **Carried, it rides on its side at the left hip, keypad out, strapped to the belt**: the model's `Carry` node (a
   webbing strap over each band, a belt loop from each, snapped) shows only while carried (`carry_at` 0.19, 0.9, 0.04 m;
   0.3 m lower fully crouched, `carry_crouch_drop`).

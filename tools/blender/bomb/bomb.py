@@ -514,7 +514,7 @@ NOSE_FROM = 6.5        # where the nose's bevels start (y, mm)
 LAP_GAP = 0.06          # the lap's clearance round the other half's disc (mm)
 PIVOT_SEGS = 72         # the pivot's circle's sides, and the outline's arcs at the same spacing
 CHAMFER = (1.3, 0.75)     # the jaw's outer chamfer: in from the root-to-tip line at the top (mm), and its drop per mm out
-EDGE_GRIND = 1.25       # the bright ground facet's width along the cutting edge
+GRIND = (1.0, 0.15)     # the cutting edge's ground facet: its width on the top face, its depth at the edge (mm)
 GRIP_FROM = -19.0       # the grip's front end and its far end (y, mm)
 GRIP_TO = -103.0
 GRIP_X = (-4.6, -14.5, 4.5)  # the grip's centre line: x at its front, at its end, and its outward bow
@@ -528,7 +528,7 @@ NUT = (3.4, 1.4)             # the pivot screw's head radius and height; the nut
 
 def cutter_colours() -> None:
     hs.material("Oxide", 0x1D1E20, 0.48, 0.65)
-    hs.material("Ground", 0x8E9196, 0.3, 1.0)
+    hs.material("Ground", 0x63666B, 0.5, 1.0)
     hs.material("Grip", 0x2A6C75, 0.74)
     hs.material("Hole", 0x0E0F10, 0.9)
 
@@ -595,9 +595,11 @@ def steel_half(name: str) -> bpy.types.Object:
     chamfer = wedge.build()
     chamfer.data.transform(Matrix.Translation(mm(rx, ry, 0.0)) @ Matrix.Rotation(turn, 4, "Z") @ Matrix.Scale(MM, 4))
     cutters.append(chamfer)
+    cutters += [grind_wedge(name, 1.0), grind_wedge(name, -1.0)]  # ground both sides, as the jaws meet level
     cut_each(ob, cutters)
     ob.data.validate()
     unneedle(ob)
+    paint_grind(ob)
     # Every face flat but the pivot's round walls, smooth (no bevel: at its size it only split the walls into faces
     # that weighted normals striped and fanned the flat faces).
     round_pivot_walls(ob)
@@ -684,6 +686,44 @@ def circle_crossings(a: tuple, b: tuple, r: float) -> list:
     root = math.sqrt(disc)
     ts = sorted(((-qb - root) / (2.0 * qa), (-qb + root) / (2.0 * qa)))
     return [(a[0] + dx * t, a[1] + dy * t) for t in ts if 1e-3 < t < 1.0 - 1e-3]
+
+
+def grind_slope() -> tuple:
+    """The top ground facet's plane, z = top - depth + slope_x * x + slope_y * (y - NOSE_FROM) (mm; the underside's is
+    its mirror): it follows the nose's bevel, so it is GRIND[0] wide all along the edge and runs out on the flat just
+    behind the nose."""
+    width, depth = GRIND
+    return depth / width, -(CUT_T - TIP_T) / (JAW_EDGE[-1][1] - NOSE_FROM)
+
+
+def grind_wedge(name: str, sign: float) -> bpy.types.Object:
+    """The cutting edge ground on the top (`sign` 1) or the underside (-1): everything past the facet's plane along the
+    edge, a closed wedge for cut_each."""
+    width, depth = GRIND
+    sx, sy = grind_slope()
+    wedge = hs.Builder(name + "_grind", [])
+    z0 = CUT_T - depth
+    # Steep past the edge (x < 0), so it never bites the pivot's round face where that reaches past the edge's line.
+    wedge.prism([(x, sign * z) for x, z in ((-1.0, CUT_T + 1.0), (0.0, z0), (width + 1.0, z0 + sx * (width + 1.0)),
+                                            (width + 1.0, CUT_T + 6.0), (-1.0, CUT_T + 6.0))],
+                "y", NOSE_FROM - 2.0, JAW_EDGE[-1][1] + 2.0, "Oxide")
+    ob = wedge.build()
+    shear = Matrix.Identity(4)
+    shear[2][1] = sign * sy  # the face falls toward the tip with the nose, from NOSE_FROM
+    shear[2][3] = -sign * sy * NOSE_FROM
+    ob.data.transform(Matrix.Scale(MM, 4) @ shear)
+    return ob
+
+
+def paint_grind(ob: bpy.types.Object) -> None:
+    """The faces the grind left, bare steel: part of the shell, sharing its points, nothing laid over it."""
+    sx, sy = grind_slope()
+    facets = [Vector((-sx, -sy, 1.0)).normalized(), Vector((-sx, -sy, -1.0)).normalized()]
+    ob.data.materials.append(surface.material("Ground"))
+    ground = len(ob.data.materials) - 1
+    for poly in ob.data.polygons:
+        if any(poly.normal.dot(n) > 0.9999 for n in facets):
+            poly.material_index = ground
 
 
 def cut_each(ob: bpy.types.Object, cutters: list) -> None:
@@ -778,9 +818,11 @@ def round_pivot_walls(ob: bpy.types.Object) -> None:
     its sides and no blend crosses into the faces beside it."""
     me = ob.data
     near = (PIVOT_R - 0.4) * MM, (PIVOT_R + 0.4) * MM
-    walls = set()
+    walls, flat = set(), set()
     for poly in me.polygons:
         upright = abs(poly.normal.z) < 0.2
+        if not upright:
+            flat.add(poly.index)
         on_wall = all(near[0] < math.hypot(me.vertices[v].co.x, me.vertices[v].co.y) < near[1] for v in poly.vertices)
         poly.use_smooth = upright  # the outline's curved sides smooth too, split at their corners by angle
         if upright and on_wall:
@@ -792,6 +834,8 @@ def round_pivot_walls(ob: bpy.types.Object) -> None:
         for key in poly.edge_keys:
             faces_of.setdefault(key, []).append(poly.index)
     sharp = {key for key, fs in faces_of.items() if len({f in walls for f in fs}) > 1}
+    # Round every flat face too (the angle and the custom normals shade every face smooth), so no corner's normal is shared across one (they would blend at a shallow crease).
+    sharp |= {key for key, fs in faces_of.items() if any(f in flat for f in fs)}
     for edge in me.edges:
         if edge.key in sharp:
             edge.use_edge_sharp = True
@@ -813,24 +857,6 @@ def outer_x(y: float) -> float:
         if y0 <= y <= y1:
             return x0 + (x1 - x0) * (y - y0) / max(y1 - y0, 1e-9)
     return pts[-1][0] if y > pts[-1][1] else pts[0][0]
-
-
-def ground_edge(b: hs.Builder) -> None:
-    """The cutting edge's bright ground facet on the top face, a strip along the edge sloping to it."""
-    bm = b.bm
-    ys = [JAW_EDGE[0][1] + 0.6] + [y for _, y in JAW_EDGE[1:-1]] + [JAW_EDGE[-1][1] - 1.0]
-    lo, hi = [], []
-    for y in ys:
-        t = half_thickness(y)
-        w = min(EDGE_GRIND * (0.55 + 0.45 * t / CUT_T), 0.6 * outer_x(y))  # inside the jaw's outline to its tip
-        lo.append(bm.verts.new(mm(0.02, y, t * 0.5)))
-        hi.append(bm.verts.new(mm(w, y, t + 0.03)))
-    faces = [bm.faces.new((lo[i], lo[i + 1], hi[i + 1], hi[i])) for i in range(len(ys) - 1)]
-    for f in faces:
-        f.normal_update()
-        if f.normal.z < 0.0:
-            f.normal_flip()
-    b._faces(faces, "Ground")
 
 
 def grip_frame(s: float) -> tuple:
@@ -940,7 +966,6 @@ def pivot_hardware(b: hs.Builder) -> None:
 def build_half(name: str, top: bool) -> bpy.types.Object:
     steel = steel_half(name)
     b = hs.Builder(name + "_parts", [])
-    ground_edge(b)
     grip(b)
     pivot_hardware(b)
     built = b.build()
