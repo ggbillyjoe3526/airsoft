@@ -150,7 +150,7 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 | 000019 | Cyber Pistol | cyber | pistol, built-in-power | | public |
 | 000021 | Sniper Rifle | sniper | rifle, spring, top-rail, under-rail, muzzle-thread | 2x Scope | public |
 | 000026 | Compact SMG | smg | rifle, electric, top-rail, side-rail, muzzle-thread | | dev |
-| 000027 | Pump Shotgun | shotgun | rifle, spring, top-rail | | dev |
+| 000027 | Pump Shotgun | shotgun | rifle, spring, top-rail, side-rail | | dev |
 
 ### Power sources
 

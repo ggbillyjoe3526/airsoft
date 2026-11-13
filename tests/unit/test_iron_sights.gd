@@ -10,6 +10,9 @@ const OPTIC := &"redDot"
 const OVER_RAIL := 0.0005
 ## Half the width of the rail's top strip checked, m.
 const STRIP_HW := 0.012
+## Replicas built with no iron sights at all (the Pump Shotgun aims along its rail: owner, 2026-11-12): none to hide,
+## and still nothing but the optic over the rail.
+const NO_SIGHTS: Array[StringName] = [&"shotgun"]
 
 
 ## Replica keys whose model has an OpticMount, with their model instanced in the tree.
@@ -36,7 +39,8 @@ func test_an_optic_hides_every_replicas_iron_sights_whole_and_taking_it_off_brin
 	for key: StringName in models:
 		var model := models[key]
 		var sights := IronSights.of(model)
-		assert_eq(sights.size(), 2, "%s: a front and a rear sight bone" % key)
+		assert_eq(sights.size(), 0 if NO_SIGHTS.has(key) else 2,
+				"%s: a front and a rear sight bone (none on a replica built without)" % key)
 		var fit := ReplicaParts.fit(model, key, {&"optic": OPTIC})
 		assert_not_null(fit.optic, "%s takes the %s" % [key, OPTIC])
 		for sight in sights:
