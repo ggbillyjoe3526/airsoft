@@ -165,6 +165,13 @@ cutting the attackers' chicanes, which break lines over 34 m.
   382 blocks against Woodland's 960, 26 lights within LightPools' 32, `test_sk1_qa` 127 s alone (16 tests); frame time
   at night on Low is on the checklist.
 
+## Owner's rulings
+
+- **Bots are not sent through the Forge and the Barn (owner, 2026-11-13):** asked whether the bot lanes should run
+  through them at about 10 points of the attackers' wins in Attack / Defend and Plant The Bomb, he chose "Leave it to
+  your playtest": the houses stay ways through for players, the bots keep to the outer ways, and he judges the houses
+  in play.
+
 ## Left for the owner
 
 - How it plays: the play checks are on the Dev 3 checklist (SK1).
