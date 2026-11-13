@@ -74,8 +74,8 @@ const OWN_CAP_CUES: Array[StringName] = [&"smoke_pop"]
 ## from tools/lift_sounds.py (MT2).
 const LIFT_CUES: Array[StringName] = [&"lift_button", &"lift_doors", &"lift_doors", &"lift_motor", &"lift_chime",
 		&"lift_buzz"]
-## Plant The Bomb's sounds by Plant.Cue (&"": the cue only stops the keys or the kit): placeholders from
-## tools/plant_sounds.py (PB1).
+## Plant The Bomb's sounds by Plant.Cue (&"": the cue only stops the keys or the kit): the owner's recordings (AU11,
+## tools/cut_recordings.py), armed still a placeholder from tools/plant_sounds.py (PB1).
 const PLANT_CUES: Array[StringName] = [&"plant_pickup", &"plant_drop", &"plant_arming", &"", &"plant_armed",
 		&"plant_beep", &"plant_defusing", &"", &"plant_defused", &"plant_went_off"]
 ## What a play is, for its pitch and level spread, its priority in the field's pool and how many of its cue may sound.

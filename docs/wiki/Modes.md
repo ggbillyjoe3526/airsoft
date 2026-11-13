@@ -55,7 +55,7 @@ A map needs a flagpole for Attack / Defend; the Match screen says when one hasn'
 One team carries a bomb to the other team's end and plants it at **Site A** or **Site B**; the other team keeps it
 out, or defuses it before it goes off. The bomb is a field prop: four grey-green blocks bound with silver tape, a
 keypad timer with an LCD and a lamp on top, and a red and a blue wire looping into the front end; carried, it rides on
-its side at the carrier's hip. When it goes off it pops a cloud of dust and sounds its buzzer, and nobody is hit by
+its side at the carrier's hip. When it goes off it pops a cloud of dust with a long, loud burst, and nobody is hit by
 it. The team you pick attacks first, and the
 sides swap at half time. Every field has both sites.
 
