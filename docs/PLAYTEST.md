@@ -1665,6 +1665,21 @@ four heads differ.
   soles as it walks.
 - [ ] **Faces** look as before.
 
+## Faces up close (MQ3C)
+
+Stand face to face with a teammate at the start of a round, or watch a bot from the dead zone, on High or Ultra.
+Look at several: there are four faces (fair with blue eyes, medium with green, tan with brown, deep with dark brown).
+
+- [ ] **Skin** looks like skin, not plastic: uneven in tone, a little darker under the eyes, with a fine grain when
+  the light catches the bridge of the nose.
+- [ ] **Brows** are hairs, thicker toward the nose, not a painted block. **Lashes** are a fine fringe, not a drawn
+  outline.
+- [ ] **Eyes** are almond shaped with the upper lid resting on the iris (not staring), the iris has fine fibres
+  and a darker rim, the whites are not pure white, and the eye glints as the light moves.
+- [ ] **Through the goggles and under the helmets, cap and hat** nothing pokes through a lens or the balaclava, from
+  the front and from the side.
+- [ ] **At 10 m and more** a face still reads as eyes and brows in the opening, with no shimmer as the bot moves.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

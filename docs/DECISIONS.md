@@ -340,6 +340,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   map naming a boot trail has it left out with a warning.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
+- **The figure's face is drawn as a real one (owner, 2026-11-13, MQ3C).** "Has the players face been improved? If
+  not then add that to the list of models to work on", in the pass that makes every model "more realistic". So the
+  face in the eye opening is no longer the clean stylised one FA1 drew: skin with its uneven tone and pores, brows
+  and lashes of single hairs, an iris of fibres, on a map of its own (2048 x 1024, four looks). Still only the
+  strip round the eyes is modelled: every head covers the rest (docs/records/MQ3C.md).
 
 ## Gameplay and feel
 

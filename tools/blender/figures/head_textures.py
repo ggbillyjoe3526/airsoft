@@ -14,7 +14,8 @@ import os
 import numpy as np
 
 import face
-from headkit import Atlas, dashes, lines, soft_box, soft_disc, soft_round_box
+import face_paint
+from headkit import Atlas, dashes, hash01 as _hash, lines, noise as _noise, soft_box, soft_disc, soft_round_box
 
 KNIT_Z0 = 1.43
 KNIT_SPAN = 0.30
@@ -105,7 +106,7 @@ def paint() -> Atlas:
     _goggle_frame(a.tile("goggle_frame", 1024, 384, 512, 64))
     _cushion(a.tile("cushion", 1024, 448, 512, 64))
     _knit(a.tile("knit", 512, 0, 1024, 384))
-    face.paint(a)  # four 256 x 128 cells over the swatch area's top half
+    a.face = face_paint.paint()  # the face's own map (MQ3C); its old cells over the swatches stay empty
     _loop(a.tile("loop_cap", 512, 384, 512, 128), 0x5a4936, 0x4a3b2b)
     _mesh(a.tile("mesh", 1536, 0, 512, 512))
     _shemagh(a.tile("shemagh", 0, 512, 1024, 512))
@@ -128,7 +129,7 @@ def paint() -> Atlas:
 
 
 def save(atlas: Atlas, stem: str) -> dict:
-    """Writes the atlas as three WebP files, all without loss (Blender's quality 100); returns their paths by kind.
+    """Writes an atlas as three WebP files, all without loss (Blender's quality 100); returns their paths by kind.
     A lossy colour map smeared each tile's edge into its neighbour, and a tile that goes round a part showed that as
     a line where its two ends meet (MQ3B). Image.save writes the pixels as painted (save_render would put them
     through the scene's view transform)."""
@@ -144,36 +145,6 @@ def save(atlas: Atlas, stem: str) -> dict:
 
 
 # ------------------------------------------------------------------------------------------------- used surfaces
-
-def _hash(ix, iy, iz, seed: int):
-    """0-1 for each lattice point, the same every run."""
-    h = (ix * 374761393 + iy * 668265263 + iz * 2147483647 + seed * 1442695041) & 0xFFFFFFFF
-    h = ((h ^ (h >> 13)) * 1274126177) & 0xFFFFFFFF
-    return ((h ^ (h >> 16)) & 0xFFFF).astype(np.float32) / 65535.0
-
-
-def _noise(x, y, cell: float, seed: int, wrap: float = 0.0, z=None):
-    """Smooth noise, -1 to 1, in lumps `cell` across at each pixel's place (x, y and, on a curved part, z, in metres).
-    With `wrap` the lumps repeat every `wrap` of x, so a tile that goes round a part meets itself."""
-    n = max(1, int(round(wrap / cell))) if wrap > 0.0 else 0
-    if n:
-        cell = wrap / n
-    z = np.zeros_like(x) if z is None else z
-    f = [np.asarray(v, np.float64) / cell for v in (x, y, z)]
-    i = [np.floor(v).astype(np.int64) for v in f]
-    w = [v - iv for v, iv in zip(f, i)]
-    w = [v * v * (3.0 - 2.0 * v) for v in w]
-    out = np.zeros(x.shape, np.float32)
-    for dx in (0, 1):
-        ix = (i[0] + dx) % n if n else i[0] + dx
-        wx = w[0] if dx else 1.0 - w[0]
-        for dy in (0, 1):
-            wy = w[1] if dy else 1.0 - w[1]
-            for dz in (0, 1):
-                wz = w[2] if dz else 1.0 - w[2]
-                out += (_hash(ix, i[1] + dy, i[2] + dz, seed) * wx * wy * wz).astype(np.float32)
-    return out * 2.0 - 1.0
-
 
 def _grain(t, pos: tuple, size: float, depth: float, seed: int, wrap: float = 0.0) -> None:
     """A fine even grain in the height alone: paint's peel, moulded polymer's pebble."""

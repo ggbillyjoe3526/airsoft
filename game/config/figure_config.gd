@@ -25,11 +25,11 @@ extends Resource
 ## TeamGlow); every other material stays as modelled.
 @export var team_material_prefix: String = "team"
 ## Materials whose name starts with this (any case) are the face in the balaclava's eye opening (FA1): its looks (skin
-## tone, brows and eyes) are painted side by side in the heads' atlas, and a figure wears look face_look(id), its
-## material's UVs offset by face_offsets[look] (Godot's UV space, v down). Presentation only.
+## tone, brows and eyes) are painted side by side in the face's own map (MQ3C: two across, two up), and a figure wears
+## look face_look(id), its material's UVs offset by face_offsets[look] (Godot's UV space, v down). Presentation only.
 @export var face_material_prefix: String = "face"
-@export var face_offsets: PackedVector2Array = PackedVector2Array([Vector2(0.0, 0.0), Vector2(0.125, 0.0),
-		Vector2(0.0, -0.0625), Vector2(0.125, -0.0625)])
+@export var face_offsets: PackedVector2Array = PackedVector2Array([Vector2(0.0, 0.0), Vector2(0.5, 0.0),
+		Vector2(0.0, -0.5), Vector2(0.5, -0.5)])
 ## The files face +Z, the figures -Z: the model is turned this far about +Y (radians).
 @export var model_yaw: float = PI
 ## The legs' clips (FI2): standing still, the gait clips by the way each steps (x to the figure's right, y ahead; placed

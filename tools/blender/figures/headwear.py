@@ -1293,7 +1293,8 @@ def main() -> None:
     heads_glb = os.path.join(tmp, "heads.glb")
     splice_heads.export_heads(heads_glb, made["objects"])
     images = head_textures.save(made["atlas"], os.path.join(tmp, "headwear"))
-    splice_heads.splice(HUMAN, heads_glb, images, out)
+    face_images = head_textures.save(made["atlas"].face, os.path.join(tmp, "face"))
+    splice_heads.splice(HUMAN, heads_glb, images, out, face_images)
     print("wrote", out)
 
 

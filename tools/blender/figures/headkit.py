@@ -55,19 +55,20 @@ ATLAS = 2048
 
 
 class Atlas:
-    """The shared texture: colour (sRGB 0-1), height (in pixels, for the normal map) and roughness, rows from the bottom
-    (Blender's pixel order, so v = row / size). Swatches are flat 32 px cells; tiles are named rectangles."""
+    """A painted texture: colour (sRGB 0-1), height (in pixels, for the normal map) and roughness, rows from the bottom
+    (Blender's pixel order, so v = row / rows). Swatches are flat 32 px cells; tiles are named rectangles. The heads
+    share one ATLAS px square; the face has a map of its own (face.FACE_MAP)."""
 
     SWATCH = 32
     SWATCH_AREA = 512  # swatches fill the bottom-left 512 px square's lower half (rows)
-    SWATCH_TOP = 256   # above it: the face's four cells (face.FACE_CELLS)
+    SWATCH_TOP = 256   # above it: free since MQ3C (the face's cells moved to a map of their own, face.FACE_MAP)
 
-    def __init__(self):
-        n = ATLAS
-        self.col = np.zeros((n, n, 3), np.float32)
+    def __init__(self, width: int = ATLAS, height: int = ATLAS):
+        self.width, self.rows = width, height
+        self.col = np.zeros((height, width, 3), np.float32)
         self.col[:] = (0.5, 0.5, 0.5)
-        self.height = np.zeros((n, n), np.float32)
-        self.rough = np.full((n, n), 0.8, np.float32)
+        self.height = np.zeros((height, width), np.float32)
+        self.rough = np.full((height, width), 0.8, np.float32)
         self.swatches: dict = {}
         self.tiles: dict = {}
 
@@ -90,8 +91,7 @@ class Atlas:
 
     def images(self, stem: str) -> dict:
         """Blender images: colour, normal (from the height) and metallic-roughness (G roughness)."""
-        n = ATLAS
-        col = np.concatenate([self.col, np.ones((n, n, 1), np.float32)], axis=2)
+        col = np.concatenate([self.col, np.ones((self.rows, self.width, 1), np.float32)], axis=2)
         # Height is in pixels: a rise of 1 over one pixel is a 45 degree slope.
         gy, gx = np.gradient(self.height)
         # Each tile's slopes from its own heights alone: across a tile's edge the next tile's height is another
@@ -107,7 +107,7 @@ class Atlas:
         orm = np.stack([np.ones_like(nx), self.rough, np.zeros_like(nx), np.ones_like(nx)], axis=2)
         out = {}
         for key, arr, colour_space in (("col", col, "sRGB"), ("nrm", nrm, "Non-Color"), ("orm", orm, "Non-Color")):
-            im = bpy.data.images.new("%s_%s" % (stem, key), n, n, alpha=False)
+            im = bpy.data.images.new("%s_%s" % (stem, key), self.width, self.rows, alpha=False)
             im.colorspace_settings.name = colour_space
             im.pixels.foreach_set(arr.astype(np.float32).ravel())
             im.pack()
@@ -128,7 +128,7 @@ class Tile:
         # Half a pixel in from the edges, so mip levels don't bleed the neighbour in.
         s = min(1.0, max(0.0, s))
         t = min(1.0, max(0.0, t))
-        return ((self.x + 1 + s * (self.w - 2)) / ATLAS, (self.y + 1 + t * (self.h - 2)) / ATLAS)
+        return ((self.x + 1 + s * (self.w - 2)) / self.atlas.width, (self.y + 1 + t * (self.h - 2)) / self.atlas.rows)
 
     def view(self, which: str):
         arr = getattr(self.atlas, which)
@@ -161,6 +161,36 @@ class Tile:
 
 def hex_rgb(h: int) -> tuple:
     return (((h >> 16) & 255) / 255.0, ((h >> 8) & 255) / 255.0, (h & 255) / 255.0)
+
+
+def hash01(ix, iy, iz, seed: int):
+    """0-1 for each lattice point, the same every run."""
+    h = (ix * 374761393 + iy * 668265263 + iz * 2147483647 + seed * 1442695041) & 0xFFFFFFFF
+    h = ((h ^ (h >> 13)) * 1274126177) & 0xFFFFFFFF
+    return ((h ^ (h >> 16)) & 0xFFFF).astype(np.float32) / 65535.0
+
+
+def noise(x, y, cell: float, seed: int, wrap: float = 0.0, z=None):
+    """Smooth noise, -1 to 1, in lumps `cell` across at each pixel's place (x, y and, on a curved part, z, in metres).
+    With `wrap` the lumps repeat every `wrap` of x, so a tile that goes round a part meets itself."""
+    n = max(1, int(round(wrap / cell))) if wrap > 0.0 else 0
+    if n:
+        cell = wrap / n
+    z = np.zeros_like(x) if z is None else z
+    f = [np.asarray(v, np.float64) / cell for v in (x, y, z)]
+    i = [np.floor(v).astype(np.int64) for v in f]
+    w = [v - iv for v, iv in zip(f, i)]
+    w = [v * v * (3.0 - 2.0 * v) for v in w]
+    out = np.zeros(x.shape, np.float32)
+    for dx in (0, 1):
+        ix = (i[0] + dx) % n if n else i[0] + dx
+        wx = w[0] if dx else 1.0 - w[0]
+        for dy in (0, 1):
+            wy = w[1] if dy else 1.0 - w[1]
+            for dz in (0, 1):
+                wz = w[2] if dz else 1.0 - w[2]
+                out += (hash01(ix, i[1] + dy, i[2] + dz, seed) * wx * wy * wz).astype(np.float32)
+    return out * 2.0 - 1.0
 
 
 def soft_box(s, t, s0: float, s1: float, t0: float, t1: float, edge: float):

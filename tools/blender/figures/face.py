@@ -14,9 +14,9 @@ the eyeballs and the rolled knit hem round the opening. Players see it through t
     skin) round an almond-shaped fissure.
   - LOD2 keeps only a coarse skin patch with the eyes painted on it (the same texture the eyeballs sample).
 
-The texture lives in four cells of the heads' atlas (paint, FACE_CELLS): one skin tone, brow and eye colour each.
-The mesh's UVs point at the first; the game picks a cell per figure by offsetting the Face material's UVs
-(FigureConfig.face_offsets), so the four looks cost no triangles.
+The texture is a map of the face's own (MQ3C: FACE_MAP, painted by face_paint.py), four looks side by side
+(FACE_CELLS): one skin tone, brow and eye colour each. The mesh's UVs point at the first; the game picks a cell per
+figure by offsetting the Face material's UVs (FigureConfig.face_offsets), so the four looks cost no triangles.
 
 Space as head_shapes.py: Blender metres, +Z up, the figure facing -Y, +X its left, the rest pose. Nothing here sits
 outside the head's knit surface except the eyelids, by at most LID_PROUD_MAX, well inside every lens: the eyewear,
@@ -30,7 +30,7 @@ import numpy as np
 from mathutils import Vector, geometry
 
 import head_shapes as hs
-from headkit import GEAR, Part, cull, gauss, smoothstep, soft_disc
+from headkit import GEAR, Part, cull, gauss, smoothstep
 
 FACE = "Face"
 
@@ -59,13 +59,13 @@ SKIN_DIVE = 0.6       # metres deeper per metre beyond the opening's edge
 
 EYE_AZ = 0.345        # the pupils' azimuth (about 61 mm apart)
 EYE_Z = 1.6155
-EYE_R = 0.0121        # eyeball radius
+EYE_R = 0.0132        # eyeball radius
 EYE_PROUD = 0.0015    # the cornea's front ahead of the head's socket floor
 # The fissure (the almond between the lids): half width, height above and below the centre, the outer corner's lift,
 # and the superellipse power (under 2 makes the corners pointed).
-FIS_W = 0.0100
-FIS_UP = 0.0044
-FIS_LO = 0.0036
+FIS_W = 0.0115
+FIS_UP = 0.0041
+FIS_LO = 0.0040
 FIS_TILT = 0.0007
 FIS_POW = 1.7
 # The lid shell (a paraboloid riding LID in front of the cornea, its radii across and up): the lids and the skin of
@@ -76,12 +76,12 @@ LID_RU_OUT = 0.0105   # toward the outer corner it curves back faster (the eye s
 LID_RV = 0.013
 # The lids' loops: (u scale, rise above, drop below) from the fissure; L1 on the shell, L2 on the skin.
 LID_L1 = (1.06, 0.0013, 0.0009)
-LID_L2 = (1.28, 0.0042, 0.0030)
+LID_L2 = (1.24, 0.0042, 0.0030)
 LID_MARGIN_OUT = 0.0004   # the lid's margin, off the eyeball
 LID_TUCK = 0.0006         # its inner edge, tucked into the eyeball
 # The carve: full inside the CARVE superellipse (u, up, down half sizes), fading to none at CARVE_OUT (kept tight
 # across, so the nose's bridge and the temples keep the head's own shape).
-CARVE = (0.0135, 0.0094, 0.0070, 0.0118)          # out, up, down, in (toward the nose: shallower)
+CARVE = (0.0150, 0.0094, 0.0074, 0.0132)          # out, up, down, in (toward the nose: shallower)
 CARVE_OUT = (0.0190, 0.0170, 0.0135, 0.0240)
 # Toward the nose the lid shell comes forward by up to this, so the socket's wall by the bridge is a gentle slope.
 MEDIAL_LIFT = 0.0024
@@ -97,18 +97,26 @@ ROLL_HEIGHT = 0.0004
 
 # --- the texture cells ------------------------------------------------------------------------------------------------
 
-# Atlas pixel rectangles (x, y from the bottom, w, h), one look each. The mesh uses the first; FigureConfig.face_offsets
-# holds the others' offsets in Godot's UV space (v flipped).
-FACE_CELLS = ((0, 256, 256, 128), (256, 256, 256, 128), (0, 384, 256, 128), (256, 384, 256, 128))
-TILE_S = 0.072                 # the cell spans s in [-TILE_S, TILE_S]
-TILE_Z = (1.588, 1.648)        # and z between these
+# The face's own map (MQ3C): its size, and each look's pixel rectangle in it (x, y from the bottom, w, h). The mesh
+# uses the first; FigureConfig.face_offsets holds the others' offsets in Godot's UV space (v flipped). face_paint.py
+# paints them.
+FACE_MAP = (2048, 1024)
+FACE_CELLS = ((0, 0, 1024, 512), (1024, 0, 1024, 512), (0, 512, 1024, 512), (1024, 512, 1024, 512))
+TILE_S = 0.072                                # the cell spans s in [-TILE_S, TILE_S]
+TILE_Z = (OPEN_Z - 0.036, OPEN_Z + 0.036)     # and z between these: a pixel is as high as it is wide
 
-# Each look (sRGB): skin, brow, iris, lip-pink for the lid margins. Stylised (art direction: clean, warm, readable).
+# Each look (sRGB): skin, brow, iris, the ring round its pupil and how strong it is, lip-pink for the lid margins;
+# how strongly the iris's fibres show (a dark eye's hardly do), freckles, the brow's hairs and width, how deep the
+# fine lines are. The looks differ as people do, not only in colour.
 LOOKS = (
-    {"skin": 0xe3b89c, "brow": 0x5a3c28, "iris": 0x5f8496, "pink": 0xd99a8a},
-    {"skin": 0xc8956c, "brow": 0x35241a, "iris": 0x5e7048, "pink": 0xd09682},
-    {"skin": 0x965f3f, "brow": 0x241911, "iris": 0x5b3a21, "pink": 0xa06450},
-    {"skin": 0x6f4531, "brow": 0x18120e, "iris": 0x3b2414, "pink": 0x8a5444},
+    {"skin": 0xe3b89c, "brow": 0x5a3c28, "iris": 0x5f8496, "ring": 0x9c8f66, "ring_in": 0.55, "pink": 0xd99a8a,
+     "fibre": 0.30, "freckles": 70, "hairs": 1250, "brow_w": 1.05, "lines": 0.85},
+    {"skin": 0xc8956c, "brow": 0x35241a, "iris": 0x5e7048, "ring": 0x8a6a34, "ring_in": 0.70, "pink": 0xd09682,
+     "fibre": 0.26, "freckles": 0, "hairs": 1150, "brow_w": 1.08, "lines": 1.0},
+    {"skin": 0x965f3f, "brow": 0x241911, "iris": 0x5b3a21, "ring": 0x7a4a22, "ring_in": 0.60, "pink": 0xa06450,
+     "fibre": 0.16, "freckles": 0, "hairs": 1050, "brow_w": 1.0, "lines": 0.7},
+    {"skin": 0x6f4531, "brow": 0x18120e, "iris": 0x3b2414, "ring": 0x4f2f18, "ring_in": 0.50, "pink": 0x8a5444,
+     "fibre": 0.10, "freckles": 0, "hairs": 950, "brow_w": 0.92, "lines": 0.6},
 )
 
 # Per level: the skin's depth at its edge and how far it runs on under the knit (the knit's chords cut deeper at
@@ -331,7 +339,7 @@ def face_part(k, keep=None) -> Part:
     """The face at level `k.level` (k: headwear.Kit). `keep(point)` False drops a face hidden under the head gear."""
     lv = LEVELS[k.level]
     margin = lv["margin"]
-    tile = k.tile("face")
+    tile = k.atlas.face.tiles["face"]
     p = Part("face")
 
     def uv(q: Vector) -> tuple:
@@ -614,107 +622,3 @@ def cut_hole(p: Part) -> None:
         return abs(math.atan2(q.x, -q.y)) > HOLE_AZ + eps or not HOLE_Z0 - eps <= q.z <= HOLE_Z1 + eps
 
     cull(p, outside)
-
-
-# ------------------------------------------------------------------------------------------------------- texture
-
-def _rgb(h: int) -> np.ndarray:
-    return np.array((((h >> 16) & 255) / 255.0, ((h >> 8) & 255) / 255.0, (h & 255) / 255.0), np.float32)
-
-
-def _mix(t, mask, colour) -> None:
-    c = t.view("col")
-    m = np.clip(mask, 0.0, 1.0)[..., None]
-    c[:] = c * (1.0 - m) + np.asarray(colour, np.float32) * m
-
-
-def paint(atlas) -> None:
-    """The four looks' cells (the first named "face", the one the mesh's UVs use)."""
-    for i, (x, y, w, h) in enumerate(FACE_CELLS):
-        t = atlas.tile("face" if i == 0 else "face%d" % i, x, y, w, h)
-        _paint_look(t, LOOKS[i])
-
-
-def _paint_look(t, look: dict) -> None:
-    skin = _rgb(look["skin"])
-    s = -TILE_S + t.s * 2 * TILE_S
-    z = TILE_Z[0] + t.t * (TILE_Z[1] - TILE_Z[0])
-    az = s / R_REF
-    col = t.view("col")
-    col[:] = skin
-    t.view("rough")[:] = 0.55
-    t.view("height")[:] = 0.0
-    flush = np.clip(skin * np.array((1.0, 0.80, 0.76), np.float32), 0.0, 1.0)
-    # Warmth on the nose's bridge and round the eyes; a soft cool shade in the sockets (no noise: smooth fields).
-    bridge = np.exp(-0.5 * (s / 0.009) ** 2) * np.exp(-0.5 * ((z - 1.607) / 0.012) ** 2)
-    _mix(t, 0.14 * bridge, flush)
-    # The hem's shade on the skin just inside it (deepest under the lower edge, where the skin faces up).
-    low = np.clip((OPEN_Z - z) / OPEN_HT, 0.0, 1.0)
-    edge = np.clip((-opening_sdf(s, z) - SKIN_HEM_IN) / (0.0055 + 0.0045 * low), 0.0, 1.0)
-    t.shade(1.0 - (0.22 + 0.22 * low) * (1.0 - edge * edge * (3.0 - 2.0 * edge)))
-    for eye in EYES:
-        x = eye.r_front * np.sin(az)
-        u = eye.side * (x - eye.front.x)
-        v = z - eye.front.z
-        on_side = (eye.side * az > 0.0).astype(np.float32)
-        rho = fissure_rho(u, v)
-        cw = carve_weight(u, v)
-        top = np.clip((v / FIS_UP + 0.2) / 0.6, 0.0, 1.0)
-        # Lids and socket: a little flush round the eye, a soft shade in the upper socket and the crease.
-        _mix(t, on_side * 0.12 * np.exp(-0.5 * ((rho - 1.4) / 0.6) ** 2), flush)
-        t.shade(1.0 - on_side * 0.06 * cw * (1.0 - np.clip((1.3 - rho) / 0.3, 0, 1)) * top)
-        # The brow: a tapered arch over the socket, its full head over the inner corner, its tail thin toward the
-        # temple, its peak about two thirds along.
-        a_ = (u + 0.0122) / 0.0345
-        zc = eye.front.z + 0.0130 + 0.0030 * np.exp(-0.5 * ((a_ - 0.62) / 0.30) ** 2) - 0.0010 * np.clip(a_, 0, 1)
-        half = 0.0010 + 0.0019 * np.clip(1.0 - a_, 0.0, 1.0) ** 0.7 * np.clip((a_ + 0.06) / 0.22, 0.45, 1.0)
-        ends = np.clip((a_ + 0.05) / 0.14, 0.0, 1.0) * np.clip((1.03 - a_) / 0.08, 0.0, 1.0)
-        brow = np.clip(0.5 - (np.abs(z - zc) - half) / 0.00045, 0.0, 1.0) * ends * on_side
-        brow *= 0.8 + 0.2 * np.clip((z - zc + half) / (2 * half), 0.0, 1.0)  # fuller along its top edge
-        _mix(t, 0.94 * brow, _rgb(look["brow"]))
-        t.view("rough")[:] = t.view("rough") * (1 - brow) + 0.8 * brow
-        t.view("height")[:] += 1.2 * brow
-        # The eye inside the fissure (a margin past it: the eyeball shows just to the lids' inner edge).
-        # (narrower toward the corners, where the lids' chords cut across the almond's points)
-        reach_in = 1.04 - 0.42 * np.clip((np.abs(u) / FIS_W - 0.45) / 0.55, 0.0, 1.0) ** 1.3
-        inside = np.clip((reach_in - rho) / 0.03, 0.0, 1.0) * on_side
-        sclera = _rgb(0xece6dc)
-        _mix(t, inside, sclera)
-        # The corners (the lids' thickness hides the eyeball's last few millimetres there): pink and shaded, not white.
-        corner = np.clip((np.abs(u) / FIS_W - 0.55) / 0.3, 0.0, 1.0) * np.clip((1.10 - rho) / 0.1, 0.0, 1.0) * on_side
-        _mix(t, 0.6 * corner, _rgb(look["pink"]) * 0.75)
-        t.shade(1.0 - inside * 0.40 * np.clip(np.abs(u) / FIS_W, 0, 1) ** 2.0)
-        car = soft_disc(u, v, -0.86 * FIS_W, 0.0002, 0.0014, 0.0006) * inside
-        _mix(t, car, _rgb(look["pink"]))
-        ri = np.sqrt(u * u + v * v)
-        iris_r = 0.0056
-        iris = np.clip(0.5 + (iris_r - ri) / 0.0006, 0.0, 1.0) * inside
-        base = _rgb(look["iris"])
-        light = np.clip(base * 1.35 + 0.03, 0.0, 1.0)
-        dark = base * 0.45
-        f = np.clip(ri / iris_r, 0.0, 1.0)[..., None]
-        iris_col = light * (1.0 - f) + base * f
-        iris_col = iris_col * (1.0 - np.clip((f - 0.8) / 0.2, 0, 1)) + dark * np.clip((f - 0.8) / 0.2, 0, 1)
-        c = t.view("col")
-        c[:] = c * (1.0 - iris[..., None]) + iris_col * iris[..., None]
-        pupil = np.clip(0.5 + (0.0022 - ri) / 0.0006, 0.0, 1.0) * inside
-        _mix(t, pupil, _rgb(0x0e0d0d))
-        # The upper lid's shadow across the top of the eyeball.
-        t.shade(1.0 - inside * 0.42 * np.clip((rho - 0.45) / 0.55, 0.0, 1.0) * np.clip((v / FIS_UP + 0.1) / 0.6, 0, 1))
-        t.view("rough")[:] = t.view("rough") * (1 - inside) + 0.10 * inside
-        # The lash line along the upper lid (thicker toward the outer corner, a small flick there); the lower lid's
-        # margin pink with a fine darker line under it.
-        upper = (v - FIS_TILT * np.clip(u / FIS_W, -1, 1) > -0.0004).astype(np.float32)
-        reach = 1.19 + 0.12 * np.clip(u / FIS_W, 0.0, 1.0)
-        lash = np.clip((rho - 0.97) / 0.05, 0, 1) * np.clip((reach - rho) / 0.06, 0, 1) * upper
-        lash *= np.clip((u / FIS_W + 1.02) / 0.25, 0.0, 1.0)
-        flick = soft_disc(u, v, 1.06 * FIS_W, FIS_TILT + 0.0009, 0.0011, 0.0004, aspect=1.6)
-        lash = np.maximum(lash, flick) * on_side
-        _mix(t, lash, _rgb(0x15100c))
-        t.view("rough")[:] = t.view("rough") * (1 - lash) + 0.6 * lash
-        lower = (1.0 - upper) * on_side
-        margin = np.clip((rho - 0.985) / 0.02, 0, 1) * np.clip((1.10 - rho) / 0.03, 0, 1) * lower
-        _mix(t, 0.75 * margin, _rgb(look["pink"]))
-        t.view("rough")[:] = t.view("rough") * (1 - margin) + 0.35 * margin
-        under = np.exp(-0.5 * ((rho - 1.16) / 0.05) ** 2) * lower * np.clip((1.05 - np.abs(u) / FIS_W) / 0.3, 0, 1)
-        t.shade(1.0 - 0.22 * under)
