@@ -149,9 +149,12 @@ west wall, the log stack by flag B) took the attackers from 57 % to 41 %.
   lengthen the defuse (`PlantConfig`).
 - Subway's guard run locally on attempt 2: 58 rounds over 8 seeds, 43 armed, 19 defused, 24 to the attackers.
 - After the merge of main at 7903cb4 (the Pump Shotgun, SH1, and Subway's arched tunnels, TB2): the gates again,
-  6,307 unit tests ✓ (2 pending, as on main), and the three match guards locally: Depot 122 rounds over 16 seeds, 78
-  armed, 29 defused, 50 to the attackers; Woodland 66 over 8, 41 armed, 14 defused, 36; Subway 54 over 8, 43 armed,
-  23 defused, 20 (37 %, on the new tunnels).
+  6,307 unit tests ✓ (2 pending, as on main), and the three match guards.
+- Attempt 3, after the merge of main at a41c1e9 (MB1's layouts) and the fetcher's fix: gdlint ✓, changelog notes ✓,
+  wiki ✓, 6,344 unit tests ✓ (2 pending, as on main), smoke test ✓, licence notices ✓. QA: Pass, five more tests
+  (35 in `test_pb1_qa.gd`); its advisory, a fetcher half a flight below a bomb on a stair counted as there and
+  crouched for good, is fixed (arrival needs `PlantConfig.reach_height`). Performance: Pass, from the diff (a few
+  comparisons a tick while a bomb lies on the ground; nothing allocated), not measured.
 - Reports: `/mnt/project-files/pipeline/runs/PB1/` (project files).
 
 ## Left for the owner
