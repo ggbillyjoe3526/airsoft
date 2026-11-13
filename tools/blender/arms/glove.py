@@ -43,6 +43,23 @@ SLEEVE_END = -0.040
 # holding rifles": half of that taken back, the cuff 9.2 mm off.
 WRIST_FULL = (0.10, 0.065)
 WRIST_SPAN = (-0.150, -0.060, -0.004, 0.026)
+# The hand against the owner's photo of one (HA1, the critic: hand_ratios.py measures both from the back). The
+# source hand's little finger was a sixth short beside its middle finger: it is this much longer from its knuckle.
+# Its fingers were a tenth slim against the palm's width: every finger this much fuller (m, on top of the glove's
+# thickness). And the bare wrist read 14 % narrow against the palm: the skin-only arms' wrist is this much wider and
+# thicker again (shares, over WRIST_SPAN), which the gloved arm's is not (the owner's fourth look, above, was of the
+# gloved wrist).
+# And the hand was a tenth short for its width: it is this much narrower across the knuckles, about the middle
+# finger's line, eased in over HAND_NARROW_SPAN (m beyond the wrist joint) so the wrist stays as it is.
+PINKY_LONGER = 1.12
+FINGER_FULL = 0.00035
+SKIN_WRIST_FULL = (0.08, 0.05)
+HAND_NARROW = 0.965
+HAND_NARROW_SPAN = 0.030
+# The bare thumb's section (the critic: "thick, even tubes"): this much slimmer about its bone at the middle of its
+# first bone, and at its tip, with nothing taken at the knuckle between them (shares of its thickness). The glove's
+# thumb keeps its fuller, even section (THUMB_FULL).
+THUMB_TAPER = (0.07, 0.16)
 # How much of the upper arm the model keeps above the elbow (m): the view never shows the shoulder, and a moved
 # shoulder tore the sleeve's top.
 UPPER_KEEP = 0.13
@@ -86,6 +103,9 @@ PAD_WRAP = 34.0
 # reaches (degrees either side of its back), its thickness (m) and its grid (rows along, columns across).
 NAIL_SPAN = (0.42, 0.98)
 NAIL_WRAP = 38.0
+# The thumb's nail is the largest: it starts nearer the knuckle and reaches further round.
+THUMB_NAIL_SPAN = (0.36, 0.98)
+THUMB_NAIL_WRAP = 50.0
 NAIL_THICK = 0.0004
 NAIL_GRID = (7, 7)
 # How much narrower a nail is at its root and at its tip than across its middle (shares of its width).
@@ -109,6 +129,70 @@ def load_source(shoulder: Vector) -> tuple:
             faces.append([int(t) - 1 for t in line.split()[1:]])
     shift = shoulder - joints["shoulder"]
     return [v + shift for v in verts], faces, {k: v + shift for k, v in joints.items()}
+
+
+def lengthen(verts: list, joints: dict, finger: int, by: float) -> tuple:
+    """`verts` and `joints` with finger `finger` (1 the thumb to 5 the little finger) `by` times as long from its
+    knuckle: each of its points moved along the finger's line by its distance from the knuckle, so the knuckle and
+    the palm stay where they are."""
+    root = joints["finger-%d-1" % finger]
+    line = (joints["finger-%d-4" % finger] - root).normalized()
+    segs = {f: [(joints["finger-%d-%d" % (f, k)], joints["finger-%d-%d" % (f, k + 1)]) for k in (1, 2, 3)]
+            for f in FINGER_NAMES}
+    palm = [(joints["hand"], joints["finger-%d-1" % f]) for f in FINGER_NAMES]
+
+    def moved(v: Vector) -> Vector:
+        t = (v - root).dot(line)
+        return v + line * (t * (by - 1.0)) if t > 0.0 else v
+
+    out = []
+    for v in verts:
+        mine = min(seg_dist(v, a, b) for a, b in segs[finger])
+        others = min(min(seg_dist(v, a, b) for f in FINGER_NAMES if f != finger for a, b in segs[f]),
+                     min(seg_dist(v, a, b) for a, b in palm))
+        out.append(moved(v) if mine < others else v)
+    grown = dict(joints)
+    for k in (2, 3, 4):
+        grown["finger-%d-%d" % (finger, k)] = moved(joints["finger-%d-%d" % (finger, k)])
+    return out, grown
+
+
+def narrow(verts: list, joints: dict, by: float) -> tuple:
+    """`verts` and `joints` with the hand `by` times as wide across its knuckles, about the line from the wrist to
+    the middle finger's knuckle: nothing at the wrist, all of it from HAND_NARROW_SPAN beyond."""
+    wrist = joints["hand"]
+    line = (joints["finger-3-1"] - wrist).normalized()
+    across = joints["finger-2-1"] - joints["finger-5-1"]
+    across = (across - line * across.dot(line)).normalized()
+
+    def moved(v: Vector) -> Vector:
+        t = max(0.0, min(1.0, (v - wrist).dot(line) / HAND_NARROW_SPAN))
+        return v - across * ((v - wrist).dot(across) * (1.0 - by) * t * t * (3.0 - 2.0 * t))
+
+    out = dict(joints)
+    for name in joints:
+        if name.startswith("finger-"):
+            out[name] = moved(joints[name])
+    return [moved(v) for v in verts], out
+
+
+def thumb_taper(verts: list, joints: dict, wts: list) -> list:
+    """`verts` (weights `wts`) with the thumb waisted along its first bone and tapered from its knuckle to its tip
+    (THUMB_TAPER), each point drawn toward the bone it lies beside by the thumb's share of it."""
+    a, b, c = joints["finger-1-2"], joints["finger-1-3"], joints["finger-1-4"]
+    out = []
+    for v, w in zip(verts, wts):
+        share = w.get("Thumb2", 0.0) + w.get("Thumb3", 0.0)
+        past = (v - b).dot(c - b) / (c - b).length_squared
+        if share <= 0.0:
+            out.append(v)
+        elif past > 0.0:
+            t = min(past, 1.0)
+            out.append(v - (v - (b + (c - b) * t)) * (THUMB_TAPER[1] * t * t * (3.0 - 2.0 * t) * share))
+        else:
+            t = max(0.0, min(1.0, (v - a).dot(b - a) / (b - a).length_squared))
+            out.append(v - (v - (a + (b - a) * t)) * (THUMB_TAPER[0] * math.sin(math.pi * t) * share))
+    return out
 
 
 def bone_points(j: dict) -> dict:
@@ -322,8 +406,8 @@ class Mesh:
         # "tab", and the sleeve's "sleeve", "hem", "sleeve_tab" and "cap".
         self.parts = {}
         self.nails = None
-        # The hand's own surface as a mesh of its own (HA1: the skin-only arms' skin, skin.py paints it); the glove's
-        # surface is the same one, so the nails laid on that sit on this.
+        # The hand's own surface as a mesh of its own (HA1: the skin-only arms' skin, skin.py paints it): the glove's
+        # surface with a fuller wrist and a tapered thumb (build_left), which the nails are laid on.
         self.skin = None
 
     def add(self, verts: list, faces: list, mat, wts: list) -> int:
@@ -632,13 +716,15 @@ def nails(surf: Surface, fr: Frame) -> Mesh:
         up = (up - d * up.dot(d)).normalized()
         side = d.cross(up)
 
-        def origin(u: float, v: float, a: Vector = a, b: Vector = b) -> Vector:
-            return a.lerp(b, NAIL_SPAN[0] + (NAIL_SPAN[1] - NAIL_SPAN[0]) * (v + 1.0) * 0.5)
+        span, wrap = (THUMB_NAIL_SPAN, THUMB_NAIL_WRAP) if f == 1 else (NAIL_SPAN, NAIL_WRAP)
 
-        def direction(u: float, v: float, up: Vector = up, side: Vector = side) -> Vector:
+        def origin(u: float, v: float, a: Vector = a, b: Vector = b, span: tuple = span) -> Vector:
+            return a.lerp(b, span[0] + (span[1] - span[0]) * (v + 1.0) * 0.5)
+
+        def direction(u: float, v: float, up: Vector = up, side: Vector = side, wrap: float = wrap) -> Vector:
             # Rounded at its root and a little narrower at its tip: a nail's outline, not a cut strip's.
             narrow = 1.0 - NAIL_ROUND[0] * max(0.0, -v) ** 3 - NAIL_ROUND[1] * max(0.0, v) ** 3
-            t = math.radians(NAIL_WRAP) * u * narrow
+            t = math.radians(wrap) * u * narrow
             return up * math.cos(t) + side * math.sin(t)
 
         out.add(*surf.shell(origin, direction, NAIL_GRID[0], NAIL_GRID[1],
@@ -661,8 +747,10 @@ def ring(surf: Surface, fr: Frame, span: tuple, thick: float, mat: str, cols: in
     return surf.shell(origin, direction, 5, cols, thick, mat, True, None, 3)
 
 
-def wrist_full(verts: list, fr: Frame) -> list:
-    """`verts` with the wrist widened and thickened (WRIST_FULL over WRIST_SPAN), about the forearm's line."""
+def wrist_full(verts: list, fr: Frame, full: tuple = None) -> list:
+    """`verts` with the wrist widened and thickened (`full`, else WRIST_FULL, over WRIST_SPAN), about the forearm's
+    line."""
+    full = WRIST_FULL if full is None else full
     across = fr.knuckles[3] - fr.knuckles[0]
     across = (across - fr.fdir * across.dot(fr.fdir)).normalized()
     through = fr.fdir.cross(across)
@@ -676,14 +764,16 @@ def wrist_full(verts: list, fr: Frame) -> list:
         k = (t - a) / (b - a) if t < b else (d - t) / (d - c) if t > c else 1.0
         k = k * k * (3.0 - 2.0 * k)
         radial = v - fr.wrist - fr.fdir * t
-        out.append(v + across * (radial.dot(across) * WRIST_FULL[0] * k) +
-                   through * (radial.dot(through) * WRIST_FULL[1] * k))
+        out.append(v + across * (radial.dot(across) * full[0] * k) +
+                   through * (radial.dot(through) * full[1] * k))
     return out
 
 
 def build_left(shoulder: Vector) -> tuple:
     """The left arm: glove and its parts, cuff and strap, and sleeve, with weights; and its joints."""
     src_v, src_f, j = load_source(shoulder)
+    src_v, j = lengthen(src_v, j, 5, PINKY_LONGER)
+    src_v, j = narrow(src_v, j, HAND_NARROW)
     fr = Frame(j)
     src_v = wrist_full(src_v, fr)
     up_dir = (j["shoulder"] - j["elbow"]).normalized()
@@ -706,8 +796,10 @@ def build_left(shoulder: Vector) -> tuple:
     idx = {o: k for k, o in enumerate(used)}
     # The thumb's glove a little fuller (the photos' gloved thumbs are thicker than the hand's skin makes them: the
     # critic, 123843; fuller still, the thumb found no room on the grip's panel and stood out from it).
+    fingers = ["%s%d" % (n, k) for n in FINGER_NAMES.values() for k in (1, 2, 3)]
     gv = [verts[o] + nrm[o] * (GLOVE_THICK + hand_forms(verts[o], nrm[o], fr) +
-                               THUMB_FULL * (wts[o].get("Thumb2", 0.0) + wts[o].get("Thumb3", 0.0))) for o in used]
+                               THUMB_FULL * (wts[o].get("Thumb2", 0.0) + wts[o].get("Thumb3", 0.0)) +
+                               FINGER_FULL * sum(wts[o].get(b, 0.0) for b in fingers)) for o in used]
     gf = [[idx[i] for i in f] for f in hand_f]
     gw = [wts[o] for o in used]
     mesh.add(gv, gf, "Glove", gw)
@@ -757,9 +849,10 @@ def build_left(shoulder: Vector) -> tuple:
     mesh.part("tab", first)
     # The glove's kit, which the skin-only arms hide: all of it but the cloth over the hand, which they show as skin.
     mesh.kit = (mesh.parts["hand"][1], len(mesh.f))
-    mesh.nails = nails(surf, fr)
+    bare = thumb_taper(wrist_full(gv, fr, SKIN_WRIST_FULL), j, gw)
+    mesh.nails = nails(Surface(bare, gf, gw), fr)
     mesh.skin = Mesh()
-    mesh.skin.add(gv, gf, "Skin", gw)
+    mesh.skin.add(bare, gf, "Skin", gw)
 
     sleeve(mesh, verts, faces, wts, fr)
     return mesh, j, fr, pts

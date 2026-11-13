@@ -1,55 +1,23 @@
-<<<<<<< HEAD
-Task: MB1 · The three fields' layouts, reworked from their play records
-Attempt: 3 of 4
-Head: 56b6162 (checks passed on it: test_mb1_layouts 9/9, gdlint clean)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks: none.
-- Check 4: Subway's flag B test is back byte for byte from 2b7d90b; nine tests, header, record and `_floor` true.
-- Settled: the 2.8 m road stack is backed by the game's ray (no line over it at 2.8 m, 1,531 at 1.8 m) and held by
-  test_mb1_layouts.gd:154; the tool headers name plan.py; Subway through SM3's gates is in band (50 % ±5, 53 % ±6).
-Condition (the merge waits on it): PH2's confirming runs go into the record before the push; a share outside its band
-beyond the noise lapses this Accept. Met: Depot 51 % ±7 and 51 % ±6, Woodland 55 % ±7 and 57 % ±7, Subway 52 % ±6
-and 53 % ±6.
-Must-fix: none.
-Owner should test: the decision card on the 2.8 m stack; Woodland's Long road trees; the Ridge hazels and the North
-bridge heads; the Fort's west wall and the Ford ramp; Depot's sites behind the stacks; Subway's flag B and the lift
-ride after the ticket gates.
-=======
-Task: MQ1B · The Cyber Pistol's grip in the GBB Pistol's shape
-Attempt: 3 of 4
-Head: 9343d3871da793757f968ead6635f4c3e838867f (gdlint, changelog and wiki checks passed on it; the full suite was still running when I reviewed. 9343d38 only adds reports to 7499a89, where QA and performance both passed)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (only if the full gate passes on this head; if it doesn't, this verdict is void)
-Evidence:
-1. Attempt 2's must-fixes are done.
-   - Back of the tang: `cyber.py` `grip_ring` (+761) caps the section's back half at BACK_ROUND = 3.0 (+211). In sheet 3, rows 1 and 2, and in my own grey render (yaw 240, pitch 35), the two creases are gone. The only edge left on the tang is the slide's cast shadow, and it is clean.
-   - Cell ribs: they stop CELL_RIB_INSET inside the window (+227, +869). The window walls sit on a clean face (sheet 4 and my low rear render).
-   - Model bar, (a) proportions against the GBB, the reference the owner named:
-     - front strap: within 1.5 mm at 4 heights (`test_cyber_grip.gd:73`)
-     - half width: within 1.5 mm at the same heights
-     - grip depth: 0.94 to 1.08 of the GBB's
-     - back strap: within 5 mm of the GBB's
-     - height/length from the side: 0.716 vs 0.716 (sheet 2, column 1)
-     All are within 10 %.
-   - (b) construction: no gap, floating part or poke-through. I rendered the tang because QA did not test above -0.03 m, and it is clean there too.
-   - (c) poses: not applicable, `arms.glb` is not changed.
-   - (d) owner-approved profile ("Perfect").
-2. Contract: the bones, empties, clips and budgets are held by `test_mq1b_qa.gd` (8/8). No `game/` path changed.
-3. No runtime code in the diff. `model_studio.gd` +54 is a dev tool; performance grepped and found no shipped reference to it.
-4. Tests fail without the feature: `test_its_front_strap_and_width_are_the_gbb_pistols_down_the_grip` would fail on main's slab grip (serrated front, flat sides at 13 mm). The bow test fails on any swelling back strap.
-5. Tool-only change. `model_studio.gd` +18..+21 and +133..+142 are typed, with named constants.
-6. Clean coated toy shell. No brand marks, and the rounded grip is less "hard-edged".
-7. `grip`, `web`, `raked` and `axis` are small, named helpers. `gbb.at` (+448) is a public wrapper rather than a copy.
-8. Docs are updated: DECISIONS (+807), KNOWN_ISSUES (+19), ASSETS (+34), the wiki's Replicas page and `changelog.d/cyber-grip.md`.
-Advisory (not blocking):
-- KNOWN_ISSUES +19 classes the hand's Cyber hold as "fix now", but it is deferred to the FP arms thread. "document" or "can wait" would match.
-- From the side, a faint diagonal shade band and a slight kink show on the back strap 2 to 3 mm under the tang, where BACK_BLEND joins the tang's curve to the straight line (my grey side render, back edge at about the window's top). It is soft, but the next pass on this model could widen BACK_BLEND.
-- The record's Review line and attempts row still read PENDING; fill them in at merge.
-Owner should test in the game:
-- First person with the Cyber: does the hand sit on the new grip without sinking in or floating at the back strap (KNOWN_ISSUES row)?
-- Inspect animation: the back of the tang and the window walls at close range, in its white and in Realistic grey.
-- Reload: the cell, its ribs and the pad leave and return cleanly through the rounded grip.
-- A bot's Cyber at mid range: the figure copy's grip reads as rounded, not as a slab.
-- The torch fitted on the Cyber still clears the guard web.
->>>>>>> origin/main
+Task: HA1 · First-person arms and grips, made realistic
+Attempt: 1 of 4
+Head: bbf29a3 (checks passed on 8218b4d; after it only the perf report and CI3's docs/guards merge, re-linted on bbf29a3)
+Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✓
+Score: 6/8 → Retry (near miss, judgment: check 1 alone stands between this and Accept)
+Failed checks, with evidence (file:line, one or two lines each, each marked measured or judgment):
+1. [judgment] Models rule (a) unmet: no render in the brief shows a hand at hand-skin-photo.jpg's angle (flat, from the back, fingers spread), so the five ratios can't be measured and nothing shows the hand is within 10 %. The record's own numbers point the wrong way: wrist 55 mm (50 +10 %) on an 85 mm hand is 0.65, and the photo's wrist to knuckle width is about 0.75 (~13 % thin; rough figures, needs the render).
+1. [judgment] (b)/(c) ha1-final-closeups.jpg "AEG: from the far side": index and middle fingers are bent back into a knot under the handguard, their tips curled into the palm with a gap to the rail. They hold nothing, and their middle joints fold at angles a hand can't make. That contradicts KNOWN_ISSUES:113 ("lie open along the handguard's far side"). Bots copy this hold (FigureView.support_mark), so it shows on every bot close up. Sniper and SMG need the same check.
+1. [judgment] (d) Bare skin in game (ha1-final-skin-zoom.jpg "GBB, bare hands", "GBB aimed, bare hands", "AEG, bare hand"): one flat tone with smooth shading. The back of the hand has no knuckle relief, no tendon lines and no vein or crease contrast. The thumbs read as thick, even tubes. Next to hand-skin-photo.jpg it reads as a plastic mannequin, not finished AAA work. The owner asked for "detail of the hand model and its textures", and the record admits the skin "read pale and smooth in the game".
+1. [judgment] Pistol at the hip (ha1-final-hip.jpg "GBB Pistol, two hands"): the pistol is about 6 % of the frame width, against about 40 % in pistol-hip-two-hands-1/2.jpg, and the hands fill the foot of the screen. The references set placement and how much shows. This keeps the 2026-11-06 place as a "default taken" (HA1.md Decisions, Pistols), not an owner ruling.
+7. [judgment] tools/blender/arms/arms.py grows to 1,459 lines (+579), with pose.py at 932 and glove.py at 881: the holds' tables (GUARD, GRIP_LEFT, SUPPORT_LEFT, CYBER_*) and their solvers sit in one script. Split the hold tables and per-family solvers into their own modules.
+Must-fix for the next attempt:
+- Add a Blender preview (tools/blender/arms/preview.py) of the bare left hand in rest pose, flat from the back, framed like hand-skin-photo.jpg. List at least five ratios against the photo: hand length to knuckle width, middle finger to palm, index to ring, thumb tip to index MCP, wrist to knuckle width. Fix any that is more than 10 % off (start with the wrist, glove.WRIST_FULL).
+- No-grip rifle holds (arms.py GUARD, SNIPER_GUARD, SMG_GUARD; Hand.onto): lay the far-side fingers along or round the handguard's underside, touching it, each joint under about 90°. No knot, and keep the tips under tips_below so the eye still sees only the thumb. Re-render "from the far side" for all three rifles.
+- Skin (skin.py TONE, MOTTLE_SHADE, crease/vein/tendon depth, and the normal map's strength): make the knuckles, tendons and veins read in the game's light at the skin-zoom framing, and taper the thumbs' sections toward the tip. Re-shoot ha1-final-skin-zoom.jpg beside the photo.
+- Pistol hip place (ViewModelConfig.hip pistol/cyber): bring it nearer and larger toward the references' framing, or get the owner's word on the current place from a side-by-side picture and record it in DECISIONS.
+Owner should test in the game (at most 6, one line each):
+- Walk, strafe, jump and land with the AEG: are the bob, lean, landing dip and per-shot roll pleasant, not seasick (HandsLifeConfig)?
+- Raise and lower the sight quickly on every rifle with each grip: does the left arm slide out of view cleanly, with no pop or flash of fingers?
+- GBB and Cyber aimed: does the fade under the slide read as "tops of the hands", not a ghost smear at the bottom left?
+- Bare hands (Settings › Dev › Skin-only arms) on the pistols: does the skin look like a hand or like plastic?
+- Stand next to a bot holding an AEG with no grip: are its left fingers a believable hold?
+- Pistol reload: does the left hand leave and come back without clipping the right arm?

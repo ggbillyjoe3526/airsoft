@@ -73,6 +73,11 @@ FINGER_WAY = (0.0, 10.0, -10.0, 20.0, -20.0, 30.0, -30.0, 45.0, -45.0, 60.0, -60
 FINGER_CLEAR = 0.0015
 # The elbow out this far (m) from where it would bend with the hand on the knob, so the upper arm clears the stock.
 ELBOW_OUT = Vector((0.03, 0.0, 0.0))
+# Where the sleeve still passes into the replica at a key (the forearm folded in beside the stock with the bolt drawn
+# back: a re-proportioned hand moved the knob's grip a fraction and the arm with it), the elbow swings further out,
+# this far a try (m), this many tries at most.
+ARM_OUT = 0.01
+ARM_TRIES = 8
 # A key every this many frames while the hand rides the knob (every frame as it leaves the grip and comes back).
 STEP = 2
 
@@ -304,6 +309,17 @@ class BoltWork:
         self.rig.local.update(local)
         self.rig.refresh(self.bone)
 
+    def clear_arm(self, hand_m: Matrix, local: dict, pole_now: Vector) -> None:
+        """The hand posed as `pose_hand` does, the elbow swung out from `pole_now` (ARM_OUT a try) until neither the
+        upper arm's sleeve nor the forearm's passes into the replica; as `pole_now` has it if no try clears."""
+        for k in range(ARM_TRIES + 1):
+            self.pose_hand(hand_m, local, pole_now + Vector((ARM_OUT * k, 0.0, 0.0)))
+            self.rig.write()
+            tally = pose.clipping(self.arms, self.frame)[1]
+            if not any(tally.get(part + SIDE, 0) for part in ("UpperArm_", "Forearm_")):
+                return
+        self.pose_hand(hand_m, local, pole_now)
+
     def way(self, knob_hand: Matrix, t: float) -> tuple:
         """The hand `t` of the way from the grip to the knob: first (to OPEN_BY) its fingers open as it draws off the
         grip's side by CLEAR, then it is carried up and out round the stock's side to the knob, turning over the way
@@ -445,16 +461,16 @@ class BoltWork:
         for f in sorted(frames):
             knob_hand = self.on_knob_at(f)
             if f < first:
-                self.pose_hand(*self.way(knob_hand, f / first))
+                self.clear_arm(*self.way(knob_hand, f / first))
                 self.clear_fingers()
             elif f <= last:
                 # The hand turned on the knob where the wrist is straightest, the elbow where it is straightest too;
                 # the fingers keep clear of the replica.
                 spin, pole_now = self.straightest(f, spin)
-                self.pose_hand(self.spun(f, spin), self.grip_local, pole_now)
+                self.clear_arm(self.spun(f, spin), self.grip_local, pole_now)
                 self.clear_fingers()
             elif f < end:
-                self.pose_hand(*self.way(self.spun(f, spin), 1.0 - (f - last) / (end - last)))
+                self.clear_arm(*self.way(self.spun(f, spin), 1.0 - (f - last) / (end - last)))
                 self.clear_fingers()
             else:
                 out.append((f, self.held))

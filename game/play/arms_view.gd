@@ -15,9 +15,8 @@ extends Node3D
 ## `<id>_grip_<key>_Hold`, and its `_Fire` and `_Reload`, where it has them; else the replica's own); through a reload
 ## the left hand changes the magazine (`<id>_Reload`, played at the reload's share, so the left arm shows on a
 ## one-handed replica while it does); and the arms can be shown skin only (Dev › Skin-only arms), a human's arms only:
-## the glove's kit (GloveKit_<side>) hidden, the fingernails (Nails_<side>) shown and the hand's surface
-## (HandSurface_<side>, the glove's cloth) in the model's painted skin (HA1: the nails' own material, whose maps share
-## the glove's layout).
+## the glove's kit (GloveKit_<side>) and its cloth over the hand (HandSurface_<side>) hidden, the bare hand
+## (Skin_<side>, HA1: the hand's own shape in its painted skin) and its fingernails (Nails_<side>) shown.
 ##
 ## HA1 (the owner): aimed, a rifle's hands are out of view, never faded: the replica hides them, and as the sight comes
 ## up (`aim`) the left arm is drawn in under it and its hand slides back behind the receiver (ArmsTuck,
@@ -41,8 +40,9 @@ const LEFT_SUFFIX := "_L"
 const LEFT_HAND := "Hand_L"
 const KIT_PREFIX := "GloveKit_"
 const NAILS_PREFIX := "Nails_"
-## The hand's surface: the glove's cloth, or skin only the painted skin.
+## The glove's cloth over the hand, and the bare hand the skin-only arms show in its place.
 const HAND_PREFIX := "HandSurface_"
+const SKIN_PREFIX := "Skin_"
 ## A grip part's name in the clips' (ReplicaParts: <slot>_<key>).
 const GRIP_PART := "grip_"
 ## A pistol's hold in both hands (HA1: `<id>_two_Hold` and its `_Reload`). Yours alone: the bots copy `<id>_Hold`, the
@@ -62,9 +62,6 @@ var _meshes: Array[MeshInstance3D] = []
 ## Each mesh's Look, and whether it is a left one (as _meshes).
 var _looks: PackedInt32Array = PackedInt32Array()
 var _lefts: Array[bool] = []
-## Whether each is a hand's surface (as _meshes), and the model's skin material (the nails'; null without them).
-var _hands: Array[bool] = []
-var _skin_own: Material = null
 ## Each Worn's material, by the model's material (indexed by Worn), the depth pressed in all.
 var _worn: Dictionary[Material, Array] = {}
 ## Each Worn's fading copy (ArmsFade; null where the model's material is no BaseMaterial3D), as _worn.
@@ -129,15 +126,12 @@ func setup(cfg: ViewModelConfig) -> void:
 		_meshes.append(mesh_node)
 		var mesh_name := String(mesh_node.name)
 		var look := Look.BOTH
-		if mesh_name.begins_with(KIT_PREFIX):
+		if mesh_name.begins_with(KIT_PREFIX) or mesh_name.begins_with(HAND_PREFIX):
 			look = Look.GLOVES
-		elif mesh_name.begins_with(NAILS_PREFIX):
+		elif mesh_name.begins_with(NAILS_PREFIX) or mesh_name.begins_with(SKIN_PREFIX):
 			look = Look.SKIN
-			if _skin_own == null and mesh_node.mesh.get_surface_count() > 0:
-				_skin_own = mesh_node.mesh.surface_get_material(0)
 		_looks.append(look)
 		_lefts.append(mesh_name.ends_with(LEFT_SUFFIX))
-		_hands.append(mesh_name.begins_with(HAND_PREFIX))
 	_dress()
 
 
@@ -421,7 +415,7 @@ func _set_left(on: bool) -> void:
 	_show_looks()
 
 
-## Each mesh shown as its side and the look worn ask: the glove's kit with gloves on, the fingernails skin only.
+## Each mesh shown as its side and the look worn ask: the glove with gloves on, the bare hand and its nails skin only.
 func _show_looks() -> void:
 	var skin := skin_worn()
 	for i in _meshes.size():
@@ -430,16 +424,15 @@ func _show_looks() -> void:
 		_meshes[i].visible = worn and (_left_on or not _lefts[i])
 
 
-## Every surface in the look worn (a human's arms or a robot's; skin only, a hand's surface in the model's skin): its
-## pressed material, or that one's fading copy while the sight is raised at all.
+## Every surface in the look worn (a human's arms or a robot's): its pressed material, or that one's fading copy while
+## the sight is raised at all.
 func _dress() -> void:
 	var look: Worn = Worn.ROBOT if _kind == FigureMix.ROBOT else Worn.HUMAN
-	var bare := skin_worn() and _skin_own != null
 	_fade_now.clear()
 	for k in _meshes.size():
 		var mesh_node := _meshes[k]
 		for i in mesh_node.mesh.get_surface_count():
-			var own := _skin_own if bare and _hands[k] else mesh_node.mesh.surface_get_material(i)
+			var own := mesh_node.mesh.surface_get_material(i)
 			if own == null:
 				continue
 			if not _worn.has(own):

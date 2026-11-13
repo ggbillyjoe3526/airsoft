@@ -1,6 +1,7 @@
 extends GutTest
 ## HA1 QA, the owner's fifth look: with no grip the rifles' left hand sits back just ahead of the magazine (between it
-## and the GripMount), no fingertip rides above the handguard's top, the bots' left hand still holds where the arms'
+## and the GripMount), no fingertip rides above the handguard's top and no finger under it is knotted, the bots' left
+## hand still holds where the arms'
 ## does for all three rifles, a bomb in both hands (PB1) carries the replica low through HA1's eased carry, and each
 ## reload clip ends on the hold's pose.
 
@@ -14,6 +15,9 @@ const BEHIND_MAG_FRONT := 0.04
 const SHORT_OF_MOUNT := 0.03
 ## How far (m) a fingertip may rise above the replica's top within a hand's breadth (a bare handguard's).
 const ABOVE_TOP := 0.005
+## The most (rad) any joint of a finger resting under a bare handguard bends from its rest (the critic, HA1: the ring
+## and little fingers lay knotted, a middle joint shut to 100 degrees).
+const MOST_BEND := PI / 2.0
 ## How near (m) a reload's last frame comes to the hold's bone places, and (rad) its turns.
 const END_PLACE := 0.003
 const END_TURN := 0.02
@@ -93,6 +97,17 @@ func test_no_left_fingertip_rides_above_the_handguard_in_the_hold() -> void:
 					top = maxf(top, v.y)
 			if top > -INF:
 				assert_lt(tip.y, top + ABOVE_TOP, "%s: the %s fingertip under the top (%.3f vs %.3f)" % [id, f, tip.y, top])
+
+
+func test_no_finger_under_a_bare_handguard_is_knotted() -> void:
+	for id: StringName in RIFLES:
+		var hands := _hands(id)
+		var sk := hands._arms._skeleton
+		for f: String in ["Index", "Middle", "Ring", "Pinky"]:
+			for k: int in [1, 2, 3]:
+				var bone := sk.find_bone("%s%d_L" % [f, k])
+				var bend := sk.get_bone_rest(bone).basis.get_rotation_quaternion().angle_to(sk.get_bone_pose_rotation(bone))
+				assert_lt(bend, MOST_BEND, "%s: %s%d bends %.0f degrees" % [id, f, k, rad_to_deg(bend)])
 
 
 func _view(first: StringName) -> Array:

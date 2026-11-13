@@ -26,8 +26,8 @@ ATTEMPT_ROWS
   -0.165, -0.24; all were 0.12, -0.19, -0.26): nearer and lower, so the rifle is larger, the left hand on the handguard
   shows and the right hand lies under the screen's foot. The owner's second look: the SMG was "too high. It should be
   a similar angle and scale to the rifles"; it is a shorter replica, so the same place drew it larger and higher, and
-  its own place draws it at the AEG's size. The holds are still solved at their old place (`arms.py` RIFLE_HIP): the
-  arms ride the replica, so moving the replica moves them as one. `magazine.View` reads the game's hip, so the
+  its own place draws it at the AEG's size. The holds are still solved at their old place (`hold_tables.py`
+  RIFLE_HIP): the arms ride the replica, so moving the replica moves them as one. `magazine.View` reads the game's hip, so the
   reload's "down out of view" is measured from where the game draws it, and the build's pictures are taken from there
   (`GAME_HIP`).
 - **Only the left thumb shows on a rifle** (`GUARD`, `SNIPER_GUARD`, `SMG_GUARD`; the owner: "You can still see the
@@ -114,8 +114,8 @@ ATTEMPT_ROWS
   thumb keeps the place he approved. Through a reload the left hand draws off to the left, changes the magazine and
   comes back; its elbow keeps 9 cm off the right arm's bones (`magazine.ARM_CLEAR`); the right thumb keeps its raised
   place while the left hand is away. Default taken: **the bots stay one-handed** (HG1; they copy `<id>_Hold`, which is
-  unchanged), and **the pistols keep their hip place** of 2026-11-06 (nearer places cut the hands off at the screen's
-  foot).
+  unchanged). The pistols kept their hip place of 2026-11-06 until the owner's pick on attempt 2 (below: 25 cm from
+  the eye on the same line, which keeps the hands off the screen's foot as a nearer place alone did not).
 - **The Cyber Pistol takes the GBB's hold** (`CYBER_RIGHT`, `CYBER_SUPPORT`, `CYBER_LIFT`; the owner: "Cyber pistol
   should have same grip as gbb pistol ... the thumb looks too long (it should stick out like the thumb in the gbb
   shot)"): its grip was reshaped to the GBB's sections (MQ1B, #324), so the GBB's marks seat the same hands on it, 7 mm
@@ -126,7 +126,9 @@ ATTEMPT_ROWS
   down). So the support hand sits 3 mm further out and back (`CYBER_OUT`) at the GBB's turn (15 and 4 degrees,
   pinned), and the right thumb's turn in the one-handed hold is searched, not the GBB's (there it closed into the
   frame and was eased 20 degrees out into the air). The trigger finger's second search is kept only when it ends no
-  further from the trigger (`trigger_again`). The bots' one-handed Cyber hold changes with it.
+  further from the trigger (`trigger_again`). The bots' one-handed Cyber hold changes with it. This closes MQ1B's
+  row in `docs/KNOWN_ISSUES.md` (the hold "posed on the old slab grip ... until the first-person arms task refits
+  it").
 - **Aimed, a rifle's hands are out of view, never faded** (`ArmsTuck`, `ViewModelConfig.aim_tuck`; the owner: "the
   hands should not fade out of view. When the animation plays to ADS (except for pistols) the hands are simply out of
   view. At most a small tip of the players left hand thumb can be visible"): the first pass faded them, which he
@@ -163,17 +165,75 @@ ATTEMPT_ROWS
   knuckle folds, creases, veins, pores, hair, nails), glove (knit back, leather palm, fourchettes, seams and stitches,
   thumb saddle, flex ribs, caps, wear) with its kit in the atlas's clear square (moulded rubber shell with a boss a
   knuckle, stitched patch, ribbed cuff, webbing strap), and sleeve (ripstop, folds, felled seam, cuff band). One atlas
-  layout serves skin and glove, so the hand's surface is one mesh (`HandSurface_<side>`) that wears either: 38,900
-  triangles drawn gloved, 34,500 skin only, four materials, a 5.9 MB file (WebP inside). Imported VRAM compressed as
-  the project's other models (about 42 MB of texture memory: BC7 colour, RGTC normals, DXT1 roughness).
+  layout serves skin and glove (the bare hand, `Skin_<side>`, and the glove's cloth over it, `HandSurface_<side>`,
+  are the same faces): 38,900 triangles drawn gloved, 34,500 skin only, four materials, a 6.5 MB file (WebP
+  inside). Imported VRAM compressed as the project's other models (about 42 MB of texture memory: BC7 colour, RGTC
+  normals, DXT1 roughness).
 - **The AEG's reload lifts 8 cm, was 10** (`reload_move_by`): at the nearer hip the left forearm showed 8 cm past the
   wrist mid reload, over BP8's 7 cm.
 - **The skin's tones run deep** (`skin.TONE`, `MOTTLE_SHADE` and its neighbours): a map that looked right in Blender
   read pale and smooth in the game, whose light and muted colours flatten it; the creases shade about twice as far.
 - **A fading copy reads the metal map** (`ArmsFade`, `metallic_map`): a glTF material's metal is 1 times its map's
   blue, so a copy with the number alone would have drawn the arms as metal through the fade.
-- **Skin-only arms** now show that painted skin (the nails' material on the hand's surface);
-  `ViewModelConfig.skin_arms` and its tint are gone. A robot's arms are plain colours with the painted maps taken off.
+- **Skin-only arms** now show that painted skin; `ViewModelConfig.skin_arms` and its tint are gone. A robot's arms
+  are plain colours with the painted maps taken off.
+- **The far-side fingers lie open under the handguard** (attempt 2; `GUARD` `tip_back` and `tip_most`, `Hand.onto`'s
+  `back`): the critic, from the far side, saw the ring and little fingers knotted (knuckle straight, middle joint
+  shut to 100 degrees). A resting finger's knuckle may now bend back up to 15 degrees and its middle joint closes no
+  further than 45 (25 under the Sniper's narrow fore-end, where 45 still looped the little finger), so every joint
+  stays well under a right angle (`test_no_finger_under_a_bare_handguard_is_knotted`) with the tips still under
+  `tips_below`. The Pump Shotgun's hold keeps SH2's figures.
+- **The bare hand against the owner's photo** (attempt 2; `hand_ratios.py`, `BL_REST`, `preview.rest_hand`): the
+  critic asked for the hand flat from its back beside `hand-skin-photo.jpg` and five ratios within 10 %. Measured
+  (model against photo, before): hand length to palm width -8.9 %, middle finger to palm length +2.2 %, index to ring
+  finger -3.4 %, little to middle finger -15.7 %, wrist to palm width -13.7 %, the middle finger's width to its
+  length +2.5 %, the index finger's width to the palm's -10.9 %. So the little finger is 12 % longer from its knuckle
+  (`PINKY_LONGER`), every finger 0.35 mm fuller (`FINGER_FULL`), the hand 3.5 % narrower across the knuckles
+  (`HAND_NARROW`), and the bare wrist 8 % wider and 5 % thicker than the gloved one (`SKIN_WRIST_FULL`; the gloved
+  wrist is the owner's fourth look and stays). After: -6.7, +2.1, -2.6, -5.0, -5.2, +2.5 and -7.7 %. The thumb's
+  reach was not measured: the photo's thumb is held out and the model's rests in, so its tip's distance says nothing
+  of its length.
+- **The bare hand is a mesh of its own** (attempt 2; `Skin_<side>`, `ArmsView.SKIN_PREFIX`): skin only, the game drew
+  the glove's cloth in the skin's material, so the bare hand had the glove's shape, its wrist and its even, fuller
+  thumb (the critic: "thick, even tubes"), and a nail laid on a slimmer thumb would have sunk into it. The model now
+  keeps the bare hand it paints from: the same faces with the fuller wrist and a thumb waisted 7 % along its first
+  bone and tapered 16 % to its tip (`glove.thumb_taper`), the nails on that, the thumb's nail larger. The game shows
+  it and its nails skin only and the glove's cloth and kit gloved; no material is swapped. The file holds 67,400
+  triangles; either look still draws what it did.
+- **The skin's forms are in the colour too** (attempt 2; `skin.FORM_SHADE`, `FLUSH_SHADE`, `CREASE_SHADE`,
+  `TENDON_FORM`): the critic found the bare skin "one flat tone" in game. The game's even light and no shadow on the
+  arms leave a normal map little to do, so each knuckle, tendon and vein is drawn a little lighter on its crown and
+  darker round its foot, the knuckles' flush and the creases' shade run deeper, the heights are about two thirds
+  greater, and the thumb has its own tendon along its back (faded out before the atlas's cut between back and palm:
+  run over it, the ridge drew a hard line). Judged in game at 2560 by 1440 (`render_fp.gd` `size:`): at 1280 by 720
+  a wrinkle is under a pixel.
+- **No white on the nails, subtler tendons** (the owner, 2026-11-13 14:01, on the first in-game pictures of that
+  skin: "Remove the white finger nail tips, make the tendons more subtle"; then "Keep the texture as is"): the
+  nail's white free edge is gone (nails cut short), its moon is a faint paler patch (`skin.MOON` 0.30, was a white
+  0.75), and a tendon takes 0.22 of a knuckle's shade (was a half) on a ridge of 0.4 mm (was 0.7). The knuckles,
+  veins, creases and the skin's grain stay as he saw them. Of the picture of it: "Perfect" (14:17).
+- **The atlas is packed by trial** (attempt 2; `skin.pack`, `PACKS`): the longer little finger made Blender's packer
+  lay the same islands out so that the glove's kit lost a third of its square (0.40 mm a texel, from 0.26). The
+  hand's islands are now packed into 100, 88, 80 and 72 % of the atlas's width and the layout kept is the one that
+  gives the hand and the kit the most texels between them: the hand 0.20 mm a texel (was 0.19), the kit 0.24.
+- **The Sniper's bolt pull swings the elbow clear** (attempt 2; `cycle.Work.clear_arm`, `ARM_OUT`): with the
+  re-proportioned hand the knob's grip moved a fraction and the right sleeve passed into the stock at six keys, bolt
+  drawn back. Where a key's sleeve passes into the replica the elbow swings out a centimetre at a time until it
+  clears.
+- **The pistols sit 25 cm from the eye** (`ViewModelConfig.hip`, `reload_move_by`; the owner's pick, 2026-11-13
+  08:38, `docs/DECISIONS.md` › First-person hands): the critic found them small beside the references; on a picture
+  of 34, 29 and 25 cm he chose 25. The place is on the same line from the eye as his of 2026-11-06, so they draw a
+  third larger where they were; their reload's lift and move inwards are drawn in by the same share (0.074 and
+  0.044 m, were 0.1 and 0.06), so a reload crosses the same part of the screen. The holds stay as solved
+  (`hold_tables.py` PISTOL_HIP): the arms ride the replica, as the rifles' do.
+- **The Pump Shotgun's trigger finger arches as it did** (attempt 2; `SHOTGUN_RIGHT` `index_arc`, `pose.ARC_TIP`):
+  on the re-proportioned hand the search reached the blade with a straighter finger (its bends 87 degrees together,
+  112 before; SH2's test asks 90 and a rifle's reach). In pictures from outside the two looked alike, but the finger
+  is asked to arch anyway (45 degrees at its middle joint, a fifth more at its tip): 119 degrees together, the pad
+  0.8 mm off its mark. `index_arc` takes the tip's share as an optional third value; the pistols keep a half.
+- **The arms' build is three files** (attempt 2, the critic's check 7): `hold_tables.py` (each hold's marks, costs
+  and limits), `hold_solve.py` (the hands placed and closed from them) and `arms.py` (the model, the clips and the
+  export); the split moved code and changed none (the same build log from both).
 - **Life in the hands** (`HandsMotion`, `HandsLifeConfig`; the amounts are first values for the owner's play): a bob
   with the ground covered (2.7 m a cycle, 3.4 mm to each side), breathing at rest (3.8 s, 1.4 mm), a lean into a
   strafe (1.8°), a trail through a jump and a dip on landing, a push through a crouch, a sprung flick (about 0.7°) and
@@ -186,8 +246,14 @@ ATTEMPT_ROWS
 
 ## Known issues left
 
-- With no grip the rifles' left index and middle fingers lie open along the handguard's far side, under its top,
-  rather than wrapped up it, and reach past the SMG's narrow front (a bot close up shows it, your view never); aimed, the Cyber's right thumb lies a little flatter than the GBB's; on the Angled Grip's short
-  tall end the ring and little fingers close under its foot (`docs/KNOWN_ISSUES.md` › Graphics).
-- The skin's atlas has about 530 texels (of 1.46 million) claimed by two places on the hand, at the thumb's web; no
+- With no grip the rifles' left fingers lie open under the handguard, their tips along its far side under its top,
+  rather than wrapped up it, and reach past the SMG's narrow front (a bot close up shows it, your view never);
+  aimed, the Cyber's right thumb lies a little flatter than the GBB's; on the Angled Grip's short tall end the ring
+  and little fingers close under its foot (`docs/KNOWN_ISSUES.md` › Graphics).
+- The skin's atlas has about 1,000 texels (of 1.27 million) claimed by two places on the hand, at the thumb's web; no
   seam shows in the pictures.
+- The Sniper Rifle's trigger finger lies straight along its trigger guard, 2 cm short of the trigger (it was as far
+  short, a little more curled, in attempt 1's model): from the stock's wrist the trigger is at the end of the
+  finger's reach. Your view never shows it; a bot close up does.
+- Working the Sniper's bolt, the right elbow steps out a few centimetres over two frames where the sleeve would
+  touch the stock; the elbow is below the view.

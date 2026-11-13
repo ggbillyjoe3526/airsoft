@@ -4,16 +4,20 @@ extends Resource
 ## camera's space (x right, y up, -z forward), seconds, radians. Read by ReplicaView.
 
 ## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The
-## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06); the
+## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06), and
+## 25 cm from the eye, was 34, on the same line from it, which draws them a third larger in the same place on screen
+## (his pick of three on a picture, 2026-11-13: HA1); the
 ## rifles sit near and low, so the left hand on the handguard shows and the right hand lies under the view's bottom
 ## edge (HA1, the owner); the Compact SMG, a shorter replica, sits lower and further off than they do, which draws it
 ## at their size and angle (the owner: "too high. It should be a similar angle and scale to the rifles"). The Pump
 ## Shotgun has its own place, the hand out on its pump showing no more forearm than the rifles' (SH2). The arms
-## model (tools/blender/arms/arms.py HOLDS) is built for these places.
+## model's holds (tools/blender/arms/hold_tables.py HOLDS) are solved for the Pump Shotgun's place and for the rifles'
+## and the pistols' earlier ones (RIFLE_HIP, PISTOL_HIP); the arms ride the replica, so each hold is drawn where its
+## replica is.
 @export var hip: Dictionary[StringName, Vector3] = {
 	&"aeg": Vector3(0.1, -0.135, -0.19),
-	&"pistol": Vector3(0.05, -0.07, -0.34),
-	&"cyber": Vector3(0.05, -0.07, -0.34),
+	&"pistol": Vector3(0.037, -0.051, -0.25),
+	&"cyber": Vector3(0.037, -0.051, -0.25),
 	&"sniper": Vector3(0.1, -0.135, -0.19),
 	&"smg": Vector3(0.1, -0.165, -0.24),
 	&"shotgun": Vector3(0.12, -0.21, -0.21),
@@ -128,12 +132,13 @@ extends Resource
 ## out and seating the fresh one) while your right forearm stays below it. The SMG comes up less than the AEG (CS2):
 ## its deeper grip holds your hands lower, and at the AEG's lift your left forearm shows past the wrist.
 ## The Pump Shotgun comes out less and no nearer (SH2): your left hand starts far forward on its pump, and at the
-## AEG's move your forearm shows past the wrist on the way to the shell and back.
+## AEG's move your forearm shows past the wrist on the way to the shell and back. The pistols' move is 0.1 and 0.06 m
+## drawn in with their hip place (HA1: 25 cm from the eye, was 34), so a reload crosses the same part of the screen.
 @export var reload_cant_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.6, 0.0, -0.25),
 		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3),
 		&"smg": Vector3(0.6, 0.0, -0.25), &"shotgun": Vector3(0.6, 0.0, -0.25)}
 @export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.08, 0.04, 0.06),
-		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0),
+		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.074, 0.044, 0.0), &"cyber": Vector3(0.074, 0.044, 0.0),
 		&"smg": Vector3(0.06, 0.04, 0.06), &"shotgun": Vector3(0.04, 0.04, 0.0)}
 ## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share
 ## at the end (a rifle's magazine is out of the well in the first quarter: the cant is there by then, BP8); others ease

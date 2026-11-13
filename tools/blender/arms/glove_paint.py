@@ -275,31 +275,15 @@ WEB_RIB = (0.00006, 0.0011)
 TAB_RIDGE = (0.00016, 0.0038)
 # The wrist's radius, about (m): turns an angle round the arm into a length along a seam.
 WRIST_RADIUS = 0.031
-# The atlas's grid when a clear square is looked for (`clear_square`), and the kit's own margin in it (share).
-GRID = 64
+# The kit's own margin in its square of the atlas (share).
 KIT_MARGIN = 0.006
 
 
 def clear_square(mask: np.ndarray) -> tuple:
     """The largest square of the atlas no texel of `mask` uses, a grid cell clear of any: its corner (u, v) and its
     side, as shares of the atlas."""
-    cell = mask.shape[0] // GRID
-    used = mask.reshape(GRID, cell, GRID, cell).any(axis=(1, 3))
-    # The nails' tile (skin.NAIL_TILE) is taken too.
-    u0, v0, w, h = skin.NAIL_TILE
-    used[int(v0 * GRID):int((v0 + h) * GRID) + 1, int(u0 * GRID):int((u0 + w) * GRID) + 1] = True
-    near = used.copy()
-    for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)):
-        near |= np.roll(used, (dy, dx), axis=(0, 1))
-    side = np.zeros((GRID + 1, GRID + 1), dtype=np.int32)
-    best = (0, 0, 0)
-    for y in range(GRID):
-        for x in range(GRID):
-            if not near[y, x]:
-                side[y + 1, x + 1] = 1 + min(side[y, x], side[y, x + 1], side[y + 1, x])
-                if side[y + 1, x + 1] > best[0]:
-                    best = (int(side[y + 1, x + 1]), x + 1 - int(side[y + 1, x + 1]), y + 1 - int(side[y + 1, x + 1]))
-    return best[1] / GRID, best[2] / GRID, best[0] / GRID
+    cell = mask.shape[0] // skin.GRID
+    return skin.clear_square(mask.reshape(skin.GRID, cell, skin.GRID, cell).any(axis=(1, 3)))
 
 
 def kit_uv(arm: bpy.types.Object, faces: range, mask: np.ndarray) -> None:

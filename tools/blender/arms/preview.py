@@ -29,6 +29,12 @@ HIDE = tuple(v for v in os.environ.get("BL_PREVIEW_HIDE", "").split(",") if v)
 SHOW = tuple(v for v in os.environ.get("BL_PREVIEW_SHOW", "").split(",") if v)
 
 
+# The hand at rest (`rest_hand`): the picture's size, how much taller than wrist to fingertip it frames, and how far
+# off (m) the camera stands.
+REST_SIZE = (1100, 1400)
+REST_FRAME = 1.45
+REST_FROM = 0.5
+
 # BL_PREVIEW_HAND=L or R: the outside views look at that hand alone (a rifle's support hand is far from the other).
 LOOK_AT = os.environ.get("BL_PREVIEW_HAND", "")
 
@@ -127,3 +133,60 @@ def hold(folder: str, name: str, to_eye: Matrix, rig, objects: list, aim_forward
             shot(os.path.join(folder, "%s_%s.jpg" % (name, view)), look + off * NEAR, look, OUTSIDE_FOV)
     for o in swapped:
         o.hide_render = not o.hide_render
+
+
+def rest_hand(folder: str, rig, gloved: list, bare: list, side: str = "L") -> None:
+    """The bare hand of `side` as the model rests it, flat from its back and from its palm (no perspective, the
+    middle finger up, clear behind), as `rest_back.png` and `rest_palm.png` in `folder`: the framing of the owner's
+    photo of a hand, for measuring the model's proportions against it (tools/blender/arms/README, HA1). `gloved`
+    are the objects left out of the picture, `bare` the ones put in."""
+    os.makedirs(folder, exist_ok=True)
+    rig.write()
+    kept = {o: o.hide_render for o in gloved + bare}
+    for o in gloved:
+        o.hide_render = True
+    for o in bare:
+        o.hide_render = not o.name.endswith("_" + side)
+    wrist = rig.pose["Hand_" + side].translation
+    knuckle = rig.pose["Middle1_" + side].translation
+    last = rig.pose["Middle3_" + side]
+    tip = last.translation + last.to_3x3().col[1] * rig.length["Middle3_" + side]
+    up = (knuckle - wrist).normalized()
+    across = rig.pose["Index1_" + side].translation - rig.pose["Pinky1_" + side].translation
+    normal = up.cross(across).normalized()
+    middle = (wrist + tip) * 0.5
+    scene = bpy.context.scene
+    lamps = _lights()
+    for name, way in (("back", -normal), ("palm", normal)):
+        data = bpy.data.cameras.new("Rest")
+        data.type = "ORTHO"
+        data.ortho_scale = (tip - wrist).length * REST_FRAME
+        data.clip_start, data.clip_end = 0.01, 5.0
+        cam = bpy.data.objects.new("Rest", data)
+        scene.collection.objects.link(cam)
+        side_way = up.cross(way).normalized()
+        cam.matrix_world = Matrix.Translation(middle + way * REST_FROM) @ Matrix(
+            (side_way, up, way)).transposed().to_4x4()
+        scene.camera = cam
+        scene.render.engine = "CYCLES"
+        scene.cycles.device = "CPU"
+        scene.cycles.samples = SAMPLES
+        scene.cycles.use_denoising = True
+        scene.render.film_transparent = True
+        scene.render.resolution_x, scene.render.resolution_y = REST_SIZE
+        scene.render.resolution_percentage = 100
+        scene.render.image_settings.file_format = "PNG"
+        scene.render.image_settings.color_mode = "RGBA"
+        scene.render.filepath = os.path.join(folder, "rest_%s.png" % name)
+        scene.view_settings.view_transform = "Standard"
+        bpy.ops.render.render(write_still=True)
+        scene.camera = None
+        bpy.data.objects.remove(cam, do_unlink=True)
+        bpy.data.cameras.remove(data)
+    scene.render.film_transparent = False
+    for ob in lamps:
+        data = ob.data
+        bpy.data.objects.remove(ob, do_unlink=True)
+        bpy.data.lights.remove(data)
+    for o, was in kept.items():
+        o.hide_render = was

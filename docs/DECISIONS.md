@@ -186,7 +186,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   edge, on pictures of each); your pistol is held in both hands, tight, the left fingers out of sight over the right
   hand's and the right thumb resting on the left hand (the arms model's `<id>_two_Hold`). His third look: "the
   forearm/wrist for the rifle hold is bent in an unnatural way. The arm and wrist should be straight" (the support
-  arm lies on the hand's own line, close along the rifle: `arms.py` `GUARD` `upper`); a pistol's left hand is
+  arm lies on the hand's own line, close along the rifle: `hold_tables.py` `GUARD` `upper`); a pistol's left hand is
   "pressed against the handle/grip", no gap seen over the sights; and the "Cyber pistol should have same grip as gbb
   pistol", its thumb sticking out as the GBB's does (`CYBER_RIGHT`). His fourth look: "Wrists are slightly too
   thick holding rifles" (half of the earlier thickening stands), "The thumb should be resting against the replica"
@@ -198,8 +198,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   its pictures: "That is still bad. Go back to the previous one", so the vertical grip's hold is the fourth look's
   and stays), and "With no grip Move the left hand back and closer to the magazine on the rifles. If you need to
   move more of the forearm out of view that's ok" (4 cm back on the AEG, to the magazine well's front, 28 mm on the Sniper and 7 mm on the Compact SMG, each as
-  far as its magazine lets the palm stay on the replica; the forearm lower in the view). Defaults taken: the bots
-  stay one-handed on pistols (HG1 below; they copy `<id>_Hold`), and the pistols keep their hip place of 2026-11-06.
+  far as its magazine lets the palm stay on the replica; the forearm lower in the view). "Keep that version"
+  (06:34, of the vertical grip's fourth-look hold). The pistols' size at the hip (08:38, on a picture of three
+  distances beside his reference shots, the reviewer having found them small): he chose "25 cm, clearly larger" over
+  keeping 34 cm and over 29 cm, so both pistols sit 25 cm from the eye, on the same line from it as his place of
+  2026-11-06 (`ViewModelConfig.hip`). The bare hands (14:01, on the repainted skin in game): "Remove the white
+  finger nail tips, make the tendons more subtle", and of the skin's texture "Keep the texture as is": the nails have
+  no white free edge and a faint moon, the tendons a little under half their shade and height
+  (`skin.NAIL_TONE`, `MOON`, `TENDON_FORM`, `TENDON`); of that picture, "Perfect" (14:17). Default taken: the bots stay one-handed on pistols (HG1 below; they copy
+  `<id>_Hold`).
   His reference pictures are other games' and set hand placement and framing only; the art is our own.
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands
   copy the first-person holds he approved (`assets/models/arms/arms.glb`), so a change to a first-person hold changes

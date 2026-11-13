@@ -28,6 +28,8 @@ THUMB_VERIFY = 800
 # normal alone misreads points beside a convex corner, a few centimetres out, as deep inside (GS2's AEG beside its
 # trigger guard, the model before it to the grip's right), which threw the hand off the grip.
 DEEP = 0.004
+# A trigger finger asked to arch (`Hand.index_arc`) bends this share of its middle joint's bend at its tip.
+ARC_TIP = 0.5
 # The rays' directions for that check: a point is inside when most first hits strike a face from behind.
 RAYS = (Vector((0.577, 0.577, 0.577)), Vector((-0.577, 0.577, -0.577)), Vector((0.577, -0.577, -0.577)))
 # How much of each finger's splay from the middle finger a hold takes out.
@@ -498,11 +500,13 @@ class Hand:
         return self.settle("Thumb", (0.0, bends[0], bends[1]), col, span)
 
     def onto(self, name: str, target: Vector, col: Collider, limits: tuple, swing: int = 20,
-             couple: float = 0.0, pin: tuple = None) -> list:
+             couple: float = 0.0, pin: tuple = None, back: int = 0) -> list:
         """Bends a finger so its last bone's pad comes to `target` (the trigger) without passing into the replica: a
         search over its three bends and its base's swing sideways (up to `swing` degrees), coarse then fine. With
-        `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched.
-        Given `pin` (swing and three bends: a pose the owner approved), the finger takes it and no search runs."""
+        `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched;
+        its knuckle may then bend `back` degrees the other way (a finger laid flat along a surface the palm is
+        tilted up to). Given `pin` (swing and three bends: a pose the owner approved), the finger takes it and no
+        search runs."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
 
@@ -526,11 +530,14 @@ class Hand:
             if self.index_left is not None:
                 over = max(0.0, self.index_left - min((self.rig.pose[b] @ q).x for b in bones[1:]
                                                       for q in self.points[b]))
-            # A finger asked to arch (`index_arc`: its middle joint's bend, and what each degree off it costs, m)
-            # bends there and half as much at its tip, as a relaxed finger does, where the pad still finds the target.
+            # A finger asked to arch (`index_arc`: its middle joint's bend, what each degree off it costs, m, and its
+            # tip's share of that bend, ARC_TIP unless given) bends there and that share at its tip, as a relaxed
+            # finger does, where the pad still finds the target.
             arch = 0.0
             if self.index_arc is not None:
-                arch = self.index_arc[1] * (abs(a[1] - self.index_arc[0]) + 0.5 * abs(a[2] - 0.5 * self.index_arc[0]))
+                mid, cost = self.index_arc[:2]
+                tip = self.index_arc[2] if len(self.index_arc) > 2 else ARC_TIP
+                arch = cost * (abs(a[1] - mid) + 0.5 * abs(a[2] - tip * mid))
             # Clear of the replica first, then the pad nearest the target; and never standing above `tip_top`, when
             # set (a support hand's fingertips kept under the handguard's top as the eye sees it).
             over += self.over(name)
@@ -547,7 +554,7 @@ class Hand:
             sc, clear = score(pin[0], tuple(pin[1:]))
             best = (sc, list(pin), clear)
         else:
-            best = self.onto_search(score, swing, limits, couple)
+            best = self.onto_search(score, swing, limits, couple, int(back))
         apply(best[1][0], tuple(best[1][1:]))
         if couple:
             best[1][3] = best[1][2] * couple
@@ -559,13 +566,14 @@ class Hand:
         print("  %s finger on its mark: pad %.1f mm off" % (name, (pad if best[2] >= CONTACT else -1) * 1e3))
         return [round(x) for x in best[1]]
 
-    def onto_search(self, score, swing: int, limits: tuple, couple: float) -> tuple:
+    def onto_search(self, score, swing: int, limits: tuple, couple: float, back: int = 0) -> tuple:
         """`onto`'s search: a coarse grid of the finger's sideways swing and bends, then finer steps from the best,
-        each within the bends allowed (a finger told to lie nearly straight stays so). The best (score, [swing,
-        bends], clearance)."""
+        each within the bends allowed (a finger told to lie nearly straight stays so; a coupled one's knuckle from
+        `back` degrees the other way). The best (score, [swing, bends], clearance)."""
         best = None
         for lat in sorted({-swing, 0, swing} | set(range(-swing, swing + 1, 10))):
-            for a1 in range(0 if couple else self.index_from, limits[0] + 1, 10):
+            for a1 in sorted({-back} | set(range(0, limits[0] + 1, 10))) if couple else range(
+                    self.index_from, limits[0] + 1, 10):
                 for a2 in range(0, limits[1] + 1, 10):
                     for a3 in range(0, 1 if couple else limits[2] + 1, 10):
                         sc, clear = score(lat, (a1, a2, a3))
@@ -578,7 +586,7 @@ class Hand:
                 for sgn in (-1.0, 1.0):
                     trial = list(best[1])
                     trial[k] += sgn * step
-                    if k == 0 and abs(trial[0]) > swing or couple and trial[1] < 0.0:
+                    if k == 0 and abs(trial[0]) > swing or couple and trial[1] < -back:
                         continue
                     if k > 0 and (trial[k] > limits[k - 1] + 0.5 or k > 1 and trial[k] < -0.5
                                   or k == 1 and not couple and trial[k] < self.index_from - 0.5):

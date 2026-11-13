@@ -3,7 +3,7 @@ extends GutTest
 ## the pump home before the next shot at every spring, the cant its arms draw, the arms' clips and the pump's cue.
 
 const SHOTGUN := "000027"
-## Where the arms model holds the AEG, Sniper and Compact SMG as their holds are solved (arms.py RIFLE_HIP).
+## Where the arms model holds the AEG, Sniper and Compact SMG as their holds are solved (hold_tables.py RIFLE_HIP).
 const RIFLES_SOLVED_AT := Vector3(0.12, -0.19, -0.26)
 const SPRINGS: Array[String] = ["000022", "000023", "000024"]
 const DT := 1.0 / 60.0
@@ -335,7 +335,7 @@ func test_the_arms_hold_mark_is_where_the_view_holds_the_shotgun() -> void:
 	var mark := arms.find_child("Hold_shotgun", true, false) as Node3D
 	var hip: Vector3 = cfg.hip[&"shotgun"]
 	assert_almost_eq(mark.global_position, hip, Vector3.ONE * 1e-4, "the hold is built for the hip place")
-	# The other long replicas' holds stay where they were solved (arms.py RIFLE_HIP): since HA1 the game draws them
+	# The other long replicas' holds stay where they were solved (hold_tables.py RIFLE_HIP): since HA1 the game draws them
 	# nearer and lower (ViewModelConfig.hip) and the arms ride the replica from this mark (ArmsView).
 	for id: StringName in [&"aeg", &"sniper", &"smg"]:
 		var other := arms.find_child("Hold_%s" % id, true, false) as Node3D

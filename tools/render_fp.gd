@@ -5,7 +5,8 @@ extends SceneTree
 ## `:fire=<seconds>` (that long after a shot), `:sprint`, `:walk=<seconds>` (that long into a walk), `:grip=<key>`,
 ## `:optic=<key>` and `:out=<x>,<y>,<z>,<far>` (seen from outside: the camera that way from your right hand along the
 ## eye's axes, that far off). An argument `set:<property>[.<key>]=<value>` changes a ViewModelConfig value for every
-## shot (a number, or three for a Vector3), for trying a pose before it goes in the config. Needs a display; Forward+
+## shot (a number, or three for a Vector3), for trying a pose before it goes in the config; `size:<w>x<h>` draws the
+## pictures that large (1280x720 otherwise: a texture's fine detail wants 2560x1440). Needs a display; Forward+
 ## under xvfb with lavapipe (mesa-vulkan-drivers):
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . -s res://tools/render_fp.gd -- <folder> [set:...] <shot> ...
 ## Dev only: tools/ never ships.
@@ -24,6 +25,7 @@ const RIGHT_HAND := "Hand_R"
 ## A walk's speed (m/s) for `walk=`.
 const WALK_SPEED := 3.0
 
+var _size := SIZE
 var _port: SubViewport = null
 var _camera: Camera3D = null
 var _outside: Camera3D = null
@@ -53,6 +55,9 @@ func _run() -> void:
 	for i in range(1, args.size()):
 		if args[i].begins_with("set:"):
 			_change(args[i].trim_prefix("set:"))
+		elif args[i].begins_with("size:"):
+			var sides := args[i].trim_prefix("size:").split("x")
+			_size = Vector2i(int(sides[0]), int(sides[1]))
 		else:
 			shots.append(args[i])
 	if not _build_scene():
@@ -91,7 +96,7 @@ func _build_scene() -> bool:
 		push_error("render_fp: %s refused" % MAP)
 		return false
 	_port = SubViewport.new()
-	_port.size = SIZE
+	_port.size = _size
 	_port.msaa_3d = Viewport.MSAA_4X
 	_port.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(_port)

@@ -28,6 +28,12 @@ STRIP = 0.07
 # The nail's tile in the atlas (u, v of its corner; width, height): every nail takes the same one.
 NAIL_TILE = (0.012, 0.008, 0.050, 0.054)
 PACK_MARGIN = 0.004
+# The packings tried (`pack`): the share of the atlas's width the hand's islands are kept to.
+PACKS = (1.0, 0.88, 0.8, 0.72)
+# The atlas's grid when a clear square is looked for (`clear_square`).
+GRID = 64
+# How much the kit's square counts beside the hand's own share when packings are compared (`pack`).
+KIT_WEIGHT = 0.5
 # How far each map is spread past its islands' edges (texels), so a seam never samples the empty atlas.
 SPREAD = 12
 # Two faces' texels this far apart on the hand (m) at one place in the atlas lie over one another (`raster` says so).
@@ -38,34 +44,52 @@ IMAGES = {"colour": "ArmsSkin", "normal": "ArmsSkinNormal", "rough": "ArmsSkinRo
 
 # Tones (sRGB 0..1): the back of the hand, the palm, a knuckle's flush, a fingertip's, a vein's cast, a crease's
 # shade, a hair.
-TONE = {"back": (0.730, 0.520, 0.420), "palm": (0.810, 0.585, 0.520), "flush": (0.720, 0.400, 0.350),
-        "tip": (0.800, 0.490, 0.450), "vein": (0.480, 0.560, 0.580), "crease": (0.480, 0.270, 0.230),
+TONE = {"back": (0.730, 0.520, 0.420), "palm": (0.810, 0.585, 0.520), "flush": (0.660, 0.340, 0.300),
+        "tip": (0.800, 0.490, 0.450), "vein": (0.420, 0.500, 0.560), "crease": (0.480, 0.270, 0.230),
         "hair": (0.330, 0.240, 0.180), "pad": (0.790, 0.480, 0.440)}
 # How strongly a crease shades the skin: on the back, on the palm's side.
-CREASE_SHADE = (0.42, 0.36)
+CREASE_SHADE = (0.60, 0.45)
 # How strongly the skin's tone varies (the game's light and its muted colours flatten a faint map): its mottling, its
 # blotches' green and blue, a knuckle's flush, a vein's cast, and the fine net's and the pores' shade.
-MOTTLE_SHADE = 0.11
+MOTTLE_SHADE = 0.16
 BLOTCH_SHADE = (0.08, 0.11)
-FLUSH_SHADE = 0.46
-VEIN_SHADE = 0.20
+FLUSH_SHADE = 0.60
+VEIN_SHADE = 0.30
 FINE_SHADE = (0.12, 0.08)
+# The hand's forms drawn into the colour as well as the normal map (the critic, HA1: in the game's even light the
+# knuckles, tendons and veins of the normal map alone left the back of the hand one flat tone): each rise a little
+# lighter on its crown and darker in a ring round its foot. How strongly (share of the tone), how much of the crown's
+# gain the ring takes back, and how many times wider than the rise the ring is.
+FORM_SHADE = 0.40
+FORM_RING = 0.60
+FORM_WIDE = 1.8
+# A tendon is a long form: it takes this share of a knuckle's shade (the owner, 2026-11-13, of the first bare hands
+# with the forms in the colour: "make the tendons more subtle"; it was a half, and the ridge 0.7 mm).
+TENDON_FORM = 0.22
 # The wrinkles over a middle knuckle: how far apart (m), and the fine ones along the back of each finger.
 WRINKLE_GAP = 0.00115
 FINGER_LINES = (0.0016, 0.00006)
-# The nail (sRGB): its bed, the pale moon at its root, its free edge; and its roughness.
-NAIL_TONE = {"bed": (0.850, 0.640, 0.610), "moon": (0.930, 0.830, 0.800), "edge": (0.920, 0.880, 0.830)}
-NAIL_ROUGH = 0.30
+# The nail (sRGB): its bed and the moon at its root; and its roughness. The nails are cut short, with no white free
+# edge, and the moon is a faint paler patch (MOON, its share of the bed's tone): the owner, 2026-11-13, of a white
+# edge and a white moon, "Remove the white finger nail tips".
+NAIL_TONE = {"bed": (0.850, 0.640, 0.610), "moon": (0.900, 0.740, 0.710)}
+MOON = 0.30
+NAIL_ROUGH = 0.40
 # Heights (m) of the forms the normal map carries.
-KNUCKLE_RISE = 0.00060
+KNUCKLE_RISE = 0.00100
 KNUCKLE_DIMPLE = 0.00012
-JOINT_RISE = 0.00030
-JOINT_RINGS = 0.00032
+JOINT_RISE = 0.00050
+JOINT_RINGS = 0.00045
 LAST_CREASE = 0.00016
 PALM_CREASE = 0.00026
 PALM_LINE = 0.00030
 TENDON = 0.00040
-VEIN = 0.00032
+VEIN = 0.00050
+# Half the width of a tendon's ridge and of a vein (m).
+TENDON_HALF = 0.0022
+# The thumb's tendon is drawn on the skin within the first of these of its bones, fading to nothing by the second (m).
+THUMB_NEAR = (0.014, 0.022)
+VEIN_HALF = 0.0020
 NET = 0.000070
 PORE = 0.000030
 # The fine net's cell (m), and the mottling's two sizes.
@@ -83,7 +107,7 @@ VEINS = (
     ((0.66, -0.60), (0.62, -0.05), (0.66, 0.30), (0.60, 0.58), (0.64, 0.85)),
     ((0.38, 0.55), (0.50, 0.45), (0.60, 0.58)),
     ((0.60, 0.58), (0.80, 0.50), (0.92, 0.25), (0.88, -0.20)),
-    ((0.28, 0.25), (0.10, 0.15), (0.02, -0.10)),
+    ((0.28, 0.25), (0.10, 0.15), (0.02, -0.10), (0.06, -0.40), (0.02, -0.65)),
 )
 PALM_LINES = (
     ((1.08, 0.80), (0.75, 0.80), (0.45, 0.86), (0.22, 0.98), (0.12, 1.10)),
@@ -242,17 +266,122 @@ def unwrap(ob: bpy.types.Object, fr: glove.Frame) -> None:
     bpy.ops.uv.unwrap(method="ANGLE_BASED", margin=PACK_MARGIN)
     bpy.ops.uv.select_all(action="SELECT")
     bpy.ops.uv.average_islands_scale()
-    # Turned any way and fitted by their outlines: the back and the palm lie fingers between fingers.
-    bpy.ops.uv.pack_islands(rotate=True, rotate_method="ANY", shape_method="CONCAVE", margin=PACK_MARGIN)
     bpy.ops.object.mode_set(mode="OBJECT")
     # The thumb's share of each vertex, kept for the painting (`raster`).
     share = me.attributes.new(THUMB_SHARE, "FLOAT", "POINT")
     share.data.foreach_set("value", thumb)
-    uv = np.zeros(len(me.loops) * 2, dtype=np.float32)
-    me.uv_layers.active.data.foreach_get("uv", uv)
-    uv = uv.reshape(-1, 2) * (1.0 - STRIP)
-    uv[:, 1] += STRIP
-    me.uv_layers.active.data.foreach_set("uv", uv.ravel())
+    pack(ob)
+
+
+def pack(ob: bpy.types.Object) -> None:
+    """Pack the skin's unwrapped islands into the atlas, clear of the nail's strip. The glove's kit lives in the
+    largest square the hand leaves clear (glove_paint.kit_uv), and Blender's packer, left the whole atlas, lays the
+    same islands out quite differently for a small change of the mesh (a longer little finger took a third off the
+    kit's square). So each of PACKS is tried, the hand kept to a share of the atlas's width, and the one kept is the
+    one that gives the hand and the kit the most texels between them (`pack_score`)."""
+    me = ob.data
+    # The UV layer's data is read afresh after each change of mode: Blender moves it.
+    flat = np.zeros(len(me.loops) * 2, dtype=np.float32)
+    me.uv_layers.active.data.foreach_get("uv", flat)
+    parts = islands(me)
+    best = None
+    for width in PACKS:
+        uv = flat.reshape(-1, 2).copy()
+        size = boxed(uv, parts, width)
+        me.uv_layers.active.data.foreach_set("uv", uv.ravel())
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.uv.select_all(action="SELECT")
+        # Turned any way and fitted by their outlines: the back and the palm lie fingers between fingers.
+        bpy.ops.uv.pack_islands(udim_source="ORIGINAL_AABB", rotate=True, rotate_method="ANY",
+                                shape_method="CONCAVE", margin=PACK_MARGIN)
+        bpy.ops.object.mode_set(mode="OBJECT")
+        uv = np.zeros(len(me.loops) * 2, dtype=np.float32)
+        me.uv_layers.active.data.foreach_get("uv", uv)
+        uv = uv.reshape(-1, 2) / size * (1.0 - STRIP)
+        uv[:, 1] += STRIP
+        hand, kit = pack_score(me, uv)
+        score = hand * kit ** KIT_WEIGHT
+        if os.environ.get("BL_DEBUG"):
+            print("  pack into %.2f of the width: hand %.3f, kit's square %.3f, score %.4f, within (%.2f..%.2f, "
+                  "%.2f..%.2f)" % (width, hand, kit, score, uv[:, 0].min(), uv[:, 0].max(), uv[:, 1].min(),
+                                   uv[:, 1].max()))
+        if best is None or score > best[0] + 1e-6:
+            best = (score, uv)
+    me.uv_layers.active.data.foreach_set("uv", best[1].ravel())
+
+
+def islands(me: bpy.types.Mesh) -> list:
+    """The mesh's UV islands, each the indices of its loops: faces joined across every edge that is not a seam."""
+    group = list(range(len(me.polygons)))
+
+    def root(k: int) -> int:
+        while group[k] != k:
+            group[k] = group[group[k]]
+            k = group[k]
+        return k
+
+    first = {}
+    for poly in me.polygons:
+        for li in poly.loop_indices:
+            edge = me.loops[li].edge_index
+            if me.edges[edge].use_seam:
+                continue
+            if edge in first:
+                group[root(poly.index)] = root(first[edge])
+            else:
+                first[edge] = poly.index
+    out = {}
+    for poly in me.polygons:
+        out.setdefault(root(poly.index), []).extend(poly.loop_indices)
+    return [np.array(v) for v in out.values()]
+
+
+def boxed(uv: np.ndarray, parts: list, width: float) -> float:
+    """Move the islands `parts` of `uv` (in place, none turned or scaled) so that together they span a box `width`
+    times as wide as it is high, its corner at the origin: the two largest in opposite corners, the rest at the
+    origin. The packer then keeps to that box (ORIGINAL_AABB). Returns the box's height."""
+    big = sorted(parts, key=lambda p: -float(np.prod(np.ptp(uv[p], axis=0))))
+    spans = [np.ptp(uv[p], axis=0) for p in big[:2]]
+    size = max((spans[0][0] + spans[1][0]) / width, spans[0][1] + spans[1][1])
+    for p in big:
+        uv[p] -= uv[p].min(axis=0)
+    uv[big[1]] += np.array((width * size, size), dtype=np.float32) - uv[big[1]].max(axis=0)
+    return float(size)
+
+
+def pack_score(me: bpy.types.Mesh, uv: np.ndarray) -> tuple:
+    """How a packing (`uv`, a pair a loop) serves the two that share the atlas: the side of the atlas's share the
+    hand's faces cover were they one square, and the side of the largest square left clear for the glove's kit."""
+    used = np.zeros((GRID, GRID), dtype=bool)
+    area = 0.0
+    for poly in me.polygons:
+        pts = uv[poly.loop_start:poly.loop_start + poly.loop_total]
+        x, y = pts[:, 0], pts[:, 1]
+        area += abs(float(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))) * 0.5
+        lo = np.clip((pts.min(axis=0) * GRID).astype(int), 0, GRID - 1)
+        hi = np.clip((pts.max(axis=0) * GRID).astype(int), 0, GRID - 1)
+        used[lo[1]:hi[1] + 1, lo[0]:hi[0] + 1] = True
+    return math.sqrt(area), clear_square(used)[2]
+
+
+def clear_square(used: np.ndarray) -> tuple:
+    """The largest square of the atlas clear of the cells `used` marks (GRID a side), of the nails' tile and of the
+    cells beside either: its corner (u, v) and its side, as shares of the atlas."""
+    used = used.copy()
+    u0, v0, w, h = NAIL_TILE
+    used[int(v0 * GRID):int((v0 + h) * GRID) + 1, int(u0 * GRID):int((u0 + w) * GRID) + 1] = True
+    near = used.copy()
+    for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+        near |= np.roll(used, (dy, dx), axis=(0, 1))
+    side = np.zeros((GRID + 1, GRID + 1), dtype=np.int32)
+    best = (0, 0, 0)
+    for y in range(GRID):
+        for x in range(GRID):
+            if not near[y, x]:
+                side[y + 1, x + 1] = 1 + min(side[y, x], side[y, x + 1], side[y + 1, x])
+                if side[y + 1, x + 1] > best[0]:
+                    best = (int(side[y + 1, x + 1]), x + 1 - int(side[y + 1, x + 1]), y + 1 - int(side[y + 1, x + 1]))
+    return best[1] / GRID, best[2] / GRID, best[0] / GRID
 
 
 def mirror_uv(left: bpy.types.Object, right: bpy.types.Object, faces: range = None) -> None:
@@ -288,8 +417,9 @@ def nail_uv(nails: list, verts: list, fr: glove.Frame) -> None:
         dist, _ = to_segment(co, a, b)
         rel = co - a
         share = (rel @ d) / float(np.linalg.norm(b - a))
-        v = (share - glove.NAIL_SPAN[0]) / (glove.NAIL_SPAN[1] - glove.NAIL_SPAN[0])
-        u = np.arctan2(rel @ across, np.maximum(rel @ up, 1e-6)) / math.radians(glove.NAIL_WRAP) * 0.5 + 0.5
+        span, wrap = (glove.THUMB_NAIL_SPAN, glove.THUMB_NAIL_WRAP) if f == 1 else (glove.NAIL_SPAN, glove.NAIL_WRAP)
+        v = (share - span[0]) / (span[1] - span[0])
+        u = np.arctan2(rel @ across, np.maximum(rel @ up, 1e-6)) / math.radians(wrap) * 0.5 + 0.5
         near = dist < best
         best[near] = dist[near]
         at[near, 0] = np.clip(u[near], 0.0, 1.0)
@@ -468,6 +598,7 @@ def paint(p: np.ndarray, n: np.ndarray, thumb: np.ndarray, hand: Hand) -> tuple:
     flush = np.zeros(count, dtype=np.float32)
     crease = np.zeros(count, dtype=np.float32)
     tip = np.zeros(count, dtype=np.float32)
+    form = np.zeros(count, dtype=np.float32)
 
     for f in glove.FINGER_NAMES:
         own = finger == f
@@ -478,6 +609,7 @@ def paint(p: np.ndarray, n: np.ndarray, thumb: np.ndarray, hand: Hand) -> tuple:
         h = np.zeros(len(q), dtype=np.float32)
         red = np.zeros(len(q), dtype=np.float32)
         cut = np.zeros(len(q), dtype=np.float32)
+        lit = np.zeros(len(q), dtype=np.float32)
         # The big knuckle (a finger's middle joint, the thumb's last) and the small one past it (none on the thumb,
         # whose first knuckle wrinkles a little instead).
         big, small = (3, 2) if f == 1 else (2, 3)
@@ -496,6 +628,7 @@ def paint(p: np.ndarray, n: np.ndarray, thumb: np.ndarray, hand: Hand) -> tuple:
                 broken = 0.55 + 0.45 * _smooth(0.3, 0.6, noise(q, 0.0022, 31 + f))
                 fade = np.exp(-1.2 * (r / 0.85) ** 2)
                 h += on_back * (JOINT_RISE * np.exp(-(r / 0.7) ** 2) - JOINT_RINGS * folds * broken * fade)
+                lit += on_back * (np.exp(-(r / 0.7) ** 2) - FORM_RING * np.exp(-(r / (0.7 * FORM_WIDE)) ** 2))
                 cut += on_back * folds * broken * fade * 0.8
                 red += on_back * np.exp(-(r / 0.9) ** 2)
             else:
@@ -537,6 +670,7 @@ def paint(p: np.ndarray, n: np.ndarray, thumb: np.ndarray, hand: Hand) -> tuple:
         height[own] += h
         flush[own] += red
         crease[own] += cut
+        form[own] += lit
 
     # The knuckles: each a rounded rise with a faint ring of dimples, flushed.
     for f in (2, 3, 4, 5):
@@ -549,21 +683,40 @@ def paint(p: np.ndarray, n: np.ndarray, thumb: np.ndarray, hand: Hand) -> tuple:
         height += back * (KNUCKLE_RISE * np.exp(-1.5 * r * r) - KNUCKLE_DIMPLE * folds * np.exp(-r * r))
         crease += back * folds * np.exp(-r * r) * 0.35
         flush += back * 0.75 * np.exp(-r * r)
+        form += back * (np.exp(-1.5 * r * r) - FORM_RING * np.exp(-1.5 * (r / FORM_WIDE) ** 2))
     # The tendons, from the wrist's middle out to each knuckle, standing a little off the back of the hand.
     ridge = np.zeros(count, dtype=np.float32)
+    foot = np.zeros(count, dtype=np.float32)
     for i, f in enumerate((2, 3, 4, 5)):
         a = hand.flat(hand.wrist + hand.across * ((i - 1.5) * 0.007))
         b = hand.flat(hand.joint[(f, 1)])
         dist, t = to_segment(flat, a, b)
-        ridge = np.maximum(ridge, np.exp(-(dist / 0.0022) ** 2) * _smooth(0.08, 0.35, t) * (1.0 - _smooth(0.78, 0.98, t)))
+        span = _smooth(0.08, 0.35, t) * (1.0 - _smooth(0.78, 0.98, t))
+        ridge = np.maximum(ridge, np.exp(-(dist / TENDON_HALF) ** 2) * span)
+        foot = np.maximum(foot, np.exp(-(dist / (TENDON_HALF * FORM_WIDE)) ** 2) * span)
     ridge *= back * on_hand
     height += TENDON * ridge
+    form += TENDON_FORM * (ridge - FORM_RING * foot * back * on_hand)
+    # The thumb's own tendon: a ridge along the back of its first two bones, which the eye looks down on in a hold.
+    thumb_up = hand.finger_frame(1, 2)[2]
+    for k in (1, 2):
+        a, b = hand.joint[(1, k)], hand.joint[(1, k + 1)]
+        d = _unit(b - a)
+        near, t = to_segment(p, a, b)
+        aside = (p - a) @ np.cross(d, thumb_up)
+        span = _smooth(0.10, 0.40, t) if k == 1 else 1.0 - _smooth(0.55, 0.95, t)
+        # Only where the atlas counts the skin as the back (`back` is nothing at the cut between back and palm: a
+        # ridge run over that cut drew a hard line along it), and faded out, never cut, away from the thumb's bones.
+        on = span * back * _smooth(0.2, 0.8, n @ thumb_up) * (1.0 - _smooth(THUMB_NEAR[0], THUMB_NEAR[1], near))
+        crown = np.exp(-(aside / TENDON_HALF) ** 2) * on
+        height += TENDON * crown
+        form += TENDON_FORM * (crown - FORM_RING * np.exp(-(aside / (TENDON_HALF * FORM_WIDE)) ** 2) * on)
     # The veins between them, wandering a little.
     vein = np.zeros(count, dtype=np.float32)
     meander = np.stack([noise(p, 0.007, 71), noise(p, 0.007, 72), noise(p, 0.007, 73)], axis=1) - 0.5
     wandered = hand.flat(p + 0.0045 * meander)
     for marks in VEINS:
-        vein = np.maximum(vein, np.exp(-(to_line(wandered, hand.line(marks)) / 0.0015) ** 2))
+        vein = np.maximum(vein, np.exp(-(to_line(wandered, hand.line(marks)) / VEIN_HALF) ** 2))
     vein *= back * (finger == 0) * (0.55 + 0.45 * noise(p, 0.012, 74))
     height += VEIN * vein
     # The palm's lines and the wrist's creases.
@@ -603,7 +756,7 @@ def paint(p: np.ndarray, n: np.ndarray, thumb: np.ndarray, hand: Hand) -> tuple:
     # The palm's pads (the heel of the thumb, the little finger's side, under the fingers) a little redder.
     pads = front * on_hand * _smooth(0.42, 0.62, noise(p, 0.016, 91))
     colour = mix(colour, tone("pad"), 0.35 * pads)
-    colour *= (1.0 + 0.025 * ridge)[:, None]
+    colour *= (1.0 + FORM_SHADE * np.clip(form, -1.0, 1.0))[:, None]
     crease = np.clip(crease, 0.0, 1.0)
     colour = mix(colour, tone("crease"), (CREASE_SHADE[0] + (CREASE_SHADE[1] - CREASE_SHADE[0]) * front) * crease)
     colour *= (1.0 - fine * (FINE_SHADE[0] * net + FINE_SHADE[1] * pore))[:, None]
@@ -691,8 +844,8 @@ def normals(height: np.ndarray, pos: np.ndarray, mask: np.ndarray) -> np.ndarray
 
 
 def nail_tile(colour: np.ndarray, normal: np.ndarray, rough: np.ndarray) -> None:
-    """The nail's tile painted into the maps: the pink bed, the pale moon at its root, the free edge past a bowed
-    line, its sides a little darker; flat and glossy."""
+    """The nail's tile painted into the maps: the pink bed, a faint moon at its root, its sides a little darker; flat
+    and glossy."""
     u0, v0, w, h = NAIL_TILE
     pad = SPREAD
     x0, x1 = int(u0 * SIZE) - pad, int((u0 + w) * SIZE) + pad
@@ -701,17 +854,15 @@ def nail_tile(colour: np.ndarray, normal: np.ndarray, rough: np.ndarray) -> None
     xs, ys = np.meshgrid(np.arange(x0, x1) + 0.5, np.arange(y0, y1) + 0.5)
     u = np.clip((xs / SIZE - u0) / w, 0.0, 1.0)
     v = np.clip((ys / SIZE - v0) / h, 0.0, 1.0)
-    bed, moon, edge = (np.array(NAIL_TONE[k], dtype=np.float32) for k in ("bed", "moon", "edge"))
+    bed, moon = (np.array(NAIL_TONE[k], dtype=np.float32) for k in ("bed", "moon"))
     side = np.abs(u * 2.0 - 1.0)
     tile = np.broadcast_to(bed, u.shape + (3,)).copy()
     tile *= (1.0 - 0.10 * side ** 3 + 0.03 * np.cos(u * 2.0 * math.pi * 9.0) * (1.0 - side))[..., None]
-    in_moon = 1.0 - _smooth(0.8, 1.1, np.sqrt(((u - 0.5) / 0.36) ** 2 + (v / 0.24) ** 2))
-    tile += (moon - tile) * (0.75 * in_moon)[..., None]
-    free = _smooth(0.0, 0.04, v - (0.86 - 0.09 * side ** 2))
-    tile += (edge - tile) * free[..., None]
+    in_moon = 1.0 - _smooth(0.5, 1.1, np.sqrt(((u - 0.5) / 0.32) ** 2 + (v / 0.18) ** 2))
+    tile += (moon - tile) * (MOON * in_moon)[..., None]
     colour[y0:y1, x0:x1] = tile
     normal[y0:y1, x0:x1] = (0.5, 0.5, 1.0)
-    rough[y0:y1, x0:x1] = NAIL_ROUGH + 0.08 * free
+    rough[y0:y1, x0:x1] = NAIL_ROUGH
 
 
 def _image(name: str, pixels: np.ndarray, data: bool) -> bpy.types.Image:
