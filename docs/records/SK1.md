@@ -48,11 +48,10 @@ Bomb (PB1). He picked from three ideas at 17:54: "Build both Stockade and Stacks
   both ways, the last two points the Attack / Defend posts at each flag. The south lane runs through the Store, in
   at its yard door and out at its east door, then over the Store court into the Woodyard's west gate.
 - **Routes through the houses (attempt 3):** the Forge, Barn, Tavern and Store have a second door each, so every
-  house on the Green is a way through, not a room off it. The defenders reach flag A through the Long House (its east
-  door off East Lane, its south doors onto the House yard); the House yard has no gate from Main Street. The Bell house
-  has a door onto the Green as well as the street, the two off each other's line with its stock between them, so the
-  East camp reaches the Green as fast as the West camp (FieldStandard: 57.6 and 58.6 m to the overtime flag; without
-  that door 72.9 m, 27 % apart, a failed check).
+  house on the Green is a way through, not a room off it, and the Long House's east door, shut at the start in
+  attempt 2, is open: a second way onto Site A from East Lane. The Bell house has a door onto the Green as well as
+  the street, the two off each other's line with its stock between them, so the street is walked through it and the
+  East camp reaches the Green as soon as the West camp (FieldStandard: 57.6 and 58.6 m to the overtime flag).
 
 ## Defaults taken
 
@@ -80,7 +79,7 @@ Departures from the concept (each so the field meets the 34 m line, or plays its
 - **East Lane** runs behind a plywood fence from the House and Shed yards, Main Street and the Long House's east
   door its ways in.
 - **Site A in the Long House's west room** (26, -21), not on the partition's doorway (30, -22): with the east door
-  the defenders' way onto flag A, a site on the doorway was theirs the moment they came in.
+  open, a site on the doorway was the defenders' the moment they came in.
 - **Doors and windows moved** where two lined up into a line over 34 m (the Store's partition doorway to the east end,
   the Forge's front door and back window, the West Arch huts' doors, the Long House's west room given a crate stack).
 - **Flag A in the House yard** before the Long House, between a crate stack and a woodpile (MB1: as Depot's flags

@@ -299,9 +299,7 @@ BELL = (15.0, 0.0)
 # the West camp's (the field's middle and overtime flag ask it, FieldStandard).
 building(BELL[0] - 3.0, -STREET - 0.01, BELL[0] + 3.0, STREET + 0.01,
          [("e", BELL[1], DOOR_W, "door"), ("w", BELL[1] + 2.0, DOOR_W, "door")])
-# Site A, the Long House: two rooms, four doors. The House yard has no gate from Main Street, so the defenders come
-# onto flag A from East Lane through the Long House's east door and out by its south ones (SK1 attempt 3: through a
-# gate off Main Street they held the yard's mouth before the attackers reached it, 39 % for the attackers).
+# Site A, the Long House: two rooms, four doors, all open; its east door is a way in from East Lane.
 LONG = (22.0, -29.0, 38.0, -15.0)
 building(*LONG, [("w", -26.0, DOOR_W, "door"), ("s", 26.5, DOOR_W, "door"), ("s", 35.0, DOOR_W, "door"),
                  ("e", -16.8, DOOR_W, "door"), ("n", 25.0, 2.0, "window"), ("n", 36.0, 2.0, "window")])
@@ -320,8 +318,8 @@ wall_z(BELL[0] - 3.0, STREET, 13.0)
 LANE_X = 38.0
 wall_z(LANE_X - T, -15.0, -STREET)
 wall_z(LANE_X - T, STREET, 12.0)
-# Main Street east of the Bell house, between the yards' fences: a gate into the Shed yard, none into the House yard.
-wall_x(-STREET - T, BELL[0] + 3.0 - 0.01, LANE_X - T)
+# Main Street east of the Bell house, between the yards' fences, a gate into each yard off to one side.
+wall_x(-STREET - T, BELL[0] + 3.0 - 0.01, LANE_X - T, [(34.0, 2.5, "gap")])
 wall_x(STREET, BELL[0] + 3.0 - 0.01, LANE_X - T, [(25.5, 2.5, "gap")])
 
 FLAG_A = (30.0, -9.5)      # Attack / Defend's poles: before the Long House, and in the Woodyard by the road
