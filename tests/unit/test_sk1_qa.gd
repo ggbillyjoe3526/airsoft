@@ -50,7 +50,7 @@ func test_stockade_is_listed_only_with_dev_content_on() -> void:
 func test_the_night_preset_and_every_light_are_read() -> void:
 	assert_has(map.lighting_presets, &"night")
 	assert_has(map.lighting_presets, &"day")
-	assert_eq(map.lights.size(), 25, "every lantern and fire kept")
+	assert_eq(map.lights.size(), 26, "every lantern and fire kept")
 
 
 func test_sites_poles_flag_and_bomb_start_are_on_floor_both_ends_reach() -> void:

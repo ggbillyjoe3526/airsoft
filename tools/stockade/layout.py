@@ -296,9 +296,10 @@ wall_x(13.0, -15.0, -12.5)
 wall_x(13.0, 10.5, 19.0)
 
 # The Orchard's fence: a palisade along the Woodyard Road's south side, two gates into the trees behind it.
-palisade(-EDGE, ORCHARD_Z, -26.0 - 1.25, ORCHARD_Z + PAL_T)
-palisade(-26.0 + 1.25, ORCHARD_Z, 10.0 - 1.25, ORCHARD_Z + PAL_T)
-palisade(10.0 + 1.25, ORCHARD_Z, EDGE, ORCHARD_Z + PAL_T)
+ORCHARD_GATES = (-29.0, 7.0)   # each between two of the Orchard's trees
+palisade(-EDGE, ORCHARD_Z, ORCHARD_GATES[0] - 1.25, ORCHARD_Z + PAL_T)
+palisade(ORCHARD_GATES[0] + 1.25, ORCHARD_Z, ORCHARD_GATES[1] - 1.25, ORCHARD_Z + PAL_T)
+palisade(ORCHARD_GATES[1] + 1.25, ORCHARD_Z, EDGE, ORCHARD_Z + PAL_T)
 
 # The courts' fences on the outer lanes: a plywood fence with one gate each, so a court is a yard of its own and the
 # lanes are lanes.
@@ -350,30 +351,31 @@ FIRE = (0.0, 0.0)
 # Plant The Bomb's sites (x, z, radius m; 0 the game's usual): A in the Long House, B under the Woodyard's shed.
 BOMB_SITES = [(30.0, -22.0, 0), (SHED[0], SHED[1], 0)]
 
-# The bots' lanes, West camp to East camp: the Back Lane to flag A, Main Street over the Green to the Bell tower, the
+# The bots' lanes, West camp to East camp: the Back Lane to flag A, Main Street over the Green and round the Bell house to flag A, the
 # Woodyard Road to flag B. A defender holds its lane's last point or the one before (RoundPlanner).
 LANES = {
-    "n": [(-47.0, -14.0), (-46.5, -33.0), (-36.0, -33.0), (-24.0, -32.0), (-12.0, -31.5), (0.0, -31.0), (8.0, -31.5),
-          (17.0, -31.0), (19.0, -22.0), (22.0, -12.0), (30.0, -9.5)],
-    "m": [(-48.5, 0.0), (-46.5, -5.3), (-43.3, -1.5), (-38.0, 0.0), (-30.0, 2.5), (-24.0, 0.0), (-19.0, -3.0),
-          (-13.0, 0.0), (-6.0, -5.5), (6.0, -5.0), (13.0, 0.0), (16.0, -8.0), (30.0, -12.0)],
-    "s": [(-47.0, 14.0), (-46.5, 33.0), (-36.0, 33.0), (-24.0, 32.0), (-10.0, 32.5), (6.0, 32.5), (17.0, 32.5),
-          (25.0, 33.0), (31.0, 31.5), (31.0, 27.0)],
+    "n": [(-48.5, -9.0), (-43.4, -26.0), (-38.0, -34.0), (-27.0, -31.0), (-14.0, -32.5), (-3.0, -32.0), (3.0, -32.0),
+          (12.0, -33.5), (18.5, -27.0), (22.0, -12.0), (30.0, -9.5)],
+    "m": [(-48.5, 0.0), (-46.5, -6.5), (-43.3, -1.5), (-36.0, 0.0), (-24.5, -2.5), (-16.5, -2.5), (-13.0, 3.0),
+          (-6.0, -3.0), (6.0, -3.0), (11.2, -9.7), (11.2, -13.3), (14.0, -9.0), (21.0, -8.0), (30.0, -12.3)],
+    "s": [(-48.5, 9.0), (-43.4, 26.0), (-38.0, 31.5), (-34.0, 28.3), (-20.5, 33.0), (-10.0, 28.3), (-3.5, 33.0),
+          (3.5, 33.0), (14.0, 28.3), (24.5, 29.5), (24.5, 24.5), (32.5, 25.6)],
 }
 # The areas, as the callouts and the map name them: boxes (x1, x2, z1, z2), the first that holds a spot naming it.
 AREAS = [
     ("Tents", -51.0, -45.0, -32.5, -26.5), ("Tents", -51.0, -45.0, 26.5, 32.5),
     ("West camp", -W, -CAMP_X, -H, H), ("East camp", CAMP_X, W, -H, H),
-    ("Bell tower", 16.0, 30.5, -2.5, 2.5),
+    ("Bell house", BELL[0] - 3.0, BELL[0] + 3.0, -STREET, STREET),
+    ("Main Street", BELL[0] + 3.0, LANE_X, -STREET, STREET),
     ("Forge", FORGE[0], FORGE[2], FORGE[1], FORGE[3]), ("Barn", BARN[0], BARN[2], BARN[1], BARN[3]),
     ("Tavern", TAVERN[0], TAVERN[2], TAVERN[1], TAVERN[3]), ("Store", STORE[0], STORE[2], STORE[1], STORE[3]),
     ("Long House", LONG[0], LONG[2], LONG[1], LONG[3]),
     ("West Arch", ARCH_N[0], ARCH_N[2], ARCH_N[1], ARCH_N[3]), ("West Arch", ARCH_S[0], ARCH_S[2], ARCH_S[1], ARCH_S[3]),
-    ("Woodyard", 19.0, LANE_X, 12.0, 30.6), ("East Lane", LANE_X, CAMP_X, -29.0, 30.5),
+    ("Woodyard", 19.0, LANE_X, 12.0, 28.4), ("East Lane", LANE_X, CAMP_X, -29.0, 29.5),
     ("Back Lane", -CAMP_X, CAMP_X, -H, -29.0),
     ("North court", -24.0, -10.0, -29.0, -17.0), ("House court", 8.0, 22.0, -29.0, -15.0),
-    ("South court", -23.0, -8.0, 15.0, 25.0), ("Store court", 8.0, 19.0, 13.0, 25.0),
-    ("Orchard", -20.0, 18.0, 33.0, H), ("Woodyard Road", -CAMP_X, CAMP_X, 25.0, H),
+    ("South court", -23.0, -8.0, 15.0, 25.0), ("Store court", 8.0, 19.0, 12.0, 25.0),
+    ("Orchard", -CAMP_X, CAMP_X, ORCHARD_Z, H), ("Woodyard Road", -CAMP_X, CAMP_X, 25.0, ORCHARD_Z),
     ("Green", -16.0, 16.0, -17.0, 15.0),
     ("House yard", 16.0, LANE_X, -15.0, 0.0), ("Shed yard", 16.0, LANE_X, 0.0, 12.0),
     ("Main Street", -CAMP_X, -16.0, -STREET, STREET),
@@ -381,9 +383,9 @@ AREAS = [
 ]
 # Night's lights: a fire in each camp and the Green's campfire, lanterns by the doors that matter (x, z, kind).
 LIGHTS = [(-47.0, 18.0, "fire"), (47.0, 18.0, "fire"), (FIRE[0], FIRE[1], "fire"),
-          (-35.2, -22.0, "lantern"), (-24.0, -21.5, "lantern"), (-23.0, 19.0, "lantern"), (-30.0, 13.2, "lantern"),
-          (-19.0, -11.2, "lantern"), (-19.0, 11.2, "lantern"), (-10.8, -24.0, "lantern"), (-1.0, -16.2, "lantern"),
-          (8.8, -22.0, "lantern"), (-8.8, 18.0, "lantern"), (8.8, 22.0, "lantern"), (21.2, -20.0, "lantern"),
+          (-35.2, -22.0, "lantern"), (-23.2, -21.5, "lantern"), (-22.2, 18.2, "lantern"), (-35.0, 13.2, "lantern"),
+          (-19.0, -11.2, "lantern"), (-19.0, 11.2, "lantern"), (-10.8, -26.0, "lantern"), (-1.0, -16.2, "lantern"),
+          (8.8, -19.0, "lantern"), (-8.8, 18.0, "lantern"), (8.8, 22.0, "lantern"), (21.2, -24.5, "lantern"),
           (26.5, -14.2, "lantern"), (35.0, -14.2, "lantern"), (24.0, 1.4, "lantern"), (31.0, 17.0, "lantern"),
           (31.0, 25.0, "lantern"), (40.0, -10.0, "lantern"), (40.0, 10.0, "lantern"), (-44.6, -29.5, "lantern"),
           (-44.6, 29.5, "lantern"), (-43.0, 0.0, "lantern"), (43.0, 0.0, "lantern")]

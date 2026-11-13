@@ -69,10 +69,11 @@ def rays(boxes: list[dict]) -> tuple:
     """From every place to stand on a 1.5 m grid, how far each ray (every half degree) runs clear at eye height:
     the points, the rays' directions and the clear lengths (points x rays)."""
     solid = raster(boxes, RES, lambda b: b["y1"] < EYE < b["y2"])
-    body = raster(boxes, 0.5, lambda b: b["y1"] < 1.7 and b["y2"] > 0.35)
+    body = np.array([(b["x1"] - BODY, b["z1"] - BODY, b["x2"] + BODY, b["z2"] + BODY) for b in boxes
+                     if b["y1"] < 1.7 and b["y2"] > 0.35])
     nx, nz = solid.shape
     pts = [(x, z) for x in np.arange(-L.W + 0.75, L.W, 1.5) for z in np.arange(-L.H + 0.75, L.H, 1.5)
-           if not body[int((x + L.W) / 0.5), int((z + L.H) / 0.5)]]
+           if not ((body[:, 0] < x) & (x < body[:, 2]) & (body[:, 1] < z) & (z < body[:, 3])).any()]
     p = np.array(pts)
     angles = np.radians(np.arange(0, 360, 0.5))
     dx, dz = np.cos(angles), np.sin(angles)

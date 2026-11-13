@@ -3,7 +3,7 @@ stacks, the Bell tower's sandbags, the Woodyard's woodpiles, the lanes' trees, l
 rooms are furnished with. Imported by layout.py once the buildings stand; adds to its `boxes`, TREES and BUSHES. Every
 piece is a prop the game already models, at the size its model was built to (PropDressConfig; tools/woodland/layout.py
 for the Sawmill's)."""
-from layout import BELL, BELL_TOWER, CAMP_X, CRATES, EDGE, FIRE, H, LANE_X, LOW, PAL_IN, PAL_T, SHED, T, box, bush, cordwood, crates, log, \
+from layout import BELL, BELL_TOWER, CAMP_X, CRATES, EDGE, FIRE, H, LANE_X, LOW, ORCHARD_GATES, PAL_IN, PAL_T, SHED, T, box, bush, cordwood, crates, log, \
     sandbags, tree
 
 TYRES, TYRE = 1.7, 0.85     # a stack of tractor tyres, and one lying flat
@@ -61,13 +61,13 @@ log(fx + 3.3, fz - 2.5, fx + 4.0, fz + 2.5)
 # Its four stacks, as the concept has them near its corners: each stands just inside an alley's mouth, so the alleys
 # are come out of round them and nobody sees from one alley into another across the Green.
 crates(-12.6, -8.15, -10.3, -5.85)         # and the concept's four, one either side of each long diagonal
-cordwood(7.4, -8.7, BELL[0] - 3.0 + 0.01, -7.0)
+cordwood(6.2, -8.7, BELL[0] - 3.0 + 0.01, -7.0)
 crates(8.85, 5.85, 11.15, 8.15)
 cordwood(-13.2, 6.6, -9.2, 7.8)
 crates(-13.45, -11.8, -10.0 + 0.01, -10.65)
-cordwood(8.0 - 0.01, -11.8, BELL[0] - 3.0 + 0.01, -10.6)
+cordwood(8.0 - 0.01, -11.8, BELL[0] - 3.0 - 1.5, -10.6)
 cordwood(-12.6, 9.4, -8.0 + 0.01, 10.6)
-crates(8.0 - 0.01, 9.4, 11.45, 10.55)
+crates(8.0 - 0.01, 9.4, 10.3, 10.55)
 
 
 # ------------------------------------------------------------------ the woodpiles along the camps' walls
@@ -105,6 +105,8 @@ crates(26.6, 18.6, 27.8, 19.75, top=LOW)
 crates(27.5, 22.5, 28.65, 23.65, top=LOW)
 
 # ------------------------------------------------------------------ the Long House (Site A) and before it (flag A)
+cordwood(20.5, 7.2, 24.5, 8.4)                    # the Shed yard: timber stacked behind its gate off Main Street
+crates(32.0, 8.0, 34.3, 9.15)
 cordwood(33.0, -10.6, LANE_X - T + 0.01, -9.4)   # flag A stands between the yard's woodpile against East Lane's fence
 crates(25.5, -10.75, 27.8, -9.6)                  # and a crate stack (MB1: as Depot's flags do)
 cordwood(14.5, -14.5, 15.7, -10.5)                # the woodpile behind the way in from the Green
@@ -120,6 +122,7 @@ barrels(36.0, -16.2)
 crates(-4.0, -19.4, 2.0, -18.25, top=LOW)   # the Tavern's bar
 crates(-7.15, -16.55, -4.85, -15.4)          # its shelves of bottles behind the windows onto the Green
 crates(2.85, -16.55, 6.3, -15.4)
+crates(5.39, -15.0 + 0.01, 7.7 + 0.01, -13.84)     # crates out of the Tavern's back, in the corner by its wing
 barrels(-8.6, -28.4)
 sofa(4.0, -28.0, True)
 drums(-6.5, -25.5)
@@ -160,16 +163,16 @@ bush(16.0, -36.0)
 # A chicane every 12 m, from the Orchard's fence and from the houses' side by turns, overlapping by a metre.
 for x in (-34.0, -10.0, 14.0, 32.0):
     cordwood(x - 0.6, 29.5, x + 0.6, 34.0 + 0.01)
-for x in (-22.0, 2.0):
+for x in (-20.5, 2.0):
     cordwood(x - 0.6, 27.0 - 0.01, x + 0.6, 32.0)
 # The Orchard's two gates, a short woodpile either side of each on the road, so nobody sees through one along the road.
-for gx in (-26.0, 10.0):
+for gx in ORCHARD_GATES:
     for side in (-1.0, 1.0):
         x1 = gx + side * 1.25
         cordwood(min(x1, x1 + side * 1.2), 32.6, max(x1, x1 + side * 1.2), 34.0 + 0.01)
 # The Orchard: two staggered rows of trees behind its fence, so nobody sees along it either.
 for k, x in enumerate(range(-38, 41, 6)):
-    oak(float(x), 35.3 if k % 2 == 0 else 36.95, 7.0 + (k % 3))
+    oak(float(x), 35.23 if k % 2 == 0 else 36.9, 7.0 + (k % 3))   # rows overlapping and the near one 2 cm into the fence
 oak(-48.0, 35.0, 12.0)
 oak(46.0, 34.0, 12.0)
 for (x, z) in ((-10.0, 29.0), (6.0, 29.5), (-35.0, 36.8), (11.0, 35.3), (-25.0, 36.8), (44.0, -22.0), (44.0, 20.0)):
