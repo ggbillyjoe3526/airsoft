@@ -506,13 +506,15 @@ def led_object(plate: float) -> bpy.types.Object:
 EDGE_LAP = 0.03         # each cutting edge past the centre line, so the closed jaws overlap inside the steel, no seam
 JAW_EDGE = [(-EDGE_LAP, y) for y in (5.6, 9.0, 12.5, 16.0, 18.5)]  # the cutting edge up to the tip
 JAW_OUTER = [(0.15, 18.45), (1.1, 17.3), (2.2, 15.0), (3.4, 11.8), (4.4, 8.4), (4.95, 5.2), (4.95, 2.62)]
-SHANK_INNER = [(1.0, -5.51), (0.35, -8.5), (-0.9, -15.0), (-1.9, -21.5)]
+SHANK_INNER = [(EDGE_LAP, -5.6), (EDGE_LAP, -8.5), (-0.9, -15.0), (-1.9, -21.5)]  # meets the other neck as the jaws do
 SHANK_OUTER = [(-7.2, -21.5), (-6.8, -15.0), (-6.1, -8.0), (-5.2, -2.06)]
 PIVOT_R = 5.6
 CUT_T = 3.2             # half the jaws' thickness at the pivot; the jaw tapers to TIP_T at its tip
 TIP_T = 0.2
 NOSE_FROM = 6.5        # where the nose's bevels start (y, mm)
-LAP_GAP = 0.06          # the lap's clearance round the other half's disc (mm)
+LAP_GAP = -0.02         # the lap's wall against the other half's disc (mm): a hair inside it, so they overlap, no slit
+LAP_DEEP = 0.02         # the lap's roof a hair under the middle, so the halves overlap there too and no seam shows
+LAP_REACH = 0.0015      # where the lower half ends: just outside the outline's arcs, so only the jaw and shank pass it
 PIVOT_SEGS = 72         # the pivot's circle's sides, and the outline's arcs at the same spacing
 CHAMFER = (1.3, 0.75)     # the jaw's outer chamfer: in from the root-to-tip line at the top (mm), and its drop per mm out
 GRIND = (1.0, 0.15)     # the cutting edge's ground facet: its width on the top face, its depth at the edge (mm)
@@ -521,7 +523,7 @@ GRIP_TO = -103.0
 GRIP_X = (-4.6, -14.5, 4.5)  # the grip's centre line: x at its front, at its end, and its outward bow
 GRIP_W = (7.2, 6.0, 6.6)     # half width in the plane: the front collar, the waist, the end
 GRIP_H = (5.0, 4.2, 4.5)     # half thickness the same
-GRIP_RINGS = 56
+GRIP_RINGS = 62
 GRIP_SECTION = 6             # each corner's steps of the section
 HOLE = (0.94, 1.35)          # the lanyard hole: how far along the grip, its radius (mm)
 NUT = (3.4, 1.4)             # the pivot screw's head radius and height; the nut under it a little smaller
@@ -539,12 +541,18 @@ def jaw_outline() -> list:
     side to the shank's inner edge, down it, across its end, up its outer edge, round the circle's upper left to the
     cutting edge, up the edge to the tip."""
     def arc(a0: float, a1: float, steps: int) -> list:
-        return [(PIVOT_R * math.cos(a0 + (a1 - a0) * k / steps), PIVOT_R * math.sin(a0 + (a1 - a0) * k / steps))
-                for k in range(1, steps)]
+        # Its corners on the circle's fixed grid (every PIVOT_SEGS'th of a turn), the same for both halves (one is the
+        # other turned over), so where both have the arc their sides lie exactly on each other, no sag between.
+        step = TAU / PIVOT_SEGS
+        ks = range(math.floor(a0 / step), math.ceil(a1 / step) - 1, -1) if a1 < a0 else \
+            range(math.ceil(a0 / step), math.floor(a1 / step) + 1)
+        return [(PIVOT_R * math.cos(k * step), PIVOT_R * math.sin(k * step)) for k in ks
+                if min(abs(k * step - a0), abs(k * step - a1)) * PIVOT_R > 0.05]
     def ang(p: tuple) -> float:
         return math.atan2(p[1], p[0])
     a_jaw = ang(JAW_OUTER[-1])
-    a_shank_in = ang(SHANK_INNER[0]) - TAU  # clockwise from the jaw down the right side
+    a_shank_in = ang(SHANK_INNER[0])  # clockwise from the jaw down the right side (less than a_jaw, no wrap)
+    a_shank_in -= TAU if a_shank_in > a_jaw else 0.0
     a_shank_out = ang(SHANK_OUTER[-1])
     a_edge = ang(JAW_EDGE[0])
     pts = list(JAW_OUTER)
@@ -608,11 +616,13 @@ def steel_half(name: str) -> bpy.types.Object:
 
 
 def lapped_steel(name: str) -> bpy.types.Object:
-    """The outline at full thickness with its lap built in, not cut: under the pivot's circle (a hair wider than the
-    pivot) only the upper half, so the other half's lap turns there. Built point for point, every face sharing its
-    neighbours' corners, where a cut left slivers along the circle that folded when mended."""
-    rim = PIVOT_R + LAP_GAP
-    ring = [(rim * math.cos(TAU * (k + 0.5) / PIVOT_SEGS), rim * math.sin(TAU * (k + 0.5) / PIVOT_SEGS))
+    """The outline at full thickness with its lap built in, not cut: under the pivot's circle only the upper half, so
+    the other half's disc turns there. Where the jaw and the shank go on past the circle, the lap's wall stands a hair
+    inside it (LAP_GAP), so the other half's disc overlaps it and no slit between them shows the light. Built point
+    for point, every face sharing its neighbours' corners, where a cut left slivers along the circle."""
+    rim = PIVOT_R + LAP_REACH  # the lower half goes where the outline passes this circle (just outside its arcs)
+    wall = PIVOT_R + LAP_GAP
+    ring = [(wall * math.cos(TAU * (k + 0.5) / PIVOT_SEGS), wall * math.sin(TAU * (k + 0.5) / PIVOT_SEGS))
             for k in range(PIVOT_SEGS)]  # half a step off the outline's arc corners
     pts = jaw_outline()
     out: list = []  # (point, on the circle)
@@ -628,7 +638,7 @@ def lapped_steel(name: str) -> bpy.types.Object:
     def vert(p: tuple, z: float) -> bmesh.types.BMVert:
         return bm.verts.new(mm(p[0], p[1], z))
     top = [vert(p, CUT_T) for p, _ in out]
-    mid = [vert(p, 0.0) if on or inside[i] or inside[i - 1] else None for i, (p, on) in enumerate(out)]
+    mid = [vert(p, -LAP_DEEP) if on or inside[i] or inside[i - 1] else None for i, (p, on) in enumerate(out)]
     low = [vert(p, -CUT_T) if on or not inside[i] or not inside[i - 1] else None for i, (p, on) in enumerate(out)]
     faces = [bm.faces.new(top)]
     for i in range(n):
@@ -647,10 +657,11 @@ def lapped_steel(name: str) -> bpy.types.Object:
         x = max((k for k in exits if k < e), default=max(exits))
         a0 = math.atan2(out[e][0][1], out[e][0][0])
         span = (math.atan2(out[x][0][1], out[x][0][0]) - a0) % TAU
-        gap = 0.1 / rim
+        gap = 0.1 / wall
         between = sorted(((math.atan2(q[1], q[0]) - a0) % TAU, q) for q in ring)
-        stretch = [(low[e], mid[e])] + [(vert(q, -CUT_T), vert(q, 0.0)) for t, q in between if gap < t < span - gap]
-        stretch.append((low[x], mid[x]))
+        ends = [(wall * math.cos(a), wall * math.sin(a)) for a in (a0, a0 + span)]  # in from the crossings to the wall
+        inner = [ends[0]] + [q for t, q in between if gap < t < span - gap] + [ends[1]]
+        stretch = [(low[e], mid[e])] + [(vert(q, -CUT_T), vert(q, -LAP_DEEP)) for q in inner] + [(low[x], mid[x])]
         for (l0, m0), (l1, m1) in zip(stretch, stretch[1:]):
             faces.append(bm.faces.new((l0, l1, m1, m0)))
         arcs[e] = (x, stretch)
@@ -686,7 +697,7 @@ def circle_crossings(a: tuple, b: tuple, r: float) -> list:
         return []
     root = math.sqrt(disc)
     ts = sorted(((-qb - root) / (2.0 * qa), (-qb + root) / (2.0 * qa)))
-    return [(a[0] + dx * t, a[1] + dy * t) for t in ts if 1e-3 < t < 1.0 - 1e-3]
+    return [(a[0] + dx * t, a[1] + dy * t) for t in ts if 1e-5 < t < 1.0 - 1e-5]
 
 
 def grind_slope() -> tuple:
@@ -827,6 +838,9 @@ def round_pivot_walls(ob: bpy.types.Object) -> None:
         if not upright:
             flat.add(poly.index)
         on_wall = all(near[0] < math.hypot(me.vertices[v].co.x, me.vertices[v].co.y) < near[1] for v in poly.vertices)
+        # ...and facing out from (or in to) the axis: a sliver of a flat side that only ends on the circle is not one.
+        out = Vector((poly.center.x, poly.center.y, 0.0))
+        on_wall = on_wall and out.length > 0.0 and abs(poly.normal.dot(out.normalized())) > 0.9
         poly.use_smooth = upright  # the outline's curved sides smooth too, split at their corners by angle
         if upright and on_wall:
             walls.add(poly.index)
@@ -843,14 +857,21 @@ def round_pivot_walls(ob: bpy.types.Object) -> None:
     for edge in me.edges:
         if edge.key in sharp:
             edge.use_edge_sharp = True
+    # The lap's roof is never seen, but where the other half's round wall dips between its corners (a chord's sag,
+    # microns) the roof's edge can show past it: shaded as the round wall there, it cannot show as a lit speck.
+    roof = {poly.index for poly in me.polygons
+            if abs(poly.normal.z) > 0.99 and all(abs(me.vertices[v].co.z + LAP_DEEP * MM) < 1e-7 for v in poly.vertices)}
     normals = [Vector(n.vector) for n in me.corner_normals]
     for poly in me.polygons:
-        if poly.index not in walls:
+        if poly.index not in walls and poly.index not in roof:
             continue
         for li in poly.loop_indices:
             co = me.vertices[me.loops[li].vertex_index].co
-            radial = Vector((co.x, co.y, 0.0)).normalized()
-            normals[li] = radial if radial.dot(poly.normal) > 0.0 else -radial
+            radial = Vector((co.x, co.y, 0.0))
+            if radial.length < 1e-4:
+                continue  # the roof's middle: hidden, any normal
+            radial.normalize()
+            normals[li] = radial if poly.index in roof or radial.dot(poly.normal) > 0.0 else -radial
     me.normals_split_custom_set(normals)
 
 
