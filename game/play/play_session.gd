@@ -1849,6 +1849,11 @@ func _exit_tree() -> void:
 		WorkerThreadPool.wait_for_task_completion(_minimap_task)
 		_minimap_task = -1
 		_minimap_out.clear()
+	# Left while the wood is built a piece a frame: it joins the tree only with its last piece, so until then it is
+	# this session's to free.
+	if _woods != null and not _woods.is_inside_tree():
+		_woods.free()
+		_woods = null
 	ReplicaPaint.clear()
 	HeldMerge.clear()
 	# Nothing is held past the figures' build; a build cut short by an error must not leave a parts file instanced.
