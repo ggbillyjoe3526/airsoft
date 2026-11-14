@@ -96,6 +96,11 @@ extends Resource
 @export var holster_swap: float = 0.5
 @export var settle_holster: float = 0.06
 @export var settle_sprint: float = 0.12
+## Holstered and stepping short of a sprint, the arms swing this share of the sprint's pump on the same stride (its
+## pump at a walk's pace, smaller), all of it from holster_step_speed (m/s, a run) and less at a slower step; the hit
+## volume and the drawn figure alike (UpperBlend.step_pump).
+@export var holster_step_mix: float = 0.45
+@export var holster_step_speed: float = 4.2
 @export var max_stride: float = 1.0
 ## The hit area fitted to the drawn figure (HV1): its joints, baked from the figure's own clips (HitFit,
 ## tools/hit_fit_bake.gd). A character's volume hangs on them (Hitbox.build_volume); the numbers above shape only the

@@ -191,7 +191,7 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = false) -> void:
 	if tree == null:
 		return
-	_animate_upper(pose, fired)
+	_animate_upper(pose, hits, fired)
 	tree.set(FigureGraph.P_GAIT, pose.gait_position())
 	_stairs_down_gate = _gate(FigureGraph.P_STAIRS_DOWN_GATE, _stairs_down_gate, pose.stairs < -HitPose.GATE)
 	_stairs_up_gate = _gate(FigureGraph.P_STAIRS_UP_GATE, _stairs_up_gate, pose.stairs > HitPose.GATE)
@@ -282,7 +282,7 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 ## gates shut at none and at full; Holster_Sprint on the walk cycle, a share of it at a step), a switch begun or shown
 ## again (forwards to a pistol, backwards to a rifle, scaled to the draw from its share), cut when the draw is (a
 ## holster, a hit).
-func _animate_upper(pose: FigurePose, fired: bool) -> void:
+func _animate_upper(pose: FigurePose, hits: HitConfig, fired: bool) -> void:
 	tree.set(FigureGraph.P_FIRE_HOLD, pose.pistol_weight)
 	if fired:
 		tree.set(FigureGraph.P_FIRE, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
@@ -304,9 +304,7 @@ func _animate_upper(pose: FigurePose, fired: bool) -> void:
 	_hold_gate = _gate(FigureGraph.P_HOLD_GATE, _hold_gate, holster < 1.0)
 	_holster_gate = _gate(FigureGraph.P_HOLSTER_GATE, _holster_gate, holster > 0.0)
 	tree.set(FigureGraph.P_HOLSTER, holster)
-	var step_mix := 0.0
-	if pose.stepping():
-		step_mix = _config.holster_step_mix * clampf(pose.speed / _config.holster_step_speed, 0.0, 1.0)
+	var step_mix := UpperBlend.step_pump(hits, pose.speed) if hits != null and pose.stepping() else 0.0
 	tree.set(FigureGraph.P_HOLSTER_MIX, maxf(pose.sprint_weight, step_mix))
 	if pose.stepping():
 		tree.set(FigureGraph.P_HOLSTER_SPRINT_SEEK, fposmod(pose.cycle, TAU))
