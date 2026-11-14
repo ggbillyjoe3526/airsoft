@@ -64,3 +64,38 @@ func test_a_match_s_bots_still_find_their_groundwork() -> void:
 	var session := PlaySession.new()
 	assert_true(session._bot_options().groundwork)
 	session.free()
+
+
+# --- A skipped round's figures ---
+
+
+func test_a_held_figure_snaps_to_its_pose_when_next_posed() -> void:
+	var f := FigureView.new()
+	f._snap = false
+	f._fired = true
+	f.hold()
+	assert_true(f._snap, "posed again, it snaps")
+	assert_false(f._fired, "a shot under the cover is not played after it")
+	f.free()
+
+
+func test_a_skip_holds_every_figure_and_the_frame_after_it_poses_them() -> void:
+	var session := PlaySession.new()
+	session.bots_active = false
+	session.difficulty = &"easy"
+	session.settings = Settings.new()
+	add_child_autofree(session)
+	await wait_physics_frames(2)
+	RoundHold.release(session.state)
+	session.player.status = Character.Status.OUT
+	session.start_skip()
+	await wait_process_frames(1)
+	assert_true(session.skipping())
+	assert_gt(session._figures.size(), 0)
+	for f in session._figures:
+		assert_true(f._snap, "%s: held under the cover" % f.name)
+	session._stop_skip()
+	await wait_process_frames(1)
+	for f in session._figures:
+		if f.visible:
+			assert_false(f._snap, "%s: posed on the first frame the field shows" % f.name)

@@ -566,6 +566,13 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 		_body.hands.show_bomb(Grenade.Kind.NONE)
 
 
+## Not posed this frame (a skip's cover: the field is not drawn): its legs are left still and it snaps to its pose
+## the next time it is posed (`animate`), as a hidden figure does.
+func hold() -> void:
+	_snap = true
+	_fired = false
+
+
 ## How far (0..1) the replica is raised at the level ahead of `c`'s aim, as `_pose` read it (FB5): by how close the
 ## level comes within the replica's reach (ahead of the figure's speed by raise_lead), eased out, one ray every
 ## raise_stride poses; none holstered, out of the hand or out of play, and after a shot at most raise_fire_most (a few

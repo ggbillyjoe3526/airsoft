@@ -1489,7 +1489,11 @@ func _process(delta: float) -> void:
 		# Watching through someone's eyes: their own figure would fill the view.
 		if f.character_id == watched.id:
 			f.visible = false
-		f.animate(c, fraction, delta, eye)
+		# Under a skip's cover nothing of the field is drawn: posed again, snapped, on the first frame it shows.
+		if _skipping:
+			f.hold()
+		else:
+			f.animate(c, fraction, delta, eye)
 	# After the figures: a torch hangs from the muzzle as just drawn.
 	if _torches != null:
 		_torches.update(state.characters, watched, fraction, _figure_of, _eyes.camera)
