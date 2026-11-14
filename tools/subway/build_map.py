@@ -596,7 +596,8 @@ def lifts() -> list[dict]:
 
 # ---------------- Writing ----------------
 
-def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "", facing: str = "") -> dict:
+def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "", facing: str = "",
+             squeeze: bool = False) -> dict:
     x0, x1, y0, y1, z0, z1 = bx
     if kind in ("floor", "ramp"):
         # Floors drawn edge to edge are grown a centimetre a side to meet (as Depot's): an edge on a grid cell's middle
@@ -612,7 +613,21 @@ def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress:
         b["dress"] = dress
     if facing:
         b["facing"] = facing
+    if squeeze:
+        b["squeeze"] = True
     return b
+
+
+def under_wall(bx: list[float]) -> list[float]:
+    """A track bed's floor run on L.UNDER_WALL in under its tunnel wall (AUD2); any other floor as it is."""
+    x0, x1, y0, y1, z0, z1 = bx
+    if abs(y1 - L.T) > EPS:
+        return bx
+    if abs(z0 + L.TRACK_WALL_Z) < EPS:
+        z0 -= L.UNDER_WALL
+    if abs(z1 - L.TRACK_WALL_Z) < EPS:
+        z1 += L.UNDER_WALL
+    return [x0, x1, y0, y1, z0, z1]
 
 
 def floor_y(x: float, z: float, near: float) -> float:
@@ -659,7 +674,8 @@ def build() -> dict:
         for other in solid:
             if overlap(bx, other, SLACK):
                 print("warning: cover", bl["kind"], bx, "overlaps", other)
-        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"], facing=bl["facing"]))
+        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"], facing=bl["facing"],
+                               squeeze=bl["squeeze"]))
         solid.append(bx)
     # A car's air keeps a roof's thickness under its shoulders (car_shoulders) where it stands under an arch.
     air = [(i, p) for i, rm in enumerate(L.rooms) for a in air_boxes(rm)
@@ -683,7 +699,7 @@ def build() -> dict:
         parts = cut(under_arch(bx) if car else [bx], holes)
         parts = cut(parts, [s for s in solid if overlap(s, bx)])
         for p in parts:
-            blocks.append(as_block(kind, p))
+            blocks.append(as_block(kind, under_wall(p) if kind == "floor" else p))
             solid.append(p)
     # The vaults over the tunnels, round the shell already standing and clear of every room's air and every arch's
     # (a platform tunnel's end round a running tunnel's mouth).
