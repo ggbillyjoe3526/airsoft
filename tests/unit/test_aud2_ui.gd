@@ -164,3 +164,67 @@ func test_a_short_address_the_system_refuses_is_not_sent_twice() -> void:
 	panel.report_button().pressed.emit()
 	assert_eq(_asked.size(), 1, "nothing shorter to try")
 	assert_false(panel.status_text().begins_with("✓"))
+
+
+# --- row 109: a seen crash is not shown again where the record cannot be written ---
+
+const RUN_DIR := "user://test-aud2-ui-run"
+const GONE := 999999
+
+
+func _crashed_start(path: String) -> RunRecord:
+	var first := RunRecord.new()
+	first.start("0.1 Dev 3", 1000, GONE)
+	assert_true(first.save(path))
+	var second := RunRecord.load_file(path)
+	second.start("0.1 Dev 3", 2000, OS.get_process_id())
+	return second
+
+
+func _clean_run_dir() -> void:
+	for f: String in DirAccess.get_files_at(RUN_DIR):
+		DirAccess.remove_absolute(RUN_DIR.path_join(f))
+
+
+func test_a_crash_seen_where_the_record_cannot_be_written_is_marked_and_not_shown_again() -> void:
+	DirAccess.make_dir_recursive_absolute(RUN_DIR)
+	_clean_run_dir()
+	var path := RUN_DIR.path_join("run.save")
+	var run := _crashed_start(path)
+	assert_true(run.crashed_before(), "the run before it never closed")
+	SaveFile.hold(PackedStringArray([path]))
+	assert_false(run.save(path), "this start can't write its record")
+	assert_true(run.crash_seen(path), "the seen crash is marked beside the record instead")
+	SaveFile.release(PackedStringArray([path]))
+	var next := RunRecord.load_file(path)
+	next.start("0.1 Dev 3", 3000, OS.get_process_id())
+	assert_false(next.crashed_before(), "the next start shows no crash again")
+	_clean_run_dir()
+	DirAccess.remove_absolute(RUN_DIR)
+
+
+func test_a_crash_seen_in_a_folder_that_takes_no_file_says_so() -> void:
+	DirAccess.make_dir_recursive_absolute(RUN_DIR)
+	_clean_run_dir()
+	var path := RUN_DIR.path_join("run.save")
+	var run := _crashed_start(path)
+	var mark := RunRecord.closed_mark(path, GONE, 1000)
+	SaveFile.hold(PackedStringArray([path, mark]))
+	assert_false(run.crash_seen(path), "nothing can be written: false, for main to warn of it")
+	SaveFile.release(PackedStringArray([path, mark]))
+	assert_true(RunRecord.load_file(path).state == RunRecord.State.RUNNING, "the old record stands")
+	_clean_run_dir()
+	DirAccess.remove_absolute(RUN_DIR)
+
+
+func test_a_crash_seen_with_a_writable_folder_is_written_as_before() -> void:
+	DirAccess.make_dir_recursive_absolute(RUN_DIR)
+	_clean_run_dir()
+	var path := RUN_DIR.path_join("run.save")
+	var run := _crashed_start(path)
+	assert_true(run.crash_seen(path))
+	var next := RunRecord.load_file(path)
+	assert_true(next.state == RunRecord.State.RUNNING, "this run's own record, under way")
+	assert_false(next.crashed_before(), "with no crash in it")
+	_clean_run_dir()
+	DirAccess.remove_absolute(RUN_DIR)
