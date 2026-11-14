@@ -74,6 +74,44 @@ func test_a_dragged_round_time_is_saved_once_on_release() -> void:
 	assert_eq(_saved_time(), 270.0, "a step after the release saves again")
 
 
+# --- row 29: the drawing dips, the control does not ---
+
+func test_the_dip_transform_is_the_one_a_scale_about_the_middle_gives() -> void:
+	var b := Button.new()
+	add_child_autofree(b)
+	b.position = Vector2(30.0, 50.0)
+	b.size = Vector2(500.0, 120.0)
+	for d: float in [0.95, 0.98, 0.9]:
+		b.scale = Vector2.ONE
+		b.pivot_offset_ratio = ButtonPress.PIVOT
+		var base := b.get_transform()
+		b.scale = Vector2.ONE * d
+		var engine := b.get_transform()
+		var ours := ButtonPress.dipped(base, b.size, d)
+		assert_true(engine.is_equal_approx(ours), "dip %s: %s against %s" % [d, ours, engine])
+
+
+func test_a_dipped_button_keeps_its_control_full_size_for_a_click() -> void:
+	var b := Button.new()
+	b.size = Vector2(500.0, 120.0)
+	add_child_autofree(b)
+	var ring := ButtonPress.new()
+	b.add_child(ring, false, Node.INTERNAL_MODE_BACK)
+	await wait_process_frames(2)
+	var base := b.get_transform()
+	ring.play()
+	var low := 1.0
+	for i: int in 10:
+		await wait_process_frames(1)
+		low = minf(low, ring.dip())
+		assert_eq(b.get_transform(), base, "the control's transform is untouched at every frame")
+	assert_lt(low, 1.0, "drawn smaller")
+	assert_eq(b.scale, Vector2.ONE, "the control keeps its scale")
+	var hit := b.get_global_transform().affine_inverse()
+	assert_true(Rect2(Vector2.ZERO, b.size).has_point(hit * Vector2(1.0, 60.0)), "the outer pixel still takes the click")
+	assert_true(Rect2(Vector2.ZERO, b.size).has_point(hit * Vector2(499.0, 60.0)))
+
+
 # --- row 28: a field's own flag raise is said on the Match page ---
 
 func _note_page(map_id: String, mode: String) -> MatchPage:

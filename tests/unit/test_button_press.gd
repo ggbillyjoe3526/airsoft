@@ -16,6 +16,12 @@ func after_all() -> void:
 		get_tree().node_added.disconnect(ButtonPress._on_node_added)
 
 
+## How much of its size `b` is drawn at now (1.0 with no press yet).
+func _dip(b: BaseButton) -> float:
+	var ring := ButtonPress.ring_of(b)
+	return 1.0 if ring == null else ring.dip()
+
+
 func _button(words: String = "SWAP") -> Button:
 	var view := SubViewport.new()
 	view.size = Vector2i(800, 400)
@@ -73,11 +79,11 @@ func test_a_click_dips_the_button_and_flashes_its_outline() -> void:
 	assert_eq(b.get_child_count(), before, "the ring is internal: the button's own children are unchanged")
 	assert_true(ring.visible and ring.playing())
 	await wait_seconds(ButtonPress.DIP_IN * 0.8)
-	assert_lt(b.scale.x, 1.0, "dipped in")
-	assert_gte(b.scale.x, ButtonPress.PRESS_SCALE - 0.001, "never past PRESS_SCALE")
-	assert_eq(b.pivot_offset_ratio, ButtonPress.PIVOT, "about its middle")
+	assert_lt(_dip(b), 1.0, "dipped in")
+	assert_gte(_dip(b), ButtonPress.PRESS_SCALE - 0.001, "never past PRESS_SCALE")
+	assert_eq(b.scale, Vector2.ONE, "the control itself keeps its size: a click is tested against all of it (PP1)")
 	await wait_seconds(ButtonPress.DIP_IN + ButtonPress.RING_FADE + 0.1)
-	assert_almost_eq(b.scale.x, 1.0, 0.0001, "back to its size")
+	assert_almost_eq(_dip(b), 1.0, 0.0001, "back to its size")
 	assert_false(ring.visible, "the outline is gone")
 	assert_false(ring.playing())
 
@@ -89,7 +95,7 @@ func test_a_big_card_dips_no_more_than_max_dip() -> void:
 	var low := 1.0
 	await _click(b)
 	for i: int in 12:
-		low = minf(low, b.scale.x)
+		low = minf(low, _dip(b))
 		await wait_process_frames(1)
 	assert_gte(low, 1.0 - 2.0 * ButtonPress.MAX_DIP / 500.0 - 0.001, "at most MAX_DIP px at a side")
 	assert_lt(low, 1.0)
@@ -104,7 +110,7 @@ func test_reduced_motion_keeps_the_outline_and_still_button() -> void:
 	assert_true(ring.visible, "the outline shows")
 	for i: int in 6:
 		await wait_process_frames(1)
-		assert_eq(b.scale, Vector2.ONE, "no dip with reduced motion")
+		assert_eq(ring.dip(), 1.0, "no dip with reduced motion")
 
 
 func test_a_key_press_plays_it_too() -> void:
@@ -173,7 +179,7 @@ func test_a_button_pressed_twice_quickly_ends_at_full_size_with_one_ring() -> vo
 			rings += 1
 	assert_eq(rings, 1, "the second press reuses the ring")
 	await wait_seconds(ButtonPress.DIP_IN + ButtonPress.RING_FADE + 0.15)
-	assert_almost_eq(b.scale.x, 1.0, 0.0001)
+	assert_almost_eq(_dip(b), 1.0, 0.0001)
 	assert_false(ButtonPress.ring_of(b).visible)
 
 
@@ -187,7 +193,7 @@ func test_a_button_taken_out_of_the_tree_mid_press_is_not_left_dipped() -> void:
 	await wait_seconds(0.5)
 	parent.add_child(b)
 	await wait_seconds(0.5)
-	assert_almost_eq(b.scale.x, 1.0, 0.0001, "back at full size after returning")
+	assert_almost_eq(_dip(b), 1.0, 0.0001, "back at full size after returning")
 	assert_false(ButtonPress.ring_of(b).visible, "no outline stuck on")
 
 
@@ -198,7 +204,7 @@ func test_a_button_hidden_mid_press_comes_back_at_full_size() -> void:
 	b.hide()
 	await wait_seconds(0.6)
 	b.show()
-	assert_almost_eq(b.scale.x, 1.0, 0.0001)
+	assert_almost_eq(_dip(b), 1.0, 0.0001)
 	assert_false(ButtonPress.ring_of(b).visible)
 
 
@@ -252,7 +258,7 @@ func test_a_button_in_a_container_that_re_sorts_mid_press_still_ends_full_size()
 	await wait_process_frames(2)
 	box.queue_sort()
 	await wait_seconds(ButtonPress.DIP_IN + ButtonPress.RING_FADE + 0.2)
-	assert_almost_eq(b.scale.x, 1.0, 0.0001)
+	assert_almost_eq(_dip(b), 1.0, 0.0001)
 	assert_false(ButtonPress.ring_of(b).visible)
 
 
@@ -281,12 +287,12 @@ func test_a_button_on_a_paused_tree_still_plays_and_finishes() -> void:
 	var dipped := false
 	for i: int in 30:
 		await wait_process_frames(1)
-		dipped = dipped or b.scale.x < 1.0
+		dipped = dipped or _dip(b) < 1.0
 	get_tree().paused = false
 	assert_not_null(ring)
 	assert_true(dipped, "the pause menu's buttons dip while the game is paused")
 	await wait_seconds(0.5)
-	assert_almost_eq(b.scale.x, 1.0, 0.0001)
+	assert_almost_eq(_dip(b), 1.0, 0.0001)
 	assert_false(ring.visible)
 
 
@@ -308,6 +314,6 @@ func test_a_still_press_cutting_a_dip_short_leaves_the_button_full_size() -> voi
 	await _click(b)
 	await wait_seconds(ButtonPress.DIP_IN * 0.6)
 	ButtonPress.ring_of(b).play(true)
-	assert_almost_eq(b.scale.x, 1.0, 0.0001, "the still press puts the button back at once")
+	assert_almost_eq(_dip(b), 1.0, 0.0001, "the still press puts the button back at once")
 	await wait_seconds(ButtonPress.RING_FADE + 0.1)
-	assert_almost_eq(b.scale.x, 1.0, 0.0001)
+	assert_almost_eq(_dip(b), 1.0, 0.0001)
