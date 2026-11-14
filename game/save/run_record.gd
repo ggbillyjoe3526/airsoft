@@ -212,11 +212,16 @@ func save_closed(path: String = PATH) -> bool:
 ## The crash screen has shown `previous`: it is forgotten and the record written. If that can't be written the record on
 ## disk still tells of the crash, so it is marked closed as a clean quit's is (its mark, failing that its removal), or
 ## the next start would show the crash again, and so on for as long as the folder takes no file. Whether the next start
-## will not show it again; false only where nothing can be written, which is warned of.
+## will not show it again; false where nothing can be written, or where the record on disk is already this run's (it
+## still names the seen crash, and no mark can say otherwise without hiding a crash of this run), which is warned of.
 func crash_seen(path: String = PATH) -> bool:
 	previous = {}
 	if save(path):
 		return true
+	# Only the run before this one is marked. Once this run's own record is on disk (the start's write worked, this one
+	# did not) the mark would be this run's, and a crash of this run would then read as a clean quit.
+	if _disk_pid == pid and _disk_started == started:
+		return false
 	return _mark_disk_closed(path)
 
 
