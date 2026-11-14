@@ -28,7 +28,11 @@ full-screen map with Go there; teams of 5 to 8 a side; and rounds of bug fixes. 
 range, the AEG Rifle and the GBB Pistol, Elimination and Attack / Defend against bots, the hit call and walk-off,
 settings, saves and accessibility.
 
-**Being built for 0.1 Dev 3:** Blender models for Depot and the practice range, and perhaps Woodland.
+**Being built for 0.1 Dev 3** (the last Dev build before 0.1 Beta 1; its notes are in `changelog.d/` until the
+release folds them into `CHANGELOG.md`): a third map, Subway, with lifts, trains and a ticket hall; the Compact SMG
+and the Pump Shotgun; Plant The Bomb; levels up to 15; climbing onto ledges; Blender models and CC0 materials for
+every map, with a new look (warm sun, real shadows, Lamp light, an Ultra preset); reworked map layouts, a physics and
+a balance pass, and more of the owner's recorded sounds.
 
 ## Run it
 
@@ -58,7 +62,10 @@ settings, saves and accessibility.
 | `tests/` | GUT unit tests, run headless |
 | `tools/` | Check, test, release and asset scripts; `tools/blender/` builds the figures |
 | `docs/` | Vision, art direction, rulings, roadmap, process, the playtest guide and the wiki's pages (`docs/wiki/`) |
+| `changelog.d/` | One note a pull request, folded into `CHANGELOG.md` at each release |
+| `pipeline/` | How a task is built and reviewed (`pipeline/README.md`); `pipeline/out/` is a run's scratch, never committed |
 | `legacy/` | Read-only reference, removed at 0.1: a few katanashotgun scripts still to port (the browser game's code went on 2026-11-05; see `legacy/README.md`) |
+| `_archive/` | Files nothing uses any more, kept in case (`_archive/README.md` lists each and why); Godot and the exports skip it |
 
 ## Checks
 
