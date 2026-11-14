@@ -62,6 +62,10 @@ var _ricochets: MenuChoice = null
 var _subs: Dictionary[String, Label] = {}
 ## The Day / Night row (shown on a map offering both) and the presets each map offers, read once a map.
 var _time_rows: VBoxContainer = null
+## The line saying a field's own flag raise (data/maps.md Raise, MB3), under the chips or the rows where the picked
+## field and mode have one.
+var _flag_note: Label = null
+var _flag_pad: Control = null
 var _time: MenuChoice = null
 var _time_sub: Label = null
 var _presets: Dictionary[String, Array] = {}
@@ -93,6 +97,12 @@ func _init(picked: MatchPicks, settings: Settings, tuning: SimTuning) -> void:
 	_rows.add_theme_constant_override("separation", ROW_GAP)
 	add_child(_rows)
 	_build_rows()
+	_flag_note = MenuParts.text("", SUB_SIZE, 500, GameTheme.MUTED)
+	_flag_note.name = "FlagNote"
+	_flag_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_flag_pad = MenuParts.padded(0.0, BLURB_TOP, 0.0, 0.0)
+	_flag_pad.add_child(_flag_note)
+	add_child(_flag_pad)
 	_time_rows = VBoxContainer.new()
 	_time_rows.add_theme_constant_override("separation", ROW_GAP)
 	add_child(_time_rows)
@@ -212,7 +222,23 @@ func show_tuning(tuning: SimTuning) -> void:
 	_rows.visible = custom and not _unused
 	_under.visible = not _unused
 	_show_switches()
+	show_flag_note()
 	_show_time_of_day()
+
+
+## The flag note for the picked field and mode: shown only where the field's flag raise differs from the game's (the
+## others play the game's, which the note names), in Attack / Defend, the one mode with a flag to raise.
+func show_flag_note() -> void:
+	var base := SimTuning.load_default().flag.raise_time
+	var seconds := MatchOptions.field_raise(_picks.mode, MapCatalog.shared().find(_picks.map_id), base)
+	_flag_pad.visible = seconds > 0.0 and not _unused
+	if seconds > 0.0:
+		_flag_note.text = tr("RULE_FLAG_RAISE_NOTE") % [MatchOptions.seconds_text(seconds), MatchOptions.seconds_text(base)]
+
+
+## The flag note's words, "" while it is hidden.
+func flag_note_text() -> String:
+	return _flag_note.text if _flag_pad.visible else ""
 
 
 func _blurb_text(custom: bool) -> String:

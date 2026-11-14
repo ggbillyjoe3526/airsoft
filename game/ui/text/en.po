@@ -969,6 +969,9 @@ msgstr "Count"
 msgid "RULE_FRIENDLY_FIRE"
 msgstr "Friendly fire"
 
+msgid "RULE_FLAG_RAISE_NOTE"
+msgstr "The flag takes %s s to raise on this field (%s s on the others)."
+
 msgid "RULE_ON"
 msgstr "On"
 

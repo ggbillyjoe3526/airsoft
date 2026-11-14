@@ -72,3 +72,40 @@ func test_a_dragged_round_time_is_saved_once_on_release() -> void:
 	assert_eq(_saved_time(), 240.0, "one write, on release")
 	slider.value = 270.0
 	assert_eq(_saved_time(), 270.0, "a step after the release saves again")
+
+
+# --- row 28: a field's own flag raise is said on the Match page ---
+
+func _note_page(map_id: String, mode: String) -> MatchPage:
+	var picks := MatchPicks.new()
+	picks.map_id = map_id
+	picks.mode = mode
+	var page := MatchPage.new(picks, Settings.new())
+	add_child_autofree(page)
+	return page
+
+
+func test_field_raise_is_the_fields_own_only_where_it_differs_in_attack_defend() -> void:
+	var woodland := MapCatalog.shared().find("woodland")
+	var depot := MapCatalog.shared().find("depot")
+	assert_eq(MatchOptions.field_raise(MatchOptions.MODE_ATTACK_DEFEND, woodland, 7.0), 9.0)
+	assert_eq(MatchOptions.field_raise(MatchOptions.MODE_ATTACK_DEFEND, depot, 7.0), 0.0, "Depot plays the game's")
+	assert_eq(MatchOptions.field_raise("elimination", woodland, 7.0), 0.0, "no flag in Elimination")
+	assert_eq(MatchOptions.field_raise(MatchOptions.MODE_ATTACK_DEFEND, null, 7.0), 0.0)
+	assert_eq(MatchOptions.field_raise(MatchOptions.MODE_ATTACK_DEFEND, woodland, 9.0), 0.0, "nothing to say at the game's own")
+
+
+func test_the_match_page_says_woodlands_nine_seconds() -> void:
+	var page := _note_page("woodland", MatchOptions.MODE_ATTACK_DEFEND)
+	assert_eq(page.rules_box().flag_note_text(), "The flag takes 9 s to raise on this field (7 s on the others).")
+	page.rules_box().rules_button(MatchOptions.RULES_CUSTOM).pressed.emit()
+	assert_ne(page.rules_box().flag_note_text(), "", "under Custom too: the raise is Woodland's in both")
+
+
+func test_the_match_page_says_nothing_on_depot_or_in_other_modes() -> void:
+	assert_eq(_note_page("depot", MatchOptions.MODE_ATTACK_DEFEND).rules_box().flag_note_text(), "")
+	var page := _note_page("woodland", MatchOptions.MODE_ATTACK_DEFEND)
+	page._pick_mode("elimination")
+	assert_eq(page.rules_box().flag_note_text(), "", "a mode with no flag")
+	page._pick_mode(MatchOptions.MODE_ATTACK_DEFEND)
+	assert_ne(page.rules_box().flag_note_text(), "")

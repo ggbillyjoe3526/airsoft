@@ -684,6 +684,7 @@ func _refresh() -> void:
 	var team_parts: Array[Control] = [_team_row, _attack_room]
 	MenuParts.set_unused(team_parts, _team_tag, practice)
 	_rules.set_unused(practice)
+	_rules.show_flag_note()
 	_bots.set_unused(practice)
 	_play.text = tr("MENU_GO_PRACTICE" if practice else "MENU_PLAY")
 	_attack_team.text = tr(MatchOptions.TEAM_KEYS[picks.team])
