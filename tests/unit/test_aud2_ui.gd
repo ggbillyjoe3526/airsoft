@@ -266,3 +266,76 @@ func test_a_crash_seen_with_a_writable_folder_is_written_as_before() -> void:
 	assert_false(next.crashed_before(), "with no crash in it")
 	_clean_run_dir()
 	DirAccess.remove_absolute(RUN_DIR)
+
+
+# --- rows 111, 113: typing into the note box and the keyboard's way round the panel, driven with input events ---
+
+func _type(view: Viewport, text: String) -> void:
+	for ch in text:
+		var e := InputEventKey.new()
+		e.pressed = true
+		e.unicode = ch.unicode_at(0)
+		e.keycode = e.unicode as Key
+		view.push_input(e)
+		var up := e.duplicate() as InputEventKey
+		up.pressed = false
+		view.push_input(up)
+
+
+func test_typing_reaches_the_note_box_and_the_report_follows_it() -> void:
+	var config := ReportConfig.load_default().duplicate() as ReportConfig
+	var panel := _report_panel(config)
+	await wait_process_frames(2)
+	assert_true(panel.note_box().has_focus(), "the box is focused as the panel opens")
+	_type(panel.get_viewport(), "Door stuck")
+	assert_eq(panel.note_text(), "Door stuck", "typed keys land in the note")
+	await wait_process_frames(2)
+	assert_eq(panel.count_text(), "10 / %d" % config.note_chars)
+	assert_string_contains(panel.report_text(), "Door stuck", "and in the report beside it")
+
+
+func test_tab_walks_the_panel_in_reading_order_and_back_closes_it() -> void:
+	var panel := _report_panel(ReportConfig.load_default().duplicate() as ReportConfig)
+	await wait_process_frames(2)
+	var order: Array[Control] = [panel.note_box(), panel.report_button(), panel.copy_button(), panel.back_button()]
+	for i in order.size() - 1:
+		var next := order[i].find_next_valid_focus()
+		assert_eq(next, order[i + 1], "%s, then %s" % [order[i].name, order[i + 1].name])
+	var esc := InputEventKey.new()
+	esc.pressed = true
+	esc.keycode = KEY_ESCAPE
+	esc.physical_keycode = KEY_ESCAPE
+	Input.parse_input_event(esc)
+	await wait_process_frames(2)
+	assert_false(panel.visible, "Esc closes it")
+
+
+## Every visible control `root` holds that can take the keyboard's focus.
+func _focusables(root: Node, out: Array[Control]) -> void:
+	for c in root.get_children():
+		var control := c as Control
+		if control != null and control.is_visible_in_tree() and control.focus_mode == Control.FOCUS_ALL \
+				and (not (control is BaseButton) or not (control as BaseButton).disabled):
+			out.append(control)
+		_focusables(c, out)
+
+
+func test_the_keyboard_reaches_every_control_of_the_menus_pages_and_comes_back_round() -> void:
+	var menus := MenuScreen.new(MatchPicks.new(), Settings.new())
+	add_child_autofree(menus)
+	await wait_process_frames(2)
+	for show: Callable in [menus.show_match, menus.show_loadout, menus.show_armory]:
+		show.call()
+		await wait_process_frames(2)
+		var all: Array[Control] = []
+		_focusables(menus, all)
+		assert_gt(all.size(), 5, "the page has controls")
+		var seen: Dictionary[Control, bool] = {}
+		var at := all[0]
+		for i in all.size() * 2:
+			seen[at] = true
+			var next := at.find_next_valid_focus()
+			assert_not_null(next)
+			at = next
+		for c in all:
+			assert_true(seen.has(c), "%s is reached by Tab" % c.get_path())
