@@ -131,20 +131,31 @@ static func _next_turn(g: NavGrid, ids: PackedInt64Array, m: int, last: int) -> 
 ## The index after `m` where a run of steps in at most two neighbouring directions (45 degrees apart) ends, or the last
 ## index (`last`): a straight line at any angle drawn in cells is such a run.
 static func _next_corner(g: NavGrid, ids: PackedInt64Array, m: int, last: int) -> int:
+	# Steps compared as cell index differences (one per neighbouring direction, never 0), decoded into directions only
+	# when a new one turns up: the comparisons a step were most of this walk's time.
 	var cols := g.cols
-	var c := g.node_cell[ids[m]]
-	var first := Vector2i(-2, -2)
-	var second := Vector2i(-2, -2)
+	var cells := g.node_cell
+	var c := cells[ids[m]]
+	var first := 0
+	var second := 0
 	var t := m
 	while t < last:
-		var n := g.node_cell[ids[t + 1]]
-		var d := Vector2i(n % cols - c % cols, n / cols - c / cols)
+		var n := cells[ids[t + 1]]
+		var d := n - c
 		c = n
-		if first.x == -2:
+		if first == 0:
 			first = d
 		elif d != first and d != second:
-			if second.x != -2 or absi(d.x - first.x) + absi(d.y - first.y) != 1:
+			if second != 0 or not _beside(d, first, cols):
 				return t
 			second = d
 		t += 1
 	return last
+
+
+## Whether the steps `a` and `b` (cell index differences between neighbouring cells, on a grid `cols` wide) are 45
+## degrees apart: one of their two cell offsets differs by one, the other not at all.
+static func _beside(a: int, b: int, cols: int) -> bool:
+	var aj := (a + cols + 1) / cols - 1
+	var bj := (b + cols + 1) / cols - 1
+	return absi((a - aj * cols) - (b - bj * cols)) + absi(aj - bj) == 1

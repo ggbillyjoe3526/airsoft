@@ -384,3 +384,74 @@ func test_a_bot_bringing_one_passes_a_second_ask_on_to_a_free_teammate_and_says_
 	assert_true(passed, "passed on to bot 3, free, rather than waiting its turn")
 	assert_eq(giver.mag_for, first, "bot 1 still brings bot 0's")
 	assert_eq(first.mag.asked, 1)
+
+
+# --- The string-pulling made cheaper with the same routes (KNOWN_ISSUES: a route costs more than 1 ms) ---
+
+
+func test_the_corner_walk_tells_45_degree_steps_apart_as_the_cell_offsets_do() -> void:
+	var cols := 37
+	var offsets: Array[Vector2i] = []
+	for dj: int in [-1, 0, 1]:
+		for di: int in [-1, 0, 1]:
+			if di != 0 or dj != 0:
+				offsets.append(Vector2i(di, dj))
+	for a in offsets:
+		for b in offsets:
+			var by_offsets := absi(a.x - b.x) + absi(a.y - b.y) == 1
+			assert_eq(NavRoute._beside(a.y * cols + a.x, b.y * cols + b.x, cols), by_offsets, "%s %s" % [a, b])
+
+
+## A line's walk with the leg probe checked by _probe_steps, the way walk_line checked it before its steps were inlined:
+## the node it ends on, or -1.
+func _walk_by_probe_steps(g: NavGrid, a: Vector3, b: Vector3, probe: float) -> int:
+	var dx := b.x - a.x
+	var dz := b.z - a.z
+	var samples := maxi(1, ceili(sqrt(dx * dx + dz * dz) / g.sample_step))
+	var node := g.pick_node(g.cell_index(a.x, a.z), a.y)
+	if node < 0 or g.walkable[node] == 0:
+		return -1
+	var ci := g.node_cell[node] % g.cols
+	var cj := g.node_cell[node] / g.cols
+	for s in samples + 1:
+		var x := b.x if s == samples else a.x + dx / samples * s
+		var z := b.z if s == samples else a.z + dz / samples * s
+		var i := int((x - g.min_x) / g.cell)
+		var j := int((z - g.min_z) / g.cell)
+		if i != ci or j != cj:
+			var next := g.steps[node * NavGridBuilder.DIRECTIONS + NavGrid.STEP_OF[(i - ci + 1) * 3 + j - cj + 1]]
+			if next < 0 or g.walkable[next] == 0:
+				return -1
+			node = next
+			ci = i
+			cj = j
+		if g.step_mask[node] != NavGrid.ALL_STEPS and NavGrid._probe_steps(x - g.min_x - ci * g.cell,
+				z - g.min_z - cj * g.cell, probe, g.cell) & ~g.step_mask[node] != 0:
+			return -1
+	return node
+
+
+func test_a_line_walked_with_its_probe_inlined_ends_where_the_probe_steps_say() -> void:
+	# The yard of test_nav_grid: walls, a crate and a door's gap, so lines pass close by walls and corners.
+	var m := _bush_field(false, 1.0)
+	for spec: Array in [[Vector3(0.0, 1.0, -6.0), Vector3(1.2, 2.0, 1.2)], [Vector3(-4.0, 1.0, 3.0),
+			Vector3(0.4, 2.0, 8.0)], [Vector3(5.0, 1.0, 0.0), Vector3(6.0, 2.0, 0.4)]]:
+		var wall := MapData.Block.new()
+		wall.kind = &"wall"
+		wall.center = spec[0]
+		wall.size = spec[1]
+		m.blocks.append(wall)
+	var g := NavGrid.build(m, tuning.nav, tuning.body)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var ends := 0
+	for k in 400:
+		var a := Vector3(rng.randf_range(-12.0, 12.0), 0.0, rng.randf_range(-12.0, 12.0))
+		var b := Vector3(rng.randf_range(-12.0, 12.0), 0.0, rng.randf_range(-12.0, 12.0))
+		# Probes up to the cell, so both halves of a cell's edge tests count (the leg probe is 0.08 m).
+		var probe: float = [g.leg_probe, 0.05, 0.12, 0.15, 0.19][k % 5]
+		var walked := g.walk_line(a.x, a.y, a.z, b.x, b.z, probe)
+		assert_eq(walked, _walk_by_probe_steps(g, a, b, probe), "line %d" % k)
+		if walked >= 0:
+			ends += 1
+	assert_between(ends, 40, 360, "both lines that get through and lines that don't")

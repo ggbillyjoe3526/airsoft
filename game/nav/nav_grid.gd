@@ -410,6 +410,13 @@ func walk_line(ax: float, ay: float, az: float, bx: float, bz: float, probe: flo
 	var spacing := length / samples
 	var ci := c % w
 	var cj := c / w
+	# The probe's edges in a cell, as _probe_steps works them out, once for the line (its steps inlined below: a call
+	# a sample was most of a route's string-pulling near walls).
+	var dirs := NavGridBuilder.DIRECTIONS
+	var step_of := STEP_OF
+	var hi_edge := size - probe
+	var q := probe * DIAGONAL
+	var q_hi := size - q
 	var s := 0
 	while s <= samples:
 		var x := bx if s == samples else ax + sx * s
@@ -423,17 +430,37 @@ func walk_line(ax: float, ay: float, az: float, bx: float, bz: float, probe: flo
 			return -1
 		if i != ci or j != cj:
 			# A sample is at most half a cell on, so the next cell is a neighbour: its step is in the table.
-			var next := table[node * NavGridBuilder.DIRECTIONS + STEP_OF[(i - ci + 1) * 3 + j - cj + 1]]
+			var next := table[node * dirs + step_of[(i - ci + 1) * 3 + j - cj + 1]]
 			if next < 0 or walk[next] == 0:
 				return -1
 			node = next
 			ci = i
 			cj = j
-		if masks[node] != ALL_STEPS:
+		var mask := masks[node]
+		if mask != ALL_STEPS:
 			if probe <= 0.0:
 				pass
 			elif probe < size:
-				if _probe_steps(x - x0 - ci * size, z - z0 - cj * size, probe, size) & ~masks[node] != 0:
+				var fx := x - x0 - ci * size
+				var fz := z - z0 - cj * size
+				var need := (1 if fx >= hi_edge else 0) | (2 if fx < probe else 0) | (4 if fz >= hi_edge else 0) \
+						| (8 if fz < probe else 0)
+				var qx_hi := fx >= q_hi
+				var qx_lo := fx < q
+				var qz_hi := fz >= q_hi
+				var qz_lo := fz < q
+				# The diagonal probes (_diagonal_step): into the corner cell when one crosses both edges, else the
+				# straight cell it crosses.
+				var z_only := (4 if qz_hi else 0) | (8 if qz_lo else 0)
+				if qx_hi:
+					need |= (16 if qz_hi else 1) | (32 if qz_lo else 1)
+				else:
+					need |= z_only
+				if qx_lo:
+					need |= (64 if qz_hi else 2) | (128 if qz_lo else 2)
+				else:
+					need |= z_only
+				if need & ~mask != 0:
 					return -1
 			elif not _probes_walkable(node, ci, cj, x, z, probe):
 				return -1
