@@ -534,3 +534,58 @@ func test_bots_walk_past_subways_works_wagons_on_the_track_without_snagging() ->
 		assert_lt(seconds, (to.x - from.x + 1.0) / tuning.movement.run_speed + 1.0, "%s: at a run's pace" % where)
 	assert_eq(wagons, 9, "the skips, the engineering and ballast wagons and the trolleys")
 	level.free()
+
+
+# --- The owner's NA1 exception: the Compact SMG on full auto inside 12 m indoors (KNOWN_ISSUES row 40) ---
+
+
+## A bot holding `key` (as a bot kit carries it: full auto out of the box) on a semi field, cramped floor everywhere and
+## a wall close ahead (no open shot), and its foe `dist` m away: its selector after a few ticks.
+func _indoor_selector(key: StringName, dist: float) -> ReplicaConfig.FireMode:
+	var config := BotConfig.load_default()
+	var r := ReplicaStats.load_replica(key).duplicate() as ReplicaConfig
+	r.default_fire_mode = ReplicaConfig.FireMode.AUTO
+	var me := Character.new(0, 0, Vector3.ZERO, 0.0, [r] as Array[ReplicaConfig])
+	var foe := Character.new(1, 1, Vector3(0.0, 0.0, -dist), 0.0, ReplicaStats.default_loadout())
+	var w := BotWorld.new()
+	w.tuning = tuning
+	w.cfg = config
+	var box := BoxWorld.new()
+	box.add_box(Vector3(0.0, 1.5, -dist - 1.0), Vector3(10.0, 3.0, 0.4))
+	w.query = box
+	w.characters = [me, foe]
+	var g := NavGrid.new()
+	g.cell = 1.0
+	g.cols = 100
+	g.rows = 100
+	g.min_x = -50.0
+	g.min_z = -50.0
+	g.open.resize(100 * 100)
+	w.nav = g
+	w.start_mode = ReplicaConfig.FireMode.SEMI
+	me.armament.reset_fire_modes(w.start_mode)
+	var b := Bot.new(me, 1, config.skill_for(&"normal"), 2)
+	b.target_visible = true
+	var eye := Vector3(0.0, 1.6, 0.0)
+	BotFireMode.on_burst(b, w, foe, eye, Vector3(0.0, 0.0, -1.0))
+	var events := SimEvents.new()
+	for i in 3:
+		var cmd := PlayerCommand.new()
+		BotFireMode.select(b, w, foe, cmd)
+		Armament.step(me, cmd, eye, 1.0, false, BBPool.new(1), Seeds.stream(1), events, tuning, DT)
+	return me.armament.fire_mode()
+
+
+func test_an_smg_bot_goes_full_auto_indoors_within_the_close_range_and_keeps_semi_beyond() -> void:
+	var config := BotConfig.load_default()
+	assert_eq(config.close_auto_replicas, PackedStringArray(["smg"]), "the Compact SMG alone")
+	assert_eq(config.close_auto_range, 12.0)
+	for dist: float in [2.0, 6.0, 11.5]:
+		assert_eq(_indoor_selector(&"smg", dist), ReplicaConfig.FireMode.AUTO, "%.1f m: full auto" % dist)
+	for dist: float in [12.5, 20.0, 30.0]:
+		assert_eq(_indoor_selector(&"smg", dist), ReplicaConfig.FireMode.SEMI, "%.1f m: semi, NA1" % dist)
+
+
+func test_an_aeg_bot_indoors_keeps_semi_at_every_range() -> void:
+	for dist: float in [2.0, 6.0, 11.5, 20.0, 30.0]:
+		assert_eq(_indoor_selector(&"aeg", dist), ReplicaConfig.FireMode.SEMI, "%.1f m" % dist)

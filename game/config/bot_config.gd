@@ -99,6 +99,10 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var auto_line_min: float = 35.0
 @export var auto_open_min: float = 2.0
 @export var auto_chance: float = 0.5
+## The owner's exception to NA1 (2026-11-14): a bot holding one of these replicas (stats.md ids: the Compact SMG) goes
+## full auto there at a target in sight within close_auto_range (m), wherever it stands; beyond it NA1 as for any.
+@export var close_auto_replicas: PackedStringArray = PackedStringArray(["smg"])
+@export var close_auto_range: float = 12.0
 ## There, the least time between a bot's pulls on semi (s): a quick player's tapping, five a second, against the AEG's
 ## 13 BBs a second on full auto. Elsewhere a bot on semi pulls as fast as the replica cycles, as it always has.
 @export var semi_tap_gap: float = 0.2

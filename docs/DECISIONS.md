@@ -636,7 +636,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   long sight line, and not every time (owner, 2026-11-02: "It's an option; it doesn't mean they have to";
   `BotFireMode`). Both hold on every map later given a Start mode (owner, 2026-11-02). Depot, the one fully indoor
   field, starts on semi; the other fields start replicas as they come and
-  keep a selector as set for the match.
+  keep a selector as set for the match. The owner's exception (2026-11-14, AUD2): bots holding the Compact SMG go
+  full auto there at a target within 12 m (`BotConfig.close_auto_replicas`, `close_auto_range`); beyond that, and for
+  every other replica, NA1 as above.
 - **A match is first to 5 round wins by default, with 2:30 rounds (2026-09-30).** A drawn round is replayed in both
   modes (2026-10-04). Half-time comes after `winsNeeded - 1` rounds, so the decider is always in the second half.
 - **Teams swap ends at half-time in both modes (owner, 2026-10-03).** Maps define spawns, dead zones and lanes per end,

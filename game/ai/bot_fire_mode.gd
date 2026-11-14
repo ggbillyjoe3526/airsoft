@@ -8,7 +8,9 @@ extends RefCounted
 ## open field (NavGrid.open, the clear space round the target's cell, BotConfig.auto_open_min). As a burst begins with
 ## both true it decides once per target (BotConfig.auto_chance); it goes back to the start mode once the shot isn't
 ## open any more or the target is gone. On semi it taps at a player's pace (pull). On a field without a start mode it
-## never touches the selector and pulls as it always has (bot kits come on full auto there, BotKits.kit_of).
+## never touches the selector and pulls as it always has (bot kits come on full auto there, BotKits.kit_of). The owner's
+## exception (2026-11-14): a bot holding the Compact SMG (BotConfig.close_auto_replicas) goes full auto at a target in
+## sight within close_auto_range, open ground or not (close_auto).
 ## Allocation-free.
 
 ## The sight line's check (one at a time: the bots think in turn).
@@ -47,8 +49,8 @@ static func select(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand) -
 	if not shown and b.auto_open:
 		b.auto_open = false
 		b.burst_left = 0.0
-	var wanted := ReplicaConfig.FireMode.AUTO if shown and b.auto_open and b.goes_auto_for(target.id) \
-			else Armament.start_mode(replica, w.start_mode)
+	var wanted := ReplicaConfig.FireMode.AUTO if shown and (b.auto_open and b.goes_auto_for(target.id)
+			or close_auto(b, w, target)) else Armament.start_mode(replica, w.start_mode)
 	if a.fire_mode() != wanted and replica.fire_modes.has(wanted):
 		cmd.cycle_fire_mode = true
 
@@ -90,6 +92,17 @@ static func on_resume(b: Bot, w: BotWorld, target: Character, eye: Vector3, dir:
 		return
 	if not open_shot(w, eye, dir, target.position):
 		b.auto_open = false
+
+
+## Whether `b`'s replica in hand is one the owner lets go full auto up close indoors (BotConfig.close_auto_replicas) and
+## `target` stands within close_auto_range of it (across the ground).
+static func close_auto(b: Bot, w: BotWorld, target: Character) -> bool:
+	var r := b.character.armament.replica()
+	if r == null or not w.cfg.close_auto_replicas.has(String(r.id)):
+		return false
+	var p := b.character.position
+	var reach := w.cfg.close_auto_range
+	return Vector2(target.position.x - p.x, target.position.z - p.z).length_squared() <= reach * reach
 
 
 ## Whether a shot from `eye` along `dir` at someone standing at `feet` is the open one full auto is for: `feet` on open
