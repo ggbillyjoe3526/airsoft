@@ -5,8 +5,9 @@
 The owner, 2026-11-14 (his `MASTER_AUDIT_PROMPT.md`, with the release plan's step 1): check every known issue and fix
 what is safe, hunt bugs over every script and scene, a performance and a code quality pass, clean the repository
 (archive, don't delete), review the balance (recommend, don't change), and report. The whole account, with the before
-and after figures, is `AUDIT_REPORT.md` in the repository root. Opened as a pull request and left for the owner: it is
-not merged by its thread (his word, for his playtest).
+and after figures, is `AUDIT_REPORT.md` in the repository root. Opened as a pull request (#350) and held open for the
+owner at his word; merged at his word ("Merge", 2026-11-14 20:15) once the second pass was green. His playtest is
+step 2.
 
 ## Attempts
 
