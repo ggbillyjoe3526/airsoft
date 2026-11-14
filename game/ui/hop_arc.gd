@@ -83,11 +83,18 @@ func _draw() -> void:
 			points.append(Vector2(left + width * float(i) * STEP / _range, aim_y - h * scale_y))
 		draw_polyline(points, GameTheme.ACCENT, PATH_WIDTH, true)
 	var mark_x := left + width * clampf(_on_target / _range, 0.0, 1.0)
-	draw_line(Vector2(mark_x, top), Vector2(mark_x, size.y - PAD.y), GameTheme.MUTED, MARK_WIDTH)
 	# The words beside the marker, kept inside the box; a second line (the field's air, AUD2) sits in the box's lower
-	# left corner, under the flight's level part, clear of the aim line the first one stands over.
+	# left corner, under the flight's level part, clear of the aim line the first one stands over. A marker that would
+	# run down through those words stops above them.
 	var font := GameTheme.font(800)
 	var lines := _label.split("\n")
+	var mark_foot := size.y - PAD.y
+	for i in range(1, lines.size()):
+		var reach := PAD.x + font.get_string_size(lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x + LABEL_GAP
+		if mark_x < reach:
+			mark_foot = size.y - PAD.y - (LABEL_SIZE + LABEL_LEADING) * (lines.size() - 1) - LABEL_LEADING
+			break
+	draw_line(Vector2(mark_x, top), Vector2(mark_x, mark_foot), GameTheme.MUTED, MARK_WIDTH)
 	var words_width := font.get_string_size(lines[0], HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x
 	var at_x := mark_x + LABEL_GAP
 	if at_x + words_width > size.x - PAD.x:
