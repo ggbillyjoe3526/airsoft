@@ -43,15 +43,17 @@ def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: fl
 
 
 def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0,
-          dress: str = "", facing: str = "", squeeze: bool = False) -> None:
+          dress: str = "", facing: str = "", squeeze: bool = False, noise: str = "") -> None:
     """A cover block; `dress` names the model drawn in its box (PropDressConfig.models; SD1), else its box is drawn
     in its room's finish; `facing` (+x, -x, +z or -z) the world direction its model's front faces, else the field's
     middle (SM3: a bench's seat to the track; SM4: a booth's window to the platform's edge). Look only: the box
     stays what BBs, bodies and the bots meet. One bodies `squeeze` past (AUD2: the works wagons, a body's width and a
-    few centimetres from the tunnel wall) is kept only a body's radius off the bots' grid (MapData.Block.squeeze)."""
+    few centimetres from the tunnel wall) is kept only a body's radius off the bots' grid (MapData.Block.squeeze).
+    `noise` names the noisy prop it sounds as where that is not its kind's (NoiseConfig.SOUND_NAMES: the steel lockers
+    are cabinets, which knock as hollow plastic; MapData.Block.noise, AUD1)."""
     assert facing in ("", "+x", "-x", "+z", "-z"), facing
     blocks.append(dict(kind=kind, y=y, x0=x0, x1=x1, z0=z0, z1=z1, h=h, colour=colour, dress=dress, facing=facing,
-                       squeeze=squeeze))
+                       squeeze=squeeze, noise=noise))
 
 
 # ---------------- Street level, 0 m: the ticket hall (Street team's start) ----------------
@@ -94,7 +96,8 @@ room("bk_s", "Booking hall", -43, -36, -5, -1.2, C, h=4.0)
 room("bk_e", "Booking hall", -38, -36, -9.5, -5, C, h=4.0)
 block("furniture", C, -50, -44, -9.5, -8.6, 1.1, dress="booking_counter")  # old ticket counter, waist high
 block("crate", C, -48.5, -47, -5.5, -4, 1.4, dress="crate")
-block("cabinet", C, -36.9, -36.0, -4.2, -1.2, 2.0, dress="locker")  # lockers: screen the spiral foot from the passage
+# lockers: screen the spiral foot from the passage
+block("cabinet", C, -36.9, -36.0, -4.2, -1.2, 2.0, dress="locker", noise="clank")
 room("wpass", "West passage", -36, -18, -9.5, -7, C, h=3.0)
 block("crate", C, -31, -29, -9.5, -8.1, 1.8, dress="cable_drum")  # cable drums staggered: no line down the passage
 block("crate", C, -25, -23, -8.4, -7.0, 1.8, dress="cable_drum")
@@ -118,11 +121,11 @@ room("spass", "South passage", -6, 20, 6.5, 9.5, C, h=3.0)
 for zs in (-1, 1):
     a, b = sorted((zs * 9.5, zs * 7.7))
     c, d = sorted((zs * 8.3, zs * 6.5))
-    block("cabinet", C, 1, 2.2, a, b, 2.0, dress="locker")  # lockers, a chicane down each passage
-    block("cabinet", C, 7, 8.2, c, d, 2.0, dress="locker")
-    block("cabinet", C, 13, 14.2, a, b, 2.0, dress="locker")
+    block("cabinet", C, 1, 2.2, a, b, 2.0, dress="locker", noise="clank")  # lockers, a chicane down each passage
+    block("cabinet", C, 7, 8.2, c, d, 2.0, dress="locker", noise="clank")
+    block("cabinet", C, 13, 14.2, a, b, 2.0, dress="locker", noise="clank")
     block("crate", C, 16.5, 18, c, d, 1.2, dress="crate")
-    block("cabinet", C, -4, -2.8, c, d, 2.0, dress="locker")  # at the passage mouth
+    block("cabinet", C, -4, -2.8, c, d, 2.0, dress="locker", noise="clank")  # at the passage mouth
 room("plant", "Plant room", 4, 18, -4, 4, C, h=3.5)
 room("pdoor_n", "Plant room", 9.5, 11.5, -6.5, -4, C, h=2.2)
 room("pdoor_s", "Plant room", 9.5, 11.5, 4, 6.5, C, h=2.2)

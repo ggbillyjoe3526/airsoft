@@ -2194,7 +2194,8 @@
     "y": 2.0,
     "z": 3.0
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "crate",
@@ -3044,7 +3045,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3058,7 +3060,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3072,7 +3075,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "crate",
@@ -3100,7 +3104,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3114,7 +3119,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3128,7 +3134,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3142,7 +3149,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "crate",
@@ -3170,7 +3178,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "generator",

@@ -597,7 +597,7 @@ def lifts() -> list[dict]:
 # ---------------- Writing ----------------
 
 def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "", facing: str = "",
-             squeeze: bool = False) -> dict:
+             squeeze: bool = False, noise: str = "") -> dict:
     x0, x1, y0, y1, z0, z1 = bx
     if kind in ("floor", "ramp"):
         # Floors drawn edge to edge are grown a centimetre a side to meet (as Depot's): an edge on a grid cell's middle
@@ -615,6 +615,8 @@ def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress:
         b["facing"] = facing
     if squeeze:
         b["squeeze"] = True
+    if noise:
+        b["noise"] = noise
     return b
 
 
@@ -675,7 +677,7 @@ def build() -> dict:
             if overlap(bx, other, SLACK):
                 print("warning: cover", bl["kind"], bx, "overlaps", other)
         blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"], facing=bl["facing"],
-                               squeeze=bl["squeeze"]))
+                               squeeze=bl["squeeze"], noise=bl["noise"]))
         solid.append(bx)
     # A car's air keeps a roof's thickness under its shoulders (car_shoulders) where it stands under an arch.
     air = [(i, p) for i, rm in enumerate(L.rooms) for a in air_boxes(rm)
