@@ -189,6 +189,8 @@ var _drawn_at: Vector2 = Vector2.ZERO
 var _hop_slot: int = -1
 ## The HUD tab's choices (apply_prefs).
 var _prefs := HudPrefs.new()
+## Settings › HUD › Callouts as apply_prefs last saw it (the prefs object is the settings' own, changed in place).
+var _callouts_on: bool = true
 ## The HUD opacity (HudPrefs.panel_opacity): how much of the replica panel's and the minimap's backgrounds show; their
 ## icons, numbers and words stay solid (owner, 2026-11-03: only those two, only in a match, only the backgrounds).
 var _opacity: float = 1.0
@@ -586,8 +588,11 @@ func apply_prefs(prefs: HudPrefs) -> void:
 	if stay != _hits.stay:
 		_hits.setup(HudPrefs.KEPT_LINES if stay else _cfg.feed_lines, _cfg.feed_line_time, _cfg.feed_fade_time)
 		_hits.stay = stay
-	if not prefs.callouts:
+	# Only as Callouts goes off: this runs at every settings change, and Plant The Bomb's notes ("Rook planted the
+	# bomb at A") are call lines shown whatever the switch says, so dropping them each time wiped them mid-round.
+	if _callouts_on and not prefs.callouts:
 		_hits.drop_calls()
+	_callouts_on = prefs.callouts
 	_replica.set_counted(prefs.ammo_counter)
 	if not is_equal_approx(prefs.panel_opacity, _opacity):
 		_opacity = prefs.panel_opacity
@@ -1193,8 +1198,14 @@ func place_plant_marker(camera: Camera3D, rs: RoundState, watched: Character, pl
 func _place_marker(camera: Camera3D, spot: Vector3, show: bool) -> void:
 	_flag_marker.place(camera, spot, show and not _board.visible, size, pin_point(), pin_right_top(), _left_stack_floor())
 	# Never over the round banner or the countdown's plate: it comes back as they go.
-	if _flag_marker.visible and overlaps_any(_flag_marker.occupied(), _stack_rects()):
+	if _flag_marker.visible and _under_stack(_flag_marker.occupied()):
 		_flag_marker.visible = false
+
+
+## Whether `rect` touches the banner or the countdown's plate, those showing (every frame a marker is up: no arrays).
+func _under_stack(rect: Rect2) -> bool:
+	return (_banner.visible and rect.intersects(Rect2(_middle.position + _banner.position, _banner.size))) \
+			or (_count.visible and rect.intersects(Rect2(_middle.position + _count.position, _count.size)))
 
 
 ## Where the banner and the countdown's plate are now (HUD coordinates), those showing.
