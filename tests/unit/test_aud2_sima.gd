@@ -455,3 +455,82 @@ func test_a_line_walked_with_its_probe_inlined_ends_where_the_probe_steps_say() 
 		if walked >= 0:
 			ends += 1
 	assert_between(ends, 40, 360, "both lines that get through and lines that don't")
+
+
+# --- Squeezing past Subway's works wagons (KNOWN_ISSUES: bots climb onto the platform round them) ---
+
+
+func test_bots_walk_past_subways_works_wagons_on_the_track_without_snagging() -> void:
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
+	var level := MapLevel.new()
+	add_child(level)
+	level.build(m, MapStyle.new(), tuning.body, null, null, false, null, tuning.lifts)
+	var nav := NavGrid.build(m, tuning.nav, tuning.body)
+	var config := BotConfig.load_default()
+	NavVaults.link(nav, level.query(), tuning.vault, tuning.body, config.vault_price)
+	var q := level.query()
+	var sim := Simulation.new(tuning, q, level.mover(tuning.body), m.ends, m.kill_y)
+	sim.nav = nav
+	var wagons := 0
+	for b in m.blocks:
+		if not b.squeeze:
+			continue
+		wagons += 1
+		# Along the track from 2 m before the wagon to 2 m past it, on the wall's side.
+		var side := signf(b.center.z)
+		var lane_z := b.center.z + side * (b.size.z * 0.5 + 0.36)
+		var half := b.size.x * 0.5 + 2.0
+		var from := Vector3(b.center.x - half, 0.0, lane_z)
+		var to := Vector3(b.center.x + half, 0.0, lane_z)
+		# The west trolley stands a metre short of a parked train: past it, the pocket between them.
+		if nav.floor_at(to) > 0.3:
+			to.x = b.center.x + b.size.x * 0.5 + 0.5
+		var route := PackedVector3Array()
+		assert_true(nav.find_route(from, to, route, true), "%s at x %.1f: a route" % [b.dress, b.center.x])
+		var highest := -INF
+		for p in route:
+			highest = maxf(highest, p.y)
+		assert_lt(highest, 0.3, "%s at x %.1f: on the track, not up on the platform" % [b.dress, b.center.x])
+		# A bot walks it through the simulation, and gets there without being held up.
+		var state := GameState.new(5, tuning)
+		state.characters.append(Character.new(0, 0, from, 0.0, ReplicaStats.default_loadout()))
+		state.characters.append(Character.new(1, 1, Vector3(-30.0, 0.0, 0.0), 0.0, ReplicaStats.default_loadout()))
+		var bots := BotController.new(state, -1, m, nav, q, tuning, config)
+		sim.start_match(state)
+		state.round_state.hold = 0.0
+		var bot: Bot = bots.world.bots[0]
+		var me := bot.character
+		me.position = nav.node_position(nav.nearest_walkable(from, 1.0)) + Vector3(0.0, tuning.body.rest_gap, 0.0)
+		me.prev_position = me.position
+		me.grounded = true
+		assert_true(nav.find_route(me.position, to, bot.route, true))
+		bot.route_from = me.position
+		bot.route_leg = 0
+		bot.route_state = Bot.RouteState.OK
+		var cmd := PlayerCommand.new()
+		var cmds: Array[PlayerCommand] = [cmd, PlayerCommand.new()]
+		var replans := 0
+		var seconds := 0.0
+		for t in roundi(10.0 / DT):
+			cmd.reset(me.yaw, 0.0)
+			bots.world.time = state.time
+			if BotRoutes.follow(bot, bots.world, DT) and bot.move_dir != Vector3.ZERO:
+				cmd.yaw = atan2(-bot.move_dir.x, -bot.move_dir.z)
+				cmd.forward = 1.0
+			if bot.route_state == Bot.RouteState.WANTED:
+				replans += 1
+				assert_true(nav.find_route(me.position, to, bot.route, true))
+				bot.route_from = me.position
+				bot.route_leg = 0
+				bot.route_state = Bot.RouteState.OK
+			sim.step(state, cmds, DT)
+			seconds += DT
+			if BotRoutes.arrived(bot):
+				break
+		var where := "%s at x %.1f" % [b.dress, b.center.x]
+		assert_true(BotRoutes.arrived(bot), "%s: walked past it" % where)
+		assert_eq(replans, 0, "%s: never held up" % where)
+		assert_lt(me.position.y, 0.3, "%s: on the track" % where)
+		assert_lt(seconds, (to.x - from.x + 1.0) / tuning.movement.run_speed + 1.0, "%s: at a run's pace" % where)
+	assert_eq(wagons, 9, "the skips, the engineering and ballast wagons and the trolleys")
+	level.free()

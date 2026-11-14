@@ -27,7 +27,7 @@ static func fill(g: NavGrid, map: MapData, cfg: NavConfig, body: BodyConfig) -> 
 		return false
 	_floors(g, map, body)
 	var r := cfg.clearance(body)
-	_stamp_blocks(g, map, r, body)
+	_stamp_blocks(g, map, r, body, body.radius)
 	_stamp_low(g, map, r, body)
 	_stamp_drops(g, r, body.height * 0.5)
 	_stamp_outer_edge(g, r)
@@ -210,13 +210,13 @@ static func _ground(g: NavGrid, t: TerrainGrid) -> PackedFloat64Array:
 
 ## Blocks every node a block stands in the way on, grown by the clearance `r`: one whose floor it stands on or above
 ## (higher than a step) without passing over a crouched body's head.
-static func _stamp_blocks(g: NavGrid, map: MapData, r: float, body: BodyConfig) -> void:
+static func _stamp_blocks(g: NavGrid, map: MapData, r: float, body: BodyConfig, squeezed: float) -> void:
 	for b in map.blocks:
 		if is_surface(b):
 			continue
 		var top := b.center.y + b.size.y * 0.5
 		var bottom := b.center.y - b.size.y * 0.5
-		var box := _cells_under(g, b, r)
+		var box := _cells_under(g, b, squeezed if b.squeeze else r)
 		for j in range(box.y, box.w + 1):
 			for i in range(box.x, box.z + 1):
 				var c := j * g.cols + i

@@ -50,6 +50,10 @@ class Block:
 	## Its own colour (sRGB; `colour` in the file, 0xRRGGBB, ST1: a map's palette paint, each building its own), or
 	## clear (alpha 0) to take its kind's (MapStyle.block_colour).
 	var colour: Color = Color(0, 0, 0, 0)
+	## Bodies squeeze past it (`squeeze` in the file, AUD2: Subway's works wagons on the rails, a body's width and a
+	## few centimetres from the walls): the nav grid keeps its cells the body's radius from it, not the clearance's
+	## margin more (NavGridBuilder), so a bot's route may go through a gap a player fits through.
+	var squeeze: bool = false
 
 
 ## One pool of light on a night field (`lights` in the file; the browser's MapLight): a camp fire, a lantern, or a lamp
@@ -419,6 +423,7 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 			if not NoiseConfig.SOUND_NAMES.has(String(b.noise)):
 				warnings.append("block %d's noise %s is not a prop sound; its kind's kept" % [i, bd["noise"]])
 				b.noise = &""
+		b.squeeze = bd.get("squeeze", false) == true
 		if bd.has("facing"):
 			b.facing = StringName(str(bd["facing"]))
 			if not RISES.has(String(b.facing)):
