@@ -1,6 +1,6 @@
 # AUD1 · The Dev 3 audit (step 1 of the 0.1 Dev 3 release)
 
-**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
+**Review:** 5 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner, 2026-11-14 (his `MASTER_AUDIT_PROMPT.md`, with the release plan's step 1): check every known issue and fix
 what is safe, hunt bugs over every script and scene, a performance and a code quality pass, clean the repository
@@ -15,6 +15,8 @@ not merged by its thread (his word, for his playtest).
 | 2026-11-14 | 1 | the audit's thread | ✓ lint, import, wiki, smoke, the touched tests | 5/8 Retry | The report said nothing changed in play though the bots' start stagger now takes effect, and counted wasted work as a bug; `docs/ARCHITECTURE.md`'s saves contract widened to fit `RunBeat`; `Hud._under_stack` beside `_stack_rects`, a test left on a path the game no longer took |
 | 2026-11-14 | 2 | the audit's thread | ✓ the same, with the changelog | 8/8 Accept | – |
 | 2026-11-14 | 3 (the second pass) | the audit's thread and seven groups | ✓ lint, wiki, changelog, smoke, the touched tests; CI green on `626ceb8` | 4/8 Retry | Three things were the owner's to rule and had been decided for him (the saves contract's second exception, the wagon squeeze's effect on Subway's balance, the lift probe built ahead of its condition); the field's air rule stood in two places; the Subway and Plant The Bomb rows lacked the pass's own figures |
+| 2026-11-14 | 4 (the owner's 22 answers built in) | the audit's thread | ✓ lint, wiki, changelog, smoke, 170 touched test files; CI on `0ebb983` green but one unit test, fixed | 7/8 Retry | Check 1: the rebuilt range props (his yes to question 11) could hardly be told from the old ones and the sandbag wall is short of the models rule (gaps between courses, faceted necks, shiny sacking) |
+| 2026-11-14 | 5 | the audit's thread | ✓ the same on `063fcd9` | 8/8 Accept | – (the three props and their scripts put back, the rebuild a known issue; past the cap of four under the owner's ruling to keep fixing until the critic passes) |
 
 ## Decisions
 
@@ -164,6 +166,8 @@ ask me what to do before actioning it." The account is `AUDIT_REPORT.md` › 10.
   count; the kits table says a Fields typo drops its kit; a holstered figure's drawn arms hang in the air as its hit
   volume's do; `switch_same_from` is an export range inside the draw). Performance: Pass twice, one advisory fixed
   (the carried cloud) and one written into the known issues (the wear's noise on doors, roof and fixtures on Low).
-  Critic: @CRITIC@.
+  Critic: Retry 4/8 (attempt 3), Retry 7/8 (attempt 4: the rounder range props against the models rule), Accept 8/8
+  (attempt 5, on `063fcd9`, past the pipeline's cap of four under the owner's standing ruling to keep fixing until
+  the critic passes).
 - Not verified here: frame times on a graphics card, the look on a real display, Windows' long address for Report a
   Bug, V-Sync and a second monitor. Each is a playtest row or a line on the checklist.
