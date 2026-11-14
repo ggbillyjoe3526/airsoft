@@ -136,15 +136,13 @@ func test_the_pole_marker_never_sits_on_the_banner_or_the_countdown_plate() -> v
 	var pole := Vector3(0.0, 0.0, -20.0)
 	hud._flag_marker.place(camera, pole, true, hud.size, Vector2.ZERO, 0.0, 1080.0)
 	# slide the stack down to where the marker over the pole is
-	var shift := hud._flag_marker.occupied().position.y - hud._stack_rects()[0].position.y
+	var shift := hud._flag_marker.occupied().position.y - hud._plate_rect(hud._banner).position.y
 	hud._middle.offset_top += shift
 	hud._middle.offset_bottom += shift
 	await wait_process_frames(3)
-	assert_true(Hud.overlaps_any(hud._flag_marker.occupied(), hud._stack_rects()), "the control: left alone it would sit on them")
+	assert_true(hud._under_stack(hud._flag_marker.occupied()), "the control: left alone it would sit on them")
 	hud.place_flag_marker(camera, pole, true)
 	assert_false(hud._flag_marker.visible, "so it is held back")
-	assert_true(Hud.overlaps_any(Rect2(Vector2(10.0, 10.0), Vector2(5.0, 5.0)), [Rect2(0.0, 0.0, 20.0, 20.0)] as Array[Rect2]))
-	assert_false(Hud.overlaps_any(Rect2(30.0, 30.0, 5.0, 5.0), [Rect2(0.0, 0.0, 20.0, 20.0)] as Array[Rect2]))
 	hud._banner.visible = false
 	hud._count.end()
 	hud.place_flag_marker(camera, pole, true)

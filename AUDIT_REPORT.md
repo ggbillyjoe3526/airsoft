@@ -17,15 +17,26 @@ deleted, no repository setting changed. The pull request is open and **not merge
 | gdlint | clean | clean |
 | Unit tests | 6,652 (6,650 pass, 2 pending, 0 fail) | 6,694: the same 6,652 and 42 new. The 829 that cover the touched code pass here; the whole suite runs on the pull request's checks |
 | Smoke test, licence notices, wiki check, changelog check | pass | pass |
-| Bugs fixed | | 16 found by the hunt, 4 from the known issues list |
-| Known issues rows | 121 | 121 (5 closed or cleared as stale, 5 added for what the audit leaves) |
+| Bugs fixed | | 15 found by the hunt (and 6 pieces of wasted work, section 4), 4 from the known issues list |
+| Known issues rows | 121 | 122 (5 closed or cleared as stale, 6 added for what the audit leaves) |
 | Tracked files | 5,031 (183.1 MiB) | 4,895 (182.8 MiB): 146 review reports out, the report, the record, two test files and the archive's notes in |
 | A match's figures fitted with parts (11 bots, headless) | 142 ms | 16 ms |
 | Subway's minimap floors at match start (headless) | 849 ms | 76 ms |
 | Depot's baked tiles' cores (each match start and light switch) | about 7 million steps | one pass over the tiles |
 
-Nothing about the game's design, feel, balance or art was changed. Where a fix would have changed any of those it is
-in section 8 as a recommendation.
+No tuning value, rule, model, sound or picture was changed, and where a fix would have changed the game's design,
+feel, balance or art it is in section 8 as a recommendation. **Two fixes will be noticed in play**, because they
+make bots do what they were always tuned to do:
+
+- **Bots at GO!** (bug 4). A lane's bots are tuned to set off 0.8 to 1.6 s apart. The 3 s countdown used that delay
+  up, so in the game they left in one stack; now they leave one after another, and the first contact of a round may
+  come a moment later than you are used to. The bot matches behind every balance figure (the balance report, the
+  match guards, each task's runs) play with no countdown, so they always had the stagger: the figures in
+  `docs/KNOWN_ISSUES.md` and below describe the game as it now plays, not as it played before.
+  <<DEPOT_AFTER>>
+- **Bots waiting at a Subway lift** (bug 5) look where a standing bot looks, not at one fixed wall.
+
+Both are on the checklist.
 
 **How it was checked.** The baseline ran every gate on the untouched code first. After the changes: lint, the wiki
 and changelog checks, the smoke test, the licence notices and the test files that cover the touched code ran here;
@@ -55,7 +66,6 @@ then each finding checked by hand before it was fixed).
 | 13 | `game/play/play_session.gd` | After a skipped round, up to 16 old callouts played at once | The audio's callout count stood still during the skip | Counted every tick, unheard while skipping |
 | 14 | `game/map/railing_mesh.gd` | A railing model with no vertex colours or index would have been a script error | Arrays read unguarded | Guarded |
 | 15 | `game/save/save_keeper.gd` | Restore or Delete with a damaged save and a full disk could leave the save renamed, so the next start loaded silent defaults | Damaged stores were set aside before the Undo copy was written | Set aside only once nothing can refuse |
-| 16 | `game/ai/bot_movement.gd`, `game/ui/hud.gd`, `game/map/map_level.gd`, `game/ui/minimap_field.gd` | Wasted work (section 4) | | |
 
 ## 3. Known issues
 
@@ -90,7 +100,7 @@ All 121 rows of `docs/KNOWN_ISSUES.md` were read against the code. None was clas
 | Limits, and tests that need a real display (window modes, 4K menus, the rigged figures by eye, a save folder that takes no file) | 5 | Nothing to fix in code; they wait for the owner's screen |
 | UI (the button's dip losing an edge click, a field's flag raise not shown before a match) | 2 | The dip's fix (dip the drawing, not the control) needs a look on a display; the raise's line is new UI |
 | The lift's three stand-in sounds | 1 | Waits for the owner's recordings (optional) |
-| The audit's own (section 8) | 3 | New rows |
+| The audit's own (section 8) | 3 | New rows. Three more of the audit's rows are classed "playtest" or "document": the lift car's probe, the balance tool, the heartbeat's files |
 
 ## 4. Performance
 
@@ -117,8 +127,7 @@ the dev folders.
   config fields nothing reads (`ViewModelConfig.selector_at`, `MinimapConfig.pin_step_across`,
   `WoodsConfig.puddle_points`) and a stray comment.
 - **Docs made true:** `README.md` (what 0.1 Dev 3 holds, the folder list), `CLAUDE.md` (the checks, the unused-files
-  rule), `docs/ARCHITECTURE.md` (the heartbeat files as the saves contract's second exception),
-  `docs/KNOWN_ISSUES.md`, the wiki's Lights section.
+  rule), `docs/KNOWN_ISSUES.md`, the wiki's Lights section. No contract in `docs/ARCHITECTURE.md` was changed.
 - **Tests added:** `tests/unit/test_audit_dev3.gd` and QA's `tests/unit/test_aud1_qa.gd`, a regression test for each
   fix that can be reached without a display.
 - **Found sound:** static types everywhere (the project treats an untyped value as an error), no class in `game/`
@@ -198,13 +207,17 @@ No figure measured in this pass is outside its band, and nothing in the data tab
 6. **Small costs left** (known issues, Performance): Practice builds the bots' groundwork with no bots, a skipped
    round still runs the draw pass, a menu's part picture instances a whole parts file, `LogTail` reads the whole
    previous log.
-7. **Match rules** (`game/ui/match_rules_box.gd`): a Custom click retunes the page twice and the round-time slider
+7. **The heartbeat and the saves contract**: `RunBeat` (BP7) writes its two small files with `FileAccess`, though
+   `docs/ARCHITECTURE.md` › Contracts › 8 says every file in `user://` goes through `SaveFile`, with `renderer.cfg`
+   the one exception. The code is safe as built; the contract and the code disagree. The owner's ruling: name it as a
+   second exception, or move it to `SaveFile` (known issues, Report).
+8. **Match rules** (`game/ui/match_rules_box.gd`): a Custom click retunes the page twice and the round-time slider
    saves at every step.
-8. **The button's dip** (`game/ui/button_press.gd`): dip the drawing instead of the control, so a click at a wide
+9. **The button's dip** (`game/ui/button_press.gd`): dip the drawing instead of the control, so a click at a wide
    card's edge is never lost. Needs a look on a display.
-9. **Depot's lockers** are silent to run into (`PropNoise` goes by the block's kind): a `locker` kind would fix it,
+10. **Depot's lockers** are silent to run into (`PropNoise` goes by the block's kind): a `locker` kind would fix it,
    and would change what bots hear on Depot.
-10. **Test-only helpers** (`spread_direction`, `step_bb_flight`, `tables_made` and nine more) and the parsed but
+11. **Test-only helpers** (`spread_direction`, `step_bb_flight`, `tables_made` and nine more) and the parsed but
     unread `Magazine.replica` fields in `figure_sidecar.gd`: kept, since tests or planned content use them.
 
 ## 9. Next steps

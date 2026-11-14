@@ -1199,25 +1199,13 @@ func _place_marker(camera: Camera3D, spot: Vector3, show: bool) -> void:
 
 ## Whether `rect` touches the banner or the countdown's plate, those showing (every frame a marker is up: no arrays).
 func _under_stack(rect: Rect2) -> bool:
-	return (_banner.visible and rect.intersects(Rect2(_middle.position + _banner.position, _banner.size))) \
-			or (_count.visible and rect.intersects(Rect2(_middle.position + _count.position, _count.size)))
+	return (_banner.visible and rect.intersects(_plate_rect(_banner))) \
+			or (_count.visible and rect.intersects(_plate_rect(_count)))
 
 
-## Where the banner and the countdown's plate are now (HUD coordinates), those showing.
-func _stack_rects() -> Array[Rect2]:
-	var out: Array[Rect2] = []
-	for plate: Control in [_banner, _count]:
-		if plate.visible:
-			out.append(Rect2(_middle.position + plate.position, plate.size))
-	return out
-
-
-## Whether `rect` touches any of `others`.
-static func overlaps_any(rect: Rect2, others: Array[Rect2]) -> bool:
-	for other in others:
-		if rect.intersects(other):
-			return true
-	return false
+## Where `plate`, the banner or the countdown's plate in the middle stack, is now (HUD coordinates).
+func _plate_rect(plate: Control) -> Rect2:
+	return Rect2(_middle.position + plate.position, plate.size)
 
 
 ## The pole the flag marker and the gauge show (AB1), as the last update left it.

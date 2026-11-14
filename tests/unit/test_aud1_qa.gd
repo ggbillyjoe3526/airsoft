@@ -468,6 +468,8 @@ func test_the_match_page_waits_while_hidden_and_reads_the_settings_when_shown() 
 	page.visible = false
 	page.visible = true
 	assert_false(page._stale, "shown with nothing changed: nothing to do")
+	# The cards each retune replaced are freed at the frame's end: let them go before the test ends.
+	await wait_process_frames(2)
 
 
 func test_a_match_page_freed_while_stale_leaves_no_connection() -> void:

@@ -39,6 +39,14 @@ not merged by its thread (his word, for his playtest).
   the wear marks' decals leave it out, so their 25 cm reach keeps meeting slopes and steps. The gear, pads
   and boots are parts of the body's model and go with it; the replicas a figure holds or wears stay on the world's
   layer (a rifle's butt on a kneeling figure may still take a mark).
+- **The bots' start stagger is a bug fix, not a tuning change** (critic, attempt 1): `RoundPlanner`'s
+  `lane_follow_delay` is unchanged; `BotMovement._advance` now runs a hold's clock only in a live round, so the 3 s
+  countdown no longer spends it. `tests/support/match_runner.gd` plays with `RoundConfig.start_countdown` 0, so the
+  balance report, the match guards and every record's bot matches already had the stagger; only the game with its
+  countdown changes, towards what was measured.
+- **The saves contract is left as written** (critic, attempt 1): `RunBeat`'s two files written outside `SaveFile`
+  are a row in the known issues and a recommendation for the owner's ruling, not a second exception written in by
+  the audit.
 - **`bots.md` › Burst (×) is 0.1 to 3** (was 0 to 3): at 0 a burst lasts no time and the bot never fires.
 - **`_archive/`** holds files nothing uses but that may be wanted (its `README.md` lists each); `pipeline/out/` is
   out of git, as `.gitignore` always said, and `pipeline/runs/` is in the shared files, as `pipeline/README.md` says.
@@ -62,4 +70,4 @@ not merged by its thread (his word, for his playtest).
   "no station models yet", the tunnels' Ultra recheck (now a playtest row).
 - Added: the lift car's probe (Performance, playtest), figures out of view animated in full (Performance), small
   costs outside a match's frame (Performance), Match rules' double retune (UI), the balance report without Plant The
-  Bomb (Tools).
+  Bomb (Tools), the heartbeat's files outside `SaveFile` (Report).
