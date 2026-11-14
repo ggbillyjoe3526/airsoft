@@ -746,15 +746,44 @@ def mentions(text: str, terms: list) -> bool:
     return any(re.search(r"(?<!\w)" + re.escape(norm(t)) + r"(?!\w)", low) for t in terms)
 
 
-def render_notes(text: str, terms: list) -> str:
+REPLACED_FILE = WIKI / "replaced.txt"
+
+
+def load_replaced() -> list:
+    """docs/wiki/replaced.txt as [(phrase, what replaced it)]: Patch Notes entries a later version replaced, marked
+    without editing CHANGELOG.md. One per line, 'phrase | what replaced it'; a '#' line is a comment."""
+    out: list = []
+    if not REPLACED_FILE.is_file():
+        return out
+    for n, line in enumerate(REPLACED_FILE.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        phrase, bar, note = (part.strip() for part in line.partition("|"))
+        if not bar or not phrase or not note:
+            raise WikiError(f"{REPLACED_FILE.name} line {n}: write 'phrase | what replaced it'")
+        out.append((phrase, note))
+    return out
+
+
+def mark_replaced(bullet: str, marks: list, hits: dict) -> str:
+    """`bullet` with '(Replaced later: ...)' added for each phrase of `marks` it holds, counted in `hits`."""
+    for phrase, note in marks:
+        if phrase in bullet:
+            hits[phrase] = hits.get(phrase, 0) + 1
+            bullet += f" *(Replaced later: {note})*"
+    return bullet
+
+
+def render_notes(text: str, terms: list, marks: list = (), hits: dict = None) -> str:
     """A changelog section for players: no Internal blocks and no hidden content, and what only dev content has
-    moved under an 'In development' heading at the end."""
+    moved under an 'In development' heading at the end. Bullets a later version replaced (`marks`) say so."""
+    hits = {} if hits is None else hits
     public, dev = [], []
     merged: dict = {}
     for title, bullets in note_blocks(text):
         if title.lower() == "internal" or HIDDEN_RE.search(title) or GONE_RE.search(title):
             continue
-        bullets = [b for b in bullets if not HIDDEN_RE.search(b) and not GONE_RE.search(b)]
+        bullets = [mark_replaced(b, marks, hits) for b in bullets if not HIDDEN_RE.search(b) and not GONE_RE.search(b)]
         whole_dev = mentions(title, terms)
         clean = re.sub(r"\s*\(dev content\)\s*$", "", title, flags=re.I)
         pub = [] if whole_dev else [b for b in bullets if not mentions(b, terms)]
@@ -781,6 +810,8 @@ def patch_notes() -> str:
     upcoming = subprocess.run(["bash", "tools/changelog.sh", "unreleased"], cwd=ROOT, capture_output=True,
                               text=True, check=True).stdout
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    marks = load_replaced()
+    hits: dict = {}
     parts = [
         "# Patch Notes",
         "What changed in each version, newest first, in plain words. Downloads are on the "
@@ -788,10 +819,14 @@ def patch_notes() -> str:
         "the [Roadmap](Roadmap). These notes are written from the same files as each release's notes.",
         f"## Coming in {gen_version('')}",
         "Already built and on its way in the next download:",
-        render_notes(upcoming, terms),
+        render_notes(upcoming, terms, marks, hits),
     ]
     for m in re.finditer(r"^## (.+?)\n(.*?)(?=^## |\Z)", changelog, re.M | re.S):
-        parts += [f"## {m.group(1).strip()}", render_notes(m.group(2), terms)]
+        parts += [f"## {m.group(1).strip()}", render_notes(m.group(2), terms, marks, hits)]
+    for phrase, _note in marks:
+        if hits.get(phrase, 0) != 1:
+            raise WikiError(f"{REPLACED_FILE.name}: '{phrase}' must match exactly one Patch Notes entry, "
+                            f"it matches {hits.get(phrase, 0)}")
     return "\n\n".join(parts) + "\n"
 
 
