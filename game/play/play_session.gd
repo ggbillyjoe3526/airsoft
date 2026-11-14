@@ -890,6 +890,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		_targets_view.setup(state.targets, _play.range_view, _tuning, sign_font)
 		range_materials = _targets_view.materials()
 	_figure_of.resize(state.characters.size())
+	# The figures' parts come out of one instance of each parts file, freed once they all stand.
+	ReplicaParts.keep()
 	for c in state.characters:
 		if c.id == PLAYER_ID:
 			continue
@@ -906,6 +908,7 @@ func _build_views(ui: CanvasLayer) -> void:
 		f.add_contact_shadow(contact, _play.effects)
 		_figures.append(f)
 		_figure_of[c.id] = f
+	ReplicaParts.release()
 	if _light.night:
 		_torches = TorchBeams.new()
 		_torches.setup(state.characters.size(), _level.query(), _tuning.body)

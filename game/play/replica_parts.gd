@@ -20,6 +20,8 @@ const SIGHT_LINE_SUFFIX := "_SightLine"
 const MUZZLE_SUFFIX := "_Muzzle"
 const BARREL_END_SUFFIX := "_BarrelEnd"
 const INSIDE_SUFFIX := "_Inside"
+## A pistol's torch's point under a laser on the same rail: where it hangs with one fitted (`_hang_under_laser`).
+const UNDER_LASER_SUFFIX := "_UnderLaser"
 ## The replica's own nodes the parts work with: its magazine mesh(es) and the bone attachment that carries them through
 ## the clips, its flash hider and its muzzle point.
 const MAGAZINE_NODE := "Magazine"
@@ -32,6 +34,7 @@ const MUZZLE_SLOT := &"muzzle"
 const BARREL_SLOT := &"barrel"
 const GRIP_SLOT := &"grip"
 const LIGHT_SLOT := &"light"
+const LASER_SLOT := &"laser"
 ## The figure version's pieces a part takes the place of: its magazine (the figures' reload magazine too, drawn in the
 ## replica's space), its flash hider and its iron sights, which an optic hides, as in the hands.
 const FIGURE_MAGAZINE := "Figure_Magazine"
@@ -39,6 +42,10 @@ const FIGURE_FLASH_HIDER := "Figure_FlashHider"
 const FIGURE_SIGHTS := "Figure_Sights"
 ## The replica's empty a barrel or muzzle part sits on.
 const BARREL_END_NODE := "BarrelEnd"
+
+## The parts files' instances held between `keep` and `release` (file -> its instance), and whether one is on.
+static var _kept: Dictionary[String, Node3D] = {}
+static var _keeping: bool = false
 
 
 ## What fitting did to one model, so it can be undone, and what the views need from it.
@@ -79,6 +86,7 @@ static func fit(model: Node3D, key: StringName, parts: Dictionary) -> Fit:
 	var taken := take(key, parts, false)
 	if taken.is_empty():
 		return f
+	_hang_under_laser(taken)
 	# A longer barrel carries whatever sits on its end, and the muzzle point, out with it.
 	var shift := Vector3.ZERO
 	var barrel := taken.get(BARREL_SLOT) as Node3D
@@ -156,6 +164,7 @@ static func fit_figure(held: Node3D, key: StringName, parts: Dictionary, barrel_
 	f.magazine = held.get_node_or_null(FIGURE_MAGAZINE) as MeshInstance3D
 	var flash_hider := held.get_node_or_null(FIGURE_FLASH_HIDER) as Node3D
 	var taken := take(key, parts, true)
+	_hang_under_laser(taken)
 	var shift := Vector3.ZERO
 	var barrel := taken.get(BARREL_SLOT) as Node3D
 	if barrel != null:
@@ -196,50 +205,93 @@ static func fit_figure(held: Node3D, key: StringName, parts: Dictionary, barrel_
 	return f
 
 
-## The part nodes for `parts` out of the replica's part models (a menu's part picture takes one alone), owned by nothing: the parts themselves without their
-## figure copies, or (`figure`) just the figure copies, placed in the replica's space. Slot -> node.
+## The part nodes for `parts` out of the replica's part models (a menu's part picture takes one alone), owned by
+## nothing: the parts themselves without their figure copies, or (`figure`) just the figure copies, placed in the
+## replica's space. Slot -> node. Between `keep` and `release` the nodes are copies out of one instance of the file.
 static func take(key: StringName, parts: Dictionary, figure: bool) -> Dictionary[StringName, Node3D]:
 	var taken: Dictionary[StringName, Node3D] = {}
 	# A replica with a stand-in model (CS1) wears that model's parts.
 	var path := "%s%s.glb" % [PART_DIR, ReplicaConfig.model_of(key)]
 	if parts.is_empty() or not ResourceLoader.exists(path):
 		return taken
-	var scene := load(path) as PackedScene
-	if scene == null:
-		return taken
-	var holder := scene.instantiate() as Node3D
+	var holder := _kept.get(path) as Node3D
+	if holder == null:
+		var scene := load(path) as PackedScene
+		if scene == null:
+			return taken
+		holder = scene.instantiate() as Node3D
+		if _keeping:
+			_kept[path] = holder
 	for slot: Variant in parts:
 		var part_name := "%s_%s" % [slot, parts[slot]]
 		var node := holder.get_node_or_null(part_name) as Node3D
 		if node == null:
 			continue
 		var copy := holder.get_node_or_null(part_name + FIGURE_SUFFIX) as Node3D
+		if _keeping:
+			# The kept instance stays whole: the work below is done on copies of its nodes.
+			copy = copy.duplicate() as Node3D if copy != null and figure else null
+			node = node.duplicate() as Node3D
 		var inner := node.get_node_or_null(part_name + FIGURE_SUFFIX) as Node3D
 		if figure:
 			if copy == null and inner != null:
 				inner.transform = node.transform * inner.transform
 				copy = inner
 			if copy == null:
+				if _keeping:
+					node.free()
 				continue
 			_carry_markers(node, copy)
+			if _keeping:
+				if copy == inner:
+					node.remove_child(inner)
+				node.free()
 			node = copy
 		elif inner != null:
 			node.remove_child(inner)
 			inner.free()
-		node.get_parent().remove_child(node)
+		if node.get_parent() != null:
+			node.get_parent().remove_child(node)
 		node.owner = null
 		for child in node.find_children("*", "", true, false):
 			child.owner = null
 		taken[StringName(slot)] = node
-	holder.free()
+	if not _keeping:
+		holder.free()
 	return taken
 
 
-## Puts `part`'s end points (a barrel's end, a silencer's muzzle) on `copy`, its figures' copy, at the same places, so
-## a figure's parts carry them as the model's do. Both are in the parts file's space (the copy not yet under the part).
+## From here to `release`, `take` instances each parts file once and hands out copies of its nodes: a match's build
+## fits every bot's figure from the same few files (instancing a parts file a figure was its build's largest cost).
+static func keep() -> void:
+	_keeping = true
+
+
+## Ends `keep`: frees the instances held.
+static func release() -> void:
+	_keeping = false
+	for holder: Node3D in _kept.values():
+		holder.free()
+	_kept.clear()
+
+
+## A torch taken with a laser hangs under it, at its `_UnderLaser` point (the pistols' parts files carry one: both sit on
+## the one rail there, so without it the two were drawn through each other; a rifle's torch has none and stays).
+static func _hang_under_laser(taken: Dictionary[StringName, Node3D]) -> void:
+	var light := taken.get(LIGHT_SLOT) as Node3D
+	if light == null or not taken.has(LASER_SLOT):
+		return
+	var under := light.find_child("*" + UNDER_LASER_SUFFIX, false, false) as Node3D
+	if under != null:
+		light.position = light.transform * under.position
+
+
+## Puts `part`'s end points (a barrel's end, a silencer's muzzle, a torch's place under a laser) on `copy`, its
+## figures' copy, at the same places, so a figure's parts carry them as the model's do. Both are in the parts file's
+## space (the copy not yet under the part).
 static func _carry_markers(part: Node3D, copy: Node3D) -> void:
 	var from := copy.transform.affine_inverse() * part.transform
-	for suffix: String in [BARREL_END_SUFFIX, MUZZLE_SUFFIX]:
+	for suffix: String in [BARREL_END_SUFFIX, MUZZLE_SUFFIX, UNDER_LASER_SUFFIX]:
 		var marker := part.find_child("*" + suffix, false, false) as Node3D
 		if marker != null and copy.find_child("*" + suffix, false, false) == null:
 			var carried := Node3D.new()
