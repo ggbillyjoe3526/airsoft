@@ -250,7 +250,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	var plain := key != null and not (key.ctrl_pressed or key.alt_pressed or key.shift_pressed or key.meta_pressed)
 	if plain and key.pressed and not key.echo and not _customising and not _gear.switching() \
 			and _strip.mode == LoadoutStrip.Mode.NORMAL:
+		# By the key's letter, else by where it sits: on an AZERTY layout the top row types & é " ' ( unshifted, so the
+		# strip's 1 to 5 picked nothing there.
 		var place := KEYS.find(key.keycode)
+		if place < 0:
+			place = KEYS.find(key.physical_keycode)
 		if place >= 0 and place < saved.slots.size():
 			saved.use(place)
 			get_viewport().set_input_as_handled()
