@@ -283,23 +283,24 @@ SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030
                     rolls=(-180.0, 174.0), thumb_turn=(-10.0, -10.0, 20.0, 40.0), index_turn=None,
                     index_soft=True, press=("Middle", "Ring", "Pinky"),
                     swing_search=(8.0, -8.0, 16.0, -16.0, 24.0, -24.0))
-# Its left hand as the AEG's, under the fore-end (narrower and lower than the AEG's handguard: `axis`, `radius`,
-# its top at 0.056) near its back, as far forward as the arm reaches, its turn searched (the fore-end is lower); the
+# Its left hand as the AEG's, under the fore-end (narrower and lower than the AEG's handguard: `axis`, `radius`, its
+# top at 0.056) near its back, as far forward as the arm reaches, its turn searched (the fore-end is lower); the
 # owner, 2026-11-06: the ring and little fingers "pressed against the rifle", the thumb pressing on it. So the palm
 # sits further right than on the AEG (`forward`; the narrow fore-end leaves the knuckles 14-21 mm off its right side),
 # the fingertips reach higher up that side (`tip_at`; the little finger's aimed lower until the fingers hooked onto
-# the side, `pinky_drop`), and the thumb presses on the left side face just above its centre line. The fifth look: 28 mm further back, just ahead of the magazine's housing (the magazine's
-# front at y 0.171); any further and the housing holds the palm 1 cm off the fore-end. Under so narrow a fore-end a
-# middle joint closed no further than 25 degrees; since the critic's second look the fingers hook up onto its right
-# side as the AEG's do (its side face runs from z 0.022 to 0.054: `tip_at`, `tips_below`), no tip more than 35 mm
-# ahead of its knuckle (`tip_reach`); the fore-end runs on well past the hand, so its front end limits nothing. The
-# critic's third look: the fingers pinched into one another there. Each now aims 4 cm ahead of its knuckle (`tip_at`;
-# at 2 cm the ring finger's tip folded back onto the little finger's) and keeps a finger's width from the one laid
-# before it (`tip_apart`), so the four stand side by side up the side face. The critic's fourth look: the little
-# finger leaned back from the ring finger, a V of daylight between them. A later pass had closed it a further 10
-# degrees after the row was laid; a rowed finger is no longer closed again (hold_solve.py), its tip is held within
-# a finger's width and 4 mm of its neighbour's and no further back than its own knuckle (`sight.crowd`), and the
-# marks lead by 4 cm, not 5, which the little finger reaches.
+# the side, `pinky_drop`), and the thumb presses on the left side face just above its centre line. The fifth look: 28
+# mm further back, just ahead of the magazine's housing (the magazine's front at y 0.171); any further and the housing
+# holds the palm 1 cm off the fore-end. Under so narrow a fore-end a middle joint closed no further than 25 degrees;
+# since the critic's second look the fingers hook up onto its right side as the AEG's do (its side face runs from z
+# 0.022 to 0.054: `tip_at`, `tips_below`), no tip more than 35 mm ahead of its knuckle (`tip_reach`); the fore-end
+# runs on well past the hand, so its front end limits nothing. The critic's third look: the fingers pinched into one
+# another there. Each now aims 4 cm ahead of its knuckle (`tip_at`; at 2 cm the ring finger's tip folded back onto the
+# little finger's) and keeps a finger's width from the one laid before it (`tip_apart`), so the four stand side by
+# side up the side face. The critic's fourth look: the little finger leaned back from the ring finger, a V of daylight
+# between them. A later pass had closed it a further 10 degrees after the row was laid; a rowed finger now closes no
+# further than its row allows (`pose._strays`), its tip is held within a finger's width and 4 mm of its neighbour's
+# and no further back than its own knuckle (`sight.crowd`), and the marks lead by 4 cm, not 5, which the little finger
+# reaches.
 SNIPER_GUARD = dict(GUARD, y=0.232, axis=(0.0, 0.030), radius=0.025, tips_below=0.050,
                     tip_at=(0.0255, 0.040, 0.035), thumb_x=-0.028, thumb_z=0.045, forward=0.034,
                     tip_most=(90.0, 85.0), tips_behind=NO_LIMIT, tip_reach=0.035, tip_apart=FINGER_APART,
@@ -320,10 +321,10 @@ SMG_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.113, -0.056), pinky=(0.024, -0.074, -
 # front end (`tips_behind`), the little finger's mark 5 mm further forward (`pinky_ahead`; at 2 cm it leaned across
 # the ring finger, the critic's third look), each a finger's width from the one before it (`tip_apart`). The
 # critic's fourth look: the little finger stood in a closed loop. The later closing passes had curled it a further
-# 51 degrees; they leave a rowed finger alone now, as on the Sniper Rifle. Those passes had also been what brought
+# 51 degrees; they keep a rowed finger in its row now, as on the Sniper Rifle. Those passes had also been what brought
 # the index finger's glove behind the front end (by a hundredth of a millimetre): swung no more than 25 degrees
 # sideways at its knuckle, the row's search had no place for it there. It may swing 30 (`tip_swing`), which lays
-# it 2 mm behind the limit and the other three beside it.
+# it 2 mm behind the limit and the other three beside it, whatever the closing passes then do.
 SMG_GUARD = dict(GUARD, y=0.205, axis=(0.0, 0.072), radius=0.022, tips_below=0.084,
                  tip_at=(0.0235, 0.015, 0.072), thumb_x=-0.028, thumb_z=0.080, tip_most=(90.0, 85.0),
                  tip_swing=30.0, tips_behind=0.277, tip_reach=NO_LIMIT, pinky_ahead=0.005, tip_apart=FINGER_APART,

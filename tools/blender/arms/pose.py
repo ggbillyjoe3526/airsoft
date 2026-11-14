@@ -271,7 +271,7 @@ class Hand:
         self.front, self.front_hard = None, False
         # The fingers already laid (each of their last two bones' ends) and how far (m) apart the next keeps its own
         # from them (`sight.crowd`).
-        self.laid, self.apart = [], 0.0
+        self.laid, self.apart, self.row = [], 0.0, []
         # The furthest left (eye space) the trigger finger's outer bones may reach (`onto`). None: no limit.
         self.index_left = None
         # How far the trigger finger's joints may bend reaching the trigger (degrees, base to tip; `onto`).
@@ -898,10 +898,10 @@ def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) ->
         for shares in (TIGHTEN_SHARES, TIGHTEN_WRAP):
             n = 0.0
             while n + TIGHTEN_STEP <= TIGHTEN_MAX:
-                high = hands[side].over(name)
+                high = _strays(hands[side], name)
                 _turn_finger(rig, hands, side, name, shares, TIGHTEN_STEP)
                 rig.write()
-                if hands[side].over(name) > high or clipping(objects, solid)[0]:
+                if _strays(hands[side], name) > high or clipping(objects, solid)[0]:
                     _turn_finger(rig, hands, side, name, shares, -TIGHTEN_STEP)
                     rig.write()
                     break
@@ -909,6 +909,19 @@ def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) ->
             total += n
         closed["%s %s" % (side, name)] = total
     return closed
+
+
+def _strays(hand: Hand, name: str) -> float:
+    """What a closing pass must not add to (m): the finger's glove above the hand's `tip_top`, and, for a finger laid
+    in a row (`hand.row`), how far it strays from that row as the fingers before it now lie (`sight.crowd`) and past
+    a firm front end (`sight.ahead`). Closed without this, a rowed finger curls back out of its row (the critic's
+    fourth look: the SMG's little finger in a loop, the Sniper's leaning back from the ring finger)."""
+    out = hand.over(name)
+    if name in hand.row:
+        hand.laid = [line for n in hand.row[:hand.row.index(name)] for line in sight.lines(hand, n)]
+        out += sight.crowd(hand, name) + (sight.ahead(hand, name) if hand.front_hard else 0.0)
+        hand.laid = []
+    return out
 
 
 # The wrap's step: the root joint closes WRAP_STEP while the middle joint and the tip open by their share of it, so
@@ -936,10 +949,10 @@ def wrap(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) -> di
     for side, name in fingers:
         n = 0.0
         while n + WRAP_STEP <= WRAP_MAX:
-            high = hands[side].over(name)
+            high = _strays(hands[side], name)
             _turn_finger(rig, hands, side, name, shares, WRAP_STEP)
             rig.write()
-            if hands[side].over(name) > high or clipping(objects, solid)[0]:
+            if _strays(hands[side], name) > high or clipping(objects, solid)[0]:
                 _turn_finger(rig, hands, side, name, back, WRAP_STEP)
                 break
             n += WRAP_STEP

@@ -403,6 +403,7 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider,
         return Matrix.Translation(-palm.normalized() * spec["standoff"]) @ m, palm
 
     hand.tip_top, hand.eyes, hand.front, hand.far = None, (), None, None
+    hand.laid, hand.apart, hand.row = [], 0.0, []
     hand_m, palm = cup(rig, hand, j, to_eye, spec, col, placed)
     hand.normal = palm
     # The fingers' highest (eye space) where they rest, level with the hand on the handguard.
@@ -446,6 +447,11 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider,
         if hand.apart > 0.0:
             hand.laid += sight.lines(hand, name)
     hand.laid = []
+    # The row the closing passes keep (`pose._strays`), judged against the front end itself, not the last finger's
+    # reach.
+    hand.row = list(spec["fingers"]) if hand.apart > 0.0 and spec["tip_at"][0] > 0.0 else []
+    if hand.row:
+        hand.front = ends
     if os.environ.get("BL_DEBUG"):
         for name in spec["fingers"]:
             js = [inv @ rig.pose["%s%d_L" % (name, k)].translation for k in (1, 2, 3)]
@@ -530,6 +536,7 @@ def left_down(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider) -> 
     hand_m = knuckle_pose(rig, hand, j, index_at, Vector((0.0, -1.0, 0.0)), Vector((1.0, 0.0, 0.0)))
     hand.normal = Vector((1.0, 0.0, 0.0))
     hand.tip_top, hand.eyes, hand.front, hand.far = None, (), None, None
+    hand.laid, hand.apart, hand.row = [], 0.0, []
     pole_l, _ = elbow_for(rig, "L", hand_m)
     pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
     curls = pose_fingers(hand, spec, col)
@@ -576,6 +583,7 @@ def left_on_grip(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, spec: dict, col
     grip (web_pose, mirrored), its fingers closed round the grip's front and its thumb round the back over them."""
     to_eye = hold.to_eye()
     hand.tip_top, hand.eyes, hand.front, hand.far = None, (), None, None
+    hand.laid, hand.apart, hand.row = [], 0.0, []
     if spec["kind"] == "support":
         hand_m, palm = support_pose(rig, hand, j, hold, spec, col)
     else:
@@ -810,10 +818,8 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
         if not trigger:
             fingers.insert(0, ("R", "Index"))
         if hold.left["kind"] == "guard":
-            # Fingers laid in a row (`tip_apart`) stay where the row put them: closed further, one curls back out of
-            # the row (the critic's fourth look: the SMG's little finger in a loop). The thumb still closes.
-            rowed = hold.left.get("tip_apart", 0.0) > 0.0
-            fingers += [("L", n) for n in (("Thumb",) if rowed else ("Index", "Middle", "Ring", "Pinky", "Thumb"))]
+            # Fingers laid in a row (`tip_apart`) close no further than the row allows (`pose._strays`).
+            fingers += [("L", n) for n in ("Index", "Middle", "Ring", "Pinky", "Thumb")]
         print("  tightened", pose.tighten(rig, hands, arms, frame, fingers))
         print("  wrapped", pose.wrap(rig, hands, arms, frame, [f for f in fingers if f[1] != "Thumb"]))
         # Whatever the last passes did, the arms are checked once more before anything is written.
