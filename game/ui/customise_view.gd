@@ -432,8 +432,8 @@ func _on_target_metres(r: ReplicaConfig, t: ReplicaTune) -> float:
 			_facts.hud.hop_band, _facts.hud.hop_range, t.bb_weight, _facts.air()).on_target_to
 
 
-## The flight's label: "on target to 44 m", and in a field's own air (AUD2) the field and its air with it ("on target
-## to 26 m · Woodland at night, 8 °C").
+## The flight's label: "on target to 44 m", and in a field's own air (AUD2) the field and its air under it ("on target
+## to 26 m", then "Woodland at night, 8 °C").
 func on_target_words(metres: String) -> String:
 	if not _facts.in_field_air():
 		return tr("CUSTOMISE_ON_TARGET") % metres

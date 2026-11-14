@@ -1393,7 +1393,7 @@ msgid "CUSTOMISE_ON_TARGET"
 msgstr "on target to %s m"
 
 msgid "CUSTOMISE_ON_TARGET_FIELD"
-msgstr "on target to %s m · %s"
+msgstr "on target to %s m\n%s"
 
 msgid "LOADOUT_FIELD_AIR"
 msgstr "%s, %d °C"

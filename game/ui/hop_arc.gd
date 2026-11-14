@@ -17,6 +17,8 @@ const DASH := 6.0
 const LABEL_SIZE := 16
 const LABEL_GAP := 10.0
 const LABEL_TOP := 6.0
+## The space between the label's lines (px).
+const LABEL_LEADING := 4.0
 
 var _heights: PackedFloat32Array = PackedFloat32Array()
 var _range: float = 1.0
@@ -30,7 +32,7 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
-## The words drawn beside the marker.
+## The words drawn beside the marker (a line each, split at "\n").
 func label() -> String:
 	return _label
 
@@ -82,10 +84,15 @@ func _draw() -> void:
 		draw_polyline(points, GameTheme.ACCENT, PATH_WIDTH, true)
 	var mark_x := left + width * clampf(_on_target / _range, 0.0, 1.0)
 	draw_line(Vector2(mark_x, top), Vector2(mark_x, size.y - PAD.y), GameTheme.MUTED, MARK_WIDTH)
+	# The words beside the marker, a line each (the field's air under the reach, AUD2), kept inside the box.
 	var font := GameTheme.font(800)
-	var words_width := font.get_string_size(_label, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x
+	var lines := _label.split("\n")
+	var words_width := 0.0
+	for line in lines:
+		words_width = maxf(words_width, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x)
 	var at_x := mark_x + LABEL_GAP
 	if at_x + words_width > size.x - PAD.x:
-		at_x = mark_x - LABEL_GAP - words_width
-	draw_string(font, Vector2(at_x, top + LABEL_TOP + LABEL_SIZE), _label, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE,
-			GameTheme.TEXT)
+		at_x = maxf(PAD.x, mark_x - LABEL_GAP - words_width)
+	for i in lines.size():
+		draw_string(font, Vector2(at_x, top + LABEL_TOP + LABEL_SIZE * (i + 1) + LABEL_LEADING * i), lines[i],
+				HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, GameTheme.TEXT)

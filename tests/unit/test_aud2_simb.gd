@@ -480,7 +480,7 @@ func test_customise_flies_and_says_the_reach_in_the_picked_fields_air() -> void:
 	page.customise().show_tab(CustomiseView.Tab.BBS)
 	var cold_reach := page.facts().sheet(Loadout.Slot.SECONDARY).row(&"on_target").text
 	assert_lt(float(cold_reach), float(rated_reach), "a gas pistol falls shorter in the cold")
-	assert_eq(arc.label(), "on target to %s m · Woodland at night, 8 °C" % cold_reach)
+	assert_eq(arc.label(), "on target to %s m\nWoodland at night, 8 °C" % cold_reach, "the field's air under it")
 	assert_almost_eq(arc._on_target, float(cold_reach), 1.0, "the flight's marker is the figure")
 	assert_true(page.facts().sheet_sub("GBB Pistol").ends_with("Flown in the picked field's air: Woodland at night, 8 °C."))
 	picks.map_id = "depot"
