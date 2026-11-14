@@ -65,6 +65,8 @@ const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 // The least a colour's brightest channel counts as when its chroma is taken (black has none).
 const float CHROMA_FLOOR = 0.001;
 
+#include "res://game/play/look/retro_vertex.gdshaderinc"
+
 varying vec3 model_position;
 varying vec3 model_normal;
 varying flat int kind;
@@ -76,6 +78,8 @@ void vertex() {
 	kind = marked >= KINDS ? default_kind : marked;
 	model_position = VERTEX;
 	model_normal = NORMAL;
+	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1); the grain keeps the true place.
+	VERTEX = retro_vertex(MODEL_MATRIX, VERTEX, retro_snaps(IN_SHADOW_PASS, PROJECTION_MATRIX));
 }
 
 // `c` (linear) scuffed towards the worn grey by `k`, in square-root light, so it reads alike on dark and light paint.

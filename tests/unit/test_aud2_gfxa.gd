@@ -168,3 +168,14 @@ func test_the_platform_vaults_take_the_vault_fill_on_every_preset() -> void:
 	assert_gt(marked, 0, "the platform vaults are marked")
 	var mat := StationSurface.material(look)
 	assert_almost_eq(float(mat.get_shader_parameter(&"vault_fill")), look.vault_fill, 1e-6, "set from the look")
+
+
+func test_your_replica_and_the_bbs_snap_with_the_retro_filter() -> void:
+	# Dev › Retro filter (RF1) wobbled only the field's own shaders: your replica and the BBs stayed steady.
+	var call := "VERTEX = retro_vertex(MODEL_MATRIX, VERTEX, retro_snaps(IN_SHADOW_PASS, PROJECTION_MATRIX));"
+	for path: String in ["res://game/play/replica_surface.gdshaderinc", "res://game/play/bb_ball.gdshader"]:
+		var code := FileAccess.get_file_as_string(path)
+		assert_string_contains(code, "#include \"res://game/play/look/retro_vertex.gdshaderinc\"", path)
+		assert_string_contains(code, call, path)
+	assert_not_null(load("res://game/play/replica_surface.gdshader") as Shader, "the replica's shader loads")
+	assert_not_null(load("res://game/play/bb_ball.gdshader") as Shader, "the BB's shader loads")
