@@ -540,8 +540,9 @@ func test_bots_walk_past_subways_works_wagons_on_the_track_without_snagging() ->
 
 
 ## A bot holding `key` (as a bot kit carries it: full auto out of the box) on a semi field, cramped floor everywhere and
-## a wall close ahead (no open shot), and its foe `dist` m away: its selector after a few ticks.
-func _indoor_selector(key: StringName, dist: float) -> ReplicaConfig.FireMode:
+## a wall close ahead (no open shot), and its foe `dist` m away: its selector after a few ticks, and, with `then`, after
+## the foe has stepped to `then` m and a few ticks more.
+func _indoor_selector(key: StringName, dist: float, then: float = -1.0) -> ReplicaConfig.FireMode:
 	var config := BotConfig.load_default()
 	var r := ReplicaStats.load_replica(key).duplicate() as ReplicaConfig
 	r.default_fire_mode = ReplicaConfig.FireMode.AUTO
@@ -569,7 +570,9 @@ func _indoor_selector(key: StringName, dist: float) -> ReplicaConfig.FireMode:
 	var eye := Vector3(0.0, 1.6, 0.0)
 	BotFireMode.on_burst(b, w, foe, eye, Vector3(0.0, 0.0, -1.0))
 	var events := SimEvents.new()
-	for i in 3:
+	for i in 3 if then < 0.0 else 6:
+		if i == 3:
+			foe.position = Vector3(0.0, 0.0, -then)
 		var cmd := PlayerCommand.new()
 		BotFireMode.select(b, w, foe, cmd)
 		Armament.step(me, cmd, eye, 1.0, false, BBPool.new(1), Seeds.stream(1), events, tuning, DT)
@@ -580,10 +583,20 @@ func test_an_smg_bot_goes_full_auto_indoors_within_the_close_range_and_keeps_sem
 	var config := BotConfig.load_default()
 	assert_eq(config.close_auto_replicas, PackedStringArray(["smg"]), "the Compact SMG alone")
 	assert_eq(config.close_auto_range, 12.0)
-	for dist: float in [2.0, 6.0, 11.5]:
+	assert_eq(config.close_auto_slack, 1.0)
+	for dist: float in [2.0, 6.0, 10.5]:
 		assert_eq(_indoor_selector(&"smg", dist), ReplicaConfig.FireMode.AUTO, "%.1f m: full auto" % dist)
 	for dist: float in [12.5, 20.0, 30.0]:
 		assert_eq(_indoor_selector(&"smg", dist), ReplicaConfig.FireMode.SEMI, "%.1f m: semi, NA1" % dist)
+
+
+## The range's edge has slack (the bug hunt: a foe stepping back and forth across 12 m turned the selector each time):
+## full auto starts a metre inside the range and is kept out to it, never past it.
+func test_an_smg_bots_selector_does_not_flick_at_the_close_ranges_edge() -> void:
+	assert_eq(_indoor_selector(&"smg", 11.5), ReplicaConfig.FireMode.SEMI, "not yet on full auto at 11.5 m: semi stays")
+	assert_eq(_indoor_selector(&"smg", 10.5, 11.8), ReplicaConfig.FireMode.AUTO, "on it, kept as the foe backs to 11.8 m")
+	assert_eq(_indoor_selector(&"smg", 11.8, 10.5), ReplicaConfig.FireMode.AUTO, "taken once the foe is a metre inside")
+	assert_eq(_indoor_selector(&"smg", 10.5, 12.5), ReplicaConfig.FireMode.SEMI, "and dropped past the range")
 
 
 func test_an_aeg_bot_indoors_keeps_semi_at_every_range() -> void:

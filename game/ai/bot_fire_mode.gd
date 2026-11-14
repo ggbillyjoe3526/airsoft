@@ -95,13 +95,17 @@ static func on_resume(b: Bot, w: BotWorld, target: Character, eye: Vector3, dir:
 
 
 ## Whether `b`'s replica in hand is one the owner lets go full auto up close indoors (BotConfig.close_auto_replicas) and
-## `target` stands within close_auto_range of it (across the ground).
+## `target` stands within close_auto_range of it (across the ground): close_auto_slack nearer than that to go to full
+## auto, the whole range to stay on it, never beyond.
 static func close_auto(b: Bot, w: BotWorld, target: Character) -> bool:
-	var r := b.character.armament.replica()
+	var a := b.character.armament
+	var r := a.replica()
 	if r == null or not w.cfg.close_auto_replicas.has(String(r.id)):
 		return false
 	var p := b.character.position
 	var reach := w.cfg.close_auto_range
+	if a.fire_mode() != ReplicaConfig.FireMode.AUTO:
+		reach -= w.cfg.close_auto_slack
 	return Vector2(target.position.x - p.x, target.position.z - p.z).length_squared() <= reach * reach
 
 

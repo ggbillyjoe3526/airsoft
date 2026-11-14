@@ -103,6 +103,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## full auto there at a target in sight within close_auto_range (m), wherever it stands; beyond it NA1 as for any.
 @export var close_auto_replicas: PackedStringArray = PackedStringArray(["smg"])
 @export var close_auto_range: float = 12.0
+## A bot not yet on full auto goes to it only this much inside close_auto_range (m), and then keeps it out to the range:
+## a target moving about at the range's edge would otherwise turn the selector back and forth with each step.
+@export var close_auto_slack: float = 1.0
 ## There, the least time between a bot's pulls on semi (s): a quick player's tapping, five a second, against the AEG's
 ## 13 BBs a second on full auto. Elsewhere a bot on semi pulls as fast as the replica cycles, as it always has.
 @export var semi_tap_gap: float = 0.2
