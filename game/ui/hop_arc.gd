@@ -17,7 +17,7 @@ const DASH := 6.0
 const LABEL_SIZE := 16
 const LABEL_GAP := 10.0
 const LABEL_TOP := 6.0
-## The space between the label's lines (px).
+## The space between the lines in the box's lower corner (px).
 const LABEL_LEADING := 4.0
 
 var _heights: PackedFloat32Array = PackedFloat32Array()
@@ -84,15 +84,17 @@ func _draw() -> void:
 		draw_polyline(points, GameTheme.ACCENT, PATH_WIDTH, true)
 	var mark_x := left + width * clampf(_on_target / _range, 0.0, 1.0)
 	draw_line(Vector2(mark_x, top), Vector2(mark_x, size.y - PAD.y), GameTheme.MUTED, MARK_WIDTH)
-	# The words beside the marker, a line each (the field's air under the reach, AUD2), kept inside the box.
+	# The words beside the marker, kept inside the box; a second line (the field's air, AUD2) sits in the box's lower
+	# left corner, under the flight's level part, clear of the aim line the first one stands over.
 	var font := GameTheme.font(800)
 	var lines := _label.split("\n")
-	var words_width := 0.0
-	for line in lines:
-		words_width = maxf(words_width, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x)
+	var words_width := font.get_string_size(lines[0], HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x
 	var at_x := mark_x + LABEL_GAP
 	if at_x + words_width > size.x - PAD.x:
 		at_x = maxf(PAD.x, mark_x - LABEL_GAP - words_width)
-	for i in lines.size():
-		draw_string(font, Vector2(at_x, top + LABEL_TOP + LABEL_SIZE * (i + 1) + LABEL_LEADING * i), lines[i],
-				HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, GameTheme.TEXT)
+	draw_string(font, Vector2(at_x, top + LABEL_TOP + LABEL_SIZE), lines[0], HORIZONTAL_ALIGNMENT_LEFT, -1,
+			LABEL_SIZE, GameTheme.TEXT)
+	for i in range(1, lines.size()):
+		var up := lines.size() - 1 - i
+		draw_string(font, Vector2(PAD.x, size.y - PAD.y - (LABEL_SIZE + LABEL_LEADING) * up), lines[i],
+				HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, GameTheme.MUTED)
