@@ -3,9 +3,15 @@ extends GutTest
 ## cover: no bot reads them, and your own vault and climb read the level, not the grid), a skipped round's figures are
 ## not posed under its cover and snap to their pose when it lifts, a menu's part pictures come out of one instance of
 ## each parts file a frame (ReplicaParts.keep, the same nodes as a plain take's and inside's), and LogTail reads only a
-## log's end and counts the rest of its lines a piece at a time.
+## log's end and counts the rest of its lines a piece at a time, and the parts files keep their wear mask beside them
+## (tools/blender/replicas/glb_images.py), not inside them a second time against their cap.
 
 const LOG_ROOT := "user://test-aud2-perf-logs"
+const PARTS_DIR := "res://assets/models/replicaParts/"
+## A glb's header and its first chunk's (bytes), and the JSON chunk's type.
+const GLB_HEADER := 12
+const CHUNK_HEADER := 8
+const JSON_CHUNK := 0x4E4F534A
 
 
 func _free(taken: Dictionary[StringName, Node3D]) -> void:
@@ -162,6 +168,52 @@ func test_a_log_over_several_count_pieces_is_counted_whole() -> void:
 	assert_eq(t.lines()[LogTail.LINES - 1], "the last, no newline")
 	assert_eq(t.lines()[LogTail.LINES - 2], "line %d" % lines)
 	assert_true(t.recent_lines()[0].begins_with("line "), "whole lines only")
+
+
+# --- The parts files' images ---
+
+
+## `path`'s glTF JSON (its first chunk), or {} if it is not a glb.
+func _glb_json(path: String) -> Dictionary:
+	var bytes := FileAccess.get_file_as_bytes(path)
+	if bytes.size() < GLB_HEADER + CHUNK_HEADER or bytes.decode_u32(GLB_HEADER + 4) != JSON_CHUNK:
+		return {}
+	var length := bytes.decode_u32(GLB_HEADER)
+	var text := bytes.slice(GLB_HEADER + CHUNK_HEADER, GLB_HEADER + CHUNK_HEADER + length).get_string_from_utf8()
+	var parsed: Variant = JSON.parse_string(text)
+	return parsed if parsed is Dictionary else {}
+
+
+func test_no_parts_file_carries_an_image_inside_it() -> void:
+	var looked := 0
+	for f: String in DirAccess.get_files_at(PARTS_DIR):
+		if not f.ends_with(".glb"):
+			continue
+		var doc := _glb_json(PARTS_DIR + f)
+		assert_false(doc.is_empty(), "%s reads" % f)
+		var images: Array = doc.get("images", [])
+		for image: Dictionary in images:
+			assert_false(image.has("bufferView"), "%s: %s is not inside the file" % [f, image.get("name")])
+			assert_true(FileAccess.file_exists(PARTS_DIR + String(image.get("uri", ""))), "%s: its %s beside it" % [f,
+					image.get("name")])
+		looked += 1
+	assert_gt(looked, 0)
+
+
+func test_the_parts_files_masks_still_reach_their_materials() -> void:
+	for id: String in ["aeg", "pistol"]:
+		var scene := (load(PARTS_DIR + id + ".glb") as PackedScene).instantiate()
+		var mask := load(PARTS_DIR + id + "_wear.png") as Texture2D
+		var found := 0
+		for node: Node in scene.find_children("*", "MeshInstance3D", true, false):
+			var mesh := (node as MeshInstance3D).mesh
+			for i in mesh.get_surface_count():
+				var m := mesh.surface_get_material(i) as BaseMaterial3D
+				if m != null and m.ao_texture != null:
+					assert_eq(m.ao_texture, mask, "%s %s: the mask beside the file" % [id, node.name])
+					found += 1
+		assert_gt(found, 0, "%s: its masked surfaces" % id)
+		scene.free()
 
 
 ## The parts of `slot` the AEG's parts file holds, by Key.

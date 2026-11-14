@@ -9,4 +9,7 @@ models. The attachments (optics, grips, silencers, laser, torch) are built from 
 with its outer extension) by `tools/blender/parts/barrels.py` (BA1), what they put inside the rifle in
 `inside/aeg.glb` (drawn only in the part's own picture); the Sniper Rifle's file from the AEG's by
 `tools/blender/replicas/sniper.py`.
+A file's images (the AEG's and the GBB Pistol's wear masks, `<id>_wear.png`) sit beside it, named by its uri, not
+inside it: `tools/blender/replicas/hardsurface.py`'s export moves them out (`glb_images.py`, AUD2), so a mask does not
+count twice against the file's 4 MiB cap.
 Record every file in [docs/ASSETS.md](../../../docs/ASSETS.md).
