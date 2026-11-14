@@ -857,13 +857,25 @@ func _baked_mesh() -> ArrayMesh:
 
 ## The baked tiles where SiteSurface.core_of draws them (a sandbag stack's own box inside its bags).
 func _site_cores(t: GreyboxFaces.Tiles) -> void:
-	for i in map.blocks.size():
-		var core := SiteSurface.core_of(_site, map.blocks[i], map)
-		if core == Transform3D.IDENTITY:
-			continue
-		for v in t.blocks.size():
-			if t.blocks[v] == i:
-				t.positions[v] = core * t.positions[v]
+	# Each block's core once, then one pass over the vertices (it was every vertex again for every cored block: about
+	# seven million steps on Depot each time the baked mesh was built).
+	var count := map.blocks.size()
+	var cores: Array[Transform3D] = []
+	cores.resize(count)
+	var cored := PackedByteArray()
+	cored.resize(count)
+	var any := false
+	for i in count:
+		cores[i] = SiteSurface.core_of(_site, map.blocks[i], map)
+		if cores[i] != Transform3D.IDENTITY:
+			cored[i] = 1
+			any = true
+	if not any:
+		return
+	for v in t.blocks.size():
+		var i := t.blocks[v]
+		if i >= 0 and i < count and cored[i] == 1:
+			t.positions[v] = cores[i] * t.positions[v]
 
 
 ## The baked tiles' custom channels: each of the `n` tile vertices its block's (`blocks`), then the ground's four.

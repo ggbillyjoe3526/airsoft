@@ -18,8 +18,14 @@ class Piece:
 		var arrays := mesh.surface_get_arrays(0)
 		verts = arrays[Mesh.ARRAY_VERTEX]
 		normals = arrays[Mesh.ARRAY_NORMAL]
-		colours = arrays[Mesh.ARRAY_COLOR]
-		indices = arrays[Mesh.ARRAY_INDEX]
+		# A model exported with no vertex colours or no index holds null there, which a typed array won't take: the
+		# fallbacks below fill them in.
+		var raw_colours: Variant = arrays[Mesh.ARRAY_COLOR]
+		if raw_colours != null:
+			colours = raw_colours
+		var raw_indices: Variant = arrays[Mesh.ARRAY_INDEX]
+		if raw_indices != null:
+			indices = raw_indices
 		if indices.is_empty():
 			for i in verts.size():
 				indices.append(i)

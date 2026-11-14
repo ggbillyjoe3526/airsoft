@@ -311,12 +311,17 @@ static func _look(b: MapData.Block, top: float, base: float, h: float, upper: bo
 static func _bases(map: MapData, cfg: MinimapConfig) -> PackedFloat64Array:
 	var out := PackedFloat64Array()
 	out.resize(map.blocks.size())
+	# The floors and ramps once: against every block for every block it was 2.3 million steps on Subway's 1,531.
+	var floors: Array[MapData.Block] = []
+	for f in map.blocks:
+		if _is_floor(f):
+			floors.append(f)
 	for i in map.blocks.size():
 		var b := map.blocks[i]
 		var bottom := b.center.y - b.size.y * 0.5
 		var best := -INF
-		for f in map.blocks:
-			if f == b or not _is_floor(f) or not _holds(f, b.center.x, b.center.z):
+		for f in floors:
+			if f == b or not _holds(f, b.center.x, b.center.z):
 				continue
 			var top := _floor_top(f, b.center.x, b.center.z)
 			if top <= bottom + cfg.floor_contact:
