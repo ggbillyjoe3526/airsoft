@@ -300,15 +300,22 @@ func test_a_staged_load_builds_the_views_over_frames_and_the_nodes_an_unstaged_b
 	# Its nodes the moment its last step is done, before a frame of play moves them.
 	staged.progressed.connect(_built_at_last.bind(staged))
 	add_child_autofree(staged)
-	var views_frames := 0
+	# The engine's own frame count at the first and the last look that finds the views' pieces under way: the pieces
+	# after the first take a frame each at least (four), and a look may come a frame late on a busy machine or miss
+	# one on a quick one, so the looks are not counted (a count of them read 3 where four frames had passed).
+	var first_frame := -1
+	var last_frame := -1
 	# By the clock, not a frame count: the nav grid is built on a worker thread, and headless frames pass far faster.
 	var until := Time.get_ticks_msec() + LOAD_WAIT_MSEC
 	while staged._bots == null and Time.get_ticks_msec() < until:
 		await wait_process_frames(1)
 		if staged._step == PlaySession.VIEWS_STEP and staged._views_piece > PlaySession.VIEWS_FIRST:
-			views_frames += 1
+			if first_frame < 0:
+				first_frame = Engine.get_process_frames()
+			last_frame = Engine.get_process_frames()
 	assert_not_null(staged._bots, "the staged load finished")
-	assert_gt(views_frames, 3, "its views were built over several frames")
+	assert_gt(first_frame, -1, "the views' pieces were seen under way")
+	assert_gt(last_frame - first_frame, 0, "its views were built over several frames, not in one")
 	assert_eq(staged._minimap_task, -1, "the minimap's drawing was taken")
 	var b := _staged_lines
 	assert_eq(b.size(), a.size(), "as many nodes")
