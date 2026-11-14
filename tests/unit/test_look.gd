@@ -191,7 +191,9 @@ func test_a_model_is_worn_only_when_its_material_asks() -> void:
 			"clean by default: the greybox, bushes, woods and flags")
 	var worn := LookMaterials.vertex_colour(0.4, 0.0, Color.WHITE, false, 0.7)
 	assert_almost_eq(worn.get_shader_parameter(&"wear") as float, 0.7, 0.0001)
-	var code := LookMaterials.VERTEX_SHADER.code
+	# The wear is one include the models' shader and the doors' share (AUD1).
+	assert_true(LookMaterials.VERTEX_SHADER.code.contains("look_wear.gdshaderinc"), "the models' shader includes the wear")
+	var code := FileAccess.get_file_as_string("res://game/play/look/look_wear.gdshaderinc")
 	for global: String in ["look_wear", "look_grime", "look_dust"]:
 		assert_true(code.contains("global uniform") and code.contains(global), "the shader reads %s" % global)
 	assert_true(code.contains("wear * look_wear"), "a material's wear scaled by the look's")
