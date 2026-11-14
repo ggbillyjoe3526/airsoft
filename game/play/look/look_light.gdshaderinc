@@ -7,6 +7,8 @@
 // [shader_globals], set by LookConfig.push_globals), so every map's materials follow one place. Ambient light,
 // global illumination and reflections are the engine's and come on top.
 
+#include "res://game/play/look/look_colour.gdshaderinc"
+
 global uniform vec4 look_shade;
 global uniform float look_band;
 global uniform float look_band_soft;

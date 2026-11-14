@@ -195,7 +195,7 @@ void fragment() {
 			vec2 uv = c / slab_set.x;
 			float grain = max(grit, slab_grain);
 			if (grain > 0.0) {
-				float t = dot(texture(slab_col, uv).rgb, vec3(0.299, 0.587, 0.114));
+				float t = dot(LOOK_LINEAR(texture(slab_col, uv).rgb), vec3(0.299, 0.587, 0.114));
 				col *= mix(1.0, t / slab_set.w, slab_set.y * grain);
 				if (!low) {
 					n = photo_relief(slab_nrm, uv, n, along, top, slab_set.z);
@@ -299,7 +299,7 @@ void fragment() {
 		vec2 uv = c / ply_set.x;
 		col = paint * gr(0.9 + 0.14 * low_f);
 		if (grit > 0.0) {
-			float t = dot(texture(ply_col, uv).rgb, vec3(0.299, 0.587, 0.114));
+			float t = dot(LOOK_LINEAR(texture(ply_col, uv).rgb), vec3(0.299, 0.587, 0.114));
 			col *= mix(1.0, t / ply_set.w, ply_set.y * grit);
 			if (!low) {
 				n = photo_relief(ply_nrm, uv, n, along, top, ply_set.z);
@@ -430,7 +430,8 @@ void fragment() {
 		col *= mix(1.0 - gradient, 1.0, clamp(h / gradient_height, 0.0, 1.0));
 	}
 
-	ALBEDO = look_paint(col * ((flags & FLAG_TINT) != 0 ? vec3(1.0) : tint_in));
+	// every colour here is linear (SiteSurface hands its paints over so); LOOK_ALBEDO gives it to either renderer
+	ALBEDO = LOOK_ALBEDO(look_paint(col * ((flags & FLAG_TINT) != 0 ? vec3(1.0) : tint_in)));
 	ROUGHNESS = r;
 	METALLIC = m;
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);

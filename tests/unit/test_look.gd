@@ -176,7 +176,10 @@ func test_the_shared_materials_draw_in_the_shared_light() -> void:
 			"res://game/play/site/site_surface.gdshader", "res://game/play/door_leaf.gdshader"]:
 		var code := (load(path) as Shader).code
 		assert_true(code.contains("look_light.gdshaderinc"), "%s includes the light" % path)
-		assert_true(code.contains("ALBEDO = look_paint("), "%s draws its paint through look_paint" % path)
+		# handed over linear on either renderer (look_colour.gdshaderinc's LOOK_ALBEDO) where the shader sums in linear
+		assert_true(code.contains("ALBEDO = look_paint(") or code.contains("ALBEDO = LOOK_ALBEDO(look_paint(")
+				or (code.contains("albedo = look_paint(") and code.contains("ALBEDO = LOOK_ALBEDO(albedo)")),
+				"%s draws its paint through look_paint" % path)
 	assert_almost_eq(m.get_shader_parameter(&"roughness") as float, 0.4, 0.0001)
 	assert_almost_eq(m.get_shader_parameter(&"metallic") as float, 0.2, 0.0001)
 

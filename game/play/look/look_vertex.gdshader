@@ -85,8 +85,10 @@ void vertex() {
 
 void fragment() {
 	vec3 own = COLOR.rgb;
-	if (srgb_colours && !OUTPUT_IS_SRGB) {
-		own = mix(pow((own + vec3(0.055)) * (1.0 / 1.055), vec3(2.4)), own * (1.0 / 12.92), lessThan(own, vec3(0.04045)));
+	// linear on either renderer (look_light.gdshaderinc's LOOK_ALBEDO hands it back to Compatibility as sRGB)
+	if (srgb_colours) {
+		own = OUTPUT_IS_SRGB ? look_srgb_to_linear(own)
+				: mix(pow((own + vec3(0.055)) * (1.0 / 1.055), vec3(2.4)), own * (1.0 / 12.92), lessThan(own, vec3(0.04045)));
 	}
 	// Metres a pixel across the strip, either way (fwidth outside the branch: every pixel of a quad takes the same).
 	float pixel = max(max(fwidth(perforation.x), fwidth(perforation.y)), 1e-5);
@@ -106,9 +108,9 @@ void fragment() {
 		own *= mix(1.0, rib_shade, groove);
 	}
 	if (use_sheet) {
-		own *= texture(sheet, UV).rgb;
+		own *= LOOK_LINEAR(texture(sheet, UV).rgb);
 	}
-	vec3 col = own * paint * tint.rgb;
+	vec3 col = own * paint * LOOK_LINEAR(tint.rgb);
 	float rough = roughness;
 	float worn = wear * look_wear;
 	// Uniform (a material's and the look's), so fwidth inside is safe and a clean model pays nothing.
@@ -137,10 +139,11 @@ void fragment() {
 		col = mix(col, look_dust.rgb, dust * wear_strengths.w * worn);
 		rough = mix(rough, 1.0, max(foot, dust) * worn);
 	}
-	ALBEDO = look_paint(col);
+	vec3 albedo = look_paint(col);
 	if (keep_by_alpha) {
-		ALBEDO = mix(ALBEDO, col, COLOR.a);
+		albedo = mix(albedo, col, COLOR.a);
 	}
+	ALBEDO = LOOK_ALBEDO(albedo);
 	ROUGHNESS = rough;
 	METALLIC = metallic;
 	SPECULAR = specular;

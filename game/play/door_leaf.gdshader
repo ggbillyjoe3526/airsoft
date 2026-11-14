@@ -23,7 +23,7 @@ void vertex() {
 }
 
 void fragment() {
-	ALBEDO = look_paint(tint.rgb * lit);
+	ALBEDO = LOOK_ALBEDO(look_paint(LOOK_LINEAR(tint.rgb) * lit));
 	ROUGHNESS = roughness;
 	METALLIC = metallic;
 }
