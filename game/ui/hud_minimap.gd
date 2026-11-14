@@ -44,9 +44,10 @@ var _corner: Vector2 = Vector2.ZERO
 
 ## Builds the panel for `map` (its field drawn now, once: call this behind the loading screen, never per frame) with
 ## `heard`'s patches and `map_name` in its caption, its top left `corner` px from the screen's. `capacity` is the most
-## characters a match has.
+## characters a match has. `field` is its drawing if already made (MinimapField.build for `map` and `cfg`, as PlaySession
+## makes it off the main thread), else it is drawn here.
 func setup(cfg: MinimapConfig, teams: TeamConfig, map: MapData, heard: MinimapHearing, map_name: String,
-		capacity: int, corner: Vector2) -> void:
+		capacity: int, corner: Vector2, field: MinimapField = null) -> void:
 	_cfg = cfg
 	_corner = corner
 	_teams = teams
@@ -62,7 +63,7 @@ func setup(cfg: MinimapConfig, teams: TeamConfig, map: MapData, heard: MinimapHe
 	offset_top = corner.y
 	offset_right = corner.x + cfg.size
 	offset_bottom = corner.y + cfg.size + cfg.caption_room
-	_field = MinimapField.build(map, cfg)
+	_field = field if field != null else MinimapField.build(map, cfg)
 	_textures = textures_of(_field)
 	_ground = ground_of(_field)
 	_view = View.new()

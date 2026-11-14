@@ -4,9 +4,15 @@ extends GutTest
 ## not posed under its cover and snap to their pose when it lifts, a menu's part pictures come out of one instance of
 ## each parts file a frame (ReplicaParts.keep, the same nodes as a plain take's and inside's), and LogTail reads only a
 ## log's end and counts the rest of its lines a piece at a time, and the parts files keep their wear mask beside them
-## (tools/blender/replicas/glb_images.py), not inside them a second time against their cap.
+## (tools/blender/replicas/glb_images.py), not inside them a second time against their cap. A staged load builds the
+## views step a piece a frame (the figures and their bodies in slices, the minimap's drawing on a worker thread) and the
+## wood a piece a dressing part, and ends with the nodes an unstaged build makes.
 
 const LOG_ROOT := "user://test-aud2-perf-logs"
+## A node named by the engine (@Class@number): its number differs from one build to the next.
+## A staged session's nodes once built (_built_at_last).
+var _staged_lines := PackedStringArray()
+static var _auto_name: RegEx = RegEx.create_from_string("@(\\w+)@\\d+")
 const PARTS_DIR := "res://assets/models/replicaParts/"
 ## A glb's header and its first chunk's (bytes), and the JSON chunk's type.
 const GLB_HEADER := 12
@@ -214,6 +220,108 @@ func test_the_parts_files_masks_still_reach_their_materials() -> void:
 					found += 1
 		assert_gt(found, 0, "%s: its masked surfaces" % id)
 		scene.free()
+
+
+# --- The loading screen's pieces ---
+
+
+## A line for each node under `node` (its path and class; with `places` its place and each multimesh's instances), so
+## two builds can be compared.
+func _tree_lines(node: Node, out: PackedStringArray, places: bool = true) -> void:
+	for child: Node in node.get_children():
+		var line := "%s %s" % [_auto_name.sub(String(node.get_path_to(child)), "@$1@", true), child.get_class()]
+		if places and child is Node3D:
+			line += " %s" % (child as Node3D).transform
+		if places and child is MultiMeshInstance3D:
+			var mm := (child as MultiMeshInstance3D).multimesh
+			line += " %d" % mm.instance_count
+			for i in mini(mm.instance_count, 8):
+				line += " %s" % mm.get_instance_transform(i)
+		out.append(line)
+		_tree_lines(child, out, places)
+
+
+func _built_at_last(step: int, steps: int, _key: String, session: PlaySession) -> void:
+	if step == steps:
+		_staged_lines.clear()
+		_tree_lines(session, _staged_lines, false)
+
+
+func _session(staged: bool) -> PlaySession:
+	var session := PlaySession.new()
+	session.settings = Settings.new(PlayTuning.new())
+	session.map_id = "depot"
+	session.match_seed = 7
+	session.autopilot = true
+	session.staged = staged
+	add_child_autofree(session)
+	return session
+
+
+func test_a_wood_built_a_piece_at_a_time_is_the_wood_built_at_once() -> void:
+	var play := PlayTuning.load_default()
+	var m := MapData.load_map("woodland", play.map_style, 1)
+	for night: bool in [false, true]:
+		var light := play.lighting.duplicate() as LightingConfig
+		light.night = night
+		var whole := WoodsView.build(m, play.woods, play.skyline, light, play.map_style, play.site_look.props)
+		var view := WoodsView.begin(m, play.woods, play.skyline, light, play.map_style, play.site_look.props)
+		for piece in WoodsView.PIECES:
+			view.build_piece(piece)
+		view = WoodsView.finish(view)
+		var a := PackedStringArray()
+		var b := PackedStringArray()
+		_tree_lines(whole, a)
+		_tree_lines(view, b)
+		assert_gt(a.size(), 3, "night %s: Woodland's wood has its parts" % night)
+		assert_eq(b, a, "night %s: the same nodes, places and instances" % night)
+		whole.free()
+		view.free()
+	var bare := WoodsView.begin(MapData.load_map("depot", play.map_style, 1), play.woods, play.skyline, play.lighting,
+			play.map_style)
+	for piece in WoodsView.PIECES:
+		bare.build_piece(piece)
+	assert_null(WoodsView.finish(bare), "no wood on a field without trees")
+
+
+func test_a_staged_load_builds_the_views_over_frames_and_the_nodes_an_unstaged_build_makes() -> void:
+	var whole := _session(false)
+	var a := PackedStringArray()
+	# Their places move with their first frames: what is built is compared, the wood's places above.
+	_tree_lines(whole, a, false)
+	var staged := PlaySession.new()
+	staged.settings = Settings.new(PlayTuning.new())
+	staged.map_id = "depot"
+	staged.match_seed = 7
+	staged.autopilot = true
+	staged.staged = true
+	# Its nodes the moment its last step is done, before a frame of play moves them.
+	staged.progressed.connect(_built_at_last.bind(staged))
+	add_child_autofree(staged)
+	var frames := 0
+	var views_frames := 0
+	while staged._bots == null and frames < 3000:
+		await wait_process_frames(1)
+		frames += 1
+		if staged._step == PlaySession.VIEWS_STEP and staged._views_piece > PlaySession.VIEWS_FIRST:
+			views_frames += 1
+	assert_not_null(staged._bots, "the staged load finished")
+	assert_gt(views_frames, 3, "its views were built over several frames")
+	assert_eq(staged._minimap_task, -1, "the minimap's drawing was taken")
+	var b := _staged_lines
+	assert_eq(b.size(), a.size(), "as many nodes")
+	var differ := 0
+	for i in mini(a.size(), b.size()):
+		if a[i] != b[i]:
+			differ += 1
+			if differ < 4:
+				assert_eq(b[i], a[i], "node %d" % i)
+	assert_eq(differ, 0, "the same nodes in the same order")
+	var fa := whole._hud.minimap()._field
+	var fb := staged._hud.minimap()._field
+	assert_eq(fb.layers.size(), fa.layers.size())
+	for i in fa.layers.size():
+		assert_eq(fb.layers[i].get_data(), fa.layers[i].get_data(), "the minimap's storey %d drawn the same" % i)
 
 
 ## The parts of `slot` the AEG's parts file holds, by Key.

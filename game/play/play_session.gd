@@ -68,7 +68,11 @@ const LEAVE_KEY := "LOAD_LEAVING"
 const LEVEL_STEP := 1
 const VIEWS_STEP := 3
 const BUILD_SLICE_USEC := 25000
-const DRESS_PARTS := 6
+const DRESS_PARTS := 9
+## The dressing's first part building the wood (WoodsView.PIECES of them, one a part).
+const WOODS_PART := 3
+## The views step's pieces (`_build_views_piece`), in order.
+enum { VIEWS_FIRST, VIEWS_FIGURES, VIEWS_BETWEEN, VIEWS_BODIES, VIEWS_REST, VIEWS_DONE }
 ## The teams' numbers in the simulation: Alpha 0, Beta 1.
 const TEAM_ALPHA := 0
 const TEAM_BETA := 1
@@ -244,6 +248,22 @@ var _cover_task: int = -1
 var _cover_out: Array[BotCover.Found] = []
 var _cover: BotCover.Found = null
 var _first_frame_due: bool = false
+## Staged, the views step a piece a frame (AUD2: built in one call it stopped the loading screen 0.7 to 1.5 s): the
+## views before the figures, the figures BUILD_SLICE_USEC a frame (one at least), their models, their bodies as the
+## figures, the rest, then the start; the same views in the same order as built at once. The piece under way, and the
+## next figure in it.
+var _views_piece: int = VIEWS_FIRST
+var _views_next: int = 0
+## Read by the views step's later pieces: the replica colours' look, the figures' contact shadow and sign font, and the
+## range's materials (practice).
+var _view_realistic: bool = false
+var _view_contact: PlaneMesh = null
+var _view_font: Font = null
+var _view_materials: Array[Material] = []
+## Staged: the worker thread task drawing the minimap's field (MinimapField.build, pure data; -1: none under way), started
+## with the views step, and where it puts the drawing.
+var _minimap_task: int = -1
+var _minimap_out: Array[MinimapField] = []
 ## Left from the loading screen (leave_loading), and whether `left` was said for it.
 var _leaving: bool = false
 var _left_said: bool = false
@@ -470,12 +490,19 @@ func _dress_part(part: int) -> void:
 			_station_fixtures = StationFixtures.build(_map, _play.station_fixtures)
 			if _station_fixtures != null:
 				add_child(_station_fixtures)
-		3:
-			_woods = WoodsView.build(_map, _play.woods, _play.skyline, _light, _play.map_style,
-					_play.site_look.props)
-			if _woods != null:
-				add_child(_woods)
-		4:
+		3, 4, 5, 6:
+			# The wood a piece a part, WOODS_PART on (WoodsView.PIECES of them: its tufts and its floor took 0.2 to
+			# 0.3 s each on Woodland).
+			var piece := part - WOODS_PART
+			if piece == 0:
+				_woods = WoodsView.begin(_map, _play.woods, _play.skyline, _light, _play.map_style,
+						_play.site_look.props)
+			_woods.build_piece(piece)
+			if piece == WoodsView.PIECES - 1:
+				_woods = WoodsView.finish(_woods)
+				if _woods != null:
+					add_child(_woods)
+		7:
 			_bushes = BushView.build(_map, _play.woods)
 			if _bushes != null:
 				add_child(_bushes)
@@ -485,7 +512,7 @@ func _dress_part(part: int) -> void:
 			_marks = WearMarks.build(_map, _play.marks, _play.look)
 			if _marks != null:
 				add_child(_marks)
-		5:
+		8:
 			# What the tall solid blocks hide is left out of the frame with Occlusion culling on (GraphicsApply.apply).
 			_occluders = MapOccluders.build(_map, _play.map_style)
 			if _occluders != null:
@@ -514,9 +541,8 @@ func _build_teams() -> void:
 func _build_views_and_start() -> void:
 	if not _map.ok():
 		return
-	if practice:
-		_lay_out_targets(_map)
-	_build_views(_ui)
+	while not _build_views_piece(0):
+		pass
 	# With the pilot on, a bot plays your character too.
 	var nobody := -1
 	var levels: Dictionary[int, StringName] = {player_team: teammates_level(), opponent_team(): difficulty}
@@ -557,7 +583,7 @@ func _build_views_and_start() -> void:
 	_hud.set_match_tail(tr("SUM_MATCH_TAIL") % [map_name, bots])
 	# A field's minimap in practice too (nobody to hear); the range is a corridor you see whole.
 	if not _on_range:
-		_hud.setup_minimap(_map, _play.minimap, _heard, map_name, state.characters.size())
+		_hud.setup_minimap(_map, _play.minimap, _heard, map_name, state.characters.size(), _take_minimap())
 	if not (staged and wait_for_go):
 		_capture()
 
@@ -593,6 +619,8 @@ func _advance_build() -> void:
 		_dressed += 1
 	elif _step == VIEWS_STEP and _map.ok() and not _prepare_bots():
 		return
+	elif _step == VIEWS_STEP and _map.ok() and _views_piece < VIEWS_DONE:
+		_build_views_piece(Time.get_ticks_usec() + BUILD_SLICE_USEC)
 	else:
 		_build_step()
 	if _step >= STEP_KEYS.size():
@@ -645,6 +673,20 @@ func _bot_options() -> BotController.Options:
 static func _find_cover(out: Array[BotCover.Found], map: MapData, nav: NavGrid, cfg: BotConfig,
 		tuning: SimTuning) -> void:
 	out.append(BotCover.find_cover(map, nav, cfg, tuning))
+
+
+## On a worker thread: `map`'s minimap drawing into `out` (MinimapField.build; pure data, the map only read).
+static func _draw_minimap(out: Array[MinimapField], map: MapData, cfg: MinimapConfig) -> void:
+	out.append(MinimapField.build(map, cfg))
+
+
+## The worker thread's minimap drawing once its task is done (null without one: the HUD draws it).
+func _take_minimap() -> MinimapField:
+	if _minimap_task < 0:
+		return null
+	WorkerThreadPool.wait_for_task_completion(_minimap_task)
+	_minimap_task = -1
+	return _minimap_out.pop_back() if not _minimap_out.is_empty() else null
 
 
 ## On a worker thread: `map`'s nav grid into `out`. Pure data (NavGrid's contract), so nothing else is touched.
@@ -849,7 +891,46 @@ func _keep_challenge_run() -> void:
 		r.save_if_dirty(records_path)
 
 
-func _build_views(ui: CanvasLayer) -> void:
+## The views step's next piece (`_views_piece`): the figures and their bodies until `until_usec` (Time.get_ticks_usec)
+## has passed, one at least (0: all of them). True once every view is built.
+func _build_views_piece(until_usec: int) -> bool:
+	match _views_piece:
+		VIEWS_FIRST:
+			if practice:
+				_lay_out_targets(_map)
+			if staged and not _on_range:
+				_minimap_out.clear()
+				_minimap_task = WorkerThreadPool.add_task(_draw_minimap.bind(_minimap_out, _map, _play.minimap), false,
+						"Minimap")
+			_build_views_first()
+			_views_piece += 1
+		VIEWS_FIGURES:
+			while _views_next < state.characters.size():
+				_build_figure(state.characters[_views_next])
+				_views_next += 1
+				if until_usec > 0 and Time.get_ticks_usec() >= until_usec and _views_next < state.characters.size():
+					return false
+			_views_next = 0
+			_views_piece += 1
+		VIEWS_BETWEEN:
+			_build_views_between()
+			_views_piece += 1
+		VIEWS_BODIES:
+			while _views_next < _figures.size():
+				_fit_body(_figures[_views_next])
+				_views_next += 1
+				if until_usec > 0 and Time.get_ticks_usec() >= until_usec and _views_next < _figures.size():
+					return false
+			_views_next = 0
+			_views_piece += 1
+		VIEWS_REST:
+			_build_views_rest(_ui)
+			_views_piece += 1
+	return _views_piece >= VIEWS_DONE
+
+
+## The views before the figures: your input, eyes and hands, the BBs' and the effects' views, the range's (practice).
+func _build_views_first() -> void:
 	_input = PlayerInput.new()
 	_input.name = "PlayerInput"
 	_input.setup(_play.controls, _tuning.movement.max_pitch)
@@ -863,7 +944,8 @@ func _build_views(ui: CanvasLayer) -> void:
 	_eyes.camera.add_child(_hands)
 	# Replica and team colours are read once a match: a change in Settings applies from the next.
 	var chosen := settings if settings != null else Settings.shared()
-	var realistic := chosen.realistic_colours
+	_view_realistic = chosen.realistic_colours
+	var realistic := _view_realistic
 	_colours = team_colours_for(chosen, _light, _play.teams)
 	_hands.setup(_play.viewmodel, player.armament.replicas, _level.query(), kit.paints, realistic,
 			kit.parts_under(_light.night), _play.view, _eyes.camera)
@@ -883,9 +965,10 @@ func _build_views(ui: CanvasLayer) -> void:
 	_kicked = KickedDust.new()
 	_kicked.setup(_play.effects, _map.kicked_dust_tint, _map.kicked_dust_scale)
 	add_child(_kicked)
-	var contact := FigureView.contact_mesh(_play.effects)
-	var sign_font := GameTheme.font(800)
-	var range_materials: Array[Material] = []
+	_view_contact = FigureView.contact_mesh(_play.effects)
+	_view_font = GameTheme.font(800)
+	var sign_font := _view_font
+	_view_materials.clear()
 	if practice:
 		# The range's markings (its lines, lane signs and distance boards) stand only on the range.
 		if _on_range:
@@ -895,26 +978,33 @@ func _build_views(ui: CanvasLayer) -> void:
 		_targets_view = RangeTargetsView.new()
 		add_child(_targets_view)
 		_targets_view.setup(state.targets, _play.range_view, _tuning, sign_font)
-		range_materials = _targets_view.materials()
+		_view_materials = _targets_view.materials()
 	_figure_of.resize(state.characters.size())
-	# The figures' parts come out of one instance of each parts file, freed once they all stand.
+	# The figures' parts come out of one instance of each parts file, freed once they all stand (_build_views_between).
 	ReplicaParts.keep()
-	for c in state.characters:
-		if c.id == PLAYER_ID:
-			continue
-		var f := FigureView.new()
-		var parts: Array[Dictionary] = []
-		parts.assign(_bot_parts.get(c.id, []))
-		# At night its replicas carry the torch it lights (WL7), drawn on the figure too (BP7 row 69).
-		if not c.armament.lights.is_empty():
-			parts = FigureView.with_lights(parts, c.armament.lights, c.armament.replicas.size())
-		f.setup(c, _colours.figures.colours[c.team], _tuning.hits, sign_font, realistic, parts,
-				_colours.figures.glow, _play.figures)
-		f.set_world(_level.query(), _tuning.body)
-		add_child(f)
-		f.add_contact_shadow(contact, _play.effects)
-		_figures.append(f)
-		_figure_of[c.id] = f
+
+
+## Character `c`'s figure, when it is a bot (a piece of the views step: one a frame or more, staged).
+func _build_figure(c: Character) -> void:
+	if c.id == PLAYER_ID:
+		return
+	var f := FigureView.new()
+	var parts: Array[Dictionary] = []
+	parts.assign(_bot_parts.get(c.id, []))
+	# At night its replicas carry the torch it lights (WL7), drawn on the figure too (BP7 row 69).
+	if not c.armament.lights.is_empty():
+		parts = FigureView.with_lights(parts, c.armament.lights, c.armament.replicas.size())
+	f.setup(c, _colours.figures.colours[c.team], _tuning.hits, _view_font, _view_realistic, parts,
+			_colours.figures.glow, _play.figures)
+	f.set_world(_level.query(), _tuning.body)
+	add_child(f)
+	f.add_contact_shadow(_view_contact, _play.effects)
+	_figures.append(f)
+	_figure_of[c.id] = f
+
+
+## The views between the figures and their bodies: the torches and lasers, the figures' kinds and their models.
+func _build_views_between() -> void:
 	ReplicaParts.release()
 	if _light.night:
 		_torches = TorchBeams.new()
@@ -925,7 +1015,17 @@ func _build_views(ui: CanvasLayer) -> void:
 	add_child(_lasers)
 	_pick_kinds()
 	_figure_lines = _play.figures.zoomed_lines(_figure_detail, _figure_zoom)
-	var figure_materials := _build_bodies()
+	_load_bodies()
+
+
+## The rest of the views once every figure has its body: the magazines' and bombs' views, the field's poles, the
+## shader prewarm, the sound, the HUD and the pause menu.
+func _build_views_rest(ui: CanvasLayer) -> void:
+	var figure_materials := _bodies_materials()
+	var realistic := _view_realistic
+	var contact := _view_contact
+	var sign_font := _view_font
+	var range_materials := _view_materials
 	if not practice:
 		_mag_tosses = MagTossView.new()
 		add_child(_mag_tosses)
@@ -1596,6 +1696,8 @@ func _leave_when_idle() -> void:
 		return
 	if _cover_task >= 0 and not WorkerThreadPool.is_task_completed(_cover_task):
 		return
+	if _minimap_task >= 0 and not WorkerThreadPool.is_task_completed(_minimap_task):
+		return
 	_left_said = true
 	left.emit()
 
@@ -1743,6 +1845,10 @@ func _exit_tree() -> void:
 		WorkerThreadPool.wait_for_task_completion(_cover_task)
 		_cover_task = -1
 		_cover_out.clear()
+	if _minimap_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_minimap_task)
+		_minimap_task = -1
+		_minimap_out.clear()
 	ReplicaPaint.clear()
 	HeldMerge.clear()
 	# Nothing is held past the figures' build; a build cut short by an error must not leave a parts file instanced.
@@ -2343,14 +2449,23 @@ func _refresh_kinds() -> void:
 ## Every figure drawn as its kind (DECISIONS BD1, FI7): the models loaded once, here behind the loading screen, the
 ## thrown magazines' pool built with them, each figure given its body. Returns every material the figures can draw
 ## with (both kinds, both teams), for ShaderPrewarm. No figures (the range): nothing loaded.
-func _build_bodies() -> Array[Material]:
+func _load_bodies() -> void:
 	if _figures.is_empty():
-		return []
+		return
 	_figure_models = FigureModels.new(_play.figures)
 	_figure_models.load_kinds()
 	_build_thrown()
-	for f in _figures:
-		f.set_body(_figure_models, figure_kinds[f.character_id], _figure_lines)
+
+
+## Figure `f`'s body (a piece of the views step: one a frame or more, staged).
+func _fit_body(f: FigureView) -> void:
+	f.set_body(_figure_models, figure_kinds[f.character_id], _figure_lines)
+
+
+## The figures' materials, once each has its body (none without figures).
+func _bodies_materials() -> Array[Material]:
+	if _figures.is_empty():
+		return []
 	return _figure_models.materials(_colours.figures.colours, _colours.figures.glow)
 
 

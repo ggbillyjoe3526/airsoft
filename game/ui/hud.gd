@@ -451,14 +451,16 @@ func mag_line() -> HudMagLine:
 
 
 ## The minimap top left (HudMinimap) for `map`, its field drawn now: call it once in match setup, behind the loading
-## screen. `heard` is what your side heard of the other team, `map_name` goes in its caption. Not for the range.
-func setup_minimap(map: MapData, cfg: MinimapConfig, heard: MinimapHearing, map_name: String, characters: int) -> void:
+## screen. `heard` is what your side heard of the other team, `map_name` goes in its caption; `field` its drawing if
+## already made (HudMinimap.setup). Not for the range.
+func setup_minimap(map: MapData, cfg: MinimapConfig, heard: MinimapHearing, map_name: String, characters: int,
+		field: MinimapField = null) -> void:
 	_minimap = HudMinimap.new()
 	add_child(_minimap)
 	move_child(_minimap, _team_markers.get_index() + 1)
 	move_child(_flag_marker, _minimap.get_index()) # the map is drawn over the marker, never the other way round
 	move_child(_pings, _minimap.get_index())
-	_minimap.setup(cfg, _teams, map, heard, map_name, characters, _cfg.minimap_margin)
+	_minimap.setup(cfg, _teams, map, heard, map_name, characters, _cfg.minimap_margin, field)
 	HudStyle.restyle(_minimap, _opacity)
 	# Over the rest of the HUD while its key is held (the order wheel never opens with it).
 	_field_map = HudFieldMap.new()
