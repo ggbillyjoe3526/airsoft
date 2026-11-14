@@ -31,6 +31,7 @@ static func fill(g: NavGrid, map: MapData, cfg: NavConfig, body: BodyConfig) -> 
 	_stamp_low(g, map, r, body)
 	_stamp_drops(g, r, body.height * 0.5)
 	_stamp_outer_edge(g, r)
+	_bushes(g, map.foliage, cfg)
 	_link(g, 1.0 / maxf(cfg.search_greed, 1.0), map.water, cfg)
 	_open(g)
 	return true
@@ -308,11 +309,41 @@ static func _stamp_outer_edge(g: NavGrid, r: float) -> void:
 					g.walkable[k] = 0
 
 
+## Marks each node a body standing on would be in one of `leaves`' bushes (NavGrid.slow: a point cfg.bush_probe_height
+## over its floor inside a bush's ellipsoid, as Character.in_bush is tested), and keeps the bushes for the
+## string-pulling. Reads the bushes' arrays only (the grid may be built off the main thread).
+static func _bushes(g: NavGrid, leaves: Foliage, cfg: NavConfig) -> void:
+	if leaves == null or leaves.is_empty():
+		return
+	g.leaves = leaves
+	g.bush_probe = cfg.bush_probe_height
+	var slow := PackedByteArray()
+	slow.resize(g.floor_y.size())
+	for i in leaves.size():
+		var f := leaves.feet[i]
+		var r := leaves.radii[i]
+		var half := leaves.heights[i] * 0.5
+		var i0 := maxi(0, ceili((f.x - r - g.min_x) / g.cell - 0.5))
+		var i1 := mini(g.cols - 1, floori((f.x + r - g.min_x) / g.cell - 0.5))
+		var j0 := maxi(0, ceili((f.z - r - g.min_z) / g.cell - 0.5))
+		var j1 := mini(g.rows - 1, floori((f.z + r - g.min_z) / g.cell - 0.5))
+		for j in range(j0, j1 + 1):
+			var dz := (g.cell_z(j) - f.z) / r
+			for ci in range(i0, i1 + 1):
+				var dx := (g.cell_x(ci) - f.x) / r
+				var c := j * g.cols + ci
+				for k in range(g.cell_start[c], g.cell_start[c + 1]):
+					var dy := (g.floor_y[k] + cfg.bush_probe_height - f.y - half) / half
+					if dx * dx + dy * dy + dz * dz <= 1.0:
+						slow[k] = 1
+	g.slow = slow
+
+
 ## Each walkable node's eight steps (the node each neighbouring cell steps onto, walkable or not, or -1), which of them
 ## land on a walkable node (`step_mask`), the route search's points and links, each point weighted `weight` (below 1 the
 ## search's estimate counts for more than the steps it has taken: NavConfig), on a floor under `water`'s surface that
-## times `cfg`'s wade_cost where it is wade_from deep or more, else its splash_cost (WS1), and each node's region
-## (NavGrid.region).
+## times `cfg`'s wade_cost where it is wade_from deep or more, else its splash_cost (WS1), in a bush (NavGrid.slow)
+## times its bush_cost (a body is slowed there, BP8), and each node's region (NavGrid.region).
 static func _link(g: NavGrid, weight: float, water: Water = null, cfg: NavConfig = null) -> void:
 	var count := g.floor_y.size()
 	var cols := g.cols
@@ -360,6 +391,8 @@ static func _link(g: NavGrid, weight: float, water: Water = null, cfg: NavConfig
 	var astar := AStar3D.new()
 	astar.reserve_space(count)
 	var wet := water != null and not water.is_empty() and cfg != null
+	var slow := g.slow
+	var bushy := not slow.is_empty() and cfg != null
 	for k in count:
 		if walkable[k] == 1:
 			var at := g.node_position(k)
@@ -367,6 +400,8 @@ static func _link(g: NavGrid, weight: float, water: Water = null, cfg: NavConfig
 			var price := 1.0
 			if depth > 0.0:
 				price = cfg.wade_cost if depth >= cfg.wade_from else cfg.splash_cost
+			if bushy and slow[k] == 1:
+				price *= cfg.bush_cost
 			astar.add_point(k, at, weight * price)
 	# Union-find over the links, taken either way: a node's parent is never above it, so one pass in order flattens it.
 	var parent := PackedInt32Array()

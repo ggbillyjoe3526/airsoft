@@ -24,6 +24,11 @@ docs/ARCHITECTURE.md › Contracts 1).
   8,000 expansions) is `NavConfig.search_budget`, counted in searches since AStar3D runs one whole: one a tick, a
   walk-off due first (`Elimination.plan_walk_off_routes`), then the bots round-robin (`BotRoutes.plan`). `searches`
   counts them (WL2: at 6v6 on Woodland 2 to 3 a second, never a second in one tick).
+- **Bushes** (AUD2). A node a body standing on would be in a bush (`NavGrid.slow`, the point `bush_probe_height` over
+  its floor in a bush's ellipsoid, as `Character.in_bush`) is priced `NavConfig.bush_cost` (2: the slow, 1 / 0.75,
+  times the search's greed, which a smaller price hardly steers), and `NavRoute.pull` keeps a leg from crossing more
+  leaves than the path it straightens, so a route that went round a bush stays round it. A field with no bushes builds
+  and routes exactly as before.
 - **Regions** (WL1). The build labels each walkable node with the lowest node it is linked to on foot, either way
   (`NavGrid.region`, a union-find over the links); `NavVaults.link` joins the regions a vault link crosses
   (`vault_region`). `find_route` refuses a goal in another region at once, before the search: a search that fails

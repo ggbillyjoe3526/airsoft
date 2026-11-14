@@ -48,6 +48,12 @@ var step_mask: PackedByteArray = PackedByteArray()
 ## most 255) to the nearest cell that isn't, past the grid's edge counting as not open: every cell within open - 1 of it
 ## is open.
 var open: PackedByteArray = PackedByteArray()
+## Per node: 1 where a body standing on it is in a bush (BP8: slowed, so the search prices the step, NavConfig.bush_cost),
+## else 0; empty on a field with no bushes. `leaves` are those bushes, for the string-pulling (NavRoute).
+var slow: PackedByteArray = PackedByteArray()
+var leaves: Foliage = null
+## How high over a floor a body's point in a bush is tested (NavConfig.bush_probe_height).
+var bush_probe: float = 0.0
 ## The route search: a point per walkable node (id = node), linked by the step rules.
 var astar: AStar3D = null
 ## Vault links (NavVaults): node k's lead to nodes vault_to[vault_start[k]] .. vault_to[vault_start[k + 1] - 1]; link l

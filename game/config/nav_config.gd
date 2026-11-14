@@ -31,6 +31,14 @@ extends Resource
 @export var wade_cost: float = 8.0
 @export var splash_cost: float = 1.5
 @export var wade_from: float = 0.15
+## A step onto a floor inside a bush (BP8: Foliage.holds a point `bush_probe_height` over it) costs this many times a
+## clear one, as a body there moves at MovementConfig.bush_speed_scale of its pace. The search is greedy (search_greed),
+## and a price under the greed hardly steers it (a bush's 1 / 0.75 alone left every test route straight through), so
+## it is the slow times the greed: 1 / 0.75 x 1.5 = 2. Over 300 seeded Woodland routes (AUD2) the leaves walked fell
+## from 3.3 m a route to 0.9 m and the walking time, the slow counted, from 88.3 m to 87.7 m on average (1 / 0.75 alone:
+## 2.7 m and 88.1 m). `bush_probe_height` is MovementConfig.bush_probe_height (a test holds both to the movement's).
+@export var bush_cost: float = 2.0
+@export var bush_probe_height: float = 0.5
 ## Points random_walkable_near tries before it gives up and returns the point it was asked about.
 @export var hunt_tries: int = 8
 ## Route searches a tick, the bots' and the walk-offs' together (the browser's NAV.searchBudget, 8,000 node expansions,

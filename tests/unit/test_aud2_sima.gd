@@ -80,3 +80,90 @@ func test_a_fields_cell_it_cant_read_is_left_out_with_its_line() -> void:
 	assert_eq(k.kits[0].fields, BotKits.INDOOR, "any case")
 	assert_eq(k.problems.size(), 1)
 	assert_string_contains(k.problems[0], "Fields \"roof\"")
+
+
+# --- Bushes priced on the nav grid (KNOWN_ISSUES: bots walk through a bush where going round is quicker) ---
+
+
+## A flat 30 m floor with a bush of `radius` (2 m tall) at the middle, when `bushy`.
+static func _bush_field(bushy: bool, radius: float) -> MapData:
+	var m := MapData.new()
+	m.id = "test"
+	var floor_block := MapData.Block.new()
+	floor_block.kind = &"floor"
+	floor_block.center = Vector3(0.0, -0.1, 0.0)
+	floor_block.size = Vector3(30.0, 0.2, 30.0)
+	m.blocks = [floor_block] as Array[MapData.Block]
+	if bushy:
+		m.foliage.add(Vector3.ZERO, radius, 2.0)
+	return m
+
+
+## How far `route` (from `start`) runs through `leaves` at a body's bush height.
+static func _leaves_walked(leaves: Foliage, start: Vector3, route: PackedVector3Array, probe: float) -> float:
+	var total := 0.0
+	var from := start
+	for p in route:
+		total += leaves.depth(from + Vector3.UP * probe, p + Vector3.UP * probe)
+		from = p
+	return total
+
+
+static func _length(start: Vector3, route: PackedVector3Array) -> float:
+	var total := 0.0
+	var from := start
+	for p in route:
+		total += from.distance_to(p)
+		from = p
+	return total
+
+
+func test_the_grids_bush_price_is_the_movements_slow() -> void:
+	assert_almost_eq(tuning.nav.bush_cost, tuning.nav.search_greed / tuning.movement.bush_speed_scale, 1e-4,
+			"the slow, times the greedy search's greed")
+	assert_eq(tuning.nav.bush_probe_height, tuning.movement.bush_probe_height)
+
+
+func test_nodes_in_a_bush_are_marked_and_priced_as_a_body_is_slowed_there() -> void:
+	var m := _bush_field(true, 2.0)
+	var g := NavGrid.build(m, tuning.nav, tuning.body)
+	var probe := Vector3.UP * tuning.movement.bush_probe_height
+	var marked := 0
+	for k in g.node_count():
+		var inside := m.foliage.holds(g.node_position(k) + probe)
+		assert_eq(g.slow[k] == 1, inside, "node %d: marked as Character.in_bush is tested" % k)
+		if inside:
+			marked += 1
+			var w := g.astar.get_point_weight_scale(k)
+			assert_almost_eq(w, tuning.nav.bush_cost / tuning.nav.search_greed, 1e-5)
+	assert_gt(marked, 100)
+	assert_true(NavGrid.build(_bush_field(false, 2.0), tuning.nav, tuning.body).slow.is_empty(), "none without bushes")
+
+
+func test_a_route_goes_round_a_bush_where_that_is_quicker_and_keeps_round_it() -> void:
+	var probe := tuning.movement.bush_probe_height
+	var m := _bush_field(true, 2.0)
+	var g := NavGrid.build(m, tuning.nav, tuning.body)
+	var start := Vector3(-8.0, 0.0, 1.0)
+	var goal := Vector3(8.0, 0.0, 1.0)
+	var route := PackedVector3Array()
+	assert_true(g.find_route(start, goal, route))
+	assert_lt(_leaves_walked(m.foliage, start, route, probe), 0.3, "round the bush, a rim at most")
+	assert_lt(_length(start, route), 16.0 + 1.0, "and not far out of its way")
+	# A bush that fills a gap between two walls is gone through: there is no way round.
+	var gap := _bush_field(true, 2.0)
+	for side: float in [-1.0, 1.0]:
+		var wall := MapData.Block.new()
+		wall.kind = &"wall"
+		wall.center = Vector3(0.0, 1.0, side * 8.5)
+		wall.size = Vector3(0.4, 2.0, 15.0)
+		gap.blocks.append(wall)
+	var walled := NavGrid.build(gap, tuning.nav, tuning.body)
+	start = Vector3(-8.0, 0.0, 0.0)
+	goal = Vector3(8.0, 0.0, 0.0)
+	assert_true(walled.find_route(start, goal, route))
+	assert_gt(_leaves_walked(gap.foliage, start, route, probe), 2.0, "through the only gap")
+	# The same field without the bush: the straight line, as before.
+	var bare := NavGrid.build(_bush_field(false, 2.0), tuning.nav, tuning.body)
+	assert_true(bare.find_route(Vector3(-8.0, 0.0, 1.0), Vector3(8.0, 0.0, 1.0), route))
+	assert_eq(route.size(), 1, "one straight leg")
