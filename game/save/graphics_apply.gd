@@ -28,6 +28,10 @@ const ANISOTROPY: Array[int] = [Viewport.ANISOTROPY_DISABLED, Viewport.ANISOTROP
 ## Each MeshDetail as the viewport's mesh_lod_threshold (px of error a simpler mesh may show; the engine's default 1 is
 ## High, the look before the presets; lower is finer).
 const MESH_LOD: Array[float] = [4.0, 2.0, 1.0, 0.5]
+## Each MeshDetail as the replica surfaces' detail (replica_surface.gdshaderinc's look_surface_detail): on Low the grain
+## is read from a face's main side alone (MQ1's advisory: 3 reads a fragment, not 7); the project's default is 1.
+const SURFACE_DETAIL: Array[float] = [0.0, 1.0, 1.0, 1.0]
+const SURFACE_DETAIL_GLOBAL := &"look_surface_detail"
 ## From this Mesh detail up your own weapon torch's real spot casts shadows (High and Ultra, data/graphics.md).
 const TORCH_SHADOWS_FROM := GraphicsQuality.MeshDetail.HIGH
 ## Each ShadowSoftness as the sun's shadow filter: Softer is the engine's default (SOFT_LOW), so High keeps its look.
@@ -91,6 +95,8 @@ class Server:
 	## fog's froxel grid, zero never sent).
 	var gi_quality: int = -1
 	var fog_grid: Vector2i = Vector2i.ZERO
+	## The replica surfaces' detail as last sent: at first the project's 1.
+	var surface_detail: float = 1.0
 	## The values last drawn (`apply_settings`), or null before the first.
 	var drawn: GraphicsQuality = null
 
@@ -99,6 +105,13 @@ class Server:
 			return
 		shadow_size = size
 		RenderingServer.directional_shadow_atlas_set_size(size, ProjectSettings.get_setting(SHADOW_16_BITS) as bool)
+
+	## The replica surfaces' detail (SURFACE_DETAIL), sent only when it changes.
+	func set_surface_detail(detail: float) -> void:
+		if detail == surface_detail:
+			return
+		surface_detail = detail
+		RenderingServer.global_shader_parameter_set(SURFACE_DETAIL_GLOBAL, detail)
 
 	func set_soft_shadows(quality: int) -> void:
 		if quality == soft_shadows:
@@ -248,6 +261,7 @@ static func apply(values: GraphicsQuality, viewport: Viewport, rs: Server = null
 	var lod := MESH_LOD[values.mesh_detail]
 	if not is_equal_approx(viewport.mesh_lod_threshold, lod):
 		viewport.mesh_lod_threshold = lod
+	to.set_surface_detail(SURFACE_DETAIL[values.mesh_detail])
 	if viewport.use_occlusion_culling != values.occlusion_culling:
 		viewport.use_occlusion_culling = values.occlusion_culling
 	to.set_shadow_size(values.shadow_detail)

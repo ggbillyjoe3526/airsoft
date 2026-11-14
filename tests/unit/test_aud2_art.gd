@@ -85,3 +85,18 @@ func test_a_figure_shown_again_mid_switch_plays_it_from_the_draw_s_share() -> vo
 				assert_gt(moved, deg_to_rad(5.0), "hidden, its arms stood still while the seen one switched")
 				assert_lt(gap, deg_to_rad(1.0), "shown again it plays the Switch where the seen one is")
 		a.draw_left = 0.0
+
+
+func test_mesh_detail_low_reads_the_replica_grain_from_one_side() -> void:
+	var table := GraphicsTable.shared()
+	var rs := GraphicsApply.Server.new()
+	var view := SubViewport.new()
+	add_child_autofree(view)
+	assert_eq(float(ProjectSettings.get_setting("shader_globals/look_surface_detail")["value"]), 1.0,
+			"the project's default: the whole grain")
+	GraphicsApply.apply(table.preset(&"low"), view, rs)
+	assert_eq(rs.surface_detail, 0.0, "Low: one side's grain")
+	for preset: StringName in [&"medium", &"high", &"ultra"]:
+		GraphicsApply.apply(table.preset(preset), view, rs)
+		assert_eq(rs.surface_detail, 1.0, "%s: the approved look, all three sides" % preset)
+	GraphicsApply.apply(table.preset(&"high"), view, GraphicsApply.Server.new())
