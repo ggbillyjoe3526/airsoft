@@ -100,3 +100,18 @@ func test_mesh_detail_low_reads_the_replica_grain_from_one_side() -> void:
 		GraphicsApply.apply(table.preset(preset), view, rs)
 		assert_eq(rs.surface_detail, 1.0, "%s: the approved look, all three sides" % preset)
 	GraphicsApply.apply(table.preset(&"high"), view, GraphicsApply.Server.new())
+
+
+func test_a_slow_sprung_sniper_rifle_s_bolt_is_home_with_the_recorded_knock() -> void:
+	var vm := ViewModelConfig.new()
+	for cycle: float in [1.25, 1.32, 1.39]:
+		var r := ReplicaStats.load_replica(&"sniper").duplicate() as ReplicaConfig
+		r.fire_rate = 1.0 / cycle
+		var view := ReplicaView.new()
+		add_child_autofree(view)
+		view.setup(vm, [r] as Array[ReplicaConfig], BoxWorld.new())
+		var held: ReplicaView.Held = view._held[0]
+		var home := vm.bolt_cycle_end / held.fire_speed
+		gut.p("a %.2f s cycle: the bolt home %.3f s after the shot, %.3f s before it can fire" % [cycle, home,
+				cycle - home])
+		assert_almost_eq(home, minf(cycle, vm.bolt_knock_at), 1e-4, "home with the last knock, never after it")

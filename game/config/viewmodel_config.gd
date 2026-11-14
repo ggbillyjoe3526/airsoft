@@ -167,6 +167,9 @@ extends Resource
 ## the clip stretched so that moment lands as the replica can fire again (its fire rate with its parts: the Sniper
 ## Rifle's 1.25 s, 1.39 s with the M150), and the arms' bolt clip with it (BP7, row 19).
 @export var bolt_cycle_end: float = 0.88
+## The cocking's recorded last knock (s after the shot: the owner's recording, cut for the M130's 1.25 s cycle). A
+## slower spring's bolt is home with it, not with the ready time, and rests there until the replica can fire again.
+@export var bolt_knock_at: float = 1.25
 ## A gas pistol's slide locks back this long (s) into its last shot's Fire clip, when the slide is fully back, and closes
 ## this far (share) through the reload that follows.
 @export var slide_lock_after: float = 0.05
