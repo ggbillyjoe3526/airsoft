@@ -29,6 +29,10 @@ var _teams: TeamConfig = null
 var _standing: Node3D = null
 var _cloth_mat: ShaderMaterial = null
 var _ring_mat: StandardMaterial3D = null
+## The ring's paint as the round has it (before its light), and its edge's material and paint.
+var _ring_paint: Color = Color.WHITE
+var _edge_mat: StandardMaterial3D = null
+var _edge_paint: Color = Color.WHITE
 var _up: bool = false
 var _rise_left: float = 0.0
 ## What the colours last showed: the team that touched it (-1 none) and whether both teams were at it.
@@ -86,11 +90,14 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float) 
 	var cloth := _add(_standing, FlagView.cloth_mesh(size, cfg.cloth_droop), _cloth_mat,
 			Vector3(r, h - cfg.overtime_cloth_drop - size.y, 0.0))
 	cloth.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-	_ring_mat = FlagView.flat(Color(cfg.overtime_ring_idle, cfg.ring_alpha))
+	_ring_paint = Color(cfg.overtime_ring_idle, cfg.ring_alpha)
+	_ring_mat = FlagView.flat(_ring_paint)
 	var ring := _add(self, FlagView.ring_mesh(reach - cfg.ring_width, reach), _ring_mat, Vector3(0.0, RING_LIFT, 0.0))
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var edge := _add(self, FlagView.ring_edge_mesh(reach, cfg.ring_width, cfg.ring_edge_width),
-			FlagView.flat(cfg.ring_edge), Vector3(0.0, EDGE_LIFT, 0.0))
+	_edge_paint = cfg.ring_edge
+	_edge_mat = FlagView.flat(_edge_paint)
+	var edge := _add(self, FlagView.ring_edge_mesh(reach, cfg.ring_width, cfg.ring_edge_width), _edge_mat,
+			Vector3(0.0, EDGE_LIFT, 0.0))
 	edge.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
@@ -125,7 +132,8 @@ func refresh(flag: OvertimeFlag, toucher: int, delta: float) -> void:
 		ring = _teams.colours[toucher]
 	elif contested:
 		ring = _cfg.ring_contested
-	_ring_mat.albedo_color = Color(ring, _cfg.ring_alpha)
+	_ring_paint = Color(ring, _cfg.ring_alpha)
+	_ring_mat.albedo_color = FlagView.lit(_ring_paint, _light)
 
 
 ## Turns the pole and cloth about the pole so the cloth's face is towards `eye` (the view's position); nothing while the
@@ -155,7 +163,7 @@ func materials() -> Array[Material]:
 	return out
 
 
-## Draws the pole and its base in the baked light of the floor at its foot (`lights`; FlagView.relight), now and each
+## Draws the pole, its base and cloth, and the ring and its edge, in the baked light of the floor at its foot (`lights`; FlagView.relight), now and each
 ## time it goes up, or in the shared light alone with `lights` null (no bake drawn).
 func relight(lights: BakedLightNear) -> void:
 	_lights = lights
@@ -171,6 +179,9 @@ func _light_pole() -> void:
 	var foot := position + Vector3(0.0, FlagView.FOOT_LIFT, 0.0)
 	_light = _lights.at(foot, Vector3.UP) if _lights != null else Color.WHITE
 	LookMaterials.light_paints(_paints, _paint_colours, _light)
+	_cloth_mat.set_shader_parameter(&"light", Vector3(_light.r, _light.g, _light.b))
+	_ring_mat.albedo_color = FlagView.lit(_ring_paint, _light)
+	_edge_mat.albedo_color = FlagView.lit(_edge_paint, _light)
 
 
 ## The way the cloth faces (radians about the pole), for tests.
@@ -183,9 +194,9 @@ func risen() -> float:
 	return _standing.scale.y
 
 
-## The ring's colour and the cloth's light checks', for tests.
+## The ring's colour as the round has it (its paint before the baked light) and the cloth's light checks', for tests.
 func ring_colour() -> Color:
-	return _ring_mat.albedo_color
+	return _ring_paint
 
 
 func cloth_colour() -> Color:

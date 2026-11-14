@@ -4,7 +4,8 @@ extends Node3D
 ## the rope, the attacking team's flag at the height the rules have it, and the ring on the floor at the rope's reach,
 ## coloured by who is working it. Scenery only: no collider, so BBs pass through. Reads the round state; owns no rule.
 ## Built once a match; `refresh` changes only what moved (the cloth's height, the ring's and cloth's colours). The pole,
-## its fittings and rope take the baked light at its foot while a bake is drawn (`relight`, BP7).
+## its fittings, rope and cloth, and the ring and its edge, take the baked light at its foot while a bake is drawn
+## (`relight`, BP7).
 
 const CLOTH_SHADER := preload("res://game/play/flag_cloth.gdshader")
 ## Segments of the ring and of the cloth's mesh (along and up).
@@ -26,6 +27,10 @@ var _teams: TeamConfig = null
 var _cloth: MeshInstance3D = null
 var _cloth_mat: ShaderMaterial = null
 var _ring_mat: StandardMaterial3D = null
+## The ring's paint as the round has it (before its light), and its edge's material and paint.
+var _ring_paint: Color = Color.WHITE
+var _edge_mat: StandardMaterial3D = null
+var _edge_paint: Color = Color.WHITE
 var _height: float = -1.0
 var _attackers: int = -1
 var _status: int = -1
@@ -73,12 +78,15 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, 
 	_cloth = _add(cloth_mesh(cfg.cloth_size, cfg.cloth_droop), _cloth_mat, Vector3(cfg.pole_radius, cfg.cloth_low, 0.0),
 			_standing)
 	_cloth.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-	_ring_mat = flat(cfg.ring_idle)
+	_ring_paint = cfg.ring_idle
+	_ring_mat = flat(_ring_paint)
 	var ring := _add(ring_mesh(reach - cfg.ring_width, reach), _ring_mat, Vector3(0.0, RING_LIFT, 0.0))
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var edge := MeshInstance3D.new()
 	edge.mesh = ring_edge_mesh(reach, cfg.ring_width, cfg.ring_edge_width)
-	edge.material_override = flat(cfg.ring_edge)
+	_edge_paint = cfg.ring_edge
+	_edge_mat = flat(_edge_paint)
+	edge.material_override = _edge_mat
 	edge.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	edge.position.y = EDGE_LIFT
 	add_child(edge)
@@ -133,7 +141,8 @@ func refresh(flag: FlagState, attackers: int) -> void:
 				c = _teams.colours[1 - attackers] if attackers >= 0 else c
 			FlagState.Status.CONTESTED:
 				c = _cfg.ring_contested
-		_ring_mat.albedo_color = Color(c, _cfg.ring_alpha)
+		_ring_paint = Color(c, _cfg.ring_alpha)
+		_ring_mat.albedo_color = lit(_ring_paint, _light)
 
 
 ## The materials drawn first in a match (ShaderPrewarm), so the flag's first sight never hitches.
@@ -143,11 +152,19 @@ func materials() -> Array[Material]:
 	return out
 
 
-## Draws the pole, its fittings and rope in the baked light of the floor at its foot (BakedLightNear), or in the
-## shared light alone with `lights` null (no bake drawn). Once a switch.
+## Draws the pole, its fittings, rope and cloth, and the ring and its edge, in the baked light of the floor at its foot
+## (BakedLightNear), or in the shared light alone with `lights` null (no bake drawn). Once a switch.
 func relight(lights: BakedLightNear) -> void:
 	_light = lights.at(position + Vector3(0.0, FOOT_LIFT, 0.0), Vector3.UP) if lights != null else Color.WHITE
 	LookMaterials.light_paints(_paints, _paint_colours, _light)
+	_cloth_mat.set_shader_parameter(&"light", Vector3(_light.r, _light.g, _light.b))
+	_ring_mat.albedo_color = lit(_ring_paint, _light)
+	_edge_mat.albedo_color = lit(_edge_paint, _light)
+
+
+## Flat paint `paint` (sRGB, its alpha kept) in `light` (a linear multiplier): as it is in white light, no bake drawn.
+static func lit(paint: Color, light: Color) -> Color:
+	return paint if light == Color.WHITE else LookMaterials.lit_paint(paint, light)
 
 
 ## The light the pole is drawn in (a linear multiplier of its paint; white with no bake drawn).
@@ -165,9 +182,9 @@ func cloth_height() -> float:
 	return _cloth.position.y
 
 
-## The ring's colour, for tests.
+## The ring's colour as the round has it (its paint before the baked light), for tests.
 func ring_colour() -> Color:
-	return _ring_mat.albedo_color
+	return _ring_paint
 
 
 func _add(mesh: Mesh, material: Material, at: Vector3, parent: Node3D = null) -> MeshInstance3D:

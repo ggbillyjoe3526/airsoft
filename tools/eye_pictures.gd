@@ -143,7 +143,7 @@ func _run() -> void:
 			roof.lamp_lights() if roof != null else null)
 	if site != null:
 		level.set_detail(values.mesh_detail)
-	# The doors, poles, gate paddles and a site's props in the baked light near them, as a match draws them (BP7).
+	# The doors, poles, gate paddles and a site's props and stencils in the baked light near them, as a match draws them (BP7).
 	var lights := level.baked_lights()
 	if doors != null:
 		doors.relight(lights)
@@ -151,8 +151,8 @@ func _run() -> void:
 		paddles.relight(lights)
 	for pole in poles:
 		pole.relight(lights)
-	if site != null and site.props() != null:
-		site.props().relight(lights)
+	if site != null:
+		site.relight(lights)
 	print("[eye_pictures] drawn on %s" % preset)
 	var camera := Camera3D.new()
 	camera.fov = fov

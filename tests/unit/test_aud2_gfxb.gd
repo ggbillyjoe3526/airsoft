@@ -49,7 +49,7 @@ func test_the_site_doors_and_models_hand_their_linear_colours_over_through_look_
 	var light := FileAccess.get_file_as_string("res://game/play/look/look_light.gdshaderinc")
 	assert_string_contains(light, '#include "res://game/play/look/look_colour.gdshaderinc"')
 	for path: String in ["res://game/play/site/site_surface.gdshader", "res://game/play/door_leaf.gdshader",
-			"res://game/play/look/look_vertex.gdshader"]:
+			"res://game/play/look/look_vertex.gdshader", "res://game/play/flag_cloth.gdshader"]:
 		var code := FileAccess.get_file_as_string(path)
 		var albedo := 0
 		for line: String in code.split("\n"):
@@ -89,3 +89,64 @@ func test_the_contact_shadow_fades_by_its_shader_not_the_instance_s_transparency
 	assert_almost_eq(float(node.get_instance_shader_parameter(&"fade")), 0.75, 1e-3, "drawn so, on either renderer")
 	assert_eq(node.transparency, 0.0, "not by the transparency Compatibility ignores")
 
+
+func test_depot_s_stencils_take_the_light_of_the_wall_behind_them() -> void:
+	var level := _baked_depot()
+	var lights := level.baked_lights()
+	var dress := SiteDress.build(level.map, play.site_look, level.site_material(), play.skyline)
+	add_child_autofree(dress)
+	var paints: Array[Color] = []
+	for l in dress.stencils():
+		paints.append(l.modulate)
+	assert_gt(paints.size(), 3, "Depot's zone stencils")
+	dress.relight(lights)
+	var lit := 0
+	for i in paints.size():
+		var l := dress.stencils()[i]
+		var light := l.modulate.srgb_to_linear().g / paints[i].srgb_to_linear().g
+		assert_true(light > 0.6 and light < 1.3, "%s in its wall's light: %.3f" % [l.name, light])
+		if not is_equal_approx(light, 1.0):
+			lit += 1
+	assert_eq(lit, paints.size(), "every stencil takes a baked light, a wall drawn as props (Offices) its props' too")
+	var offices := SiteDress.stencil_light(lights, Vector3(16.5, 1.9, -25.834), Vector3.BACK, Vector3(16.5, 0.0, -25.834))
+	assert_eq(offices, lights.at(Vector3(16.5, PropDress.LIGHT_LIFT, -25.834)), "the Offices' plywood wall: its foot's")
+	var dim := BakedLightNear.new(PackedVector3Array([Vector3(0.0, 1.9, -0.2)]), PackedVector3Array([Vector3.BACK]),
+			PackedColorArray([Color(0.4, 0.4, 0.4)]))
+	assert_eq(SiteDress.stencil_light(dim, Vector3(0.0, 1.9, 0.0), Vector3.BACK, Vector3.ZERO), Color(0.4, 0.4, 0.4),
+			"the wall's own faces first")
+	dress.relight(null)
+	for i in paints.size():
+		assert_eq(dress.stencils()[i].modulate, paints[i], "Baked light off: its own paint")
+
+
+func test_a_flag_s_cloth_and_ring_take_the_light_at_its_foot() -> void:
+	var dim := Color(0.4, 0.35, 0.3)
+	var at := PackedVector3Array([Vector3.ZERO])
+	var lights := BakedLightNear.new(at, PackedVector3Array([Vector3.UP]), PackedColorArray([dim]))
+	var teams := TeamColours.resolve(TeamColours.Set.STANDARD, false, null, play.teams).figures
+	var pole := FlagView.new()
+	add_child_autofree(pole)
+	pole.setup(play.flag, teams, Vector3.ZERO, 3.0)
+	var ring := pole.materials()[1] as StandardMaterial3D
+	var paint := ring.albedo_color
+	pole.relight(lights)
+	var cloth := pole.materials()[0] as ShaderMaterial
+	assert_eq(cloth.get_shader_parameter(&"light"), Vector3(dim.r, dim.g, dim.b), "the cloth in the floor's light")
+	assert_eq(ring.albedo_color, LookMaterials.lit_paint(paint, dim), "the ring too")
+	assert_eq(pole.ring_colour(), paint, "its colour as the round has it unchanged")
+	var flag := FlagState.new()
+	flag.status = FlagState.Status.CONTESTED
+	pole.refresh(flag, 0)
+	assert_eq(ring.albedo_color, LookMaterials.lit_paint(Color(play.flag.ring_contested, play.flag.ring_alpha), dim),
+			"a new colour in the same light")
+	pole.relight(null)
+	assert_eq(cloth.get_shader_parameter(&"light"), Vector3.ONE)
+	assert_eq(ring.albedo_color, Color(play.flag.ring_contested, play.flag.ring_alpha), "off: its own paint")
+	var overtime := OvertimeFlagView.new()
+	add_child_autofree(overtime)
+	overtime.setup(play.flag, teams, Vector3.ZERO, 3.0)
+	var ot_ring := overtime.materials()[1] as StandardMaterial3D
+	var ot_paint := ot_ring.albedo_color
+	overtime.relight(lights)
+	assert_eq((overtime.materials()[0] as ShaderMaterial).get_shader_parameter(&"light"), Vector3(dim.r, dim.g, dim.b))
+	assert_eq(ot_ring.albedo_color, LookMaterials.lit_paint(ot_paint, dim), "the overtime flag's ring too")

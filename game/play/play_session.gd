@@ -2286,7 +2286,7 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 	_set_figure_lines()
 
 
-## The doors, poles and props in the baked light near them while it is drawn, in the shared light alone while it
+## The doors, poles, props and stencils in the baked light near them while it is drawn, in the shared light alone while it
 ## isn't (BakedLightNear, BP7): as the light drawn changes, Baked light switched or the roof's lamps (PT1; they are
 ## built in the shared light alone).
 func _relight() -> void:
@@ -2302,9 +2302,10 @@ func _relight() -> void:
 		_overtime_flag.relight(lights)
 	if _plant != null:
 		_plant.relight(lights)
-	var props := _site.props() if _site != null else _props
-	if props != null:
-		props.relight(lights)
+	if _site != null:
+		_site.relight(lights)
+	elif _props != null:
+		_props.relight(lights)
 
 
 ## The figures' detail lines for the Mesh detail and the eye's zoom (a sight raised: BP6), set when they change.
