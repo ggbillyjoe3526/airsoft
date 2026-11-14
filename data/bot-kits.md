@@ -37,7 +37,8 @@ The kits are the bots' own: what you have unlocked never changes them.
 - **Fields** keeps a kit to one kind of field: `indoor` (a field the breeze doesn't reach, Wind 0 in maps.md: Depot,
   Subway) or `outdoor` (any other: Woodland, Stockade). Empty: every field. The Clearer is indoor only: its Pump
   Shotgun is out-ranged in the open (on Woodland its carriers took about three hits for each one they gave). The column
-  may be left out.
+  may be left out. A word here that is neither (a typo) drops the whole kit with a warning, as any cell of a kit that
+  can't be read does: the kit is not left to play on every field.
 - **Easy**, **Normal** and **Hard** are each difficulty's weight for the kit: how likely a bot on that
   difficulty is to carry it, against the other kits in the same column. The columns here add up to about 100, so the weights
   read roughly as a chance in 100, but they don't have to: a kit weighted 2 is picked twice as often as one weighted 1. 0 (or

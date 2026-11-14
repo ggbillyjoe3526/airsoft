@@ -8,6 +8,8 @@ extends GutTest
 ## views step a piece a frame (the figures and their bodies in slices, the minimap's drawing on a worker thread) and the
 ## wood a piece a dressing part, and ends with the nodes an unstaged build makes.
 
+## The longest a staged load is waited for (ms): its nav grid is built on a worker thread.
+const LOAD_WAIT_MSEC := 90000
 const LOG_ROOT := "user://test-aud2-perf-logs"
 ## A node named by the engine (@Class@number): its number differs from one build to the next.
 ## A staged session's nodes once built (_built_at_last).
@@ -298,11 +300,11 @@ func test_a_staged_load_builds_the_views_over_frames_and_the_nodes_an_unstaged_b
 	# Its nodes the moment its last step is done, before a frame of play moves them.
 	staged.progressed.connect(_built_at_last.bind(staged))
 	add_child_autofree(staged)
-	var frames := 0
 	var views_frames := 0
-	while staged._bots == null and frames < 3000:
+	# By the clock, not a frame count: the nav grid is built on a worker thread, and headless frames pass far faster.
+	var until := Time.get_ticks_msec() + LOAD_WAIT_MSEC
+	while staged._bots == null and Time.get_ticks_msec() < until:
 		await wait_process_frames(1)
-		frames += 1
 		if staged._step == PlaySession.VIEWS_STEP and staged._views_piece > PlaySession.VIEWS_FIRST:
 			views_frames += 1
 	assert_not_null(staged._bots, "the staged load finished")

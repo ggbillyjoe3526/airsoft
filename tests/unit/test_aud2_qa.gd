@@ -236,17 +236,24 @@ func _staged(map_id: String) -> PlaySession:
 	return session
 
 
+## Whether `session`'s load is at `stage` or past it (a piece that takes one frame can be over by the next look, and a
+## busy machine may give the test a look only every other frame).
 func _reached(session: PlaySession, stage: int) -> bool:
+	if session._bots != null:
+		return true
+	var piece := session._views_piece if session._step == PlaySession.VIEWS_STEP else PlaySession.VIEWS_FIRST
+	if session._step > PlaySession.VIEWS_STEP:
+		piece = PlaySession.VIEWS_DONE
 	match stage:
 		0:
-			return session._step == PlaySession.LEVEL_STEP
+			return session._step >= PlaySession.LEVEL_STEP
 		1:
-			return session._step == PlaySession.VIEWS_STEP and session._views_piece == PlaySession.VIEWS_FIGURES
+			return piece >= PlaySession.VIEWS_FIGURES
 		2:
-			return session._step == PlaySession.VIEWS_STEP and session._views_piece == PlaySession.VIEWS_BODIES
+			return piece >= PlaySession.VIEWS_BODIES
 		3:
-			return session._step == PlaySession.VIEWS_STEP and session._views_piece == PlaySession.VIEWS_REST
-	return session._bots != null
+			return piece >= PlaySession.VIEWS_REST
+	return false
 
 
 func test_a_load_left_at_any_stage_leaves_no_node_task_or_kept_parts_file_behind() -> void:

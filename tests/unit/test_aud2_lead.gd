@@ -2,6 +2,9 @@ extends GutTest
 ## The second audit's fixes that fall between its groups (AUD2): Subway's steel lockers sound as Depot's do, and the
 ## bugs its own hunt found in the pass's changes.
 
+## The longest a staged load is waited for (ms): its nav grid is built on a worker thread.
+const LOAD_WAIT_MSEC := 90000
+
 var tuning: SimTuning = SimTuning.new()
 
 
@@ -89,10 +92,11 @@ func test_a_load_left_while_the_wood_is_built_frees_the_wood() -> void:
 	session.autopilot = true
 	session.staged = true
 	add_child(session)
-	var frames := 0
-	while frames < 3000 and (session._woods == null or session._woods.is_inside_tree()) and session._bots == null:
+	# By the clock, not a frame count: the nav grid is built on a worker thread, and headless frames pass far faster.
+	var until := Time.get_ticks_msec() + LOAD_WAIT_MSEC
+	while Time.get_ticks_msec() < until and (session._woods == null or session._woods.is_inside_tree()) \
+			and session._bots == null:
 		await wait_process_frames(1)
-		frames += 1
 	var woods := session._woods
 	assert_not_null(woods, "the wood's first piece is built")
 	assert_false(woods.is_inside_tree(), "and it is not in the tree yet: the load is between its pieces")
