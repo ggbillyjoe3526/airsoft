@@ -45,11 +45,11 @@ static func label(r: MatchRunner, map_id: String) -> String:
 	return "%s %s%s" % [map_id, r.difficulty, " night" if r.night else ""]
 
 
-## Elimination over seeds 1 to `seeds`: every match won, few rounds run out the clock, every character leaves its
+## Elimination over `seeds` seeds from `first` (1 to `seeds` as it comes): every match won, few rounds run out the clock, every character leaves its
 ## spawn over a match and every bot each round, nobody held up on its way, falls through the floor, flies, stays in the
 ## air or leaves the level, and no bot knocks out a teammate.
 static func elimination(test: GutTest, map_id: String, level: StringName = &"normal", seeds: int = SEEDS,
-		night: bool = false) -> void:
+		night: bool = false, first: int = 1) -> void:
 	var r: MatchRunner = await runner(test, map_id, level, night)
 	var name := label(r, map_id)
 	var longest := longest_round(r.tuning, RoundState.Mode.ELIMINATION)
@@ -60,7 +60,7 @@ static func elimination(test: GutTest, map_id: String, level: StringName = &"nor
 	var ricochets := 0
 	var knocks := 0
 	var rings := 0
-	for seed_value in range(1, seeds + 1):
+	for seed_value in range(first, first + seeds):
 		var m := r.play(seed_value, MAX_MATCH_SECONDS)
 		var at := "%s seed %d" % [name, seed_value]
 		test.assert_true(m.finished, "%s: the match is won" % at)
@@ -87,11 +87,11 @@ static func elimination(test: GutTest, map_id: String, level: StringName = &"nor
 	r.free_level()
 
 
-## Attack / Defend over seeds 1 to `seeds` (the map needs a pole), checked as Elimination is, except that only the
+## Attack / Defend over `seeds` seeds from `first` (the map needs a pole), checked as Elimination is, except that only the
 ## attackers must leave their spawn (defenders hold by their pole), and no round runs past the clock and the longest
 ## overtime. Returns [rounds, captures, matches with a flag raised, rounds on time] for the file's own checks.
 static func attack_defend(test: GutTest, map_id: String, level: StringName = &"normal", seeds: int = SEEDS,
-		night: bool = false) -> PackedInt32Array:
+		night: bool = false, first: int = 1) -> PackedInt32Array:
 	var r: MatchRunner = await runner(test, map_id, level, night, RoundState.Mode.ATTACK_DEFEND)
 	test.assert_true(r.map.has_pole, "%s has a pole" % map_id)
 	var name := label(r, map_id) + " A/D"
@@ -100,7 +100,7 @@ static func attack_defend(test: GutTest, map_id: String, level: StringName = &"n
 	var captures := 0
 	var raised := 0
 	var on_time := 0
-	for seed_value in range(1, seeds + 1):
+	for seed_value in range(first, first + seeds):
 		var m := r.play(seed_value, MAX_MATCH_SECONDS)
 		var at := "%s seed %d" % [name, seed_value]
 		test.assert_true(m.finished, "%s: the match is won" % at)

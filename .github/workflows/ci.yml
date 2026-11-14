@@ -228,9 +228,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  # The night guards: Woodland at 5v5, 50 to 70 s a match headless, tests/guards/test_woodland_guards.gd in six jobs
-  # of 8 or 16 matches, one test each (a test name's part picks it; both modes at Hard in one job ran out its 30
-  # minutes, CI3).
+  # The night guards: Woodland at 6v6, 50 to 70 s a match headless, tests/guards/test_woodland_guards.gd in eight
+  # jobs of 8 matches, one test each (a test name's part picks it; both modes at Hard in one job ran out its 30
+  # minutes, CI3, and Normal's 16 seeds in one came within two of them, so each mode's play in halves, AUD1).
   night-guards:
     name: Night match guards, ${{ matrix.part.name }}
     runs-on: ubuntu-latest
@@ -239,9 +239,11 @@ jobs:
       fail-fast: false
       matrix:
         part:
-          - { name: "Woodland, Elimination at Normal", file: test_woodland_guards, test: elimination_at_normal, log: night-guards-1 }
+          - { name: "Woodland, Elimination at Normal, seeds 1 to 8", file: test_woodland_guards, test: elimination_at_normal_seeds_1, log: night-guards-1 }
+          - { name: "Woodland, Elimination at Normal, seeds 9 to 16", file: test_woodland_guards, test: elimination_at_normal_seeds_9, log: night-guards-7 }
           - { name: "Woodland, Elimination at Easy", file: test_woodland_guards, test: elimination_at_easy, log: night-guards-2 }
-          - { name: "Woodland, Attack / Defend at Normal", file: test_woodland_guards, test: attack_defend_at_normal, log: night-guards-3 }
+          - { name: "Woodland, Attack / Defend at Normal, seeds 1 to 8", file: test_woodland_guards, test: attack_defend_at_normal_seeds_1, log: night-guards-3 }
+          - { name: "Woodland, Attack / Defend at Normal, seeds 9 to 16", file: test_woodland_guards, test: attack_defend_at_normal_seeds_9, log: night-guards-8 }
           - { name: "Woodland, Attack / Defend at Easy", file: test_woodland_guards, test: attack_defend_at_easy, log: night-guards-4 }
           - { name: "Woodland, Elimination at Hard", file: test_woodland_guards, test: elimination_at_hard, log: night-guards-5 }
           - { name: "Woodland, Attack / Defend at Hard", file: test_woodland_guards, test: attack_defend_at_hard, log: night-guards-6 }
