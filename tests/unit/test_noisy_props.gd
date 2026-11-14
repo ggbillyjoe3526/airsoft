@@ -126,7 +126,9 @@ func test_the_halls_drums_barrels_containers_racks_and_crates_are_noisy_and_its_
 	var props := PropNoise.new(noise, level.query())
 	var kinds: Dictionary[StringName, int] = {}
 	for i in props.count():
-		kinds[level.query().block_kinds[props.block[i]]] = 1
+		# A block naming its own sound (Depot's steel lockers, a plywood box that clanks, AUD2) counts as that, not its kind.
+		if level.query().block_noises[props.block[i]] == &"":
+			kinds[level.query().block_kinds[props.block[i]]] = 1
 	for k: StringName in [&"drum", &"barrel", &"container", &"rack", &"crate"]:
 		assert_true(kinds.has(k), "the hall's %s is noisy" % k)
 	for k: StringName in [&"plywood", &"pillar", &"net", &"wall"]:

@@ -348,7 +348,7 @@ func _add_rest() -> void:
 	# prop's block counts as its box.
 	for b in m.blocks:
 		if b.rise == MapData.Rise.NONE:
-			_query.add_block(b.kind, b.center, b.size, b.surface)
+			_query.add_block(b.kind, b.center, b.size, b.surface, b.noise)
 	_add_doors(m)
 	_add_lifts(m)
 	_make_mover_bodies(_body)

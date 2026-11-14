@@ -14,6 +14,9 @@ var block_centers: PackedVector3Array = PackedVector3Array()
 var block_halves: PackedVector3Array = PackedVector3Array()
 ## What each is made of (RayHit.Surface), for the dust a knock shakes off it.
 var block_surfaces: PackedInt32Array = PackedInt32Array()
+## The noisy prop's sound each box makes over its kind's (NoiseConfig.SOUND_NAMES; empty for its kind's: Depot's
+## steel lockers are plywood boxes that clank, MapData.Block.noise).
+var block_noises: Array[StringName] = []
 ## The level's bushes (WL5, FO1): no surface a ray meets or a mover is stopped by, only leaves a BB pushes through and
 ## a bot can't see far through. Empty unless whoever builds the level hands it the map's (MapLevel from MapData.foliage;
 ## tests through BoxWorld.add_bush).
@@ -82,10 +85,12 @@ func surface_under(_feet: Vector3) -> RayHit.Surface:
 	return RayHit.Surface.NONE
 
 
-## Lists a box of `kind` centred at `center` measuring `size`, made of `surface` (block_kinds). It records what the box
-## is; it adds nothing a ray or a mover meets.
-func add_block(kind: StringName, center: Vector3, size: Vector3, surface: RayHit.Surface) -> void:
+## Lists a box of `kind` centred at `center` measuring `size`, made of `surface` (block_kinds), sounding as `noise`
+## (block_noises; empty for its kind's). It records what the box is; it adds nothing a ray or a mover meets.
+func add_block(kind: StringName, center: Vector3, size: Vector3, surface: RayHit.Surface,
+		noise: StringName = &"") -> void:
 	block_kinds.append(kind)
+	block_noises.append(noise)
 	block_centers.append(center)
 	block_halves.append(size * 0.5)
 	block_surfaces.append(surface)

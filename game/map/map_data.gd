@@ -41,6 +41,9 @@ class Block:
 	## pickup, a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet
 	## (a round prop's, MapStyle.round_steps, as its stepped boxes).
 	var dress: StringName = &""
+	## The noisy prop's sound it makes (`noise` in the file, a NoiseConfig.SOUND_NAMES name: Depot's steel lockers,
+	## `clank`), or empty for its kind's (NoiseConfig.props). Read by PropNoise through WorldQuery.block_noises.
+	var noise: StringName = &""
 	## The world direction its prop's front faces (`facing` in the file: +x, -x, +z or -z; SM3), or empty for the lay's
 	## own rule (FIT: towards the field's middle). A bench's seat to the track, its back to the wall. Look only.
 	var facing: StringName = &""
@@ -411,6 +414,11 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 		b.surface = SURFACES.get(str(bd["surface"]), style.surface_of(b.kind)) if bd.has("surface") \
 				else style.surface_of(b.kind)
 		b.dress = StringName(str(bd.get("dress", "")))
+		if bd.has("noise"):
+			b.noise = StringName(str(bd["noise"]))
+			if not NoiseConfig.SOUND_NAMES.has(String(b.noise)):
+				warnings.append("block %d's noise %s is not a prop sound; its kind's kept" % [i, bd["noise"]])
+				b.noise = &""
 		if bd.has("facing"):
 			b.facing = StringName(str(bd["facing"]))
 			if not RISES.has(String(b.facing)):
