@@ -175,6 +175,16 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Art direction and graphics
 
+- **The audit's look questions (owner, 2026-11-14, AUD1).** On pictures, by number: yes to a faint glow of their own
+  colour on Subway's running tunnels' arch while Lamp light is off (`StationLook.arch_fill` 0.3) and on the platform
+  vaults on every preset (`vault_fill` 0.2); yes to the doors, the roof's steel and lamps and the light fixtures
+  taking the props' wear; yes to a cheaper replica grain on Mesh detail Low; yes to the range's sandbags, toilet and
+  tote rebuilt rounder; yes to Dev › Retro filter snapping your replica and the BBs and its haze reaching 110 m. No
+  to figures lit by the baked light of the room they stand in for 0.1 Dev 3 (a player in shade is harder to see), to
+  a rifle laid along the pack's diagonal, to the Cyber Pistol's thumb straightened and to the magazine change's
+  fingers. The three performance trades that change the look (out-of-view figures posed every fourth frame,
+  Woodland's night shadows to 50 m, Ultra's figure lamp shadows under the nearest lamps only) wait until one of his
+  frame times needs them.
 - **First-person hands (owner, 2026-11-12, HA1).** "When not aiming down sight with a rifle only the player's left
   hand should be visible … When aiming down sight no hands should be visible. For pistols, the player should hold the
   pistol with two hands … When aiming down sight on a pistol the hand should only be slightly visible." So: rifles sit
@@ -511,6 +521,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Bots and balance
 
+- **The audit's play questions (owner, 2026-11-14, AUD1).** Bots keep squeezing past Subway's works wagons on the
+  track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a
+  6 s defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots
+  only. A holstered bot's arms swing as it steps, a switch between two replicas of one class plays its own put-away
+  and draw, and a slow-sprung Sniper Rifle's bolt is home with the recording's last knock: looks only, the timing of
+  a shot or a switch is unchanged.
 - **Bots throw their bombs as a player would (2026-10-30, SF2; Claude's defaults).** A smoke when pinned in cover
   (an enemy BB close in the last 2 s) by someone 8 to 35 m off with no cloud between them yet, half way to them; a flash
   round a corner it is searching toward, 4 to 16 m off, landing before its bang and never where a teammate close by
@@ -951,6 +967,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Replicas, Loadout and levels
 
+- **The Compact SMG and the Pump Shotgun are public, and swap levels (owner, 2026-11-14, AUD1).** Asked whether
+  the two should leave Dev content in 0.1 Dev 3 and whether their unlock levels should swap, he answered yes to both:
+  the Pump Shotgun unlocks at level 10 and the Compact SMG at 12 (SH1's level 12 and LV15's SMG at 10 below are
+  overtaken), both `public` in `data/pool.md`. The bots' Breacher and Clearer kits are carried in every match since,
+  the Clearer indoors only.
 - **Replicas are made of steel, aluminium and polymer under any paint (owner, 2026-11-12, MQ1).** "Pistol slides
   are metal and body's made of polymer/plastic. Rifles should be mostly metal and sniper rifle barrel is metal." On
   the first pictures: "Black polymer should be darker but not as dark as the black metals. Also, the white polymer
@@ -1393,6 +1414,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Performance budgets and technical foundations
 
+- **No Git LFS and no OGG loops in the repository (owner, 2026-11-14, AUD1).** LFS would use his allowance and
+  change every checkout, the checks included; re-encoding the six ambience loops would save repository size only,
+  since the game already ships them compressed. A Subway lift car keeps its reflection probe where it stopped while
+  it rides (his word on a picture that shows no difference), so the engine doesn't capture it again every frame.
 - **No ray or path tracing; the game keeps its current lighting (owner, 2026-10-11).** The Dev switch built for it
   (RT1) was scrapped.
 - **The Low preset must hold 60 FPS on modern low-powered hardware (owner, 2026-10-04; restated 2026-10-16).** The
