@@ -137,6 +137,16 @@ func test_a_holstered_figure_stepping_swings_a_share_of_the_sprint_s_pump() -> v
 	for i in 60:
 		_frame(v, c)
 	assert_eq(v.body().tree.get(FigureGraph.P_HOLSTER_MIX), 0.0, "standing, the arms hang")
+	# In the air the arms hang, as the hit volume's do (HitPose asks grounded): QA's advisory, 2026-11-14.
+	c.velocity = Vector3(0.0, 0.0, -hits.holster_step_speed)
+	c.grounded = false
+	for i in 60:
+		_frame(v, c)
+	assert_eq(v.body().tree.get(FigureGraph.P_HOLSTER_MIX), 0.0, "running through the air, the arms hang")
+	c.grounded = true
+	for i in 60:
+		_frame(v, c)
+	assert_almost_eq(v.body().tree.get(FigureGraph.P_HOLSTER_MIX) as float, hits.holster_step_mix, 0.02, "and landed, pump")
 
 
 ## Runs a switch to slot `to` of `frames` frames on `v` from `c`, stopping at frame `stop` (the draw's share there).

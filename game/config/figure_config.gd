@@ -200,8 +200,8 @@ extends Resource
 @export var switch_clip: StringName = &"Switch"
 @export var switch_pistol_from: float = 0.35
 ## Between two replicas of one class the clip plays out to its hand-over and back: the new replica in the hand from this
-## share of the draw, the clip's turn.
-@export var switch_same_from: float = 0.5
+## share of the draw, the clip's turn (inside the draw: neither end, the turn has a way out and a way back).
+@export_range(0.05, 0.95) var switch_same_from: float = 0.5
 ## One trigger press each, played additively over the aim per shot: made additive once at load, against its first frame
 ## (the sidecar's fireClips), kept in the kind's library under the clip's name and additive_suffix.
 @export var rifle_fire_clip: StringName = &"Rifle_Fire"

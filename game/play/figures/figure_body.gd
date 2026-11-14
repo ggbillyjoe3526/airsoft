@@ -304,7 +304,9 @@ func _animate_upper(pose: FigurePose, hits: HitConfig, fired: bool) -> void:
 	_hold_gate = _gate(FigureGraph.P_HOLD_GATE, _hold_gate, holster < 1.0)
 	_holster_gate = _gate(FigureGraph.P_HOLSTER_GATE, _holster_gate, holster > 0.0)
 	tree.set(FigureGraph.P_HOLSTER, holster)
-	var step_mix := UpperBlend.step_pump(hits, pose.speed) if hits != null and pose.stepping() else 0.0
+	# On the ground only, as the hit volume's arms (HitPose): in the air the arms hang.
+	var on_foot := hits != null and pose.stepping() and pose.jump <= 0.0
+	var step_mix := UpperBlend.step_pump(hits, pose.speed) if on_foot else 0.0
 	tree.set(FigureGraph.P_HOLSTER_MIX, maxf(pose.sprint_weight, step_mix))
 	if pose.stepping():
 		tree.set(FigureGraph.P_HOLSTER_SPRINT_SEEK, fposmod(pose.cycle, TAU))
