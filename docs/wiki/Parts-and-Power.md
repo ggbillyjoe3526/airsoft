@@ -85,7 +85,8 @@ magazine holds and **Carried** adds magazines to the replica's own (you always c
 - **Looks:** each is its replica's own magazine at another length. The hi-cap is a third longer, a pressed steel
   shell with narrow ribs, a welded seam down its back and a winding wheel under its base; the low-cap is short,
   moulded polymer with wide ribs; the pistol's extended magazine sticks out below the grip, holes down its back.
-- **Rattles:** the loose BBs in a hi-cap rattle as you move, so bots close by hear you even walking.
+- **Rattles:** the loose BBs in a hi-cap rattle as you move, so bots close by hear you even walking, and your run
+  and sprint carry 7 m further.
 - The hi-cap carries as many BBs in all in fewer, rattling changes, each one slower; the low-cap carries fewer BBs
   in all for the quickest change and draw. The pistol's extended magazine holds half as many again, for a slower draw.
 

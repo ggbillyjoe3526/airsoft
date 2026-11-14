@@ -15,7 +15,7 @@ enum Kind {
 	BB_IMPACT, ## actor's BB stopped at position: on the level (target -1, value2 the RayHit.Surface; direction its velocity as it landed), in a bush's leaves (target -1, value BBStep.IN_LEAVES; direction its unit path, reach the leaves it crossed) or a body not knocked out.
 	BB_LOST, ## actor's BB fell out of the level or flew past its lifetime at position.
 	CHARACTER_HIT, ## actor's BB hit target at position, flying along direction: target is out and calls the hit.
-	FOOTSTEP, ## actor's footstep (value: Footstep) on surface (value2: RayHit.Surface), carrying carry × as far; LAND: direction, down at its speed.
+	FOOTSTEP, ## actor's footstep (value: Footstep) on surface (value2: RayHit.Surface), carrying carry × as far; LAND: direction, down at its speed; a RUN or SPRINT with a rattling magazine: slot, whose magazine rattles with it (-1 none), heard the rattle's reach further.
 	VAULT, ## actor started a vault at position: hands and boots on the obstacle, loud (bots hear it far).
 	ROUND_START, ## round number value is live.
 	ROUND_OVER, ## value won the round (-1: a draw), for reason.

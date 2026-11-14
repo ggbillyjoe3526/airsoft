@@ -308,3 +308,82 @@ func test_a_rifle_over_a_1_4_m_top_is_raised_clear_and_lifts_clear_firing() -> v
 	assert_almost_eq(firing.x, cfg.raise_fire_most, 1e-6, "firing, lifted only the approved share")
 	assert_eq(int(firing.z), 0, "and that lifts it clear of a 1.4 m top")
 	assert_gt(firing.y, 1.4)
+
+
+# --- KNOWN_ISSUES 32 (owner 2026-11-14): a Hi-Cap's rattle carries with a run's and a sprint's steps ---
+
+
+## The footstep events `c` makes over 20 m of moving (sprinting or not) with a magazine that rattles or not.
+func _strides(rattling: bool, sprinting: bool, walking: bool = false) -> Array[GameEvent]:
+	var r := loadout[0].duplicate() as ReplicaConfig
+	r.rattles = rattling
+	var c := Character.new(0, 0, Vector3.ZERO, 0.0, [r] as Array[ReplicaConfig])
+	c.grounded = true
+	c.sprinting = sprinting
+	c.walking = walking
+	var events := SimEvents.new()
+	var out: Array[GameEvent] = []
+	for i in 400:
+		events.clear()
+		c.prev_position = c.position
+		c.position.z -= 0.05
+		Footsteps.step(c, tuning.footsteps, events, BoxWorld.new(tuning.body), tuning.noise)
+		for k in events.count:
+			var copy := GameEvent.new()
+			copy.reset(events.items[k].kind)
+			copy.value = events.items[k].value
+			copy.slot = events.items[k].slot
+			copy.carry = events.items[k].carry
+			out.append(copy)
+	return out
+
+
+func test_a_rattling_magazine_adds_its_reach_to_a_run_and_a_sprint() -> void:
+	var bots := BotConfig.new()
+	var rattle := bots.footstep_hearing_rattle
+	for sprinting: bool in [false, true]:
+		var plain := _strides(false, sprinting)
+		var loud := _strides(true, sprinting)
+		assert_eq(loud.size(), plain.size(), "the same strides, sprinting %s" % sprinting)
+		assert_gt(plain.size(), 0)
+		var step := bots.footstep_hearing_sprint if sprinting else bots.footstep_hearing_run
+		assert_eq(plain[0].slot, -1, "nothing rattles")
+		assert_almost_eq(BotHearing.footstep_reach(plain[0], bots), step, 1e-4)
+		assert_eq(loud[0].slot, 0, "the slot whose magazine rattles")
+		assert_almost_eq(BotHearing.footstep_reach(loud[0], bots), step + rattle, 1e-4,
+				"run 11 to 18 m, sprint 16 to 23 m")
+	# On loud ground the step's own reach carries further and the rattle's is added as it is.
+	var gravel := _strides(true, true)[0]
+	gravel.carry = tuning.noise.carry(RayHit.Surface.GRAVEL)
+	assert_almost_eq(BotHearing.footstep_reach(gravel, bots), bots.footstep_hearing_sprint * gravel.carry + rattle, 1e-4)
+	# A walk's rattle is the rattle alone, as before.
+	var walk := _strides(true, false, true)
+	assert_gt(walk.size(), 0)
+	assert_eq(walk[0].value, GameEvent.Footstep.RATTLE)
+	assert_almost_eq(BotHearing.footstep_reach(walk[0], bots), rattle, 1e-4)
+
+
+func test_your_own_run_with_a_rattling_magazine_plays_the_rattle_with_the_step() -> void:
+	var sound := SoundConfig.new()
+	var audio := SimAudio.new()
+	add_child_autofree(audio)
+	audio.setup(sound, [] as Array[StringName], BodyConfig.new(), null, null, tuning.footsteps)
+	var state := GameState.new(1)
+	var you := Character.new(0, 0, Vector3.ZERO)
+	state.characters.append(you)
+	var rattle := audio._streams[&"magRattle"] as Array
+	for slot: int in [-1, 0]:
+		state.time += 1.0
+		state.events.clear()
+		for v in audio._own:
+			v.stop()
+		var e := state.events.add(GameEvent.Kind.FOOTSTEP)
+		e.actor = 0
+		e.value = GameEvent.Footstep.RUN
+		e.slot = slot
+		e.position = you.position
+		audio.on_tick(state, 0, you)
+		var rattled := false
+		for v in audio._own:
+			rattled = rattled or (v.playing and rattle.has(v.stream))
+		assert_eq(rattled, slot >= 0, "the rattle with the step only with a rattling magazine (slot %d)" % slot)

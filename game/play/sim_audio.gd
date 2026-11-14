@@ -384,6 +384,10 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 					gain = (_cfg.own_land_gain if own else _cfg.step_gain) * lerpf(1.0, _cfg.land_hard_gain, hard) * e.carry
 					pitch = lerpf(1.0, _cfg.land_hard_pitch, hard)
 				_play(cue, at, own, gain, Kind.STEP, BUS_FOOTSTEPS, pitch, reach, c)
+				# A rattling magazine with a run's or a sprint's step (AUD2): its rattle as a walk's, with it.
+				if e.slot >= 0 and e.value != GameEvent.Footstep.RATTLE and e.value != GameEvent.Footstep.LAND:
+					_play(&"magRattle", at, own, (_cfg.own_step_gain if own else _cfg.step_gain), Kind.STEP,
+							BUS_FOOTSTEPS, 1.0, reach, c)
 				# A hard landing rustles the kit under its thud.
 				if e.value == GameEvent.Footstep.LAND and speed >= _cfg.hard_land_speed and c != null:
 					_kit(&"foley_crouch", c, own, now)

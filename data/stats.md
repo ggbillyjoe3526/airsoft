@@ -222,7 +222,8 @@ Each replica's standard magazine is how it comes (its Magazine and Magazines abo
 | extended | Extended Magazine | 1.5 | 0 | 1 | 1.35 | no |
 
 - **Carried.** Magazines carried, added to the replica's own (at least one is always carried).
-- **Rattles.** The loose BBs rattle as you move, so bots close by hear you even walking.
+- **Rattles.** The loose BBs rattle as you move, so bots close by hear you even walking, and a run or a sprint carries
+  the rattle's reach further.
 - **Which magazine.** On the rifle, the hi-cap carries as many BBs as the standard ones in fewer, rattling changes,
   each a quarter slower (a longer, heavier magazine, RP1), and the low-cap fewer BBs in all for the quickest change
   and draw. On the pistol, the extended magazine carries half as many
