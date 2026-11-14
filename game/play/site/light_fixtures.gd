@@ -72,10 +72,10 @@ static func build(map: MapData, cfg: LightFixturesConfig, light: LightingConfig)
 	fixtures._cfg = cfg
 	fixtures._placed = placed
 	var night := light != null and light.night
-	var prop := LookMaterials.vertex_colour(cfg.roughness, cfg.metallic)
+	var prop := LookMaterials.vertex_colour(cfg.roughness, cfg.metallic, Color.WHITE, false, cfg.wear)
 	# by day the globe is glass (the props' own) and the coals are cold: dimmed to charcoal in the props' light
 	var glow: Material = null
-	var coals: Material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic, cfg.cold_tint)
+	var coals: Material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic, cfg.cold_tint, false, cfg.wear)
 	if night:
 		var g := ShaderMaterial.new()
 		g.shader = CodeShaders.of(GLOW_SHADER)

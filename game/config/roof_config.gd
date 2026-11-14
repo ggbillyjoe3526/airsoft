@@ -10,6 +10,9 @@ extends Resource
 ## its roughness, and how far past the field's walls it reaches (m), so no gap shows at the eaves.
 @export var ceiling_colour: Color = Color8(0xd2, 0xce, 0xc8)
 @export var roughness: float = 0.9
+## How worn the roof's steel and lamps are drawn (SL2, look_vertex.gdshader's `wear`; LookConfig.wear scales it): dust
+## on their tops, streaks and stains down their sides, as the site's props (PropDressConfig.wear).
+@export_range(0.0, 1.0) var wear: float = 1.0
 @export var ceiling_overhang: float = 1.0
 ## The trusses: across the hall along z, one every `truss_step` m along x (Depot's hall walls' columns stand under
 ## them, PropDressConfig.bay_anchor), drawn as the roof's bay model (Dev 3: truss, purlins, sheet and services,
