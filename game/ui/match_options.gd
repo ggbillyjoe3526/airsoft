@@ -144,6 +144,15 @@ static func raise_time(map: MapCatalog.Entry, played: float) -> float:
 	return map.raise_time
 
 
+## The seconds a flag takes to raise on `map` in `mode` where that is not the game's `base` (a field's own, data/maps.md
+## Raise): what the Match page says before a match (the HUD's raise bar fills at it). 0 where it is the game's, the
+## mode has no flag, or the map has no pole time of its own.
+static func field_raise(mode: String, map: MapCatalog.Entry, base: float) -> float:
+	if mode != MODE_ATTACK_DEFEND or map == null or map.raise_time <= 0.0 or is_equal_approx(map.raise_time, base):
+		return 0.0
+	return map.raise_time
+
+
 ## `map_id` loaded as the Match page lists it: its problems (empty when it can be played) and whether it has a pole.
 static func map_check(map_id: String, style: MapStyle, team_size: int) -> MapData:
 	return MapData.load_map(map_id, style, team_size)
@@ -175,6 +184,11 @@ static func chip_text(chip: PackedStringArray) -> String:
 ## "3 v 3".
 static func size_text(team_size: int) -> String:
 	return _tr("RULE_SIZE") % [team_size, team_size]
+
+
+## "9": `seconds` as the fewest digits ("7.5" for a half).
+static func seconds_text(seconds: float) -> String:
+	return String.num(seconds, 1).trim_suffix(".0")
 
 
 ## "2:30": `seconds` as minutes and seconds, a part-second counted whole.

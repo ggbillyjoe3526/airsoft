@@ -203,13 +203,35 @@ func close() -> void:
 ## reads as closed; `previous` goes with them). A file holding no run under way needs neither. Whether the next start
 ## will read the run as closed.
 func save_closed(path: String = PATH) -> bool:
-	var mark := closed_mark(path, _disk_pid, _disk_started)
 	close()
 	if save(path):
 		return true
+	return _mark_disk_closed(path)
+
+
+## The crash screen has shown `previous`: it is forgotten and the record written. If that can't be written the record on
+## disk still tells of the crash, so it is marked closed as a clean quit's is (its mark, failing that its removal), or
+## the next start would show the crash again, and so on for as long as the folder takes no file. Whether the next start
+## will not show it again; false where nothing can be written, or where the record on disk is already this run's (it
+## still names the seen crash, and no mark can say otherwise without hiding a crash of this run), which is warned of.
+func crash_seen(path: String = PATH) -> bool:
+	previous = {}
+	if save(path):
+		return true
+	# Only the run before this one is marked. Once this run's own record is on disk (the start's write worked, this one
+	# did not) the mark would be this run's, and a crash of this run would then read as a clean quit.
+	if _disk_pid == pid and _disk_started == started:
+		return false
+	return _mark_disk_closed(path)
+
+
+## When `save` failed: the record on disk, if it holds a run under way, made to read as closed by the empty mark named
+## for that run, failing that by taking the record's files away (a missing record reads as closed). A file holding no run
+## under way needs neither. Whether the next start will read the run as closed.
+func _mark_disk_closed(path: String) -> bool:
 	if not _disk_running:
 		return true
-	if SaveFile.touch(mark):
+	if SaveFile.touch(closed_mark(path, _disk_pid, _disk_started)):
 		push_warning("run record: %s not written; its clean quit marked beside it" % path)
 		return true
 	push_warning("run record: %s not written nor marked; taking it away" % path)

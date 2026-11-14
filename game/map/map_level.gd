@@ -348,7 +348,7 @@ func _add_rest() -> void:
 	# prop's block counts as its box.
 	for b in m.blocks:
 		if b.rise == MapData.Rise.NONE:
-			_query.add_block(b.kind, b.center, b.size, b.surface)
+			_query.add_block(b.kind, b.center, b.size, b.surface, b.noise)
 	_add_doors(m)
 	_add_lifts(m)
 	_make_mover_bodies(_body)
@@ -421,6 +421,13 @@ func set_detail(detail: GraphicsQuality.MeshDetail) -> void:
 		_site_material.set_shader_parameter(&"low", detail == GraphicsQuality.MeshDetail.LOW)
 	if _station_material != null:
 		_station_material.set_shader_parameter(&"low", detail == GraphicsQuality.MeshDetail.LOW)
+
+
+## The station's arch fill (StationLook.arch_fill) on while no lamp lights the running tunnels (Lamp light off), else
+## off. Nothing on a map with no station.
+func set_arch_fill(on: bool) -> void:
+	if _station_material != null:
+		_station_material.set_shader_parameter(&"arch_fill", _station.arch_fill if on else 0.0)
 
 
 ## Sloping ground's tiles (WL4), row by row; empty on a map without sloping ground.
@@ -857,13 +864,25 @@ func _baked_mesh() -> ArrayMesh:
 
 ## The baked tiles where SiteSurface.core_of draws them (a sandbag stack's own box inside its bags).
 func _site_cores(t: GreyboxFaces.Tiles) -> void:
-	for i in map.blocks.size():
-		var core := SiteSurface.core_of(_site, map.blocks[i], map)
-		if core == Transform3D.IDENTITY:
-			continue
-		for v in t.blocks.size():
-			if t.blocks[v] == i:
-				t.positions[v] = core * t.positions[v]
+	# Each block's core once, then one pass over the vertices (it was every vertex again for every cored block: about
+	# seven million steps on Depot each time the baked mesh was built).
+	var count := map.blocks.size()
+	var cores: Array[Transform3D] = []
+	cores.resize(count)
+	var cored := PackedByteArray()
+	cored.resize(count)
+	var any := false
+	for i in count:
+		cores[i] = SiteSurface.core_of(_site, map.blocks[i], map)
+		if cores[i] != Transform3D.IDENTITY:
+			cored[i] = 1
+			any = true
+	if not any:
+		return
+	for v in t.blocks.size():
+		var i := t.blocks[v]
+		if i >= 0 and i < count and cored[i] == 1:
+			t.positions[v] = cores[i] * t.positions[v]
 
 
 ## The baked tiles' custom channels: each of the `n` tile vertices its block's (`blocks`), then the ground's four.

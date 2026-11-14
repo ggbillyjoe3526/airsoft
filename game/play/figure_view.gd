@@ -19,6 +19,9 @@ const SIGN_FONT_SIZE := 96
 const SIGN_PIXEL := 0.004
 const SIGN_OUTLINE_DARKEN := 0.5
 const MODEL_DIR := "res://assets/models/replicas/"
+## The contact shadow's shader: its fade by instance, which both renderers draw (BP7 row: Compatibility ignores
+## GeometryInstance3D.transparency).
+const CONTACT_SHADER := preload("res://game/play/contact_disc.gdshader")
 
 var character_id: int = -1
 var _sign: Label3D = null
@@ -80,8 +83,9 @@ var _lenses: PackedVector3Array = PackedVector3Array()
 var _contact: MeshInstance3D = null
 var _effects: EffectsConfig = null
 var _floor_y: float = 0.0
-## The disc's radius as last placed (m: narrower crouched).
+## The disc's radius as last placed (m: narrower crouched), and how whole it was drawn (its shader's `fade`).
 var _contact_radius: float = 0.0
+var _contact_fade: float = 1.0
 ## The floor under the feet as the last tick's ground ray found it (`on_tick`): a point on it, its normal (up when
 ## flat or too steep) and whether a ray has found one yet (until then, and without a world, the floor the feet last
 ## stood on, flat); the ray's own scratch.
@@ -430,10 +434,9 @@ static func contact_mesh(cfg: EffectsConfig) -> PlaneMesh:
 	tex.fill_to = Vector2(0.5, 0.0)
 	tex.width = PuffView.DISC_PIXELS
 	tex.height = PuffView.DISC_PIXELS
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_texture = tex
+	var mat := ShaderMaterial.new()
+	mat.shader = CONTACT_SHADER
+	mat.set_shader_parameter(&"disc", tex)
 	var disc := PlaneMesh.new()
 	disc.size = Vector2.ONE * 2.0
 	disc.material = mat
@@ -452,6 +455,11 @@ func add_contact_shadow(disc: Mesh, cfg: EffectsConfig) -> void:
 	_contact.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_contact.visible = false
 	add_child(_contact)
+
+
+## How whole the contact shadow is drawn (1 whole, 0 gone: its shader's `fade`), for tests.
+func contact_fade() -> float:
+	return _contact_fade
 
 
 ## Draws the contact shadow (where the sun casts none) or not.
@@ -566,6 +574,13 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 		_body.hands.show_bomb(Grenade.Kind.NONE)
 
 
+## Not posed this frame (a skip's cover: the field is not drawn): its legs are left still and it snaps to its pose
+## the next time it is posed (`animate`), as a hidden figure does.
+func hold() -> void:
+	_snap = true
+	_fired = false
+
+
 ## How far (0..1) the replica is raised at the level ahead of `c`'s aim, as `_pose` read it (FB5): by how close the
 ## level comes within the replica's reach (ahead of the figure's speed by raise_lead), eased out, one ray every
 ## raise_stride poses; none holstered, out of the hand or out of play, and after a shot at most raise_fire_most (a few
@@ -588,7 +603,8 @@ func _raise_target(c: Character) -> float:
 func _raise_share(cfg: FigureConfig) -> float:
 	var yaw := rotation.y
 	var h := Character.eye_height(_pose.crouch, _body_config)
-	var from := _pose.feet + Vector3(0.0, h - cfg.raise_drop, 0.0) \
+	var drop := lerpf(cfg.raise_drop_rifle, cfg.raise_drop_pistol, _pose.pistol)
+	var from := _pose.feet + Vector3(0.0, h - drop, 0.0) \
 			+ Lean.offset(h, _pose.lean, _pose.crouch, yaw, _hits)
 	var cp := cos(_pose.pitch)
 	var way := Vector3(-sin(yaw) * cp, sin(_pose.pitch), -cos(yaw) * cp)
@@ -661,7 +677,10 @@ func _place_disc() -> void:
 	var up := clampf(1.0 - height / maxf(_effects.contact_fade_height, 0.001), 0.0, 1.0) if height >= 0.0 else 0.0
 	_contact.global_transform = Transform3D(tilt * Basis.from_scale(Vector3(_contact_radius, 1.0, _contact_radius)),
 			Vector3(feet.x, floor_y, feet.z) + tilt.y * _effects.contact_lift)
-	_contact.transparency = 1.0 - _fade * up
+	var fade := _fade * up
+	if fade != _contact_fade:
+		_contact_fade = fade
+		_contact.set_instance_shader_parameter(&"fade", fade)
 
 
 ## A replica carrying a night torch draws it in the hand and on the back, not in the holster (it would poke through).

@@ -3,6 +3,9 @@ extends Control
 ## Every button answers a press (owner, 2026-11-10: "a simple animation where it looks like the button is being clicked
 ## ... even a simple highlight outline"): it dips in a little about its middle and springs back, and an outline in the
 ## accent lights just round it and fades. With Reduced motion (Settings › Accessibility) only the outline shows.
+## Only the drawing dips: the button's canvas item is drawn through a shrunk transform while its own `scale`, and so
+## the area a click is tested against, stays full (PP1: a click in the outer 4 px of a wide card was lost when the mouse
+## moved in the dip, because Godot tests the press against the shrunk control).
 ##
 ## `ButtonPress.install(tree)` (once, at boot; `uninstall` as the game leaves the tree) hooks every BaseButton in the
 ## tree and every one added later, as TooltipWrap watches for tooltips. A button gets its ring, an internal child drawn
@@ -25,6 +28,8 @@ const PIVOT := Vector2(0.5, 0.5)
 
 var _box: StyleBoxFlat = null
 var _tween: Tween = null
+## How much of its size the button is drawn at now: 1.0 at rest.
+var _dip: float = 1.0
 
 
 static func install(tree: SceneTree) -> void:
@@ -87,23 +92,51 @@ func play(still: bool = false) -> void:
 	if _tween != null:
 		_tween.kill()
 		# a dip cut short (a still press after it: Reduced motion turned on between two quick presses) leaves no shrink
-		b.scale = Vector2.ONE
+		_set_dip(1.0)
 	_box.set_corner_radius_all(_radius(b) + RING_GAP + RING_WIDTH)
 	visible = true
 	modulate.a = 1.0
 	queue_redraw()
 	_tween = create_tween().set_parallel(true)
 	if not still:
-		b.pivot_offset_ratio = PIVOT
 		var longest := maxf(b.size.x, b.size.y)
 		var dip := maxf(PRESS_SCALE, 1.0 - 2.0 * MAX_DIP / longest) if longest > 0.0 else PRESS_SCALE
-		b.scale = Vector2.ONE
-		_tween.tween_property(b, "scale", Vector2.ONE * dip, DIP_IN).set_trans(Tween.TRANS_QUAD) \
-				.set_ease(Tween.EASE_OUT)
-		_tween.tween_property(b, "scale", Vector2.ONE, DIP_OUT).set_delay(DIP_IN).set_trans(Tween.TRANS_BACK) \
+		_set_dip(1.0)
+		_tween.tween_method(_set_dip, 1.0, dip, DIP_IN).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		_tween.tween_method(_set_dip, dip, 1.0, DIP_OUT).set_delay(DIP_IN).set_trans(Tween.TRANS_BACK) \
 				.set_ease(Tween.EASE_OUT)
 	_tween.tween_property(self, "modulate:a", 0.0, RING_FADE).set_delay(DIP_IN).set_ease(Tween.EASE_IN)
 	_tween.chain().tween_callback(hide)
+
+
+## How much of its size the button is drawn at now (1.0 at rest).
+func dip() -> float:
+	return _dip
+
+
+## The transform a button is drawn through at `dip` of its size about its middle: `base` (its own, from its position,
+## scale and pivot) with the shrink applied in the button's space.
+static func dipped(base: Transform2D, size: Vector2, dip_to: float) -> Transform2D:
+	return base * Transform2D(Vector2(dip_to, 0.0), Vector2(0.0, dip_to), size * PIVOT * (1.0 - dip_to))
+
+
+## Draws the button at `to` of its size without touching its `scale`: the engine tests a click against the control's
+## own transform, which stays full.
+func _set_dip(to: float) -> void:
+	_dip = to
+	var b := get_parent() as Control
+	if b == null:
+		return
+	var base := b.get_transform()
+	RenderingServer.canvas_item_set_transform(b.get_canvas_item(), base if to == 1.0 else dipped(base, b.size, to))
+
+
+## A button leaving the tree in the middle of a press is drawn at its full size when it comes back.
+func _exit_tree() -> void:
+	if _tween != null:
+		_tween.kill()
+	_set_dip(1.0)
+	hide()
 
 
 ## Whether the press is still playing.

@@ -176,7 +176,10 @@ func test_the_shared_materials_draw_in_the_shared_light() -> void:
 			"res://game/play/site/site_surface.gdshader", "res://game/play/door_leaf.gdshader"]:
 		var code := (load(path) as Shader).code
 		assert_true(code.contains("look_light.gdshaderinc"), "%s includes the light" % path)
-		assert_true(code.contains("ALBEDO = look_paint("), "%s draws its paint through look_paint" % path)
+		# handed over linear on either renderer (look_colour.gdshaderinc's LOOK_ALBEDO) where the shader sums in linear
+		assert_true(code.contains("ALBEDO = look_paint(") or code.contains("ALBEDO = LOOK_ALBEDO(look_paint(")
+				or (code.contains("albedo = look_paint(") and code.contains("ALBEDO = LOOK_ALBEDO(albedo)")),
+				"%s draws its paint through look_paint" % path)
 	assert_almost_eq(m.get_shader_parameter(&"roughness") as float, 0.4, 0.0001)
 	assert_almost_eq(m.get_shader_parameter(&"metallic") as float, 0.2, 0.0001)
 
@@ -188,7 +191,9 @@ func test_a_model_is_worn_only_when_its_material_asks() -> void:
 			"clean by default: the greybox, bushes, woods and flags")
 	var worn := LookMaterials.vertex_colour(0.4, 0.0, Color.WHITE, false, 0.7)
 	assert_almost_eq(worn.get_shader_parameter(&"wear") as float, 0.7, 0.0001)
-	var code := LookMaterials.VERTEX_SHADER.code
+	# The wear is one include the models' shader and the doors' share (AUD1).
+	assert_true(LookMaterials.VERTEX_SHADER.code.contains("look_wear.gdshaderinc"), "the models' shader includes the wear")
+	var code := FileAccess.get_file_as_string("res://game/play/look/look_wear.gdshaderinc")
 	for global: String in ["look_wear", "look_grime", "look_dust"]:
 		assert_true(code.contains("global uniform") and code.contains(global), "the shader reads %s" % global)
 	assert_true(code.contains("wear * look_wear"), "a material's wear scaled by the look's")

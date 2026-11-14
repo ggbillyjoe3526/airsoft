@@ -59,7 +59,6 @@ every replica there (the spec test's table, below), what it is good and bad at, 
 
 ## Known limits
 
-- Bots lead and judge their friendly line by the first replica of the default loadout, not by the one they carry
-  (`legacy/browser/docs/KNOWN_ISSUES.md`). A replica whose BBs fly much slower than the AEG's may test weaker with bots
-  than with players.
+- Bots lead and judge their friendly line by the replica in their hands, with the BBs it loads
+  (`BotCombat.flight_time`; the browser game's bots used the default loadout's first replica).
 - Bots carry their primary only, so the balance run gives each bot one replica.

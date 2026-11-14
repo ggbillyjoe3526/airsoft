@@ -38,8 +38,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Not mirrored:** the halves differ, but they're balanced. Both teams reach the Chrono hall together; Beta reaches
   the Lounge first and Alpha the Box yard, by about the same margin.
 - **Spawn rooms** open by two crate chicanes each, so nobody sees into a spawn from the floor outside it.
-- **Noisy props:** running into a container, a steel drum, a plastic barrel, a rack or a crate stack makes a noise
-  bots hear, and a BB rings off the steel ([Movement](Movement#paces)).
+- **Noisy props:** running into a container, a steel drum, the steel lockers, a plastic barrel, a rack or a crate stack
+  makes a noise bots hear, and a BB rings off the steel ([Movement](Movement#paces)).
 - **Doors:** some of the plywood rooms and huts have wooden [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)). Each pole stands between two crate stacks: one hides it from the

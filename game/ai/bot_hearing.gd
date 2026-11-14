@@ -29,7 +29,7 @@ static func observe(state: GameState, w: BotWorld) -> void:
 			GameEvent.Kind.FOOTSTEP:
 				var walker := _character(w, e.actor)
 				if walker != null and Elimination.is_in_play(walker):
-					_hear(w, walker, walker.position, walker.position, _footstep_range(e.value, w.cfg) * e.carry, null)
+					_hear(w, walker, walker.position, walker.position, footstep_reach(e, w.cfg), null)
 			GameEvent.Kind.VAULT:
 				var vaulter := _character(w, e.actor)
 				if vaulter != null and Elimination.is_in_play(vaulter):
@@ -57,6 +57,15 @@ static func observe(state: GameState, w: BotWorld) -> void:
 				var shooter := _character(w, e.actor)
 				if shooter != null and Elimination.is_in_play(shooter):
 					_hear(w, shooter, e.position, e.position, e.reach, null, e.position, false, true)
+
+
+## How far a footstep event `e` carries to bots (m): its kind's reach times its ground's carry, and a rattling
+## magazine's reach on top for a run's or a sprint's step that names one (GameEvent.slot, AUD2).
+static func footstep_reach(e: GameEvent, cfg: BotConfig) -> float:
+	var reach := _footstep_range(e.value, cfg) * e.carry
+	if e.slot >= 0 and e.value != GameEvent.Footstep.RATTLE:
+		reach += cfg.footstep_hearing_rattle
+	return reach
 
 
 static func _footstep_range(kind: int, cfg: BotConfig) -> float:

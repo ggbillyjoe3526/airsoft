@@ -78,8 +78,9 @@ func test_level_3_lists_ten_of_twenty_with_the_silencer_next() -> void:
 	var page := _page(920)
 	var facts := page.facts()
 	assert_eq(facts.level, 3)
-	assert_eq([facts.unlocked_count, facts.item_count], [10, 25],
-			"the Weapon Torch (2026-10-29) and the Sniper Rifle, its springs and the Variable Scope (2026-11-05) are listed")
+	assert_eq([facts.unlocked_count, facts.item_count], [10, 27],
+			"the Weapon Torch (2026-10-29), the Sniper Rifle, its springs and the Variable Scope (2026-11-05), and the"
+			+ " Compact SMG and the Pump Shotgun (2026-11-14) are listed")
 	assert_eq(facts.next_row().number, 4)
 	assert_eq(facts.next_row().items[0].id, SILENCER)
 	var states: Array[ArmoryFacts.State] = []
@@ -90,7 +91,7 @@ func test_level_3_lists_ten_of_twenty_with_the_silencer_next() -> void:
 	assert_eq(states[5], ArmoryFacts.State.LOCKED)
 	assert_eq(states.size(), 16, "the starting kit and 15 levels (LV15)")
 	var words := _words(page.summary())
-	for w: String in ["LEVEL 3", "120 / 500 XP · 380 XP to level 4", "920 XP earned in all · 10 / 25 unlocked",
+	for w: String in ["LEVEL 3", "120 / 500 XP · 380 XP to level 4", "920 XP earned in all · 10 / 27 unlocked",
 			"Every match 100 XP · a win +100 · round won 20 · hit 10 · Easy ×0.5 · Normal ×1 · Hard ×1.5"]:
 		assert_true(words.has(w), w)
 	# the multipliers and the rest of what XP means: the earn line's tooltip (UI1)
@@ -141,7 +142,7 @@ func test_at_the_cap_it_says_xp_stops_counting_and_nothing_is_next() -> void:
 	var facts := page.facts()
 	assert_eq(facts.level, 15)
 	assert_null(facts.next_row())
-	assert_eq(facts.unlocked_count, 25)
+	assert_eq(facts.unlocked_count, 27)
 	var words := _words(page.summary())
 	assert_true(words.has("Top level reached · XP counts again when the level cap goes up."))
 	assert_eq(page.summary().bar().fraction(), 0.0, "nothing past the cap to fill")
@@ -153,7 +154,7 @@ func test_with_levelling_off_everything_is_unlocked() -> void:
 	var page := _page(920, true)
 	var facts := page.facts()
 	assert_true(facts.levelling_off)
-	assert_eq([facts.unlocked_count, facts.item_count], [25, 25])
+	assert_eq([facts.unlocked_count, facts.item_count], [27, 27])
 	assert_null(facts.next_row())
 	for r in facts.rows:
 		assert_eq(r.state, ArmoryFacts.State.UNLOCKED)
@@ -195,7 +196,7 @@ func test_every_item_has_its_own_model_picture_and_a_blurb() -> void:
 			assert_ne(blurb, "", it.display_name)
 			assert_false(blurb.begins_with("PART_BLURB") or blurb.begins_with("ARMORY_BLURB"), it.display_name)
 			shown += 1
-	assert_eq(shown, 25)
+	assert_eq(shown, 27)
 
 
 func test_every_power_source_has_a_model_entry_and_a_gas_bottle_takes_its_own_label() -> void:

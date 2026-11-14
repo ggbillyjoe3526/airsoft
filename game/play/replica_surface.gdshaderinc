@@ -11,6 +11,9 @@
 // The figures' copies are not drawn with it: they keep ReplicaPaint's plain paints, which HeldMerge merges.
 
 global uniform float look_wear;
+// The surfaces' detail (GraphicsApply: 0 on Mesh detail Low, else 1): under 0.5 the grain and its cloud are read from
+// the face's main side alone (3 texture reads a fragment, not 7), the slanted faces' blend between sides dropped.
+global uniform float look_surface_detail;
 
 const int KINDS = 16;
 
@@ -65,6 +68,8 @@ const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 // The least a colour's brightest channel counts as when its chroma is taken (black has none).
 const float CHROMA_FLOOR = 0.001;
 
+#include "res://game/play/look/retro_vertex.gdshaderinc"
+
 varying vec3 model_position;
 varying vec3 model_normal;
 varying flat int kind;
@@ -76,6 +81,8 @@ void vertex() {
 	kind = marked >= KINDS ? default_kind : marked;
 	model_position = VERTEX;
 	model_normal = NORMAL;
+	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1); the grain keeps the true place.
+	VERTEX = retro_vertex(MODEL_MATRIX, VERTEX, retro_snaps(IN_SHADOW_PASS, PROJECTION_MATRIX));
 }
 
 // `c` (linear) scuffed towards the worn grey by `k`, in square-root light, so it reads alike on dark and light paint.
@@ -97,9 +104,29 @@ void fragment() {
 	side /= side.x + side.y + side.z;
 	// The bore runs along the model's z: the two long sides read it as u, stretched; the end-on side reads it plain.
 	vec3 p = model_position / fine.x;
-	vec4 gx = texture(grain, vec2(p.z / fine.y, p.y));
-	vec4 gy = texture(grain, vec2(p.z / fine.y, p.x));
-	vec4 gz = texture(grain, p.xy);
+	vec3 q = model_position / tone.x;
+	vec4 gx;
+	vec4 gy;
+	vec4 gz;
+	float cloud;
+	// Uniform (the look's), so the reads inside take their derivatives as a whole quad's.
+	if (look_surface_detail < 0.5) {
+		// The main side whole: one read of the grain and one of its cloud.
+		vec3 lead = vec3(greaterThanEqual(side, max(side.yzx, side.zxy)));
+		side = lead / (lead.x + lead.y + lead.z);
+		vec2 at = side.x > 0.0 ? vec2(p.z / fine.y, p.y) : (side.y > 0.0 ? vec2(p.z / fine.y, p.x) : p.xy);
+		vec2 at_cloud = side.x > 0.0 ? q.zy : (side.y > 0.0 ? q.zx : q.xy);
+		vec4 g = texture(grain, at);
+		gx = g;
+		gy = g;
+		gz = g;
+		cloud = texture(grain, at_cloud).b;
+	} else {
+		gx = texture(grain, vec2(p.z / fine.y, p.y));
+		gy = texture(grain, vec2(p.z / fine.y, p.x));
+		gz = texture(grain, p.xy);
+		cloud = side.x * texture(grain, q.zy).b + side.y * texture(grain, q.zx).b + side.z * texture(grain, q.xy).b;
+	}
 	vec3 slope = side.x * vec3(0.0, gx.g - 0.5, (gx.r - 0.5) / fine.y)
 			+ side.y * vec3(gy.g - 0.5, 0.0, (gy.r - 0.5) / fine.y)
 			+ side.z * vec3(gz.r - 0.5, gz.g - 0.5, 0.0);
@@ -109,8 +136,6 @@ void fragment() {
 	float relief = fine.z * (1.0 - smoothstep(GRAIN_FADE.x, GRAIN_FADE.y, texels));
 	vec3 bumped = normalize(n - slope * relief * 2.0);
 	NORMAL = normalize((VIEW_MATRIX * (MODEL_MATRIX * vec4(bumped, 0.0))).xyz);
-	vec3 q = model_position / tone.x;
-	float cloud = side.x * texture(grain, q.zy).b + side.y * texture(grain, q.zx).b + side.z * texture(grain, q.xy).b;
 	float figure = side.x * gx.a + side.y * gy.a + side.z * gz.a;
 	paint = mix(paint, wood_stain, fine.w * wood_stain_share);
 	// The kind's gain, whole on a grey paint (black, white); a bold paint keeps `shine.w` of its own brightness.

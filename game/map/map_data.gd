@@ -41,12 +41,19 @@ class Block:
 	## pickup, a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet
 	## (a round prop's, MapStyle.round_steps, as its stepped boxes).
 	var dress: StringName = &""
+	## The noisy prop's sound it makes (`noise` in the file, a NoiseConfig.SOUND_NAMES name: Depot's steel lockers,
+	## `clank`), or empty for its kind's (NoiseConfig.props). Read by PropNoise through WorldQuery.block_noises.
+	var noise: StringName = &""
 	## The world direction its prop's front faces (`facing` in the file: +x, -x, +z or -z; SM3), or empty for the lay's
 	## own rule (FIT: towards the field's middle). A bench's seat to the track, its back to the wall. Look only.
 	var facing: StringName = &""
 	## Its own colour (sRGB; `colour` in the file, 0xRRGGBB, ST1: a map's palette paint, each building its own), or
 	## clear (alpha 0) to take its kind's (MapStyle.block_colour).
 	var colour: Color = Color(0, 0, 0, 0)
+	## Bodies squeeze past it (`squeeze` in the file, AUD2: Subway's works wagons on the rails, a body's width and a
+	## few centimetres from the walls): the nav grid keeps its cells the body's radius from it, not the clearance's
+	## margin more (NavGridBuilder), so a bot's route may go through a gap a player fits through.
+	var squeeze: bool = false
 
 
 ## One pool of light on a night field (`lights` in the file; the browser's MapLight): a camp fire, a lantern, or a lamp
@@ -411,6 +418,12 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 		b.surface = SURFACES.get(str(bd["surface"]), style.surface_of(b.kind)) if bd.has("surface") \
 				else style.surface_of(b.kind)
 		b.dress = StringName(str(bd.get("dress", "")))
+		if bd.has("noise"):
+			b.noise = StringName(str(bd["noise"]))
+			if not NoiseConfig.SOUND_NAMES.has(String(b.noise)):
+				warnings.append("block %d's noise %s is not a prop sound; its kind's kept" % [i, bd["noise"]])
+				b.noise = &""
+		b.squeeze = bd.get("squeeze", false) == true
 		if bd.has("facing"):
 			b.facing = StringName(str(bd["facing"]))
 			if not RISES.has(String(b.facing)):

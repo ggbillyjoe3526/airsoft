@@ -3,7 +3,7 @@
 # and in Attack / Defend, and the callouts' guards (CO1: one match a map, the bots' calls checked). Many minutes, so they
 # run as CI jobs of their own (one a file) and not in tools/check.sh's unit tests. Prints failures and totals.
 # Usage: tools/match_guards.sh [file [test]]   (a file in tests/guards, e.g. test_flag_guards, and optionally the tests
-#                                              in it whose names hold `test`, e.g. elimination_at_normal; all of them
+#                                              in it whose names hold `test`, e.g. elimination_at_easy; all of them
 #                                              without one; GODOT=/path/to/godot to override)
 set -uo pipefail
 GODOT="${GODOT:-godot}"

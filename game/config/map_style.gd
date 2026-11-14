@@ -187,6 +187,9 @@ const ROUND_TRUNK: Array[Vector2] = [Vector2(-1.0, -0.55), Vector2(1.0, 0.55), V
 @export var most_forest_trees: int = 6000
 ## Greybox roughness, drawn clean in the shared light (no floor grid since WA1).
 @export var roughness: float = 0.85
+## How worn the doors' leaves and frames are drawn (SL2, look_wear.gdshaderinc; LookConfig.wear scales it), as the
+## site's props (PropDressConfig.wear).
+@export_range(0.0, 1.0) var door_wear: float = 1.0
 
 
 ## What blocks of `kind` are made of.

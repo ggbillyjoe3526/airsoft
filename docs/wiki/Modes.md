@@ -29,7 +29,7 @@ swap at half time; the Match card says who attacks first. Depot and Woodland hav
 each site: the attackers win by raising their flag on either, and each pole's flag goes up and down on its own.
 
 - **Attackers** raise their flag by standing at the pole, on the rope, for **<!-- wiki:config flag_config.raise_time --> seconds** (a
-  big field takes longer: the [Maps](Maps) table lists each field's flag raise), then
+  big field takes longer: the [Maps](Maps) table lists each field's flag raise, and the Match page says it under the rules when you pick one), then
   win the round by **holding it up for <!-- wiki:config flag_config.hold_time --> seconds**. The flag stays up on its own, but a defender on the
   rope pulls it off the top and the hold starts again; with both teams on the rope the hold waits. The FLAG gauge
   counts the hold down: **HOLD 3, 2, 1**

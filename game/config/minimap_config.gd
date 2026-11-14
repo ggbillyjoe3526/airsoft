@@ -16,9 +16,8 @@ extends Resource
 @export var under_gap: float = 18.0
 @export var pin_x: float = 28.0
 ## How far apart (px) the screen-edge markers pinned past the panel sit (BP5: a flag and a hold marker landed on top of
-## each other): down its side, and across its top (a label's width).
+## each other), down its side.
 @export var pin_step_down: float = 48.0
-@export var pin_step_across: float = 96.0
 ## Metres from the panel's middle to its edge (its corners reach a little further).
 @export var view_radius: float = 20.0
 ## Pixels per metre of the field drawing made once per match (the panel shows 40 m across 200 px, 5 px/m, so

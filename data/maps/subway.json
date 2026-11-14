@@ -2194,7 +2194,8 @@
     "y": 2.0,
     "z": 3.0
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "crate",
@@ -3044,7 +3045,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3058,7 +3060,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3072,7 +3075,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "crate",
@@ -3100,7 +3104,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3114,7 +3119,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3128,7 +3134,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "cabinet",
@@ -3142,7 +3149,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "crate",
@@ -3170,7 +3178,8 @@
     "y": 2.0,
     "z": 1.8
    },
-   "dress": "locker"
+   "dress": "locker",
+   "noise": "clank"
   },
   {
    "kind": "generator",
@@ -4624,7 +4633,8 @@
     "y": 2.7,
     "z": 2.0
    },
-   "dress": "skip_wagon"
+   "dress": "skip_wagon",
+   "squeeze": true
   },
   {
    "kind": "skip",
@@ -4638,7 +4648,8 @@
     "y": 2.7,
     "z": 2.0
    },
-   "dress": "skip_wagon"
+   "dress": "skip_wagon",
+   "squeeze": true
   },
   {
    "kind": "skip",
@@ -4652,7 +4663,8 @@
     "y": 2.7,
     "z": 2.0
    },
-   "dress": "skip_wagon"
+   "dress": "skip_wagon",
+   "squeeze": true
   },
   {
    "kind": "cabinet",
@@ -4711,7 +4723,8 @@
     "y": 1.2,
     "z": 1.7
    },
-   "dress": "platelayer_trolley"
+   "dress": "platelayer_trolley",
+   "squeeze": true
   },
   {
    "kind": "container",
@@ -4726,7 +4739,8 @@
     "z": 2.0
    },
    "colour": 8223346,
-   "dress": "engineering_wagon"
+   "dress": "engineering_wagon",
+   "squeeze": true
   },
   {
    "kind": "cabinet",
@@ -4800,7 +4814,8 @@
     "y": 1.2,
     "z": 1.7
    },
-   "dress": "platelayer_trolley_short"
+   "dress": "platelayer_trolley_short",
+   "squeeze": true
   },
   {
    "kind": "crate",
@@ -4829,7 +4844,8 @@
     "z": 1.8
    },
    "colour": 8223346,
-   "dress": "ballast_wagon"
+   "dress": "ballast_wagon",
+   "squeeze": true
   },
   {
    "kind": "container",
@@ -4844,7 +4860,8 @@
     "z": 1.8
    },
    "colour": 8223346,
-   "dress": "ballast_wagon"
+   "dress": "ballast_wagon",
+   "squeeze": true
   },
   {
    "kind": "cabinet",
@@ -4858,7 +4875,8 @@
     "y": 1.2,
     "z": 1.7
    },
-   "dress": "platelayer_trolley_long"
+   "dress": "platelayer_trolley_long",
+   "squeeze": true
   },
   {
    "kind": "wall",
@@ -10926,12 +10944,12 @@
    "center": {
     "x": -48.0,
     "y": -0.15,
-    "z": -10.75
+    "z": -10.755
    },
    "size": {
     "x": 8.02,
     "y": 0.3,
-    "z": 3.52
+    "z": 3.53
    }
   },
   {
@@ -10991,12 +11009,12 @@
    "center": {
     "x": 33.0,
     "y": -0.15,
-    "z": -10.75
+    "z": -10.755
    },
    "size": {
     "x": 34.02,
     "y": 0.3,
-    "z": 3.52
+    "z": 3.53
    }
   },
   {
@@ -11277,12 +11295,12 @@
    "center": {
     "x": -11.0,
     "y": -0.15,
-    "z": 10.75
+    "z": 10.755
    },
    "size": {
     "x": 82.02,
     "y": 0.3,
-    "z": 3.52
+    "z": 3.53
    }
   },
   {
@@ -11355,12 +11373,12 @@
    "center": {
     "x": 14.075,
     "y": -0.15,
-    "z": -10.75
+    "z": -10.755
    },
    "size": {
     "x": 3.87,
     "y": 0.3,
-    "z": 3.52
+    "z": 3.53
    }
   },
   {
@@ -11381,12 +11399,12 @@
    "center": {
     "x": -42.075,
     "y": -0.15,
-    "z": -10.75
+    "z": -10.755
    },
    "size": {
     "x": 3.87,
     "y": 0.3,
-    "z": 3.52
+    "z": 3.53
    }
   },
   {
@@ -13435,12 +13453,12 @@
    "center": {
     "x": 58.075,
     "y": -0.15,
-    "z": 10.75
+    "z": 10.755
    },
    "size": {
     "x": 3.87,
     "y": 0.3,
-    "z": 3.52
+    "z": 3.53
    }
   },
   {
@@ -13461,12 +13479,12 @@
    "center": {
     "x": 31.925,
     "y": -0.15,
-    "z": 10.75
+    "z": 10.755
    },
    "size": {
     "x": 3.87,
     "y": 0.3,
-    "z": 3.52
+    "z": 3.53
    }
   },
   {
@@ -16594,12 +16612,12 @@
    "center": {
     "x": 50.15,
     "y": -0.15,
-    "z": -10.75
+    "z": -10.755
    },
    "size": {
     "x": 0.32,
     "y": 0.3,
-    "z": 3.52
+    "z": 3.53
    }
   },
   {
@@ -16750,12 +16768,12 @@
    "center": {
     "x": 60.15,
     "y": -0.15,
-    "z": 10.75
+    "z": 10.755
    },
    "size": {
     "x": 0.32,
     "y": 0.3,
-    "z": 3.52
+    "z": 3.53
    }
   },
   {
@@ -21056,7 +21074,7 @@
     "y": 11.9
    },
    {
-    "x": 7.0,
+    "x": 6.0,
     "z": -8.0,
     "y": 11.9
    },
@@ -21071,7 +21089,7 @@
     "y": 11.9
    },
    {
-    "x": 7.0,
+    "x": 6.0,
     "z": 8.0,
     "y": 11.9
    },
@@ -21081,12 +21099,12 @@
     "y": 11.9
    },
    {
-    "x": 7.5,
+    "x": 9.5,
     "z": 0.0,
     "y": 12.4
    },
    {
-    "x": 14.5,
+    "x": 16.5,
     "z": 0.0,
     "y": 12.4
    },

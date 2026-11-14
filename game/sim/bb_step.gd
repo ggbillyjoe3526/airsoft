@@ -105,7 +105,8 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 				_prepare(characters)
 				prepared = true
 			_first_body(bb, dir, leaf_end if leaf_end >= 0.0 else reach, characters, tuning.hits, length)
-			if not targets.is_empty() and not cease_fire and _stop_on_target(bb, dir, targets, tuning, events, rng):
+			if not targets.is_empty() and not cease_fire \
+					and _stop_on_target(bb, dir, targets, tuning, events, rng, length):
 				continue
 			if _reached >= 0:
 				_stop_on_body(bb, dir, characters, tuning.hits, cease_fire, ends, events)
@@ -306,9 +307,11 @@ static func _leave_leaves(bb: BB, dir: Vector3, leaf_end: float, stop: bool, cfg
 
 ## Whether the BB's segment this tick (from prev_position along `dir`) reaches one of `targets` before _reached_at (the
 ## nearest body, or else the level or the segment's end): it stops there, as a TARGET_HIT, or a BB_IMPACT at a post.
+## `flown` is the segment's whole length (m) for a BB in flight: a target that moved this tick is swept as a body is.
 static func _stop_on_target(bb: BB, dir: Vector3, targets: Array[RangeTarget], tuning: SimTuning, events: SimEvents,
-		rng: RandomNumberGenerator) -> bool:
-	RangeTargets.first_hit(bb.prev_position, dir, _reached_at, targets, tuning.targets, _target_hit)
+		rng: RandomNumberGenerator, flown: float = 0.0) -> bool:
+	RangeTargets.first_hit(bb.prev_position, dir, _reached_at, targets, tuning.targets, _target_hit, flown,
+			tuning.hits.max_stride)
 	if _target_hit.index < 0:
 		return false
 	bb.position = bb.prev_position + dir * _target_hit.at

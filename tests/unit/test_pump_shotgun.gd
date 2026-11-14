@@ -69,12 +69,12 @@ func _flying(pool: BBPool) -> Array[BB]:
 	return out
 
 
-func test_it_is_a_dev_spring_rifle_in_the_pool_with_the_snipers_springs() -> void:
+func test_it_is_a_public_spring_rifle_in_the_pool_with_the_snipers_springs() -> void:
 	var it := rules.pool.item(SHOTGUN)
 	assert_not_null(it)
 	assert_eq(it.display_name, "Pump Shotgun")
 	assert_eq(it.key, &"shotgun")
-	assert_true(it.is_dev(), "Dev content until the owner says make it public")
+	assert_false(it.is_dev(), "public (owner, 2026-11-14)")
 	for tag: String in ["rifle", "spring", "top-rail", "side-rail"]:
 		assert_true(it.tags.has(tag), tag)
 	for tag: String in ["under-rail", "barrel-mount", "aeg-mag", "muzzle-thread", "electric", "gas"]:
@@ -84,7 +84,7 @@ func test_it_is_a_dev_spring_rifle_in_the_pool_with_the_snipers_springs() -> voi
 			"the Sniper Rifle's springs (owner, 2026-11-12), the M130 as it comes")
 	assert_eq(ids.call(rules.pool.comes_with(it)), [], "iron sights as it comes")
 	rules.dev_content = false
-	assert_false(rules.is_offered(SHOTGUN), "hidden without Dev content")
+	assert_true(rules.is_offered(SHOTGUN), "offered without Dev content")
 
 
 func test_it_plays_by_its_stats_row_single_shots_and_a_pump() -> void:
@@ -305,16 +305,16 @@ func test_it_takes_the_optics_and_the_springs_and_nothing_else_yet() -> void:
 			"still short of the AEG")
 
 
-func test_it_unlocks_at_level_12_with_a_spring_and_a_sight_already_there() -> void:
+func test_it_unlocks_at_level_10_with_a_spring_and_a_sight_already_there() -> void:
 	var table := LevelTable.read_file(rules.pool)
 	assert_eq(table.problems, [] as Array[String])
-	assert_eq(table.unlock_level(SHOTGUN), 12, "owner, 2026-11-12")
+	assert_eq(table.unlock_level(SHOTGUN), 10, "swapped with the Compact SMG (owner, 2026-11-14)")
 	for part: String in [RED_DOT, SCOPE, M130, M140]:
-		assert_lt(table.unlock_level(part), 12, "%s before it" % part)
-	assert_gt(table.unlock_level(M150), 12, "the strongest spring after it")
+		assert_lt(table.unlock_level(part), 10, "%s before it" % part)
+	assert_gt(table.unlock_level(M150), 10, "the strongest spring after it")
 
 
-func test_the_clearer_kit_carries_it_with_a_red_dot_with_dev_content_only() -> void:
+func test_the_clearer_kit_carries_it_with_a_red_dot_in_every_indoor_match() -> void:
 	var k := BotKits.read_file(rules.pool)
 	var plan: BotKits.Plan = null
 	for p in k.kits:
@@ -325,9 +325,9 @@ func test_the_clearer_kit_carries_it_with_a_red_dot_with_dev_content_only() -> v
 	var kit := BotKits.kit_of(plan, rules)
 	assert_eq(kit.replicas[0].id, &"shotgun")
 	assert_eq(kit.parts[0].get(&"optic"), &"redDot")
-	assert_true(kit.dev, "dev gear: the match stays out of the records")
+	assert_false(kit.dev, "public gear: the match counts for the records")
 	rules.dev_content = false
-	assert_false(BotKits.offers(rules, plan), "never without Dev content")
+	assert_true(BotKits.offers(rules, plan), "and without it")
 
 
 func test_its_sounds_are_there_with_a_pump_of_its_own() -> void:

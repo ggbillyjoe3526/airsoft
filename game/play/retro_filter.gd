@@ -25,7 +25,7 @@ const AFFINE_REACH := 0.2
 ## The haze: from and to (m from the eye), at most this much of the view, the map's own haze colour (else its sky's
 ## horizon) times `HAZE_LIGHT`.
 const HAZE_FROM := 12.0
-const HAZE_TO := 70.0
+const HAZE_TO := 110.0
 const HAZE_MOST := 0.85
 const HAZE_LIGHT := 0.55
 const SHADER := preload("res://game/play/retro_filter.gdshader")

@@ -308,6 +308,10 @@ look_wear={
 "type": "float",
 "value": 1.0
 }
+look_surface_detail={
+"type": "float",
+"value": 1.0
+}
 look_grime={
 "type": "color",
 "value": Color(0.0684782, 0.0528606, 0.0368894, 1)

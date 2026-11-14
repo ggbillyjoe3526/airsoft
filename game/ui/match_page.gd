@@ -68,6 +68,8 @@ var _settings: Settings = null
 var _tuning: SimTuning = null
 ## The map the round tuning was read for.
 var _tuned_map: String = ""
+## A settings change came while the page was hidden (the menus' Settings open over it): it reads them when shown.
+var _stale: bool = false
 ## The mode you had on the field you left for the Range (Practice too, when you picked it), given back when a field is
 ## picked next; "" when the page opened on the Range, so the field opens on its first mode, not the Range's Practice.
 var _field_mode: String = ""
@@ -592,9 +594,20 @@ static func _colour_team_card(card: MenuCard, colour: Color) -> void:
 ## The rule set, a Custom switch or any setting changed (Dev content, a reset save): the round tuning is read again,
 ## and what reads it redrawn, the Custom rows included.
 func _on_rules_changed() -> void:
+	# Hidden under the menus' Settings, it waits to be shown: every step of a slider dragged there (a volume, the
+	# sensitivity) changes the settings, and each change rebuilt the rules' chips and the map list for a page nobody saw.
+	if is_inside_tree() and not is_visible_in_tree():
+		_stale = true
+		return
+	_stale = false
 	_retune()
 	_list_maps()
 	_refresh()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and _stale and is_visible_in_tree():
+		_on_rules_changed()
 
 
 ## Reads the round tuning again and redraws the rules with it (the Team size row shows the picked map's sizes).
@@ -671,6 +684,7 @@ func _refresh() -> void:
 	var team_parts: Array[Control] = [_team_row, _attack_room]
 	MenuParts.set_unused(team_parts, _team_tag, practice)
 	_rules.set_unused(practice)
+	_rules.show_flag_note()
 	_bots.set_unused(practice)
 	_play.text = tr("MENU_GO_PRACTICE" if practice else "MENU_PLAY")
 	_attack_team.text = tr(MatchOptions.TEAM_KEYS[picks.team])

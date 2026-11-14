@@ -83,8 +83,9 @@ func _unplayable() -> void:
 func test_only_replicas_the_game_can_play_are_offered() -> void:
 	_unplayable()
 	var offered := rules.offered().map(func(i: Pool.Item) -> String: return i.id)
-	assert_eq(offered, [PISTOL, AEG, CYBER, SNIPER],
-			"the Cyber Pistol plays since CP1, the Sniper Rifle is public since 2026-11-05; one with no config isn't offered")
+	assert_eq(offered, [PISTOL, AEG, CYBER, SNIPER, "000026", "000027"],
+			"the Cyber Pistol plays since CP1, the Sniper Rifle is public since 2026-11-05, the Compact SMG and the Pump"
+			+ " Shotgun since 2026-11-14; one with no config isn't offered")
 
 
 func test_a_new_player_carries_the_browser_games_defaults() -> void:

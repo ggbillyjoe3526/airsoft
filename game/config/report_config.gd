@@ -9,9 +9,15 @@ const DEFAULT_PATH := "res://game/config/report_config.tres"
 
 ## A new issue on the game's repository: the address the title and body are added to.
 @export var issue_url: String = "https://github.com/ggbillyjoe3526/airsoft/issues/new"
-## The longest address sent (GitHub answers 414 a little above 8,000 characters; Windows' ShellExecute is untested
-## past it, so this drops if the owner's PC refuses: 2,000 still holds the note and the main fields).
+## The longest address sent first (GitHub answers 414 a little above 8,000 characters; GitHub's own page for query
+## parameters says only that a URL over its server limit gets 414). Godot's OS.shell_open hands the address whole to
+## Windows' ShellExecuteW, whose own limit no Microsoft page states (CreateProcess' command line takes 32,767
+## characters, Chromium's addresses 2 MiB), so a refusal is met by `retry_url_chars` below, not guessed at here.
 @export var max_url_chars: int = 8000
+## The address sent once more when the system refused the first and it was longer than this: 2,000 characters, under
+## the 2,084 of INTERNET_MAX_URL_LENGTH (wininet.h, the longest the shell's URL functions document), still holds the
+## note and the main fields; the whole report is on the clipboard.
+@export var retry_url_chars: int = 2000
 ## Entries kept of each list as the issue's body is cut to fit, newest first, one step at a time.
 @export var keep_steps: PackedInt32Array = PackedInt32Array([10, 3, 0])
 ## Fields left out next, when the lists alone don't make it fit (BugReport's labels).

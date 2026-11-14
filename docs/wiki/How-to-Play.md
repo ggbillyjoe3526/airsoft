@@ -62,7 +62,8 @@ you can skip. The trigger held as you were hit doesn't skip: let go and click ag
 Don't want to wait? Turn on **Simulate skipped rounds** in [Settings](Settings#gameplay) (it starts off). While the
 round is skipping, a **SIMULATE** button and the pointer show above the countdown: click the button and the round
 is decided at once instead of played out (a second click elsewhere doesn't, so a double click never simulates). The side with more players still in has the better chance, and attackers who
-already have their flag part way up get a boost. The result says **Simulated**.
+already have their flag part way up get a boost. The result says **Simulated**. A simulated round counts for the
+score, but gives no XP and counts for no records: its Round won, and its hits and BBs, are left out.
 
 ## BBs are real projectiles
 
@@ -87,7 +88,8 @@ Each field has its own air, too. Replicas are rated at 20 °C, as on a site's ch
 so every BB slows slightly sooner, and **gas shoots softer in the cold**: a gas replica loses about 1.2 % of its energy
 for each degree under 20 °C (about 1 fps a °F, as players reckon) and gains it back in the warm, never past its
 [site limit](Replicas#site-limits). Batteries and springs don't mind. A night in the open is 8 °C colder than the
-day. The pause menu shows the match's air and breeze, and pointing at a field on the Match page shows its weather.
+day. The pause menu shows the match's air and breeze, pointing at a field on the Match page shows its weather, and the
+[Loadout](Loadout#the-performance-sheet)'s figures are flown in the picked field's air.
 
 ### Hop-up
 

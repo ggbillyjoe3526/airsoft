@@ -82,7 +82,7 @@ menu. Settings › HUD › Ping markers turns them off.
 
 For [Need a Mag](Squad-Orders#need-a-mag), one line under the crosshair says what the hand-off is doing, never which
 key to press: who needs a mag and how far ("Rook needs a mag · 12 m"), underlined in your team's colour once they are
-close enough for a toss; whose is coming ("Brick is bringing you a mag"); what you caught ("+1 mag from Brick · 60
+close enough for a toss; who you asked ("Asked Brick for a mag") and, once they set off, whose is coming ("Brick is bringing you a mag"); what you caught ("+1 mag from Brick · 60
 BBs", without the BBs while the ammo counter is off); and why a press did nothing, for a couple of seconds. The line
 hides while the order wheel is open. A small magazine sits by the chevron of a teammate asking you for one or bringing
 you one. Settings › HUD › Mag hand-off turns the line and the magazines off; Screen reader messages read the line's

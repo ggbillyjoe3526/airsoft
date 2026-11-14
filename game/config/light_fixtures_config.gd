@@ -45,3 +45,6 @@ extends Resource
 ## The fixtures' material: roughness and metalness (the props').
 @export var roughness: float = 0.7
 @export var metallic: float = 0.0
+## How worn they are drawn (SL2, look_vertex.gdshader's `wear`; LookConfig.wear scales it), as the site's props
+## (PropDressConfig.wear).
+@export_range(0.0, 1.0) var wear: float = 1.0

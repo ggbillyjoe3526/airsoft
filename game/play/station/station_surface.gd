@@ -10,6 +10,8 @@ extends RefCounted
 const SHADER := preload("res://game/play/station/station_surface.gdshader")
 ## A face looking into no room grimes from nowhere: its floor this far below.
 const NO_FLOOR := -1000.0
+## A platform vault arc's vertex alpha (the vault fill's mark; 0 marks the arch fill's, 1 neither).
+const VAULT_MARK := 0.5
 ## The render layer the station's surface draws on, alone (MapLevel), so the lamps inside a train's cars, unshadowed
 ## beyond the eye's near lamps, light the cars and whoever stands in them but never the tunnel walls round the train
 ## through its sides (SM1, RoofView.hide_lamps_in).
@@ -42,6 +44,7 @@ static func material(look: StationLook) -> ShaderMaterial:
 	m.set_shader_parameter(&"variation_size", look.variation_size)
 	m.set_shader_parameter(&"grime_height", look.grime_height)
 	m.set_shader_parameter(&"grime_strength", look.grime_strength)
+	m.set_shader_parameter(&"vault_fill", look.vault_fill)
 	return m
 
 
@@ -365,7 +368,11 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 	var tint := look.tint_of(finish, null)
 	var pbr := look.pbr_of(finish)
 	var size := look.scale_of(finish)
-	st.set_color(tint.srgb_to_linear())
+	var colour := tint.srgb_to_linear()
+	# Its alpha marks the arc a fill lights (the shader draws no alpha): 0 the arch fill (StationLook.arch_fill), 0.5 the
+	# vault fill (vault_fill), 1 none.
+	colour.a = 0.0 if look.arch_fill_finishes.has(finish) else (VAULT_MARK if finish == look.vault_finish else 1.0)
+	st.set_color(colour)
 	st.set_custom(0, Color(float(look.layer_of(finish)), pbr.y, pbr.x, NO_FLOOR))
 	for k in steps:
 		var a := -half + 2.0 * half * float(k) / float(steps)

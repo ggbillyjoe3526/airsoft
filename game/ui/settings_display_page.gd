@@ -223,6 +223,8 @@ func _show_monitors() -> void:
 		_show_vsync_note()
 		changed.emit(true))
 	_monitor_row.add_child(_monitor)
+	# on its buttons too: they stop the mouse, so the row's own tooltip never showed over them
+	_screen.explain(_monitor_row, tr("SETTINGS_MONITOR_HELP"))
 	# the screen the window is on now (dragged since the start, it may not be the saved one)
 	var on := ds.current()
 	_monitor.put(on if on >= 0 else SettingsApply.monitor_now(_screen.settings, ds))

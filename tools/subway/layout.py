@@ -43,13 +43,17 @@ def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: fl
 
 
 def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0,
-          dress: str = "", facing: str = "") -> None:
+          dress: str = "", facing: str = "", squeeze: bool = False, noise: str = "") -> None:
     """A cover block; `dress` names the model drawn in its box (PropDressConfig.models; SD1), else its box is drawn
     in its room's finish; `facing` (+x, -x, +z or -z) the world direction its model's front faces, else the field's
     middle (SM3: a bench's seat to the track; SM4: a booth's window to the platform's edge). Look only: the box
-    stays what BBs, bodies and the bots meet."""
+    stays what BBs, bodies and the bots meet. One bodies `squeeze` past (AUD2: the works wagons, a body's width and a
+    few centimetres from the tunnel wall) is kept only a body's radius off the bots' grid (MapData.Block.squeeze).
+    `noise` names the noisy prop it sounds as where that is not its kind's (NoiseConfig.SOUND_NAMES: the steel lockers
+    are cabinets, which knock as hollow plastic; MapData.Block.noise, AUD1)."""
     assert facing in ("", "+x", "-x", "+z", "-z"), facing
-    blocks.append(dict(kind=kind, y=y, x0=x0, x1=x1, z0=z0, z1=z1, h=h, colour=colour, dress=dress, facing=facing))
+    blocks.append(dict(kind=kind, y=y, x0=x0, x1=x1, z0=z0, z1=z1, h=h, colour=colour, dress=dress, facing=facing,
+                       squeeze=squeeze, noise=noise))
 
 
 # ---------------- Street level, 0 m: the ticket hall (Street team's start) ----------------
@@ -92,7 +96,8 @@ room("bk_s", "Booking hall", -43, -36, -5, -1.2, C, h=4.0)
 room("bk_e", "Booking hall", -38, -36, -9.5, -5, C, h=4.0)
 block("furniture", C, -50, -44, -9.5, -8.6, 1.1, dress="booking_counter")  # old ticket counter, waist high
 block("crate", C, -48.5, -47, -5.5, -4, 1.4, dress="crate")
-block("cabinet", C, -36.9, -36.0, -4.2, -1.2, 2.0, dress="locker")  # lockers: screen the spiral foot from the passage
+# lockers: screen the spiral foot from the passage
+block("cabinet", C, -36.9, -36.0, -4.2, -1.2, 2.0, dress="locker", noise="clank")
 room("wpass", "West passage", -36, -18, -9.5, -7, C, h=3.0)
 block("crate", C, -31, -29, -9.5, -8.1, 1.8, dress="cable_drum")  # cable drums staggered: no line down the passage
 block("crate", C, -25, -23, -8.4, -7.0, 1.8, dress="cable_drum")
@@ -116,11 +121,11 @@ room("spass", "South passage", -6, 20, 6.5, 9.5, C, h=3.0)
 for zs in (-1, 1):
     a, b = sorted((zs * 9.5, zs * 7.7))
     c, d = sorted((zs * 8.3, zs * 6.5))
-    block("cabinet", C, 1, 2.2, a, b, 2.0, dress="locker")  # lockers, a chicane down each passage
-    block("cabinet", C, 7, 8.2, c, d, 2.0, dress="locker")
-    block("cabinet", C, 13, 14.2, a, b, 2.0, dress="locker")
+    block("cabinet", C, 1, 2.2, a, b, 2.0, dress="locker", noise="clank")  # lockers, a chicane down each passage
+    block("cabinet", C, 7, 8.2, c, d, 2.0, dress="locker", noise="clank")
+    block("cabinet", C, 13, 14.2, a, b, 2.0, dress="locker", noise="clank")
     block("crate", C, 16.5, 18, c, d, 1.2, dress="crate")
-    block("cabinet", C, -4, -2.8, c, d, 2.0, dress="locker")  # at the passage mouth
+    block("cabinet", C, -4, -2.8, c, d, 2.0, dress="locker", noise="clank")  # at the passage mouth
 room("plant", "Plant room", 4, 18, -4, 4, C, h=3.5)
 room("pdoor_n", "Plant room", 9.5, 11.5, -6.5, -4, C, h=2.2)
 room("pdoor_s", "Plant room", 9.5, 11.5, 4, 6.5, C, h=2.2)
@@ -156,6 +161,12 @@ room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H, vault=True)
 # body climbs out over a platform's edge (VaultConfig climb_depth) and drops back down; bots take the same links.
 TRACK_H = TUNNEL_H + 0.9
 TRACK_Z = 10.75      # each track's middle line (z, the south one; the north one at -TRACK_Z): station_dress.LINES
+TRACK_WALL_Z = 12.5  # the tunnel wall's face beside each track (z, the south one; the north one at -TRACK_WALL_Z)
+# How much further a track bed's floor runs in under its tunnel wall than build_map.py's GROW (AUD2, unseen): with
+# GROW alone the north track's floor edge lies on a row of the bots' grid's cell centres, and the grid's 32-bit
+# rounding left that row without floor, so it stamped a drop 9 cm inside the wall's face, whose clearance shut the
+# one-cell lane past the works wagons. Both tracks alike (the south edge stays between two rows either way).
+UNDER_WALL = 0.01
 
 
 def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: float) -> None:
@@ -164,9 +175,9 @@ def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: flo
     room(name, area, x0, x1, lo, hi, T, h=TRACK_H, vault=True)
 
 
-track("track_n_w", "North track", -52, -44, -9, -12.5)
-track("track_n_e", "North track", 16, 50, -9, -12.5)
-track("trench", "South track", -52, 30, 9, 12.5)
+track("track_n_w", "North track", -52, -44, -9, -TRACK_WALL_Z)
+track("track_n_e", "North track", 16, 50, -9, -TRACK_WALL_Z)
+track("trench", "South track", -52, 30, 9, TRACK_WALL_Z)
 # A car's door holes' half width (train.py DOOR_HW): wide doors, as the owner's photos (1.6 m).
 DOOR_HW = 0.8
 # North train: four cars standing at the north platform, five doors open; the middle pair not coupled through.
@@ -312,18 +323,19 @@ block("barrier", P, 38, 40, -7.4, -5.5, 1.3, dress="tunnel_segments")  # stacked
 block("cabinet", P, 48.6, 49.4, -7.5, -6.6, 2.2, dress="signal_cabinet")  # signal cabinet at the tunnel mouth
 # The works vehicles and the buffer stops stand centred on their track (TRACK_Z), their wheels on the running rails
 # (owner, 2026-11-12), leaving a way past each side.
-block("skip", T, -18, -16, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon")  # spoil skips on wagons
-block("skip", T, -2, 0, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon")
-block("skip", T, 6, 8, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon")
+block("skip", T, -18, -16, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon", squeeze=True)  # spoil skips on wagons
+block("skip", T, -2, 0, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon", squeeze=True)
+block("skip", T, 6, 8, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon", squeeze=True)
 # Signal cabinets beside the south track's skips, so no way past them is an 80 m sight line (the field's 60 m rule,
 # which the old staggered skips kept): the track's middle stays open between them. The west pair stands clear of the
 # wide poster on the wall behind (x -20.05..-13.95).
 block("cabinet", T, -13.7, -12.9, 9.0, 9.9, 2.2, dress="signal_cabinet", facing="+z")
 block("cabinet", T, -13.7, -12.9, 11.6, 12.5, 2.2, dress="signal_cabinet", facing="-z")
 block("cabinet", T, 8.2, 9.0, 9.0, 9.9, 2.2, dress="signal_cabinet", facing="+z")
-block("cabinet", T, -46.5, -45, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley")  # trolley
+block("cabinet", T, -46.5, -45, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley",
+      squeeze=True)  # trolley
 block("container", T, 36, 40, -TRACK_Z - 1.0, -TRACK_Z + 1.0, 2.6, 0x7d7a72,
-      dress="engineering_wagon")  # left on the north track
+      dress="engineering_wagon", squeeze=True)  # left on the north track
 block("cabinet", T, 44.6, 45.4, -9.9, -9.0, 2.2, dress="signal_cabinet", facing="-z")  # either side of the north
 block("cabinet", T, 44.6, 45.4, -12.5, -11.6, 2.2, dress="signal_cabinet", facing="+z")  # track: no 80 m line past
 block("barrier", T, -52, -51.5, -TRACK_Z - 1.15, -TRACK_Z + 1.15, 1.2, dress="buffer_stop",
@@ -345,11 +357,13 @@ room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=RUN_SPRING, vault=True)
 # (VaultConfig climb_depth: the car's floor runs on behind the doorway) and drops back down (owner, 2026-11-12).
 room("run_s", "South tunnel", 60, 82, 9, 12.6, T, h=RUN_SPRING, vault=True)
 room("xpass", "Cross passage", 74, 77, -9, 9, T, h=2.6)
-block("cabinet", T, 60.5, 61.8, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley_short")  # trolley
+block("cabinet", T, 60.5, 61.8, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley_short",
+      squeeze=True)  # trolley
 block("crate", T, 69.5, 70.9, -TRACK_Z - 0.7, -TRACK_Z + 0.7, 1.4, dress="cable_drum_small")  # between the rails
-block("container", T, 55, 59, -TRACK_Z - 0.9, -TRACK_Z + 0.9, 2.2, 0x7d7a72, dress="ballast_wagon")  # ballast wagons
-block("container", T, 64.5, 68.5, -TRACK_Z - 0.9, -TRACK_Z + 0.9, 2.2, 0x7d7a72, dress="ballast_wagon")
-block("cabinet", T, 66, 68, TRACK_Z - 0.85, TRACK_Z + 0.85, 1.2, dress="platelayer_trolley_long")
+block("container", T, 55, 59, -TRACK_Z - 0.9, -TRACK_Z + 0.9, 2.2, 0x7d7a72, dress="ballast_wagon",
+      squeeze=True)  # ballast wagons
+block("container", T, 64.5, 68.5, -TRACK_Z - 0.9, -TRACK_Z + 0.9, 2.2, 0x7d7a72, dress="ballast_wagon", squeeze=True)
+block("cabinet", T, 66, 68, TRACK_Z - 0.85, TRACK_Z + 0.85, 1.2, dress="platelayer_trolley_long", squeeze=True)
 
 # ---------------- The lifts (MT2) ----------------
 # Two shafts side by side, x -46.3 to -40.8 and z -1.2 to 1.2, their walls SHAFT_T thick and a partition between,

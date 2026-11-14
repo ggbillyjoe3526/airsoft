@@ -385,7 +385,8 @@ func _build_renderer(column: VBoxContainer) -> void:
 	_renderer_choice.picked.connect(_on_renderer)
 	# that it waits for the next start is what surprises; the rest is the tooltip
 	_note(row, "GRAPHICS_RENDERER_NEXT_START")
-	row.tooltip_text = tr("GRAPHICS_RENDERER_NOTE")
+	# on its buttons too: they stop the mouse, so the row's own tooltip never showed over them
+	_screen.explain(row, tr("GRAPHICS_RENDERER_NOTE"))
 
 
 func _build_reset(column: VBoxContainer) -> void:

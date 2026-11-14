@@ -8,13 +8,17 @@ the files stay plain colours the game paints (ReplicaPaint). Run the build scrip
 """
 
 import math
+import os
 
 import bpy  # first: it brings bmesh and mathutils with it
 import bmesh
 from mathutils import Matrix, Vector
 
+import glb_images
 import surface
 
+# The parts files' folder (assets/models/replicaParts): a glb written there keeps its images beside it (export).
+PARTS_FOLDER = "replicaParts"
 # How finished parts are shaded: edges sharper than this split the shading.
 SHARP_ANGLE = math.radians(32.0)
 # The bevel's angle limit: only edges sharper than this are rounded.
@@ -473,7 +477,8 @@ def export(path: str, animated: bool, webp: int = 0) -> None:
     """Writes the scene to `path` as a glb, each mesh's surface kinds (surface.py) as its vertex colours (MQ1: a
     replica) or as its extras (MQ2: a part's table, a mesh custom property; no other custom property is written). With
     `webp` (a quality, 1..100), its images are stored as WebP at that quality (EXT_texture_webp, which Godot reads):
-    a 2K painted set a fraction of its PNG size."""
+    a 2K painted set a fraction of its PNG size. A parts file (in a `replicaParts` folder) keeps its images beside it,
+    not inside it (glb_images: the same import, and its wear mask no longer counts twice against the file's cap)."""
     surface.adopt()
     surface.only_tables()
     images = {"export_image_format": "WEBP", "export_image_quality": webp} if webp else {}
@@ -483,3 +488,5 @@ def export(path: str, animated: bool, webp: int = 0) -> None:
                               export_cameras=False, export_lights=False, export_vertex_color="NAME",
                               export_vertex_color_name=surface.ATTR, export_all_vertex_colors=False,
                               export_active_vertex_color_when_no_material=False, **images)
+    if os.path.basename(os.path.dirname(os.path.abspath(path))) == PARTS_FOLDER:
+        glb_images.move_images_out(path)

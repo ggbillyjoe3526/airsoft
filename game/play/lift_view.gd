@@ -141,7 +141,20 @@ func refresh(lifts: LiftState, fraction: float) -> void:
 		var y := lerpf(lifts.prev_y[i], lifts.y[i], fraction)
 		var moving := lifts.phase[i] == LiftState.Phase.MOVING
 		var doors := 0.0 if moving else lifts.doors[i]
+		_hold_probe(i, moving)
 		_place(i, y, lifts.stop[i], doors, lifts.calls[i])
+
+
+## Car `i`'s reflection probe held where the car last stood while it rides (top level: it keeps its place as the car
+## moves), as the engine captures a probe again whenever it moves; put back in the car when it stops, and captured once
+## there.
+func _hold_probe(i: int, moving: bool) -> void:
+	var probe := _probes[i]
+	if probe.top_level == moving:
+		return
+	probe.top_level = moving
+	if not moving:
+		probe.position = Vector3(0.0, _lift_cfg.car_height * 0.5, 0.0)
 
 
 ## Turns the cars' lamps on (the station's lamps light: Settings › Graphics › Lamp lights) or off.

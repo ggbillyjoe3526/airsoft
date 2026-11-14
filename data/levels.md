@@ -40,9 +40,9 @@ typo never stops the game from starting.
 | 7 | 800 | Angled Grip, Low-Cap Magazine |
 | 8 | 900 | Red Gas |
 | 9 | 1000 | M140 Spring |
-| 10 | 1200 | Compact SMG, Variable Scope |
+| 10 | 1200 | Pump Shotgun, Variable Scope |
 | 11 | 1400 | 11.1 V LiPo Battery |
-| 12 | 1500 | Long Barrel, Pump Shotgun |
+| 12 | 1500 | Long Barrel, Compact SMG |
 | 13 | 1600 | Black Gas |
 | 14 | 1700 | M150 Spring |
 | 15 | 1800 | Cyber Pistol |
@@ -50,13 +50,13 @@ typo never stops the game from starting.
 - **The order.** The first levels give the parts that help straight away (a clear sight, a steadier aim, more BBs),
   the middle ones the trade-offs (a quiet muzzle, quick handling or a tighter barrel), and the last ones the strongest
   power (the LiPo battery, Black Gas, the M150 Spring) and the Cyber Pistol.
-- **A replica every five levels** (LV15, 2026-11-10): the Sniper Rifle at 5 with the M130 Spring and 2x Scope it comes
-  with (owner, 2026-11-02), the Compact SMG at 10 and the Cyber Pistol at the cap, 15. Every level gives something
-  public, so level 10 also gives the Variable Scope while the SMG is dev content (CS1); its red dot, laser and
-  silencer unlock before it. The Pump Shotgun (SH1, owner 2026-11-12: level 12) comes between the SMG and the Cyber
-  Pistol, beside the Long Barrel while it is dev content; the M130 and M140 springs it takes are unlocked by then, and
-  the M150 follows at 14. The LiPo battery comes straight after
-  the SMG; the stronger springs follow as the stronger gases do (M140 at 9, Red Gas at 8; M150 at 14 after Black Gas
+- **A replica every few levels** (LV15, 2026-11-10; owner, 2026-11-14): the Sniper Rifle at 5 with the M130 Spring
+  and 2x Scope it comes with (owner, 2026-11-02), the Pump Shotgun at 10, the Compact SMG at 12 and the Cyber Pistol
+  at the cap, 15. The shotgun and the SMG swapped levels and became public on 2026-11-14 (owner; the SMG was at 10,
+  the shotgun at 12, both dev content): the shotgun's first pull is its whole job, the SMG puts about ten BBs where
+  the shotgun puts three, so the SMG is the later reward. The M130 and M140 springs the shotgun takes are unlocked by
+  10 and the M150 follows at 14; the SMG's red dot, laser and silencer unlock before it. The LiPo battery comes at
+  11, before the SMG; the stronger springs follow as the stronger gases do (M140 at 9, Red Gas at 8; M150 at 14 after Black Gas
   at 13).
 - **The pace** (LV15, 2026-11-10). A first-to-5 match on Normal gives about 250 XP. Levels 1 to 10 take the XP they
   took when 10 was the cap (each 100 more than the last, so nobody's level changed when the cap went up): level 1

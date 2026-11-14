@@ -120,6 +120,9 @@ var using: bool = false
 ## already when they went on (then it stays away after).
 var hands_on_bomb: bool = false
 var bomb_was_holstered: bool = false
+## How far a lift's car carried it up or down this tick (Lifts.carry, m; 0 off a moving car): Hitbox.step_stairs
+## takes it out of the tick's rise, so a walk across a rising car's floor is not a climb.
+var lift_rise: float = 0.0
 
 
 func _init(character_id: int = 0, character_team: int = 0, spawn: Vector3 = Vector3.ZERO, facing: float = 0.0,
@@ -212,6 +215,7 @@ func respawn() -> void:
 	fire_lockout = 0.0
 	hands_on_bomb = false
 	bomb_was_holstered = false
+	lift_rise = 0.0
 	status = Status.ALIVE
 	status_time = 0.0
 	hit_by = -1

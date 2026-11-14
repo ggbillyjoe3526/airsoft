@@ -94,6 +94,7 @@ static func build(map: MapData, style: MapStyle, swing_time: float) -> DoorView:
 	view._material.shader = LEAF_SHADER
 	view._material.set_shader_parameter(&"tint", style.colour_of(KIND, 0) if leaf_mesh == null else Color.WHITE)
 	view._material.set_shader_parameter(&"roughness", style.roughness)
+	view._material.set_shader_parameter(&"wear", style.door_wear)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true
@@ -109,6 +110,8 @@ static func build(map: MapData, style: MapStyle, swing_time: float) -> DoorView:
 	view._mesh.name = "Leaves"
 	view._mesh.multimesh = mm
 	view._mesh.material_override = view._material
+	# The leaf model's foot (its y), where its grime starts.
+	view._mesh.set_instance_shader_parameter(&"wear_floor", mm.mesh.get_aabb().position.y)
 	view.add_child(view._mesh)
 	view._add_frames(map, style)
 	for i in map.doors.size():
@@ -219,7 +222,7 @@ func _add_frames(map: MapData, style: MapStyle) -> void:
 		_frame_at.append(at)
 		mm.set_instance_transform(i, at)
 		mm.set_instance_color(i, Color.WHITE)
-	_frame_material = LookMaterials.vertex_colour(style.roughness, 0.0)
+	_frame_material = LookMaterials.vertex_colour(style.roughness, 0.0, Color.WHITE, false, style.door_wear)
 	_frames = MultiMeshInstance3D.new()
 	_frames.name = "Frames"
 	_frames.multimesh = mm

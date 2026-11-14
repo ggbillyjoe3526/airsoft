@@ -18,6 +18,7 @@ render_mode blend_mix, cull_back;
 
 #include "res://game/play/look/look_light.gdshaderinc"
 #include "res://game/play/look/retro_vertex.gdshaderinc"
+#include "res://game/play/look/look_wear.gdshaderinc"
 
 uniform vec4 tint : source_color = vec4(1.0);
 uniform float roughness : hint_range(0.0, 1.0) = 0.8;
@@ -41,38 +42,14 @@ uniform float perforation_shade : hint_range(0.0, 1.0) = 0.22;
 uniform float rib_pitch = 0.0085;
 uniform float rib_groove : hint_range(0.0, 1.0) = 0.45;
 uniform float rib_shade : hint_range(0.0, 1.0) = 0.42;
-uniform float wear : hint_range(0.0, 1.0) = 0.0;
 // Whether Dev › Retro filter wobbles its corners (RF1): not the level's blocks and ground, whose big faces would tilt
 // through the floors and cladding laid a few cm over them (LookMaterials.vertex_colour's `wobble`).
 uniform bool retro_wobble = true;
-instance uniform float wear_floor = 0.0;
-// How high (m) a foot's grime climbs, at most; how strong each wear is at full wear, of the paint it covers.
-uniform float grime_height = 0.9;
-uniform vec4 wear_strengths = vec4(0.6, 0.28, 0.15, 0.4); // foot grime, streaks, stains, dust
-
-global uniform float look_wear;
-global uniform vec4 look_grime;
-global uniform vec4 look_dust;
 
 varying vec3 paint;
 varying vec2 perforation;
 varying vec3 wear_at; // world position
 varying float wear_foot; // metres over the model's floor
-
-// A smooth value noise in 0..1, a cell a unit (Hoskins's sin-free hash, steady far from the origin).
-float wear_hash(vec2 p) {
-	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
-	p3 += dot(p3, p3.yzx + 33.33);
-	return fract((p3.x + p3.y) * p3.z);
-}
-
-float wear_noise(vec2 p) {
-	vec2 i = floor(p);
-	vec2 f = fract(p);
-	f = f * f * (3.0 - 2.0 * f);
-	return mix(mix(wear_hash(i), wear_hash(i + vec2(1.0, 0.0)), f.x),
-			mix(wear_hash(i + vec2(0.0, 1.0)), wear_hash(i + vec2(1.0, 1.0)), f.x), f.y);
-}
 
 void vertex() {
 	paint = paint_by_custom ? mix(vec3(1.0), INSTANCE_CUSTOM.rgb, COLOR.a) : vec3(1.0);
@@ -85,8 +62,10 @@ void vertex() {
 
 void fragment() {
 	vec3 own = COLOR.rgb;
-	if (srgb_colours && !OUTPUT_IS_SRGB) {
-		own = mix(pow((own + vec3(0.055)) * (1.0 / 1.055), vec3(2.4)), own * (1.0 / 12.92), lessThan(own, vec3(0.04045)));
+	// linear on either renderer (look_light.gdshaderinc's LOOK_ALBEDO hands it back to Compatibility as sRGB)
+	if (srgb_colours) {
+		own = OUTPUT_IS_SRGB ? look_srgb_to_linear(own)
+				: mix(pow((own + vec3(0.055)) * (1.0 / 1.055), vec3(2.4)), own * (1.0 / 12.92), lessThan(own, vec3(0.04045)));
 	}
 	// Metres a pixel across the strip, either way (fwidth outside the branch: every pixel of a quad takes the same).
 	float pixel = max(max(fwidth(perforation.x), fwidth(perforation.y)), 1e-5);
@@ -106,41 +85,16 @@ void fragment() {
 		own *= mix(1.0, rib_shade, groove);
 	}
 	if (use_sheet) {
-		own *= texture(sheet, UV).rgb;
+		own *= LOOK_LINEAR(texture(sheet, UV).rgb);
 	}
-	vec3 col = own * paint * tint.rgb;
+	vec3 col = own * paint * LOOK_LINEAR(tint.rgb);
 	float rough = roughness;
-	float worn = wear * look_wear;
-	// Uniform (a material's and the look's), so fwidth inside is safe and a clean model pays nothing.
-	if (worn > 0.0) {
-		// The face's own plane in the world, so the wear lies on it unstretched: a side's across and up, blended by
-		// which way it faces; a top's x and z, blended into the side's between (critic), so a round model shows no seam.
-		vec3 n = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
-		float facing_x = n.x * n.x / max(n.x * n.x + n.z * n.z, 1e-4);
-		float across = mix(wear_at.x, wear_at.z, facing_x);
-		vec2 p_side = vec2(across, wear_at.y);
-		float top = smoothstep(0.5, 0.7, abs(n.y));
-		// Streaks fade out where they'd be finer than a few pixels (far off), so they never shimmer.
-		float fine = 1.0 - smoothstep(0.015, 0.05, fwidth(across));
-		float blotch = mix(wear_noise(p_side * 0.7), wear_noise(wear_at.xz * 0.7), top);
-		float side = 1.0 - smoothstep(0.4, 0.7, abs(n.y));
-		// None under the floor: a model sunk into the ground keeps its paint there.
-		float foot = (1.0 - smoothstep(0.0, grime_height * (0.35 + 0.65 * blotch), wear_foot)) * side
-				* step(-0.05, wear_foot);
-		float streak = side * fine * smoothstep(0.6, 0.85, wear_noise(vec2(across * 14.0, wear_at.y * 0.5)))
-				* smoothstep(0.25, 0.65, wear_noise(vec2(across * 0.8, wear_at.y * 0.2) + 5.3));
-		float stain = smoothstep(0.55, 0.85,
-				mix(wear_noise(p_side * 0.3 + 11.7), wear_noise(wear_at.xz * 0.3 + 11.7), top));
-		float dust = smoothstep(0.7, 0.95, n.y) * (0.4 + 0.6 * blotch);
-		float dirt = clamp(foot * wear_strengths.x + streak * wear_strengths.y + stain * wear_strengths.z, 0.0, 1.0);
-		col = mix(col, look_grime.rgb, dirt * worn);
-		col = mix(col, look_dust.rgb, dust * wear_strengths.w * worn);
-		rough = mix(rough, 1.0, max(foot, dust) * worn);
-	}
-	ALBEDO = look_paint(col);
+	look_worn(col, rough, (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz, wear_at, wear_foot);
+	vec3 albedo = look_paint(col);
 	if (keep_by_alpha) {
-		ALBEDO = mix(ALBEDO, col, COLOR.a);
+		albedo = mix(albedo, col, COLOR.a);
 	}
+	ALBEDO = LOOK_ALBEDO(albedo);
 	ROUGHNESS = rough;
 	METALLIC = metallic;
 	SPECULAR = specular;

@@ -167,6 +167,9 @@ extends Resource
 ## the clip stretched so that moment lands as the replica can fire again (its fire rate with its parts: the Sniper
 ## Rifle's 1.25 s, 1.39 s with the M150), and the arms' bolt clip with it (BP7, row 19).
 @export var bolt_cycle_end: float = 0.88
+## The cocking's recorded last knock (s after the shot: the owner's recording, cut for the M130's 1.25 s cycle). A
+## slower spring's bolt is home with it, not with the ready time, and rests there until the replica can fire again.
+@export var bolt_knock_at: float = 1.25
 ## A gas pistol's slide locks back this long (s) into its last shot's Fire clip, when the slide is fully back, and closes
 ## this far (share) through the reload that follows.
 @export var slide_lock_after: float = 0.05
@@ -178,8 +181,6 @@ extends Resource
 ## materials and its optic's glass press its depth towards the eye to this share (Godot's z clip scale, the same on
 ## both renderers; light and shadows unchanged, no extra pass). 1 draws it at its true depth.
 @export var depth_scale: float = 0.25
-## Where the selector sits along its clip in each fire mode (semi, burst, auto), as a share of the clip.
-@export var selector_at: PackedFloat32Array = PackedFloat32Array([0.5, 0.75, 1.0])
 ## Your arms (ArmsView): replicas held in the right hand alone, the left arm hidden (a smoke or flash bomb in hand,
 ## GT1; a pistol is held in both, HA1: the arms model's `<id>_two_Hold`), and a robot's arms' colours (sRGB) by the
 ## arms model's material name, with their roughness (satin, as the robot figure's plates).

@@ -1030,7 +1030,8 @@
     "z": 2.0
    },
    "dress": "locker",
-   "surface": "metal"
+   "surface": "metal",
+   "noise": "clank"
   },
   {
    "kind": "barrel",

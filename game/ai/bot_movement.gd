@@ -326,8 +326,12 @@ static func keep_apart(b: Bot, w: BotWorld, moving: bool, cmd: PlayerCommand) ->
 static func _advance(b: Bot, w: BotWorld, dt: float, at_post: bool = false) -> bool:
 	var cfg := w.cfg
 	if b.hold_left > 0.0:
-		b.hold_left -= dt
-		b.team_wait += dt
+		# A hold's clock runs in a live round only: counted through the start's countdown (PlayTuning.round_countdown,
+		# 3 s) the stagger between lane mates (RoundPlanner, lane_follow_delay) was spent before GO, and they set off
+		# in one stack.
+		if w.live:
+			b.hold_left -= dt
+			b.team_wait += dt
 		b.holding = true
 		return false
 	# At a lane point well ahead of the team: wait for them to catch up. Moving in pairs (team play): also while a lane
@@ -715,14 +719,17 @@ static func _strafe(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float, target: 
 	if pusher and (new_step or b.push_look_for != target.id):
 		b.push_in_sight = not _step_blocked(b, w, 0.0, 1.0, target)
 		b.push_look_for = target.id
-	if _step_blocked(b, w, b.strafe_dir, 0.0, target):
+	# The way it sidesteps, looked at once: the other way is looked at only if this one is blocked.
+	var side_blocked := _step_blocked(b, w, b.strafe_dir, 0.0, target)
+	if side_blocked:
 		b.strafe_dir = -b.strafe_dir
+		side_blocked = _step_blocked(b, w, b.strafe_dir, 0.0, target)
 	# It closes in as it sidesteps, until push_distance from its target.
 	if pusher and b.push_in_sight and Vector2(target.position.x - b.character.position.x,
 			target.position.z - b.character.position.z).length() > cfg.push_distance \
 			and not _step_off_ground(b, w, 0.0, 1.0):
 		cmd.forward = cfg.strafe_input
-	if not _step_blocked(b, w, b.strafe_dir, 0.0, target):
+	if not side_blocked:
 		cmd.right = b.strafe_dir * cfg.strafe_input
 	elif not _step_blocked(b, w, 0.0, b.strafe_dir, target):
 		cmd.forward = b.strafe_dir * cfg.strafe_input

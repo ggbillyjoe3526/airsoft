@@ -202,7 +202,8 @@ static func step_stairs(c: Character, hits: HitConfig, dt: float) -> void:
 	var target := 0.0
 	var moved := Vector2(c.position.x - c.prev_position.x, c.position.z - c.prev_position.z).length()
 	if c.grounded and not c.vault.active and moved > hits.walking_speed * dt and moved < hits.max_stride:
-		var rise := (c.position.y - c.prev_position.y) / moved
+		# A lift's car carried it this far (Lifts.carry): the car's rise is not a climb of its own.
+		var rise := (c.position.y - c.prev_position.y - c.lift_rise) / moved
 		if absf(rise) >= hits.stairs_from:
 			target = clampf(rise / hits.stairs_slope, -1.0, 1.0)
 	c.stairs = move_toward(c.stairs, target, dt / hits.stairs_ease) if hits.stairs_ease > 0.0 else target

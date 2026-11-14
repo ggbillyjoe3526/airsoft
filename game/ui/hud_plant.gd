@@ -47,8 +47,10 @@ static func carrying(rs: RoundState, player: Character) -> bool:
 
 ## Plant The Bomb's bomb on the weapon rail of `c` (PB3, the owner's ask): carried, being set down and armed, or none.
 static func rail_carry(rs: RoundState, c: Character) -> WeaponRail.Carry:
+	# Hit with the bomb as the last attacker, the round ends before the bomb is dropped (Round steps before Plant), so
+	# the state still names them its carrier through the round's end: someone out carries nothing.
 	if rs.mode != RoundState.Mode.PLANT_THE_BOMB or rs.plant.status != PlantState.Status.CARRIED \
-			or rs.plant.carrier != c.id:
+			or rs.plant.carrier != c.id or not Elimination.is_in_play(c):
 		return WeaponRail.Carry.NONE
 	return WeaponRail.Carry.SETTING if rs.plant.planter == c.id else WeaponRail.Carry.CARRIED
 

@@ -173,8 +173,10 @@ Every task runs through the pipeline: `pipeline/README.md` (the protocol, the cr
 
 ## 12. Repo-Specific
 
-- **Checks:** `tools/check.sh` runs every local gate (gdlint, the changelog notes, the GUT unit tests, the headless
-  smoke test, the licence notices); CI runs the same on every pull request. Output is failures and totals only.
+- **Checks:** `tools/check.sh` runs every local gate (gdlint, the changelog notes, the wiki, the GUT unit tests in
+  seven parts, the headless smoke test, the licence notices); CI runs the same on every pull request, with the match
+  guards. Output is failures and totals only. The whole suite is long in a cloud session (6,650 tests, the parts one
+  after another): run the touched test files locally and let CI run the rest.
 - **Cloud sessions** get the pinned Godot from `.claude/hooks/session-start.mjs`, as `godot` on PATH. Export templates
   are not installed; CI builds releases.
 - **Releases:** the owner's tag starts `.github/workflows/release.yml` (Windows installer and zip, Linux build,
@@ -182,5 +184,8 @@ Every task runs through the pipeline: `pipeline/README.md` (the protocol, the cr
 - **Data tables** in `data/*.md` are read at start with `FileAccess`; an unreadable cell keeps its built-in value and
   warns. Every export preset includes `data/*` as non-resource files.
 - **Reading big files:** a hook stops whole-file reads over 40 KB; grep, then read with offset and limit.
+- **Unused files** (owner, 2026-11-14): delete only provable junk; a file nothing uses but that may be wanted again
+  moves to `_archive/` under its own path, with a line in `_archive/README.md`. `pipeline/out/` is scratch and is
+  never committed; a run's reports go to the shared files (`pipeline/runs/`).
 - **Exit-time leak warnings** (`RID allocations ... leaked at exit`, `ObjectDB instances were leaked`) at the end of a
   headless run are known and are not script errors.

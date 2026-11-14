@@ -31,6 +31,23 @@ extends Resource
 @export var wade_cost: float = 8.0
 @export var splash_cost: float = 1.5
 @export var wade_from: float = 0.15
+## A step onto a floor inside a bush (BP8: Foliage.holds a point `bush_probe_height` over it) costs this many times a
+## clear one, as a body there moves at MovementConfig.bush_speed_scale of its pace. The search is greedy (search_greed),
+## and a price under the greed hardly steers it (a bush's 1 / 0.75 alone left every test route straight through), so
+## it is the slow times the greed: 1 / 0.75 x 1.5 = 2. Over 300 seeded Woodland routes (AUD2) the leaves walked fell
+## from 3.3 m a route to 0.9 m and the walking time, the slow counted, from 88.3 m to 87.7 m on average (1 / 0.75 alone:
+## 2.7 m and 88.1 m). `bush_probe_height` is MovementConfig.bush_probe_height (a test holds both to the movement's).
+@export var bush_cost: float = 2.0
+@export var bush_probe_height: float = 0.5
+## A step onto a floor where a standing body's eyes would be in a smoke cloud (NavSmoke, AUD2: bots route round a cloud
+## rather than walk blind through it) costs this many times as much while the cloud stands: well over the search's
+## greed, so a route goes round a 4 m cloud where the way round is open, and through where it is the only way. A power
+## of two (a test holds it), so taking the price off gives each node its own weight back exactly.
+@export var smoke_cost: float = 4.0
+## How far a priced cloud's middle moves (m) before its price is taken off and put on again where it now is: a cloud
+## standing costs nothing a tick, and one carried (a lift's car, a canister still rolling) is priced again once a
+## metre, a quarter of its 4 m radius, not every few ticks (each a pass over every cell under it, 2.5 to 3.5 ms).
+@export var smoke_move: float = 1.0
 ## Points random_walkable_near tries before it gives up and returns the point it was asked about.
 @export var hunt_tries: int = 8
 ## Route searches a tick, the bots' and the walk-offs' together (the browser's NAV.searchBudget, 8,000 node expansions,

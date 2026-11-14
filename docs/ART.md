@@ -83,8 +83,8 @@ Woodland's look in placeholders (WL4, `WoodsView` from `WoodsConfig`), until the
 - **In the shared light** (WA1): the greybox and the ground (clean, no metre grid), the crowns, the forest, the floor
   pieces, the bushes, the CC0 props and (BP7) the skyline and the flag poles on `look_vertex.gdshader`
   (`LookMaterials.paint` for a mesh in one colour), the doors on `door_leaf.gdshader`, the puddles on
-  `look_clear.gdshader`. On a baked map the doors, poles and props take the bake's light near them
-  (`BakedLightNear`), a door's each face its own side's. The grass tufts keep their
+  `look_clear.gdshader`. On a baked map the doors, poles, props, Depot's stencils and the flags' cloth and ring take
+  the bake's light near them (`BakedLightNear`), a door's each face its own side's. The grass tufts keep their
   own light (two-sided blades would take the rim on every back face).
 
 ## Colour

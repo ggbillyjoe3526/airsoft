@@ -66,6 +66,13 @@ var ping_target: Vector3 = Vector3.ZERO
 ## The magazine hand-off (one-shot; MH1): toss a magazine to the nearest teammate asking you who is in reach, else ask
 ## for one if you are low, else nothing but a refusal (MagShare.press).
 var mag_hand_off: bool = false
+## The answer to the magazine asks standing with you (one-shot; MagShare.answer), from a controller that chooses (a bot):
+## TAKE, setting off to bring `mag_answer_to` one (their line says so from then on); TURN_DOWN, every ask standing
+## with you but `mag_answer_to`'s (-1: every one) passed on to the next teammate with one to spare, or ended where
+## there is none; PASS_ON, the same but an ask nobody else can take stays with you and waits its turn. NONE: no answer.
+enum MagAnswer { NONE, TAKE, TURN_DOWN, PASS_ON }
+var mag_answer: MagAnswer = MagAnswer.NONE
+var mag_answer_to: int = -1
 ## Throw a bomb of this kind (one-shot; Grenades, SF1): NONE throws nothing.
 var throw_grenade: Grenade.Kind = Grenade.Kind.NONE
 ## Take a bomb of this kind in hand (one-shot; MC1, the mouse wheel's step past the replicas): the replica goes down and
@@ -114,6 +121,8 @@ func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
 	ping_on_map = false
 	ping_target = Vector3.ZERO
 	mag_hand_off = false
+	mag_answer = MagAnswer.NONE
+	mag_answer_to = -1
 	throw_grenade = Grenade.Kind.NONE
 	ready_grenade = Grenade.Kind.NONE
 	use_door = false
@@ -153,6 +162,8 @@ func copy_from(other: PlayerCommand) -> void:
 	ping_on_map = other.ping_on_map
 	ping_target = other.ping_target
 	mag_hand_off = other.mag_hand_off
+	mag_answer = other.mag_answer
+	mag_answer_to = other.mag_answer_to
 	throw_grenade = other.throw_grenade
 	ready_grenade = other.ready_grenade
 	use_door = other.use_door

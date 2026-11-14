@@ -1,11 +1,13 @@
 // A flag's cloth, rippling more towards its free edge. UV.x runs from the pole (0) to the free edge (1).
 // Attack / Defend's (FlagView): canvas in the attacking team's colour with pale stripes near the top and bottom and a
 // BB roundel. Elimination's overtime flag (OvertimeFlagView, `chequer` on): `checks` squares of `team_colour` (its
-// off-white until a team touches it, then that team's colour) and `dark`.
+// off-white until a team touches it, then that team's colour) and `dark`. `light` is the baked light at the pole's foot
+// (a linear multiplier, white with no bake drawn: BakedLightNear, as the pole takes it).
 
 shader_type spatial;
 render_mode cull_disabled;
 
+#include "res://game/play/look/look_colour.gdshaderinc"
 #include "res://game/play/look/retro_vertex.gdshaderinc"
 
 uniform vec3 team_colour : source_color = vec3(0.23, 0.53, 0.96);
@@ -20,6 +22,7 @@ uniform float wave_speed = 7.0;
 uniform bool chequer = false;
 uniform vec2 checks = vec2(6.0, 4.0);
 uniform vec3 dark : source_color = vec3(0.15, 0.16, 0.17);
+uniform vec3 light = vec3(1.0);
 
 void vertex() {
 	float u = UV.x;
@@ -44,8 +47,9 @@ void fragment() {
 			c = (d > 0.2 || (d > 0.08 && d < 0.13)) ? pale : team_colour;
 		}
 	}
-	ALBEDO = c;
+	vec3 lit = LOOK_LINEAR(c) * light;
+	ALBEDO = LOOK_ALBEDO(lit);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
-	EMISSION = c * 0.35;
+	EMISSION = LOOK_ALBEDO(lit * 0.35);
 }

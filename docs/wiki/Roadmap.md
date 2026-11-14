@@ -14,8 +14,8 @@ then **0.1**, which opens **Early Access**. Each build is posted on the
 ### Built
 
 Depot as an indoor airsoft hall and Woodland as an open wood (by day, or at night with the weapon torch and glowing
-BBs), with doors and two flags; the AEG Rifle, the GBB Pistol, the Cyber Pistol and the Sniper Rifle with the 2x and
-Variable Scopes, every part and power source, the Loadout, levels and the Armory; Easy, Normal and Hard bots with
+BBs), with doors and two flags; the AEG Rifle, the GBB Pistol, the Cyber Pistol, the Sniper Rifle with the 2x and
+Variable Scopes, the Pump Shotgun and the Compact SMG, every part and power source, the Loadout, levels and the Armory; Easy, Normal and Hard bots with
 names, personalities, kits and callouts, playing as a team; Elimination with its overtime flag, Attack / Defend and
 Custom matches with 5 to 8 a side; the practice range in Depot's site, Practice on any field and the timed challenge;
 squad orders, pings, Go there and the magazine hand-off; the minimap, the full-screen map, the hit feed, scoreboard
@@ -26,11 +26,9 @@ The rest of this wiki describes all of it.
 
 ### Next
 
-- **0.1 Dev 3:** finished models for Depot and the practice range, and perhaps Woodland, two new replicas: a compact
-  electric SMG, quick on your feet and fast on the trigger, short on reach, and a spring pump shotgun that sends
-  three BBs a pull for corners and doorways, with a pump between pulls, and a new map: Subway, a closed metro
+- **0.1 Dev 3:** finished models for Depot and the practice range, and perhaps Woodland, and a new map: Subway, a closed metro
   station on three levels, from the ticket hall down escalators, stairs and working lifts to the platforms, the
-  trains and the tunnels, tiled, terrazzo-floored and lamp-lit, its shots ringing off the tiles (both in
+  trains and the tunnels, tiled, terrazzo-floored and lamp-lit, its shots ringing off the tiles (in
   development). A test map for the developers, Stockade, a plywood village inside a log fort with an indoor site
   and an open woodyard, is in development for trying out Plant The Bomb; it is not offered to players.
 

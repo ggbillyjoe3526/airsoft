@@ -174,10 +174,6 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		# Hands on Plant The Bomb's device (PB1, PB3): arming or disarming it, it holds still with its replica away.
 		c.using = in_play and cmd.interact
 		var ps := state.round_state.plant
-		if c.using and ps.status == PlantState.Status.CARRIED and ps.carrier == c.id and ps.planter != c.id:
-			ps.set_room = Plant.room_ahead(c.position, c.yaw, tuning.plant, query, _set_hit)
-			ps.set_floor = Plant.floor_at(Plant.set_spot(ps, c.position, c.yaw, tuning.plant, ps.set_room),
-					tuning.plant, query, _set_hit)
 		if Plant.hands_on(c, c.using and Plant.busy(ps, c), tuning.plant, state.events):
 			_working.reset(cmd.yaw, cmd.pitch)
 			_working.crouch = cmd.crouch
@@ -225,6 +221,12 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			if in_play and noisy:
 				noise.knock(c, tuning.body, dt, state)
 		c.rescue_if_out_of_world(kill_y)
+		# The room ahead and the floor for the bomb's set-down (PB3), from where this tick's move and turn left its
+		# carrier: Plant.step sets it down from there, so a turn towards a wall on the tick the arming starts is seen.
+		if c.using and ps.status == PlantState.Status.CARRIED and ps.carrier == c.id and ps.planter != c.id:
+			ps.set_room = Plant.room_ahead(c.position, c.yaw, tuning.plant, query, _set_hit)
+			ps.set_floor = Plant.floor_at(Plant.set_spot(ps, c.position, c.yaw, tuning.plant, ps.set_room),
+					tuning.plant, query, _set_hit)
 		Hitbox.step_walk_cycle(c, tuning.hits) # the legs' swing, for their hit volumes and the drawn figure
 		Hitbox.step_stairs(c, tuning.hits, dt)
 		Lean.step(c, cmd, tuning, query, dt)
@@ -327,8 +329,13 @@ func _ping(c: Character, commands: Array[PlayerCommand], live: bool, events: Sim
 		e.reach = _ping_hit.fraction * reach
 
 
-## The magazine hand-off pressed in `c`'s command this tick (MH1): a toss, an ask or a refusal (MagShare.press).
+## The magazine hand-off pressed in `c`'s command this tick (MH1): a toss, an ask or a refusal (MagShare.press); and
+## its answer to the asks standing with it (MagShare.answer).
 func _mag_hand_off(c: Character, commands: Array[PlayerCommand], sharing: bool, state: GameState) -> void:
 	var cmd: PlayerCommand = commands[c.id] if c.id >= 0 and c.id < commands.size() else null
-	if cmd != null and cmd.mag_hand_off:
+	if cmd == null:
+		return
+	if cmd.mag_answer != PlayerCommand.MagAnswer.NONE:
+		mag_share.answer(c, cmd.mag_answer, cmd.mag_answer_to, state, sharing)
+	if cmd.mag_hand_off:
 		mag_share.press(c, state, sharing)

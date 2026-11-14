@@ -509,9 +509,10 @@ func _load(r: ReplicaConfig, paint: StringName, realistic: bool, parts: Dictiona
 	var held := Held.new()
 	# Drawn, held and posed as its model's replica (a stand-in model's, CS1).
 	held.id = r.model_id()
-	# A bolt-action replica's cycle stretched to its ready time with its parts (the loadout's stats carry them; row 19).
+	# A bolt-action replica's cycle stretched to its ready time with its parts (the loadout's stats carry them; row 19),
+	# but no slower than the recorded cocking: a slower spring's bolt is home with its last knock (bolt_knock_at).
 	if r.bolt_action and r.fire_rate > 0.0:
-		held.fire_speed = _cfg.bolt_cycle_end * r.fire_rate
+		held.fire_speed = _cfg.bolt_cycle_end / minf(1.0 / r.fire_rate, _cfg.bolt_knock_at)
 	held.root = Node3D.new()
 	held.root.name = "Held_%s" % r.id
 	held.root.visible = false

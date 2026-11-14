@@ -82,12 +82,11 @@ extends Resource
 
 @export_group("Puddles")
 ## Puddles and mud (MapData.puddles; Medium and up): the ground's own squares under each, cut `puddle_cuts` times a
-## side and lifted `puddle_lift` m (so they lie on the slope exactly and sit under any BB), coloured by an outline of
-## `puddle_points` points pulled in by up to `puddle_wobble` of its radius: water (`water` at `water_alpha`) inside
+## side and lifted `puddle_lift` m (so they lie on the slope exactly and sit under any BB), coloured by an outline
+## pulled in by up to `puddle_wobble` of its radius: water (`water` at `water_alpha`) inside
 ## `puddle_core` of it, then a wet margin (`wet` at `wet_alpha`) fading out; mud the same in `mud` and `mud_wet`.
 ## Water glossy (`puddle_roughness`), mud duller (`mud_roughness`), each its own draw; seen through, drawn before every
 ## other see-through thing so none hides a BB.
-@export var puddle_points: int = 24
 @export var puddle_wobble: float = 0.35
 @export var puddle_core: float = 0.72
 @export var puddle_cuts: int = 4

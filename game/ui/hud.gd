@@ -189,6 +189,8 @@ var _drawn_at: Vector2 = Vector2.ZERO
 var _hop_slot: int = -1
 ## The HUD tab's choices (apply_prefs).
 var _prefs := HudPrefs.new()
+## Settings › HUD › Callouts as apply_prefs last saw it (the prefs object is the settings' own, changed in place).
+var _callouts_on: bool = true
 ## The HUD opacity (HudPrefs.panel_opacity): how much of the replica panel's and the minimap's backgrounds show; their
 ## icons, numbers and words stay solid (owner, 2026-11-03: only those two, only in a match, only the backgrounds).
 var _opacity: float = 1.0
@@ -449,14 +451,16 @@ func mag_line() -> HudMagLine:
 
 
 ## The minimap top left (HudMinimap) for `map`, its field drawn now: call it once in match setup, behind the loading
-## screen. `heard` is what your side heard of the other team, `map_name` goes in its caption. Not for the range.
-func setup_minimap(map: MapData, cfg: MinimapConfig, heard: MinimapHearing, map_name: String, characters: int) -> void:
+## screen. `heard` is what your side heard of the other team, `map_name` goes in its caption; `field` its drawing if
+## already made (HudMinimap.setup). Not for the range.
+func setup_minimap(map: MapData, cfg: MinimapConfig, heard: MinimapHearing, map_name: String, characters: int,
+		field: MinimapField = null) -> void:
 	_minimap = HudMinimap.new()
 	add_child(_minimap)
 	move_child(_minimap, _team_markers.get_index() + 1)
 	move_child(_flag_marker, _minimap.get_index()) # the map is drawn over the marker, never the other way round
 	move_child(_pings, _minimap.get_index())
-	_minimap.setup(cfg, _teams, map, heard, map_name, characters, _cfg.minimap_margin)
+	_minimap.setup(cfg, _teams, map, heard, map_name, characters, _cfg.minimap_margin, field)
 	HudStyle.restyle(_minimap, _opacity)
 	# Over the rest of the HUD while its key is held (the order wheel never opens with it).
 	_field_map = HudFieldMap.new()
@@ -586,8 +590,11 @@ func apply_prefs(prefs: HudPrefs) -> void:
 	if stay != _hits.stay:
 		_hits.setup(HudPrefs.KEPT_LINES if stay else _cfg.feed_lines, _cfg.feed_line_time, _cfg.feed_fade_time)
 		_hits.stay = stay
-	if not prefs.callouts:
+	# Only as Callouts goes off: this runs at every settings change, and Plant The Bomb's notes ("Rook planted the
+	# bomb at A") are call lines shown whatever the switch says, so dropping them each time wiped them mid-round.
+	if _callouts_on and not prefs.callouts:
 		_hits.drop_calls()
+	_callouts_on = prefs.callouts
 	_replica.set_counted(prefs.ammo_counter)
 	if not is_equal_approx(prefs.panel_opacity, _opacity):
 		_opacity = prefs.panel_opacity
@@ -804,11 +811,6 @@ func refresh_door_prompt() -> void:
 	_door_want = DoorPrompt.NONE
 	set_door_prompt(what, _door_stop)
 	_plant_prompt.refresh_key()
-
-
-## Whether the door prompt shows.
-func door_prompt_shown() -> bool:
-	return _door_prompt.visible
 
 
 ## Shows "What got you" for `facts` (the hit on you just called): the shooter's name in their team's colour and the
@@ -1193,25 +1195,19 @@ func place_plant_marker(camera: Camera3D, rs: RoundState, watched: Character, pl
 func _place_marker(camera: Camera3D, spot: Vector3, show: bool) -> void:
 	_flag_marker.place(camera, spot, show and not _board.visible, size, pin_point(), pin_right_top(), _left_stack_floor())
 	# Never over the round banner or the countdown's plate: it comes back as they go.
-	if _flag_marker.visible and overlaps_any(_flag_marker.occupied(), _stack_rects()):
+	if _flag_marker.visible and _under_stack(_flag_marker.occupied()):
 		_flag_marker.visible = false
 
 
-## Where the banner and the countdown's plate are now (HUD coordinates), those showing.
-func _stack_rects() -> Array[Rect2]:
-	var out: Array[Rect2] = []
-	for plate: Control in [_banner, _count]:
-		if plate.visible:
-			out.append(Rect2(_middle.position + plate.position, plate.size))
-	return out
+## Whether `rect` touches the banner or the countdown's plate, those showing (every frame a marker is up: no arrays).
+func _under_stack(rect: Rect2) -> bool:
+	return (_banner.visible and rect.intersects(_plate_rect(_banner))) \
+			or (_count.visible and rect.intersects(_plate_rect(_count)))
 
 
-## Whether `rect` touches any of `others`.
-static func overlaps_any(rect: Rect2, others: Array[Rect2]) -> bool:
-	for other in others:
-		if rect.intersects(other):
-			return true
-	return false
+## Where `plate`, the banner or the countdown's plate in the middle stack, is now (HUD coordinates).
+func _plate_rect(plate: Control) -> Rect2:
+	return Rect2(_middle.position + plate.position, plate.size)
 
 
 ## The pole the flag marker and the gauge show (AB1), as the last update left it.

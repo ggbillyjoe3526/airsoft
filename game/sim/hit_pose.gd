@@ -96,7 +96,10 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 		# its ease has come (UpperBlend); the aim the rest.
 		var put_away := holster_share(c)
 		if put_away > 0.0:
-			var sprint := clampf(c.sprint_weight, 0.0, 1.0)
+			# Short of a sprint, a step's share of the pump (UpperBlend.step_pump), as the drawn figure's.
+			var stepped := UpperBlend.step_pump(hits, Vector2(c.velocity.x, c.velocity.z).length()) \
+					if c.grounded and alive else 0.0
+			var sprint := clampf(maxf(c.sprint_weight, stepped), 0.0, 1.0)
 			_add_upper(fit.holster, 0, put_away * (1.0 - sprint))
 			_add_upper(fit.sprint, 0, put_away * sprint)
 		if put_away < 1.0:

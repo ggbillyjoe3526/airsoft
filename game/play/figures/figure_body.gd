@@ -21,6 +21,10 @@ const GATE_OPEN := 1
 ## The vault layer's two clips as asked of its Transition (CL1).
 const VAULT_OVER := 0
 const VAULT_CLIMB := 1
+## The render layer a body is drawn on, its own in place of the world's: the floor's wear marks leave it out
+## (WearMarks: their decals reach up to meet slopes and steps, and a figure standing on a stain took it on its boots).
+## Every camera and light keeps it (inside OpticGlass.ALL_LAYERS).
+const LAYER := 1 << 15
 
 ## The parts it draws (the shadow twin last) and each one's level (0, 1, 2; -1 for the twin).
 var meshes: Array[MeshInstance3D] = []
@@ -138,6 +142,10 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 		levels.append(-1)
 		_last_level.append(-1)
 	_merge_levels(models, kind, team, colour, glow, _config.face_look(figure_id), skin)
+	for mi in meshes:
+		mi.layers = LAYER
+	for mi in merged:
+		mi.layers = LAYER
 	set_lod_lines(lines)
 	for bone in _config.bones:
 		var index := skeleton.find_bone(bone)
@@ -183,7 +191,7 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = false) -> void:
 	if tree == null:
 		return
-	_animate_upper(pose, fired)
+	_animate_upper(pose, hits, fired)
 	tree.set(FigureGraph.P_GAIT, pose.gait_position())
 	_stairs_down_gate = _gate(FigureGraph.P_STAIRS_DOWN_GATE, _stairs_down_gate, pose.stairs < -HitPose.GATE)
 	_stairs_up_gate = _gate(FigureGraph.P_STAIRS_UP_GATE, _stairs_up_gate, pose.stairs > HitPose.GATE)
@@ -271,9 +279,10 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 
 ## The upper body's parameters: a trigger press when `fired`; the upper body's weight, its gate shut (not evaluated)
 ## under FigureConfig.gate_below; then, while it shows, the aim by pitch, the hold, the holster (its arms' and the aim's
-## gates shut at none and at full; Holster_Sprint on the walk cycle), a switch begun (forwards to a pistol, backwards to
-## a rifle, scaled to the draw), cut when the draw is (a holster, a hit).
-func _animate_upper(pose: FigurePose, fired: bool) -> void:
+## gates shut at none and at full; Holster_Sprint on the walk cycle, a share of it at a step), a switch begun or shown
+## again (forwards to a pistol, backwards to a rifle, scaled to the draw from its share), cut when the draw is (a
+## holster, a hit).
+func _animate_upper(pose: FigurePose, hits: HitConfig, fired: bool) -> void:
 	tree.set(FigureGraph.P_FIRE_HOLD, pose.pistol_weight)
 	if fired:
 		tree.set(FigureGraph.P_FIRE, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
@@ -295,15 +304,28 @@ func _animate_upper(pose: FigurePose, fired: bool) -> void:
 	_hold_gate = _gate(FigureGraph.P_HOLD_GATE, _hold_gate, holster < 1.0)
 	_holster_gate = _gate(FigureGraph.P_HOLSTER_GATE, _holster_gate, holster > 0.0)
 	tree.set(FigureGraph.P_HOLSTER, holster)
-	tree.set(FigureGraph.P_HOLSTER_MIX, pose.sprint_weight)
+	# On the ground only, as the hit volume's arms (HitPose): in the air the arms hang.
+	var on_foot := hits != null and pose.stepping() and pose.jump <= 0.0
+	var step_mix := UpperBlend.step_pump(hits, pose.speed) if on_foot else 0.0
+	tree.set(FigureGraph.P_HOLSTER_MIX, maxf(pose.sprint_weight, step_mix))
 	if pose.stepping():
 		tree.set(FigureGraph.P_HOLSTER_SPRINT_SEEK, fposmod(pose.cycle, TAU))
-	if pose.switch_started and pose.draw_seconds > 0.0:
+	if pose.switching and pose.draw_seconds > 0.0 and (pose.switch_started or pose.snapped):
+		# Begun, or shown again mid-switch (a hidden figure's tree stands still): from the draw's share, in step with it
+		# (a backwards clip's time counts from its own start, the clip's end).
 		tree.set(FigureGraph.P_SWITCH_WAY, 1.0 if pose.switch_back else 0.0)
 		tree.set(FigureGraph.P_SWITCH_PACE, _switch_seconds / pose.draw_seconds)
+		tree.set(FigureGraph.P_SWITCH_SEEK, pose.draw_share * _switch_seconds)
 		tree.set(FigureGraph.P_SWITCH, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	elif not pose.switching and tree.get(FigureGraph.P_SWITCH_ACTIVE):
 		tree.set(FigureGraph.P_SWITCH, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+	if pose.switching and pose.switch_same and pose.draw_seconds > 0.0:
+		# One class to the same: out to the hand-over (switch_pistol_from of the clip from the replica's own end) and
+		# back, seeked every frame.
+		var half := _config.switch_same_from
+		var turn := pose.draw_share / half if pose.draw_share < half else (1.0 - pose.draw_share) / (1.0 - half)
+		var reach := 1.0 - _config.switch_pistol_from if pose.switch_back else _config.switch_pistol_from
+		tree.set(FigureGraph.P_SWITCH_SEEK, clampf(turn, 0.0, 1.0) * reach * _switch_seconds)
 	_animate_reload(pose)
 
 

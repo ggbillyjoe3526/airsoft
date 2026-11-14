@@ -596,7 +596,8 @@ def lifts() -> list[dict]:
 
 # ---------------- Writing ----------------
 
-def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "", facing: str = "") -> dict:
+def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "", facing: str = "",
+             squeeze: bool = False, noise: str = "") -> dict:
     x0, x1, y0, y1, z0, z1 = bx
     if kind in ("floor", "ramp"):
         # Floors drawn edge to edge are grown a centimetre a side to meet (as Depot's): an edge on a grid cell's middle
@@ -612,7 +613,23 @@ def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress:
         b["dress"] = dress
     if facing:
         b["facing"] = facing
+    if squeeze:
+        b["squeeze"] = True
+    if noise:
+        b["noise"] = noise
     return b
+
+
+def under_wall(bx: list[float]) -> list[float]:
+    """A track bed's floor run on L.UNDER_WALL in under its tunnel wall (AUD2); any other floor as it is."""
+    x0, x1, y0, y1, z0, z1 = bx
+    if abs(y1 - L.T) > EPS:
+        return bx
+    if abs(z0 + L.TRACK_WALL_Z) < EPS:
+        z0 -= L.UNDER_WALL
+    if abs(z1 - L.TRACK_WALL_Z) < EPS:
+        z1 += L.UNDER_WALL
+    return [x0, x1, y0, y1, z0, z1]
 
 
 def floor_y(x: float, z: float, near: float) -> float:
@@ -659,7 +676,8 @@ def build() -> dict:
         for other in solid:
             if overlap(bx, other, SLACK):
                 print("warning: cover", bl["kind"], bx, "overlaps", other)
-        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"], facing=bl["facing"]))
+        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"], facing=bl["facing"],
+                               squeeze=bl["squeeze"], noise=bl["noise"]))
         solid.append(bx)
     # A car's air keeps a roof's thickness under its shoulders (car_shoulders) where it stands under an arch.
     air = [(i, p) for i, rm in enumerate(L.rooms) for a in air_boxes(rm)
@@ -683,7 +701,7 @@ def build() -> dict:
         parts = cut(under_arch(bx) if car else [bx], holes)
         parts = cut(parts, [s for s in solid if overlap(s, bx)])
         for p in parts:
-            blocks.append(as_block(kind, p))
+            blocks.append(as_block(kind, under_wall(p) if kind == "floor" else p))
             solid.append(p)
     # The vaults over the tunnels, round the shell already standing and clear of every room's air and every arch's
     # (a platform tunnel's end round a running tunnel's mouth).
@@ -823,6 +841,8 @@ def drop_rods(placed: list[dict]) -> list[dict]:
 
 
 LAMP_HALF_DEPTH = 0.3  # a lamp panel's half depth (RoofConfig.lamp_size.y) and a little: hung clear of a vault
+LAMP_CLEAR = 1.0      # a lamp hangs this far (m) along its room clear of a model standing under it (AUD2 row 19)
+LAMP_CLEAR_H = 1.5    # ... one at least this tall (a fan housing, a locker); a low one's sides are lit by the floor's bounce
 
 
 def vault_of(rm: dict) -> dict | None:
@@ -849,7 +869,8 @@ def lamps() -> list[dict]:
             a = a0 + (a1 - a0) * (i + 0.5) / n
             for t in rows:
                 b = b0 + (b1 - b0) * t
-                x, z = (a, b) if along_x else (b, a)
+                la = clear_of_models(rm, along_x, a, b, a0, a1)
+                x, z = (la, b) if along_x else (b, la)
                 v = vault_of(rm)
                 if v is not None:
                     # Under the vault, low enough that the panel's side nearer the wall clears the curve.
@@ -867,6 +888,27 @@ def lamps() -> list[dict]:
                     lamp["state"] = "flicker"
                 out.append(lamp)
     return out
+
+
+def clear_of_models(rm: dict, along_x: bool, a: float, b: float, a0: float, a1: float) -> float:
+    """`a` along room `rm` (x where `along_x`, else z), moved the least way along it that hangs a lamp at (a, b)
+    LAMP_CLEAR m clear of every model standing on the room's floor under it: a lamp straight over a fan housing or
+    a booth lit only its roof, its sides turned away from it and out of the other lamps' reach (AUD2 row 19). A vault
+    room's lamps (the platforms') keep their places."""
+    if rm["vault"]:
+        return a
+    for blk in L.blocks:
+        if not blk["dress"] or blk["y"] is None or blk["h"] < LAMP_CLEAR_H \
+                or abs(blk["y"] - min(rm["ya"], rm["yb"])) > EPS:
+            continue
+        lo, hi = (blk["x0"], blk["x1"]) if along_x else (blk["z0"], blk["z1"])
+        c0, c1 = (blk["z0"], blk["z1"]) if along_x else (blk["x0"], blk["x1"])
+        if not (c0 - EPS <= b <= c1 + EPS and lo - EPS <= a <= hi + EPS):
+            continue
+        ways = [x for x in (lo - LAMP_CLEAR, hi + LAMP_CLEAR) if a0 + LAMP_CLEAR <= x <= a1 - LAMP_CLEAR]
+        if ways:
+            a = min(ways, key=lambda x: abs(x - a))
+    return a
 
 
 def spiral_floor(x: float, z: float, near: float) -> float | None:

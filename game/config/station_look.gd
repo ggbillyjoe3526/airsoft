@@ -125,6 +125,15 @@ extends Resource
 @export var vault_rib_width: float = 0.3
 @export var vault_rib_depth: float = 0.05
 @export var vault_rib_finish: StringName = &"vault_rib"
+## The running tunnels' arch with no lamp lights (Lamp light off: Low, Medium; AUD2 row 22): the arc of a vault in one
+## of `arch_fill_finishes` glows `arch_fill` of its own colour, so it reads above the walls where only the lamps' glass
+## shows; none while the lamps light it.
+@export var arch_fill: float = 0.3
+@export var arch_fill_finishes: Array[StringName] = [&"lining"]
+## The platforms' vaults (TB1, AUD2 row 23): facing down away from their lamps, which shine straight down, they glow
+## `vault_fill` of their own colour on every preset (the arc of a vault in `vault_finish`), so the tiles read white in
+## shade beside the lit walls.
+@export var vault_fill: float = 0.2
 ## The track: rails a standard gauge apart (m, between their middles), each a head this wide and tall, grey steel
 ## that stands out on the dark ballast; sleepers (only when `sleepers`) this long, wide and tall, one every
 ## `sleeper_pitch` m, the rails on them. Scenery: no collider (a rail stands lower than a step). The owner

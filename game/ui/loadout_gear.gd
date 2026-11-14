@@ -235,8 +235,8 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 		_carried_sub[s].text = " · ".join(bits)
 		_carried_pic[s].texture = _pictures.texture(item.key, t.paint, realistic, f.fitted_keys(item))
 	_line_name.text = f.saved.carried().name
-	_line_rest.text = " · " + tr("LOADOUT_FOOT") % " and ".join(names) if not names.is_empty() else ""
-	_sheet.show_sheet(f.sheet(slot), tr("LOADOUT_SHEET_SUB") % f.item(slot).display_name)
+	_line_rest.text = " · " + tr("LOADOUT_FOOT") % (" %s " % tr("PART_AND")).join(names) if not names.is_empty() else ""
+	_sheet.show_sheet(f.sheet(slot), f.sheet_sub(f.item(slot).display_name))
 	_sheet.set_replica(f.item(slot).display_name)
 	# the pictures now hold the parts fitted: one scale again for every replica, sized to the longest
 	_set_scales()

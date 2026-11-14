@@ -969,6 +969,9 @@ msgstr "Count"
 msgid "RULE_FRIENDLY_FIRE"
 msgstr "Friendly fire"
 
+msgid "RULE_FLAG_RAISE_NOTE"
+msgstr "The flag takes %s s to raise on this field (%s s on the others)."
+
 msgid "RULE_ON"
 msgstr "On"
 
@@ -1391,6 +1394,18 @@ msgstr "%d %%"
 
 msgid "CUSTOMISE_ON_TARGET"
 msgstr "on target to %s m"
+
+msgid "CUSTOMISE_ON_TARGET_FIELD"
+msgstr "on target to %s m\n%s"
+
+msgid "LOADOUT_FIELD_AIR"
+msgstr "%s, %d °C"
+
+msgid "LOADOUT_FIELD_NIGHT"
+msgstr "%s at night"
+
+msgid "LOADOUT_SHEET_FIELD"
+msgstr " Flown in the picked field's air: %s."
 
 msgid "CUSTOMISE_OWN_NOTE"
 msgstr "This replica keeps its own colours."
@@ -2203,6 +2218,10 @@ msgstr "%s needs a mag · %d m"
 
 msgid "HUD_MAG_BRINGING"
 msgstr "%s is bringing you a mag"
+
+# Your ask stands with a teammate who hasn't set off yet.
+msgid "HUD_MAG_ASKED"
+msgstr "Asked %s for a mag"
 
 msgid "HUD_MAG_CAUGHT"
 msgstr "+1 mag from %s · %d BBs"

@@ -1,7 +1,8 @@
 class_name Footsteps
 ## Footsteps (the browser game's sim/footsteps.ts): after a character has moved, counts the ground it covered and sends
 ## a footstep event every stride while running or sprinting, and a landing when it comes down hard. Walking and moving
-## crouched are silent, but for a rattling magazine (a rattle every stride). Each says what it came down on when the
+## crouched are silent, but for a rattling magazine (a rattle every stride); a run's or a sprint's step names the slot
+## whose magazine rattles with it (GameEvent.slot), heard its rattle's reach further. Each says what it came down on when the
 ## world can tell, for its sound; a landing says how hard it came down too. A run, sprint or landing step on loud ground
 ## (`noise`'s ground: gravel, steel plate) carries further, by the event's carry; a rattle carries as ever. One pushing
 ## through a bush (Character.in_bush, BP8) sounds as leaves and carries NoiseConfig.bush_carry as far. In a stream
@@ -39,6 +40,9 @@ static func step(c: Character, cfg: FootstepConfig, events: SimEvents, query: Wo
 			_send(c, GameEvent.Footstep.RATTLE, events, query, null)
 		else:
 			var e := _send(c, GameEvent.Footstep.SPRINT if c.sprinting else GameEvent.Footstep.RUN, events, query, noise)
+			# A rattling magazine sounds with a run's or a sprint's step too (AUD2, owner 2026-11-14): its slot, so a
+			# listener hears the rattle's reach on top of the step's.
+			e.slot = c.armament.rattling_slot()
 			# A walk or a crouch through water, however shallow, still splashes, softer than a run.
 			if hushed and noise != null:
 				e.carry = noise.wade_quiet_carry

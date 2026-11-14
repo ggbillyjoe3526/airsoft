@@ -5,7 +5,8 @@ extends Node3D
 ## battens, a plywood sheet's timber cap, the perimeter wall's coping, the skip's rim), the watch tower's camouflage net
 ## and flag, the map's shade sails (SiteDressing), all as one mesh in the same material; sandbags laid bag by bag in
 ## each stack round its own box, drawn smaller under them (SiteSurface.core_of; one MultiMesh); the CC0 props in place
-## of some kinds' boxes (PropDress, DR2); and each zone's name stencilled on its wall.
+## of some kinds' boxes (PropDress, DR2); and each zone's name stencilled on its wall. The props and stencils take the
+## baked light near them while it is drawn (`relight`, BP7).
 ## Scenery only: no collider, no nav cell; every detail stays within `proud` (a bag `bag_bulge`) of its block's box.
 ## `dress_sky` gives the day its cumulus and haze.
 
@@ -24,6 +25,10 @@ var _details: MeshInstance3D = null
 var _bags: MultiMeshInstance3D = null
 var _props: PropDress = null
 var _stencils: Array[Label3D] = []
+## Each stencil's paint before the baked light (sRGB), and the foot of the wall it is on (where its light is taken from
+## when the wall has no baked faces near it: a wall drawn as props).
+var _stencil_paints: PackedColorArray = PackedColorArray()
+var _stencil_feet: PackedVector3Array = PackedVector3Array()
 ## Whether the watch tower wears the camouflage net and flag (its greybox does; its model keeps its own roof).
 var _tower_netted: bool = true
 
@@ -77,6 +82,24 @@ func bags() -> MultiMeshInstance3D:
 
 func stencils() -> Array[Label3D]:
 	return _stencils
+
+
+## Draws the props and stencils in the baked light near them (`stencil_light`), or in the shared light alone with
+## `lights` null (no bake drawn). Once a switch.
+func relight(lights: BakedLightNear) -> void:
+	if _props != null:
+		_props.relight(lights)
+	for i in _stencils.size():
+		var l := _stencils[i]
+		var light := stencil_light(lights, l.position, l.basis.z, _stencil_feet[i]) if lights != null else Color.WHITE
+		l.modulate = FlagView.lit(_stencil_paints[i], light)
+
+
+## The baked light a stencil at `at` facing `facing` is drawn in: its wall's faces round it facing the same way, or,
+## where the wall has none (drawn as props, DM1), the light its props take at its `foot` (PropDress.relight).
+static func stencil_light(lights: BakedLightNear, at: Vector3, facing: Vector3, foot: Vector3) -> Color:
+	var light := lights.at(at, facing, Color(0.0, 0.0, 0.0, 0.0))
+	return light if light.a > 0.0 else lights.at(foot + Vector3(0.0, PropDress.LIGHT_LIFT, 0.0))
 
 
 ## The CC0 props (DR2), or null on a map with none.
@@ -136,6 +159,8 @@ func _build(map: MapData, look: SiteLook, material: ShaderMaterial) -> void:
 	var font := GameTheme.font(STENCIL_WEIGHT)
 	for s in map.site.stencils:
 		_stencil(look, s, font, stencil_paint(map, look, s))
+		var wall := _behind(map, look, s)
+		_stencil_feet.append(Vector3(s.at.x, wall.center.y - wall.size.y * 0.5 if wall != null else 0.0, s.at.z))
 
 
 ## A container's frame, unit by unit and tier by tier: four corner posts, the rails along its long sides and, at its
@@ -344,12 +369,20 @@ static func _stack(look: SiteLook, b: MapData.Block, rng: RandomNumberGenerator,
 
 ## The paint stencil `s` is drawn in: charcoal, or light on a dark wall (the block just behind it).
 static func stencil_paint(map: MapData, look: SiteLook, s: SiteDressing.Stencil) -> Color:
+	var b := _behind(map, look, s)
+	if b == null:
+		return look.stencil_paint
+	var paint: Color = look.paints.get(look.finish_of(b), look.paints[&"default"])
+	return look.stencil_light if paint.get_luminance() < look.stencil_light_below else look.stencil_paint
+
+
+## The block stencil `s` is painted on (just behind it), or null.
+static func _behind(map: MapData, look: SiteLook, s: SiteDressing.Stencil) -> MapData.Block:
 	var behind := s.at - Basis(Vector3.UP, s.yaw) * Vector3(0.0, 0.0, look.stencil_off)
 	for b in map.blocks:
 		if AABB(b.center - b.size * 0.5, b.size).grow(look.stencil_off * 0.5).has_point(behind):
-			var paint: Color = look.paints.get(look.finish_of(b), look.paints[&"default"])
-			return look.stencil_light if paint.get_luminance() < look.stencil_light_below else look.stencil_paint
-	return look.stencil_paint
+			return b
+	return null
 
 
 ## A zone's name stencilled on its wall in `paint`, `stencil_off` m off it.
@@ -361,6 +394,7 @@ func _stencil(look: SiteLook, s: SiteDressing.Stencil, font: Font, paint: Color)
 	l.font_size = STENCIL_PIXELS
 	l.pixel_size = s.height / float(STENCIL_PIXELS)
 	l.modulate = paint
+	_stencil_paints.append(paint)
 	l.outline_size = 0
 	l.shaded = true
 	l.double_sided = false

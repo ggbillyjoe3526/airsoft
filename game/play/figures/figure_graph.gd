@@ -11,7 +11,8 @@ extends RefCounted
 ## volume's. Over the legs (FI3) the upper body (every bone but FigureConfig.lower_bones) takes a filtered Blend2: the
 ## rifle's or the pistol's aim (a BlendSpace1D down, level and up by pitch, the two blended by the hold), the holster's
 ## hanging arms over it, the reload as a OneShot through a TimeSeek (FI4: the rifle's or the pistol's clip at the
-## reload's share), the Switch as a OneShot through a TimeScale (forwards to a pistol, backwards to a rifle), and on top
+## reload's share), the Switch as a OneShot through a TimeSeek (begun at the draw's share) and a TimeScale (forwards to
+## a pistol, backwards to a rifle), and on top
 ## of all the trigger press as an additive OneShot. The upper body's branch sits beside the legs' TimeSeeks, never under
 ## them.
 
@@ -77,6 +78,7 @@ const SWITCH_FORWARD := &"switch_forward"
 const SWITCH_BACK := &"switch_back"
 const SWITCH_WAY := &"switch_way"
 const SWITCH_PACE := &"switch_pace"
+const SWITCH_SEEK := &"switch_seek"
 const SWITCH := &"switch"
 const UPPER := &"upper"
 const RIFLE_FIRE := &"rifle_fire"
@@ -117,6 +119,7 @@ const P_RELOAD := &"parameters/reload/request"
 const P_RELOAD_ACTIVE := &"parameters/reload/active"
 const P_SWITCH_WAY := &"parameters/switch_way/blend_amount"
 const P_SWITCH_PACE := &"parameters/switch_pace/scale"
+const P_SWITCH_SEEK := &"parameters/switch_seek/seek_request"
 const P_SWITCH := &"parameters/switch/request"
 const P_SWITCH_ACTIVE := &"parameters/switch/active"
 const P_UPPER := &"parameters/upper/blend_amount"
@@ -267,12 +270,14 @@ static func _upper_body(graph: AnimationNodeBlendTree, library: AnimationLibrary
 	_layer(graph, SWITCH_WAY, SWITCH_FORWARD, SWITCH_BACK)
 	graph.add_node(SWITCH_PACE, AnimationNodeTimeScale.new())
 	graph.connect_node(SWITCH_PACE, 0, SWITCH_WAY)
+	graph.add_node(SWITCH_SEEK, AnimationNodeTimeSeek.new())
+	graph.connect_node(SWITCH_SEEK, 0, SWITCH_PACE)
 	var switch := AnimationNodeOneShot.new()
 	switch.fadein_time = cfg.settle_overlay
 	switch.fadeout_time = cfg.settle_overlay
 	graph.add_node(SWITCH, switch)
 	graph.connect_node(SWITCH, 0, RELOAD)
-	graph.connect_node(SWITCH, 1, SWITCH_PACE)
+	graph.connect_node(SWITCH, 1, SWITCH_SEEK)
 	var upper := AnimationNodeBlend2.new()
 	upper.filter_enabled = true
 	for b in skeleton.get_bone_count():

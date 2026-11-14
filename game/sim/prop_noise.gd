@@ -20,16 +20,18 @@ var rings: bool = false
 var ringing: PackedInt32Array = PackedInt32Array()
 
 
-## The noisy props among `query`'s boxes (those whose kind `noise` lists).
+## The noisy props among `query`'s boxes (those whose kind `noise` lists, or that name their own sound,
+## WorldQuery.block_noises).
 func _init(noise: NoiseConfig, query: WorldQuery) -> void:
 	cfg = noise
 	if query == null:
 		return
 	for i in query.block_kinds.size():
-		var kind := query.block_kinds[i]
-		if not noise.props.has(kind):
+		var own := query.block_noises[i]
+		var s: int = NoiseConfig.SOUND_NAMES.find(String(own)) if own != &"" \
+				else noise.props.get(query.block_kinds[i], -1)
+		if s < 0:
 			continue
-		var s: int = noise.props[kind]
 		block.append(i)
 		center.append(query.block_centers[i])
 		half.append(query.block_halves[i])

@@ -170,6 +170,15 @@ func open_from_practice(slot_in: Loadout.Slot) -> void:
 	_refresh()
 
 
+## Measures the figures in the air of the field `picks` (the Match page's) plays on, at its day or night (FieldAir,
+## AUD2), and shows them again.
+func set_field(picks: MatchPicks) -> void:
+	_facts.set_field(FieldAir.of(picks.map_id, picks.lighting, settings.dev.time_of_day, _facts.tuning,
+			PlayTuning.load_default()))
+	if is_inside_tree():
+		_refresh()
+
+
 ## The load problem shown at the top ("" when there was none).
 func notice_text() -> String:
 	return _notice.text if _notice.visible else ""
@@ -250,7 +259,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	var plain := key != null and not (key.ctrl_pressed or key.alt_pressed or key.shift_pressed or key.meta_pressed)
 	if plain and key.pressed and not key.echo and not _customising and not _gear.switching() \
 			and _strip.mode == LoadoutStrip.Mode.NORMAL:
+		# By the key's letter, else by where it sits: on an AZERTY layout the top row types & é " ' ( unshifted, so the
+		# strip's 1 to 5 picked nothing there.
 		var place := KEYS.find(key.keycode)
+		if place < 0:
+			place = KEYS.find(key.physical_keycode)
 		if place >= 0 and place < saved.slots.size():
 			saved.use(place)
 			get_viewport().set_input_as_handled()

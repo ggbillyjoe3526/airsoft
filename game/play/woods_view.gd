@@ -93,7 +93,23 @@ const TILE_REACH := 0.75
 ## How far under and over 0 the night air's box reaches (m): past any field's ground and eye.
 const AIR_DEPTH := 100.0
 
+## How many pieces `build_piece` builds.
+const PIECES := 4
+
+
+## What a wood is built from, kept between its pieces.
+class Building:
+	extends RefCounted
+	var map: MapData = null
+	var sky: SkylineConfig = null
+	var lighting: LightingConfig = null
+	var style: MapStyle = null
+	var props: PropDressConfig = null
+
+
 var _cfg: WoodsConfig = null
+## What `begin` was given, while the pieces are built (null after `finish`).
+var _building: Building = null
 var _crowns: MultiMeshInstance3D = null
 var _forest: MultiMeshInstance3D = null
 var _tufts: Array[MultiMeshInstance3D] = []
@@ -107,19 +123,53 @@ var _air_look: ShaderMaterial = null
 ## `map`'s wood drawn with `cfg`, under `lighting` (the playing preset: its horizon fades the forest, its night flag
 ## brings the fireflies and motes), the grass in `style`'s colour, the forest faded as `sky` fades the skyline; null
 ## on a map with no trees and none of a wood's dressing; a tree dressed in its own crowned model that `props` draws
-## gets no cone. Every part starts as Low draws it (`set_quality`).
+## gets no cone. Every part starts as Low draws it (`set_quality`). All at once: `begin`, each of PIECES
+## `build_piece`, `finish`.
 static func build(map: MapData, cfg: WoodsConfig, sky: SkylineConfig, lighting: LightingConfig,
+		style: MapStyle, props: PropDressConfig = null) -> WoodsView:
+	var view := begin(map, cfg, sky, lighting, style, props)
+	for piece in PIECES:
+		view.build_piece(piece)
+	return finish(view)
+
+
+## A wood to be built a piece at a time (`build_piece`, then `finish`), as `build` builds it at once: the loading screen
+## builds a piece a frame (AUD2: Woodland's took 0.4 s in one).
+static func begin(map: MapData, cfg: WoodsConfig, sky: SkylineConfig, lighting: LightingConfig,
 		style: MapStyle, props: PropDressConfig = null) -> WoodsView:
 	var view := WoodsView.new()
 	view.name = "Woods"
 	view._cfg = cfg
-	view._make_crowns(WoodsShapes.crowns(map, cfg, props))
-	view._make_forest(WoodsShapes.forest(map, cfg, sky, lighting.sky_horizon))
-	view._make_tufts(WoodsShapes.tufts(map, cfg, style))
-	view._make_puddles(WoodsShapes.puddles(map, cfg))
-	view._make_floor(WoodsShapes.floor_mesh(map, cfg))
-	if lighting.night:
-		view._make_air(WoodsShapes.night_air(map, cfg), map)
+	view._building = Building.new()
+	view._building.map = map
+	view._building.sky = sky
+	view._building.lighting = lighting
+	view._building.style = style
+	view._building.props = props
+	return view
+
+
+## Builds piece `piece` (0 .. PIECES - 1, in order): the crowns and the forest, the grass tufts, the puddles, the floor
+## and the night's air.
+func build_piece(piece: int) -> void:
+	var b := _building
+	match piece:
+		0:
+			_make_crowns(WoodsShapes.crowns(b.map, _cfg, b.props))
+			_make_forest(WoodsShapes.forest(b.map, _cfg, b.sky, b.lighting.sky_horizon))
+		1:
+			_make_tufts(WoodsShapes.tufts(b.map, _cfg, b.style))
+		2:
+			_make_puddles(WoodsShapes.puddles(b.map, _cfg))
+		3:
+			_make_floor(WoodsShapes.floor_mesh(b.map, _cfg))
+			if b.lighting.night:
+				_make_air(WoodsShapes.night_air(b.map, _cfg), b.map)
+
+
+## `view` once every piece is built, as Low draws it; null (and `view` freed) if it has nothing to draw.
+static func finish(view: WoodsView) -> WoodsView:
+	view._building = null
 	if view.get_child_count() == 0:
 		view.free()
 		return null

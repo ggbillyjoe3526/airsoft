@@ -68,7 +68,7 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 	# in while the real lamps shine (no sky indoors).
 	view._mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	# In the shared light (docs/ART.md › Light): its underside takes the look's shade and the bounce off the floor.
-	var mat := LookMaterials.vertex_colour(cfg.roughness, 0.0)
+	var mat := LookMaterials.vertex_colour(cfg.roughness, 0.0, Color.WHITE, false, cfg.wear)
 	view._mesh.material_override = mat
 	view._materials.append(mat)
 	view.add_child(view._mesh)
@@ -193,7 +193,7 @@ func _add_bays(bay: Mesh, area: Rect2, y: float, cfg: RoofConfig) -> void:
 	var lines := bay_lines(area, cfg).size()
 	var cells := bay_cells(area, cfg)
 	var at := bay_placings(bay.get_aabb(), area, y, cfg)
-	var mat := LookMaterials.vertex_colour(cfg.roughness, 0.0)
+	var mat := LookMaterials.vertex_colour(cfg.roughness, 0.0, Color.WHITE, false, cfg.wear)
 	_materials.append(mat)
 	var chunk := maxi(1, cfg.bay_chunk)
 	for first in range(0, lines, chunk):
@@ -275,7 +275,7 @@ func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]
 	var own := PropDressConfig.load_mesh(cfg.plain_lamp_model if map.roof_plain else cfg.lamp_model) as ArrayMesh
 	var drop := cfg.plain_lamp_drop if map.roof_plain else cfg.lamp_drop
 	if own != null:
-		var body := LookMaterials.vertex_colour(cfg.roughness, 0.0)
+		var body := LookMaterials.vertex_colour(cfg.roughness, 0.0, Color.WHITE, false, cfg.wear)
 		_materials.append(body)
 		lamp = own.duplicate() as ArrayMesh
 		for s in lamp.get_surface_count():

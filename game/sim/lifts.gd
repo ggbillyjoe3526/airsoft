@@ -6,7 +6,8 @@ extends RefCounted
 ## (door_time), rides to the nearest called stop ahead of the way it last went (floor_time a stop), stopping on the way
 ## at any stop called meanwhile, and opens them. Its doors never shut on a body in the doorway, nor with anyone hit
 ## aboard (they walk off), nor with more than `capacity` aboard (it buzzes). Its riders rise and fall with its floor
-## (carry). A doorway is a solid steel leaf to BBs, bombs, sight and bodies but while the car stands open at it. Each
+## (carry). A doorway is a solid steel leaf to bombs, sight and bodies but while the car stands open at it, and to BBs
+## where its two leaves stand at that tick while they shut or open (WorldQuery.set_lift_ajar, bb_ray). Each
 ## press, chime, door and ride is a LIFT event, heard out to LiftConfig.heard through walls. Each match and each round
 ## starts with every car at its start stop, open, nothing called. Pure rules on GameState.lifts; the level is told each
 ## move through WorldQuery.set_lift_car and set_lift_door. Allocates nothing a tick.
@@ -68,6 +69,7 @@ func reset(lifts: LiftState) -> void:
 		lifts.buzz_left[i] = 0.0
 		lifts.caller[i] = -1
 		_query.set_lift_car(i, lifts.y[i])
+		_query.set_lift_ajar(i, -1, 0.0)
 		for s in spec.stop_count():
 			_query.set_lift_door(i, s, s != k)
 
@@ -96,16 +98,22 @@ func step(state: GameState, dt: float) -> void:
 					lifts.doors[i] = 1.0
 					lifts.left[i] = _cfg.dwell
 					_query.set_lift_door(i, lifts.stop[i], false)
+		# Its leaves as they stand, shutting or opening: a BB's path meets only them in the doorway (bb_ray).
+		var ajar := lifts.phase[i] == LiftState.Phase.SHUTTING or lifts.phase[i] == LiftState.Phase.OPENING
+		_query.set_lift_ajar(i, lifts.stop[i] if ajar else -1, lifts.doors[i])
 
 
 ## Carries `c` with the car it rides this tick (feet in it as it stood before this tick's rise): up or down by the
 ## car's rise, never under its floor. Before `c` moves.
 func carry(c: Character, lifts: LiftState) -> void:
+	c.lift_rise = 0.0
 	for i in lifts.count():
 		var rise := lifts.rise[i]
 		if rise == 0.0 or not _query.lifts[i].holds(c.position, lifts.y[i] - rise, _cfg):
 			continue
-		c.position.y = maxf(c.position.y + rise, lifts.y[i] + _body.rest_gap)
+		var from := c.position.y
+		c.position.y = maxf(from + rise, lifts.y[i] + _body.rest_gap)
+		c.lift_rise = c.position.y - from
 		return
 
 

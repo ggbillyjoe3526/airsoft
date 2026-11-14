@@ -9,6 +9,7 @@ docs/ARCHITECTURE.md › Contracts 1).
 | `nav_grid.gd` | `NavGrid`: a 0.2 m grid holding a node per floor of each cell in flat packed arrays, its queries (`node_at`, `floor_at`, `is_walkable_at`, `nearest_walkable`, `clear_line`, `drop_on_line`, `random_walkable_near`) and `find_route` |
 | `nav_grid_builder.gd` | `NavGridBuilder`: each cell's floors (the terrain's ground at its centre, then each floor or ramp top), blocks and drops stamped with the clearance, the outer edge; each node's eight steps, the open-ground distances a line skips over, and the route search's points and links |
 | `nav_route.gd` | `NavRoute`: string-pulls the search's node path into straight legs probed a body's radius from corners (the browser's pullRoute) |
+| `nav_smoke.gd` | `NavSmoke`: a standing smoke cloud's price on the search (AUD2), put on the tick it pops and taken off the tick it clears, kept on the grid (`NavGrid.smoke`) so the next match's bots start from none |
 | `nav_lifts.gd` | `NavLifts`: a lift link each way between every two stops' landings of each lift (MT2), priced as the ride's time (doors, floors, a wait) at a run, joined into the vault regions; a walk-off never takes one, and a route asked for inside a car starts at its landing (`NavGrid.car_landing`, `lift_leg`) |
 
 - **Sloping ground** (WL1, the browser's M33c). A cell's ground is `TerrainGrid.height_at` its centre, with nothing
@@ -24,6 +25,11 @@ docs/ARCHITECTURE.md › Contracts 1).
   8,000 expansions) is `NavConfig.search_budget`, counted in searches since AStar3D runs one whole: one a tick, a
   walk-off due first (`Elimination.plan_walk_off_routes`), then the bots round-robin (`BotRoutes.plan`). `searches`
   counts them (WL2: at 6v6 on Woodland 2 to 3 a second, never a second in one tick).
+- **Bushes** (AUD2). A node a body standing on would be in a bush (`NavGrid.slow`, the point `bush_probe_height` over
+  its floor in a bush's ellipsoid, as `Character.in_bush`) is priced `NavConfig.bush_cost` (2: the slow, 1 / 0.75,
+  times the search's greed, which a smaller price hardly steers), and `NavRoute.pull` keeps a leg from crossing more
+  leaves than the path it straightens, so a route that went round a bush stays round it. A field with no bushes builds
+  and routes exactly as before.
 - **Regions** (WL1). The build labels each walkable node with the lowest node it is linked to on foot, either way
   (`NavGrid.region`, a union-find over the links); `NavVaults.link` joins the regions a vault link crosses
   (`vault_region`). `find_route` refuses a goal in another region at once, before the search: a search that fails

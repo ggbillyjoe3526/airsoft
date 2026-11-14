@@ -14,7 +14,18 @@ pipeline/out/
 *.local
 .DS_Store
 Thumbs.db
+desktop.ini
 .claude/launch.json
+
+# Editor and tool leftovers (Blender's backups, merge and patch leftovers, swap files)
+*.blend1
+*.blend2
+*.blend@
+*.tmp
+*.orig
+*.rej
+*.swp
+*~
 
 # Python tool caches
 __pycache__/

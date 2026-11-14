@@ -545,8 +545,9 @@ func _show_crash_screen() -> bool:
 
 ## The crash has been seen: the record forgets it.
 func _crash_shown() -> void:
-	run.previous = {}
-	run.save(run_path)
+	if not run.crash_seen(run_path):
+		push_warning("run record: %s could not be written or marked, so the crash screen may show again at the next start"
+				% run_path)
 
 
 ## Continue: the menus, and their notices as on any start.

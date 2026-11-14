@@ -22,6 +22,9 @@ static var _look_pitch: float = 0.0
 static func aim(b: Bot, w: BotWorld, target: Character, eye: Vector3, walking: bool, cmd: PlayerCommand,
 		dt: float) -> float:
 	var cfg := w.cfg
+	# Standing on its spot though its mode walks it (waiting for a lift, riding one: BotLifts leaves b.move_dir zero)
+	# is not walking: a zero step has no way to face (atan2 gave the field's +Z), so it looks as one standing does.
+	walking = walking and b.move_dir != Vector3.ZERO
 	if b.target_visible and target != null and b.contact != null:
 		var point := BotSenses.body_point(target, w.tuning.hits, b.target_part)
 		var dist := eye.distance_to(point)

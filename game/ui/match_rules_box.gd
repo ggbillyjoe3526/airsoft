@@ -9,7 +9,7 @@ extends VBoxContainer
 ## Under the rules, for either rule set, a map offering both Day and Night (MapData.lighting_presets) shows a Day / Night
 ## row lighting the one it plays (MapData.preset_played); a pick goes into the MatchPicks, for this session only.
 
-## The rule set or a Custom switch changed.
+## The rule set picked changed (a Custom switch moves the settings, whose `changed` the page hears).
 signal changed
 
 const PICKER_GAP := 8
@@ -53,6 +53,8 @@ var _rows: VBoxContainer = null
 var _team_size: MenuChoice = null
 var _wins: MenuChoice = null
 var _round_time: HSlider = null
+## The round-time slider's knob is held: its steps change the settings but are saved once, on release.
+var _dragging: bool = false
 var _clock: Label = null
 var _friendly_fire: MenuChoice = null
 var _ricochets: MenuChoice = null
@@ -60,6 +62,10 @@ var _ricochets: MenuChoice = null
 var _subs: Dictionary[String, Label] = {}
 ## The Day / Night row (shown on a map offering both) and the presets each map offers, read once a map.
 var _time_rows: VBoxContainer = null
+## The line saying a field's own flag raise (data/maps.md Raise, MB3), under the chips or the rows where the picked
+## field and mode have one.
+var _flag_note: Label = null
+var _flag_pad: Control = null
 var _time: MenuChoice = null
 var _time_sub: Label = null
 var _presets: Dictionary[String, Array] = {}
@@ -91,6 +97,12 @@ func _init(picked: MatchPicks, settings: Settings, tuning: SimTuning) -> void:
 	_rows.add_theme_constant_override("separation", ROW_GAP)
 	add_child(_rows)
 	_build_rows()
+	_flag_note = MenuParts.text("", SUB_SIZE, 500, GameTheme.MUTED)
+	_flag_note.name = "FlagNote"
+	_flag_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_flag_pad = MenuParts.padded(0.0, BLURB_TOP, 0.0, 0.0)
+	_flag_pad.add_child(_flag_note)
+	add_child(_flag_pad)
 	_time_rows = VBoxContainer.new()
 	_time_rows.add_theme_constant_override("separation", ROW_GAP)
 	add_child(_time_rows)
@@ -210,7 +222,25 @@ func show_tuning(tuning: SimTuning) -> void:
 	_rows.visible = custom and not _unused
 	_under.visible = not _unused
 	_show_switches()
+	show_flag_note()
 	_show_time_of_day()
+
+
+## The flag note for the picked field and mode: shown only where the field's flag raise differs from the game's (the
+## others play the game's, which the note names), in Attack / Defend, the one mode with a flag to raise.
+func show_flag_note() -> void:
+	# The game's own raise time, from the loaded tuning the Match page builds on (MatchOptions.match_tuning's base):
+	# `_tuning` is the round tuning, which already holds the picked field's.
+	var base := SimTuning.load_default().flag.raise_time
+	var seconds := MatchOptions.field_raise(_picks.mode, MapCatalog.shared().find(_picks.map_id), base)
+	_flag_pad.visible = seconds > 0.0 and not _unused
+	if seconds > 0.0:
+		_flag_note.text = tr("RULE_FLAG_RAISE_NOTE") % [MatchOptions.seconds_text(seconds), MatchOptions.seconds_text(base)]
+
+
+## The flag note's words, "" while it is hidden.
+func flag_note_text() -> String:
+	return _flag_note.text if _flag_pad.visible else ""
 
 
 func _blurb_text(custom: bool) -> String:
@@ -329,6 +359,8 @@ func _build_time_row() -> void:
 	for icon: String in ["grabber", "grabber_highlight"]:
 		_round_time.add_theme_icon_override(icon, GameTheme.knob())
 	_round_time.value_changed.connect(_on_round_time)
+	_round_time.drag_started.connect(_on_round_time_grab)
+	_round_time.drag_ended.connect(_on_round_time_release)
 	line.add_child(_round_time)
 	_clock = MenuParts.text("", READOUT_SIZE, 700, GameTheme.TEXT)
 	line.add_child(_clock)
@@ -408,9 +440,32 @@ func _on_wins(index: int) -> void:
 	_edited()
 
 
+## A step of the slider: a knob being dragged retunes the page at each step but is saved once, on release; a key or a
+## click on the track saves at once.
 func _on_round_time(seconds: float) -> void:
 	_settings.custom_rules.round_time = seconds
-	_edited()
+	if _dragging:
+		_settings.mark_changed()
+	else:
+		_edited()
+
+
+func _on_round_time_grab() -> void:
+	_dragging = true
+
+
+func _on_round_time_release(_value_changed: bool) -> void:
+	_dragging = false
+	_settings.save_if_dirty(save_path)
+
+
+## A drag cut short (the page hidden or closed with the knob still held, when the slider sends no release) ends here:
+## its steps are saved, and a later key or click on the track saves at once again.
+func _notification(what: int) -> void:
+	if not _dragging:
+		return
+	if what == NOTIFICATION_EXIT_TREE or (what == NOTIFICATION_VISIBILITY_CHANGED and not is_visible_in_tree()):
+		_on_round_time_release(true)
 
 
 ## Off is the first button, On the second.
@@ -424,11 +479,11 @@ func _on_ricochets(index: int) -> void:
 	_edited()
 
 
-## A Custom switch moved: saved at once, as the settings screen saves a click, and the page told.
+## A Custom switch moved: saved at once, as the settings screen saves a click. The settings' own `changed` tells the page
+## (it listens while in the tree), so this box sends none: the page retuned twice for one click when it did (AUD1).
 func _edited() -> void:
 	_settings.mark_changed()
 	_settings.save_if_dirty(save_path)
-	changed.emit()
 
 
 ## The team sizes the Team size row offers now (the picked map's), smallest first.

@@ -17,6 +17,8 @@ const DASH := 6.0
 const LABEL_SIZE := 16
 const LABEL_GAP := 10.0
 const LABEL_TOP := 6.0
+## The space between the lines in the box's lower corner (px).
+const LABEL_LEADING := 4.0
 
 var _heights: PackedFloat32Array = PackedFloat32Array()
 var _range: float = 1.0
@@ -30,7 +32,7 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
-## The words drawn beside the marker.
+## The words drawn beside the marker (a line each, split at "\n").
 func label() -> String:
 	return _label
 
@@ -41,9 +43,10 @@ func heights() -> PackedFloat32Array:
 
 
 ## Flies a level shot from `replica` with its dial at `dial` and `grams` BBs, for `range_limit` m, and marks `on_target`
-## m (the reach `Ballistics.hop_up_reach` found). `words` is the label ("on target to 44 m").
+## m (the reach `Ballistics.hop_up_reach` found). `words` is the label ("on target to 44 m"); `field_air` the field's air
+## the reach was found in (FieldAir, AUD2), or null for the rated.
 func show_shot(replica: ReplicaConfig, dial: float, grams: float, tuning: SimTuning, range_limit: float,
-		on_target: float, words: String) -> void:
+		on_target: float, words: String, field_air: AirModel = null) -> void:
 	_range = range_limit
 	_on_target = on_target
 	_label = words
@@ -52,7 +55,7 @@ func show_shot(replica: ReplicaConfig, dial: float, grams: float, tuning: SimTun
 	var cfg := tuning.ballistics
 	var bb := BBPool.new(1).spawn(0, Vector3.ZERO, Vector3.FORWARD, Ballistics.muzzle_velocity(replica, rules, grams),
 			Ballistics.hop_up_lift(replica, dial, rules), Ballistics.bb_mass(replica, grams), cfg.spin_per_hop)
-	var air := AirModel.of(cfg)
+	var air := field_air if field_air != null else AirModel.of(cfg)
 	var dt := 1.0 / float(Engine.physics_ticks_per_second)
 	var next := 0.0
 	while bb.age < cfg.max_lifetime and next <= range_limit:
@@ -80,11 +83,25 @@ func _draw() -> void:
 			points.append(Vector2(left + width * float(i) * STEP / _range, aim_y - h * scale_y))
 		draw_polyline(points, GameTheme.ACCENT, PATH_WIDTH, true)
 	var mark_x := left + width * clampf(_on_target / _range, 0.0, 1.0)
-	draw_line(Vector2(mark_x, top), Vector2(mark_x, size.y - PAD.y), GameTheme.MUTED, MARK_WIDTH)
+	# The words beside the marker, kept inside the box; a second line (the field's air, AUD2) sits in the box's lower
+	# left corner, under the flight's level part, clear of the aim line the first one stands over. A marker that would
+	# run down through those words stops above them.
 	var font := GameTheme.font(800)
-	var words_width := font.get_string_size(_label, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x
+	var lines := _label.split("\n")
+	var mark_foot := size.y - PAD.y
+	for i in range(1, lines.size()):
+		var reach := PAD.x + font.get_string_size(lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x + LABEL_GAP
+		if mark_x < reach:
+			mark_foot = size.y - PAD.y - (LABEL_SIZE + LABEL_LEADING) * (lines.size() - 1) - LABEL_LEADING
+			break
+	draw_line(Vector2(mark_x, top), Vector2(mark_x, mark_foot), GameTheme.MUTED, MARK_WIDTH)
+	var words_width := font.get_string_size(lines[0], HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x
 	var at_x := mark_x + LABEL_GAP
 	if at_x + words_width > size.x - PAD.x:
-		at_x = mark_x - LABEL_GAP - words_width
-	draw_string(font, Vector2(at_x, top + LABEL_TOP + LABEL_SIZE), _label, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE,
-			GameTheme.TEXT)
+		at_x = maxf(PAD.x, mark_x - LABEL_GAP - words_width)
+	draw_string(font, Vector2(at_x, top + LABEL_TOP + LABEL_SIZE), lines[0], HORIZONTAL_ALIGNMENT_LEFT, -1,
+			LABEL_SIZE, GameTheme.TEXT)
+	for i in range(1, lines.size()):
+		var up := lines.size() - 1 - i
+		draw_string(font, Vector2(PAD.x, size.y - PAD.y - (LABEL_SIZE + LABEL_LEADING) * up), lines[i],
+				HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, GameTheme.MUTED)

@@ -35,7 +35,9 @@ Table numbers are never typed into a page, and a rule number in a sentence uses 
 
 **Patch Notes is generated** whole: the `changelog.d/` notes waiting for the next release, then every version in
 `CHANGELOG.md`. `### Internal` blocks are left out, and bullets about dev content move under an "In development"
-heading.
+heading. An entry a later version replaced is marked "(Replaced later: ...)" from a line in `replaced.txt` here (a phrase
+that matches exactly one bullet | what replaced it); `CHANGELOG.md` is never edited, and a line that matches no bullet
+fails the check.
 
 A table only lists **public** content. A new replica, part or map shows up on its own once its row is in the data
 tables; a new kind of data needs a generator in `tools/wiki.py` and a marker on a page.

@@ -13,6 +13,11 @@ uniform sampler2DArray colour_tex : source_color, filter_linear_mipmap_anisotrop
 // x, y: the OpenGL normal's x and y; z: roughness.
 uniform sampler2DArray surface_tex : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform bool low = false;
+// The arch fill (StationLook.arch_fill, set while no lamp lights it): a face whose colour's alpha is 0 glows this much
+// of its own colour.
+uniform float arch_fill = 0.0;
+// The vault fill (StationLook.vault_fill, every preset): a face whose colour's alpha is 0.5 glows this much of its colour.
+uniform float vault_fill = 0.0;
 uniform float variation : hint_range(0.0, 0.5) = 0.16;
 uniform float variation_size = 3.0;
 uniform float grime_height = 0.8;
@@ -67,4 +72,7 @@ void fragment() {
 	ALBEDO = look_paint(col);
 	ROUGHNESS = clamp(rough * info.z + foot * 0.2, 0.0, 1.0);
 	METALLIC = info.y;
+	float arch = 1.0 - step(0.25, COLOR.a);
+	float vault = step(0.25, COLOR.a) * (1.0 - step(0.75, COLOR.a));
+	EMISSION = ALBEDO * (arch_fill * arch + vault_fill * vault);
 }

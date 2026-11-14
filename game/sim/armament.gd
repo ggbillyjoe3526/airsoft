@@ -186,10 +186,15 @@ func replica() -> ReplicaConfig:
 
 ## Any magazine carried rattles (ReplicaConfig.rattles): heard as you move, even walking.
 func rattles() -> bool:
-	for r in replicas:
-		if r.rattles:
-			return true
-	return false
+	return rattling_slot() >= 0
+
+
+## The first slot whose magazines rattle (ReplicaConfig.rattles), or -1 for none.
+func rattling_slot() -> int:
+	for i in replicas.size():
+		if replicas[i].rattles:
+			return i
+	return -1
 
 
 ## The selector setting of the replica in hand.

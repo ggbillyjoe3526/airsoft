@@ -149,9 +149,9 @@ class Sheet:
 
 ## `replica` loaded with `grams` BBs and its dial at `dial`, measured by `tuning`'s ballistics: `range_limit` m is the
 ## readout's reach and `band` m the "on target" band (the HUD's hop-up readout uses the same); `iron_zoom` is the view's
-## zoom aiming through iron sights.
+## zoom aiming through iron sights; `air` the field's (FieldAir, AUD2), or null for the rated 20 °C in still air.
 static func measure(replica: ReplicaConfig, grams: float, dial: float, tuning: SimTuning, band: float,
-		range_limit: float, iron_zoom: float) -> Figures:
+		range_limit: float, iron_zoom: float, air: AirModel = null) -> Figures:
 	var f := Figures.new()
 	var rules := tuning.replica_rules
 	var dt := 1.0 / float(Engine.physics_ticks_per_second)
@@ -161,10 +161,10 @@ static func measure(replica: ReplicaConfig, grams: float, dial: float, tuning: S
 	f.rate = replica.fire_rate
 	f.shot_bbs = replica.shot_bbs
 	f.pattern = replica.pattern_deg if replica.shot_bbs > 1 else 0.0
-	var reach := Ballistics.hop_up_reach(replica, dial, tuning, dt, band, range_limit, grams)
+	var reach := Ballistics.hop_up_reach(replica, dial, tuning, dt, band, range_limit, grams, air)
 	f.on_target = reach.on_target_to
 	f.on_target_full = reach.on_target_to >= range_limit
-	f.time = Ballistics.flight_time(replica, dial, TIME_DISTANCE, tuning, dt, grams)
+	f.time = Ballistics.flight_time(replica, dial, TIME_DISTANCE, tuning, dt, grams, air)
 	# from the hip, as the wiki gives it: a hip spread (the Sniper Rifle wider, the Compact SMG tighter) counts (PP1)
 	f.spread = replica.spread_deg * replica.hip_spread
 	f.recoil = replica.recoil_deg

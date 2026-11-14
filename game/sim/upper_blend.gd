@@ -29,6 +29,14 @@ static func in_hand(a: Armament, swap: float) -> bool:
 			and 1.0 - a.draw_left / a.draw_total < swap)
 
 
+## The share of the sprint's pumping arms a holstered figure stepping at `speed` (m/s) swings short of a sprint
+## (HitConfig.holster_step_mix, full from holster_step_speed); none at or under the walking speed.
+static func step_pump(hits: HitConfig, speed: float) -> float:
+	if speed <= hits.walking_speed or hits.holster_step_speed <= 0.0:
+		return 0.0
+	return hits.holster_step_mix * clampf(speed / hits.holster_step_speed, 0.0, 1.0)
+
+
 ## Moves `c`'s holster and sprint weights `dt` seconds towards their targets.
 static func step(c: Character, hits: HitConfig, dt: float) -> void:
 	c.holster_weight = lerpf(c.holster_weight, holster_target(c.armament, hits.holster_swap),

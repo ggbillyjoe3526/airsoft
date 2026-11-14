@@ -1,0 +1,4 @@
+# Patch Notes entries a later version replaced (tools/wiki.py), marked "(Replaced later: ...)" without editing CHANGELOG.md.
+# One per line: a phrase that appears in exactly one Patch Notes bullet | what replaced it, in plain words.
+# A phrase matching no bullet, or more than one, fails the wiki check. Example:
+# Every round now starts with 3, 2, 1, GO! | a longer countdown on the first round

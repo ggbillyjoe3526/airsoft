@@ -91,7 +91,7 @@ kits that suit it.
 Under the Factory kit house rule every bot carries the AEG Rifle and the GBB Pistol as they come. Bots fire full auto wherever their replica has it,
 except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there they fire single shots and only now and
 then switch to full auto, at someone out in the open down a long sight line. Each bot decides that once per opponent
-each round.
+each round. A bot carrying the Compact SMG is the one exception: indoors it goes full auto at a target within 12 m.
 
 ## Bots in Attack / Defend
 
@@ -162,7 +162,8 @@ each team the bot nearest the flag calls it, naming where it stands.
 Every bot carries a smoke and a flash bomb a round, as you do, and throws them: a smoke when pinned in cover by
 someone at range, a flash round a corner before it pushes, then it looks away until the bang. Harder bots throw more
 often. A Normal or Hard bot that sees someone else's flash coming may turn away from it too (Hard more often than
-Normal; an Easy bot never does), so a flash is surest thrown where it lands out of sight. [Grenades](Grenades) has the rules.
+Normal; an Easy bot never does), so a flash is surest thrown where it lands out of sight. Bots walk round a standing smoke cloud
+where the way round is open, and through it only where it is the only way. [Grenades](Grenades) has the rules.
 
 ## Magazines
 
@@ -171,6 +172,8 @@ saying "Need a mag!". A bot asked, by a teammate or by you, calls "Mag coming!",
 last metres and tosses it once you are in reach and in sight; a bot never gives away its last full spare of the replica
 it fights with, but hands over its unused pistol's freely. A bot that asked you walks up to you and waits for your toss;
 one that asked another bot waits where it is, behind cover while that bot is held up in a fight. An ask to a teammate
-who then asks for one of its own ends at once, so the asker can try someone else. A fight or cover comes first, then bringing one, then your squad order,
+who then asks for one of its own ends at once, so the asker can try someone else. A bot that can't come (off to the
+flag, or already bringing one when someone else could) passes the ask on to the next nearest teammate with one to
+spare, or tells you nobody can. A fight or cover comes first, then bringing one, then your squad order,
 then waiting for one; the same at every level. A catch gets a "Thanks for the mag!" now and then. You toss yours, and ask
 for one, with [Need a Mag](Squad-Orders#need-a-mag).

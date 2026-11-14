@@ -89,8 +89,9 @@ func test_a_pick_is_seeded_and_follows_the_difficultys_weights() -> void:
 	for i in 4000:
 		var plan := k.pick(&"easy", rules, Seeds.kit_seed(i, 3))
 		counts[plan.kit_name] = counts.get(plan.kit_name, 0) + 1
-	assert_almost_eq(counts["Factory"] / 4000.0, 0.30, 0.03)
-	assert_almost_eq(counts["Rifleman"] / 4000.0, 0.25, 0.03)
+	# Easy's weights add up to 109 since the Breacher and the Clearer are public (owner, 2026-11-14).
+	assert_almost_eq(counts["Factory"] / 4000.0, 30.0 / 109.0, 0.03)
+	assert_almost_eq(counts["Rifleman"] / 4000.0, 25.0 / 109.0, 0.03)
 	assert_false(counts.has("Cyber"), "weighted 0 at Easy: never")
 	var hard: Dictionary[String, int] = {}
 	for i in 2000:
@@ -183,7 +184,7 @@ func test_in_a_session_every_bot_on_both_teams_carries_its_kit() -> void:
 			continue
 		# Its kit leans towards its personality (BN1); your teammates pick theirs the same way (B4).
 		var plan := k.pick(&"hard", s._bot_kit_rules(), Seeds.kit_seed(11, c.id), s._identities[c.id].personality,
-				s._bot_config.kit_suit_lean)
+				s._bot_config.kit_suit_lean, BotKits.field_kind(MapCatalog.shared().find(s.map_id)))
 		assert_not_null(plan, "Hard never carries the replicas as they come")
 		var kit := BotKits.kit_of(plan, s._bot_kit_rules())
 		assert_eq(c.armament.replicas.size(), kit.size())

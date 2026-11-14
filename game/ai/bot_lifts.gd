@@ -6,7 +6,8 @@ class_name BotLifts
 ## presses its stop's button (once) and stands while the car rides; open at its stop, it walks out to the landing,
 ## where the leg ends. One too many aboard (the buzzer), the highest ids step back out and wait. Waiting on the
 ## landing longer than BotConfig.lift_patience it gives up: a fresh route on foot (no links for vault_retry_delay).
-## Aboard a car on a leg on foot (a route planned again inside it), it waits for the doors before walking out. Writes
+## Aboard a car on a leg on foot (a route planned again inside it), it waits for the doors before walking out, and
+## plans again if they open on another floor than its route's. Writes
 ## b.move_dir (zero: stand) and b.lift_press; never stuck while it waits. Allocates nothing.
 
 ## Close enough (m, level) to a spot to stand still on it.
@@ -70,13 +71,19 @@ static func ride(b: Bot, w: BotWorld, link: int, dt: float) -> bool:
 	return true
 
 
-## Aboard a car on a leg on foot: false (walk on) once the car stands open; else true, standing (b.move_dir zero).
-static func hold_aboard(b: Bot, w: BotWorld) -> bool:
+## Aboard a car on a leg on foot to `wp`: false (walk on) once the car stands open on wp's floor; else true, standing
+## (b.move_dir zero). A route planned aboard starts at the landing of the stop the car was making for; open at another
+## stop (one called on the way), the route is wanted again from there rather than walked out on the wrong floor.
+static func hold_aboard(b: Bot, w: BotWorld, wp: Vector3) -> bool:
 	if w.lifts == null:
 		return false
 	var i := Lifts.riding(w.query, w.tuning.lifts, w.lifts, b.character.position)
-	if i < 0 or w.lifts.phase[i] == LiftState.Phase.OPEN:
+	if i < 0:
 		return false
+	if w.lifts.phase[i] == LiftState.Phase.OPEN:
+		if absf(wp.y - w.lifts.y[i]) <= w.tuning.lifts.reach_up:
+			return false
+		b.route_state = Bot.RouteState.WANTED
 	b.move_dir = Vector3.ZERO
 	b.stuck_for = 0.0
 	return true

@@ -26,7 +26,6 @@ const UNDO_SECONDS := 6.0
 ## name, so five cards of the longest names and the actions fit the window (UI1).
 const NAME_WIDTH := 170.0
 
-signal mode_changed
 
 var saved: SavedLoadouts = null
 var mode: Mode = Mode.NORMAL
@@ -144,7 +143,6 @@ func _set_mode(m: Mode) -> void:
 	mode = m
 	_signature = ""
 	refresh()
-	mode_changed.emit()
 	if not is_inside_tree():
 		return
 	if m == Mode.RENAMING and _edit != null:

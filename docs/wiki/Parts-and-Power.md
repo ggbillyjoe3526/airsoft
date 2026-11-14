@@ -85,7 +85,8 @@ magazine holds and **Carried** adds magazines to the replica's own (you always c
 - **Looks:** each is its replica's own magazine at another length. The hi-cap is a third longer, a pressed steel
   shell with narrow ribs, a welded seam down its back and a winding wheel under its base; the low-cap is short,
   moulded polymer with wide ribs; the pistol's extended magazine sticks out below the grip, holes down its back.
-- **Rattles:** the loose BBs in a hi-cap rattle as you move, so bots close by hear you even walking.
+- **Rattles:** the loose BBs in a hi-cap rattle as you move, so bots close by hear you even walking, and your run
+  and sprint carry 7 m further.
 - The hi-cap carries as many BBs in all in fewer, rattling changes, each one slower; the low-cap carries fewer BBs
   in all for the quickest change and draw. The pistol's extended magazine holds half as many again, for a slower draw.
 
@@ -116,4 +117,5 @@ someone well enough to be made out, by you and by bots; **Beam** is the bright h
 light round it. A torch lights the way and gives you away: bots see anyone standing in a lit beam, or pointing a lit
 torch near them, from as far as its reach. Every bot carries one at night and switches it on in a close fight and at
 the end of a search. On Medium graphics and up your torch is a real light from the rail, with shadows on High and
-Ultra; on Low it is a soft haze.
+Ultra; on Low it is a soft haze. On the GBB Pistol, whose one rail the torch shares with the laser, the torch hangs
+under the laser when both are fitted.

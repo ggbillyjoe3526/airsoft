@@ -140,3 +140,33 @@ func test_flag_figures_count_the_attackers_rounds_the_clock_and_captures_with_ea
 	var hard := BalanceReport.flag_figures("depot", "Depot", matches, &"hard")
 	assert_eq(Vector2(hard[0].band_min, hard[0].band_max), Vector2(0.4, 0.6), "Pro's band, kept by Hard (TL1)")
 	assert_string_contains(hard[0].label, "Attack / Defend, Hard")
+
+
+func test_plant_figures_count_the_attackers_rounds_and_what_became_of_each_armed_bomb() -> void:
+	var m := MatchRunner.MatchTally.new()
+	# winner, attackers, why it ended, when the bomb was armed (s, -1 never)
+	for spec: Array in [[0, 0, GameEvent.RoundEnd.WENT_OFF, 20.0], [1, 0, GameEvent.RoundEnd.DEFUSED, 30.0],
+			[0, 0, GameEvent.RoundEnd.ELIMINATED, 25.0], [1, 0, GameEvent.RoundEnd.ELIMINATED, -1.0],
+			[1, 0, GameEvent.RoundEnd.TIME, -1.0]]:
+		var r := _round(spec[0] as int, 0, spec[2] as int, -1.0, -1.0)
+		r.attackers = spec[1]
+		r.planted_at = spec[3]
+		m.rounds.append(r)
+	var matches: Array[MatchRunner.MatchTally] = [m]
+	var f := BalanceReport.plant_figures("Depot", matches)
+	assert_eq(f.size(), 6)
+	assert_almost_eq(f[0].value, 2.0 / 5.0, 1e-6, "the attackers won two of five")
+	assert_eq(Vector2(f[0].band_min, f[0].band_max), BalanceReport.ATTACK_NORMAL_BAND, "judged by Attack / Defend's")
+	assert_almost_eq(f[1].value, 1.0 / 5.0, 1e-6, "one ran out the clock")
+	assert_eq(f[1].band_max, BalanceReport.ON_TIME_MAX)
+	assert_almost_eq(f[2].value, 3.0 / 5.0, 1e-6, "armed in three rounds")
+	assert_almost_eq(f[3].value, 1.0 / 3.0, 1e-6, "one armed bomb in three was made safe")
+	assert_almost_eq(f[4].value, 1.0 / 3.0, 1e-6, "one in three went off")
+	assert_eq(f[3].of, 3, "a share of the armed bombs, so its error is theirs")
+	assert_eq(BalanceReport.judge(f[4]), BalanceReport.Verdict.MEASURED)
+	assert_string_contains(f[0].label, "Plant The Bomb, Normal")
+	var hard := BalanceReport.plant_figures("Depot", matches, &"hard")
+	assert_eq(Vector2(hard[0].band_min, hard[0].band_max), Vector2(0.4, 0.6))
+	var none: Array[MatchRunner.MatchTally] = []
+	assert_eq(BalanceReport.judge(BalanceReport.plant_figures("Depot", none)[3]), BalanceReport.Verdict.NOT_RUN,
+			"no bomb armed: a share of nothing did not run")
