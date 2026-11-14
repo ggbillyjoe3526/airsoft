@@ -116,4 +116,5 @@ someone well enough to be made out, by you and by bots; **Beam** is the bright h
 light round it. A torch lights the way and gives you away: bots see anyone standing in a lit beam, or pointing a lit
 torch near them, from as far as its reach. Every bot carries one at night and switches it on in a close fight and at
 the end of a search. On Medium graphics and up your torch is a real light from the rail, with shadows on High and
-Ultra; on Low it is a soft haze.
+Ultra; on Low it is a soft haze. On the GBB Pistol, whose one rail the torch shares with the laser, the torch hangs
+under the laser when both are fitted.
