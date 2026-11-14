@@ -437,3 +437,54 @@ func test_a_simulated_round_gives_no_round_won_and_its_hits_and_bbs_count_for_no
 	assert_eq(round_won, 1, "Round won only for the round played out")
 	assert_eq(r.win_loss(&"normal", "elimination"), PackedInt32Array([1, 0]), "the match's win is kept: its score counts")
 	assert_eq(r.streak, 1)
+
+
+# --- KNOWN_ISSUES 34 (owner 2026-11-14): the Loadout's reach in the picked field's air ---
+
+
+func test_the_field_air_of_the_match_pages_pick() -> void:
+	var play := PlayTuning.load_default()
+	var night := FieldAir.of("woodland", LightingConfig.NIGHT, &"", tuning, play)
+	assert_true(night.night)
+	assert_almost_eq(night.temperature, 16.0 - tuning.weather.night_drop, 1e-4, "Woodland's 16 °C, colder at night")
+	assert_true(night.applies())
+	var day := FieldAir.of("woodland", LightingConfig.DAY, &"", tuning, play)
+	assert_false(day.night)
+	assert_almost_eq(day.temperature, 16.0, 1e-4)
+	var depot := FieldAir.of("depot", LightingConfig.NIGHT, &"", tuning, play)
+	assert_false(depot.applies(), "Depot is indoors at the rated 20 °C: the rated figures and wording")
+	var subway := FieldAir.of("subway", &"", &"", tuning, play)
+	assert_almost_eq(subway.temperature, 14.0, 1e-4, "Subway's still air is its own 14 °C, as the match plays it")
+	var nowhere := FieldAir.of("no_such_map", &"", &"", tuning, play)
+	assert_false(nowhere.applies())
+
+
+func test_customise_flies_and_says_the_reach_in_the_picked_fields_air() -> void:
+	var saved := SavedLoadouts.new(LoadoutRules.standard())
+	var page := LoadoutPage.new(saved, Settings.new())
+	page.save_path = "user://test_aud2_simb_loadouts.save"
+	add_child_autofree(page)
+	page.show_customise(1)
+	page.customise().show_tab(CustomiseView.Tab.BBS)
+	var r := page.facts().replica(Loadout.Slot.SECONDARY)
+	assert_eq(r.power, Kit.GAS, "the secondary is the gas pistol")
+	var arc := page.customise().hop_arc()
+	var rated_words := arc.label()
+	var rated_reach := page.facts().sheet(Loadout.Slot.SECONDARY).row(&"on_target").text
+	assert_true(rated_words.begins_with("on target to "))
+	assert_false(rated_words.contains("°C"), "no field: today's line")
+	var picks := MatchPicks.new()
+	picks.map_id = "woodland"
+	picks.lighting = LightingConfig.NIGHT
+	page.set_field(picks)
+	page.customise().show_tab(CustomiseView.Tab.BBS)
+	var cold_reach := page.facts().sheet(Loadout.Slot.SECONDARY).row(&"on_target").text
+	assert_lt(float(cold_reach), float(rated_reach), "a gas pistol falls shorter in the cold")
+	assert_eq(arc.label(), "on target to %s m · Woodland at night, 8 °C" % cold_reach)
+	assert_almost_eq(arc._on_target, float(cold_reach), 1.0, "the flight's marker is the figure")
+	assert_true(page.facts().sheet_sub("GBB Pistol").ends_with("Flown in the picked field's air: Woodland at night, 8 °C."))
+	picks.map_id = "depot"
+	page.set_field(picks)
+	page.customise().show_tab(CustomiseView.Tab.BBS)
+	assert_eq(arc.label(), rated_words, "indoors at the rated air: today's line again")
+	SaveFile.remove("user://test_aud2_simb_loadouts.save")

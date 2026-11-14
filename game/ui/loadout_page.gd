@@ -170,6 +170,15 @@ func open_from_practice(slot_in: Loadout.Slot) -> void:
 	_refresh()
 
 
+## Measures the figures in the air of the field `picks` (the Match page's) plays on, at its day or night (FieldAir,
+## AUD2), and shows them again.
+func set_field(picks: MatchPicks) -> void:
+	_facts.set_field(FieldAir.of(picks.map_id, picks.lighting, settings.dev.time_of_day, _facts.tuning,
+			PlayTuning.load_default()))
+	if is_inside_tree():
+		_refresh()
+
+
 ## The load problem shown at the top ("" when there was none).
 func notice_text() -> String:
 	return _notice.text if _notice.visible else ""

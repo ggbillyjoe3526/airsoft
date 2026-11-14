@@ -41,9 +41,10 @@ func heights() -> PackedFloat32Array:
 
 
 ## Flies a level shot from `replica` with its dial at `dial` and `grams` BBs, for `range_limit` m, and marks `on_target`
-## m (the reach `Ballistics.hop_up_reach` found). `words` is the label ("on target to 44 m").
+## m (the reach `Ballistics.hop_up_reach` found). `words` is the label ("on target to 44 m"); `field_air` the field's air
+## the reach was found in (FieldAir, AUD2), or null for the rated.
 func show_shot(replica: ReplicaConfig, dial: float, grams: float, tuning: SimTuning, range_limit: float,
-		on_target: float, words: String) -> void:
+		on_target: float, words: String, field_air: AirModel = null) -> void:
 	_range = range_limit
 	_on_target = on_target
 	_label = words
@@ -52,7 +53,7 @@ func show_shot(replica: ReplicaConfig, dial: float, grams: float, tuning: SimTun
 	var cfg := tuning.ballistics
 	var bb := BBPool.new(1).spawn(0, Vector3.ZERO, Vector3.FORWARD, Ballistics.muzzle_velocity(replica, rules, grams),
 			Ballistics.hop_up_lift(replica, dial, rules), Ballistics.bb_mass(replica, grams), cfg.spin_per_hop)
-	var air := AirModel.of(cfg)
+	var air := field_air if field_air != null else AirModel.of(cfg)
 	var dt := 1.0 / float(Engine.physics_ticks_per_second)
 	var next := 0.0
 	while bb.age < cfg.max_lifetime and next <= range_limit:

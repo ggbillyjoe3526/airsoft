@@ -114,12 +114,12 @@ static func hop_up_reach(replica: ReplicaConfig, dial: float, tuning: SimTuning,
 
 
 ## Seconds a level-fired `grams` BB from `replica` with its dial at `dial` takes to fly `distance` m, interpolated
-## between steps of `dt`, or INF if it never gets there.
+## between steps of `dt`, or INF if it never gets there; in `field_air` (a field's own air, PH1) or the rated air.
 static func flight_time(replica: ReplicaConfig, dial: float, distance: float, tuning: SimTuning, dt: float,
-		grams: float = -1.0) -> float:
+		grams: float = -1.0, field_air: AirModel = null) -> float:
 	var cfg := tuning.ballistics
 	var bb := _level_shot(replica, dial, tuning, grams)
-	var air := AirModel.of(cfg)
+	var air := field_air if field_air != null else AirModel.of(cfg)
 	var before := 0.0
 	while bb.age < cfg.max_lifetime:
 		var t := bb.age

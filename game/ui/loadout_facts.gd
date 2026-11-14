@@ -2,8 +2,9 @@ class_name LoadoutFacts
 extends RefCounted
 ## What the Loadout screens show about the loadout carried: for each slot the replica it plays (LoadoutRules.carried, so a
 ## replica not on offer shows as the slot's default, as it plays), its setup, its words ("Cobalt · 0.25 g · LiPo") and the
-## Performance sheet against the replica as it comes. Read-only: edits go through LoadoutRules and SavedLoadouts. Call
-## `refresh` after any change.
+## Performance sheet against the replica as it comes, both in the air of the field the Match page has picked (`field`,
+## AUD2: a gas replica's energy and every BB's flight; the rated 20 °C without one). Read-only: edits go through
+## LoadoutRules and SavedLoadouts. Call `refresh` after any change.
 
 const SLOTS: Array[Loadout.Slot] = [Loadout.Slot.PRIMARY, Loadout.Slot.SECONDARY]
 const SLOT_KEYS: Array[String] = ["LOADOUT_PRIMARY", "LOADOUT_SECONDARY"]
@@ -13,6 +14,8 @@ var tuning: SimTuning = null
 var hud: HudConfig = null
 ## The view's zoom aiming through iron sights (a replica with an optic has its own).
 var iron_zoom: float = 1.0
+## The air the figures are measured in (null: the rated air), set_field.
+var field: FieldAir = null
 
 var _kit: Kit = null
 ## Each slot's pool item, and the replicas as they come, measured once each (they don't change while the screen is open).
@@ -37,9 +40,44 @@ func pool() -> Pool:
 	return saved.rules.pool
 
 
+## Measures in `f`'s air from now on (null: the rated air); the figures as they come are measured again.
+func set_field(f: FieldAir) -> void:
+	field = f
+	_comes_by_key.clear()
+	refresh()
+
+
+## Whether the figures are in a field's own air, other than the rated.
+func in_field_air() -> bool:
+	return field != null and field.applies()
+
+
+## The air the figures are measured in: the field's, or null for the rated (AirModel.of).
+func air() -> AirModel:
+	return field.air(tuning.ballistics) if in_field_air() else null
+
+
+## The field and its air as the figures say it ("Woodland at night, 8 °C"; "" in the rated air).
+func field_words() -> String:
+	if not in_field_air():
+		return ""
+	var where := TranslationServer.translate("LOADOUT_FIELD_NIGHT") % field.map_name if field.night else field.map_name
+	return TranslationServer.translate("LOADOUT_FIELD_AIR") % [where, roundi(field.temperature)]
+
+
+## The Performance sheet's line for `replica_name`, the field's air with it when the figures are in it.
+func sheet_sub(replica_name: String) -> String:
+	var line := TranslationServer.translate("LOADOUT_SHEET_SUB") % replica_name
+	if in_field_air():
+		line += TranslationServer.translate("LOADOUT_SHEET_FIELD") % field_words()
+	return line
+
+
 ## Reads the carried loadout again.
 func refresh() -> void:
 	_kit = saved.rules.carried(saved.carried())
+	if in_field_air():
+		_kit.set_temperature(tuning.weather, field.temperature, field.rated)
 	for slot in SLOTS:
 		_items[slot] = null
 		if slot < _kit.size():
@@ -129,7 +167,7 @@ func sheet(slot: Loadout.Slot) -> LoadoutPerformance.Sheet:
 	var base := as_it_comes(slot)
 	var t := tune(slot)
 	var carried := LoadoutPerformance.measure(r, t.bb_weight, r.hop_up_dial, tuning, hud.hop_band, hud.hop_range,
-			iron_zoom)
+			iron_zoom, air())
 	var comes := _comes_of(slot, base)
 	return LoadoutPerformance.compare(carried, comes, capped(slot), saved.rules.stats.energy_limit(r.site_class))
 
@@ -138,7 +176,18 @@ func sheet(slot: Loadout.Slot) -> LoadoutPerformance.Sheet:
 func _comes_of(slot: Loadout.Slot, base: ReplicaConfig) -> LoadoutPerformance.Figures:
 	var key := _items[slot].key
 	if not _comes_by_key.has(key):
-		_comes_by_key[key] = LoadoutPerformance.measure(base, base.bb_weight, base.hop_up_dial, tuning, hud.hop_band,
-				hud.hop_range, iron_zoom)
+		_comes_by_key[key] = LoadoutPerformance.measure(_comes_in_field(base), base.bb_weight, base.hop_up_dial, tuning,
+				hud.hop_band, hud.hop_range, iron_zoom, air())
 	return _comes_by_key[key]
 
+
+## `base` as it comes on the field: a gas replica's energy scaled by the field's air as a carried one's (Kit
+## set_temperature), under its site limit on its own BBs; any other as it is.
+func _comes_in_field(base: ReplicaConfig) -> ReplicaConfig:
+	if not in_field_air() or base.power != Kit.GAS:
+		return base
+	var r := base.duplicate() as ReplicaConfig
+	var limit := saved.rules.stats.energy_limit(base.site_class) \
+			/ Ballistics.weight_energy_share(base, saved.rules.rules, base.bb_weight)
+	r.muzzle_energy = minf(base.muzzle_energy * field.gas_share(tuning.weather), limit)
+	return r

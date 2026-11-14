@@ -364,8 +364,8 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 			not PART_SLOTS.has(tab))
 	if tab == Tab.BBS:
 		var on_target := sheet_now.row(&"on_target")
-		_arc.show_shot(r, r.hop_up_dial, t.bb_weight, f.tuning, f.hud.hop_range, _on_target_metres(r, t), tr(
-				"CUSTOMISE_ON_TARGET") % on_target.text)
+		_arc.show_shot(r, r.hop_up_dial, t.bb_weight, f.tuning, f.hud.hop_range, _on_target_metres(r, t),
+				on_target_words(on_target.text), f.air())
 
 
 ## The line under PERFORMANCE: the colour tab's own, a part tab's (the parts carried, or what parts do), else the usual.
@@ -377,7 +377,7 @@ func _sheet_sub(slot: Loadout.Slot, item: Pool.Item) -> String:
 		if names.size() < SHEET_LIST_PARTS:
 			return tr("PART_SHEET_SUB") % item.display_name
 		return tr("PART_SHEET_SUB_FITTED") % [item.display_name, _join_words(names)]
-	return tr("LOADOUT_SHEET_SUB") % item.display_name
+	return _facts.sheet_sub(item.display_name)
 
 
 ## "A, B and C".
@@ -429,7 +429,15 @@ func _mount_words(tag: String) -> String:
 
 func _on_target_metres(r: ReplicaConfig, t: ReplicaTune) -> float:
 	return Ballistics.hop_up_reach(r, r.hop_up_dial, _facts.tuning, 1.0 / float(Engine.physics_ticks_per_second),
-			_facts.hud.hop_band, _facts.hud.hop_range, t.bb_weight).on_target_to
+			_facts.hud.hop_band, _facts.hud.hop_range, t.bb_weight, _facts.air()).on_target_to
+
+
+## The flight's label: "on target to 44 m", and in a field's own air (AUD2) the field and its air with it ("on target
+## to 26 m · Woodland at night, 8 °C").
+func on_target_words(metres: String) -> String:
+	if not _facts.in_field_air():
+		return tr("CUSTOMISE_ON_TARGET") % metres
+	return tr("CUSTOMISE_ON_TARGET_FIELD") % [metres, _facts.field_words()]
 
 
 

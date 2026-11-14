@@ -26,7 +26,9 @@ loadout, and a new loadout carries one of each. More grenades, chest rigs and po
 Beside your replicas, the Performance sheet compares your setup with the replica as it comes: **better in green,
 worse in red**. It covers energy, fire rate, magazines, handling and the rest, adds **Zoom aimed** and **Aim in** for
 an optic and a **Rattles** warning for a hi-cap magazine, and says when the [site limit](Replicas#site-limits) capped
-the energy. Point at the panel to read what got better and worse in words.
+the energy. Point at the panel to read what got better and worse in words. Its reach, speed and flight are in
+the air of the field the Match page has picked, day or night (a gas replica falls a little shorter on a cold field),
+and the sheet says which field and how cold; on a field at the rated 20 °C it reads as on a site's chrono.
 
 ## Customise
 

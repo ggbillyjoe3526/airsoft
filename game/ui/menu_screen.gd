@@ -187,6 +187,8 @@ func show_loadout() -> void:
 		add_child(_loadout)
 		# under the rail, over the Match page
 		move_child(_loadout, _rail.get_index())
+	# the figures in the air of the field the Match page has picked (AUD2)
+	_loadout.set_field(_match.picks)
 	_match.visible = false
 	_rail.set_current(NavRail.Tab.LOADOUT)
 	# the LOADOUT tab pressed in Customise is the way back to the Loadout (FB1)

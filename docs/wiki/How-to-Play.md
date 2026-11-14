@@ -88,7 +88,8 @@ Each field has its own air, too. Replicas are rated at 20 °C, as on a site's ch
 so every BB slows slightly sooner, and **gas shoots softer in the cold**: a gas replica loses about 1.2 % of its energy
 for each degree under 20 °C (about 1 fps a °F, as players reckon) and gains it back in the warm, never past its
 [site limit](Replicas#site-limits). Batteries and springs don't mind. A night in the open is 8 °C colder than the
-day. The pause menu shows the match's air and breeze, and pointing at a field on the Match page shows its weather.
+day. The pause menu shows the match's air and breeze, pointing at a field on the Match page shows its weather, and the
+[Loadout](Loadout#the-performance-sheet)'s figures are flown in the picked field's air.
 
 ### Hop-up
 
