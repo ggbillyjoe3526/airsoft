@@ -99,6 +99,9 @@ var _wash: ColorRect = null
 ## (HELD_TIP: `_held_rest`) and moved with the hand throwing it, and its pin `_pin` (with your arms) with it until the
 ## left hand takes it.
 var _held_root: Node3D = null
+## The life the hands have this frame (HA1: ReplicaView's HandsMotion, stepped before this draws), which the bomb in
+## hand takes too; null: none.
+var hands_life: HandsMotion = null
 var _held: MeshInstance3D = null
 var _pin: MeshInstance3D = null
 var _held_rest := Transform3D.IDENTITY
@@ -537,7 +540,12 @@ func _draw_held(eyes: Character, eye: Vector3, delta: float, ahead: float) -> vo
 	var low := 1.0 - _raise
 	var drop := _view_cfg.bomb_raise_drop * low * low if _view_cfg != null else 0.0
 	var view := Basis.from_euler(Vector3(eyes.pitch, eyes.yaw, 0.0))
-	_held_root.transform = Transform3D(view, eye + view * (HELD_AT + Vector3(0.0, -drop, 0.0)))
+	var at := HELD_AT + Vector3(0.0, -drop, 0.0)
+	if hands_life != null:
+		# The bob, the breathing and the lean your hands have with a replica (HA1), about the bomb's own middle.
+		_held_root.transform = Transform3D(view * Basis.from_euler(hands_life.turn), eye + view * (at + hands_life.shift))
+	else:
+		_held_root.transform = Transform3D(view, eye + view * at)
 	_held.visible = kind != Grenade.Kind.NONE
 	if _arms != null:
 		if _unwind > 0.0:

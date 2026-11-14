@@ -110,26 +110,42 @@ func test_each_reload_clip_lasts_as_the_replicas_own() -> void:
 	var anim := _anim(hands)
 	for slot in HELD.size():
 		var held: ReplicaView.Held = hands._held[slot]
-		var clip := StringName(String(held.id) + ArmsView.RELOAD_SUFFIX)
+		# A pistol's is from its hold in both hands (HA1).
+		var clip := StringName(hands._arms.clip_base(held.id, &"") + ArmsView.RELOAD_SUFFIX)
 		assert_true(anim.has_animation(clip), "%s: the left hand changes the magazine" % held.id)
 		assert_almost_eq(anim.get_animation(clip).length, held.anim.get_animation(ReplicaView.RELOAD_CLIP).length,
 				1.0 / 60.0, "%s: as long as the replica's Reload clip (played at the same share)" % held.id)
 
 
-func test_a_reload_shows_the_left_hand_on_a_pistol_then_hides_it() -> void:
+func test_a_pistols_left_hand_leaves_its_hold_for_the_reload_and_comes_back() -> void:
 	var hands := _hands([&"pistol"])
 	hands._show(0)
 	var held: ReplicaView.Held = hands._held[0]
 	var left := _mesh(hands, ArmsView.LEFT_ARM)
-	assert_false(left.visible, "control: one-handed, the left arm hidden")
+	assert_true(left.visible, "control: held in both hands (HA1)")
+	assert_eq(_anim(hands).assigned_animation, &"pistol_two_Hold")
 	hands._arms.follow(held.anim, DT, 0.5)
-	assert_eq(_anim(hands).assigned_animation, &"pistol_Reload", "changing the magazine")
+	assert_eq(_anim(hands).assigned_animation, &"pistol_two_Reload", "changing the magazine")
 	assert_true(hands._arms.reloading())
 	assert_true(left.visible, "the left hand shows while it does")
 	assert_almost_eq(_anim(hands).current_animation_position, 0.5 * _anim(hands).current_animation_length, 1e-3,
 			"at the reload's share")
 	hands._arms.follow(held.anim, DT)
-	assert_eq(_anim(hands).assigned_animation, &"pistol_Hold", "the reload over: back on the hold")
+	assert_eq(_anim(hands).assigned_animation, &"pistol_two_Hold", "the reload over: back on the hold")
+	assert_true(left.visible, "both hands on it again")
+
+
+func test_a_one_handed_replica_shows_its_left_hand_only_through_the_reload() -> void:
+	# No replica is one-handed now (the bombs are: GrenadeView); the config still can list one.
+	cfg.one_hand.append(&"pistol")
+	var hands := _hands([&"pistol"])
+	hands._show(0)
+	var held: ReplicaView.Held = hands._held[0]
+	var left := _mesh(hands, ArmsView.LEFT_ARM)
+	assert_false(left.visible, "listed one-handed: the left arm hidden")
+	hands._arms.follow(held.anim, DT, 0.5)
+	assert_true(left.visible, "the left hand shows while it changes the magazine")
+	hands._arms.follow(held.anim, DT)
 	assert_false(left.visible, "the left arm hidden again")
 
 
@@ -247,8 +263,14 @@ func test_only_the_hand_and_wrist_show_through_a_reload() -> void:
 			var c := Character.new(0, 0, Vector3.ZERO, 0.0, [ReplicaStats.load_replica(id)] as Array[ReplicaConfig])
 			hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
 			# No more than the approved hold shows, where it shows a sliver of sleeve at the screen's edge; your right
-			# arm too, the replica canted in it.
+			# arm too, the replica canted in it. A foregrip's fist shows less arm than the replica's own hold (HA1:
+			# the straight forearm beside the rifle), and the magazine is changed the same way from either, so the
+			# replica's own hold sets the limit there too.
 			var most := ARM_CUFF if cfg.one_hand.has(id) else maxf(ARM_CUFF, _arm_shown(hands) + HOLD_SLACK)
+			if grip != &"":
+				var plain := _hands([id])
+				plain.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
+				most = maxf(most, _arm_shown(plain) + HOLD_SLACK)
 			var most_right := maxf(ARM_CUFF, _arm_shown(hands, "R") + HOLD_SLACK)
 			var clip := _anim(hands).get_animation(hands._arms.reload_clip())
 			var track := clip.find_track(NodePath("%s:Forearm_L" % _skeleton_path(hands)), Animation.TYPE_ROTATION_3D)
@@ -262,29 +284,6 @@ func test_only_the_hand_and_wrist_show_through_a_reload() -> void:
 						hands._arms.reload_clip(), share])
 				assert_lt(_arm_shown(hands, "R"), most_right, "%s at %.2f: no right arm past the wrist on screen" % [
 						hands._arms.reload_clip(), share])
-
-
-func test_a_one_handed_reload_brings_the_hand_up_from_below_the_screen() -> void:
-	for id: StringName in cfg.one_hand:
-		if not HELD.has(id):
-			continue
-		var hands := _hands([id])
-		var c := Character.new(0, 0, Vector3.ZERO, 0.0, [ReplicaStats.load_replica(id)] as Array[ReplicaConfig])
-		hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
-		for share: float in [0.0, 1.0]:
-			c.armament.reload_left = maxf(c.armament.replica().reload_time * (1.0 - share), 1e-4)
-			hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
-			var skeleton := hands._arms._skeleton
-			skeleton.force_update_all_bone_transforms()
-			for bone in skeleton.get_bone_count():
-				# The hand and its fingers' joints (Index1_L ...).
-				var bone_name := skeleton.get_bone_name(bone)
-				if bone_name != "Hand_L" and not (bone_name.ends_with("_L")
-						and bone_name.substr(bone_name.length() - 3, 1).is_valid_int()):
-					continue
-				var s := _on_screen(hands, skeleton.global_transform * skeleton.get_bone_global_pose(bone).origin)
-				assert_true(s.y < -1.0 or s.z <= 0.0, "%s at %.0f%%: %s below the screen" % [id, share * 100.0,
-						bone_name])
 
 
 func _skeleton_path(hands: ReplicaView) -> String:
@@ -314,19 +313,33 @@ func test_skin_only_arms_switch_live() -> void:
 	hands.skin_arms = true
 	assert_false(kit.visible, "skin only: the kit hidden")
 	assert_true(nails.visible, "the fingernails shown")
-	var skinned := 0
+	# HA1: the bare hand is a mesh of its own in the model's painted skin (the nails' material), shown in place of the
+	# glove's cloth over the hand; the sleeve keeps its own cloth.
+	var hand := _mesh(hands, ArmsView.HAND_PREFIX + "R")
+	var bare := _mesh(hands, ArmsView.SKIN_PREFIX + "R")
+	assert_false(hand.visible, "the glove's cloth hidden")
+	assert_true(bare.visible, "the bare hand shown")
+	var skin := nails.mesh.surface_get_material(0) as BaseMaterial3D
+	for i in bare.mesh.get_surface_count():
+		var worn := bare.get_surface_override_material(i) as BaseMaterial3D
+		assert_true(worn.use_z_clip_scale, "still pressed")
+		assert_eq(worn.resource_name, skin.resource_name, "the bare hand is skin")
+		assert_eq(worn.albedo_texture, skin.albedo_texture, "painted, not tinted")
+		assert_not_null(worn.albedo_texture)
+		assert_true(worn.normal_enabled, "with the skin's own relief")
 	for i in arm.mesh.get_surface_count():
-		var key := StringName(arm.mesh.surface_get_material(i).resource_name)
 		var worn := arm.get_surface_override_material(i) as BaseMaterial3D
-		assert_true(worn.use_z_clip_scale, "%s: still pressed" % key)
-		if cfg.skin_arms.has(key):
-			skinned += 1
-			assert_eq(worn.albedo_color, cfg.skin_arms[key], "%s in skin" % key)
-			assert_false(worn.normal_enabled, "%s: no cloth weave" % key)
-	assert_gt(skinned, 0, "the hand's surface is skin")
+		assert_eq(worn.resource_name, arm.mesh.surface_get_material(i).resource_name, "the sleeve stays cloth")
 	hands.arms_kind = FigureMix.ROBOT
 	assert_true(kit.visible, "a robot's arms keep their plates")
+	assert_true(hand.visible, "and the glove's shell over the hand")
 	assert_false(nails.visible)
+	assert_false(bare.visible)
+	for i in hand.mesh.get_surface_count():
+		var key := StringName(hand.mesh.surface_get_material(i).resource_name)
+		var worn := hand.get_surface_override_material(i) as BaseMaterial3D
+		assert_eq(worn.albedo_color, cfg.robot_arms[key], "a robot's plain shell")
+		assert_null(worn.albedo_texture, "no painted cloth on it")
 	hands.arms_kind = FigureMix.HUMAN
 	hands.skin_arms = false
 	assert_true(kit.visible, "gloves again")
@@ -334,6 +347,7 @@ func test_skin_only_arms_switch_live() -> void:
 
 
 func test_skin_only_keeps_a_one_handed_left_arm_hidden() -> void:
+	cfg.one_hand.append(&"pistol")
 	var hands := _hands([&"pistol"])
 	hands.skin_arms = true
 	hands._show(0)

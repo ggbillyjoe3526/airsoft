@@ -183,7 +183,7 @@ func test_behind_a_fitted_grip() -> void:
 	var mount := Vector3(0.0, 0.022, -0.215)
 	var mark := FigureView.support_mark(mount, grip, config)
 	assert_almost_eq(mark.z, -0.2 + config.support_behind_grip, 0.0001, "behind the grip's back end")
-	assert_eq(FigureView.support_mark(mount, null, config), mount, "at the mount with none")
+	assert_false(FigureView.support_mark(mount, null, config).is_finite(), "no grip: no limit, the arms' own hold")
 	assert_false(FigureView.support_mark(Vector3.INF, grip, config).is_finite(), "no mount: no support")
 	grip.free()
 	var bare := _view(0)

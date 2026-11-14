@@ -1,47 +1,23 @@
-Task: MB4 · Woodland's Brow hazel, back in its place
-Attempt: 1 of 4
-Head: cbd75ffe66280645a5c383a242cf20c10e5c634e plus the uncommitted tree (partial checks ran on this tree: gdlint, check.py, 7 GUT
-  files with 63 tests; the full unit parts and the night guards run in CI)
+Task: HA1 · First-person arms and grips, made realistic
+Attempt: 5 of 4 (past four, under the owner's standing ruling)
+Head: 9cc3f11 (= git rev-parse HEAD; checks passed on db5afd5, and 9cc3f11 adds only pipeline/ reports)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (criterion 4's "the guards pass" holds only once CI is green on the pull request)
-
-Evidence for the checks that pass:
-1. Criterion 1: tools/woodland/layout.py +521 puts the hazel at (-16.3, -40.5). `git show 85e3f52:data/maps/woodland.json`
-   and the working file are identical (I compared them). Criterion 2: I recounted eh, ehb, ehc, ehd: 117 of 246 decided
-   rounds = 47.6 %, seeds 1 to 32, in band. rc16* gives 114 of 240 and ef to efg 177 of 418 (seeds 1 to 56), as the
-   record says. Criterion 3: h9* gives 136 of 232 = 58.6 %, inside 40 to 65. All 232 rounds match rs9* round for round
-   on seed, winner, attackers, reason and alpha_end, so the claim that BU1 never came into play holds. Criterion 4:
-   seed 14 was replayed with held_up 0, and test_mb2_qa passes 7 of 7. The night guards are owed to CI. Criterion 5:
-   test_mb4_brow.gd checks the hazel stands across the gap.
-2. No contract is touched: nothing under game/ changes, only the data and the build script move.
-3. Nothing on a per-frame path. The performance agent's identity argument stands: the map file is the one MB2's bench
-   measured.
-4. On MB2's layout (hazel at z -38.2, radius 1.3, leaves ending at about z -39.5), test 1 finds no bush within 0.2 m
-   of the hazel's place and fails. Test 2's lines toward the gap cross x -16.3 at z -40 to -41.6, clear of those
-   leaves, so the leaf depth stays under leaf_stop_depth and that test fails too. test_mb4_qa pins BU1's rule on the
-   real hazel.
-5. The only change is data: tuples in layout.py. The tests are typed and name their constants.
-6. The hazel is soft cover with a way through, as MB1 designed and the owner's pictures show. The right call over the
-   solid spruce clump.
-7. The layout.py comment says why the hazel is back. Both new tests have `.uid` files.
-8. One line of data plus its test. KNOWN_ISSUES deletes the fix-now Elimination row and brings the by-team row and
-   the Attack / Defend row up to date; DECISIONS' MB2 entry is amended; the wiki's Maps page speaks of "a hazel
-   hedge" in general, so no change is due.
-
-Failed checks: none.
-
-Advisory (no fix needed to accept):
-- Test 3 (`assert_lt(nearest, 6.0)`) passes on either layout: it guards the lane, not the hazel.
-- QA found a pair 0.7 m apart in the hazel still held for the leaves (BU1 opens at about 0.66 m). Seed 14 plays
-  clean. If a night guard in CI flags held_up on Woodland, add a KNOWN_ISSUES row before merging rather than moving
-  the hazel again.
-
-Must-fix for the next attempt: none. Merge only once CI's full unit parts and night guards are green on this tree.
-
-Owner should test in the game:
-- Woodland Elimination from the west end: whether the Ridge's brow gives you a screen when the east comes off the
-  North bridge.
-- Woodland Elimination from the east end: whether pushing over the brow still feels fair, not blocked.
-- Walk the north lane past the brow hazel: whether its way through reads, and whether you snag on it.
-- In a firefight inside the hazel at point blank: whether you and a bot shoot each other rather than shuffling.
-- Woodland Attack / Defend at the 9 s raise: whether the north approach to the flag feels the same as before.
+Score: 8/8 → Accept (QA Pass, performance Pass)
+Failed checks, with evidence: none.
+1. SMG far side (ha1-round5-far-side.jpg "NOW: Compact SMG, side-on", zoomed 4x): the loop is gone. The little finger rises from its knuckle, bends forward at a middle joint of about 60 degrees and lays its tip up the side face toward the bore, touching the ring finger at the tips, like the Sniper's. From below, all four lie closed side by side. Sniper: the four fingers stand side by side, tips up and a little forward, with no V of daylight and none leaning back. The near sides are unchanged, the AEG is kept as the owner ruled, and the hip view still shows only the thumb (ha1-final-hip.jpg). Residual (not a fail): on the SMG, a slit of daylight about a quarter of a finger wide shows between the ring and little fingers above the knuckles. A flexed hand, with its little finger converging, shows this too, and nobody sees it at bot distance. The record says so (HA1.md:240).
+   Cause and fix read in the diff: pose.py:+914-925 `_strays` stops tighten/wrap at the row; sight.py:+63-86 `crowd` adds the tip-behind-knuckle and tip-gap terms; hold_solve.py:+406,+539,+586 clear the row per solve, so the grips' fists match attempt 4 (QA's qa5 floor test fails on the loose intermediate build).
+2, 3, 5, 6. No file under game/ changed. The change is arms.glb, build tools, tests and docs. Budgets match attempt 4 (38,900/34,452 triangles, 4 materials, 6.18 MB).
+4. test_ha1_qa3.gd:+75-93 asserts tip.z < knuckle.z and a 20 mm tip gap per neighbour pair on the skinned mesh. On attempt 4's model the little finger's tip lay behind its knuckle (SMG loop) and the ring-to-little tip gap was 35 to 36 mm, so it fails there, as QA confirmed. qa5 fails on the intermediate build (Ring 260, Pinky 299 degrees).
+Non-blocking notes (check 7 passes):
+- test_ha1_qa4.gd:2 describes the dropped approach ("with the closing passes skipped"). It should say the passes keep the row.
+- test_ha1_qa4.gd:+21 `_surface_gap` measures to triangle edges, not faces. That overstates the gap, which is safe, but the name says surface.
+- The SMG slit sits only in the attempt-5 entry (HA1.md:240). It belongs under Known issues left too.
+- test_ha1_qa3.gd's TIP_GAP passes the SMG's middle-to-ring pair at 20.1 mm by 0.4 mm of rounding: little headroom against a re-bake.
+Must-fix for the next attempt: none. Optional, in the records commit: the three notes above.
+Owner should test in the game (at most 6, one line each):
+- Beside a bot holding the Compact SMG: do its left fingers read as a hand wrapped on the handguard (no loop, no hole)?
+- Beside a bot holding the Sniper: do the four left fingers stand together up the fore-end's side?
+- Sniper and AEG with the Vertical and Angled Grips: are the fists still closed round the grip as you kept them?
+- AEG, Sniper, SMG at the hip, gloves and bare: still only the left thumb while walking, firing and turning?
+- Raise and lower the sight fast on each rifle: any pop of the left hand?
+- Reload and bolt on the Sniper and SMG: does the left hand start and end on the handguard without a snap?

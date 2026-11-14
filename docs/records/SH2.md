@@ -35,10 +35,10 @@
   the last column while it stopped short. A sling loop hangs at the toe.
 - **The first-person hold.** The left hand holds the pump at its back end, 13 cm further forward than the AEG's
   handguard hold. From the rifles' hip place that showed 11 cm of forearm (the house rule is glove and cuff only), so
-  the replica has its own hip place, 5 cm nearer and 2 cm lower (`ViewModelConfig.hip`, the same in `arms.py`'s
+  the replica has its own hip place, 5 cm nearer and 2 cm lower (`ViewModelConfig.hip`, the same in `hold_tables.py`'s
   `HOLDS`): 5 cm of forearm shows, as the Sniper Rifle's, and the wrist bends 8 degrees. A default the owner may
   change; a play check asks whether it sits well beside the other rifles.
-- **The right hand sits 18 mm higher on the grip than on the AEG Rifle** (attempt 3; its own marks in `arms.py`
+- **The right hand sits 18 mm higher on the grip than on the AEG Rifle** (attempt 3; its own marks in `hold_tables.py`
   `SHOTGUN_RIGHT`): the shotgun's trigger guard is 2 cm higher over the same grip (an adapter stands between the
   grip and the receiver), so as in the photos the middle finger sits right under the guard and the index finger lies
   along it onto the trigger. From the AEG's place the finger had to swing 40 degrees off the others to reach, which
@@ -63,5 +63,6 @@
 - No sights: nothing marks the aim but the rail's far end (the owner's ruling; a play check asks).
   `docs/KNOWN_ISSUES.md`.
 - The hold and its hip place wait for the owner's word on the pictures. `docs/KNOWN_ISSUES.md`.
-- Aimed, the left fingertips show beside the receiver until HA1's aimed-hands rules have the shotgun's entries.
+- Aimed, the left fingertips showed beside the receiver until HA1's aimed-hands rules had the shotgun's entries
+  (added in HA1: `aim_tuck`, `aim_slide`).
 - Its sounds are still stand-ins (SH1).

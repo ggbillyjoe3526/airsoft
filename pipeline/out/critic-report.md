@@ -1,29 +1,23 @@
-Task: FL1 · Bots' flashes no longer blind their own teammates
-Attempt: 1 of 4
-Head: 283c5bf (checks passed on it; the only commit after QA's 025070b and performance's d53525f is the changelog note)
+Task: HA1 · First-person arms and grips, made realistic
+Attempt: 5 of 4 (past four, under the owner's standing ruling)
+Head: 9cc3f11 (= git rev-parse HEAD; checks passed on db5afd5, and 9cc3f11 adds only pipeline/ reports)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Evidence:
-1. No task block; judged against the brief. Planning: game/ai/bot_bombs.gd:+169-183 `_mate_sees` checks each mate now
-   and led by `windup + flash_fuse` (0.3 + 1.5 s); +110-116 `_flash_at` stores the bang on `Bot.bomb_bang` (bot.gd:+244).
-   Throw time: bot_bombs.gd:+36-38 re-checks a FLASH at the press, drops it, flash kept. Probe: 0 teammates dazzled.
-2. Contracts 1-9 untouched: pure static code in game/ai, acts through PlayerCommand, no new random draw.
-3. Runs only after a passed roll (bomb_roll_gap) and once per press; Vector3 values only, no Array/Dictionary/Callable
-   or strings; the led ray is skipped for a still mate (+180). QA and performance both Pass.
-4. tests/unit/test_bot_bombs.gd:+268 (walking mate at 16.5 m: 1.8 s x 5 m/s brings it to 7.5 m, inside flash_mate_clear
-   8; standing it is outside flash_mate_sight 16, so a throw) and +281 (mate placed 3 m from the planned bang after the
-   decision; main has no press check, so it throws). Both fail on main by reading.
-5. Rules in BotBombs; typed; lead comes from GrenadeConfig, radii from bot config; EPSILON is the file's own constant.
-6. Bots refusing a flash that would catch a mate is honest, readable bot play; no tone or asset change.
-7. `_caught` factored out cleanly; one field added. Nit: `bomb_bang` isn't cleared in Bot's reset (bot.gd:303-306),
-   same as bomb_yaw/pitch; it's only read while bomb_kind is FLASH, which `_flash_at` sets with it. Not a defect.
-8. Scope is the fix only; changelog note, wiki Grenades.md, PLAYTEST line and record updated.
-Advisory (no fix needed now):
-- The lead samples one endpoint (now + 1.8 s), not the closest approach: a mate crossing past the bang inside 8 m with
-  the line to it blocked at both ends would slip through. Rare; it's also caught at the press.
-- Flashes thrown fell 9 → 4 and enemies dazzled 7 → 3 on the same seeds, so bot flashes are now noticeably rarer.
-  Small sample; worth the owner's eye rather than a change now.
-Owner should test in the game:
-- Play a few Attack / Defend rounds on Depot with bots on your team: no teammate (or you) gets flashed by a bot.
-- Do enemy bots still flash corners often enough to matter, or do they now almost never do it?
-- When a bot turns to throw and then holds the flash, does that pause look odd (stood still, turned, nothing thrown)?
+Score: 8/8 → Accept (QA Pass, performance Pass)
+Failed checks, with evidence: none.
+1. SMG far side (ha1-round5-far-side.jpg "NOW: Compact SMG, side-on", zoomed 4x): the loop is gone. The little finger rises from its knuckle, bends forward at a middle joint of about 60 degrees and lays its tip up the side face toward the bore, touching the ring finger at the tips, like the Sniper's. From below, all four lie closed side by side. Sniper: the four fingers stand side by side, tips up and a little forward, with no V of daylight and none leaning back. The near sides are unchanged, the AEG is kept as the owner ruled, and the hip view still shows only the thumb (ha1-final-hip.jpg). Residual (not a fail): on the SMG, a slit of daylight about a quarter of a finger wide shows between the ring and little fingers above the knuckles. A flexed hand, with its little finger converging, shows this too, and nobody sees it at bot distance. The record says so (HA1.md:240).
+   Cause and fix read in the diff: pose.py:+914-925 `_strays` stops tighten/wrap at the row; sight.py:+63-86 `crowd` adds the tip-behind-knuckle and tip-gap terms; hold_solve.py:+406,+539,+586 clear the row per solve, so the grips' fists match attempt 4 (QA's qa5 floor test fails on the loose intermediate build).
+2, 3, 5, 6. No file under game/ changed. The change is arms.glb, build tools, tests and docs. Budgets match attempt 4 (38,900/34,452 triangles, 4 materials, 6.18 MB).
+4. test_ha1_qa3.gd:+75-93 asserts tip.z < knuckle.z and a 20 mm tip gap per neighbour pair on the skinned mesh. On attempt 4's model the little finger's tip lay behind its knuckle (SMG loop) and the ring-to-little tip gap was 35 to 36 mm, so it fails there, as QA confirmed. qa5 fails on the intermediate build (Ring 260, Pinky 299 degrees).
+Non-blocking notes (check 7 passes):
+- test_ha1_qa4.gd:2 describes the dropped approach ("with the closing passes skipped"). It should say the passes keep the row.
+- test_ha1_qa4.gd:+21 `_surface_gap` measures to triangle edges, not faces. That overstates the gap, which is safe, but the name says surface.
+- The SMG slit sits only in the attempt-5 entry (HA1.md:240). It belongs under Known issues left too.
+- test_ha1_qa3.gd's TIP_GAP passes the SMG's middle-to-ring pair at 20.1 mm by 0.4 mm of rounding: little headroom against a re-bake.
+Must-fix for the next attempt: none. Optional, in the records commit: the three notes above.
+Owner should test in the game (at most 6, one line each):
+- Beside a bot holding the Compact SMG: do its left fingers read as a hand wrapped on the handguard (no loop, no hole)?
+- Beside a bot holding the Sniper: do the four left fingers stand together up the fore-end's side?
+- Sniper and AEG with the Vertical and Angled Grips: are the fists still closed round the grip as you kept them?
+- AEG, Sniper, SMG at the hip, gloves and bare: still only the left thumb while walking, firing and turning?
+- Raise and lower the sight fast on each rifle: any pop of the left hand?
+- Reload and bolt on the Sniper and SMG: does the left hand start and end on the handguard without a snap?

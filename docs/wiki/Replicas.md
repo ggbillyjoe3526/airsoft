@@ -5,9 +5,16 @@ original design, and they differ in how they load, cycle, sound and handle, **ne
 whatever it came from.
 
 You carry two at once, a primary and a sidearm, picked in your [Loadout](Loadout). In play you see your own arms, in
-dark olive gloves and sleeves, holding the one in your hands: the AEG Rifle and the Sniper Rifle in both hands, a pistol
-in your right hand, held right of the middle of the screen with only your hand and wrist in view. With a grip fitted
-your left hand holds the grip. On a reload your left hand takes the empty magazine out, carries it down out of view
+dark olive gloves and sleeves, holding the one in your hands. A rifle sits low and near at the hip, so you see your
+left hand under the handguard just ahead of the magazine, its thumb along the near side and its forearm running
+up beside the rifle, and your right hand stays below the screen. A pistol
+is held tight and close in both hands, the left wrapped round the right, a little right of the middle of the screen. Raise the
+sight and your hands leave the view: a rifle hides them behind itself, and only the top of them shows under a
+pistol's slide. With a grip fitted your left hand closes round the grip, high under the handguard.
+
+The replica moves with you: it bobs with your steps, rises and falls a little as you breathe, leans into a strafe,
+dips when you land and flicks lightly with each shot. With the sight raised it holds almost still, and **Reduced
+motion** (Settings › Accessibility) calms it further. On a reload your left hand takes the empty magazine out, carries it down out of view
 and brings a fresh one up in the hand to push it home; the replica tips up toward you while it does, so you see your
 hand at work and not your forearm.
 
@@ -140,5 +147,5 @@ the recesses, in whatever colours they wear. Their swappable magazines (Hi-Cap, 
 Bots hold the same replicas you hold, with the parts they have fitted: their optic (the iron sights taken off under
 it), silencer, grip, torch or laser, and the magazine they reload.
 A rifle is held with its stock in the shoulder and the head down on it, looking along the sights, the other hand
-under the handguard (just behind a fitted grip); a pistol is held out in one hand. Their hands hold each replica as
+under the handguard (just behind a fitted grip); a pistol is held out in one hand (yours takes both). Their hands hold each replica as
 yours do in first person: high on the grip, index finger on the trigger, thumb round the grip's left side.

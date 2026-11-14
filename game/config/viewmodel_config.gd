@@ -4,15 +4,22 @@ extends Resource
 ## camera's space (x right, y up, -z forward), seconds, radians. Read by ReplicaView.
 
 ## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The
-## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06); the
-## Pump Shotgun sits 5 cm nearer and 2 cm lower than the other rifles, so the hand out on its pump shows no more
-## forearm than theirs (SH2); the arms model (tools/blender/arms/arms.py HOLDS) is built for these places.
+## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06), and
+## 25 cm from the eye, was 34, on the same line from it, which draws them a third larger in the same place on screen
+## (his pick of three on a picture, 2026-11-13: HA1); the
+## rifles sit near and low, so the left hand on the handguard shows and the right hand lies under the view's bottom
+## edge (HA1, the owner); the Compact SMG, a shorter replica, sits lower and further off than they do, which draws it
+## at their size and angle (the owner: "too high. It should be a similar angle and scale to the rifles"). The Pump
+## Shotgun has its own place, the hand out on its pump showing no more forearm than the rifles' (SH2). The arms
+## model's holds (tools/blender/arms/hold_tables.py HOLDS) are solved for the Pump Shotgun's place and for the rifles'
+## and the pistols' earlier ones (RIFLE_HIP, PISTOL_HIP); the arms ride the replica, so each hold is drawn where its
+## replica is.
 @export var hip: Dictionary[StringName, Vector3] = {
-	&"aeg": Vector3(0.12, -0.19, -0.26),
-	&"pistol": Vector3(0.05, -0.07, -0.34),
-	&"cyber": Vector3(0.05, -0.07, -0.34),
-	&"sniper": Vector3(0.12, -0.19, -0.26),
-	&"smg": Vector3(0.12, -0.19, -0.26),
+	&"aeg": Vector3(0.1, -0.135, -0.19),
+	&"pistol": Vector3(0.037, -0.051, -0.25),
+	&"cyber": Vector3(0.037, -0.051, -0.25),
+	&"sniper": Vector3(0.1, -0.135, -0.19),
+	&"smg": Vector3(0.1, -0.165, -0.24),
 	&"shotgun": Vector3(0.12, -0.21, -0.21),
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
@@ -23,6 +30,27 @@ extends Resource
 @export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.25, &"cyber": -0.25,
 		&"sniper": -0.2, &"smg": -0.15, &"shotgun": -0.09}
 @export var aim_forward_default: float = -0.25
+## Aimed, a rifle's hands are out of the view (HA1, the owner: never faded; "at most a small tip of the players left
+## hand thumb"): the replica hides them. As the sight comes up your left shoulder moves this far (m, the replica's
+## axes: x right, y up, z back; by replica id) and the elbow turns to hang under the line from it to the wrist
+## (ArmsTuck), so the forearm lies behind the replica too.
+@export var aim_tuck: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.14, -0.06, 0.0),
+		&"sniper": Vector3(0.14, -0.06, 0.0), &"smg": Vector3(0.14, -0.06, 0.0),
+		&"shotgun": Vector3(0.14, -0.06, 0.0)}
+## The hand on the handguard would still show past the replica's sides when aimed (most with an optic fitted, which
+## sits the eye higher): it slides this far along the replica as the sight comes up (the same axes; by replica id),
+## back and down toward the receiver, which hides it. It holds the handguard while the sight is raised less than
+## `aim_slide_span`'s first share and has slid by its second, so it lets go only once the replica is in front of it.
+@export var aim_slide_span: Vector2 = Vector2(0.4, 0.9)
+@export var aim_slide: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.0, -0.07, 0.22),
+		&"sniper": Vector3(0.02, -0.09, 0.22), &"smg": Vector3(0.0, -0.07, 0.22),
+		&"shotgun": Vector3(0.0, -0.07, 0.22)}
+## A replica in aim_hands_hint (the pistols) keeps the tops of its hands under the slide (the owner's pick of three
+## pictures): as the sight's raise (as drawn, 0..1) passes from aim_hint_span's x to its y, what lies below the sight
+## line fades out, whole down to aim_hint_below's x (m under it) and gone by its y.
+@export var aim_hint_span: Vector2 = Vector2(0.3, 0.8)
+@export var aim_hands_hint: Array[StringName] = [&"pistol", &"cyber"]
+@export var aim_hint_below: Vector2 = Vector2(0.08, 0.12)
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits
 ## aimed (m, so the glass shows as the approved sight concepts do); and the mark on the glass (dot: a lit red dot;
@@ -56,6 +84,8 @@ extends Resource
 @export var sway_per_radian: float = 0.05
 @export var sway_max: float = 0.035
 @export var return_rate: float = 14.0
+## Lagging, it rolls too, its top trailing the turn (HA1): rad per m of lag across.
+@export var sway_roll: float = 1.3
 ## Each shot's kick: back and up (m), never more than kick_max shots' worth. A lift, not a tilt, so the barrel stays in
 ## line with the BBs leaving it.
 @export var kick_back: float = 0.028
@@ -63,6 +93,8 @@ extends Resource
 @export var kick_max: float = 1.5
 ## With the sight raised, the share of sway and kick left.
 @export var aim_steady: float = 0.25
+## Its life over that pose (HA1: the bob, the breathing, the lean, the springs): HandsMotion.
+@export var life: HandsLifeConfig = HandsLifeConfig.new()
 ## Drawing drops it this far and brings it back up; sprinting carries it this far down and this tilted (rad).
 @export var draw_drop: float = 0.22
 @export var sprint_drop: float = 0.06
@@ -100,12 +132,13 @@ extends Resource
 ## out and seating the fresh one) while your right forearm stays below it. The SMG comes up less than the AEG (CS2):
 ## its deeper grip holds your hands lower, and at the AEG's lift your left forearm shows past the wrist.
 ## The Pump Shotgun comes out less and no nearer (SH2): your left hand starts far forward on its pump, and at the
-## AEG's move your forearm shows past the wrist on the way to the shell and back.
+## AEG's move your forearm shows past the wrist on the way to the shell and back. The pistols' move is 0.1 and 0.06 m
+## drawn in with their hip place (HA1: 25 cm from the eye, was 34), so a reload crosses the same part of the screen.
 @export var reload_cant_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.6, 0.0, -0.25),
 		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3),
 		&"smg": Vector3(0.6, 0.0, -0.25), &"shotgun": Vector3(0.6, 0.0, -0.25)}
-@export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.1, 0.04, 0.06),
-		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0),
+@export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.08, 0.04, 0.06),
+		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.074, 0.044, 0.0), &"cyber": Vector3(0.074, 0.044, 0.0),
 		&"smg": Vector3(0.06, 0.04, 0.06), &"shotgun": Vector3(0.04, 0.04, 0.0)}
 ## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share
 ## at the end (a rifle's magazine is out of the well in the first quarter: the cant is there by then, BP8); others ease
@@ -147,10 +180,10 @@ extends Resource
 @export var depth_scale: float = 0.25
 ## Where the selector sits along its clip in each fire mode (semi, burst, auto), as a share of the clip.
 @export var selector_at: PackedFloat32Array = PackedFloat32Array([0.5, 0.75, 1.0])
-## Your arms (ArmsView): replicas held in the right hand alone, the left arm hidden (a pistol, as the owner's default
-## of 2026-11-05: two-handed pistol holds clipped or bent the wrist; a smoke or flash bomb in hand, GT1), and a robot's
-## arms' colours (sRGB) by the arms model's material name, with their roughness (satin, as the robot figure's plates).
-@export var one_hand: Array[StringName] = [&"pistol", &"cyber", &"smoke", &"flash"]
+## Your arms (ArmsView): replicas held in the right hand alone, the left arm hidden (a smoke or flash bomb in hand,
+## GT1; a pistol is held in both, HA1: the arms model's `<id>_two_Hold`), and a robot's arms' colours (sRGB) by the
+## arms model's material name, with their roughness (satin, as the robot figure's plates).
+@export var one_hand: Array[StringName] = [&"smoke", &"flash"]
 ## A bomb taken in hand comes up into view with your hand from this far below (m) over this long (s), eased as a draw,
 ## while the replica goes down (holster_time); the empty hand goes back down the same way once the bomb has left it.
 @export var bomb_raise_drop: float = 0.3
@@ -163,14 +196,8 @@ extends Resource
 	&"Glove": Color(0.80, 0.81, 0.82),
 	&"GloveArmour": Color(0.16, 0.17, 0.18),
 	&"Sleeve": Color(0.62, 0.63, 0.65),
-	&"SleeveTrim": Color(0.22, 0.23, 0.24),
 }
 @export var robot_arms_roughness: float = 0.45
-## Skin-only arms (Dev › Skin-only arms; BP8, the owner's playtest note 11): the arms model's materials shown as bare
-## skin (sRGB, by name: the glove's surface, a glove's thickness over the hand), the cloth's weave taken off, with
-## their roughness. The glove's kit hides and the fingernails show (ArmsView).
-@export var skin_arms: Dictionary[StringName, Color] = {&"Glove": Color(0.78, 0.60, 0.48)}
-@export var skin_arms_roughness: float = 0.62
 ## Your arms' throw (GT3, ArmsThrow), `share` running 0..1 over the windup (GrenadeConfig.windup) and 1..2 over the
 ## recovery. Each key is a wrist's place in the eyes' frame (m: x right, y up, -z ahead), each pole the way its elbow
 ## bends. The left hand comes up from bomb_left_in to the pin's ring (its wrist bomb_left_ring off it) by bomb_pin_grab,

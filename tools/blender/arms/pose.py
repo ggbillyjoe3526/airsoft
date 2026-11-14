@@ -4,11 +4,16 @@ and the contact solver that closes each finger onto a replica's surface without 
 import math
 import os
 
+import bmesh
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Matrix, Quaternion, Vector
 from mathutils.bvhtree import BVHTree
 
-from glove import FINGER_NAMES, PARENT, Frame, Mesh, seg_dist
+import sight
+from glove import FINGER_NAMES, HEEL, HEEL_TWIST, PARENT, Frame, Mesh, seg_dist
+
+# The thumb's first bone, whose heel bone (glove.HEEL) follows it.
+THUMB_ROOT = "Thumb1_"
 
 # Each side's shoulder joint (eye space: +X right, +Y forward, +Z up); arms.py sets them.
 SHOULDER = {}
@@ -24,6 +29,11 @@ THUMB_VERIFY = 800
 # normal alone misreads points beside a convex corner, a few centimetres out, as deep inside (GS2's AEG beside its
 # trigger guard, the model before it to the grip's right), which threw the hand off the grip.
 DEEP = 0.004
+# A trigger finger asked to arch (`Hand.index_arc`) bends this share of its middle joint's bend at its tip.
+ARC_TIP = 0.5
+# A finger turned about its own line at the knuckle (`Hand.onto`'s `cup`) keeps the turn only if it scores this much
+# better (m) than the smaller turn tried before it.
+CUP_GAIN = 0.0005
 # The rays' directions for that check: a point is inside when most first hits strike a face from behind.
 RAYS = (Vector((0.577, 0.577, 0.577)), Vector((-0.577, 0.577, -0.577)), Vector((0.577, -0.577, -0.577)))
 # How much of each finger's splay from the middle finger a hold takes out.
@@ -147,6 +157,13 @@ class Rig:
         if name in self.shift:
             m = Matrix.Translation(self.shift[name]) @ m
         self.pose[name] = m
+        if name.startswith(THUMB_ROOT):
+            # The heel of the thumb goes with it: the same swing, a share of its turn about its own line.
+            q = self.local[name].to_quaternion()
+            turn = Quaternion((q.w, 0.0, q.y, 0.0))
+            turn = turn.normalized() if turn.magnitude > 1e-9 else Quaternion()
+            part = (q @ turn.inverted()) @ Quaternion().slerp(turn, HEEL_TWIST)
+            self.fk(HEEL + name[len(THUMB_ROOT) - 1:], part.to_matrix())
         return m
 
     def refresh(self, name: str) -> None:
@@ -243,27 +260,49 @@ class Hand:
         # The height (eye space) no finger's glove may rise above: a support hand's fingers rest on the handguard's
         # side, their tips below its top (the critic: no tip showing over it from the left). None: no limit.
         self.tip_top = None
+        # Where the game's eye may stand as a support hand's fingers are laid (eye space) and the replica that hides
+        # them from it (`sight.seen`): no finger may show past the handguard's far side. Empty: not judged.
+        self.eyes, self.screen = (), None
+        # The replica's right (a direction and a point on its middle, eye space): only a finger's glove
+        # sight.SEEN_FAR m or more to that side of the middle is judged. None: all of it.
+        self.far = None
+        # How far forward a support hand's fingers may reach: a direction (eye space) and the furthest any of a
+        # finger's glove may lie along it (m), the handguard's front end. None: no limit.
+        self.front, self.front_hard = None, False
+        # The fingers already laid (each of their last two bones' ends) and how far (m) apart the next keeps its own
+        # from them (`sight.crowd`).
+        self.laid, self.apart, self.row = [], 0.0, []
         # The furthest left (eye space) the trigger finger's outer bones may reach (`onto`). None: no limit.
         self.index_left = None
         # How far the trigger finger's joints may bend reaching the trigger (degrees, base to tip; `onto`).
         self.index_bends = (70, 90, 70)
         # The least its base may bend (degrees; below 0 it lifts off the frame's side).
         self.index_from = -10
+        # The bend its middle joint is drawn to and what each degree off it costs (m), so it arches (`onto`). None:
+        # wherever its pad comes nearest.
+        self.index_arc = None
+        # Whether the trigger finger's coarse search forgives passing into the replica (`onto_search`).
+        self.index_soft = False
         # How far down the trigger (a share of its height, top to tip) the trigger finger's pad rests.
         self.trigger_at = 0.55
         # The whole hand bone's glove (the knuckles and the heel of the thumb too), for seating it clear.
         whole = [hand_rest.inverted() @ sx(v) for v, w in zip(mesh.v, mesh.w) if w.get("Hand", 0.0) > 0.45]
         self.points["Hand_" + side] = [q for i, q in enumerate(whole) if i % max(1, len(whole) // 300) == 0]
         mid = (sx(j["finger-3-2"]) - sx(j["finger-3-1"])).normalized()
+
+        def share(w: dict, name: str, k: int) -> float:
+            # The heel of the thumb's skin is its first bone's, for where that bone's surface lies.
+            b = "%s%d" % (name, k)
+            return w.get(b, 0.0) + (w.get(HEEL, 0.0) if b + "_" == THUMB_ROOT else 0.0)
+
         for f, name in FINGER_NAMES.items():
             for k in (1, 2, 3):
                 b = "%s%d_%s" % (name, k, side)
                 h, t = sx(j["finger-%d-%d" % (f, k)]), sx(j["finger-%d-%d" % (f, k + 1)])
-                ds = sorted(seg_dist(sx(v), h, t) for v, w in zip(mesh.v, mesh.w)
-                            if w.get("%s%d" % (name, k), 0.0) > 0.7)
+                ds = sorted(seg_dist(sx(v), h, t) for v, w in zip(mesh.v, mesh.w) if share(w, name, k) > 0.7)
                 self.radius[b] = (ds[int(len(ds) * 0.85)] if ds else 0.008) + 0.0004
                 inv = rig.rest[b].inverted()
-                pts = [inv @ sx(v) for v, w in zip(mesh.v, mesh.w) if w.get("%s%d" % (name, k), 0.0) > 0.45]
+                pts = [inv @ sx(v) for v, w in zip(mesh.v, mesh.w) if share(w, name, k) > 0.45]
                 self.points[b] = [q for i, q in enumerate(pts) if i % max(1, len(pts) // 90) == 0]
                 toward = self.palmar if f != 1 else ((self.palm_centre + self.palmar * 0.02) - h).normalized()
                 ax = (t - h).normalized().cross(toward).normalized()
@@ -376,7 +415,7 @@ class Hand:
                             if best is None or found[0] < best[0]:
                                 best = found
             # Then finer round the best, within the same bounds.
-            a0, c0, t0, k0 = best[2:]
+            a0, c0, t0, k0 = best[2:6]
             for a in range(max(-swing, a0 - 10), min(swing, a0 + 10) + 1, THUMB_FINE):
                 for c in range(max(-80, c0 - 10), min(80, c0 + 10) + 1, THUMB_FINE):
                     for t in range(max(min(twists), t0 - 15), min(max(twists), t0 + 15) + 1, THUMB_FINE):
@@ -394,7 +433,7 @@ class Hand:
         out = closed(best)
         if verify is not None and pin is None:
             # Nearest the target first: the bones' own clearance no longer ranks them, the glove's check does.
-            for found in sorted(tried, key=lambda f: reach.get(f[2:], f[0]))[:THUMB_VERIFY]:
+            for found in sorted(tried, key=lambda f: reach.get(f[2:6], f[0]))[:THUMB_VERIFY]:
                 out = closed(found)
                 if not verify():
                     best = found
@@ -402,15 +441,17 @@ class Hand:
             else:
                 out = closed(best)
         if os.environ.get("BL_DEBUG"):
-            print("   thumb search: score %.4f at %s" % (best[0], best[2:]))
-        return list(best[2:]) + out[1:]
+            print("   thumb search: score %.4f at %s" % (best[0], best[2:6]))
+        return list(best[2:6]) + out[1:]
 
     def settle(self, name: str, start: tuple, col: Collider, span: int = 30, swing: float = 0.0,
-               root: bool = False) -> list:
+               root: bool = False, more: int = None, strict: bool = False) -> list:
         """Poses a finger at its authored bends `start` (degrees, base to tip; its base swung `swing` degrees
         sideways), then curls it further or opens it, its three joints together and the tip a little less, until it
-        rests on the replica: the most curl within `span` of the authored pose that stays clear of it. With `root`,
-        its first bone may rest on the replica (a palm cupped round a handguard), never pass into it."""
+        rests on the replica: the most curl within `span` of the authored pose that stays clear of it (given `more`,
+        no more than that past it: a finger reaching round something wide, which a fist closed short of it would
+        clear too). With `root`, its first bone may rest on the replica (a palm cupped round a handguard), never
+        pass into it. With `strict`, None when no curl clears the replica (the caller then tries another swing)."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
 
@@ -426,7 +467,7 @@ class Hand:
         # The most curl that clears the replica and keeps under `tip_top`; failing that, the clear curl rising least
         # above it.
         lowest = None
-        for t in range(span, -3 * span - 1, -2):
+        for t in range(span if more is None else more, -3 * span - 1, -2):
             angles = apply(t)
             if not (self.clearance(bones[0], col) < (0.0 if root else CONTACT)
                     or any(self.touches(b, col) for b in bones[1:])):
@@ -437,6 +478,8 @@ class Hand:
                     lowest = (high, t)
         if lowest is not None:
             return [round(a) for a in apply(lowest[1])]
+        if strict:
+            return None
         print("  ! the %s finger can't clear the replica %s" % (name, [round(self.clearance(b, col) * 1000, 1)
                                                                     for b in bones]))
         return [round(a) for a in angles]
@@ -477,13 +520,19 @@ class Hand:
         return self.settle("Thumb", (0.0, bends[0], bends[1]), col, span)
 
     def onto(self, name: str, target: Vector, col: Collider, limits: tuple, swing: int = 20,
-             couple: float = 0.0, pin: tuple = None) -> list:
+             couple: float = 0.0, pin: tuple = None, back: int = 0, cup: float = 0.0) -> list:
         """Bends a finger so its last bone's pad comes to `target` (the trigger) without passing into the replica: a
         search over its three bends and its base's swing sideways (up to `swing` degrees), coarse then fine. With
-        `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched.
-        Given `pin` (swing and three bends: a pose the owner approved), the finger takes it and no search runs."""
+        `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched;
+        its knuckle may then bend `back` degrees the other way (a finger laid flat along a surface the palm is
+        tilted up to). Given `pin` (swing and three bends: a pose the owner approved), the finger takes it and no
+        search runs. With `cup` (degrees), the finger may also turn that far about its own line at its knuckle, as
+        the ring and little fingers' do when a hand cups round a bar (the palm's arch): none, half and all of it are
+        tried, either way, and the least that scores best is kept."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
+
+        turned = [0.0]
 
         def apply(lat: float, a: tuple) -> None:
             if couple:
@@ -491,7 +540,8 @@ class Hand:
             for k, ang in enumerate(a):
                 rot = Matrix.Rotation(math.radians(ang), 3, self.axis[bones[k]])
                 if k == 0:
-                    rot = Matrix.Rotation(math.radians(lat), 3, side_axis) @ rot
+                    rot = Matrix.Rotation(math.radians(lat), 3, side_axis) \
+                        @ Matrix.Rotation(math.radians(turned[0]), 3, Vector((0.0, 1.0, 0.0))) @ rot
                 self.rig.fk(bones[k], self.adduct[bones[k]] @ rot if bones[k] in self.adduct else rot)
 
         def score(lat: float, a: tuple) -> tuple:
@@ -505,16 +555,44 @@ class Hand:
             if self.index_left is not None:
                 over = max(0.0, self.index_left - min((self.rig.pose[b] @ q).x for b in bones[1:]
                                                       for q in self.points[b]))
-            # Clear of the replica first, then the pad nearest the target.
-            return pad + over * 10.0 + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
+            # A finger asked to arch (`index_arc`: its middle joint's bend, what each degree off it costs, m, and its
+            # tip's share of that bend, ARC_TIP unless given) bends there and that share at its tip, as a relaxed
+            # finger does, where the pad still finds the target.
+            arch = 0.0
+            if self.index_arc is not None:
+                mid, cost = self.index_arc[:2]
+                tip = self.index_arc[2] if len(self.index_arc) > 2 else ARC_TIP
+                arch = cost * (abs(a[1] - mid) + 0.5 * abs(a[2] - tip * mid))
+            # Clear of the replica first, then the pad nearest the target; and never standing above `tip_top`, when
+            # set (a support hand's fingertips kept under the handguard's top as the eye sees it).
+            # Past `front` (a handguard's front end) counts as the height limit does; or, where the hold says so
+            # (`front_hard`), as passing into the replica does: never, where any pose keeps behind it.
+            past = sight.ahead(self, name)
+            over += self.over(name) + (0.0 if self.front_hard else past) + sight.seen(self, name) * sight.SEEN_COST
+            over += sight.crowd(self, name)
+            return pad + arch + over * 10.0 + (1.0 + past * 10.0 if self.front_hard and past > 0.0 else 0.0) \
+                + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
 
         swing = int(swing)
+        if os.environ.get("BL_DEBUG"):
+            head = self.rig.pose[bones[0]].translation
+            print("   %s: knuckle %s target %s (%.1f mm away), bones %s mm, left limit %s" % (
+                name, tuple(round(x, 4) for x in head), tuple(round(x, 4) for x in target), (target - head).length * 1e3,
+                [round(self.rig.length[b] * 1e3, 1) for b in bones], self.index_left))
         if pin is not None:
             # A pinned pose (an approved hand) is kept as it is: no search.
             sc, clear = score(pin[0], tuple(pin[1:]))
             best = (sc, list(pin), clear)
         else:
-            best = self.onto_search(score, swing, limits, couple)
+            best, kept = None, 0.0
+            for share in ((0.0, 0.5, 1.0, -0.5, -1.0) if cup else (0.0,)):
+                turned[0] = cup * share
+                found = self.onto_search(score, swing, limits, couple, int(back))
+                if best is None or found[0] < best[0] - CUP_GAIN:
+                    best, kept = found, turned[0]
+            turned[0] = kept
+            if cup:
+                print("  %s finger cupped %.0f degrees" % (name, kept))
         apply(best[1][0], tuple(best[1][1:]))
         if couple:
             best[1][3] = best[1][2] * couple
@@ -526,18 +604,27 @@ class Hand:
         print("  %s finger on its mark: pad %.1f mm off" % (name, (pad if best[2] >= CONTACT else -1) * 1e3))
         return [round(x) for x in best[1]]
 
-    def onto_search(self, score, swing: int, limits: tuple, couple: float) -> tuple:
+    def onto_search(self, score, swing: int, limits: tuple, couple: float, back: int = 0) -> tuple:
         """`onto`'s search: a coarse grid of the finger's sideways swing and bends, then finer steps from the best,
-        each within the bends allowed (a finger told to lie nearly straight stays so). The best (score, [swing,
-        bends], clearance)."""
+        each within the bends allowed (a finger told to lie nearly straight stays so; a coupled one's knuckle from
+        `back` degrees the other way). The best (score, [swing, bends], clearance). With `index_soft`, the coarse
+        grid forgives a pose for passing into the replica (it still pays for how deep): the finer steps then walk
+        from the nearest such pose to a clear one, where a clear pose is a pocket too small for the grid to land in
+        (a gloved fingertip inside a trigger guard)."""
         best = None
+        step_off = 1.0 if self.index_soft else 0.0
         for lat in sorted({-swing, 0, swing} | set(range(-swing, swing + 1, 10))):
-            for a1 in range(0 if couple else self.index_from, limits[0] + 1, 10):
+            for a1 in sorted({-back} | set(range(0, limits[0] + 1, 10))) if couple else range(
+                    self.index_from, limits[0] + 1, 10):
                 for a2 in range(0, limits[1] + 1, 10):
                     for a3 in range(0, 1 if couple else limits[2] + 1, 10):
                         sc, clear = score(lat, (a1, a2, a3))
+                        if clear < CONTACT:
+                            sc -= step_off
                         if best is None or sc < best[0]:
                             best = (sc, [lat, a1, a2, a3], clear)
+        if step_off and best[2] < CONTACT:
+            best = (best[0] + step_off, best[1], best[2])
         step = 4.0
         while step >= 1.0:
             moved = False
@@ -545,7 +632,7 @@ class Hand:
                 for sgn in (-1.0, 1.0):
                     trial = list(best[1])
                     trial[k] += sgn * step
-                    if k == 0 and abs(trial[0]) > swing or couple and trial[1] < 0.0:
+                    if k == 0 and abs(trial[0]) > swing or couple and trial[1] < -back:
                         continue
                     if k > 0 and (trial[k] > limits[k - 1] + 0.5 or k > 1 and trial[k] < -0.5
                                   or k == 1 and not couple and trial[k] < self.index_from - 0.5):
@@ -680,6 +767,32 @@ def key_pose(rig: Rig, clip: str) -> None:
     track.strips.new(clip, 0, act)
 
 
+def frozen(ob: bpy.types.Object, name: str, without: tuple = ()) -> bpy.types.Object:
+    """A still copy of `ob`'s skin as its armature poses it now, for the other hand to rest on or keep clear of;
+    `without` the skin of the bones named (a thumb that will be laid again, on the hand that comes to rest here)."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg))
+    me.name = name
+    if without:
+        names = {g.index: g.name for g in ob.vertex_groups}
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bm.verts.ensure_lookup_table()
+        drop = []
+        for sv in ob.data.vertices:
+            g = max(sv.groups, key=lambda x: x.weight, default=None)
+            if g is not None and names[g.group] in without:
+                drop.append(bm.verts[sv.index])
+        bmesh.ops.delete(bm, geom=drop, context="VERTS")
+        bm.to_mesh(me)
+        bm.free()
+    still = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(still)
+    still.matrix_world = ob.matrix_world.copy()
+    bpy.context.view_layer.update()
+    return still
+
+
 def clipping(objects: list, solid: list) -> tuple:
     """Pairs of faces where the posed arms pass into the rifle, and how many of them each bone's skin has."""
     dg = bpy.context.evaluated_depsgraph_get()
@@ -703,6 +816,8 @@ def clipping(objects: list, solid: list) -> tuple:
                 if vi < n:
                     g = max(ob.data.vertices[vi].groups, key=lambda x: x.weight, default=None)
                     key = ob.vertex_groups[g.group].name if g else "?"
+                    # The heel of the thumb counts as the thumb's first bone, which moves it.
+                    key = THUMB_ROOT + key[len(HEEL) + 1:] if key.startswith(HEEL + "_") else key
                     tally[key] = tally.get(key, 0) + 1
                     break
                 vi -= n
@@ -783,10 +898,10 @@ def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) ->
         for shares in (TIGHTEN_SHARES, TIGHTEN_WRAP):
             n = 0.0
             while n + TIGHTEN_STEP <= TIGHTEN_MAX:
-                high = hands[side].over(name)
+                high = _strays(hands[side], name)
                 _turn_finger(rig, hands, side, name, shares, TIGHTEN_STEP)
                 rig.write()
-                if hands[side].over(name) > high or clipping(objects, solid)[0]:
+                if _strays(hands[side], name) > high or clipping(objects, solid)[0]:
                     _turn_finger(rig, hands, side, name, shares, -TIGHTEN_STEP)
                     rig.write()
                     break
@@ -794,6 +909,19 @@ def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) ->
             total += n
         closed["%s %s" % (side, name)] = total
     return closed
+
+
+def _strays(hand: Hand, name: str) -> float:
+    """What a closing pass must not add to (m): the finger's glove above the hand's `tip_top`, and, for a finger laid
+    in a row (`hand.row`), how far it strays from that row as the fingers before it now lie (`sight.crowd`) and past
+    a firm front end (`sight.ahead`). Closed without this, a rowed finger curls back out of its row (the critic's
+    fourth look: the SMG's little finger in a loop, the Sniper's leaning back from the ring finger)."""
+    out = hand.over(name)
+    if name in hand.row:
+        hand.laid = [line for n in hand.row[:hand.row.index(name)] for line in sight.lines(hand, n)]
+        out += sight.crowd(hand, name) + (sight.ahead(hand, name) if hand.front_hard else 0.0)
+        hand.laid = []
+    return out
 
 
 # The wrap's step: the root joint closes WRAP_STEP while the middle joint and the tip open by their share of it, so
@@ -821,10 +949,10 @@ def wrap(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) -> di
     for side, name in fingers:
         n = 0.0
         while n + WRAP_STEP <= WRAP_MAX:
-            high = hands[side].over(name)
+            high = _strays(hands[side], name)
             _turn_finger(rig, hands, side, name, shares, WRAP_STEP)
             rig.write()
-            if hands[side].over(name) > high or clipping(objects, solid)[0]:
+            if _strays(hands[side], name) > high or clipping(objects, solid)[0]:
                 _turn_finger(rig, hands, side, name, back, WRAP_STEP)
                 break
             n += WRAP_STEP

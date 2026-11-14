@@ -2,23 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drijw041jakhn"
-path="res://.godot/imported/arms_ArmsWeave.png-815424d08bfb5c1c23f514485d93f371.ctex"
+uid="uid://c6l8xvf6b7es8"
+path.s3tc="res://.godot/imported/arms_ArmsSkinRough.webp-5e2314af2e926768971eb12472864ccc.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "6ee06a68bc8140f03095e690898abf86"
+"md5": "66839a0d2607992d10338659dd51f8d6"
 }
 
 [deps]
 
-source_file="res://assets/models/arms/arms_ArmsWeave.png"
-dest_files=["res://.godot/imported/arms_ArmsWeave.png-815424d08bfb5c1c23f514485d93f371.ctex"]
+source_file="res://assets/models/arms/arms_ArmsSkinRough.webp"
+dest_files=["res://.godot/imported/arms_ArmsSkinRough.webp-5e2314af2e926768971eb12472864ccc.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

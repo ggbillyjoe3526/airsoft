@@ -61,6 +61,7 @@ or drop (`docs/ROADMAP.md` › What 0.1 is).
 - Smoke and flash bombs: two grenade slots per loadout, each picked Smoke or Flash on the Loadout page (one of each by default; bots carry what their kit lists), refilled each round, taken in hand with 4 and 5 (rebindable) and thrown with a click, or held and let go; smoke hides you from bots but never BBs, and a flash blinds anyone facing it up to 22 m, teammates included, and looking away from a flash keeps you safe; bots throw theirs too; both bombs have detailed models you see in hand, in flight and on the ground (SF1, SF2, BL9)
 - Bots' bombs in hand: a bot throwing a smoke or flash shows it in its right hand and throws it overhand, its arm swinging back by its head, so you see the throw (GT1)
 - Your arms hold the bomb: in first person your gloved right hand holds a smoke or flash in a fist while it's in hand, each bomb with its own fitted grip (GT2); your left hand pulls the pin and your arm swings the bomb over and throws it (GT3)
+- First-person hands: with a rifle at the hip your left hand shows under the handguard, a grip makes it a fist round the grip, pistols are held in both hands with a reload that lets go, and raised sights hide them (HA1)
 - Mouse wheel: steps through your two replicas, then your smoke and flash bombs, and round again, never onto the holster; on a bomb your replica goes down, the bomb shows in your hand and a click throws it, while 1, 2, R, 3 or rolling on brings the replica back (MC1)
 
 ## Menus and settings

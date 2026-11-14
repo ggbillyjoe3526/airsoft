@@ -469,14 +469,17 @@ def fold_material(base: str, extra: str) -> None:
     bpy.data.materials.remove(gone)
 
 
-def export(path: str, animated: bool) -> None:
-    """Writes the scene as a glb, each mesh's surface kinds (surface.py) as its vertex colours (MQ1: a replica) or
-    as its extras (MQ2: a part's table, a mesh custom property; no other custom property is written)."""
+def export(path: str, animated: bool, webp: int = 0) -> None:
+    """Writes the scene to `path` as a glb, each mesh's surface kinds (surface.py) as its vertex colours (MQ1: a
+    replica) or as its extras (MQ2: a part's table, a mesh custom property; no other custom property is written). With
+    `webp` (a quality, 1..100), its images are stored as WebP at that quality (EXT_texture_webp, which Godot reads):
+    a 2K painted set a fraction of its PNG size."""
     surface.adopt()
     surface.only_tables()
+    images = {"export_image_format": "WEBP", "export_image_quality": webp} if webp else {}
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
                               export_animations=animated, export_animation_mode="NLA_TRACKS", export_yup=True,
                               export_draco_mesh_compression_enable=False, export_extras=True,
                               export_cameras=False, export_lights=False, export_vertex_color="NAME",
                               export_vertex_color_name=surface.ATTR, export_all_vertex_colors=False,
-                              export_active_vertex_color_when_no_material=False)
+                              export_active_vertex_color_when_no_material=False, **images)

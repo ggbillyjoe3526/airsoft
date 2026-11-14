@@ -199,6 +199,23 @@ own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a 
   its own, and no forearm comes across the screen (at most the sleeve's hem at its edge). Do the rifles' steeper
   tip-up (the stock down out of view) and the pistols' tip toward you read well? Settings › Dev › Skin-only arms swaps the gloves for
   bare hands at once.
+- [ ] **Your hands, at the hip and aimed** (HA1). A rifle sits near and low: only your left hand shows, under the
+  handguard just ahead of the magazine, its thumb on the near side and no fingers on the far side, the forearm and wrist in one straight line
+  running up close beside the rifle, the thumb resting on the handguard's side; with a Vertical or Angled Grip
+  fitted the hand is a fist round the grip, its index finger under the handguard and its thumb round the
+  grip's back; the SMG sits as the rifles do. A pistol is held tight in both hands, no left
+  fingers showing, the right thumb resting on the left hand, the Cyber Pistol held as the GBB is; over the sights no
+  gap shows between the left hand and the grip. Raise the sight: a
+  rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and only the top of the
+  hands shows under a pistol's slide. Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
+  should hold up close on Inspect (Y); the right index finger and the skin between wrist and thumb look natural.
+  The pistols sit 25 cm from the eye (the owner's pick): judge their size at the hip, through a reload and on
+  Inspect. Skin-only arms on a pistol: the bare hands should read as hands (knuckle folds, the thumb's tendon, veins
+  at the wrist, nails, a tapered thumb), not plastic. Close to a bot holding an AEG with no grip: its left fingers
+  lie open under the handguard.
+- [ ] **The replica moves with you** (HA1). Walk, sprint, strafe, jump and land, crouch, stand, fire, switch: a
+  gentle bob with your steps, breathing at rest, a lean into a strafe, a dip on landing, a light flick with each
+  shot. Aimed it holds almost still; Reduced motion calms it. A bomb in hand moves the same way.
 - [ ] **Look straight down.** Standing, crouched and in a vault: you see the ground, never your own body (Beta 1
   item 24).
 - [ ] **Hit call.** Hit a bot: the HIT! sign, the hand up, the replica hanging straight down; readable at 20 to 30 m.
