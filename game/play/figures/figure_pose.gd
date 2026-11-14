@@ -59,11 +59,12 @@ var on_back: int = -1
 var in_holster: int = -1
 var hanging: bool = false
 ## A switch between replicas under way (the Switch clip: backwards to a rifle), whether it began since the last read
-## (the clip is fired once), and how long the draw takes in all (s).
+## (the clip is fired once), how long the draw takes in all (s) and its share done (0..1; 1 with none under way).
 var switching: bool = false
 var switch_started: bool = false
 var switch_back: bool = false
 var draw_seconds: float = 0.0
+var draw_share: float = 1.0
 ## A reload under way (FI4) in slot `reload_slot` (-1 none; not while holstered or calling the hit), whether it began
 ## since the last read (reload_left rose, or none was under way), whether it is a pistol's, and its share (0..1) of the
 ## replica's reload time, from the simulation's reload_left: a figure hidden or posed only now and then keeps step.
@@ -202,6 +203,7 @@ func read_hands(a: Armament, called: bool, alive: bool = true) -> void:
 	_drawn_slot = a.active
 	draw_seconds = a.draw_total
 	var share := 1.0 - a.draw_left / a.draw_total if drawing else 1.0
+	draw_share = share
 	var swap := _hits.holster_swap
 	var put_away := a.holstered or (_from_holster and share < swap)
 	holster = 1.0 if a.holstered else 0.0

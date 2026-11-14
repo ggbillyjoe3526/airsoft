@@ -279,8 +279,8 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 
 ## The upper body's parameters: a trigger press when `fired`; the upper body's weight, its gate shut (not evaluated)
 ## under FigureConfig.gate_below; then, while it shows, the aim by pitch, the hold, the holster (its arms' and the aim's
-## gates shut at none and at full; Holster_Sprint on the walk cycle), a switch begun (forwards to a pistol, backwards to
-## a rifle, scaled to the draw), cut when the draw is (a holster, a hit).
+## gates shut at none and at full; Holster_Sprint on the walk cycle), a switch begun or shown again (forwards to a
+## pistol, backwards to a rifle, scaled to the draw from its share), cut when the draw is (a holster, a hit).
 func _animate_upper(pose: FigurePose, fired: bool) -> void:
 	tree.set(FigureGraph.P_FIRE_HOLD, pose.pistol_weight)
 	if fired:
@@ -306,9 +306,12 @@ func _animate_upper(pose: FigurePose, fired: bool) -> void:
 	tree.set(FigureGraph.P_HOLSTER_MIX, pose.sprint_weight)
 	if pose.stepping():
 		tree.set(FigureGraph.P_HOLSTER_SPRINT_SEEK, fposmod(pose.cycle, TAU))
-	if pose.switch_started and pose.draw_seconds > 0.0:
+	if pose.switching and pose.draw_seconds > 0.0 and (pose.switch_started or pose.snapped):
+		# Begun, or shown again mid-switch (a hidden figure's tree stands still): from the draw's share, in step with it
+		# (a backwards clip's time counts from its own start, the clip's end).
 		tree.set(FigureGraph.P_SWITCH_WAY, 1.0 if pose.switch_back else 0.0)
 		tree.set(FigureGraph.P_SWITCH_PACE, _switch_seconds / pose.draw_seconds)
+		tree.set(FigureGraph.P_SWITCH_SEEK, pose.draw_share * _switch_seconds)
 		tree.set(FigureGraph.P_SWITCH, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	elif not pose.switching and tree.get(FigureGraph.P_SWITCH_ACTIVE):
 		tree.set(FigureGraph.P_SWITCH, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
