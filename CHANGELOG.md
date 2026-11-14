@@ -9,6 +9,774 @@ Don't edit this file for a change: add a note to `changelog.d/` instead (its `RE
 
 The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 
+## 0.1 Dev 3 (2026-11-14)
+
+### Highlights
+- Plant The Bomb, a new mode: carry the bomb to a site, hold Use to plant it, and keep it alive or defuse it, on Depot and Woodland.
+- Two new replicas with models of their own: the Pump Shotgun (three BBs a pull, level 10) and the Compact SMG (level 12). The level cap is now 15.
+- Sunlit Concrete, a new look for the whole game: warm sun, real shadows, calmer colours and wear on everything.
+- Woodland is a real wood now, with real trees, a stream, tunnels, a culvert and timber structures. Depot's hall looks and lights like a real building.
+- Map layouts reworked for angles, routes and cover, and the Practice Range has models of its own.
+- Every replica, part and power source has its own job, and shooting is checked against real airsoft: wind and air temperature on outdoor fields.
+- Replicas, magazines, gear, headwear and faces look like the metal, plastic and cloth they are made of, and your first-person hands are rebuilt.
+- Subway, a third map in an abandoned metro station, is in development: switch on Settings › Dev › Dev content to play it.
+- Jump climbs onto ledges, new recorded sounds for steps, the shotgun and the bomb, finer light on Ultra, and a full fix pass before the Beta.
+
+### Plant The Bomb fixes
+- A bomb set down while turning beside a wall no longer ends up inside the wall.
+- Throwing a smoke or flash just before arming no longer brings your replica back up mid-plant.
+- The last attacker hit while carrying the bomb no longer leaves a bomb row on the weapon rail.
+- With Callouts off, the feed's bomb notes no longer clear whenever a setting changes.
+
+### Bot fixes
+- Bots in each lane set off one after another at GO!, not in one clump.
+- Bots waiting for or riding a Subway lift no longer turn to stare one fixed way.
+- Bots and players inside a moving lift are no longer drawn climbing stairs.
+- After skipping a round, the callouts made during the skip no longer all play at once.
+- A bot personality with a Burst of 0 now warns and plays as 1, instead of never firing.
+
+### Weapon and graphics fixes
+- GBB Pistol with the Weapon Torch and Red Laser both fitted: the torch hangs under the laser.
+- Switching Lamp light in the pause menu with Global illumination on Scene refreshes the bounced light at once.
+- Oil stains and tyre tracks on the floor no longer show on the boots of someone standing on them.
+
+### Menu and settings fixes
+- The Loadout page's 1 to 5 keys work on AZERTY keyboards.
+- The Monitor and Renderer rows in Settings show their help.
+- Dragging a slider in Settings opened from the Match page no longer stutters.
+
+### Saves and loading
+- Restoring or deleting a save with a damaged file on a full disk no longer leaves default settings on the next start.
+- Night matches start a little sooner.
+- Subway and Depot matches load faster.
+
+### Sound and bots
+- A Hi-Cap magazine rattles while you run and sprint too, not only at a walk, and bots hear it from about 7 m further.
+- Steel lockers on Depot and Subway clank and ring when you run into them or shoot them.
+- Bots with the Compact SMG go full auto indoors at targets within 12 m. Other replicas still don't go full auto indoors.
+- Bots walk round a standing smoke cloud where another way is open, and go through it only when it is the only way.
+- Bots go round a bush on Woodland when that is quicker than pushing through it.
+- Bots squeeze past the works wagons on Subway's track, as you can, and no longer climb onto the platform to get by.
+- A bot riding a Subway lift that stops somewhere unexpected plans its way again.
+- Ask a bot for a magazine while it is bringing one to a teammate and your ask goes on to another teammate. The HUD says who was asked.
+- Bots carry the Clearer kit (Pump Shotgun) on indoor fields only.
+
+### Rounds, XP and menus
+- A round decided with SIMULATE keeps its score and win streak but gives no XP and sets no records.
+- Loadout and Customise show reach, speed and flight for the Match page's field, e.g. "Woodland at night, 8 °C".
+- The Match page says when a field's flag takes longer to raise: Woodland 9 s, 7 s on the others.
+- Match page, Custom rules: dragging the round time no longer stutters, and the time is saved once when you let go.
+- A pressed button still dips, and a click on the outer edge of a wide card is no longer lost.
+- Report a Bug: if the system refuses the long web address, a shorter one opens and the status line says so. The whole report is still copied.
+- The crash screen no longer shows the same crash again when the save folder refuses the run record.
+- Patch Notes on the wiki can mark an old note as replaced later.
+
+### Shooting
+- Subway lifts: a BB passes through an ajar doorway where no door leaf stands.
+- Practice range: hits on the fastest moving targets count all through their swing.
+- A crouched figure firing a rifle over a crate lifts the replica clear, so its magazine no longer dips into the crate.
+
+### Graphics
+- Subway's plant room: the fan housings and switch cabinet no longer draw black on their sides. Their lamps moved about 2 m.
+- Riding a Subway lift with Reflections on no longer redraws the car's reflections every frame.
+- On the simpler renderer (Settings › Graphics › Renderer), walls, doors, crates and flags are no longer far too dark.
+- On the simpler renderer the soft shadow under a figure now fades as it jumps.
+- Depot's painted stencils and the flag's cloth take the room's baked light.
+- A bot that comes into view half way through switching replicas carries on with the switch, not from the start.
+
+- Subway's running tunnels on Low and Medium: the arch overhead glows a little of its own colour instead of drawing near black.
+- Subway's platform vaults glow a little of their own colour on every preset, so they no longer read darker and cooler than the walls.
+- Depot and the other fields: doors, the roof's steel and lamps, and the light fixtures are worn like the props beside them.
+- Mesh detail Low: the replica in your hands draws its grain more cheaply.
+- Dev › Retro filter: your replica and BBs in flight wobble with the field, and the haze reaches 110 m (was 70 m).
+
+### Loading and speed
+- Loading screens move in smaller steps with shorter stops on every field.
+- Practice starts a little sooner.
+- Customise and the Armory open a little quicker.
+- Skipping a round no longer hitches as the skip starts.
+
+### Replicas and levels
+- Bots carry the Compact SMG on every field and the Pump Shotgun on indoor fields only, in ordinary matches.
+- The Armory lists 27 items.
+
+### Figures and animation
+- A bot running with its replica put away swings its arms, where before they hung still.
+- Switching between two replicas of the same kind (two rifles, or two pistols) puts the old one away and draws the new one from the right place.
+- Sniper Rifle on the slower springs: the bolt is home with the last knock of the cocking sound.
+
+### Hands that look and move like yours
+- With an AEG Rifle, Sniper or Compact SMG at the hip, you see only your left hand under the handguard, ahead of the magazine.
+- Your right hand stays below the screen, and the Compact SMG sits at the same angle and size as the rifles.
+- With a Vertical Grip or Angled Grip fitted, your left hand is a fist round the grip.
+- Pistols are held tight in both hands, the left wrapped round the right; the Cyber Pistol is held like the GBB Pistol.
+- Pistols sit nearer and larger at the hip, about a third bigger on screen; the reload moves to match.
+- On a pistol reload your left hand lets go, changes the magazine and comes back.
+- Raise the sights and a rifle's hands leave the view; with a pistol only the tops of your hands show under the slide.
+- Gloves, sleeves and bare hands (Settings › Dev › Skin-only arms) are remodelled and repainted in more detail.
+- Bare hands (Settings › Dev › Skin-only arms) have real hand proportions, a slimmer thumb, short nails, and knuckles and veins that show in the light.
+- First-person motion is smoother: a gentle bob as you walk, breathing at rest, a lean into strafes, a dip on landing and an eased drop when you sprint.
+- Bots still hold pistols in one hand; with a rifle and no grip, their left hand holds where yours does.
+
+### Setting the bomb with no animation
+- Setting the bomb has no animation: hold Use in a site and the bomb is set on the ground just in front of you while the PLANTING bar fills.
+- The bomb goes on the floor even on a slope, a little short of a wall, and always inside the site's ring.
+- Your replica is put away while you plant or defuse, and comes back after.
+- While you carry the bomb it shows as a row at the bottom of your weapon rail, keyed with Use, and lit while you set it.
+- Bots set the bomb by crouching beside it with no weapon in hand.
+- Once anyone arms the bomb, from either team, the bar under the score reads BOMB ARMED.
+
+### Real sounds for the shotgun and the bomb
+- The Pump Shotgun fires with the Sniper Rifle's shot sound.
+- The Pump Shotgun's pump and shell swap now use real recordings.
+- The bomb in Plant The Bomb now uses real recordings: set down, the code keyed in, the fuse's beep, the defusal, made safe and going off.
+- Picking the bomb up and putting it down are quieter.
+- The armed jingle is still a computer-made placeholder.
+
+### The bomb and the wire cutters
+- The Plant The Bomb bomb has its own look: four grey-green blocks bound by two silver tape bands, with a keypad timer and antenna on top.
+- Its red and blue wires plug into the front end, and no words or markings show on it.
+- The lamp winks amber while the bomb waits on the ground, flashes red with each beep once armed, and turns green when made safe.
+- The carrier wears the bomb strapped at the left hip, so you can spot who has it at a glance. It sits lower when they crouch.
+- While someone defuses it, a pair of teal-handled wire cutters lies open on the floor beside the wires, and is put away when the defuse stops or the round ends.
+
+### Woodland brow bush back in place
+- On Woodland, the hazel bush on the north lane at the Ridge's brow, just west of the North bridge, is back where it stood.
+- It had moved in the road change, which opened a gap the east end could shoot through.
+- Elimination on Woodland is even between the two ends again. Against bots the west end wins 48% of rounds, up from 41%.
+- Nothing else changes. The flag still takes 9 seconds to raise on Woodland.
+
+### Stockade (Dev content)
+- New map Stockade, shown only with Dev content switched on in the Dev tab.
+- A plywood village inside a log fort, 104 by 76 metres. Attackers start in the west camp by its tents, defenders in the east camp.
+- Each camp sits behind a palisade with three gates.
+- Three ways across: the Back Lane in the north, Main Street in the middle, and the Woodyard Road in the south.
+- Main Street runs through the West Arch onto the open Green, with its campfire.
+- The Woodyard Road passes the fenced Orchard.
+- The Forge and the Barn by the West Arch, and the Tavern and the Store on the Green, each have more than one door, so each is a way through.
+- Fenced courts and yards sit between the buildings.
+- The Bell house stands across the east end of Main Street, with a door onto the street and one onto the Green.
+- Plant The Bomb: Site A is indoors in the Long House's west room. Site B is in the open Woodyard, under the Sawmill's shed.
+- Also plays Elimination and Attack / Defend.
+- Day and night: three fires and lanterns light it at night.
+- Its picture shows on the Match page and the loading screen.
+
+### Faces drawn as real ones
+- Bot figures have real-looking faces: skin with uneven tone and fine grain, not one flat colour.
+- Brows are made of single hairs, low and heavy over the eyes. Lashes are fine, not a drawn outline.
+- Eyes have an iris of fine fibres round a black pupil with a small glint, off-white whites and a pink inner corner.
+- Eyes sit about one eye's width apart under a slight brow ridge, so faces no longer stare.
+- The fair, medium, tan and deep faces differ in more than colour.
+- Goggle and glasses lenses are a thin dark tint, so eyes show clearly through them.
+- No gameplay change.
+
+### Woodland flag takes longer to raise
+- In Attack / Defend on Woodland the flag now takes 9 seconds to raise. On every other map it still takes 7 seconds.
+- The 3 seconds you must keep it up afterwards are the same everywhere.
+- Woodland's two flags are about 77 m apart, so defenders at the other flag now have time to get across.
+- Against bots the attackers now win about 6 rounds in 10 on Woodland, down from about 7 in 10.
+- It applies in Skirmish and Custom matches. There is no setting for it.
+- The Maps table on the wiki lists each map's flag raise time.
+
+### Bots fire through bushes at point blank
+- Two bots from opposing teams in the same bush now shoot it out, instead of walking into each other.
+- Within 2.5 m, a bot fires through a bush whenever a BB could get through the leaves to its target.
+- Further away, bots still hold fire behind more than a thin edge of leaves.
+- Hiding in a bush right next to a bot is no longer safe: it shoots back.
+
+### Woodland's road is clear
+- The Long road on Woodland is clear: the fallen trees and the log stack that lay across it are gone.
+- No tree or woodpile stands on the gravel any more.
+- The road now bends twice between two stands of spruce west of the Culvert, so you cannot see or shoot down its whole length. The longest clear view is about 60 m.
+- Cover moved to the roadside: a fallen tree on the verge at the bend, and log stacks beside the road.
+- The pickup and the tyre stack are clear of the gravel.
+- At flag B the sawn boards now stand at the end of the shed, not beside the flagpole.
+- Woodpiles are 1.8 m tall. Only the camp gate screens are taller.
+
+### Headwear, arm bands and boots look worn
+- Helmets have scuffed and scratched paint, dust low down and grained rails.
+- Caps and boonie hats are sun-faded, with worn brim edges. The boonie has a flat square-weave top and a sweat-dark band.
+- Mesh masks have chipped paint and an edge bound in stitched tape.
+- Ear defenders and headsets are moulded plastic with padded cushions. The headset band is quilted.
+- Goggle frames are matte rubber.
+- Team arm bands are ribbed elastic with stitched hems, still Alpha blue and Beta orange.
+- Boots are suede, with creases across the top of the foot, scuffed toe caps and lugged soles.
+- Faces are unchanged. From range, figures look as before. No gameplay change.
+
+### Pump Shotgun has its own model
+- The Pump Shotgun has a model of its own.
+- It has a plain barrel over a tube, a round ribbed pump, a boxy receiver, a box shell ahead of the trigger guard and a pistol grip.
+- The stock has six positions, slotted sides and a sling loop.
+- It has no iron sights: aim along the top rail. Any optic sits on the rail as on the other replicas.
+- Steel barrel and tube, aluminium receiver and rails, polymer pump, grip, stock and shell. Every paint scheme works on it.
+- In first person your left hand holds the pump and rides it back and home after each pull, in time with the two knocks.
+- The hand is held a little nearer and lower than on the other rifles, so only your hand and wrist show.
+- The reload shows your left hand taking the shell off and pushing a fresh one home.
+- The Red Laser sits on its left side rail and the Weapon Torch on its right.
+- Bots with the Clearer kit hold it with a hand on the pump and carry it on the backpack.
+
+### Gear looks like cloth and plastic up close
+- Plate carriers, pouches, battle belts, holsters, packs and radios show their material when you are close to a teammate or an opponent.
+- Carriers look like woven cordura with ribbed webbing rows, soft loop panels and tape-bound edges with stitches.
+- Buckles and holsters are moulded polymer. Zips have teeth and cord pulls.
+- Pouches and straps sit in a soft shadow on the gear they are fixed to.
+- The cloth is a little dustier toward the seams and faded where it faces the sky.
+- The rolled dump pouch on the belt is rounder.
+- From range, Alpha's blue and Beta's orange carriers look as before. No gameplay change.
+
+### Plant The Bomb
+- New mode on the Match page, third card after Attack / Defend and Elimination, on Depot, Woodland and Subway.
+- One team carries a bomb to the other team's end and plants it at Site A or Site B; the other team keeps it out or defuses it.
+- Hold Use (G by default) to pick the bomb up, plant it inside a site's ring (3.5 seconds) and defuse it (6 seconds).
+- Let go of a defuse past half way and the work is kept.
+- Once armed, the bomb goes off after 30 seconds, beeping faster. It pops dust and buzzes, and hits nobody.
+- A carrier who is hit drops the bomb for any attacker to pick up.
+- Attackers win when the bomb goes off or every defender is out. Defenders win by defusing it, by getting every attacker out before it is armed, or by running the clock out.
+- Once armed, getting the attackers out is not enough: the bomb still has to be defused.
+- Bots fetch the bomb, push a site, plant behind cover and come back to defuse. A bot within 5 m of a planter or defuser sees them through smoke.
+- The ATK and DEF tags, the fuse on the clock, a PLANTING / BOMB gauge, a Use prompt, site markers and rings with A and B, and the sites and bomb on the minimap are all new.
+- Picking the bomb up and the armed jingle still have stand-in sounds.
+
+### Bombs and power sources look like what they're made of
+- The smoke bomb has a glossy printed film sleeve, a matte cap and a matte black lever with ribs and nicks.
+- The flash bomb is a dead matte card tube with a paper band, printed tiles and six small vents on its cap.
+- Both bombs have printed labels with bold stencil shapes and lines. They read as print but spell nothing.
+- The gas bottle is a glossy coated can with a full label, in green, red and black gas colours.
+- The LiPo and Standard Battery have glossy shrink film and matte paper stickers. The Standard Battery has a yellow caution sticker.
+- The springs are painted steel wire.
+- Customise › Power and the Loadout show these power sources in the new look.
+- Thrown bombs, bombs on the ground and bombs in bots' hands look as before. Smoke, flash and power source stats are unchanged.
+
+### Subway trains are real metro cars
+- Both Subway trains are now metro cars: clean white with an orange stripe under the windows and a curved roof.
+- Doors are tall and curve into the roof; windows are deep and rounded.
+- Inside, seats line the walls with padded backs, and poles and grab rails hang in the aisle.
+- Cool white lamp strips light the cars, a few of them flicker, and white lamps sit on the cab fronts.
+- Gangways are open between cars, and a tool cart sits in the south train's aisle.
+- Wheels and bogies show under each end of both trains.
+- The platform side's windows and door glass are see-through: you and the bots see in and out, but BBs, bodies and grenades stop on it.
+- The south train's open cab is the way out onto the track: drop down, and press Jump to climb back up.
+- Each cab stands in its tunnel, and the tunnel carries on past its corners.
+- The seats are low cover you can crouch behind.
+
+### Map layouts reworked
+- Depot: each flag now stands between two crate stacks, one hiding the pole from the site doors and one from the A stairs or B ramp.
+- Depot: the two corner stacks behind the flags are gone, so rounds are fought on the flags.
+- Depot: bot defenders now hold the sites themselves, not the foot of the stairs and the ramp.
+- Woodland: a hazel hedge on the Ridge's brow, and a fallen tree and log stack at each end of the North bridge break the long sight lines.
+- Woodland: a full west wall with a window and a doorway on the Fort, and a fallen tree in the Clearing.
+- Woodland: two spruce thickets on the Ford's east bank, with a short ramp up to Hut row.
+- Woodland: a log stack beside flag B.
+- Woodland: the middle knock-out now comes from closer, and each lane plays at its own range: the road close, the Clearing mid-range, the north lane over the bridge long.
+- Subway: flag B moved from the stair landing to the north platform, so each platform holds a flag.
+- Subway: bots ride the lifts and take the escalators, and no longer use the spiral stair.
+- Subway: rounds now run about 50 seconds, and Elimination is more even.
+
+### Attachments and magazines look like what they're made of
+- Red dots, scopes, silencers and the Weapon Torch look like anodised aluminium, in any colour scheme, in your hands and on Customise.
+- Lasers and grips look like matte polymer with rubber pads.
+- The Hi-Cap Magazine looks like a pressed steel shell. Low-Cap and Extended magazines look like polymer.
+- The Long Barrel and Tight Bore crowns look like polished brass and steel.
+- Silencers have wrench flats and spanner holes.
+- The Weapon Torch has cooling grooves, a ridged bezel and a battery door.
+- The laser has a window, screws and a battery cap.
+- The Hi-Cap Magazine has narrow ribs, a welded seam and steel feed lips. The Low-Cap has wide ribs and a mould line.
+- Barrel crowns are recessed. The Angled Grip has grip ridges.
+- Magazines show rounder BBs at the top.
+- The Vertical Grip is a little longer.
+- How the parts play is unchanged. Bots' parts look as before.
+
+### Pump Shotgun
+- A new replica: the Pump Shotgun, a spring pump shotgun for close quarters.
+- Each pull sends three BBs at once in a small triangle, so a rushed shot up close still lands.
+- Pump before the next pull; about five pulls in three seconds. Single shots only.
+- Its 30 BB shell is ten pulls and swaps like a magazine, the quickest reload of the long replicas; five shells are carried.
+- It has the shortest reach of the long replicas, about 24 m, and is weak at range.
+- One hit is still one hit, however many of the three BBs land.
+- It takes the Sniper Rifle's springs, any optic and the Weapon Torch; no grips, silencers, barrels or magazines.
+- It unlocks at level 10. Some bots carry it in a new Clearer kit with a Red Dot and two flashes, on indoor fields.
+- The Loadout sheet shows its rate as "1.7 × 3" and a Pattern row.
+
+### Subway tunnels arch like the trains
+- On Subway, the running tunnels east of the platforms have straight sides up to head height, then a round arch over the train.
+- The arch rings every 6 m and opens straight onto each platform's curved ceiling.
+- The train car in the south tunnel has its roof stepped in at the edges to fit under the arch.
+- On High and Ultra, the tunnel wall lamps now light the curve of the arch.
+- On Low and Medium, the arch stays dark above the walls.
+- BBs and grenades stop on the arch where you can see it.
+
+### More detail in Subway's interiors
+- Subway's halls, passages and plant rooms have more detail: a dark skirting, a green tile band at waist height and a frieze over the posters.
+- Cable conduit and pipes run under the ceilings, with access hatches in the ceilings and vents high on the tall rooms' walls.
+- Drains run along the halls' walls, and each plant room has a grey-green service door.
+- Yellow tactile strips mark the top and bottom of each escalator and stair.
+- None of the new detail covers a sign or poster. It is for looks only and doesn't stop BBs or players.
+
+### A plain hall floor
+- The halls' floor is now plain, smooth pale grey in place of the speckled terrazzo.
+- The passages keep their small tiles.
+
+### Subway's works models
+- Subway's tracks, platforms and plant room now have models in place of grey boxes (Dev content).
+- Spoil skip wagons, a ballast wagon pair and an engineering wagon loaded with concrete sleepers under a tarp (Dev content).
+- Three platelayers' trolleys, yellow buffer stops at the dead west end, cable drums and stacked tunnel lining segments (Dev content).
+- Signal cabinets, five new ones trackside beside the wagons, and staff booths with their blinds down, facing the platform edge (Dev content).
+- Works hoardings with a padlocked gate, two big ventilation fan housings and switch cabinets (Dev content).
+- The works wagons and trolleys stand on the train rails. Squeeze past them on either side; bots climb out onto the platform instead.
+- The train track has no sleepers now. Its rails are a little thicker, taller and light grey, so they're easy to see in the dark.
+
+### Cyber Pistol has a new grip
+- The Cyber Pistol has a new grip, rounded like the GBB Pistol's, with finger grooves on the front and a rounded base pad under the foot.
+- The back of the grip now runs straight from under the tang to the heel, so it is less curved.
+- Its dark power cell with the pink ring still shows through a window in each side; the window is smaller and leans with the handle.
+- The pistol is the same size and plays exactly the same. Bots' Cyber Pistols have the new grip too.
+
+### GBB Pistol shoots harder
+- The GBB Pistol now fires at 0.70 J, up from 0.52 J (274 fps with 0.20 g BBs, up from 237), like a real green-gas pistol.
+- Its BBs get there sooner, and it stays on target to about 29 m, up from 27 m. Red Gas takes it to about 31 m and Black Gas to about 32 m.
+- Its hop-up dial has a shorter range and comes set at 75 %. Tuned as far as it goes, the pistol reaches about as far as before (37 m), still short of the Cyber Pistol.
+- It is still a sidearm: single shots, a hard kick, a wide spread and 18 BBs a magazine.
+
+### Subway's ceilings on Ultra
+- On Ultra, the Subway's ceilings and shade now pick up the lamps' bounced light, so they read dark grey instead of black.
+- High and the other maps look the same as before.
+
+### Subway lit as underground
+- The Subway no longer takes a cold blue cast from the outdoor sky on Low and High, so it feels underground.
+- On Medium, the Subway platforms and halls get real light and shade instead of one flat grey.
+- Running on the Subway kicks up grey dust instead of white.
+
+### Subway ticket hall and concourse look real
+- The ticket hall and concourse have real models in place of grey boxes.
+- A line of 14 slim ticket gates, each lane only one person wide, with a paddle door on each side.
+- The paddles swing open as you walk up and shut behind you. They are look only, so BBs and players pass as before.
+- Ticket machines, two shuttered newsagent kiosks, a closed ticket office and a walnut booking counter.
+- Help points with maps, steel benches and crowd barriers.
+- The station's crates and lockers now use the Depot models.
+
+### Shooting checked against real airsoft
+- Wind blows only on open fields: Woodland and the Range keep a breeze of 0.3 to 1.8 m/s, new every match.
+- Depot and Subway (Dev content) are indoors and still, so BBs fly straight.
+- Each field has its own air: Depot and the Range 20 °C, Woodland 16 °C by day and 8 °C at night, Subway 14 °C.
+- Cold air is a little thicker, so BBs slow slightly sooner.
+- Gas replicas shoot softer in the cold, about 1.2 % less energy for each degree below 20 °C. Electric and spring replicas are unaffected.
+- The GBB Pistol holds its aim line about 2 m less far on Woodland at night than at 20 °C.
+- The pause menu shows the field's air under the match line, such as "Air 16 °C · breeze 1.2 m/s" or "Air 20 °C · still air".
+- A map card's tooltip says whether the field is open to the breeze.
+- BB weights on the Loadout go up to 0.40 g, from 0.30 g. Heavier than 0.30 g pays on the Sniper Rifle and the AEG Rifle; the pistols lose reach with it.
+- The site energy limit is read with the BBs you load, so a heavier BB can no longer push a replica past its limit.
+
+### Hits on running targets
+- Fixed: a BB could pass through the trailing edge of a running player or bot, by up to 11 cm on a sprinter. Hits are now tested where the BB and the body were at the same moment.
+
+### Lobbed BBs land
+- Fixed: a BB lobbed high no longer vanishes in mid-air after 2.5 seconds; it flies until it lands.
+
+### Replicas are made of metal and plastic
+- The GBB Pistol's slide is coated steel with a satin shine over a matte plastic frame.
+- The AEG Rifle's receiver and rail are anodised metal, its barrel steel, and its grip and stock matte plastic.
+- The Sniper Rifle has a steel action and a dark steel barrel in every paint, on a plastic stock.
+- The Cyber Pistol keeps its white shell and colours, with a finer finish and steel for its dark metal. Its lines still glow.
+- Metal catches the light and reflects its surroundings. Plastic is matte with a fine moulded grain.
+- In a black paint the metal is the darkest part and the plastic a shade lighter. White plastic is an off-white, not a glaring white.
+- Bold colours such as Cobalt stay bold. The light wear on the AEG Rifle and GBB Pistol still shows, and scratches on metal show metal.
+- Customise and the turntable show the same materials, with a small studio for the metal to reflect.
+- Bots' replicas look as before. Shapes, sizes and how replicas play are unchanged, in every colour scheme and with Realistic colours.
+
+### Every replica, part and power source has a job
+- The GBB Pistol is the quick sidearm: it draws in 0.22 s and reloads in 1.0 s, shoots tighter, and you run a little faster with it.
+- The Cyber Pistol keeps its rifle power, tight groups and pistol handling, but holds 30 BBs a magazine, with three magazines.
+- The Cyber Pistol's spread doubles when you run, sprint or jump, so stop or walk to shoot.
+- The Sniper Rifle walks and runs a little slower. The AEG Rifle and Compact SMG are unchanged.
+- The Red Laser tightens only shots from the hip, by a quarter, and is a touch slower to bring up. Aimed shots are the same with or without it.
+- The Vertical Grip is steadier when moving and after a sprint, but slower to bring up. The Angled Grip is quicker up but shakier after a sprint.
+- The Tight-Bore Barrel gives tighter groups for a little less energy. The Long Barrel gives more energy and reach, is front-heavy, and is no tighter.
+- The Hi-Cap Magazine is now slower to change, and it still rattles. The Low-Cap is the quickest to change and to draw.
+- Every optic is a little slower to bring up than iron sights. The Red Dot is still the quickest sight to your eye.
+- The 2x Scope comes up a little quicker than before, and the Variable Scope a little slower.
+- The 11.1 V LiPo kicks noticeably harder for its faster fire.
+- Red Gas and Black Gas kick harder, and Black Gas cycles a little slower.
+- Springs now trade off: the M130 is quick and quiet (heard 15 % less far), the M140 is the middle one, and the M150 shoots hardest, kicks hardest and is heard a fifth further.
+- Customise shows "Heard from" on the spring cards.
+- Customise's cards show the new figures: "from the hip" on the laser, "moving" on the grips and "draw" on the optics.
+
+### Subway's escalators, lifts and stairs (Dev content)
+- Escalators run in banks of two, two people wide, with ribbed steps, bright safety-yellow edges and black handrails.
+- Each escalator has steel balustrades and bronze lamps down its middle deck.
+- Escalators are narrower now, with solid decks between them and the walls.
+- Lift cars have brushed panels, handrails, a lit button panel and a sign.
+- Each lift landing has a lit direction display over its doors, and a vision panel across both door leaves.
+- The spiral stair and platform stair have ribbed yellow nosings and steel handrails.
+- The railing round the spiral stair's hole now sits exactly where its bars stop BBs.
+
+### Subway platforms like the Tube, and Morrin Street
+- Each platform now shares a deep tunnel with its track, under a curved white-tiled arched ceiling with dark rings every 6 m.
+- The yellow line is only at the platform edges, with a pale edge and MIND THE GAP painted in white.
+- The wall across the track is white tiles now, not black.
+- Tiles across the station are white and grey under a cool white light.
+- Platform floors are smooth grey concrete, and the track bed is near black.
+- A dark tiled band runs under the curve, with cables along the wall across the track and a dark face on each platform edge.
+- The station is called Morrin Street on its name boards, line map and information panel.
+- The name boards are orange, the same as the stripe on the trains.
+- Departure boards hang on rods from the curved ceiling.
+- BBs and grenades can now fly over the roof of a standing train.
+
+### Subway gets signs and posters in every room
+- Rows of small posters run down both walls of the escalators.
+- "Way out" and "Platforms" signs hang over the escalators and the stairs.
+- Departure boards hang over the platforms, and the line's map runs along the platform walls.
+- Information panels, "Hold the handrail", "No smoking" and "CCTV in use" notices dot the station.
+- More posters in the lower hall, the passages and the lift landing.
+
+### Subway station gets lamps and dressing
+- Every station ceiling now has a caged industrial strip lamp in place of the plain glowing panels.
+- The running tunnels have black caged bulkhead lamps with glowing glass on their walls.
+- The station is called Morrin Street on its orange name boards.
+- Hanging way-out signs read "Way out" one way and "Platforms" the other.
+- Thirteen posters, from "Call your hits" and "Goggles on" to adverts for a lido, a tea, a lemonade and a jazz club.
+- Huge 6 x 3 m posters hang on the walls across the tracks.
+- Clocks, CCTV cameras, fire extinguishers and litter bins fill the station.
+- "Stay behind the yellow line" marks the platform edges.
+- The new props are for looks only: nothing blocks you, a bot or a BB.
+
+### Subway shots echo
+- On Subway, every replica's shot is a little louder and rings off the tiles with a short underground echo.
+- The echo is light and fades in well under a second, and bots' shots echo the same way as yours.
+- Silenced shots stay muffled, and every other map sounds exactly as before.
+
+### Real sounds for steps, landings and the lift
+- Footsteps and jump landings on soil and metal now use real recordings.
+- Wading through Woodland's stream now uses a real recording.
+- Subway's lift doors and the lift setting off now use a real lift (Dev content).
+- Subway has its own background, a recorded tunnel (Dev content).
+- The Compact SMG's motor buzz has a little electric toothbrush whir under it (Dev content).
+- The lift chime, button and buzzer and the BB landing in water are still computer-made.
+
+### Map pictures
+- The map pictures on the Match page, the loading screen and the menu backdrop are rendered again: Woodland's far trees are green, Depot shows its worn lamps, and Subway shows its tiled station instead of a grey box.
+
+### Balance: parts as trade-offs, the Sniper and SMG, bots and flashes
+- The 11.1 V LiPo battery now kicks 10 % harder as well as firing 15 % faster.
+- The Tight-Bore Barrel costs a little energy (5 %, a little less reach) for its tighter groups.
+- The Red Dot is now the quickest sight to raise (0.85 of the iron sights' time).
+- The Sniper Rifle is much wider from the hip (ten times its aimed spread, was six): aim it.
+- Normal and Hard bots that see your flash bomb coming may turn away from it (Hard more often); Easy bots never do.
+
+### A proper shirt collar at the back of the neck
+- Player and bot figures no longer show a dark V at the back of the neck when seen from behind.
+- The shirt collar now goes all the way round the neck and sits a little higher at the back, like a real shirt's.
+- The neck stays tucked inside the collar when a figure aims up, down or with its cheek on the stock.
+- The sand scarf worn with the boonie hat now sits on the collar like a neck gaiter.
+
+### Climbing and Subway's lifts
+- Jump climbs only onto floors and platforms: Depot's desks and sofa, Subway's benches and the Range's long crate can
+  no longer be climbed from an end.
+- A full lift no longer waits forever for a bot left on the landing (it pressed the button every moment, beeping); the
+  car leaves and comes back for it.
+- Bots riding a lift stand in its corners, so none is pushed into the doorway holding the doors open.
+- Hit while riding a lift, you wait for the doors before walking off, and walk off from the floor you arrived at.
+- A smoke or flash bomb dropped in a lift rides with the car instead of floating in the shaft.
+- Bots call a contact in a lift car "Lift".
+
+### Fixes from the preliminary Dev 3 pass
+- Door frames on Depot and Woodland now sit in their walls; before, each one stood about a hand's width proud of the
+  wall face the door hangs on.
+- The Armory shows items you already own as unlocked, even where the new level track moved them to a later level (a
+  save from 0.1 Dev 2 at the old cap saw the Cyber Pistol, LiPo, Long Barrel, Black Gas and M150 as locked).
+- The Loadout's Spread now reads from the hip, as the wiki gives it: the Sniper Rifle shows 0.60°, not 0.10°. The
+  Compact SMG's sheet shows its quicker pace and its steadier spread on the move.
+- Rebinding a replica key from the pause menu now relabels the weapon rail at once.
+- A button pressed twice quickly with Reduced motion turned on in between no longer stays shrunk.
+- Woodland's lanterns and campfires no longer compile their shaders again on every loading screen, flickering lamps
+  stop updating every frame during a flicker, and a raised scope's glass keeps every lamp's shadow on Depot and Subway.
+
+### Depot hall lit by its lamps alone
+- On High and Ultra, Depot's hall floor and walls no longer glow with sun bouncing in; Low and Medium keep it.
+
+### Woodland's stream
+- A shallow stream runs down Woodland's old river bed. Wading slows you to about 60% pace.
+- Every stride in the water splashes, even walking or crouched, and bots hear it from about 16 m.
+- The bridges are the quiet, quick way over, and bots prefer them too.
+- The Ford is only ankle deep: it splashes but doesn't slow you, so the overtime flag race stays fair.
+- BBs that hit the water splash where they go in and stop.
+- The water is clear and slightly bright blue, with ripples drifting downstream (still with Reduced motion).
+- The river bed is now level and the North bridge sits lower over it. The two mud puddles are gone.
+
+### Woodland's trees and log stacks
+- The far forest grows in clumps and glades, and the treeline at the fences rises and falls.
+- Thicket spruces stand at uneven spacing.
+- Log stacks have real depth: log ends stand out, and split pieces lock together like a woodpile.
+
+### Wear marks on the floor
+- New setting, Wear marks, under Settings › Graphics › Light and detail. It is on from Medium up, off on Low, and not available on the Compatibility renderer.
+- Depot: dark rubber tyre marks where vans and the forklift drove through the Loading bay, the Garage and the forklift lanes in the hall.
+- Depot: oil stains where the vans and forklift stood, shiny in the middle.
+- Woodland: muddy tyre tracks run from the culvert up the road to where the pickup is parked, with an oil drip beside it.
+- Marks lie flat on the floor and fade out past about 40 m.
+
+### Level track in pages
+- The Armory's line of level dots now shows ten levels at a time: the starting kit and levels 1 to 10, then levels 11 to 15.
+- Small arrows at each end of the line switch between the two pages.
+- The Armory opens on the page with your next level.
+- The arrow keys also move across to the second page when you step past level 10.
+
+### Buttons answer your click
+- Every button in the menus and the pause menu dips in slightly and flashes a pale outline when you click it or press Enter on it.
+- With Reduced motion on, only the outline flashes.
+
+### Loadout swap
+- On the Loadout page, the PRIMARY and SECONDARY boxes' SWITCH REPLICA button now says SWAP.
+
+### Level stays on the rail
+- Your level at the foot of the left rail no longer disappears when Settings › Dev › Disable levelling is on.
+- It stays there greyed out, and hovering it says levelling is off.
+
+### Climb onto platforms
+- Press Jump at a ledge about knee-high to waist-high whose flat top runs on, like a station platform's edge, to climb up onto it.
+- "Space to climb" shows under the crosshair; you pull up in about half a second and your replica is held low until you're up.
+- Crates and props are still only vaulted.
+- Bots climb up onto platforms and drop back down the same way.
+- Bots lean in with high knees going up stairs and sit back on softer steps going down.
+
+### In development: Subway
+- Subway's steps at the ends of the track pits are gone; you climb out over the platform edge instead.
+
+### Compact SMG has its own model
+- The Compact SMG no longer borrows the AEG Rifle's look. It is a classic-style compact SMG with a stamped receiver and a curved steel magazine.
+- Its iron sights are a knurled drum rear sight whose ghost ring frames the hooded front post. Any optic removes them.
+- Small rails: a short top rail for optics, and a short rail each side of the handguard for a laser (left) and a torch (right). No grips.
+- Optics, lasers, torches and silencers fit its own rails and barrel. Your hands hold it with its own grip and change its magazine.
+- Inspect pulls the cocking handle back, flicks it up into its notch and slaps it home. Bots carry a lighter copy.
+- In your hands it looks lightly used, like the AEG Rifle and GBB Pistol: faint scratches and rubbed edges, the magazine the most worn.
+
+### Compact SMG
+- A new replica: the Compact SMG, a compact electric SMG for close quarters.
+- It fires 18 BBs a second from 45-BB magazines that empty in about 2.5 s, with a quicker draw and reload and 8 % quicker movement than a rifle.
+- It moves with half the usual spread and is tighter from the hip, so it shoots well on the run.
+- Its 0.20 g BBs at 0.85 J reach about 30 m on target, against 39 m for the AEG Rifle, and the spread is wider with the sight up.
+- It has semi and full auto, unlocks at level 12 and has no grips, barrels or extra magazines.
+- Some bots carry it in the Breacher kit. Its sounds are stand-ins made from the AEG Rifle's.
+
+### Countdown beeps
+- Each round's 3, 2, 1 countdown now beeps on every number, with the same short beep each time.
+- The referee's whistle still blows at GO! with no beep.
+- The Practice Range has no start countdown, so nothing beeps there.
+
+### Depot hall looks like a real building
+- Depot's hall has solid block walls under cladding, crimson steel columns every 8 m under the roof, two roller shutters and a fire exit.
+- Steel pillars carry hazard bands, and camouflage nets hang from scaffold walls.
+- The roof has trusses, purlins, rooflights, a sprinkler main and cable trays, with high-bay lamps hanging on cables.
+- The concrete floor has a softer tone, speckles and a few hairline cracks.
+- Walls, pillars and nets block BBs and sight just as before.
+- Camouflage net walls are closed over their tops and at their ends, so you can no longer see through them from above or from the end.
+
+### Depot's first map models
+- Depot's plywood walls are now the game's own model: birch sheets between screwed battens, with nails, patches, a rail, skirting and a cap, and shorter versions under and over the windows.
+- Crates on Depot and Woodland are now wooden crates on pallets, with perforated steel edges, clips and stencilled arrows.
+- Depot's shipping containers are corrugated containers with ribbed doors, bright steel locking bars, hinges and corner castings, still in each container's own paint; the Box is built from container walls and a roof.
+- Every map's doors are now two-panel honey-oak doors with a handle and keyhole, set in a frame with architraves, sized for each map, instead of plain green slabs.
+
+### Depot's racking and furniture, modelled
+- Depot's pallet racking, steel drums, plastic barrels, pallets, sofas, office desks and steel lockers are new models
+  made from real reference photos, and the Practice Range has a kit rack of replica stands, hooks and cases.
+- The racking comes in three differently stocked bays (one with no drums or sacks, and empty slots), mixed along
+  every rack so no two side by side are the same.
+- Steel drums now stand two high, nine stacks to a pallet.
+- Steel drums and lockers ring like metal and a BB can ricochet off them; plastic barrels tick and no longer bounce
+  BBs back.
+
+### Depot's worn lamps
+- Not every lamp in Depot's hall is new any more: twelve burn dimmer and warmer, three flicker now and then, and two are dead, leaving darker patches. They are the same lamps every match.
+- The dim and dead lenses show on every preset; on High and Ultra the lamps' light changes with them.
+
+### Eye adaptation
+- A new graphics setting, **Eye adaptation**, on for High and Ultra: step into a dark tunnel or under the trees and your eyes open up over a second or two, so you can make out what is in there; step back into the light and it dazzles a moment, then settles.
+- Ordinary views look just as they did, and nights stay dark. Turn it off under Graphics › Custom.
+
+### New flagpole and Range skyline
+- The flagpoles on every map are now a modelled sectional pole, black below and aluminium on top, with twist-lock
+  collars, a weighted base and the rope the flag climbs. The overtime flag uses the same pole, shorter.
+- The buildings round the Practice Range are no longer grey blocks: green steel sheds with roller shutters, yellow jib
+  cranes, feed silos, a steel watch tower with an open cab, a water tower, an old airliner fuselage on sleepers and
+  phone masts that still carry the yard's floodlights.
+- The Range's sheds and silos stand lower, so a little more sky shows over the walls. Where BBs go is unchanged, and
+  the skyline still draws as one cheap mesh.
+
+### Bots' flashes spare teammates
+- Bots no longer blind their own teammates with a flash they throw.
+- A bot checks the spot its flash will go off, including teammates walking towards it, and checks again as it throws.
+- If a teammate would be caught, the bot keeps the flash and tries again after its usual pause.
+
+### Depot lit by its lamps alone
+- On High and Ultra, no sunlight gets into Depot's hall any more: every roof lamp lights the whole hall, wide and soft, blending into one even light with no visible cone.
+- Shadows under racking, crates and players stay dark, but you can still make out what and who is in them, even inside the tunnels through the racking.
+- Low and Medium look as before.
+
+### Subway's working lifts
+- Press G at a lift door in Subway to call the car.
+- Inside, look at a floor's button and press G to ride there. The HUD names the floor.
+- One car waits in the ticket hall, the other at the platforms.
+- A car takes 4 people. Its doors open in 1.5 s, and it rides 4 s a floor.
+- The car stops on the way at floors someone called, and holds its doors open for 2 s at each stop.
+- Doors won't shut on someone in the doorway or while a hit player is aboard.
+- A fifth rider sounds the buzzer.
+- Bots ride the lifts when that is quicker than the stairs, and step back out of an over-full car.
+- Walk-offs always take the stairs.
+- Lit buttons glow warm white.
+- The chime, doors, motor, button beep and buzzer are placeholder sounds until a real lift is recorded.
+
+### Subway dressed in materials
+- Subway's station is no longer grey boxes: white tiled walls, terrazzo and quarry-tile floors, light concrete ceilings.
+- Platforms have concrete, a pale coping stone and a yellow tactile strip at each edge.
+- Both tracks have ballast, concrete sleepers and rails. They are scenery: you walk straight over them.
+- Escalators have ribbed tread. Running tunnels are sooty concrete. Train floors are rubber, and the walls are painted steel.
+- The cover is painted steel, planks, boards, corrugated shutters and rust.
+- Lift shafts are tiled like each hall's walls. Grime gathers at the foot of the walls.
+- Cover, collision and sight lines are the same as before.
+- Low graphics draws the materials without their surface relief.
+- The materials are CC0 from ambientCG, credited in the game's notices.
+- Subway no longer borrows Depot's container and crate models.
+
+### Subway in development
+- A new map is in development: Subway, an abandoned metro station on three levels, in Settings › Dev › Dev content.
+- The Street team starts in the ticket hall and comes down the escalators or spiral stair to the booking hall and concourse.
+- A stair and ramps lead down to two platforms beside abandoned trains, where the Tunnel team comes out from the running tunnels.
+- Close quarters above, with one long 58 m line along the south platform.
+- In Attack / Defend, flag A is inside the south train and flag B is on the stair's half landing. The flag poles are shorter to fit inside the train.
+- Strip lamps light every level on High and Ultra. Medium draws the station in flat shade.
+
+### Lamps that really light the room
+- New graphics setting, **Lamp light**: an indoor hall's roof lamps become real lights, each casting its own shadow. Players, crates and racking throw shadows out from under the lamps, light pools on the floor under each lamp, and on Ultra the lamps light the haze.
+- At night, fires and lanterns cast shadows with Lamp light on, and Ultra gives real light to up to eight of them (four before).
+- High lights the lamps near you, Ultra lights them across the whole hall. Low and Medium look as before.
+- The lamps' shadows follow your shadow settings. On Softest they are sharp where an object meets the floor and soft further away.
+
+### Level cap goes up to 15
+- The level cap goes from 10 to 15, with a new replica every five levels: the Sniper Rifle at 5, the Pump Shotgun at 10, the Compact SMG at 12 and the Cyber Pistol at 15.
+- Every level now unlocks something, spread more evenly: the M140 Spring at 9, the LiPo battery at 11, Black Gas at 13, the M150 Spring at 14.
+- Levels 1 to 10 take the same XP as before, so your level doesn't change and you keep everything you've unlocked.
+- Levels 11 to 15 take 1,400 to 1,800 XP each, about 58 matches on Normal to the top.
+
+### Lightly used magazines
+- The Hi-Cap and Low-Cap magazines for the AEG Rifle, and the Extended magazine for the GBB Pistol, now look used too.
+- They show faint scratches, rubbed edges and a little dust, the same as your replica's own magazine.
+- Bots' magazines stay plain.
+
+### Attack and Defend come first
+- The Match screen lists the modes as Attack / Defend at the top, then Elimination, then Practice.
+
+### The Practice Range has its own models
+- White steel plates hang from timber posts in black H-stands, and the swinger hangs from its own frame.
+- Figure targets are flat plywood cut-outs, standing and crouched, on hinge plates, with a motor box, rails and a trolley for the movers.
+- Distance boards, fence walls and a 5 m backstop mark out the range.
+- Sandbag walls of fat tied bags, a site toilet, a water tote and an open-frame generator with jerry cans fill the space.
+- Hit sizes are unchanged, so a BB hits a target where it always did.
+
+### Replicas look used
+- Your AEG Rifle and GBB Pistol now show light use: faint scratches, more on the magazines and the pistol's slide.
+- Edges rubbed by your hands and gear look worn, and a little dust sits in the recesses.
+- Metal parts wear to bare metal only where they are rubbed hard.
+- The wear shows in first person, on Inspect, on the Customise turntable and in the menu pictures, in every paint scheme and in Realistic colours.
+- The wear follows the look's wear setting, so a preset with wear at 0 shows clean replicas.
+- Bots' replicas, the Cyber Pistol and the Sniper Rifle look as before.
+
+### Retro filter: a 1990s console look
+- Settings › Dev › Retro pixels is now Retro filter, and the view looks like a 1990s console game instead of Doom.
+- The picture is 240 lines of square pixels, with smooth 15-bit colour and a fine dither instead of hard colour bands.
+- Props, racks, trees and doors have corners that wobble slightly as you move.
+- Wall and floor textures swim a little, and a soft haze falls over things from about 12 m.
+- Two sliders: Lines (120 to 480) and Shades (4 to 32).
+- Turning the filter off brings back the map's own haze exactly.
+- An old save's Retro pixels switch carries over; its old size and shade settings don't.
+
+### Scope glass at the hip looks ahead
+- At the hip, the 2x Scope and Variable Scope glass now shows what the scope points at, straight along its barrel.
+- The hip view comes from the point where the scope's line passes nearest your eye, never more than 25 cm away, so it can't show through a wall you stand against.
+- The glass stays clear, unmagnified and lightly tinted; aiming (zoom and reticle) is unchanged.
+- Low graphics still show a still tint.
+
+### The Street removed
+- The Street map is gone from the game; it showed only with Dev content on. The maps are Depot, Woodland and the Range.
+
+### Menus, HUD and replicas in Sunlit Concrete
+- The menus and HUD are charcoal and off-white, with a pale bone accent on Play, Customise, Resume and the selection; team blue and orange stand out most.
+- Warnings and the Loadout's better and worse colours are a little quieter.
+- Replica paints are drawn matte and a little muted, like the maps' paint; every scheme keeps its two tones, and the Loadout's swatches match.
+- Part of the Sunlit Concrete look.
+
+### Depot's roof and map pictures
+- Depot's roof is no longer crimson and violet. Its trusses and wall frames are galvanised grey steel, under a pale grey roof liner.
+- Red sprinkler pipes run along the roof, like a real warehouse.
+- The map pictures on the Match page, loading screen and menus are new, and show the Sunlit Concrete look.
+
+### Map models look used
+- Every map's models now look used: grime at their feet, thin dirty streaks down their sides, and faint stains and dust on their tops.
+- Depot's plywood walls, crates, containers and racking, and Woodland's kit, tyres and trunks all wear this way.
+- No two props wear alike, and tree leaves stay clean.
+- Part of the Sunlit Concrete look.
+
+### Sunlit Concrete on every map
+- Every map has a new, more realistic look: Sunlit Concrete.
+- Light falls off smoothly now, instead of in cartoon bands.
+- The sun is warmer and stronger, with clearer shadows, and shadows are neutral grey instead of violet.
+- Painted surfaces keep about 60% of their old colour, so they read as weathered paint.
+- Concrete and plywood show their grain and light wear.
+- Woodland's grass is a darker, natural green.
+- Team blue and orange stay the strongest colours.
+
+### Finer light on Ultra
+- On Ultra, shadows in corners and under crates, racking and pallets are crisper, so objects sit on the floor instead of floating.
+- Bounce light is worked out in finer detail near you, so thin walls and tree trunks keep their shade. Reflections on screen are sharper.
+- Low, Medium and High look and run exactly as before. Ultra is for the most powerful graphics cards.
+
+### Woodland's north bridge without the glowing marks
+- From Medium graphics up, the trees, grass and spruces near Woodland's north bridge no longer draw as black shapes with a white glow round them.
+
+### Woodland looks like a real wood
+- Ferns are now leafy clumps, and bushes are leafy shrubs instead of green balls.
+- Fallen logs have bark, moss and fungi, with a sawn butt and a snapped tip.
+- The six wind-thrown trees show a root plate torn out on edge, with the trunk and green crown lying behind it.
+- Woodpiles are split firewood with ragged tops, and they are lower at 1.8 m. The camp gate screens stay tall, so the spawns stay hidden.
+- B site's shed has a yellow saw bench, a heap of log rounds, sawhorses and a stack of sawn boards.
+- Props on slopes stand on the ground, with earth under them.
+- Everything else stops BBs and blocks sight just as before.
+
+### Woodland has tunnels, a culvert, a wreck and fires
+- Two crawl tunnels are hollow oak logs, with finished cut ends, to crouch through.
+- A concrete culvert with kerbs carries the road over the stream, and stacks of tractor tyres stand around the map.
+- An abandoned violet pickup with flat tyres and rust stands at the Truck bend.
+- Campfires and hurricane lanterns stand cold and dark by day, with charcoal in the fire pits.
+- At night the coals and lantern globes glow, and the flames flicker and sway.
+- Campfires and lanterns are for looks only: BBs and players pass straight through them.
+
+### Woodland's structures are built from timber
+- The Tower is a timber watch tower: braced legs on concrete piers, a board deck walled in on every side but the stair's head, a low roof on posts and a closed stair with handrails.
+- The Tower's walls now close its corners and both sides of the stair's head, so it stops BBs all round; you look out over the walls.
+- The North bridge is a log bridge with split-log decking and closed slab sides under a pole handrail.
+- The Sawmill is an open post-and-beam shed with knee braces and a corrugated roof.
+- The huts have shake roofs, and the camps and the field's edge are walled by a palisade of sharpened stakes.
+- The Fort's firing window has a plywood lintel to match its walls, not a plain bar.
+- Everything else stops BBs and sight exactly as before.
+
+### Woodland trees look green
+- The trees past the fence on Woodland are green again, not white-grey, on every graphics setting.
+- The far trees fade into the distance later, so the treelines stay green out to the horizon.
+- The sunlit tops of the spruce thickets no longer look pale or white.
+- Thickets no longer show a plain green block between their spruces. The trees stand closer and their branches overlap.
+- The dark patch at the foot of each thicket is lower and shaded, so it reads as cover.
+
+### Woodland has real trees
+- Pines come in three ages, young, grown and old, by their height.
+- Oaks have broad, buttressed trunks, and birches are white.
+- Thickets are dense dark spruces, with no bright green showing between them.
+- A far wood of stepped spruce spires stands past the fence, and the treelines behind it are spruces too.
+- Every crown starts over head height, so you can walk under the branches.
+- Trunks stop BBs at their bark, and cover and sight lines are unchanged.
+
+### Internal
+- The unit tests run in seven parts side by side instead of four, each well inside its time limit, so checks no longer fail at random on a slow machine.
+- Unused stand-in models and an old concrete texture are removed from the game; nothing looks or plays differently, and the download is a little smaller.
+
 ## 0.1 Dev 2 (2026-11-09)
 
 ### Highlights

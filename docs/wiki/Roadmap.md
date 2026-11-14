@@ -16,27 +16,23 @@ then **0.1**, which opens **Early Access**. Each build is posted on the
 Depot as an indoor airsoft hall and Woodland as an open wood (by day, or at night with the weapon torch and glowing
 BBs), with doors and two flags; the AEG Rifle, the GBB Pistol, the Cyber Pistol, the Sniper Rifle with the 2x and
 Variable Scopes, the Pump Shotgun and the Compact SMG, every part and power source, the Loadout, levels and the Armory; Easy, Normal and Hard bots with
-names, personalities, kits and callouts, playing as a team; Elimination with its overtime flag, Attack / Defend and
+names, personalities, kits and callouts, playing as a team; Elimination with its overtime flag, Attack / Defend, Plant The Bomb and
 Custom matches with 5 to 8 a side; the practice range in Depot's site, Practice on any field and the timed challenge;
 squad orders, pings, Go there and the magazine hand-off; the minimap, the full-screen map, the hit feed, scoreboard
 and match summary; smoke and flash bombs, thrown by you and the bots; detailed models of every replica, attachment,
-magazine and bomb, your own arms holding them, and figures in real gear with faces; recorded sounds; graphics presets,
+magazine and bomb, your own arms holding them, and figures in real gear with faces; finished models for every
+field, climbing onto ledges, wind and air temperature on the outdoor fields; recorded sounds; graphics presets,
 accessibility options, the save file screen, the crash screen and bug reports.
 The rest of this wiki describes all of it.
 
 ### Next
 
-- **0.1 Dev 3:** finished models for Depot and the practice range, and perhaps Woodland, and a new map: Subway, a closed metro
-  station on three levels, from the ticket hall down escalators, stairs and working lifts to the platforms, the
-  trains and the tunnels, tiled, terrazzo-floored and lamp-lit, its shots ringing off the tiles (in
-  development). A test map for the developers, Stockade, a plywood village inside a log fort with an indoor site
-  and an open woodyard, is in development for trying out Plant The Bomb; it is not offered to players.
-
-### Then: the rest of the art pass
-
-The replicas, attachments, figures and first-person arms have their finished models. The fields' greybox goes next:
-finished models for Depot and everything in it (the range too), then the other fields, all made for the game and
-checked in play under its own lighting.
+- **0.1 Beta 1:** 0.1 Dev 3 was the last Dev build. The Beta builds add no new systems: they are for balance, fixes,
+  speed and polish, from the playtests, up to 0.1 and Early Access.
+- **In development:** Subway, a closed metro station on three levels, from the ticket hall down escalators, stairs
+  and working lifts to the platforms, the trains and the tunnels, tiled, terrazzo-floored and lamp-lit, its shots
+  ringing off the tiles. A test map for the developers, Stockade, a plywood village inside a log fort with an indoor
+  site and an open woodyard, is for trying out Plant The Bomb; it is not offered to players.
 
 ## Early Access: the themed updates
 
