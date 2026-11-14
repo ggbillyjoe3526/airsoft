@@ -1,22 +1,23 @@
 Task: HA1 · First-person arms and grips, made realistic
-Attempt: 3 of 4
-Head: ef9d94f (checks passed on it; HEAD is 7768f7b, a merge of main (PB3, AU11) that touches none of this task's hunks; its re-run must pass before merge)
-Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 7/8 → Retry (near miss, judgment: check 1 alone; QA Pass, performance Pass)
-Failed checks, with evidence (file:line, one or two lines each, each marked measured or judgment):
-1. [judgment] (b) AEG far side, attempt 2's must-fix "tips behind its front end" not met, and the record says otherwise. In ha1-round3-far-side.jpg "NOW: AEG Rifle" (and closeups "AEG: left hand, FROM THE FAR SIDE") the foremost (little) finger stands wholly in front of the handguard's front end, against the barrel under the front sight base, about one finger's width past it. docs/records/HA1.md:190 says "none past the handguard's front end". hold_tables.py GUARD (tip_at / tips_behind) does not hold it.
-1. [judgment] (b)/(d) Far-side fingers now touch but don't read as a grip. AEG: the index stands alone, a clear gap of more than a finger's width to the middle finger, all four rising nearly straight up from a palm that hangs below the handguard. Sniper: the four fingers are pinched together into a beak, overlapping, pads at mid-height of the stock's side, a light gap between the palm and the stock's underside along its whole length, so the hand hangs from its fingertips. SMG: the index curls into a tight hook pointing back with daylight between it and the middle finger (an "OK sign" ring), the little finger aimed forward (pinky_ahead). A hand carrying a rifle lays the fingers along the side face, closed together, slightly curled, with the weight on the palm and finger roots. Bots show this close up.
-1. passes: AEG hip, both looks (ha1-round3-hip.jpg NOW and ha1-final-bare-before-now.jpg): only the thumb shows. Sniper right hand (ha1-round3-sniper-hand.jpg): pad in the guard on the trigger, three fingers round the wrist. Palm arc gone, nails thin to the root (ha1-round3-palm-thumb.jpg). Thumb: 0.689 vs 0.710 (-2.9 %), seven older ratios within 7.7 %. Near side, foregrips and pistols unchanged as ruled.
-Non-blocking notes (check 7 still passes): tests/unit/test_ha1_rifle_hold.gd:23-28, the new FINGERS doc was inserted under END_PLACE's doc line ("How near (m) a reload's last frame..."), so END_PLACE lost its doc and FINGERS carries a wrong first line; :127-128 `_finger_points` doc says "those on the replica's far side" but it returns every left finger point (`_far_side` filters).
-Must-fix for the next attempt:
-- AEG (GUARD): every far-side fingertip, little finger included, behind the handguard's front end by at least 5 mm; add that to the eye test or a sibling (tip z against the handguard's front in replica space) for AEG, Sniper, SMG, so the record's claim is tested.
-- Far-side fingers on AEG, Sniper and SMG: closed together (no daylight between neighbours from the far side), slightly curled along the side face with pads on its lower half, no finger hooked back (SMG index) and no pinch (Sniper). Raise the palm's far edge to touch the underside if the eye check and the approved near-side thumb allow it; if the palm can't move, say so in the record and keep the fingers' line instead. Keep the eye test at 0 points.
-- Re-render "FROM THE FAR SIDE" for all three from a side-on camera and the 3/4 below camera a bot is seen from.
-- Fix the two doc comments above.
+Attempt: 5 of 4 (past four, under the owner's standing ruling)
+Head: 9cc3f11 (= git rev-parse HEAD; checks passed on db5afd5, and 9cc3f11 adds only pipeline/ reports)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept (QA Pass, performance Pass)
+Failed checks, with evidence: none.
+1. SMG far side (ha1-round5-far-side.jpg "NOW: Compact SMG, side-on", zoomed 4x): the loop is gone. The little finger rises from its knuckle, bends forward at a middle joint of about 60 degrees and lays its tip up the side face toward the bore, touching the ring finger at the tips, like the Sniper's. From below, all four lie closed side by side. Sniper: the four fingers stand side by side, tips up and a little forward, with no V of daylight and none leaning back. The near sides are unchanged, the AEG is kept as the owner ruled, and the hip view still shows only the thumb (ha1-final-hip.jpg). Residual (not a fail): on the SMG, a slit of daylight about a quarter of a finger wide shows between the ring and little fingers above the knuckles. A flexed hand, with its little finger converging, shows this too, and nobody sees it at bot distance. The record says so (HA1.md:240).
+   Cause and fix read in the diff: pose.py:+914-925 `_strays` stops tighten/wrap at the row; sight.py:+63-86 `crowd` adds the tip-behind-knuckle and tip-gap terms; hold_solve.py:+406,+539,+586 clear the row per solve, so the grips' fists match attempt 4 (QA's qa5 floor test fails on the loose intermediate build).
+2, 3, 5, 6. No file under game/ changed. The change is arms.glb, build tools, tests and docs. Budgets match attempt 4 (38,900/34,452 triangles, 4 materials, 6.18 MB).
+4. test_ha1_qa3.gd:+75-93 asserts tip.z < knuckle.z and a 20 mm tip gap per neighbour pair on the skinned mesh. On attempt 4's model the little finger's tip lay behind its knuckle (SMG loop) and the ring-to-little tip gap was 35 to 36 mm, so it fails there, as QA confirmed. qa5 fails on the intermediate build (Ring 260, Pinky 299 degrees).
+Non-blocking notes (check 7 passes):
+- test_ha1_qa4.gd:2 describes the dropped approach ("with the closing passes skipped"). It should say the passes keep the row.
+- test_ha1_qa4.gd:+21 `_surface_gap` measures to triangle edges, not faces. That overstates the gap, which is safe, but the name says surface.
+- The SMG slit sits only in the attempt-5 entry (HA1.md:240). It belongs under Known issues left too.
+- test_ha1_qa3.gd's TIP_GAP passes the SMG's middle-to-ring pair at 20.1 mm by 0.4 mm of rounding: little headroom against a re-bake.
+Must-fix for the next attempt: none. Optional, in the records commit: the three notes above.
 Owner should test in the game (at most 6, one line each):
-- AEG, Sniper, SMG at the hip, gloves and bare: any left fingertip on the right of the replica while walking, firing and turning?
-- Stand beside a bot with an AEG and a Sniper: do its left fingers read as holding the handguard?
-- Sniper, work the bolt at the hip: the right glove fills the top-right quarter of the screen; acceptable?
-- Raise and lower the sight fast on each rifle: any pop or flash of the left hand?
-- Pistols at 25 cm, walking and firing: do the bob, flick and roll feel good and not seasick?
-- Bare hands at 1440p: nails, tendons and skin as you approved them ("Perfect")?
+- Beside a bot holding the Compact SMG: do its left fingers read as a hand wrapped on the handguard (no loop, no hole)?
+- Beside a bot holding the Sniper: do the four left fingers stand together up the fore-end's side?
+- Sniper and AEG with the Vertical and Angled Grips: are the fists still closed round the grip as you kept them?
+- AEG, Sniper, SMG at the hip, gloves and bare: still only the left thumb while walking, firing and turning?
+- Raise and lower the sight fast on each rifle: any pop of the left hand?
+- Reload and bolt on the Sniper and SMG: does the left hand start and end on the handguard without a snap?

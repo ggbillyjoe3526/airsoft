@@ -1,6 +1,6 @@
 # HA1 · First-person arms and grips, made realistic
 
-**Review:** REVIEW_LINE
+**Review:** 5 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 Owner's ask (2026-11-12, with reference pictures from other games and photos of a hand): "go over the first person arms
 and their grips on weapons to make them appear more realistic. When not aiming down sight with a rifle only the player's
@@ -20,7 +20,7 @@ Decisions). The ruling is in `docs/DECISIONS.md` › First-person hands.
 | 2026-11-13 | 2 | build thread | ✓ 6,617 of 6,619 (2 pending, as on main) | 7/8 Retry | check 1: fingertips seen at the AEG's hip; far-side fingers floating under the handguard; a seam on the palm and a step at the nails; the Sniper's right hand off its trigger; the thumb unmeasured |
 | 2026-11-13 | 3 | build thread | ✓ 6,619 of 6,621 (2 pending, as on main) | 7/8 Retry | check 1: a far-side finger on the AEG past the handguard's front end; the Sniper's and the SMG's far-side fingers pinched into one another |
 | 2026-11-13 | 4 | build thread | ✓ 6,647 of 6,649 (2 pending, as on main) | 7/8 Retry | check 1: the SMG's rearmost far-side finger curled in a loop and the Sniper's leaning back from its neighbour (a closing pass ran after the row was laid) |
-ATTEMPT5_ROW
+| 2026-11-14 | 5 | build thread | ✓ 6,650 of 6,652 (2 pending, as on main) | 8/8 Accept | – |
 
 ## Decisions
 
@@ -331,6 +331,10 @@ ATTEMPT5_ROW
 - On the AEG's far side (a bot beside the player shows it; the player's own view never does) the left middle
   fingertip rests 13 mm past the handguard's end, and the fingers stand less evenly than on the Sniper and the SMG
   (the decision above; `docs/KNOWN_ISSUES.md` › Graphics).
+- On the SMG's far side a slit of daylight about a quarter of a finger wide shows between the ring and little
+  fingers just above their knuckles (the handguard is narrower there than the fingers are long). Its middle and
+  ring fingertips stand 20.1 mm apart, inside the test's 20 mm only by its half millimetre for rounding: a rebuild
+  that re-rolls the fingers may need `sight.TIP_SLACK` a little tighter.
 - The skin's atlas has about 1,000 texels (of 1.27 million) claimed by two places on the hand, at the thumb's web; no
   seam shows in the pictures.
 - Working the Sniper's bolt, the right elbow steps out a few centimetres over two frames where the sleeve would

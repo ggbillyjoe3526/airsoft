@@ -1,6 +1,7 @@
 extends GutTest
-## HA1 QA, attempt 5: with the closing passes skipped for the four left fingers on the Sniper and the SMG, no
-## fingertip floats off the handguard: each lies within FLOAT_LIMIT of the replica's surface.
+## HA1 QA, attempt 5: the closing passes keep the row of the four left fingers on the Sniper and the SMG, and no
+## fingertip floats off the handguard: each lies within FLOAT_LIMIT of the replica's nearest triangle edge (which
+## overstates the gap to a face, on the safe side).
 
 const FINGERS: Array[String] = ["Index", "Middle", "Ring", "Pinky"]
 const TIP_BONE := {"Index": 0.0247, "Middle": 0.0263, "Ring": 0.0260, "Pinky": 0.0217}
