@@ -304,9 +304,15 @@ func step_throw(c: Character, eye: Vector3, pool: Array[Grenade], events: SimEve
 		return
 	# the pull that threw it may still be held: it stays let go after the throw too (trigger_command)
 	hand.end_throw()
-	if not hand.was_holstered:
-		c.armament.bring_up(c.id, events, cfg.redraw_scale)
-		hand.torch_back = hand.torch_was_on
+	if hand.was_holstered:
+		return
+	# Both hands went onto Plant The Bomb's device meanwhile (PB3): the replica stays away, and comes up as they come
+	# off (Plant.hands_on), not in the middle of the arming.
+	if c.hands_on_bomb:
+		c.bomb_was_holstered = false
+		return
+	c.armament.bring_up(c.id, events, cfg.redraw_scale)
+	hand.torch_back = hand.torch_was_on
 
 
 ## Every bomb in `state` flies, bounces, pops or goes bang this tick, and every dazzle wears off. A throw by someone
