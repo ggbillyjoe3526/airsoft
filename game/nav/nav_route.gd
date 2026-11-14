@@ -5,7 +5,8 @@ class_name NavRoute
 ## run drawn in cells ends), where a leg's end lies, and only when the next corner is out of sight its turns, then every
 ## second node. Each try walks a line in GDScript, so fewer tries keep the smoothing cheap.
 ##
-## On a field with bushes a leg may run through no more leaves than the path it straightens does (a cell's diagonal
+## Smoke clouds standing (NavSmoke) are kept the same way. On a field with bushes a leg may run through no more leaves
+## than the path it straightens does (a cell's diagonal
 ## more at most, for a rim): the search went round a bush where that is quicker (NavConfig.bush_cost), so the pull keeps
 ## it round.
 ##
@@ -36,10 +37,19 @@ static func pull(g: NavGrid, ids: PackedInt64Array, start: Vector3, goal: Vector
 			bushes[t] = n
 			if ids[t] < g.slow.size() and g.slow[ids[t]] == 1:
 				n += 1
+	# The same for the smoke clouds standing now (NavSmoke); empty while none does.
+	var smoked := PackedInt32Array()
+	if g.smoke != null and g.smoke.live():
+		smoked.resize(ids.size())
+		var n := 0
+		for t in ids.size():
+			smoked[t] = n
+			if g.smoke.priced(ids[t]):
+				n += 1
 	var k := 0
 	var end := _segment_end(g, ids, k)
 	while k < last:
-		var next := k + 2 if k == end else _furthest(g, ids, ax, ay, az, k, end, bushes)
+		var next := k + 2 if k == end else _furthest(g, ids, ax, ay, az, k, end, bushes, smoked)
 		if k == end:
 			if out.is_empty():
 				out.append(g.node_position(ids[k]))
@@ -78,10 +88,10 @@ static func _segment_end(g: NavGrid, ids: PackedInt64Array, k: int) -> int:
 ## k + 1: the corners up to the first out of sight (a corner ends a run of at most two neighbouring directions, a straight line
 ## drawn in cells); if the first is out of sight, the turns short of it; if the first turn is, every second node.
 static func _furthest(g: NavGrid, ids: PackedInt64Array, ax: float, ay: float, az: float, k: int, last: int,
-		bushes: PackedInt32Array) -> int:
+		bushes: PackedInt32Array, smoked: PackedInt32Array) -> int:
 	var next := k + 1
 	var m := _next_corner(g, ids, k, last)
-	while _in_line(g, ax, ay, az, ids, k, m, bushes):
+	while _in_line(g, ax, ay, az, ids, k, m, bushes, smoked):
 		next = m
 		if m == last:
 			return m
@@ -90,12 +100,12 @@ static func _furthest(g: NavGrid, ids: PackedInt64Array, ax: float, ay: float, a
 		return next
 	var t := _next_turn(g, ids, k, last)
 	var first_turn := t
-	while t < m and _in_line(g, ax, ay, az, ids, k, t, bushes):
+	while t < m and _in_line(g, ax, ay, az, ids, k, t, bushes, smoked):
 		next = t
 		t = _next_turn(g, ids, t, last)
 	if next == k + 1:
 		var s := k + 2
-		while s < first_turn and _in_line(g, ax, ay, az, ids, k, s, bushes):
+		while s < first_turn and _in_line(g, ax, ay, az, ids, k, s, bushes, smoked):
 			next = s
 			s += 2
 	return next
@@ -104,17 +114,24 @@ static func _furthest(g: NavGrid, ids: PackedInt64Array, ax: float, ay: float, a
 ## True if the straight line from the anchor (the path's node `from`) reaches its node `to` on foot, probed by
 ## leg_probe, and (with `bushes`, pull's counts) through no more leaves than the path between them.
 static func _in_line(g: NavGrid, ax: float, ay: float, az: float, ids: PackedInt64Array, from: int, to: int,
-		bushes: PackedInt32Array) -> bool:
+		bushes: PackedInt32Array, smoked: PackedInt32Array) -> bool:
 	var k := ids[to]
 	var c := g.node_cell[k]
 	var bx := g.cell_x(c % g.cols)
 	var bz := g.cell_z(c / g.cols)
 	if g.walk_line(ax, ay, az, bx, bz, g.leg_probe) != k:
 		return false
-	if bushes.is_empty():
-		return true
-	var most := (bushes[to] - bushes[from] + 1) * g.cell * sqrt(2.0)
-	return g.leaves.depth(Vector3(ax, ay + g.bush_probe, az), Vector3(bx, g.floor_y[k] + g.bush_probe, bz), most) <= most
+	if not bushes.is_empty():
+		var most := (bushes[to] - bushes[from] + 1) * g.cell * sqrt(2.0)
+		if g.leaves.depth(Vector3(ax, ay + g.bush_probe, az), Vector3(bx, g.floor_y[k] + g.bush_probe, bz), most) \
+				> most:
+			return false
+	if not smoked.is_empty():
+		var most := (smoked[to] - smoked[from] + 1) * g.cell * sqrt(2.0)
+		var eye := g.smoke.eye
+		if g.smoke.depth(Vector3(ax, ay + eye, az), Vector3(bx, g.floor_y[k] + eye, bz), most) > most:
+			return false
+	return true
 
 
 ## The index after `m` where the path turns (its step there differs from the step before), or `last`.

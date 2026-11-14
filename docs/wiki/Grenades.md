@@ -70,4 +70,6 @@ moment.
   checks again as it throws.
 - **A Normal or Hard bot that sees your flash coming** may turn away from it until the bang, and isn't blinded
   (Hard more often; an Easy bot never does). A flash that lands out of its sight is surest.
+- **Bots walk round a standing smoke cloud** where the way round is open, yours or their own, and through it only
+  where there is no other way: a cloud in the only doorway does not stop them.
 - Bots hear a bang or a smoke's pop and come to look. Harder bots throw more often.

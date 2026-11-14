@@ -589,3 +589,205 @@ func test_an_smg_bot_goes_full_auto_indoors_within_the_close_range_and_keeps_sem
 func test_an_aeg_bot_indoors_keeps_semi_at_every_range() -> void:
 	for dist: float in [2.0, 6.0, 11.5, 20.0, 30.0]:
 		assert_eq(_indoor_selector(&"aeg", dist), ReplicaConfig.FireMode.SEMI, "%.1f m" % dist)
+
+
+# --- Smoke clouds priced on the nav grid (row 67, the owner 2026-11-14: "make them route around") ---
+
+
+## A pool of four bombs, a popped smoke resting at each of `at` (on a floor at y 0).
+func _smokes(at: Array[Vector3]) -> Array[Grenade]:
+	var pool := Grenades.make_pool(4)
+	for i in at.size():
+		pool[i].launch(Grenade.Kind.SMOKE, 0, at[i], Vector3.ZERO)
+		pool[i].resting = true
+		pool[i].popped = true
+	return pool
+
+
+func _smoke_step(g: NavGrid, pool: Array[Grenade]) -> void:
+	if g.smoke == null:
+		g.smoke = NavSmoke.new()
+	g.smoke.step(g, pool, tuning.grenades, tuning.nav, tuning.body.stand_eye_height)
+
+
+static func _weights(g: NavGrid) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	out.resize(g.node_count())
+	for k in g.node_count():
+		out[k] = g.astar.get_point_weight_scale(k) if g.walkable[k] == 1 else 0.0
+	return out
+
+
+## Whether a standing body's eyes on node `k` are in the full cloud of a smoke resting at `at`.
+func _in_cloud(g: NavGrid, k: int, at: Vector3) -> bool:
+	var c := tuning.grenades
+	var m := at + Vector3.UP * c.smoke_lift
+	var p := g.node_position(k)
+	var d := Vector3((p.x - m.x) / c.smoke_radius, (p.y + tuning.body.stand_eye_height - m.y) / c.smoke_height,
+			(p.z - m.z) / c.smoke_radius)
+	return d.length_squared() <= 1.0
+
+
+## How far `route` (from `start`) runs through the clouds priced on `g`, at a standing body's eyes.
+func _smoke_walked(g: NavGrid, start: Vector3, route: PackedVector3Array) -> float:
+	var eye := Vector3.UP * tuning.body.stand_eye_height
+	var total := 0.0
+	var from := start
+	for p in route:
+		total += g.smoke.depth(from + eye, p + eye)
+		from = p
+	return total
+
+
+func test_the_smoke_price_is_a_power_of_two_well_over_the_searchs_greed() -> void:
+	var cost := tuning.nav.smoke_cost
+	assert_eq(pow(2.0, roundf(log(cost) / log(2.0))), cost, "a power of two: its price comes off exactly")
+	assert_gt(cost, 2.0 * tuning.nav.search_greed, "a price the greedy search steers by")
+
+
+func test_a_cloud_is_priced_as_it_pops_and_its_price_comes_off_exactly_as_it_clears() -> void:
+	var g := NavGrid.build(_bush_field(false, 2.0), tuning.nav, tuning.body)
+	var before := _weights(g)
+	var pool := _smokes([Vector3.ZERO] as Array[Vector3])
+	pool[0].popped = false
+	_smoke_step(g, pool)
+	assert_false(g.smoke.live(), "not yet popped: nothing priced")
+	assert_eq(_weights(g), before)
+	pool[0].popped = true
+	_smoke_step(g, pool)
+	assert_true(g.smoke.live())
+	var priced := 0
+	for k in g.node_count():
+		if g.walkable[k] == 0:
+			continue
+		var inside := _in_cloud(g, k, Vector3.ZERO)
+		assert_eq(g.smoke.priced(k), inside, "node %d: priced where a standing body's eyes are in the cloud" % k)
+		var w := g.astar.get_point_weight_scale(k)
+		assert_eq(w, before[k] * tuning.nav.smoke_cost if inside else before[k], "node %d" % k)
+		if inside:
+			priced += 1
+	assert_gt(priced, 1000, "the full cloud's floor")
+	# A second cloud overlapping it: where both stand, the price is put on once and stays till both are gone.
+	pool[1].launch(Grenade.Kind.SMOKE, 0, Vector3(3.0, 0.0, 0.0), Vector3.ZERO)
+	pool[1].resting = true
+	pool[1].popped = true
+	_smoke_step(g, pool)
+	var both := g.node_at(Vector3(1.5, 0.0, 0.0))
+	assert_eq(g.astar.get_point_weight_scale(both), before[both] * tuning.nav.smoke_cost, "priced once")
+	pool[0].active = false
+	_smoke_step(g, pool)
+	assert_true(g.smoke.priced(both), "the other cloud still stands there")
+	assert_false(g.smoke.priced(g.node_at(Vector3(-3.0, 0.0, 0.0))), "the cleared cloud's own side is off")
+	Grenades.clear(pool)
+	_smoke_step(g, pool)
+	assert_false(g.smoke.live(), "a new round's clear takes every price off")
+	assert_eq(_weights(g), before, "every node's own weight back, exactly")
+
+
+func test_a_cloud_lives_and_clears_in_the_simulation_and_the_bots_price_it_meanwhile() -> void:
+	var made := _bot_squad([Vector3(-30.0, 0.0, 20.0), Vector3(-31.0, 0.0, 20.0), Vector3(-30.0, 0.0, 21.0),
+			Vector3(-31.0, 0.0, 21.0)] as Array[Vector3])
+	var state: GameState = made[1]
+	var bots: BotController = made[2]
+	var g := bots.world.nav
+	var before := _weights(g)
+	var at := Vector3(10.0, 0.1, 10.0)
+	state.grenades[0].launch(Grenade.Kind.SMOKE, 0, at, Vector3.ZERO)
+	state.grenades[0].resting = true
+	var node := g.node_at(Vector3(at.x, 0.0, at.z))
+	_bot_ticks(made, tuning.grenades.smoke_fuse * 0.5)
+	assert_false(g.smoke.priced(node), "before its fuse: no cloud, no price")
+	_bot_ticks(made, tuning.grenades.smoke_fuse)
+	assert_true(state.grenades[0].popped)
+	assert_true(g.smoke.priced(node), "priced from the tick it pops")
+	_bot_ticks(made, tuning.grenades.smoke_time - tuning.grenades.smoke_fuse)
+	assert_true(state.grenades[0].active and g.smoke.priced(node), "still standing")
+	_bot_ticks(made, tuning.grenades.smoke_fuse + 0.5)
+	assert_false(state.grenades[0].active)
+	assert_false(g.smoke.live(), "off the tick it clears")
+	assert_eq(_weights(g), before)
+
+
+func test_a_route_goes_round_a_cloud_where_it_can_and_the_pull_keeps_it_round() -> void:
+	var g := NavGrid.build(_bush_field(false, 2.0), tuning.nav, tuning.body)
+	var start := Vector3(-9.0, 0.0, 0.5)
+	var goal := Vector3(9.0, 0.0, 0.5)
+	var route := PackedVector3Array()
+	assert_true(g.find_route(start, goal, route))
+	assert_eq(route.size(), 1, "no cloud: one straight leg")
+	_smoke_step(g, _smokes([Vector3.ZERO] as Array[Vector3]))
+	assert_true(g.find_route(start, goal, route))
+	assert_lt(_smoke_walked(g, start, route), 0.5, "round the cloud, a rim at most")
+	assert_lt(_length(start, route), 18.0 + 6.0, "and not far out of its way")
+	assert_eq(route[route.size() - 1], goal)
+
+
+func test_a_cloud_that_is_the_only_way_is_gone_through() -> void:
+	var gap := _bush_field(false, 2.0)
+	for side: float in [-1.0, 1.0]:
+		var wall := MapData.Block.new()
+		wall.kind = &"wall"
+		wall.center = Vector3(0.0, 1.5, side * 8.5)
+		wall.size = Vector3(0.4, 3.0, 15.0)
+		gap.blocks.append(wall)
+	var g := NavGrid.build(gap, tuning.nav, tuning.body)
+	_smoke_step(g, _smokes([Vector3.ZERO] as Array[Vector3]))
+	var start := Vector3(-9.0, 0.0, 0.0)
+	var route := PackedVector3Array()
+	assert_true(g.find_route(start, Vector3(9.0, 0.0, 0.0), route), "a cost, not a wall")
+	assert_gt(_smoke_walked(g, start, route), 4.0, "through the only gap")
+
+
+func test_a_body_inside_a_cloud_routes_out_and_one_outside_routes_in() -> void:
+	var g := NavGrid.build(_bush_field(false, 2.0), tuning.nav, tuning.body)
+	_smoke_step(g, _smokes([Vector3.ZERO] as Array[Vector3]))
+	var inside := Vector3(0.5, 0.0, 0.5)
+	assert_true(g.smoke.priced(g.node_at(inside)))
+	var route := PackedVector3Array()
+	assert_true(g.find_route(inside, Vector3(9.0, 0.0, 6.0), route), "out of the cloud it stands in")
+	assert_lt(_smoke_walked(g, inside, route), 4.5, "the short way out, about the cloud's radius")
+	assert_true(g.find_route(Vector3(-9.0, 0.0, 0.0), inside, route), "into a cloud, to a goal in it")
+	assert_eq(route[route.size() - 1], inside)
+
+
+func test_a_cloud_standing_is_priced_once_and_one_carried_off_is_priced_where_it_is() -> void:
+	var g := NavGrid.build(_bush_field(false, 2.0), tuning.nav, tuning.body)
+	var before := _weights(g)
+	var pool := _smokes([Vector3.ZERO] as Array[Vector3])
+	_smoke_step(g, pool)
+	var priced := _weights(g)
+	var counts := g.smoke._count.size()
+	var slots := g.smoke._priced.size()
+	for t in 120:
+		_smoke_step(g, pool)
+	assert_eq(_weights(g), priced, "a standing cloud: nothing put on again")
+	assert_eq(g.smoke._count.size(), counts, "nothing grown a tick")
+	assert_eq(g.smoke._priced.size(), slots)
+	# A small drift (under half a cell) keeps its price; carried 3 m (a lift's car, a roll), it is priced where it is.
+	pool[0].position.x += g.cell * 0.4
+	_smoke_step(g, pool)
+	assert_eq(_weights(g), priced)
+	pool[0].position = Vector3(3.0, 0.0, 0.0)
+	_smoke_step(g, pool)
+	for k in g.node_count():
+		if g.walkable[k] == 1:
+			assert_eq(g.smoke.priced(k), _in_cloud(g, k, pool[0].position), "node %d" % k)
+	g.smoke.release(g, tuning.grenades, tuning.nav, tuning.body.stand_eye_height)
+	assert_eq(_weights(g), before, "released: every price off")
+
+
+func test_the_next_matchs_bots_start_from_a_grid_with_no_smoke_priced() -> void:
+	var made := _bot_squad([Vector3(-30.0, 0.0, 20.0)] as Array[Vector3])
+	var state: GameState = made[1]
+	var bots: BotController = made[2]
+	var g := bots.world.nav
+	var before := _weights(g)
+	state.grenades[0].launch(Grenade.Kind.SMOKE, 0, Vector3(5.0, 0.1, 5.0), Vector3.ZERO)
+	state.grenades[0].resting = true
+	state.grenades[0].popped = true
+	_bot_ticks(made, DT)
+	assert_true(g.smoke.live())
+	var next := BotController.new(state, -1, MapData.new(), g, BoxWorld.new(tuning.body), tuning, BotConfig.load_default())
+	assert_not_null(next)
+	assert_false(g.smoke.live(), "a new match's bots: the old match's cloud is off the grid")
+	assert_eq(_weights(g), before)

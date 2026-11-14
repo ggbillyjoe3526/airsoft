@@ -54,6 +54,8 @@ var slow: PackedByteArray = PackedByteArray()
 var leaves: Foliage = null
 ## How high over a floor a body's point in a bush is tested (NavConfig.bush_probe_height).
 var bush_probe: float = 0.0
+## The smoke clouds priced on the search while they stand (NavSmoke, made by the first bots to route here).
+var smoke: NavSmoke = null
 ## The route search: a point per walkable node (id = node), linked by the step rules.
 var astar: AStar3D = null
 ## Vault links (NavVaults): node k's lead to nodes vault_to[vault_start[k]] .. vault_to[vault_start[k + 1] - 1]; link l

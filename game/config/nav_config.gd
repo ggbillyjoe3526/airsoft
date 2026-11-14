@@ -39,6 +39,11 @@ extends Resource
 ## 2.7 m and 88.1 m). `bush_probe_height` is MovementConfig.bush_probe_height (a test holds both to the movement's).
 @export var bush_cost: float = 2.0
 @export var bush_probe_height: float = 0.5
+## A step onto a floor where a standing body's eyes would be in a smoke cloud (NavSmoke, AUD2: bots route round a cloud
+## rather than walk blind through it) costs this many times as much while the cloud stands: well over the search's
+## greed, so a route goes round a 4 m cloud where the way round is open, and through where it is the only way. A power
+## of two (a test holds it), so taking the price off gives each node its own weight back exactly.
+@export var smoke_cost: float = 4.0
 ## Points random_walkable_near tries before it gives up and returns the point it was asked about.
 @export var hunt_tries: int = 8
 ## Route searches a tick, the bots' and the walk-offs' together (the browser's NAV.searchBudget, 8,000 node expansions,
