@@ -44,6 +44,10 @@ extends Resource
 ## greed, so a route goes round a 4 m cloud where the way round is open, and through where it is the only way. A power
 ## of two (a test holds it), so taking the price off gives each node its own weight back exactly.
 @export var smoke_cost: float = 4.0
+## How far a priced cloud's middle moves (m) before its price is taken off and put on again where it now is: a cloud
+## standing costs nothing a tick, and one carried (a lift's car, a canister still rolling) is priced again once a
+## metre, a quarter of its 4 m radius, not every few ticks (each a pass over every cell under it, 2.5 to 3.5 ms).
+@export var smoke_move: float = 1.0
 ## Points random_walkable_near tries before it gives up and returns the point it was asked about.
 @export var hunt_tries: int = 8
 ## Route searches a tick, the bots' and the walk-offs' together (the browser's NAV.searchBudget, 8,000 node expansions,

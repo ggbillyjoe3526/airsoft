@@ -776,10 +776,12 @@ func test_a_cloud_standing_is_priced_once_and_one_carried_off_is_priced_where_it
 	assert_eq(_weights(g), priced, "a standing cloud: nothing put on again")
 	assert_eq(g.smoke._count.size(), counts, "nothing grown a tick")
 	assert_eq(g.smoke._priced.size(), slots)
-	# A small drift (under half a cell) keeps its price; carried 3 m (a lift's car, a roll), it is priced where it is.
-	pool[0].position.x += g.cell * 0.4
+	# A drift under NavConfig.smoke_move keeps its price (one riding a lift is priced again a step a metre, not every
+	# few ticks); carried 3 m (a lift's car, a roll), it is priced where it is.
+	pool[0].position.x += tuning.nav.smoke_move * 0.9
 	_smoke_step(g, pool)
 	assert_eq(_weights(g), priced)
+	assert_lt(tuning.nav.smoke_move, tuning.grenades.smoke_radius * 0.5, "the price never lags its cloud by half of it")
 	pool[0].position = Vector3(3.0, 0.0, 0.0)
 	_smoke_step(g, pool)
 	for k in g.node_count():

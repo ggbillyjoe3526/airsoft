@@ -5,7 +5,8 @@ extends RefCounted
 ## cloud costs NavConfig.smoke_cost times as much to step onto, so a route goes round a cloud where it can and through
 ## it only where it must (a cost, not a wall: a route from inside one, or with no way round, still goes). Put on the
 ## tick a cloud pops and taken off the tick its bomb is gone (a new round's clear too); one riding a lift's car moves
-## its price with it. Overlapping clouds count per node, and smoke_cost is a power of two, so taking a price off gives
+## its price with it, a step each NavConfig.smoke_move it is carried. Overlapping clouds count per node, and smoke_cost
+## is a power of two, so taking a price off gives
 ## back the node's own weight exactly. Lives on its grid (NavGrid.smoke), so whoever routes on it next (the next match's
 ## bots) starts from what is priced; `release` takes every price off. Nothing is allocated per tick: the per-node counts
 ## once per grid, the per-bomb places once per pool size.
@@ -35,7 +36,7 @@ func step(g: NavGrid, pool: Array[Grenade], cfg: GrenadeConfig, nav: NavConfig, 
 	for i in _priced.size():
 		var smoking := i < pool.size() and _smoking(pool[i])
 		if _priced[i] == 1:
-			if smoking and _at[i].distance_squared_to(_full_middle(pool[i], cfg)) < g.cell * g.cell * 0.25:
+			if smoking and _at[i].distance_squared_to(_full_middle(pool[i], cfg)) < nav.smoke_move * nav.smoke_move:
 				continue
 			_price(g, _at[i], cfg, nav, eye, false)
 			_priced[i] = 0
