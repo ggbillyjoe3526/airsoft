@@ -841,6 +841,8 @@ def drop_rods(placed: list[dict]) -> list[dict]:
 
 
 LAMP_HALF_DEPTH = 0.3  # a lamp panel's half depth (RoofConfig.lamp_size.y) and a little: hung clear of a vault
+LAMP_CLEAR = 1.0      # a lamp hangs this far (m) along its room clear of a model standing under it (AUD2 row 19)
+LAMP_CLEAR_H = 1.5    # ... one at least this tall (a fan housing, a locker); a low one's sides are lit by the floor's bounce
 
 
 def vault_of(rm: dict) -> dict | None:
@@ -867,7 +869,8 @@ def lamps() -> list[dict]:
             a = a0 + (a1 - a0) * (i + 0.5) / n
             for t in rows:
                 b = b0 + (b1 - b0) * t
-                x, z = (a, b) if along_x else (b, a)
+                la = clear_of_models(rm, along_x, a, b, a0, a1)
+                x, z = (la, b) if along_x else (b, la)
                 v = vault_of(rm)
                 if v is not None:
                     # Under the vault, low enough that the panel's side nearer the wall clears the curve.
@@ -885,6 +888,27 @@ def lamps() -> list[dict]:
                     lamp["state"] = "flicker"
                 out.append(lamp)
     return out
+
+
+def clear_of_models(rm: dict, along_x: bool, a: float, b: float, a0: float, a1: float) -> float:
+    """`a` along room `rm` (x where `along_x`, else z), moved the least way along it that hangs a lamp at (a, b)
+    LAMP_CLEAR m clear of every model standing on the room's floor under it: a lamp straight over a fan housing or
+    a booth lit only its roof, its sides turned away from it and out of the other lamps' reach (AUD2 row 19). A vault
+    room's lamps (the platforms') keep their places."""
+    if rm["vault"]:
+        return a
+    for blk in L.blocks:
+        if not blk["dress"] or blk["y"] is None or blk["h"] < LAMP_CLEAR_H \
+                or abs(blk["y"] - min(rm["ya"], rm["yb"])) > EPS:
+            continue
+        lo, hi = (blk["x0"], blk["x1"]) if along_x else (blk["z0"], blk["z1"])
+        c0, c1 = (blk["z0"], blk["z1"]) if along_x else (blk["x0"], blk["x1"])
+        if not (c0 - EPS <= b <= c1 + EPS and lo - EPS <= a <= hi + EPS):
+            continue
+        ways = [x for x in (lo - LAMP_CLEAR, hi + LAMP_CLEAR) if a0 + LAMP_CLEAR <= x <= a1 - LAMP_CLEAR]
+        if ways:
+            a = min(ways, key=lambda x: abs(x - a))
+    return a
 
 
 def spiral_floor(x: float, z: float, near: float) -> float | None:

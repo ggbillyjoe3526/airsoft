@@ -59,3 +59,24 @@ func test_the_eye_pictures_light_an_underground_field_and_dress_a_station_as_a_m
 	assert_string_contains(tool, "lighting.set_underground(map.roof_underground)")
 	assert_string_contains(tool, "PropDress.build(map, cfg, play.site_look.prop_paint)")
 	assert_string_contains(tool, "play.site_look.props.named_only() if station")
+
+
+func test_no_roof_lamp_hangs_straight_over_a_tall_model_in_a_ceilinged_room() -> void:
+	# Subway's plant room hung a lamp straight over each fan housing: every side of the housing turned away from its
+	# lamp and lay past the other's reach, so the housings (and a booth stood there) drew near black in a match on
+	# High while the walls and floor were lit (AUD2 row 19). tools/subway/build_map.py now hangs a lamp 1 m clear.
+	var plant := AABB(Vector3(4.0, 8.8, -4.0), Vector3(14.0, 3.7, 8.0))
+	var lamps := 0
+	for i in map.roof_lamps.size():
+		var spot := Vector3(map.roof_lamps[i].x, map.roof_lamp_heights[i] - 0.05, map.roof_lamps[i].y)
+		if not plant.has_point(spot):
+			continue
+		lamps += 1
+		for b in map.blocks:
+			if b.dress == &"" or b.size.y < 1.5:
+				continue
+			var lo := b.center - b.size * 0.5
+			var hi := b.center + b.size * 0.5
+			var over := spot.x > lo.x - 1.0 + 1e-3 and spot.x < hi.x + 1.0 - 1e-3 and spot.z >= lo.z and spot.z <= hi.z
+			assert_false(over and spot.y > hi.y, "the lamp at %s hangs clear of %s" % [spot, b.dress])
+	assert_eq(lamps, 2, "the plant room keeps its two lamps")
