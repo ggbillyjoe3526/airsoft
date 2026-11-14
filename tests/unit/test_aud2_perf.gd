@@ -5,6 +5,9 @@ extends GutTest
 ## each parts file a frame (ReplicaParts.keep, the same nodes as a plain take's and inside's), and LogTail reads only a
 ## log's end and counts the rest of its lines a piece at a time.
 
+const LOG_ROOT := "user://test-aud2-perf-logs"
+
+
 func _free(taken: Dictionary[StringName, Node3D]) -> void:
 	for node: Node3D in taken.values():
 		node.free()
@@ -132,6 +135,33 @@ func test_part_pictures_keep_the_parts_files_for_the_frame_only() -> void:
 	assert_false(ReplicaParts._keeping, "and when the pictures leave the tree")
 	assert_eq(ReplicaParts._kept.size(), 0)
 	pictures.let_go_parts()
+
+
+# --- LogTail ---
+
+
+func after_each() -> void:
+	if DirAccess.dir_exists_absolute(LOG_ROOT):
+		for f: String in DirAccess.get_files_at(LOG_ROOT):
+			DirAccess.remove_absolute(LOG_ROOT.path_join(f))
+		DirAccess.remove_absolute(LOG_ROOT)
+
+
+func test_a_log_over_several_count_pieces_is_counted_whole() -> void:
+	DirAccess.make_dir_recursive_absolute(LOG_ROOT)
+	var f := FileAccess.open(LOG_ROOT.path_join("godot2026-11-14T10.00.00.log"), FileAccess.WRITE)
+	var lines := 0
+	while f.get_length() < LogTail.COUNT_BYTES * 2 + LogTail.TAIL_BYTES + 77:
+		lines += 1
+		f.store_line("line %d" % lines)
+	f.store_string("the last, no newline")
+	f.close()
+	var t := LogTail.new()
+	t.dir = LOG_ROOT
+	assert_eq(t.line_count(), lines + 1)
+	assert_eq(t.lines()[LogTail.LINES - 1], "the last, no newline")
+	assert_eq(t.lines()[LogTail.LINES - 2], "line %d" % lines)
+	assert_true(t.recent_lines()[0].begins_with("line "), "whole lines only")
 
 
 ## The parts of `slot` the AEG's parts file holds, by Key.
