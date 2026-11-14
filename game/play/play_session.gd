@@ -721,12 +721,8 @@ func _start_simulation(map: MapData) -> void:
 	if listed != null:
 		state.round_state.start_mode = listed.start_mode
 	# The field's weather (data/maps.md Wind and Air, PH1): still air indoors, and colder air on a night in the open,
-	# for every BB. A field the breeze doesn't reach (Wind 0) is the indoor one, on purpose: under a roof the night
-	# doesn't cool the air either (data/maps.md says so; one cell, so a field can't be half indoors).
-	var rated := _tuning.ballistics.air_temperature
-	var wind_share := listed.wind if listed != null else 1.0
-	_sim.set_weather(state, wind_share, _tuning.weather.temperature_at(
-			listed.air_or(rated) if listed != null else rated, _light.night and wind_share > 0.0))
+	# for every BB (FieldAir.temperature_on, the rule the Loadout's figures read too).
+	_sim.set_weather(state, listed.wind if listed != null else 1.0, FieldAir.temperature_on(listed, _light.night, _tuning))
 	var loadout := ReplicaStats.default_loadout()
 	if kit == null:
 		var s := settings if settings != null else Settings.shared()
@@ -736,7 +732,7 @@ func _start_simulation(map: MapData) -> void:
 		_kit_unlocked_all = s.dev.disable_levelling
 	state.dev_content = state.dev_content or kit.dev_under(_light.night)
 	# Gas shoots softer in the cold (PH1): your gas replicas', and below the bots', in this field's air.
-	kit.set_temperature(_tuning.weather, state.air_temperature, rated)
+	kit.set_temperature(_tuning.weather, state.air_temperature, _tuning.ballistics.air_temperature)
 	player = Character.new(PLAYER_ID, player_team, Vector3.ZERO, 0.0, kit.replicas, kit.bb_weights)
 	player.grenades.picks = kit.bombs
 	# Your weapon light is fitted only at night (WL7): by day the kit plays exactly as one without.

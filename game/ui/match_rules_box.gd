@@ -229,6 +229,8 @@ func show_tuning(tuning: SimTuning) -> void:
 ## The flag note for the picked field and mode: shown only where the field's flag raise differs from the game's (the
 ## others play the game's, which the note names), in Attack / Defend, the one mode with a flag to raise.
 func show_flag_note() -> void:
+	# The game's own raise time, from the loaded tuning the Match page builds on (MatchOptions.match_tuning's base):
+	# `_tuning` is the round tuning, which already holds the picked field's.
 	var base := SimTuning.load_default().flag.raise_time
 	var seconds := MatchOptions.field_raise(_picks.mode, MapCatalog.shared().find(_picks.map_id), base)
 	_flag_pad.visible = seconds > 0.0 and not _unused

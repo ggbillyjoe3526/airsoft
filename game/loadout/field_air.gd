@@ -36,8 +36,19 @@ static func of(map_id: String, lighting_pick: StringName, forced: StringName, tu
 	m.lighting_presets.assign(_presets[map_id])
 	var played := m.preset_played(lighting_pick, forced)
 	f.night = play.night_lighting.night and played == play.night_lighting.id
-	f.temperature = tuning.weather.temperature_at(listed.air_or(f.rated), f.night and listed.wind > 0.0)
+	f.temperature = temperature_on(listed, f.night, tuning)
 	return f
+
+
+## The air temperature (°C) every BB flies in on the field `listed` (null: no field's own air), by `night`: the field's
+## own air (data/maps.md Air) or the rated one, colder on a night in the open. A field the breeze doesn't reach (Wind 0)
+## is the indoor one, on purpose: under a roof the night doesn't cool the air either (data/maps.md says so; one cell,
+## so a field can't be half indoors). The one rule the match (PlaySession) and the Loadout's figures both read.
+static func temperature_on(listed: MapCatalog.Entry, night: bool, tuning: SimTuning) -> float:
+	var rated := tuning.ballistics.air_temperature
+	if listed == null:
+		return tuning.weather.temperature_at(rated, night)
+	return tuning.weather.temperature_at(listed.air_or(rated), night and listed.wind > 0.0)
 
 
 ## Whether the field's air is other than the rated (the Loadout then says it).
