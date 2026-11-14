@@ -14,31 +14,26 @@ every merge (`docs/wiki/README.md`).
 
 ## Status
 
-**[0.1 Dev 2](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.2) is out (2026-11-09); 0.1 Dev 3 is
-being built.** The plan is `docs/ROADMAP.md`; what is happening now is `docs/HANDOFF.md`.
+**[0.1 Dev 3](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.3) is out (2026-11-14), the last Dev
+build; 0.1 Beta 1 is next.** The plan is `docs/ROADMAP.md`; what is happening now is `docs/HANDOFF.md`.
 
-**What's in 0.1 Dev 2:** Depot rebuilt as an indoor airsoft hall and Woodland as an open wood, with doors and two
-flags; smoke and flash bombs, thrown by bots too; the Sniper Rifle with the 2x and Variable Scopes; detailed models
-built in Blender for every replica, attachment, magazine, barrel and bomb, first-person arms, and bot figures in real
-gear, head gear and faces; the owner's recorded sounds; new menus and HUD with a weapon rail and a round countdown; a
-full-screen map with Go there; teams of 5 to 8 a side; and rounds of bug fixes. Its full notes are `CHANGELOG.md` ›
-0.1 Dev 2.
+**What's in 0.1 Dev 3:** Plant The Bomb, a new mode; the Pump Shotgun and the Compact SMG, with levels up to 15;
+climbing onto ledges; Blender models and CC0 materials for every map, with a new look (warm sun, real shadows, Lamp
+light, an Ultra preset); reworked map layouts; replicas, gear and faces drawn as the metal, plastic and cloth they
+are made of, and rebuilt first-person hands; a physics and a balance pass; more of the owner's recorded sounds; and a
+full fix pass. A third map, Subway, is in the Dev tab's Dev content. Its full notes are `CHANGELOG.md` › 0.1 Dev 3.
 
-**New since 0.1 Dev 1:** everything above. 0.1 Dev 1 (2026-10-30) was the first build: Depot, Woodland and a practice
-range, the AEG Rifle and the GBB Pistol, Elimination and Attack / Defend against bots, the hit call and walk-off,
-settings, saves and accessibility.
-
-**Being built for 0.1 Dev 3** (the last Dev build before 0.1 Beta 1; its notes are in `changelog.d/` until the
-release folds them into `CHANGELOG.md`): a third map, Subway, with lifts, trains and a ticket hall; the Compact SMG
-and the Pump Shotgun; Plant The Bomb; levels up to 15; climbing onto ledges; Blender models and CC0 materials for
-every map, with a new look (warm sun, real shadows, Lamp light, an Ultra preset); reworked map layouts, a physics and
-a balance pass, and more of the owner's recorded sounds.
+**New since 0.1 Dev 2:** everything above. 0.1 Dev 2 (2026-11-09) rebuilt Depot as an indoor airsoft hall and
+Woodland as an open wood; brought smoke and flash bombs, the Sniper Rifle, detailed models of every replica and bot
+figures in real gear; and new menus and HUD. 0.1 Dev 1 (2026-10-30) was the first build: Depot, Woodland and a
+practice range, the AEG Rifle and the GBB Pistol, Elimination and Attack / Defend against bots, the hit call and
+walk-off, settings, saves and accessibility.
 
 ## Run it
 
 - **Players:** download the Windows installer or zip, or the Linux build, from the
-  [0.1 Dev 2 release page](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.2): the Windows
-  installer (`Airsoft-0.1-dev.2-Windows-Setup.exe`), the Windows zip or the Linux zip. The installer is not signed
+  [0.1 Dev 3 release page](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.3): the Windows
+  installer (`Airsoft-0.1-dev.3-Windows-Setup.exe`), the Windows zip or the Linux zip. The installer is not signed
   yet, so Windows warns about it: choose *More info*, then *Run anyway*.
 - **From source:** install Godot **4.7.2** (standard, not .NET), choose *Import*, pick this folder's `project.godot`
   and press F5.

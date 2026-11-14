@@ -6,13 +6,13 @@ Every version is posted on the
 [Releases page](https://github.com/ggbillyjoe3526/airsoft/releases), with its [Patch Notes](Patch-Notes).
 <!-- wiki:latest -->
 
-Each release has three downloads, named after the version (here `0.1-dev.2`):
+Each release has three downloads, named after the version (here `0.1-dev.3`):
 
 | File | What it is |
 | --- | --- |
-| `Airsoft-0.1-dev.2-Windows-Setup.exe` | The Windows installer: Start menu and desktop shortcuts, and an uninstaller. |
-| `Airsoft-0.1-dev.2-Windows-Portable.zip` | Windows without installing: unzip anywhere and run `Airsoft.exe`. |
-| `Airsoft-0.1-dev.2-Linux.zip` | Linux: unzip, then run `Airsoft.x86_64` (mark it executable first if your file manager asks). |
+| `Airsoft-0.1-dev.3-Windows-Setup.exe` | The Windows installer: Start menu and desktop shortcuts, and an uninstaller. |
+| `Airsoft-0.1-dev.3-Windows-Portable.zip` | Windows without installing: unzip anywhere and run `Airsoft.exe`. |
+| `Airsoft-0.1-dev.3-Linux.zip` | Linux: unzip, then run `Airsoft.x86_64` (mark it executable first if your file manager asks). |
 
 Every download carries `THIRD_PARTY_NOTICES.txt`, the licences of everything the game ships; the game shows the same
 text under **Settings › About › Licences**.
