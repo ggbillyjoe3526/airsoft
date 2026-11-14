@@ -101,11 +101,14 @@ func step(state: GameState, dt: float) -> void:
 ## Carries `c` with the car it rides this tick (feet in it as it stood before this tick's rise): up or down by the
 ## car's rise, never under its floor. Before `c` moves.
 func carry(c: Character, lifts: LiftState) -> void:
+	c.lift_rise = 0.0
 	for i in lifts.count():
 		var rise := lifts.rise[i]
 		if rise == 0.0 or not _query.lifts[i].holds(c.position, lifts.y[i] - rise, _cfg):
 			continue
-		c.position.y = maxf(c.position.y + rise, lifts.y[i] + _body.rest_gap)
+		var from := c.position.y
+		c.position.y = maxf(from + rise, lifts.y[i] + _body.rest_gap)
+		c.lift_rise = c.position.y - from
 		return
 
 
