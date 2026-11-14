@@ -33,7 +33,9 @@ make bots do what they were always tuned to do:
   come a moment later than you are used to. The bot matches behind every balance figure (the balance report, the
   match guards, each task's runs) play with no countdown, so they always had the stagger: the figures in
   `docs/KNOWN_ISSUES.md` and below describe the game as it now plays, not as it played before.
-  <<DEPOT_AFTER>>
+  Depot re-measured on the audit's code over the same 12 seeds agrees: Attack / Defend the same to the round (43 of
+  93 to the attackers), Elimination's west end 52.9 % where it was 52.3 % (45 of 85 decided, was 45 of 86), and a
+  round's first hit at a median 14.8 s before and after.
 - **Bots waiting at a Subway lift** (bug 5) look where a standing bot looks, not at one fixed wall.
 
 Both are on the checklist.
@@ -163,7 +165,7 @@ Maps and modes, bots against bots at Normal, 6v6 (the bands are the balance repo
 |---|---|---|---|
 | Depot | 52.3 % ±5.4 (band 45 to 55): fine | 46.2 % ±5.2 (38 to 67): fine | 37 to 41 % (PB1, SK1): low |
 | Woodland | 47.6 % (MB4, 13 Nov): fine | 58.6 % at the 9 s raise (40 to 65): fine, at the top | 41 % (PB1): low |
-| Subway | 50.0 % ±3.2 (PP1, 11 Nov, 32 seeds): fine | 44.4 % ±3.2 (PP1, 11 Nov; band 38 to 67): fine | 48 to 53 % (PB1): about even |
+| Subway | 46.7 % ±5.3 (45 to 55): fine, near the edge at 12 seeds (50.0 % ±3.2 at 32 on 11 Nov) | 51.1 % ±5.3 (40 to 65): fine | 48 to 53 % (PB1): about even |
 | Stockade (Dev) | 52 % ±5 (SK1): fine | 49 % ±3 (SK1): fine | 40 % ±3 (SK1): low |
 
 1. **Plant The Bomb favours the defenders on three of four fields** (the attackers take about 40 % on Depot, Woodland
@@ -172,7 +174,8 @@ Maps and modes, bots against bots at Normal, 6v6 (the bands are the balance repo
    with a player, the levers are `PlantConfig`'s (a longer defuse than 6 s, or a shorter fuse), one at a time.
 2. **The balance report does not play Plant The Bomb** (`tools/balance.sh`): its figures above come from each task's
    own runs. Adding the mode would let every later map change be checked the same way.
-3. **Subway by level**: at Normal it is even, but the last runs at Easy and Hard (11 Nov, before the lift fixes) had
+3. **Subway by level**: at Normal it is even (one team's share read 44.4 % ±5.2 at this pass's 12 seeds, outside its
+   band within noise, where 32 seeds read 50.0 %), but the last runs at Easy and Hard (11 Nov, before the lift fixes) had
    the attackers at 67 % and 61 %, outside their bands within noise. Re-measure both on 32 seeds after the playtest.
 4. **The Pump Shotgun on Woodland**: bots who carry it there are out-ranged (0.30 hits for each hit taken, known
    issues). Keeping the Clearer kit to the indoor fields is a one-line data change, if the owner agrees.
