@@ -352,25 +352,29 @@ on top; Depot's from 46.2 % to 54.9 %. Both changes are the owner's rulings; the
 12 seeds, Subway's close to the top of its band.
 
 **Plant The Bomb** (bots only, Normal, 6v6, 16 seeds; `tools/balance.sh` plays it since this pass). With today's
-timings (fuse 30 s, defuse 6 s) the attackers take 38.3 % ±4.3 on Depot on the final code (31.1 % before the pass's bot changes; Woodland was 31.0 % ±4.3 and Subway
-53.5 % ±4.4 then, both being re-measured). Timings tried:
+timings (fuse 30 s, defuse 6 s) on the final code the attackers take 38.3 % ±4.3 on Depot (band 40 to 65: just
+under, within noise), 47.2 % ±4.4 on Woodland and 47.5 % ±4.6 on Subway. Before this pass's bot fixes the same
+timings gave 31.1 %, 31.0 % and 53.5 %; which fix moved Woodland was not isolated (the bushes priced on the grid
+and the Clearer kit kept indoors both act there). No armed
+bomb went off in 287 armed rounds; an armed bomb is made safe 40 to 50 % of the time.
 
 | Field | Fuse / defuse | The attackers' share | Armed bombs that go off |
 |---|---|---|---|
 | Depot | 30 s / 6 s (today) | 38.3 % ±4.3 | 0 % |
 | Depot | 20 s / 8 s | 46.6 % ±4.6 | 7 % |
-| Depot | 22 s / 8 s | 40.0 % ±4.5 | |
-| Depot | 20 s / 6 s | 34.5 % ±4.5 | |
-| Depot | 30 s / 9 s | 30.1 % ±4.5 | |
-| Depot | 16 s / 8 s, 18 s / 10 s | 58.6 %, 58.5 % (older code) | |
-| Woodland | 20 s / 8 s | 70.0 % ±4.2 | 31 % |
+| Depot | 22 s / 8 s | 40.0 % ±4.5 (before the pass's last bot fixes) | |
+| Depot | 20 s / 6 s | 34.5 % ±4.5 (the same) | |
+| Depot | 30 s / 9 s | 30.1 % ±4.5 (the same) | |
+| Woodland | 30 s / 6 s (today) | 47.2 % ±4.4 | 0 % |
 | Woodland | 25 s / 8 s | 54.1 % ±4.5 | 10 % |
+| Woodland | 20 s / 8 s | 70.0 % ±4.2 | 31 % |
+| Subway | 30 s / 6 s (today) | 47.5 % ±4.6 | 0 % |
 | Subway | 30 s / 8 s | 50.8 % ±4.5 | 2 % |
 
-Nothing was changed: the timings are the owner's playtest call (question 13). The proposal is a defuse of 8 s on
-every field and a fuse a field (Depot 20 s, Woodland 25 s, Subway 30 s), which needs a Fuse column in
-`data/maps.md`, as Raise has.
-
+Nothing was changed, and on these figures nothing needs to be before the owner plays it: every field is inside
+its band or within noise of it at today's timings (question 13, with that recommendation). If Depot plays
+one-sided for the defenders, a 20 s fuse and an 8 s defuse there is the measured nudge; a fuse a field needs a Fuse
+column in `data/maps.md`, as Raise has.
 
 ### 10.5 What still needs the owner
 
@@ -391,7 +395,8 @@ proposals.
 10. A cheaper replica grain on Mesh detail Low [yes].
 11. The range's sandbags, toilet and tote rebuilt rounder [yes].
 12. Dev › Retro filter: the replica and BBs wobble too, and the haze reaches 110 m [yes].
-13. Plant The Bomb: defuse 8 s, and a fuse a field (Depot 20 s, Woodland 25 s, Subway 30 s) [yes].
+13. Plant The Bomb: defuse 8 s, and a fuse a field (Depot 20 s, Woodland 25 s, Subway 30 s) [first yes; corrected
+    to leave them once the final code's figures were in: today's timings are in band, 10.4].
 14. Three performance trades that change the look (out-of-view figures posed every fourth frame, Woodland's night
     shadows to 50 m, Ultra's figure lamp shadows under the nearest lamps only) [leave until a frame time needs them].
 15. The Compact SMG and the Pump Shotgun public in 0.1 Dev 3, not Dev content [decide after the playtest].
