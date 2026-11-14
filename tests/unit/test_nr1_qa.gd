@@ -32,11 +32,10 @@ func test_no_shipped_item_or_map_is_dev_and_the_range_is_listed() -> void:
 	every.append_array(pool.replicas)
 	every.append_array(pool.powers)
 	every.append_array(pool.parts)
-	# The Sniper Rifle, its springs and the Variable Scope went public (owner, 2026-11-05): no item is dev but the
-	# Compact SMG, Dev content until the owner says make it public (CS1, 2026-11-10), and the Pump Shotgun (SH1,
-	# 2026-11-12).
+	# The Sniper Rifle, its springs and the Variable Scope went public (owner, 2026-11-05), the Compact SMG and the
+	# Pump Shotgun too (owner, 2026-11-14): no item is dev.
 	for it in every:
-		assert_eq(it.is_dev(), it.id in ["000026", "000027"], it.display_name)
+		assert_false(it.is_dev(), it.display_name)
 
 
 func test_the_torch_is_a_night_light_for_bots_without_dev_content() -> void:

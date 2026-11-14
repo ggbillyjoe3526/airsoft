@@ -44,12 +44,12 @@ func _holding(r: ReplicaConfig) -> Character:
 	return c
 
 
-func test_it_is_a_dev_electric_rifle_in_the_pool() -> void:
+func test_it_is_a_public_electric_rifle_in_the_pool() -> void:
 	var it := rules.pool.item(SMG)
 	assert_not_null(it)
 	assert_eq(it.display_name, "Compact SMG")
 	assert_eq(it.key, &"smg")
-	assert_true(it.is_dev(), "Dev content until the owner says make it public")
+	assert_false(it.is_dev(), "public (owner, 2026-11-14)")
 	for tag: String in ["rifle", "electric", "top-rail", "side-rail", "muzzle-thread"]:
 		assert_true(it.tags.has(tag), tag)
 	for tag: String in ["under-rail", "barrel-mount", "aeg-mag"]:
@@ -58,7 +58,7 @@ func test_it_is_a_dev_electric_rifle_in_the_pool() -> void:
 	assert_eq(ids.call(rules.pool.powers_for(it, true)), [BATTERY, LIPO], "the batteries, the standard one first")
 	assert_eq(ids.call(rules.pool.comes_with(it)), [], "iron sights as it comes")
 	rules.dev_content = false
-	assert_false(rules.is_offered(SMG), "hidden without Dev content")
+	assert_true(rules.is_offered(SMG), "offered without Dev content")
 
 
 func test_it_plays_by_its_stats_row_semi_and_full_auto() -> void:
@@ -188,15 +188,15 @@ func test_its_parts_are_the_optics_laser_silencer_and_torch() -> void:
 	assert_almost_eq(carried.replicas[0].move_spread, 0.5, 1e-6)
 
 
-func test_it_unlocks_at_level_10_with_its_parts_already_there() -> void:
+func test_it_unlocks_at_level_12_with_its_parts_already_there() -> void:
 	var table := LevelTable.read_file(rules.pool)
 	assert_eq(table.problems, [] as Array[String])
-	assert_eq(table.unlock_level(SMG), 10, "a replica every five levels (LV15)")
+	assert_eq(table.unlock_level(SMG), 12, "swapped with the Pump Shotgun (owner, 2026-11-14)")
 	for part: String in [RED_DOT, RED_LASER, SILENCER, BATTERY]:
-		assert_lt(table.unlock_level(part), 10, "%s before it" % part)
+		assert_lt(table.unlock_level(part), 12, "%s before it" % part)
 
 
-func test_the_breacher_kit_carries_it_with_a_red_dot_with_dev_content_only() -> void:
+func test_the_breacher_kit_carries_it_with_a_red_dot_in_every_match() -> void:
 	var k := BotKits.read_file(rules.pool)
 	var plan: BotKits.Plan = null
 	for p in k.kits:
@@ -207,9 +207,9 @@ func test_the_breacher_kit_carries_it_with_a_red_dot_with_dev_content_only() -> 
 	var kit := BotKits.kit_of(plan, rules)
 	assert_eq(kit.replicas[0].id, &"smg")
 	assert_eq(kit.parts[0].get(&"optic"), &"redDot")
-	assert_true(kit.dev, "dev gear: the match stays out of the records")
+	assert_false(kit.dev, "public gear: the match counts for the records")
 	rules.dev_content = false
-	assert_false(BotKits.offers(rules, plan), "never without Dev content")
+	assert_true(BotKits.offers(rules, plan), "and without it")
 
 
 func test_its_sounds_are_there() -> void:

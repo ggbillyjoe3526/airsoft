@@ -40,8 +40,8 @@ The kits are the bots' own: what you have unlocked never changes them.
   may be left out. A word here that is neither (a typo) drops the whole kit with a warning, as any cell of a kit that
   can't be read does: the kit is not left to play on every field.
 - **Easy**, **Normal** and **Hard** are each difficulty's weight for the kit: how likely a bot on that
-  difficulty is to carry it, against the other kits in the same column. The columns here add up to about 100, so the weights
-  read roughly as a chance in 100, but they don't have to: a kit weighted 2 is picked twice as often as one weighted 1. 0 (or
+  difficulty is to carry it, against the other kits in the same column. The columns here add up to a little over 100 (109,
+  118 and 124), so the weights read roughly as a chance in 100, but they don't have to: a kit weighted 2 is picked twice as often as one weighted 1. 0 (or
   empty) means never. A column with no weight above 0 means that difficulty's bots all carry the replicas as they come.
 - **Dev gear.** A kit holding a pool.md asset whose Access is `dev` is picked only with Dev content on, and such a
   match stays out of the records.

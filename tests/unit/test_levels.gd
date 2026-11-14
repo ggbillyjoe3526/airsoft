@@ -52,7 +52,8 @@ func test_the_shipped_levels_read_clean_and_unlock_every_item_once() -> void:
 	assert_eq(table.unlock_level(SCOPE), 5, "with the Sniper Rifle it comes on (SN1)")
 	assert_eq(table.unlock_level("000021"), 5)
 	assert_eq(table.unlock_level(CYBER), 15)
-	assert_eq(table.unlock_level("000026"), 10, "the Compact SMG, a replica every five levels (LV15)")
+	assert_eq(table.unlock_level("000027"), 10, "the Pump Shotgun, a replica every five levels (LV15; swapped, owner, 2026-11-14)")
+	assert_eq(table.unlock_level("000026"), 12, "the Compact SMG, where the Pump Shotgun was")
 	var count := 0
 	for l in table.levels:
 		count += l.unlocks.size()
