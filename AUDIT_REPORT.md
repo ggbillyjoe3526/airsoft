@@ -15,11 +15,11 @@ deleted, no repository setting changed. The pull request is open and **not merge
 |---|---|---|
 | Headless import | 0 errors, 0 warnings | 0 errors, 0 warnings |
 | gdlint | clean | clean |
-| Unit tests | 6,652 (6,650 pass, 2 pending, 0 fail) | <<TESTS>> |
+| Unit tests | 6,652 (6,650 pass, 2 pending, 0 fail) | 6,694: the same 6,652 and 42 new. The 829 that cover the touched code pass here; the whole suite runs on the pull request's checks |
 | Smoke test, licence notices, wiki check, changelog check | pass | pass |
 | Bugs fixed | | 16 found by the hunt, 4 from the known issues list |
 | Known issues rows | 121 | 121 (5 closed or cleared as stale, 5 added for what the audit leaves) |
-| Tracked files | 5,031 (183.1 MiB) | <<FILES>> |
+| Tracked files | 5,031 (183.1 MiB) | 4,895 (182.8 MiB): 146 review reports out, the report, the record, two test files and the archive's notes in |
 | A match's figures fitted with parts (11 bots, headless) | 142 ms | 16 ms |
 | Subway's minimap floors at match start (headless) | 849 ms | 76 ms |
 | Depot's baked tiles' cores (each match start and light switch) | about 7 million steps | one pass over the tiles |
@@ -145,10 +145,42 @@ rule now.
 
 ## 8. Recommendations not applied, most valuable first
 
-**Balance** (from the data tables, the records' bot matches and this pass's runs: <<BALRUNS>>; nothing here was
+**Balance** (from the data tables, the records' bot matches and this pass's runs on the untouched code, Depot and Subway at Normal, 12 seeds a mode; nothing here was
 changed)
 
-<<BALANCE>>
+Maps and modes, bots against bots at Normal, 6v6 (the bands are the balance report's):
+
+| Field | Elimination, the west end's share | Attack / Defend, the attackers' share | Plant The Bomb, the attackers' share |
+|---|---|---|---|
+| Depot | 52.3 % ±5.4 (band 45 to 55): fine | 46.2 % ±5.2 (38 to 67): fine | 37 to 41 % (PB1, SK1): low |
+| Woodland | 47.6 % (MB4, 13 Nov): fine | 58.6 % at the 9 s raise (40 to 65): fine, at the top | 41 % (PB1): low |
+| Subway | 50.0 % ±3.2 (PP1, 11 Nov, 32 seeds): fine | 44.4 % ±3.2 (PP1, 11 Nov; band 38 to 67): fine | 48 to 53 % (PB1): about even |
+| Stockade (Dev) | 52 % ±5 (SK1): fine | 49 % ±3 (SK1): fine | 40 % ±3 (SK1): low |
+
+1. **Plant The Bomb favours the defenders on three of four fields** (the attackers take about 40 % on Depot, Woodland
+   and Stockade). In 350 bot rounds only two bombs went off: once it is armed the fight is settled before the fuse
+   matters, and a defuse nearly always comes after the last attacker is out. Play it first; if it feels the same
+   with a player, the levers are `PlantConfig`'s (a longer defuse than 6 s, or a shorter fuse), one at a time.
+2. **The balance report does not play Plant The Bomb** (`tools/balance.sh`): its figures above come from each task's
+   own runs. Adding the mode would let every later map change be checked the same way.
+3. **Subway by level**: at Normal it is even, but the last runs at Easy and Hard (11 Nov, before the lift fixes) had
+   the attackers at 67 % and 61 %, outside their bands within noise. Re-measure both on 32 seeds after the playtest.
+4. **The Pump Shotgun on Woodland**: bots who carry it there are out-ranged (0.30 hits for each hit taken, known
+   issues). Keeping the Clearer kit to the indoor fields is a one-line data change, if the owner agrees.
+5. **The Pump Shotgun unlocks at level 12, after the Compact SMG at 10**: the SMG throws 18 BBs a second at half the
+   moving spread, so in the same half second it puts about ten BBs where the shotgun puts three. The shotgun's first
+   pull is its job (SH1). Ask in play whether it feels like a reward two levels after the SMG; if not, swapping the
+   two levels costs nothing else.
+6. **The Cyber Pistol** (level 15) still beats the AEG Rifle standing still on energy, spread, rate and kick, and pays
+   in BBs carried and on the move (the owner's design, kept by RP1). The one to watch in play as a sidearm that
+   replaces the primary.
+7. **The 11.1 V LiPo** gives 15 % more BBs a second for 30 % more kick on replicas whose kick is small (0.18° and
+   0.14° a shot). RP1 judged the climb enough; in play, see whether anyone ever picks the Standard Battery.
+8. **Two of the three public fields are close quarters** (Depot, Subway), where the Compact SMG's pace, hip and
+   moving spread all count and the AEG Rifle's reach does not. Both new replicas are still Dev content: decide
+   whether they are public in 0.1 Dev 3 before the tag.
+
+No figure measured in this pass is outside its band, and nothing in the data tables contradicts a ruling.
 
 **Performance and code**
 
