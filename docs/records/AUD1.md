@@ -1,6 +1,6 @@
 # AUD1 · The Dev 3 audit (step 1 of the 0.1 Dev 3 release)
 
-**Review:** <<REVIEW>>
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner, 2026-11-14 (his `MASTER_AUDIT_PROMPT.md`, with the release plan's step 1): check every known issue and fix
 what is safe, hunt bugs over every script and scene, a performance and a code quality pass, clean the repository
@@ -12,7 +12,8 @@ not merged by its thread (his word, for his playtest).
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-<<ATTEMPTS>>
+| 2026-11-14 | 1 | the audit's thread | ✓ lint, import, wiki, smoke, the touched tests | 5/8 Retry | The report said nothing changed in play though the bots' start stagger now takes effect, and counted wasted work as a bug; `docs/ARCHITECTURE.md`'s saves contract widened to fit `RunBeat`; `Hud._under_stack` beside `_stack_rects`, a test left on a path the game no longer took |
+| 2026-11-14 | 2 | the audit's thread | ✓ the same, with the changelog | 8/8 Accept | – |
 
 ## Decisions
 
@@ -57,11 +58,27 @@ not merged by its thread (his word, for his playtest).
 
 - Baseline on `c6bf874`: import 0 errors and 0 warnings; gdlint, changelog, wiki, unit parts 1 to 7 (6,652 tests, 2
   pending), smoke test and licence notices all pass.
-- After: <<VERIFIED>>
+- After, on the head the critic accepted: gdlint clean; import 0 errors and 0 warnings; the wiki and changelog checks;
+  the smoke test with zero script errors; the 48 test files that cover the touched code (787 tests) and the audit's
+  two (`test_audit_dev3`, QA's `test_aud1_qa`: 42 tests), 0 failing. The whole suite and the match guards run on the
+  pull request's checks.
+- QA: Pass, 30 tests added, no defect found. Advisories: a torch that was on before a throw stays off after an arming
+  the throw's recovery ran into (as a plain arming leaves it); `ReplicaParts`' keeping is a static (the session's
+  teardown now releases it too, the performance agent's point as well).
+- Performance: Pass. Nodes and orphans the same as `main` in the smoke match; no per-tick or per-frame path
+  allocates anything new. Left for the owner's card: a possible pop as the bounced light comes back after a Lamp
+  light switch.
+- Critic, attempt 2: Accept 8/8. Its two advisories (state the team shares that sit outside within noise) are in the
+  report.
 - Measured: `ReplicaParts.take` 142 to 16 ms for 11 figures; `MinimapField._bases` 849 to 76 ms on Subway and 16 to
   0.3 ms on Depot (headless, the same result); a figure still draws lit and shadowed on its own layer (a Compatibility
   picture under Xvfb; Forward+ cannot be drawn in the cloud).
-- Balance runs on the untouched code (Normal, 12 seeds, 6v6): <<BALRUNS>>
+- Balance runs (`tools/balance.sh`, Normal, 12 seeds, 6v6), on `c6bf874` and again on the audit's code; the four
+  reports are in the shared files, `playtest/aud1/`. Depot: Elimination's west end 52.3 % then 52.9 % ±5.4, the
+  attackers 46.2 % ±5.2 of Attack / Defend both times (43 of 93), first hit 14.8 s both times. Subway, where the
+  lift fixes act: the west end 46.7 % then 52.2 % ±5.2, the attackers 51.1 % then 47.4 % ±5.1, first hit 16.3 then
+  16.6 s. Every figure is inside its band or outside within noise (a team's share: Subway 44.4 % before, Depot
+  55.3 % after).
 
 ## Known issues left
 

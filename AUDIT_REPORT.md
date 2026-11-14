@@ -19,7 +19,7 @@ deleted, no repository setting changed. The pull request is open and **not merge
 | Smoke test, licence notices, wiki check, changelog check | pass | pass |
 | Bugs fixed | | 15 found by the hunt (and 6 pieces of wasted work, section 4), 4 from the known issues list |
 | Known issues rows | 121 | 122 (5 closed or cleared as stale, 6 added for what the audit leaves) |
-| Tracked files | 5,031 (183.1 MiB) | 4,895 (182.8 MiB): 146 review reports out, the report, the record, two test files and the archive's notes in |
+| Tracked files | 5,031 (183.1 MiB) | 4,894 (182.8 MiB): 146 review reports out; the report, the record, the changelog note, two test files and the archive's notes in |
 | A match's figures fitted with parts (11 bots, headless) | 142 ms | 16 ms |
 | Subway's minimap floors at match start (headless) | 849 ms | 76 ms |
 | Depot's baked tiles' cores (each match start and light switch) | about 7 million steps | one pass over the tiles |
@@ -35,7 +35,11 @@ make bots do what they were always tuned to do:
   `docs/KNOWN_ISSUES.md` and below describe the game as it now plays, not as it played before.
   Depot re-measured on the audit's code over the same 12 seeds agrees: Attack / Defend the same to the round (43 of
   93 to the attackers), Elimination's west end 52.9 % where it was 52.3 % (45 of 85 decided, was 45 of 86), and a
-  round's first hit at a median 14.8 s before and after.
+  round's first hit at a median 14.8 s before and after. One team's share of Elimination read 55.3 % ±5.4 where it
+  was 52.3 % (47 of 85, was 45 of 86): two rounds, noise at 12 seeds, but outside its 45 to 55 band on paper.
+  Subway, where the two lift fixes act (bugs 2 and 5), moved more, inside its bands and its noise: Elimination's
+  west end 52.2 % ±5.2 (was 46.7 %), the attackers 47.4 % ±5.1 of Attack / Defend (was 51.1 %), a round's first
+  hit at 16.6 s (was 16.3 s) and an Elimination round a median 54 s long (was 49 s).
 - **Bots waiting at a Subway lift** (bug 5) look where a standing bot looks, not at one fixed wall.
 
 Both are on the checklist.
@@ -156,16 +160,16 @@ rule now.
 
 ## 8. Recommendations not applied, most valuable first
 
-**Balance** (from the data tables, the records' bot matches and this pass's runs on the untouched code, Depot and Subway at Normal, 12 seeds a mode; nothing here was
+**Balance** (from the data tables, the records' bot matches and this pass's runs, Depot and Subway at Normal over 12 seeds a mode, on the untouched code and again on the audit's; nothing here was
 changed)
 
 Maps and modes, bots against bots at Normal, 6v6 (the bands are the balance report's):
 
 | Field | Elimination, the west end's share | Attack / Defend, the attackers' share | Plant The Bomb, the attackers' share |
 |---|---|---|---|
-| Depot | 52.3 % ±5.4 (band 45 to 55): fine | 46.2 % ±5.2 (38 to 67): fine | 37 to 41 % (PB1, SK1): low |
+| Depot | 52.9 % ±5.4 on the audit's code, 52.3 % before (band 45 to 55): fine | 46.2 % ±5.2, before and after (38 to 67): fine | 37 to 41 % (PB1, SK1): low |
 | Woodland | 47.6 % (MB4, 13 Nov): fine | 58.6 % at the 9 s raise (40 to 65): fine, at the top | 41 % (PB1): low |
-| Subway | 46.7 % ±5.3 (45 to 55): fine, near the edge at 12 seeds (50.0 % ±3.2 at 32 on 11 Nov) | 51.1 % ±5.3 (40 to 65): fine | 48 to 53 % (PB1): about even |
+| Subway | 52.2 % ±5.2 on the audit's code, 46.7 % ±5.3 before (45 to 55; 50.0 % ±3.2 at 32 seeds on 11 Nov): fine | 47.4 % ±5.1 on the audit's code, 51.1 % ±5.3 before (40 to 65): fine | 48 to 53 % (PB1): about even |
 | Stockade (Dev) | 52 % ±5 (SK1): fine | 49 % ±3 (SK1): fine | 40 % ±3 (SK1): low |
 
 1. **Plant The Bomb favours the defenders on three of four fields** (the attackers take about 40 % on Depot, Woodland
@@ -174,8 +178,8 @@ Maps and modes, bots against bots at Normal, 6v6 (the bands are the balance repo
    with a player, the levers are `PlantConfig`'s (a longer defuse than 6 s, or a shorter fuse), one at a time.
 2. **The balance report does not play Plant The Bomb** (`tools/balance.sh`): its figures above come from each task's
    own runs. Adding the mode would let every later map change be checked the same way.
-3. **Subway by level**: at Normal it is even (one team's share read 44.4 % ±5.2 at this pass's 12 seeds, outside its
-   band within noise, where 32 seeds read 50.0 %), but the last runs at Easy and Hard (11 Nov, before the lift fixes) had
+3. **Subway by level**: at Normal it is even (one team's share read 44.4 % ±5.2 before the audit and 52.2 % after it at
+   12 seeds, where 32 seeds read 50.0 %), but the last runs at Easy and Hard (11 Nov, before the lift fixes) had
    the attackers at 67 % and 61 %, outside their bands within noise. Re-measure both on 32 seeds after the playtest.
 4. **The Pump Shotgun on Woodland**: bots who carry it there are out-ranged (0.30 hits for each hit taken, known
    issues). Keeping the Clearer kit to the indoor fields is a one-line data change, if the owner agrees.
@@ -192,7 +196,8 @@ Maps and modes, bots against bots at Normal, 6v6 (the bands are the balance repo
    moving spread all count and the AEG Rifle's reach does not. Both new replicas are still Dev content: decide
    whether they are public in 0.1 Dev 3 before the tag.
 
-No figure measured in this pass is outside its band, and nothing in the data tables contradicts a ruling.
+No figure measured in this pass is outside its band by two standard errors (a team's share on Subway before the
+audit, and on Depot after it, sits just outside within noise at 12 seeds), and nothing in the data tables contradicts a ruling.
 
 **Performance and code**
 
