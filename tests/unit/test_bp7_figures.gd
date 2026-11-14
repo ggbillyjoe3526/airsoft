@@ -77,7 +77,7 @@ func test_the_contact_shadow_lies_on_a_ramp_tilted_to_it_one_ray_a_tick() -> voi
 	for side: float in [-1.0, 1.0]:
 		var rim := disc.global_transform * Vector3(side, 0.0, 0.0)
 		assert_almost_eq(rim.y - 0.3 * rim.x, cfg.contact_lift / normal.y, 1e-3, "the rim at x %.1f on the ramp" % side)
-	assert_eq(disc.transparency, 0.0)
+	assert_eq(f.contact_fade(), 1.0)
 	# Between ticks the feet move up the ramp: the disc keeps to it.
 	c.prev_position = c.position
 	c.position = Vector3(2.4, 0.72, 0.0)
@@ -98,14 +98,14 @@ func test_off_a_ledge_the_shadow_lies_on_the_floor_below_and_fades_with_the_drop
 	f.update(c, 1.0)
 	var disc := f.contact_shadow()
 	assert_almost_eq(disc.global_position.y, cfg.contact_lift, 1e-4, "on the ledge's top")
-	assert_eq(disc.transparency, 0.0)
+	assert_eq(f.contact_fade(), 1.0)
 	c.grounded = false
 	c.prev_position = Vector3(1.3, -0.4, 0.0)
 	c.position = c.prev_position
 	f.on_tick(c)
 	f.update(c, 1.0)
 	assert_almost_eq(disc.global_position.y, -1.0 + cfg.contact_lift, 1e-4, "on the floor below the ledge")
-	assert_almost_eq(disc.transparency, 0.6 / cfg.contact_fade_height, 1e-3, "fading with the 0.6 m over it")
+	assert_almost_eq(1.0 - f.contact_fade(), 0.6 / cfg.contact_fade_height, 1e-3, "fading with the 0.6 m over it")
 	assert_almost_eq(disc.global_basis.y.normalized(), Vector3.UP, Vector3.ONE * 1e-4, "flat on a flat floor")
 
 

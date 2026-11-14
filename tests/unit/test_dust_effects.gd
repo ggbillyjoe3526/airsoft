@@ -185,13 +185,13 @@ func test_the_contact_shadow_lies_under_the_feet_and_stays_on_the_floor_off_it()
 	f.update(c, 1.0)
 	assert_almost_eq(disc.global_position, Vector3(1.0, 0.5 + cfg.contact_lift, 2.0), Vector3.ONE * 1e-4)
 	assert_almost_eq(disc.global_basis.get_scale().x, cfg.contact_radius, 1e-4)
-	assert_eq(disc.transparency, 0.0)
+	assert_eq(f.contact_fade(), 1.0)
 	c.grounded = false
 	c.prev_position = c.position + Vector3.UP * cfg.contact_fade_height * 0.5
 	c.position = c.prev_position
 	f.update(c, 1.0)
 	assert_almost_eq(disc.global_position.y, 0.5 + cfg.contact_lift, 1e-4, "on the floor while the feet are off it")
-	assert_almost_eq(disc.transparency, 0.5, 1e-3, "fading with the height")
+	assert_almost_eq(1.0 - f.contact_fade(), 0.5, 1e-3, "fading with the height")
 
 
 func test_the_figures_muzzle_is_read_from_the_model() -> void:

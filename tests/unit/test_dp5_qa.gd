@@ -43,7 +43,7 @@ func test_a_shadow_does_not_float_above_feet_that_drop_below_the_floor_they_stoo
 	c.position = c.prev_position
 	f.update(c, 1.0)
 	var disc := f.contact_shadow()
-	assert_true(disc.global_position.y <= 0.6 + cfg.contact_lift + 1e-3 or disc.transparency > 0.99,
+	assert_true(disc.global_position.y <= 0.6 + cfg.contact_lift + 1e-3 or f.contact_fade() < 0.01,
 			"walking off a crate: no disc hangs at the crate's top above the falling feet")
 
 

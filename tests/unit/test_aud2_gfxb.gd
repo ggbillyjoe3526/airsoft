@@ -63,3 +63,29 @@ func test_the_site_doors_and_models_hand_their_linear_colours_over_through_look_
 	assert_string_contains(site, "LOOK_LINEAR(texture(slab_col, uv).rgb)")
 	assert_string_contains(site, "LOOK_LINEAR(texture(ply_col, uv).rgb)")
 
+
+func test_the_contact_shadow_fades_by_its_shader_not_the_instance_s_transparency() -> void:
+	var cfg := EffectsConfig.new()
+	var disc := FigureView.contact_mesh(cfg)
+	var mat := disc.material as ShaderMaterial
+	assert_not_null(mat, "a shader of its own")
+	assert_eq(mat.shader, FigureView.CONTACT_SHADER)
+	assert_not_null(mat.get_shader_parameter(&"disc"), "its soft disc")
+	var c := Character.new(3, 0, Vector3(1.0, 0.5, 2.0), 0.0, ReplicaStats.default_loadout())
+	c.grounded = true
+	var f := FigureView.new()
+	add_child_autofree(f)
+	f.setup(c, Color.RED, HitConfig.new(), null)
+	f.add_contact_shadow(disc, cfg)
+	f.set_contact_shadow(true)
+	f.update(c, 1.0)
+	var node := f.contact_shadow()
+	assert_eq(f.contact_fade(), 1.0, "whole on the floor")
+	c.grounded = false
+	c.prev_position = c.position + Vector3.UP * cfg.contact_fade_height * 0.25
+	c.position = c.prev_position
+	f.update(c, 1.0)
+	assert_almost_eq(f.contact_fade(), 0.75, 1e-3, "fading with the height")
+	assert_almost_eq(float(node.get_instance_shader_parameter(&"fade")), 0.75, 1e-3, "drawn so, on either renderer")
+	assert_eq(node.transparency, 0.0, "not by the transparency Compatibility ignores")
+
