@@ -109,3 +109,58 @@ func test_the_match_page_says_nothing_on_depot_or_in_other_modes() -> void:
 	assert_eq(page.rules_box().flag_note_text(), "", "a mode with no flag")
 	page._pick_mode(MatchOptions.MODE_ATTACK_DEFEND)
 	assert_ne(page.rules_box().flag_note_text(), "")
+
+
+# --- row 110: a long address the system refuses is sent again short ---
+
+var _asked: PackedStringArray = PackedStringArray()
+var _refuse_over: int = 0
+
+
+func _refusing(url: String) -> int:
+	_asked.append(url)
+	return FAILED if url.length() > _refuse_over else OK
+
+
+func _long_info(config: ReportConfig) -> BugReport.ReportInfo:
+	var info := BugReport.ReportInfo.new()
+	info.version = "0.1 Dev 3 (exported, release)"
+	info.note_chars = config.note_chars
+	info.note = "Bot walked through a shut door"
+	for i in 150:
+		info.events.append("t%d Beta 2 SHOT x4 GBB Pistol" % (12000 + i))
+	info.scrub = ReportScrub.for_this_machine(config)
+	return info
+
+
+func _report_panel(config: ReportConfig) -> ReportPanel:
+	_asked = PackedStringArray()
+	var panel := ReportPanel.new()
+	panel.config = config
+	panel.opener = _refusing
+	panel.clipboard = func(_text: String) -> void: pass
+	add_child_autofree(panel)
+	panel.open(_long_info(config))
+	return panel
+
+
+func test_an_address_the_system_refuses_is_sent_again_at_the_short_length() -> void:
+	var config := ReportConfig.load_default().duplicate() as ReportConfig
+	_refuse_over = config.retry_url_chars
+	var panel := _report_panel(config)
+	panel.report_button().pressed.emit()
+	assert_eq(_asked.size(), 2, "the long address, then the short one")
+	assert_gt(_asked[0].length(), config.retry_url_chars, "the first was long")
+	assert_lte(_asked[1].length(), config.retry_url_chars)
+	assert_string_contains(panel.status_text(), "Part of the report didn't fit the link", "and says it was cut")
+	assert_true(panel.status_text().begins_with("✓"))
+
+
+func test_a_short_address_the_system_refuses_is_not_sent_twice() -> void:
+	var config := ReportConfig.load_default().duplicate() as ReportConfig
+	config.max_url_chars = config.retry_url_chars
+	_refuse_over = 0
+	var panel := _report_panel(config)
+	panel.report_button().pressed.emit()
+	assert_eq(_asked.size(), 1, "nothing shorter to try")
+	assert_false(panel.status_text().begins_with("✓"))

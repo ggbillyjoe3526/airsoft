@@ -138,6 +138,14 @@ func report() -> void:
 	clipboard.call(BugReport.write(_info))
 	var answer: Variant = opener.call(link.url)
 	var opened: bool = answer is int and answer == OK
+	if not opened and link.url.length() > config.retry_url_chars:
+		# a long address the system refused (Windows' ShellExecute has a limit of its own, SV4): once more with a short
+		# one, the rest being on the clipboard
+		var short_config := config.duplicate() as ReportConfig
+		short_config.max_url_chars = config.retry_url_chars
+		link = IssueLink.make(_info, short_config)
+		answer = opener.call(link.url)
+		opened = answer is int and answer == OK
 	var key := "REPORT_NOT_OPENED"
 	if opened:
 		key = "REPORT_OPENED_CUT" if link.cut else "REPORT_OPENED"
