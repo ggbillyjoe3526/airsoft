@@ -9,7 +9,7 @@ extends VBoxContainer
 ## Under the rules, for either rule set, a map offering both Day and Night (MapData.lighting_presets) shows a Day / Night
 ## row lighting the one it plays (MapData.preset_played); a pick goes into the MatchPicks, for this session only.
 
-## The rule set or a Custom switch changed.
+## The rule set picked changed (a Custom switch moves the settings, whose `changed` the page hears).
 signal changed
 
 const PICKER_GAP := 8
@@ -53,6 +53,8 @@ var _rows: VBoxContainer = null
 var _team_size: MenuChoice = null
 var _wins: MenuChoice = null
 var _round_time: HSlider = null
+## The round-time slider's knob is held: its steps change the settings but are saved once, on release.
+var _dragging: bool = false
 var _clock: Label = null
 var _friendly_fire: MenuChoice = null
 var _ricochets: MenuChoice = null
@@ -329,6 +331,8 @@ func _build_time_row() -> void:
 	for icon: String in ["grabber", "grabber_highlight"]:
 		_round_time.add_theme_icon_override(icon, GameTheme.knob())
 	_round_time.value_changed.connect(_on_round_time)
+	_round_time.drag_started.connect(_on_round_time_grab)
+	_round_time.drag_ended.connect(_on_round_time_release)
 	line.add_child(_round_time)
 	_clock = MenuParts.text("", READOUT_SIZE, 700, GameTheme.TEXT)
 	line.add_child(_clock)
@@ -408,9 +412,23 @@ func _on_wins(index: int) -> void:
 	_edited()
 
 
+## A step of the slider: a knob being dragged retunes the page at each step but is saved once, on release; a key or a
+## click on the track saves at once.
 func _on_round_time(seconds: float) -> void:
 	_settings.custom_rules.round_time = seconds
-	_edited()
+	if _dragging:
+		_settings.mark_changed()
+	else:
+		_edited()
+
+
+func _on_round_time_grab() -> void:
+	_dragging = true
+
+
+func _on_round_time_release(_value_changed: bool) -> void:
+	_dragging = false
+	_settings.save_if_dirty(save_path)
 
 
 ## Off is the first button, On the second.
@@ -424,11 +442,11 @@ func _on_ricochets(index: int) -> void:
 	_edited()
 
 
-## A Custom switch moved: saved at once, as the settings screen saves a click, and the page told.
+## A Custom switch moved: saved at once, as the settings screen saves a click. The settings' own `changed` tells the page
+## (it listens while in the tree), so this box sends none: the page retuned twice for one click when it did (AUD1).
 func _edited() -> void:
 	_settings.mark_changed()
 	_settings.save_if_dirty(save_path)
-	changed.emit()
 
 
 ## The team sizes the Team size row offers now (the picked map's), smallest first.
