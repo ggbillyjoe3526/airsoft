@@ -9,7 +9,8 @@ extends Label
 ##    refusal of a press picked on the order wheel shows in the wheel's middle instead (wheel_notice).
 ## 2. The nearest teammate asking you, with nothing in the air to them yet, and how far across the ground ("Rook needs
 ##    a mag · 12 m"), underlined in your team's colour once a press would toss it (MagShare.can_toss_to).
-## 3. The teammate your ask stands with, or whose magazine is in the air to you ("Brick is bringing you a mag").
+## 3. The teammate bringing you one ("Brick is bringing you a mag": they set off, MagShare.Hand.taken, or their
+##    magazine is in the air to you), else the one your ask stands with ("Asked Brick for a mag").
 ##
 ## Also, for the HUD: whether a toss is ready (the wheel's item reads Toss a Mag), and the teammates to mark with a
 ## magazine glyph by their chevron (`marks`, by character id: one asking you, or bringing you one). Each notice goes to
@@ -17,8 +18,8 @@ extends Label
 ## HUD › Mag hand-off off (`enabled`). A string is made only when what the plate says changes; a tick otherwise
 ## allocates nothing.
 
-## What the plate says (besides a notice): nothing, a teammate needing one, or one coming to you.
-enum Says { NOTHING, NEEDS, BRINGING }
+## What the plate says (besides a notice): nothing, a teammate needing one, one coming to you, or your ask standing.
+enum Says { NOTHING, NEEDS, BRINGING, ASKED }
 
 ## Settings › HUD › Mag hand-off: off, neither the plate nor the glyphs show (the rules and the notices to the screen
 ## reader go on).
@@ -195,7 +196,7 @@ func _standing(state: GameState) -> void:
 		_about = best.id
 		_metres = roundi(Vector2(best.position.x - me.position.x, best.position.z - me.position.z).length())
 	elif bringer >= 0:
-		_says = Says.BRINGING
+		_says = Says.BRINGING if me.mag.coming > 0 or me.mag.taken else Says.ASKED
 		_about = bringer
 		_metres = 0
 
@@ -215,8 +216,13 @@ func _show(now: float) -> void:
 		var key := Vector3i(_says, _about, _metres)
 		if key != _line_for:
 			_line_for = key
-			_line = tr("HUD_MAG_NEEDS") % [_name(_about), _metres] if _says == Says.NEEDS \
-					else tr("HUD_MAG_BRINGING") % _name(_about)
+			match _says:
+				Says.NEEDS:
+					_line = tr("HUD_MAG_NEEDS") % [_name(_about), _metres]
+				Says.BRINGING:
+					_line = tr("HUD_MAG_BRINGING") % _name(_about)
+				_:
+					_line = tr("HUD_MAG_ASKED") % _name(_about)
 		words = _line
 		ruled = _in_reach
 	if words != text:

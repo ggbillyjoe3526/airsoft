@@ -171,6 +171,8 @@ saying "Need a mag!". A bot asked, by a teammate or by you, calls "Mag coming!",
 last metres and tosses it once you are in reach and in sight; a bot never gives away its last full spare of the replica
 it fights with, but hands over its unused pistol's freely. A bot that asked you walks up to you and waits for your toss;
 one that asked another bot waits where it is, behind cover while that bot is held up in a fight. An ask to a teammate
-who then asks for one of its own ends at once, so the asker can try someone else. A fight or cover comes first, then bringing one, then your squad order,
+who then asks for one of its own ends at once, so the asker can try someone else. A bot that can't come (off to the
+flag, or already bringing one when someone else could) passes the ask on to the next nearest teammate with one to
+spare, or tells you nobody can. A fight or cover comes first, then bringing one, then your squad order,
 then waiting for one; the same at every level. A catch gets a "Thanks for the mag!" now and then. You toss yours, and ask
 for one, with [Need a Mag](Squad-Orders#need-a-mag).

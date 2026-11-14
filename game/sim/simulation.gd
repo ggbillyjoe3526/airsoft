@@ -329,8 +329,13 @@ func _ping(c: Character, commands: Array[PlayerCommand], live: bool, events: Sim
 		e.reach = _ping_hit.fraction * reach
 
 
-## The magazine hand-off pressed in `c`'s command this tick (MH1): a toss, an ask or a refusal (MagShare.press).
+## The magazine hand-off pressed in `c`'s command this tick (MH1): a toss, an ask or a refusal (MagShare.press); and
+## its answer to the asks standing with it (MagShare.answer).
 func _mag_hand_off(c: Character, commands: Array[PlayerCommand], sharing: bool, state: GameState) -> void:
 	var cmd: PlayerCommand = commands[c.id] if c.id >= 0 and c.id < commands.size() else null
-	if cmd != null and cmd.mag_hand_off:
+	if cmd == null:
+		return
+	if cmd.mag_answer != PlayerCommand.MagAnswer.NONE:
+		mag_share.answer(c, cmd.mag_answer, cmd.mag_answer_to, state, sharing)
+	if cmd.mag_hand_off:
 		mag_share.press(c, state, sharing)

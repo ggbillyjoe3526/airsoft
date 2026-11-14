@@ -2204,6 +2204,10 @@ msgstr "%s needs a mag · %d m"
 msgid "HUD_MAG_BRINGING"
 msgstr "%s is bringing you a mag"
 
+# Your ask stands with a teammate who hasn't set off yet.
+msgid "HUD_MAG_ASKED"
+msgstr "Asked %s for a mag"
+
 msgid "HUD_MAG_CAUGHT"
 msgstr "+1 mag from %s · %d BBs"
 

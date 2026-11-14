@@ -232,3 +232,155 @@ func test_a_rider_whose_car_stops_on_the_way_plans_again_there_and_walks_out_whe
 	assert_ne(b.move_dir, Vector3.ZERO, "out at the hall")
 	assert_eq(b.route_state, Bot.RouteState.OK)
 	level.free()
+
+
+# --- Magazine asks a bot can't take (KNOWN_ISSUES: an ask to a bot off to the pole stands 15 s unanswered) ---
+
+
+## Four of team 0 on a 60 by 30 m floor at x = 0, 4, 8 and 12 (0 the asker, on its last magazine) and the share.
+func _asks() -> Array:
+	var w := BoxWorld.new(tuning.body)
+	w.add_floor(60.0, 30.0)
+	var s := GameState.new(1, tuning)
+	for i in 4:
+		s.characters.append(Character.new(i, 0, Vector3(4.0 * i, 0.0, 0.0), 0.0, ReplicaStats.default_loadout()))
+	s.characters[0].armament.ammo[0].pouch.fill(0)
+	return [s, MagShare.new(tuning, w)]
+
+
+func test_an_ask_turned_down_goes_to_the_next_nearest_and_never_back() -> void:
+	var made := _asks()
+	var s: GameState = made[0]
+	var share: MagShare = made[1]
+	var asker := s.characters[0]
+	share.press(asker, s, true)
+	assert_eq(asker.mag.asked, 1, "the nearest")
+	assert_false(asker.mag.taken, "asked, not taken")
+	s.events.clear()
+	share.answer(s.characters[1], PlayerCommand.MagAnswer.TURN_DOWN, -1, s, true)
+	assert_eq(asker.mag.asked, 2, "passed on to the next nearest at once")
+	assert_eq(s.events.first(GameEvent.Kind.MAG_ASK).target, 2)
+	share.answer(s.characters[2], PlayerCommand.MagAnswer.TURN_DOWN, -1, s, true)
+	assert_eq(asker.mag.asked, 3, "not back to the first that turned it down")
+	share.answer(s.characters[3], PlayerCommand.MagAnswer.TAKE, 0, s, true)
+	assert_true(asker.mag.taken, "taken: the asker's line may say it is coming")
+	share.answer(s.characters[3], PlayerCommand.MagAnswer.TURN_DOWN, 0, s, true)
+	assert_eq(asker.mag.asked, 3, "the ask it brings is kept")
+	s.events.clear()
+	share.answer(s.characters[3], PlayerCommand.MagAnswer.TURN_DOWN, -1, s, true)
+	assert_eq(asker.mag.asked, -1, "turned down by everyone: it ends")
+	assert_false(asker.mag.taken)
+	assert_eq(s.events.first(GameEvent.Kind.MAG_REFUSED).value, MagShare.Refusal.NOBODY, "with nobody to bring it")
+	assert_gt(asker.mag.next_ask, s.time, "its gap on, as any ask that ends")
+	share.press(asker, s, true)
+	assert_eq(asker.mag.asked, -1, "not before the gap")
+	asker.mag.next_ask = s.time
+	share.press(asker, s, true)
+	assert_eq(asker.mag.asked, 1, "a fresh ask may go to anyone again")
+
+
+func test_an_answer_out_of_play_or_off_the_round_does_nothing() -> void:
+	var made := _asks()
+	var s: GameState = made[0]
+	var share: MagShare = made[1]
+	share.press(s.characters[0], s, true)
+	share.answer(s.characters[1], PlayerCommand.MagAnswer.TURN_DOWN, -1, s, false)
+	assert_eq(s.characters[0].mag.asked, 1, "the round not live")
+	share.answer(s.characters[2], PlayerCommand.MagAnswer.TAKE, 0, s, true)
+	assert_false(s.characters[0].mag.taken, "only the teammate asked takes it")
+
+
+func test_the_command_carries_the_answer_and_resets_it() -> void:
+	var cmd := PlayerCommand.new()
+	cmd.mag_answer = PlayerCommand.MagAnswer.TURN_DOWN
+	cmd.mag_answer_to = 4
+	var copy := PlayerCommand.new()
+	copy.copy_from(cmd)
+	assert_eq(copy.mag_answer, PlayerCommand.MagAnswer.TURN_DOWN)
+	assert_eq(copy.mag_answer_to, 4)
+	cmd.reset()
+	assert_eq(cmd.mag_answer, PlayerCommand.MagAnswer.NONE)
+	assert_eq(cmd.mag_answer_to, -1)
+
+
+## A 100 m open field: four of team 0 at `at` (all bots), round 1 live, the bots holding fire. [sim, state, bots].
+func _bot_squad(at: Array[Vector3]) -> Array:
+	var m := MapData.new()
+	m.id = "open field"
+	m.kill_y = -10.0
+	var floor_block := MapData.Block.new()
+	floor_block.kind = &"floor"
+	floor_block.center = Vector3(0.0, -0.25, 0.0)
+	floor_block.size = Vector3(100.0, 0.5, 100.0)
+	m.blocks.append(floor_block)
+	for e in 2:
+		var end := MapEnd.new()
+		end.spawns.append(SpawnPoint.new(Vector3(-30.0, 0.0, 20.0) if e == 0 else Vector3(40.0, 0.0, -40.0), 0.0))
+		end.dead_zone.append(SpawnPoint.new(Vector3(-45.0, 0.0, 45.0) if e == 0 else Vector3(45.0, 0.0, -45.0), 0.0))
+		m.ends.append(end)
+	var w := BoxWorld.new(tuning.body)
+	w.add_floor(100.0, 100.0)
+	var nav := NavGrid.build(m, tuning.nav, tuning.body)
+	var sim := Simulation.new(tuning, w, w.mover(), m.ends, m.kill_y)
+	sim.nav = nav
+	var state := GameState.new(5, tuning)
+	for i in at.size():
+		state.characters.append(Character.new(i, 0, at[i], 0.0, ReplicaStats.default_loadout()))
+	state.characters.append(Character.new(at.size(), 1, Vector3(40.0, 0.0, -40.0), 0.0, ReplicaStats.default_loadout()))
+	var bots := BotController.new(state, -1, m, nav, w, tuning, BotConfig.load_default())
+	sim.start_match(state)
+	bots.observe(state)
+	for b in bots.world.bots:
+		if b.character.team == 1:
+			bots.world.bots.erase(b)
+			break
+	for i in at.size():
+		state.characters[i].position = at[i]
+	state.cheats.bots_hold_fire = true
+	return [sim, state, bots]
+
+
+func _bot_ticks(made: Array, seconds: float) -> void:
+	var sim: Simulation = made[0]
+	var state: GameState = made[1]
+	var bots: BotController = made[2]
+	var cmds: Array[PlayerCommand] = []
+	for c in state.characters:
+		cmds.append(PlayerCommand.new())
+	for t in roundi(seconds / DT):
+		bots.think(state, cmds, DT)
+		sim.step(state, cmds, DT)
+		bots.observe(state)
+
+
+func test_a_bot_bringing_one_passes_a_second_ask_on_to_a_free_teammate_and_says_it_only_once_it_sets_off() -> void:
+	var made := _bot_squad([Vector3(-30.0, 0.0, 20.0), Vector3(-26.0, 0.0, 20.0), Vector3(-20.0, 0.0, 20.0),
+			Vector3(-8.0, 0.0, 20.0)])
+	var state: GameState = made[1]
+	var bots: BotController = made[2]
+	_bot_ticks(made, 0.5)
+	var first := state.characters[0]
+	first.armament.ammo[0].pouch.fill(0)
+	_bot_ticks(made, 0.2)
+	assert_eq(first.mag.asked, 1, "the nearest")
+	assert_true(first.mag.taken, "bot 1 took it through its command")
+	var giver: Bot = null
+	for b in bots.world.bots:
+		if b.character.id == 1:
+			giver = b
+	assert_eq(giver.mag_for, first)
+	# Bot 2 runs low while bot 1 brings bot 0's: its ask goes to bot 1 (the nearest), which passes it on to bot 3.
+	var second := state.characters[2]
+	second.armament.ammo[0].pouch.fill(0)
+	var passed := false
+	var asked_first := false
+	for t in 30:
+		_bot_ticks(made, DT)
+		asked_first = asked_first or second.mag.asked == 1
+		if second.mag.asked == 3:
+			passed = true
+			break
+	assert_true(asked_first, "bot 1 asked first, the nearest")
+	assert_true(passed, "passed on to bot 3, free, rather than waiting its turn")
+	assert_eq(giver.mag_for, first, "bot 1 still brings bot 0's")
+	assert_eq(first.mag.asked, 1)

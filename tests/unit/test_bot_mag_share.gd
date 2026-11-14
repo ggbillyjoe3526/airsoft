@@ -191,8 +191,8 @@ func test_a_low_bot_asks_the_nearest_teammate_with_one_to_spare_skipping_one_ask
 
 
 func test_a_bot_asked_while_bringing_one_brings_that_first_then_the_next() -> void:
-	# The browser's asker went to the next nearest; here the simulation asks the nearest, and the giver serves its asks
-	# in turn (the second stands its 15 s meanwhile).
+	# The browser's asker went to the next nearest; here the simulation asks the nearest, and with nobody else to pass
+	# it to the giver serves its asks in turn (the second stands meanwhile; with someone else it is passed on, AUD2).
 	_squad([Vector3(-40.0, 0.0, 20.0), Vector3(-20.0, 0.0, 20.0), Vector3(-30.0, 0.0, 20.0), FAR_ORANGE])
 	var giver := _bot(2)
 	_empty(you)
@@ -218,12 +218,18 @@ func test_a_bot_off_to_the_pole_brings_none_until_it_isnt() -> void:
 	giver.lane_done = true # an attacker that has swept its lane goes to the pole
 	_empty(asker.character)
 	_run(0.2)
-	assert_eq(asker.character.mag.asked, 2, "the simulation asks the nearest")
+	assert_eq(_count(GameEvent.Kind.MAG_ASK), 1, "the simulation asked the nearest")
 	assert_eq(giver.mag_for, null, "off to the pole, it doesn't come")
+	# AUD2: it turns the ask down at once (before, it stood its 15 s unanswered); with nobody else in reach it ends.
+	assert_eq(asker.character.mag.asked, -1, "turned down, and nobody else to pass it to")
 	assert_ne(asker.mode, Bot.Mode.MAG, "and the asker doesn't wait for it")
 	giver.lane_done = false
+	# Asked again (its gaps skipped here) as the giver is free of the pole's pull.
+	asker.character.mag.asked = 2
+	asker.character.mag.asked_at = state.time
 	_tick()
-	assert_eq(giver.mag_for, asker.character, "back from the pole's pull, it takes the ask")
+	var asked_again := giver.mag_for == asker.character
+	assert_true(asked_again, "back from the pole's pull, it takes the next ask")
 	_tick()
 	assert_eq(asker.mode, Bot.Mode.MAG)
 

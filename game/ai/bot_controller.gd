@@ -144,6 +144,7 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		if w.plant != null:
 			BotPlant.act(b, w, cmd)
 		BotMagShare.ask_when_low(b, w, cmd, sharing)
+		BotMagShare.answer(b, w, cmd, sharing)
 		# Holding fire holds their bombs too (SF2).
 		if hold_fire:
 			cmd.fire = false

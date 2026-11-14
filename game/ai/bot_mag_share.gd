@@ -10,6 +10,10 @@ class_name BotMagShare
 ##   nearest ask standing to it, sets off sprinting while further than mag_hurry_distance, walks on to within
 ##   mag_walk_up_to, and presses once the catcher is in reach and in sight (MagShare.can_toss_to). It lets the job go
 ##   when the ask ends, either of them is out, it has none to spare any more or it wants the pole.
+## - A bot answers the asks standing with it through its command (PlayerCommand.mag_answer): it takes the one it sets
+##   off for (the asker's line says it is coming only then), and turns down one it can't take, which the simulation
+##   passes on to the next teammate with one to spare: every one while it is off to the pole, and, while it brings one
+##   to someone else, those another teammate could bring (with nobody else an ask waits its turn).
 ## - A bot that asked a bot waits where it is while that bot brings it, behind cover from what the giver fights while
 ##   the giver is held up in a fight (BotBrain); one that asked a player walks up to within mag_walk_up_to of them and
 ##   waits for their toss.
@@ -68,6 +72,33 @@ static func ask_when_low(b: Bot, w: BotWorld, cmd: PlayerCommand, sharing: bool)
 		return
 	b.mag_press_at = w.time + w.cfg.mag_press_gap
 	cmd.mag_hand_off = true
+
+
+## After BotBrain.think wrote `b`'s command: its answer to the asks standing with it (MagShare.answer), one a tick. It
+## takes the ask of the teammate it brings one to (update picked it), and turns down any other it can't take: all of
+## them while it is off to the pole (BotFlag.wants_flag), else, while it brings one, those another teammate could
+## bring.
+static func answer(b: Bot, w: BotWorld, cmd: PlayerCommand, sharing: bool) -> void:
+	var me := b.character
+	if not sharing or not Elimination.is_in_play(me):
+		return
+	var to := b.mag_for
+	if to != null and to.mag.asked == me.id and not to.mag.taken:
+		cmd.mag_answer = PlayerCommand.MagAnswer.TAKE
+		cmd.mag_answer_to = to.id
+		return
+	var pole := false
+	var looked := false
+	for c in w.characters:
+		if c == me or c == to or c.mag.asked != me.id or c.mag.coming > 0 or not Elimination.is_in_play(c):
+			continue
+		if not looked:
+			looked = true
+			pole = BotFlag.wants_flag(b, w)
+		if pole or (to != null and _anyone_else_to_ask(c, me, w)):
+			cmd.mag_answer = PlayerCommand.MagAnswer.TURN_DOWN
+			cmd.mag_answer_to = to.id if to != null else -1
+			return
 
 
 ## Whether `b` waits for a magazine now (BotBrain's mode): one in the air to it, or its ask standing with a player, or
@@ -178,6 +209,19 @@ static func _anyone_to_ask(me: Character, w: BotWorld) -> bool:
 		if c == me or c.team != me.team or c.mag.asked >= 0 or not Elimination.is_in_play(c):
 			continue
 		if _flat(c.position, me.position) <= reach and w.mag_share.has_mag_for(c, me):
+			return true
+	return false
+
+
+## Whether `asker`'s ask, turned down by `me`, would find another giver (MagShare.answer's rule): a teammate in play
+## within ask_range, not asking itself, that hasn't turned it down, with one to spare that fits.
+static func _anyone_else_to_ask(asker: Character, me: Character, w: BotWorld) -> bool:
+	var reach := w.mag_share.cfg.ask_range
+	for c in w.characters:
+		if c == me or c == asker or c.team != asker.team or c.mag.asked >= 0 or not Elimination.is_in_play(c) \
+				or asker.mag.turned_down & MagShare.bit(c.id) != 0:
+			continue
+		if _flat(c.position, asker.position) <= reach and w.mag_share.has_mag_for(c, asker):
 			return true
 	return false
 

@@ -7,7 +7,8 @@ extends RefCounted
 ## and the input's (MH3).
 ##
 ## An ask names the nearest teammate in play within MagShareConfig.ask_range with a magazine to spare that fits; it
-## stands ask_time unless a magazine lands first, and the asker may ask again its gap after it ends. A toss takes its BBs
+## stands ask_time unless a magazine lands first or the teammate turns it down (answer: then it goes to the next
+## nearest, never back to one that turned it down), and the asker may ask again its gap after it ends. A toss takes its BBs
 ## out of the thrower's spare at once and puts the magazine in the air (GameState.mag_tosses, made once); after its
 ## flight they go into the catcher's emptiest spares for the replica it was tossed for, or it is lost: a catcher out of
 ## play, the round decided meanwhile, or the level met on the way (lost there). Nothing is made out of nothing, and
@@ -50,9 +51,13 @@ class Toss:
 ## for `player`.
 class Hand:
 	extends RefCounted
-	## The teammate asked (-1: no ask standing), and when (s of match time).
+	## The teammate asked (-1: no ask standing), and when (s of match time); `taken` once that teammate has set off to
+	## bring it (PlayerCommand.MagAnswer.TAKE; a new ask, or one passed on, isn't).
 	var asked: int = -1
 	var asked_at: float = 0.0
+	var taken: bool = false
+	## The teammates that turned this ask down (a bit 1 << id each; MagShare.answer): it never goes back to them.
+	var turned_down: int = 0
 	## Magazines in the air to it, and the thrower of the last.
 	var coming: int = 0
 	var coming_from: int = -1
@@ -64,6 +69,8 @@ class Hand:
 	func clear() -> void:
 		asked = -1
 		asked_at = 0.0
+		taken = false
+		turned_down = 0
 		coming = 0
 		coming_from = -1
 		next_ask = -INF
@@ -288,6 +295,27 @@ func press(c: Character, state: GameState, live: bool) -> void:
 	_refuse(c, Refusal.TOO_FAR if fit else Refusal.NO_SPARE, asker.id, events)
 
 
+## `c`'s answer to the asks standing with it (PlayerCommand.mag_answer, `to` its mag_answer_to), in a live round with
+## `c` in play: TAKE marks `to`'s ask to it taken (it sets off to bring one); TURN_DOWN passes every ask standing with
+## it but `to`'s, nothing in the air to them yet, on to the nearest other teammate in reach with one to spare
+## (MAG_ASK, a fresh ask's time), or ends it with its gap, refused as NOBODY, when there is none. An ask that can't be
+## taken (its giver off to the pole) goes to someone who can at once, rather than standing ask_time unanswered.
+func answer(c: Character, reply: PlayerCommand.MagAnswer, to: int, state: GameState, live: bool) -> void:
+	if not live or not Elimination.is_in_play(c):
+		return
+	if reply == PlayerCommand.MagAnswer.TAKE:
+		var r := _by_id(state.characters, to)
+		if r != null and r.mag.asked == c.id:
+			r.mag.taken = true
+		return
+	for o in state.characters:
+		if o == c or o.id == to or o.mag.asked != c.id or o.mag.coming > 0 or not Elimination.is_in_play(o):
+			continue
+		o.mag.turned_down |= bit(c.id)
+		if not _ask_except(o, state, o.mag.turned_down):
+			_end_ask(o, state.time)
+
+
 ## One tick after the BBs flew: each magazine in the air lands once its flight is over, in the catcher's spares
 ## (MAG_CATCH) or, the catcher out of play, on the ground (MAG_LOST); with the round decided (`live` false) every one
 ## still flying is lost. Then each standing ask that has lapsed, lost its giver or its giver's spare, ends.
@@ -359,16 +387,25 @@ static func _giver_asking(c: Character, chars: Array[Character]) -> bool:
 
 func _end_ask(c: Character, time: float) -> void:
 	c.mag.asked = -1
+	c.mag.taken = false
+	c.mag.turned_down = 0
 	c.mag.next_ask = time + (cfg.player_ask_gap if c.mag.player else cfg.bot_ask_gap)
 
 
 ## `c` asks the nearest teammate in play within ask_range with one to spare (not one asking itself): MAG_ASK, or
 ## refused as NOBODY.
 func _ask(c: Character, state: GameState) -> void:
+	c.mag.turned_down = 0
+	_ask_except(c, state, 0)
+
+
+## _ask, passing over the teammates in `except` (a bit 1 << id each). False when it was refused.
+func _ask_except(c: Character, state: GameState, except: int) -> bool:
 	var best: Character = null
 	var best_d := cfg.ask_range
 	for o in state.characters:
-		if o == c or o.team != c.team or not Elimination.is_in_play(o) or o.mag.asked >= 0:
+		if o == c or except & bit(o.id) != 0 or o.team != c.team or not Elimination.is_in_play(o) \
+				or o.mag.asked >= 0:
 			continue
 		var d := Vector2(o.position.x - c.position.x, o.position.z - c.position.z).length()
 		if d > best_d or not has_mag_for(o, c):
@@ -377,14 +414,16 @@ func _ask(c: Character, state: GameState) -> void:
 		best_d = d
 	if best == null:
 		_refuse(c, Refusal.NOBODY, -1, state.events)
-		return
+		return false
 	c.mag.asked = best.id
 	c.mag.asked_at = state.time
+	c.mag.taken = false
 	var e := state.events.add(GameEvent.Kind.MAG_ASK)
 	e.actor = c.id
 	e.target = best.id
 	e.slot = c.armament.active
 	e.position = c.position
+	return true
 
 
 ## `giver` tosses `receiver` a magazine (can_toss_to already allowed it): refused as WAIT while one of its own is still
@@ -446,6 +485,11 @@ func nearest_asker(me: Character, chars: Array[Character], in_reach: bool) -> Ch
 		best = o
 		best_d = d
 	return best
+
+
+## Character `id`'s bit in a Hand's turned_down (0 for an id out of its range).
+static func bit(id: int) -> int:
+	return 1 << id if id >= 0 and id < 63 else 0
 
 
 static func _refuse(c: Character, reason: Refusal, other: int, events: SimEvents) -> void:

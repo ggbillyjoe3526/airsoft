@@ -325,7 +325,11 @@ func test_whose_is_coming_and_what_you_caught() -> void:
 	_match()
 	_last_mag(state.characters[YOU])
 	_tick([YOU])
-	assert_eq(_line().text, "Rook is bringing you a mag", "your ask stands with Rook, the nearest")
+	# AUD2: Rook has not set off (it takes the ask through its command, MagShare.answer), so it is only asked.
+	assert_eq(_line().text, "Asked Rook for a mag", "your ask stands with Rook, the nearest")
+	state.characters[YOU].mag.taken = true
+	_tick()
+	assert_eq(_line().text, "Rook is bringing you a mag", "once Rook sets off")
 	_tick([ROOK])
 	assert_eq(_line().text, "Rook is bringing you a mag", "in the air")
 	var caught: GameEvent = null
