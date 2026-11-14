@@ -94,6 +94,8 @@ func _decal(cfg: MarksConfig, size: Vector3) -> Decal:
 	d.distance_fade_length = cfg.fade_over
 	d.upper_fade = 0.0
 	d.lower_fade = 0.0
+	# The floor's marks, not a figure's standing on them: bodies are drawn on a layer of their own.
+	d.cull_mask &= ~FigureBody.LAYER
 	add_child(d)
 	_decals.append(d)
 	return d

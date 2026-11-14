@@ -2,7 +2,8 @@ extends GutTest
 ## The Dev 3 audit's fixes to what is drawn (AUD1): a pistol's torch hangs under a laser fitted with it (the parts
 ## file's `_UnderLaser` point, which nothing read), a match's figures take their parts out of one instance of each
 ## parts file (ReplicaParts.keep and release), the same nodes as a plain take's and nothing left behind, and the
-## scene's bounced light (SDFGI) is gathered afresh when the field's lamps are switched (FieldLighting).
+## scene's bounced light (SDFGI) is gathered afresh when the field's lamps are switched (FieldLighting), and the
+## floor's wear marks leave the figures' bodies out (their own render layer).
 
 const EPS := 1e-5
 const TORCH := {&"light": &"weaponTorch"}
@@ -169,3 +170,34 @@ func test_lighting_freed_during_a_refresh_lets_its_frame_hook_go() -> void:
 	assert_false(get_tree().process_frame.is_connected(hook), "no hook left on the tree")
 	assert_true(lighting.environment.sdfgi_enabled, "and the light is as the settings ask")
 	lighting.free()
+
+
+func test_a_body_is_drawn_on_its_own_layer_and_the_wear_marks_leave_it_out() -> void:
+	var cfg := FigureConfig.new()
+	var models := FigureModels.new(cfg)
+	models.load_kinds()
+	var body := FigureBody.new()
+	assert_true(body.setup(models, FigureMix.HUMAN, 0, 0, Color.RED, 0.0, cfg.lod_high))
+	add_child_autofree(body)
+	assert_gt(body.meshes.size(), 0)
+	assert_gt(body.merged.size(), 0)
+	for mi: MeshInstance3D in body.meshes + body.merged:
+		assert_eq(mi.layers, FigureBody.LAYER, "%s: the bodies' layer alone" % mi.name)
+	var play := PlayTuning.load_default()
+	var map := MapData.parse('{"size":[40,40],"dressing":{"wearMarks":[{"kind":"tyres","x":0,"z":0,"length":8}]}}',
+			play.map_style, 6)
+	if map.marks.is_empty():
+		pending("a bare map does not parse in this build")
+		return
+	var marks := WearMarks.build(map, play.marks, play.look)
+	add_child_autofree(marks)
+	assert_gt(marks.decals().size(), 0)
+	for d: Decal in marks.decals():
+		assert_eq(d.cull_mask & FigureBody.LAYER, 0, "a mark leaves the bodies out")
+		assert_eq(d.cull_mask & 1, 1, "and keeps the world")
+
+
+func test_the_bodies_layer_is_one_every_view_and_light_keeps() -> void:
+	assert_eq(FigureBody.LAYER & OpticGlass.ALL_LAYERS, FigureBody.LAYER, "inside the cameras' layers")
+	for other: int in [1, OpticGlass.HANDS_LAYER, AreaProbes.LAYER, LightFixtures.LAYER, StationSurface.LAYER]:
+		assert_eq(FigureBody.LAYER & other, 0, "its own: not layer %d" % other)

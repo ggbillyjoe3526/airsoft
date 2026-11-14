@@ -21,6 +21,10 @@ const GATE_OPEN := 1
 ## The vault layer's two clips as asked of its Transition (CL1).
 const VAULT_OVER := 0
 const VAULT_CLIMB := 1
+## The render layer a body is drawn on, its own in place of the world's: the floor's wear marks leave it out
+## (WearMarks: their decals reach up to meet slopes and steps, and a figure standing on a stain took it on its boots).
+## Every camera and light keeps it (inside OpticGlass.ALL_LAYERS).
+const LAYER := 1 << 15
 
 ## The parts it draws (the shadow twin last) and each one's level (0, 1, 2; -1 for the twin).
 var meshes: Array[MeshInstance3D] = []
@@ -138,6 +142,10 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 		levels.append(-1)
 		_last_level.append(-1)
 	_merge_levels(models, kind, team, colour, glow, _config.face_look(figure_id), skin)
+	for mi in meshes:
+		mi.layers = LAYER
+	for mi in merged:
+		mi.layers = LAYER
 	set_lod_lines(lines)
 	for bone in _config.bones:
 		var index := skeleton.find_bone(bone)
