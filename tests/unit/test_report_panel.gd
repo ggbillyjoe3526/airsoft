@@ -15,7 +15,8 @@ var open_answer: int = OK
 
 
 func before_each() -> void:
-	config = ReportConfig.load_default()
+	# a copy: a test changing the limits must not change the game's cached config for the tests after it
+	config = ReportConfig.load_default().duplicate() as ReportConfig
 	opened = PackedStringArray()
 	copied = PackedStringArray()
 	open_answer = OK
