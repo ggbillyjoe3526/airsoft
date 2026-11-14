@@ -68,13 +68,9 @@ pull request that builds them.
 7. **Version.** `Version.current()` is the only reader of `application/config/version`; the release workflow writes
    it from the owner's tag. Nothing else derives a version.
 8. **Saves.** Every file the game writes to `user://` goes through `SaveFile` (atomic write, backup, magic header).
-   Two exceptions. `user://renderer.cfg` (`RendererOverride`): one key Godot reads itself through
+   One exception: `user://renderer.cfg` (`RendererOverride`), one key Godot reads itself through
    `application/config/project_settings_override` before any script runs, so it is a plain settings file, written to
-   a temp file and renamed. The running game's heartbeat (`RunBeat`, `user://run.save.beat0` and `.beat1`; owner,
-   2026-11-14, the audit's recommendation): a process id and a time, written every few seconds on a worker thread
-   so a match never waits on the disk, the two files in turn so a write cut short spoils one, and the reader takes
-   the newer that reads whole. Nothing a player keeps is in them, and `SaveFile`'s rotation and its failure and hold
-   state are the main thread's.
+   a temp file and renamed.
 9. **Headless.** `godot --headless -- --smoke` runs with zero script errors and prints `[smoke] ok`; once bots exist
    it plays a whole match. New systems keep it so.
 
