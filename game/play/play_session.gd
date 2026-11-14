@@ -1288,8 +1288,9 @@ func _after_tick() -> void:
 		_audio.on_ping(_bots.pings, PLAYER_ID)
 	_hud.on_tick(state, _input.mag_from_wheel)
 	if _bots.callouts != null:
-		if heard:
-			_audio.on_calls(_bots.callouts.said, state, player.team, settings.hud.callouts)
+		# Every tick, skipped ones too: unheard calls are passed over there and then, never kept for the tick the cover
+		# lifts, when up to a log's worth of radio clicks started at once.
+		_audio.on_calls(_bots.callouts.said, state, player.team, settings.hud.callouts and heard)
 		_hud.on_calls(_bots.callouts.said, state)
 	var vault_ready := _vault_ready()
 	_hud.set_vault_ready(vault_ready, vault_ready and _vault_probe.climb)
