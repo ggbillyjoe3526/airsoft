@@ -2253,11 +2253,7 @@ func _apply_motion() -> void:
 func _apply_graphics(values: GraphicsQuality) -> void:
 	GraphicsApply.apply_field(values, _lighting, _dust, null, _level, _kicked, _woods,
 			_roof.lamp_lights() if _roof != null else null, _marks)
-	if _lifts != null:
-		_lifts.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
-		_lifts.set_probes(values.reflections != GraphicsQuality.Reflections.OFF)
-	if _station_fixtures != null:
-		_station_fixtures.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
+	GraphicsApply.apply_station(values, _lifts, _station_fixtures)
 	if _lamp_light != int(values.lamp_lights):
 		if _lamp_light >= 0 and _lighting != null:
 			_lighting.refresh_scene_light()

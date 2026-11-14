@@ -299,6 +299,18 @@ static func apply_picture(values: GraphicsQuality, viewport: Viewport) -> void:
 		viewport.screen_space_aa = screen_aa
 
 
+## A station's lights with `values`, as a match and the eye pictures draw them: its lamp fixtures' lights
+## (StationFixtures, the running tunnels' lamps) and its lift cars' lamps lit with Lamp light on, the cars' reflection
+## probes shown with Reflections on. Either may be null.
+static func apply_station(values: GraphicsQuality, lifts: LiftView, fixtures: StationFixtures) -> void:
+	var lamps := values.lamp_lights != GraphicsQuality.LampLights.OFF
+	if lifts != null:
+		lifts.set_lamps(lamps)
+		lifts.set_probes(values.reflections != GraphicsQuality.Reflections.OFF)
+	if fixtures != null:
+		fixtures.set_lamps(lamps)
+
+
 ## The match's sun (shadows on, their range, contact-hardening on Softest), its ambient occlusion (on, and half or full
 ## size), its global illumination, reflections, glow and volumetric fog (FieldLighting.set_effects), eye adaptation, the wind dust's share,
 ## the kicked dust (on with any wind dust), the level's baked light (a new mesh only when it changes; no sun's bounce

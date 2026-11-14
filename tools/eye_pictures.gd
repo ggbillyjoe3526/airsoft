@@ -141,6 +141,8 @@ func _run() -> void:
 	# The roof's lamps as real lights where the preset lights them (Lamp light, UG1), the sun dimmed as a match does.
 	GraphicsApply.apply_field(values, lighting, null, null, level, null, null,
 			roof.lamp_lights() if roof != null else null)
+	# A station's tunnel lamps and its lift cars' lamps and probes, as the preset lights them in a match (TB2, MT2).
+	GraphicsApply.apply_station(values, lifts, station_fixtures)
 	if site != null:
 		level.set_detail(values.mesh_detail)
 	# The doors, poles, gate paddles and a site's props and stencils in the baked light near them, as a match draws them (BP7).
