@@ -237,7 +237,7 @@ ATTEMPT5_ROW
   the pictures the four fingers now stand side by side up the side face on both, tips
   pointing up toward the bore; on the SMG a small opening still shows under the little finger's arch, since the
   handguard is narrower there than the finger is long. Measured on the built model: neighbouring fingertips
-  TIPS_SMG mm apart on the SMG and TIPS_SN mm on the Sniper (round 4: up to 36 mm), every tip ahead of its knuckle.
+  19.0 to 19.5 mm apart on the SMG and 17.7 to 19.7 mm on the Sniper (round 4: up to 36 mm), every tip ahead of its knuckle.
   `test_each_fingertip_lies_ahead_of_its_knuckle_and_beside_its_neighbour_s` (test_ha1_qa3.gd) holds both on the
   skinned mesh, and fails on attempt 4's model (the little finger's tip behind its knuckle on both; ring to little
   fingertip 35.0 mm on the Sniper, 36.4 mm on the SMG).
