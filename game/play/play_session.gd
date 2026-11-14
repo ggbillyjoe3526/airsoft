@@ -607,9 +607,10 @@ func _advance_build() -> void:
 ## Staged, the bots' groundwork, a slice a frame before the views step runs (Woodland's took 2.2 s in one frame, BP6):
 ## the cover found on a worker thread (pure data) while the vault links' rays, which only the main thread casts, run
 ## BUILD_SLICE_USEC a frame, so the loading screen keeps drawing. True on the frame after both are in: the bots get
-## them as BotController would find them.
+## them as BotController would find them. Practice has no bots: nothing reads either, so neither is found (on Woodland
+## that was 2.1 s of its loading screen).
 func _prepare_bots() -> bool:
-	if _cover != null:
+	if _cover != null or practice:
 		return true
 	if _vaults == null:
 		_vaults = NavVaults.Finder.new()
@@ -635,6 +636,7 @@ func _prepare_bots() -> bool:
 func _bot_options() -> BotController.Options:
 	var options := BotController.Options.new()
 	options.cover = _cover
+	options.groundwork = not practice
 	_cover = null
 	return options
 

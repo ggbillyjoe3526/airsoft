@@ -10,11 +10,13 @@ extends RefCounted
 
 ## How the bots are set up: with `talk` they call to their team (Callouts, data/callouts.md; off, they play exactly the
 ## same and say nothing); `cover` is the map's cover if already found (BotCover.find_cover, as PlaySession finds it off
-## the main thread), else it is found here.
+## the main thread), else it is found here; without `groundwork` (practice: no bot to route) neither the vault links nor
+## the cover is found, as nothing would read them (the player's own vault and climb read the level, not the grid).
 class Options:
 	extends RefCounted
 	var talk: bool = true
 	var cover: BotCover.Found = null
+	var groundwork: bool = true
 
 
 var world: BotWorld = BotWorld.new()
@@ -62,7 +64,8 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	w.cfg = config
 	w.nav = nav
 	w.query = query
-	NavVaults.link(nav, query, tuning.vault, tuning.body, config.vault_price)
+	if options.groundwork:
+		NavVaults.link(nav, query, tuning.vault, tuning.body, config.vault_price)
 	NavLifts.link(nav, query, tuning.lifts, tuning.movement.run_speed, config.lift_wait)
 	# Smoke clouds priced on the grid (NavSmoke): this match's bots start with none, whatever a grid used before has left.
 	if nav.smoke == null:
@@ -72,7 +75,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	w.lanes = map.lanes
 	var cover := options.cover
 	if cover == null:
-		cover = BotCover.find_cover(map, nav, config, tuning)
+		cover = BotCover.find_cover(map, nav, config, tuning) if options.groundwork else BotCover.Found.new()
 	w.low_cover = cover.low
 	w.tall_cover = cover.tall
 	w.angle_bushes = BotAngles.bushes_of(query.foliage, config)
