@@ -39,7 +39,8 @@ A personality changes how a bot plays, never how well: its reaction, turning and
   metres.
 - **Flank chance (+).** The chance a search of a far spot goes round to one side first; in overtime, the chance it
   goes for the flag round the side.
-- **Burst (×) and Burst pause (×).** How long it holds the trigger, and how long it waits between bursts.
+- **Burst (×) and Burst pause (×).** How long it holds the trigger, and how long it waits between bursts. Burst is
+  0.1 to 3 (at 0 it would never fire); one outside that keeps 1 with a warning.
 - **Watch where you ducked (s).** Having lost sight of you, how long it keeps watching the spot before coming after
   you.
 - **Pushes in.** In a fight it closes in as it sidesteps, it takes no cover on a fresh sighting, and it runs at

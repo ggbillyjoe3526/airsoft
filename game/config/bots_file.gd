@@ -16,14 +16,16 @@ const HABITS := "Habits"
 const PERSONALITY_COLUMN := "Personality"
 const NAME_COLUMN := "Name"
 const CARD_COLUMN := "Card note"
-## How they move: each (×) column, the Style field it sets and the most it may be.
+## The least a Burst (×) may be: at 0 a bot's burst lasts no time, so it aims and never pulls the trigger.
+const BURST_LEAST := 0.1
+## How they move: each (×) column, the Style field it sets, the most it may be and the least.
 const SCALE_COLUMNS: Array[Array] = [
-	["Lane pause (×)", &"hold_time", 5.0],
-	["Cover at a lane point (×)", &"hold_cover_chance", 5.0],
-	["Cover on contact from (×)", &"contact_cover_min_distance", 5.0],
-	["Walk the last (×)", &"search_walk_distance", 5.0],
-	["Burst (×)", &"burst", 3.0],
-	["Burst pause (×)", &"burst_pause", 3.0],
+	["Lane pause (×)", &"hold_time", 5.0, 0.0],
+	["Cover at a lane point (×)", &"hold_cover_chance", 5.0, 0.0],
+	["Cover on contact from (×)", &"contact_cover_min_distance", 5.0, 0.0],
+	["Walk the last (×)", &"search_walk_distance", 5.0, 0.0],
+	["Burst (×)", &"burst", 3.0, BURST_LEAST],
+	["Burst pause (×)", &"burst_pause", 3.0, 0.0],
 ]
 const FLANK_COLUMN := "Flank chance (+)"
 const WATCH_COLUMN := "Watch where you ducked (s)"
@@ -186,9 +188,9 @@ func _read_moves(row: DataTable.Row, t: DataTable) -> void:
 	var s := styles[StringName(row.cell(PERSONALITY_COLUMN).to_lower())]
 	for c in SCALE_COLUMNS:
 		var v := _number(row.cell(c[0]))
-		if is_nan(v) or v < 0.0 or v > c[2]:
-			problems.append("%s: %s: \"%s\" is not a number from 0 to %d" % [t.where(row.line), c[0], row.cell(c[0]),
-					c[2]])
+		if is_nan(v) or v < c[3] or v > c[2]:
+			problems.append("%s: %s: \"%s\" is not a number from %s to %d" % [t.where(row.line), c[0], row.cell(c[0]),
+					String.num(c[3]), c[2]])
 		else:
 			s.set(c[1], v)
 	var flank := _number(row.cell(FLANK_COLUMN))
