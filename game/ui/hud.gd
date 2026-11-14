@@ -811,11 +811,6 @@ func refresh_door_prompt() -> void:
 	_plant_prompt.refresh_key()
 
 
-## Whether the door prompt shows.
-func door_prompt_shown() -> bool:
-	return _door_prompt.visible
-
-
 ## Shows "What got you" for `facts` (the hit on you just called): the shooter's name in their team's colour and the
 ## bot's personality `note` ("" for none). It stays until the next round starts.
 func show_what_got_you(facts: HitFacts, shooter_name: String, colour: Color, note: String) -> void:

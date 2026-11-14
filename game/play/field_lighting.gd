@@ -229,11 +229,6 @@ func add_probes(map: MapData) -> void:
 		add_child(_probes)
 
 
-## How many reflection probes it holds (for tests).
-func probe_count() -> int:
-	return _probes.get_child_count() if _probes != null else 0
-
-
 ## Switches the dearer effects (GraphicsQuality's rows): global illumination (screen: SSIL; scene: SSIL and SDFGI),
 ## reflections (probes: the area probes; screen: and SSR), glow, volumetric fog, and the sun's contact-hardening soft
 ## shadows (`soft_sun`). Only properties that change are set, so a repeat is free; never per frame.

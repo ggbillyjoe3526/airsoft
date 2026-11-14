@@ -222,11 +222,6 @@ func set_weather(temperature: float, wind_speed: float) -> void:
 	_weather.text = weather_line(temperature, wind_speed)
 
 
-## The weather line's words.
-func weather_text() -> String:
-	return _weather.text
-
-
 ## Practice, on the map `map_name`: "Practice · Range", with " · timed challenge" while the challenge is `on` and
 ## " · best N" once it has a best (`best` above 0). Shows the Timed challenge switch (unless the map has no room for its
 ## START plate: `can_challenge` false) and Leave practice, and no seed.

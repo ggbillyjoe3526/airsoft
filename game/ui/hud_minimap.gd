@@ -391,7 +391,6 @@ class View:
 	## A ping's ring and diamond with their ink, each one triangle array (one draw call; HudPingMarker.Mark).
 	var _ping_ring: HudPingMarker.Mark = null
 	var _ping_diamond: HudPingMarker.Mark = null
-	var _you_on: bool = true
 	## Where the white arrow is (the world's x, z): the middle on the minimap, wherever you are on the whole field.
 	var _you_at: Vector2 = Vector2.ZERO
 
@@ -618,10 +617,6 @@ class View:
 	func ping_is_contact(i: int) -> bool:
 		return i < _ping_count and _ping_contacts[i] == 1
 
-	## Whether the white arrow shows (the thumbnails' sample has it; so does every real panel).
-	func set_you(on: bool) -> void:
-		_you_on = on
-
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, size), HudStyle.backing_on(self, BACKING))
 		var mid := size * 0.5
@@ -654,11 +649,10 @@ class View:
 			_draw_site(mid + _pin(_to_panel(_sites[i]), _cfg.mark_pad), _site_letters[i])
 		for i in _dot_count:
 			_draw_dot(mid + _pin(_to_panel(_dots[i]), _cfg.dot_pad), _dot_colours[i], _dot_arrows[i])
-		if _you_on:
-			draw_set_transform(mid + _pin(_to_panel(_you_at), _cfg.dot_pad), _arrow_rot, Vector2.ONE)
-			draw_colored_polygon(_you_shape, YOU_COLOUR)
-			draw_polyline(_you_shape, _cfg.ink, OUTLINE, true)
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		draw_set_transform(mid + _pin(_to_panel(_you_at), _cfg.dot_pad), _arrow_rot, Vector2.ONE)
+		draw_colored_polygon(_you_shape, YOU_COLOUR)
+		draw_polyline(_you_shape, _cfg.ink, OUTLINE, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if _bomb_on:
 			_draw_bomb(mid + _pin(_to_panel(_bomb), _cfg.dot_pad if _bomb_carried else _cfg.mark_pad))
 

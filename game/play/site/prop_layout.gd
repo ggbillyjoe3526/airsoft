@@ -9,7 +9,6 @@ extends RefCounted
 const FACE_SLAB := 0.04
 ## The trees' own seeded stream (their turns and shades, WT1), apart from the other props' so theirs stay as they were.
 const TREE_SALT := 0x7EE5
-## The turn about up that points a model's front (its +z) along a block's named `facing` (SM4).
 
 
 ## One model's instances: a transform, a shade (1 is the model's own colours) and a paint (a linear multiplier, white

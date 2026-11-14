@@ -104,14 +104,6 @@ func bare_extent(key: StringName) -> Vector2:
 	return shot.bare_extent if shot != null else Vector2.ONE
 
 
-## The picture's width over its height (1 for a replica with no model).
-func aspect(key: StringName) -> float:
-	var shot := _shots.get(key) as Shot
-	if shot == null:
-		return 1.0
-	return float(shot.port.size.x) / float(shot.port.size.y)
-
-
 ## How many replicas have a picture (a viewport each).
 func count() -> int:
 	return _shots.size()

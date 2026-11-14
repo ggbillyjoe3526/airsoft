@@ -158,11 +158,6 @@ func underlined() -> bool:
 	return get_theme_stylebox(&"normal") == _ruled
 
 
-## Whether a notice is up at `now` (s of match time), for tests.
-func notice_up(now: float) -> bool:
-	return now < _notice_until
-
-
 ## A notice: shown for mag_notice_time and handed to the screen reader.
 func _say(words: String, now: float) -> void:
 	_notice = words

@@ -312,7 +312,6 @@ script = ExtResource("55_ha1hl")
 [sub_resource type="Resource" id="Resource_k2yse"]
 script = ExtResource("10_bqp2c")
 life = SubResource("Resource_ha1hl")
-selector_at = PackedFloat32Array(0.5, 0.75, 1)
 inspect_poses = Dictionary[StringName, ExtResource("50_in1ip")]({
 &"aeg": SubResource("Resource_in1ae"),
 &"cyber": SubResource("Resource_in1cy"),

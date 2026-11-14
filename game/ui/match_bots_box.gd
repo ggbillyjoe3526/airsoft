@@ -71,11 +71,6 @@ func teammates_text() -> String:
 	return _teammates_line
 
 
-## The XP multiplier after the Opponents label, as shown.
-func xp_text() -> String:
-	return _xp.text
-
-
 ## Whether the Teammates label says FOLLOWS OPPONENTS (no level picked for them).
 func says_follows() -> bool:
 	return _follows.visible

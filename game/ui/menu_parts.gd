@@ -118,14 +118,6 @@ static func padded(left: float, top: float, right: float, bottom: float) -> Marg
 	return pad
 
 
-## A vertical box holding `head` over what follows.
-static func section(head: Control) -> VBoxContainer:
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", HEADING_GAP)
-	box.add_child(head)
-	return box
-
-
 ## The radial glow a replica's picture sits in, fading into `edge`.
 static func glow(edge: Color) -> GradientTexture2D:
 	var gradient := Gradient.new()
