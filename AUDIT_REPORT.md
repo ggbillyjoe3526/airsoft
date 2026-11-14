@@ -273,15 +273,16 @@ His answers of 11:15 to the first seven questions:
 | Watching Here for Normal bots | Hard only | Nothing changed |
 | The raised pose in the hit volume | leave for Beta | Nothing changed |
 
-A second batch of 18 questions went to him the same afternoon (10.5). Most are already built on side branches, not
+A second batch of 22 questions went to him the same afternoon (10.5). Most are already built on side branches, not
 on this pull request, and go in when he says yes.
 
 **What became of section 8's recommendations.** Balance: 1 measured and put to him (question 13); 2 built
 (`tools/balance.sh` plays Plant The Bomb); 3 being measured (10.4); 4 built (the Clearer kit is indoors only); 5 and 8
-put to him (questions 16 and 15); 6 and 7 are play checks on the checklist. Performance and code: 1 fixed (the lift
-car's probe); 2 built on a side branch and put to him (question 14); 3 done another way (the wear masks moved out
+put to him (questions 16 and 15); 6 and 7 are play checks on the checklist. Performance and code: 1 built ahead of
+its condition (his F3) and put to him (question 20); 2 built on a side branch and put to him (question 14); 3 done another way (the wear masks moved out
 beside the parts files: Godot 4.7.2's importer refuses the quantised export, tried); 4 and 5 put to him (questions
-17 and 18); 6, 7, 8, 9 and 10 fixed; 11 left as it was (the helpers are used by tests or planned content).
+17 and 18); 6, 8, 9 and 10 fixed; 7 put to him (question 21: the report gave him two options, so the contract is
+unchanged); 11 left as it was (the helpers are used by tests or planned content).
 
 ### 10.2 Fixed without a ruling (no change to look, feel or balance beyond the bug itself)
 
@@ -374,8 +375,9 @@ every field and a fuse a field (Depot 20 s, Woodland 25 s, Subway 30 s), which n
 ### 10.5 What still needs the owner
 
 **The second batch of questions** (2026-11-14; pictures in `playtest/aud2/` in the shared files; the recommendation
-in brackets). Questions 1 to 11, the replica and BBs of 12 and the first trade of 14 are built and tested on side
-branches kept in the shared files (`audit/aud2-backup.bundle`); the rest are proposals.
+in brackets). Questions 1 to 11, the replica and BBs of 12, the first trade of 14 and 22 are built and tested on
+side branches kept in the shared files (`audit/aud2-backup.bundle`); 19 and 20 are on the pull request; the rest are
+proposals.
 
 1. Subway's running tunnels: a faint glow on the arch on Low and Medium [yes].
 2. Subway's platform vaults: the same glow on every preset [yes].
@@ -396,6 +398,13 @@ branches kept in the shared files (`audit/aud2-backup.bundle`); the rest are pro
 16. Their unlock levels swapped (the Pump Shotgun at 10, the Compact SMG at 12) [leave until both are played].
 17. Git LFS for models, sounds and pictures [no: it uses the owner's LFS allowance and changes every checkout].
 18. The six ambience loops stored as OGG [no: it re-encodes his recordings to save repository size only].
+19. Keep the bots' squeeze past Subway's works wagons, given what it may have done to Attack / Defend there (10.4)
+    [yes]. It is on the pull request, as the fix of a known issue; the critic asked that its balance effect be his call.
+20. Keep the lift car's reflections still during a ride (pictured: no visible difference), or hold it until his F3
+    shows a dip [keep]. On the pull request.
+21. The heartbeat's two files written outside `SaveFile`: a second exception in the saves contract, or moved into
+    `SaveFile` [the exception]. Not changed: the contract is as it was.
+22. The magazine change's free fingers curled in with the others [leave: hardly visible].
 
 **His playtest** (the Dev 3 checklist, "The audit's second pass", 15 lines, and the notes under eight older items):
 what a cloud machine can't judge. Above all: whether the Hi-Cap's rattle now gives you away fairly, whether SMG

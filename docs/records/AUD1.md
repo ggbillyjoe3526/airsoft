@@ -14,6 +14,7 @@ not merged by its thread (his word, for his playtest).
 |---|---|---|---|---|---|
 | 2026-11-14 | 1 | the audit's thread | ✓ lint, import, wiki, smoke, the touched tests | 5/8 Retry | The report said nothing changed in play though the bots' start stagger now takes effect, and counted wasted work as a bug; `docs/ARCHITECTURE.md`'s saves contract widened to fit `RunBeat`; `Hud._under_stack` beside `_stack_rects`, a test left on a path the game no longer took |
 | 2026-11-14 | 2 | the audit's thread | ✓ the same, with the changelog | 8/8 Accept | – |
+| 2026-11-14 | 3 (the second pass) | the audit's thread and seven groups | ✓ lint, wiki, changelog, smoke, the touched tests; CI green on `626ceb8` | 4/8 Retry | Three things were the owner's to rule and had been decided for him (the saves contract's second exception, the wagon squeeze's effect on Subway's balance, the lift probe built ahead of its condition); the field's air rule stood in two places; the Subway and Plant The Bomb rows lacked the pass's own figures |
 
 ## Decisions
 
@@ -127,6 +128,12 @@ ask me what to do before actioning it." The account is `AUDIT_REPORT.md` › 10.
   vertices differ, 4 in the shoulder by more than 0.1), so the sleeve, glove and strap rows would move the shoulder
   the owner approved (33fa48b). A row in the known issues says how a rebuild must start.
 - **The Dev 3 checklist** got a second item (the pass's play checks) and dated notes under eight older items.
+- **After the critic's Retry (attempt 3):** the saves contract is as it was (88bb0ad reverted; the heartbeat's row
+  is back and the two options are question 21); the wagon squeeze and the lift probe stay on the pull request as
+  fixes of known issues, each put to him with its evidence (questions 19 and 20; Subway was run with and without
+  the squeeze); the match and the Loadout read one rule for a field's air (`FieldAir.temperature_on`);
+  `play_session.gd`'s size is a row in the known issues, not split in an audit pass (its staged build is a state
+  machine over its own build functions).
 
 **Verified**
 
