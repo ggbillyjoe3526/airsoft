@@ -50,7 +50,7 @@ The kits are the bots' own: what you have unlocked never changes them.
 
 The kits are first guesses for the owner's playtest. Easy carries the most factory replicas; each level up carries more
 and better matched gear; Hard never factory. The Cyber Pistol turns up now and then from Normal up, and the Sniper Rifle
-and the Compact SMG and the Pump Shotgun (the Breacher and the Clearer, Dev content for now) at every level, more often
+and the Compact SMG and the Pump Shotgun (the Breacher and the Clearer) at every level, more often
 on Hard. Rushers lean to Support, Pointman, the Cyber Pistol, the Breacher and the Clearer, anchors to Marksman, Support
 and Sniper, flankers to Stealth, Pointman, the Breacher and the Clearer, careful bots to Rifleman, Marksman and Sniper.
 

@@ -39,7 +39,8 @@ each replica as it comes, before [parts and power sources](Parts-and-Power).
 
 Each replica has its own job. The **AEG Rifle** is the all-rounder that takes every part. The **GBB Pistol** is the
 quickest thing to bring up, with steady single shots. The **Cyber Pistol** is rifle power in a pistol, short on
-BBs. The **Sniper Rifle** is reach and precision, one shot at a time.
+BBs. The **Sniper Rifle** is reach and precision, one shot at a time. The **Pump Shotgun** is the first pull
+round a corner, three BBs at once. The **Compact SMG** is close quarters on the move.
 
 ## AEG Rifle
 
@@ -99,6 +100,33 @@ heard ([Parts and Power](Parts-and-Power#power-sources)). It takes the AEG Rifle
 barrels or other magazines. It is a long rifle in a grey chassis: a plain barrel with a thread cap, a slotted forend,
 a black receiver with a top rail, a short box magazine, a vertical grip and a stock with a cheek piece and a rubber
 butt pad.
+
+## Pump Shotgun
+
+A spring pump shotgun for corners and doorways, unlocked at level 10. One pull sends **three BBs at once**, one from
+each of its three barrels, in a small even triangle, so a rushed aim that would put a single BB past someone still
+lands one of the three. After every pull your left hand works the pump before the next: single shots only, and a
+missed pull is a long wait. Its **shell** holds enough BBs for ten pulls and is swapped like a magazine, the quickest
+change of the long replicas.
+
+It has the shortest reach of the long replicas: past about 25 m its three BBs land round a body more often than on
+it. It shares the Sniper Rifle's springs ([Parts and Power](Parts-and-Power#power-sources)) and takes an optic, the
+Red Laser and the Weapon Torch; no grip (the pump is the grip), no silencer, barrel or magazine parts. It has no iron
+sights: bare, you aim along its top rail. It is a short pump gun with a full stock and three barrels side by side
+over the pump.
+
+## Compact SMG
+
+A compact electric SMG built for shooting on the move, unlocked at level 12. It fires **single shots or full auto**
+(no burst) faster than any other replica, you move a little quicker with it than with a rifle, and moving spreads its
+shots only half as much as it does the others', so on the run it groups tighter than the AEG Rifle. It is the
+quickest of the rifles to bring up and to reload. On an indoor field it starts each round on single shots, as the AEG
+Rifle does ([no full auto indoors](Maps#depot)).
+
+Against that, its reach is short, its shots are a little wider aimed, and a magazine is empty in under three seconds
+with the trigger held. It takes an optic, the Red Laser or Weapon Torch and a muzzle part; no grip, barrel or
+magazine parts. Bots that carry it go full auto indoors at a target within 12 m, the one exception to no full auto
+indoors.
 
 ## How they sound
 
