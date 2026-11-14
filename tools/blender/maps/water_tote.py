@@ -79,15 +79,15 @@ def build() -> object:
             w = c - inset
             return [(u, -w, z), (w, u, z), (-u, w, z), (-w, -u, z)][side]
         for u in xs[1:-1]:
-            k.bar(at(u, z0), at(u, z1), TUBE, "cage", seg=5, cap=False)
-        k.bar(at(-c, z0), at(-c, z1), TUBE * 1.3, "cage", seg=6)
+            k.bar(at(u, z0), at(u, z1), TUBE, "cage", seg=8, cap=False)
+        k.bar(at(-c, z0), at(-c, z1), TUBE * 1.3, "cage", seg=10)
         for row in range(5):
             z = z0 + 0.12 + row * (z1 - z0 - 0.12) / 4.5
-            k.bar(at(-c, z), at(c, z), TUBE, "cage", seg=5, cap=False)
-        k.bar(at(-c, z1), at(c, z1), TUBE * 1.3, "cage", seg=6)
-        k.bar(at(-c, z0 + 0.01), at(c, z0 + 0.01), TUBE * 1.3, "cage", seg=6)
+            k.bar(at(-c, z), at(c, z), TUBE, "cage", seg=8, cap=False)
+        k.bar(at(-c, z1), at(c, z1), TUBE * 1.3, "cage", seg=10)
+        k.bar(at(-c, z0 + 0.01), at(c, z0 + 0.01), TUBE * 1.3, "cage", seg=10)
     for y in (-0.22, 0.32):
-        k.bar((-c, y, z1), (c, y, z1), TUBE, "cage", seg=5)
+        k.bar((-c, y, z1), (c, y, z1), TUBE, "cage", seg=8)
     # A blank dark label plate on the front (the photos' notice plate, no writing).
     # Fixed on the cage over its bars, with a clip at each corner.
     k.blk((-0.42, -CAGE - 0.008, 0.42), (-0.02, -CAGE - 0.002, 0.82), "label")

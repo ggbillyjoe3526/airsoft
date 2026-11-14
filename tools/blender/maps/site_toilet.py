@@ -44,7 +44,8 @@ def _wave(k: rk.Kit, axis: str, at: float, out: float, u0: float, u1: float, z0:
         u = u0 + (u1 - u0) * t
         z = z0 + amp * (0.5 - 0.5 * math.cos(math.pi * t))
         ring = []
-        for d, dz in ((0.0, 0.0), (out, width * 0.3), (out, width * 0.7), (0.0, width)):
+        for d, dz in ((0.0, 0.0), (out * 0.55, width * 0.06), (out, width * 0.2), (out, width * 0.8),
+                      (out * 0.55, width * 0.94), (0.0, width)):
             ring.append((at + d, u, z + dz) if axis == "x" else (u, at + d, z + dz))
         rings.append(ring)
     faces = k.loft(rings, mat, closed=False)
@@ -84,11 +85,11 @@ def build() -> object:
     for sx in (-1.0, 1.0):
         at = sx * WALL
         for i, z0 in enumerate((0.45, 1.05, 1.6)):
-            _wave(k, "x", at, sx * 0.02, -0.42 * sx, 0.42 * sx, z0, 0.2, "loo_wall", 0.1)
+            _wave(k, "x", at, sx * 0.035, -0.42 * sx, 0.42 * sx, z0, 0.2, "loo_wall", 0.1)
         # A round moulded boss low on each side (photo 2's circles).
         k.cyl((at if sx > 0 else at - 0.012, 0.2, 0.62), 0.16, 0.012, "loo_wall", seg=20, axis="x")
     for z0 in (0.7, 1.45):
-        _wave(k, "y", WALL, 0.02, -0.42, 0.42, z0, 0.16, "loo_wall", 0.1)
+        _wave(k, "y", WALL, 0.035, -0.42, 0.42, z0, 0.16, "loo_wall", 0.1)
     # The front: the door frame (posts up to the header, never overlapping it, and the header, proud of the wall),
     # the door a little back in it, its two moulded swoops, three hinges on the left, the latch with its round
     # indicator and a pull handle on the right.
