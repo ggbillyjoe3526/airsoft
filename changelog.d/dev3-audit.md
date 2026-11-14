@@ -60,8 +60,26 @@
 - Depot's painted stencils and the flag's cloth take the room's baked light.
 - A bot that comes into view half way through switching replicas carries on with the switch, not from the start.
 
+- Subway's running tunnels on Low and Medium: the arch overhead glows a little of its own colour instead of drawing near black.
+- Subway's platform vaults glow a little of their own colour on every preset, so they no longer read darker and cooler than the walls.
+- Depot and the other fields: doors, the roof's steel and lamps, and the light fixtures are worn like the props beside them.
+- Mesh detail Low: the replica in your hands draws its grain more cheaply.
+- Practice range: the sandbags, the site toilet and the tote are rounder up close.
+- Dev › Retro filter: your replica and BBs in flight wobble with the field, and the haze reaches 110 m (was 70 m).
+
 ### Loading and speed
 - Loading screens move in smaller steps with shorter stops on every field.
 - Practice starts a little sooner.
 - Customise and the Armory open a little quicker.
 - Skipping a round no longer hitches as the skip starts.
+
+### Replicas and levels
+- The Compact SMG and the Pump Shotgun are for everyone now, no longer Dev content.
+- The two swapped levels: the Pump Shotgun unlocks at level 10, the Compact SMG at level 12.
+- Bots carry the Compact SMG on every field and the Pump Shotgun on indoor fields only, in ordinary matches.
+- The Armory lists 27 items.
+
+### Figures and animation
+- A bot running with its replica put away swings its arms, where before they hung still.
+- Switching between two replicas of the same kind (two rifles, or two pistols) puts the old one away and draws the new one from the right place.
+- Sniper Rifle on the slower springs: the bolt is home with the last knock of the cocking sound.

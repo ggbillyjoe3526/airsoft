@@ -37,7 +37,8 @@ in `docs/PROCESS.md`.
   live bounce; the sun's bounce goes from under a lit roof). The Ultra push is done. The owner added a replica (2026-11-10): the Compact SMG, its numbers
   and play first (CS1, Dev content), then its own model from his photos (CS2). And another (2026-11-12): the Pump
   Shotgun, a spring pump replica that sends three BBs a pull (SH1, Dev content), then its own model from his
-  photos, with no sights on it (SH2). And a
+  photos, with no sights on it (SH2). Both went public on 2026-11-14 (owner, AUD1), the Pump Shotgun at level 10
+  and the Compact SMG at level 12. And a
   new map (2026-11-10): Subway, a closed metro station on three levels, from his concept v2: its greybox as Dev
   content (MT1, done), then its working lifts (MT2, done), its CC0 materials (MT3, done), then its models and lamps.
   And a third mode (2026-11-12): Plant The Bomb on every field (PB1: the attackers plant at Site A or B, the
@@ -307,7 +308,7 @@ After 0.1 the game grows through themed updates, each a mini expansion (owner, 2
 | Spring sniper rifles | One shot per cocking; high velocity and long reach (the Sniper Rifle, SN1) | In the game |
 | DMRs | Semi-auto only; high velocity; a minimum engagement distance, as at real sites | Maybe |
 | SMGs | Compact and quick to handle; high rate; short range | Maybe, after the sniper |
-| Shotguns | Three BBs a pull; pump every shot; a 30 BB shell swapped like a magazine (the Pump Shotgun, SH1, Dev content; the owner chose the swap over shells loaded one by one, 2026-11-12) | In the game (dev) |
+| Shotguns | Three BBs a pull; pump every shot; a 30 BB shell swapped like a magazine (the Pump Shotgun, SH1, public since 2026-11-14; the owner chose the swap over shells loaded one by one, 2026-11-12) | In the game |
 | GBBRs | Gas blowback kick; the bolt locks back on empty; small gas mags that run out fast | Later |
 | LMGs | Huge box mags; slow to move and aim; covering fire; a bipod | Later |
 
