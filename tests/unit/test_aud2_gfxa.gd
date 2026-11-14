@@ -80,3 +80,41 @@ func test_no_roof_lamp_hangs_straight_over_a_tall_model_in_a_ceilinged_room() ->
 			var over := spot.x > lo.x - 1.0 + 1e-3 and spot.x < hi.x + 1.0 - 1e-3 and spot.z >= lo.z and spot.z <= hi.z
 			assert_false(over and spot.y > hi.y, "the lamp at %s hangs clear of %s" % [spot, b.dress])
 	assert_eq(lamps, 2, "the plant room keeps its two lamps")
+
+
+func _lift_state(lifts: LiftView, y: float, phase: LiftState.Phase) -> LiftState:
+	var state := LiftState.new()
+	var n := map.lifts.size()
+	state.y.resize(n)
+	state.prev_y.resize(n)
+	state.stop.resize(n)
+	state.doors.resize(n)
+	state.calls.resize(n)
+	state.phase.resize(n)
+	for i in n:
+		state.y[i] = map.lifts[i].stops[0]
+		state.prev_y[i] = state.y[i]
+		state.phase[i] = LiftState.Phase.OPEN
+	state.y[0] = y
+	state.prev_y[0] = y
+	state.phase[0] = phase
+	lifts.refresh(state, 1.0)
+	return state
+
+
+func test_a_riding_car_leaves_its_probe_where_it_stopped_and_takes_it_back_at_the_next_stop() -> void:
+	# The engine captures a reflection probe again whenever it moves (AUDIT 8, Performance 1).
+	var lifts := LiftView.build(map, MapStyle.new(), tuning.lifts, play.lifts)
+	add_child_autofree(lifts)
+	var spec := map.lifts[0]
+	var car := _cars(lifts)[0] as Node3D
+	var probe := car.get_node("Probe") as ReflectionProbe
+	_lift_state(lifts, spec.stops[0], LiftState.Phase.OPEN)
+	var parked := probe.global_position
+	_lift_state(lifts, spec.stops[0] + 1.0, LiftState.Phase.MOVING)
+	_lift_state(lifts, spec.stops[0] + 2.0, LiftState.Phase.MOVING)
+	assert_almost_eq(probe.global_position.distance_to(parked), 0.0, 1e-4, "riding: the probe stays put")
+	_lift_state(lifts, spec.stops[1], LiftState.Phase.OPENING)
+	var inside := car.global_position + Vector3(0.0, tuning.lifts.car_height * 0.5, 0.0)
+	assert_false(probe.top_level, "stopped: the probe is the car's again")
+	assert_almost_eq(probe.global_position.distance_to(inside), 0.0, 1e-4, "stopped: the probe fills the car")
