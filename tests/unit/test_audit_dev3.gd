@@ -1,7 +1,8 @@
 extends GutTest
-## The Dev 3 audit's fixes to the replicas' parts (AUD1): a pistol's torch hangs under a laser fitted with it (the parts
-## file's `_UnderLaser` point, which nothing read), and a match's figures take their parts out of one instance of each
-## parts file (ReplicaParts.keep and release), the same nodes as a plain take's and nothing left behind.
+## The Dev 3 audit's fixes to what is drawn (AUD1): a pistol's torch hangs under a laser fitted with it (the parts
+## file's `_UnderLaser` point, which nothing read), a match's figures take their parts out of one instance of each
+## parts file (ReplicaParts.keep and release), the same nodes as a plain take's and nothing left behind, and the
+## scene's bounced light (SDFGI) is gathered afresh when the field's lamps are switched (FieldLighting).
 
 const EPS := 1e-5
 const TORCH := {&"light": &"weaponTorch"}
@@ -113,3 +114,58 @@ func test_release_frees_what_keep_held() -> void:
 	# After release a take is a plain one again: its file's instance is freed with it.
 	_free(ReplicaParts.take(&"aeg", TORCH, true))
 	assert_eq(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)), orphans, "a plain take keeps none")
+
+
+## A field's lighting in the tree, with Global illumination at `gi`.
+func _lighting(gi: GraphicsQuality.GlobalIllumination) -> FieldLighting:
+	var lighting := FieldLighting.build(LightingConfig.new())
+	add_child_autofree(lighting)
+	lighting.set_effects(gi, GraphicsQuality.Reflections.OFF, false, false, false)
+	return lighting
+
+
+func test_a_refresh_holds_the_scene_light_off_for_its_frames_then_on() -> void:
+	var lighting := _lighting(GraphicsQuality.GlobalIllumination.SCENE)
+	assert_true(lighting.environment.sdfgi_enabled, "Scene: on")
+	lighting.refresh_scene_light()
+	assert_false(lighting.environment.sdfgi_enabled, "off at once")
+	assert_true(lighting.refreshing_scene_light())
+	# The settings applied again meanwhile (another row changed) don't cut the refresh short.
+	lighting.set_effects(GraphicsQuality.GlobalIllumination.SCENE, GraphicsQuality.Reflections.OFF, false, false, false)
+	assert_false(lighting.environment.sdfgi_enabled, "still off: a frame must draw without it")
+	for i: int in FieldLighting.SCENE_LIGHT_REFRESH_FRAMES:
+		assert_true(lighting.refreshing_scene_light(), "frame %d" % i)
+		await get_tree().process_frame
+	assert_false(lighting.refreshing_scene_light())
+	assert_true(lighting.environment.sdfgi_enabled, "on again")
+	assert_false(get_tree().process_frame.is_connected(lighting._on_refresh_frame), "the frame hook is let go")
+
+
+func test_a_refresh_does_nothing_without_the_scene_light() -> void:
+	for gi: GraphicsQuality.GlobalIllumination in [GraphicsQuality.GlobalIllumination.OFF,
+			GraphicsQuality.GlobalIllumination.SCREEN]:
+		var lighting := _lighting(gi)
+		lighting.refresh_scene_light()
+		assert_false(lighting.refreshing_scene_light(), "gi %d" % gi)
+		assert_false(lighting.environment.sdfgi_enabled)
+
+
+func test_the_scene_light_switched_off_during_a_refresh_stays_off() -> void:
+	var lighting := _lighting(GraphicsQuality.GlobalIllumination.SCENE)
+	lighting.refresh_scene_light()
+	lighting.set_effects(GraphicsQuality.GlobalIllumination.OFF, GraphicsQuality.Reflections.OFF, false, false, false)
+	for i: int in FieldLighting.SCENE_LIGHT_REFRESH_FRAMES:
+		await get_tree().process_frame
+	assert_false(lighting.environment.sdfgi_enabled, "the settings' word, not the refresh's")
+
+
+func test_lighting_freed_during_a_refresh_lets_its_frame_hook_go() -> void:
+	var lighting := FieldLighting.build(LightingConfig.new())
+	add_child(lighting)
+	lighting.set_effects(GraphicsQuality.GlobalIllumination.SCENE, GraphicsQuality.Reflections.OFF, false, false, false)
+	lighting.refresh_scene_light()
+	var hook := lighting._on_refresh_frame
+	remove_child(lighting)
+	assert_false(get_tree().process_frame.is_connected(hook), "no hook left on the tree")
+	assert_true(lighting.environment.sdfgi_enabled, "and the light is as the settings ask")
+	lighting.free()

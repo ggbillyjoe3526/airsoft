@@ -192,6 +192,8 @@ var _props: PropDress = null
 ## Which of the level's lights the doors, poles and props were last lit by (`_relight`, BP7;
 ## MapLevel.baked_light_builds: 0 the shared light alone, as they are built).
 var _relit: int = 0
+## The Lamp light the field was last drawn with (-1 before the first), so a switch refreshes the bounced light.
+var _lamp_light: int = -1
 ## Scratch for the vault prompt's look ahead each tick.
 var _vault_probe: VaultState = VaultState.new()
 var _figures: Array[FigureView] = []
@@ -2134,6 +2136,10 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 		_lifts.set_probes(values.reflections != GraphicsQuality.Reflections.OFF)
 	if _station_fixtures != null:
 		_station_fixtures.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
+	if _lamp_light != int(values.lamp_lights):
+		if _lamp_light >= 0 and _lighting != null:
+			_lighting.refresh_scene_light()
+		_lamp_light = int(values.lamp_lights)
 	if _level != null:
 		_level.set_detail(values.mesh_detail)
 		if _level.baked_light_builds() != _relit:

@@ -61,6 +61,9 @@ const STAR_GRID := 160.0
 ## CameraAttributesPractical's auto exposure limits are sensitivities (ISO): it meters brightness b as b x 800 at its
 ## default sensitivity of 100 (12.5 / 100 / 100 per ISO), so a brightness limit is set as this many times it.
 const ISO_PER_BRIGHTNESS := 800.0
+## The frames the scene's bounced light (SDFGI) is off in `refresh_scene_light`: one drawn without it drops what it
+## had gathered; the second is room for a frame the renderer skipped.
+const SCENE_LIGHT_REFRESH_FRAMES := 2
 
 var sun: DirectionalLight3D = null
 var environment: Environment = null
@@ -91,6 +94,9 @@ var _held_sky: float = 0.0
 ## The field's world environment, and the eyes it adapts with while Eye adaptation is on (`set_eye_adaptation`).
 var _world: WorldEnvironment = null
 var _eyes: CameraAttributesPractical = null
+## Whether the settings ask for the scene's bounced light (SDFGI), and the frames left of a refresh holding it off.
+var _scene_light: bool = false
+var _refresh_left: int = 0
 
 
 ## A node holding the environment and the sun, graded and its effects set up by `look` (the built-in look when null).
@@ -238,7 +244,8 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 	var ssil := gi != GraphicsQuality.GlobalIllumination.OFF
 	if env.ssil_enabled != ssil:
 		env.ssil_enabled = ssil
-	var sdfgi := gi == GraphicsQuality.GlobalIllumination.SCENE
+	_scene_light = gi == GraphicsQuality.GlobalIllumination.SCENE
+	var sdfgi := _scene_light and _refresh_left == 0
 	if env.sdfgi_enabled != sdfgi:
 		env.sdfgi_enabled = sdfgi
 	var ssr := reflections == GraphicsQuality.Reflections.SCREEN
@@ -255,6 +262,40 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 	var size := _look.sun_size if soft_sun else 0.0
 	if not is_equal_approx(sun.light_angular_distance, size):
 		sun.light_angular_distance = size
+
+
+## Gathers the scene's bounced light (SDFGI) afresh: off for SCENE_LIGHT_REFRESH_FRAMES frames, then on again. What it
+## had gathered follows a change to the field's lights (Lamp light switched in the pause menu) only as the view moves,
+## so the old lamps' bounce, or the roof still shutting out the sky, stayed where you stood. Nothing without it on.
+func refresh_scene_light() -> void:
+	if not _scene_light or _refresh_left > 0 or not is_inside_tree():
+		return
+	environment.sdfgi_enabled = false
+	_refresh_left = SCENE_LIGHT_REFRESH_FRAMES
+	get_tree().process_frame.connect(_on_refresh_frame)
+
+
+## Whether a refresh is holding the scene's bounced light off.
+func refreshing_scene_light() -> bool:
+	return _refresh_left > 0
+
+
+func _on_refresh_frame() -> void:
+	_refresh_left -= 1
+	if _refresh_left <= 0:
+		_end_refresh()
+
+
+func _end_refresh() -> void:
+	_refresh_left = 0
+	get_tree().process_frame.disconnect(_on_refresh_frame)
+	if environment.sdfgi_enabled != _scene_light:
+		environment.sdfgi_enabled = _scene_light
+
+
+func _exit_tree() -> void:
+	if _refresh_left > 0:
+		_end_refresh()
 
 
 ## The eyes adapting (Graphics › Eye adaptation, UG3): the field's world meters what its camera sees and brightens a
