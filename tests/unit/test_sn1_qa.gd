@@ -131,18 +131,19 @@ func test_the_armory_names_no_sniper_gear_without_dev_content_and_with_it_names_
 	for id in DEV_IDS:
 		assert_false(plain_ids.has(id), "%s hidden" % id)
 		assert_true(dev_ids.has(id), "%s shown with Dev content" % id)
-	assert_eq(dev.item_count - plain.item_count, 7,
-			"the rifle, three springs and the Variable Scope (SN2), the Compact SMG (CS1, dev) and the Pump Shotgun (SH1, dev)")
+	assert_eq(dev.item_count - plain.item_count, 5,
+			"the rifle, three springs and the Variable Scope (SN2); the Compact SMG and the Pump Shotgun are public")
 	assert_true(plain_ids.has(SCOPE), "the public 2x Scope is still listed")
 
 
-func test_the_next_unlock_skips_levels_9_and_10_without_dev_content() -> void:
-	# Level 9 gives only the M140 Spring and level 10 only the Variable Scope, both dev here: a public player's next
-	# unlock from level 8 is the level 11 battery (LV15).
+func test_the_next_unlock_skips_level_9_without_dev_content() -> void:
+	# Level 9 gives only the M140 Spring, dev here: a public player's next unlock from level 8 is level 10, and of its
+	# two items only the public Pump Shotgun is named (the Variable Scope is dev here).
 	var facts := ArmoryFacts.new(table, pool, table.levels[8].total, false, false)
 	var next := facts.next_row()
 	assert_not_null(next)
-	assert_eq(next.number, 11)
+	assert_eq(next.number, 10)
+	assert_eq(next.items.size(), 1, "the Pump Shotgun alone")
 	for it in next.items:
 		assert_false(it.is_dev())
 
