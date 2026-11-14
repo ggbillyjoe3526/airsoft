@@ -137,17 +137,41 @@ static func ray_target(o: Vector3, d: Vector3, max_t: float, target: RangeTarget
 	return t if x * x + y * y <= target.radius * target.radius else INF
 
 
-## The nearest target, or plate post, along the unit ray within `max_t`, into `out`.
+## The nearest target, or plate post, along the unit ray within `max_t`, into `out`. With `flown` (a BB's segment this
+## tick, `flown` m from `o`) a target that moved this tick (prev_position to position, under `stride`) is swept as a body
+## is (PH1, BBStep._first_body): met in its own frame, where the BB starts its step further on and ends where it ends.
+## Its posts stand still.
 static func first_hit(o: Vector3, d: Vector3, max_t: float, targets: Array[RangeTarget], cfg: RangeConfig,
-		out: Hit) -> void:
+		out: Hit, flown: float = 0.0, stride: float = INF) -> void:
 	out.index = -1
 	out.at = max_t
 	out.post = false
+	var stride2 := stride * stride
 	for i in targets.size():
 		var target := targets[i]
-		if Hitbox.ray_sphere(o, d, target.reach_centre, target.reach) > out.at:
+		var from := o
+		var along := d
+		# Metres of the BB's own path per metre of the path the target saw.
+		var per_metre := 1.0
+		var swept := true
+		if flown > 0.0:
+			var step := target.position - target.prev_position
+			var step2 := step.length_squared()
+			if step2 > 0.0 and step2 < stride2:
+				from = o + step
+				along = o + d * flown - from
+				var seen := along.length()
+				swept = seen > 0.0
+				if swept:
+					along /= seen
+					per_metre = flown / seen
+		var near := Hitbox.ray_sphere(o, d, target.reach_centre, target.reach)
+		if swept and from != o:
+			near = minf(near, Hitbox.ray_sphere(from, along, target.reach_centre, target.reach) * per_metre)
+		if near > out.at:
 			continue
-		var t := ray_target(o, d, out.at, target)
+		# A target that moved along with the BB never gets nearer: only its posts.
+		var t := ray_target(from, along, out.at / per_metre, target) * per_metre if swept else INF
 		if t <= out.at:
 			out.index = i
 			out.at = t

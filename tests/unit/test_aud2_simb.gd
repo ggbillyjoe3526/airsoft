@@ -196,3 +196,63 @@ func test_jolt_flies_a_bb_through_subways_ajar_lift_doorway() -> void:
 	var leaf := door + side * half * 0.75
 	assert_true(q.bb_ray(leaf + out, leaf - out * 0.6, hit), "beside it, a leaf")
 	assert_almost_eq((hit.position - door).dot(out), spec.door_depth * 0.5, 2e-3, "on the leaf's landing face")
+
+
+# --- KNOWN_ISSUES 35: a moving range target is swept through its move as a body is ---
+
+
+## A plate 0.1 m across facing the firing line (+z) at 10 m, which moved 0.15 m along +x this tick (to x 0).
+func _moved_plate() -> Array[RangeTarget]:
+	var s := RangeTarget.Spec.new()
+	s.kind = RangeTarget.Kind.STEEL
+	s.position = Vector3(0.0, 1.0, -10.0)
+	s.radius = 0.1
+	var specs: Array[RangeTarget.Spec] = [s]
+	var targets := RangeTargets.create(specs, tuning)
+	targets[0].prev_position = targets[0].position - Vector3(0.15, 0.0, 0.0)
+	return targets
+
+
+## Where a BB flying 4 m from (`x`, 1, -8) along -z this tick meets `targets` (-1 none, -2 a post), unswept or swept.
+func _plate_hit(targets: Array[RangeTarget], x: float, swept: bool) -> int:
+	var out := RangeTargets.Hit.new()
+	RangeTargets.first_hit(Vector3(x, 1.0, -8.0), Vector3(0.0, 0.0, -1.0), 4.0, targets, tuning.targets, out,
+			4.0 if swept else 0.0, tuning.hits.max_stride)
+	return -2 if out.index >= 0 and out.post else out.index
+
+
+func test_a_bb_meets_a_moving_plate_where_it_was_as_the_bb_crossed() -> void:
+	var targets := _moved_plate()
+	# The BB crosses the plate's face halfway through the tick, when the plate stood at x -0.075.
+	assert_eq(_plate_hit(targets, -0.15, false), -1, "at the tick's end the plate is 0.15 m off: a miss")
+	assert_eq(_plate_hit(targets, -0.15, true), 0, "swept, it was 0.075 m off as the BB crossed: a hit")
+	assert_eq(_plate_hit(targets, 0.08, false), 0, "where it stands at the tick's end: a hit")
+	assert_ne(_plate_hit(targets, 0.08, true), 0, "swept, it was 0.155 m off as the BB crossed: no plate hit")
+	targets[0].prev_position = targets[0].position
+	assert_eq(_plate_hit(targets, 0.08, true), 0, "a still plate is met where it stands")
+	targets[0].prev_position = targets[0].position - Vector3(tuning.hits.max_stride + 0.5, 0.0, 0.0)
+	assert_eq(_plate_hit(targets, 0.08, true), 0, "a jump past max_stride (a reset) is no move to sweep")
+
+
+func test_a_swinger_in_flight_is_swept_by_the_bbs_path() -> void:
+	var s := RangeTarget.Spec.new()
+	s.kind = RangeTarget.Kind.STEEL
+	s.motion = RangeTarget.Motion.SWINGER
+	s.position = Vector3(0.0, 1.0, -10.0)
+	s.radius = 0.1
+	var specs: Array[RangeTarget.Spec] = [s]
+	var targets := RangeTargets.create(specs, tuning)
+	RangeTargets.step(targets, tuning, DT)
+	var t := targets[0]
+	var moved := t.position - t.prev_position
+	assert_gt(moved.length(), 0.0, "it swings from the off")
+	# Aimed at where the plate was halfway through the tick, just past its rim from where it ends the tick.
+	var mid := t.prev_position + moved * 0.5
+	var aim := mid - moved.normalized() * (t.radius * 0.9)
+	assert_gt(Vector2(aim.x - t.position.x, aim.y - t.position.y).length(), t.radius, "a miss at the tick's end")
+	var out := RangeTargets.Hit.new()
+	var o := Vector3(aim.x, aim.y, -8.0)
+	RangeTargets.first_hit(o, Vector3(0.0, 0.0, -1.0), 4.0, targets, tuning.targets, out, 4.0, tuning.hits.max_stride)
+	assert_eq(out.index, 0)
+	assert_false(out.post)
+	assert_almost_eq(out.at, 2.0, 1e-3, "on its face")
