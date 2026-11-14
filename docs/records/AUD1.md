@@ -99,11 +99,22 @@ ask me what to do before actioning it." The account is `AUDIT_REPORT.md` › 10.
 **Decisions**
 
 - **Every row is attempted; a change to look, feel or balance is asked first.** Two batches of numbered questions
-  went to him (7 in the morning, 18 in the afternoon). His first answers: the Hi-Cap's rattle is heard at a run and a
+  went to him (7 in the morning, 22 in the afternoon). His first answers: the Hi-Cap's rattle is heard at a run and a
   sprint; a simulated round counts for the score only; Customise shows the chosen field's air; bots with the Compact
   SMG may go full auto indoors inside 12 m; bots route round smoke (the two missing bomb plays are Beta); Watching
-  Here stays Hard only; the raised pose in the hit volume is Beta. The second batch's builds wait on side branches
-  (`audit/aud2-backup.bundle` in the shared files), not on the pull request.
+  Here stays Hard only; the raised pose in the hit volume is Beta. The second batch's builds waited on side branches
+  (`audit/aud2-backup.bundle` in the shared files) until he answered.
+- **His answers to the 22 (16:49: "Go with defaults for 1-14. 15-16: yes. 17-22: defaults.")**, the defaults being
+  the picks sent with each question: built in are the tunnel arch's and the platform vaults' glow, the wear on doors,
+  roof steel and fixtures, the holstered arm swing, the same-class switch, the sniper's bolt, the cheaper grain on
+  Mesh detail Low, the rounder range props, and the Retro filter's wobble with its haze out to 110 m. Left by his
+  word: figures in the baked light, the rifle on the pack, the Cyber Pistol's thumb, the magazine fingers, Plant
+  The Bomb's timings, the three performance trades, Git LFS and OGG loops. Kept: the wagon squeeze and the lift
+  probe. The heartbeat is the saves contract's second exception. `AUDIT_REPORT.md` › 10.1 has the table.
+- **The Compact SMG and the Pump Shotgun are public and swap levels** (his yes to 15 and 16: the Shotgun at 10,
+  the SMG at 12). The bots' Breacher and Clearer kits were dev gear and `LoadoutRules.standard()` leaves Dev content
+  off, so no bot match, balance figure or match guard had ever carried them: every figure was measured again
+  (10.4). The kits' weights are as they were written, so each column now adds up to a little over 100.
 - **Seven groups worked in parallel** in worktrees of their own (two simulation, menus, performance, two graphics,
   models), each row attempted and its outcome written to one tracker; the thread picked their commits onto the
   branch, hunted bugs over the pass's own diff (seven fixed) and re-measured the balance.
@@ -129,21 +140,28 @@ ask me what to do before actioning it." The account is `AUDIT_REPORT.md` › 10.
   the owner approved (33fa48b). A row in the known issues says how a rebuild must start.
 - **The Dev 3 checklist** got a second item (the pass's play checks) and dated notes under eight older items.
 - **After the critic's Retry (attempt 3):** the saves contract is as it was (88bb0ad reverted; the heartbeat's row
-  is back and the two options are question 21); the wagon squeeze and the lift probe stay on the pull request as
-  fixes of known issues, each put to him with its evidence (questions 19 and 20; Subway was run with and without
-  the squeeze); the match and the Loadout read one rule for a field's air (`FieldAir.temperature_on`);
-  `play_session.gd`'s size is a row in the known issues, not split in an audit pass (its staged build is a state
-  machine over its own build functions).
+  is back and the two options are question 21); the wagon squeeze and the lift probe stay on the pull request as fixes
+  of known issues, each put to him with its evidence (questions 19 and 20; he kept both. The run of Subway without the
+  squeeze was stopped when the two replicas went public and made its figures stale); the match and the Loadout read
+  one rule for a field's air (`FieldAir.temperature_on`); `play_session.gd`'s size is a row in the known issues, not
+  split in an audit pass (its staged build is a state machine over its own build functions).
 
 **Verified**
 
-- The pass's eight test files (`test_aud2_*.gd`, 96 tests) and every test file its changes touch pass here; gdlint,
-  the wiki and changelog checks and the smoke test pass; the whole suite and the match guards ran green on the pull
-  request's checks at `626ceb8` and run again on each push.
-- Balance on the final simulation code (`748781e`), Normal, 12 seeds a field: no figure outside its band by two
-  standard errors; Subway's west end (43.5 % ±5.2) and attackers (61.8 % ±5.2) are the two to watch
-  (`AUDIT_REPORT.md` › 10.4).
-- QA: Pass, 11 tests added, two advisories fixed (two tests waited by frame count; the kits table now says a Fields
-  typo drops its kit). Performance: Pass, one advisory fixed (the carried cloud). Critic: @CRITIC@.
+- The pass's nine test files (`test_aud2_*.gd`, 124 tests) and every test file its changes touch pass here (170
+  files); 24 older expectations follow the public replicas and their levels; gdlint, the wiki and changelog checks
+  and the smoke test pass; the whole suite and the match guards run on the pull request's checks on each push (on
+  `0ebb983` every match guard passed with the two replicas in, and one unit test that read the wear from the models'
+  shader text failed and was pointed at the include).
+- Balance on the final simulation code (`0f4fefb`, the two replicas in bots' hands), 6v6, 16 seeds a field and
+  level: no figure outside its band by two standard errors. To watch: Plant The Bomb's attackers on Depot (37.9 %
+  ±3.1) and Woodland (37.2 % ±3.1, down from 47.2 % before the replicas went public), both on 32 seeds and just
+  under the band's 40 %; Subway at Hard (Alpha 58.6 %, the attackers 58.4 %, band 40 to 60). Woodland's 7v7 row
+  is closed (51.9 % ±4.4). `AUDIT_REPORT.md` › 10.4.
+- QA: Pass twice (11 tests, then 21 on the owner's answers), four advisories fixed (two tests waited by frame
+  count; the kits table says a Fields typo drops its kit; a holstered figure's drawn arms hang in the air as its hit
+  volume's do; `switch_same_from` is an export range inside the draw). Performance: Pass twice, one advisory fixed
+  (the carried cloud) and one written into the known issues (the wear's noise on doors, roof and fixtures on Low).
+  Critic: @CRITIC@.
 - Not verified here: frame times on a graphics card, the look on a real display, Windows' long address for Report a
   Bug, V-Sync and a second monitor. Each is a playtest row or a line on the checklist.

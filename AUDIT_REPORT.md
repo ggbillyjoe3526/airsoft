@@ -273,16 +273,45 @@ His answers of 11:15 to the first seven questions:
 | Watching Here for Normal bots | Hard only | Nothing changed |
 | The raised pose in the hit volume | leave for Beta | Nothing changed |
 
-A second batch of 22 questions went to him the same afternoon (10.5). Most are already built on side branches, not
-on this pull request, and go in when he says yes.
+A second batch of 22 questions went to him the same afternoon, most of them already built on side branches. His
+answer (16:49): "Go with defaults for 1-14. 15-16: yes. 17-22: defaults." The defaults were the recommendations.
 
-**What became of section 8's recommendations.** Balance: 1 measured and put to him (question 13); 2 built
-(`tools/balance.sh` plays Plant The Bomb); 3 being measured (10.4); 4 built (the Clearer kit is indoors only); 5 and 8
-put to him (questions 16 and 15); 6 and 7 are play checks on the checklist. Performance and code: 1 built ahead of
-its condition (his F3) and put to him (question 20); 2 built on a side branch and put to him (question 14); 3 done another way (the wear masks moved out
-beside the parts files: Godot 4.7.2's importer refuses the quantised export, tried); 4 and 5 put to him (questions
-17 and 18); 6, 8, 9 and 10 fixed; 7 put to him (question 21: the report gave him two options, so the contract is
-unchanged); 11 left as it was (the helpers are used by tests or planned content).
+| # | Question | Answer | What happened |
+|---|---|---|---|
+| 1 | A faint glow on Subway's tunnel arch on Low and Medium | yes | Merged (`StationLook.arch_fill` 0.3 while Lamp light is off) |
+| 2 | The same glow on the platform vaults, every preset | yes | Merged (`vault_fill` 0.2) |
+| 3 | Depot's doors, roof steel and lamp fixtures take the walls' wear | yes | Merged (the props' wear in one include the doors read too) |
+| 4 | Figures lit by the baked light of their room | no for Dev 3 | Left on its side branch |
+| 5 | A holstered bot swings its arms | yes | Merged, with the hit volume's upper body following |
+| 6 | A switch between two rifles or two pistols plays a put-away and a draw | yes | Merged |
+| 7 | The rifle on the back along the pack's diagonal | no | Left |
+| 8 | The Cyber Pistol's thumb straightened | no | Left |
+| 9 | The Sniper Rifle's bolt home with the last knock on every spring | yes | Merged (only the drawn bolt's timing) |
+| 10 | A cheaper replica grain on Mesh detail Low | yes | Merged (3 reads a fragment there, 7 elsewhere) |
+| 11 | The range's sandbags, toilet and tote rounder | yes | Merged (three models rebuilt by their scripts) |
+| 12 | Dev › Retro filter: replica and BBs wobble, haze to 110 m | yes | Merged; the haze constant changed |
+| 13 | Plant The Bomb's timings | leave them | Nothing changed. He answered on figures from before answer 15 put the two replicas in bots' hands; with them in, Depot and Woodland read about 38 % for the attackers (10.4), so it goes back to him after his playtest |
+| 14 | Three performance trades that change the look | leave until a frame time needs them | Nothing changed |
+| 15 | The Compact SMG and the Pump Shotgun public | yes | Both `public` in `data/pool.md`; the wiki's Replicas page describes them |
+| 16 | Their unlock levels swapped | yes | Pump Shotgun at 10, Compact SMG at 12 (`data/levels.md`) |
+| 17, 18 | Git LFS; OGG loops | no | Nothing changed |
+| 19 | Keep the bots' squeeze past Subway's wagons | yes | Stays |
+| 20 | Keep the lift car's reflections still during a ride | yes | Stays |
+| 21 | The heartbeat: a second exception in the saves contract | the exception | `docs/ARCHITECTURE.md` › Contracts › 8 names it |
+| 22 | The magazine change's free fingers | leave | Left |
+
+**Making the two replicas public changes every bot match:** the bots' Breacher (Compact SMG) and Clearer (Pump
+Shotgun, indoors) kits were dev gear, so no balance figure before this answer had them in it, the match guards
+neither. Every figure in 10.4 was measured again with them.
+
+**What became of section 8's recommendations.** Balance: 1 measured and left by his word (question 13: the
+timings stay); 2 built (`tools/balance.sh` plays Plant The Bomb); 3 measured (10.4); 4 built (the Clearer kit is
+indoors only); 5 and 8 built by his word (questions 16 and 15: the levels swapped, both replicas public); 6 and 7
+are play checks on the checklist. Performance and code: 1 built and kept by his word (question 20); 2 left by his
+word (question 14); 3 done another way (the wear masks moved out beside the parts files: Godot 4.7.2's importer
+refuses the quantised export, tried); 4 and 5 left by his word (questions 17 and 18); 6, 8, 9 and 10 fixed; 7
+settled by his word (question 21: the heartbeat is the contract's second exception); 11 left as it was (the helpers
+are used by tests or planned content).
 
 ### 10.2 Fixed without a ruling (no change to look, feel or balance beyond the bug itself)
 
@@ -313,12 +342,12 @@ Each of these was worked on, not just re-read. The row in `docs/KNOWN_ISSUES.md`
 |---|---|---|
 | A bot route's search costs 1.2 to 2.9 ms | The time is the engine's native search. A cache would almost never hit (466 searches on Depot asked 464 different pairs) | The cheap cuts change routes, or when a bot gets one: a ruling |
 | Woodland's nav grid: 4.3 to 5.5 s, 300 MB | 275 MB is AStar3D's per-point neighbour maps, 2.4 to 3.6 s the engine linking points | No change keeps every route the same |
-| Lamp shadows redrawn every frame on Ultra | On Depot, 23 of 91 lamps have a figure in range at a round's start and 66 mid-round | Godot 4.7 can't keep the still casters' map; the fallback changes the look (question 14) |
+| Lamp shadows redrawn every frame on Ultra | On Depot, 23 of 91 lamps have a figure in range at a round's start and 66 mid-round | Godot 4.7 can't keep the still casters' map; the fallback changes the look, and the owner left it (question 14) |
 | Far lamps light through a roof on High | 59 of Depot's 93 lamps' cones reach under a rack's or container's roof, seen only from 20 m or more | The exact fixes cost more shadow maps than the leak is worth |
 | The figure's sleeve edge, glove cloth and strap opening | The body's build script does not reproduce the committed weights (11,856 vertices differ, 4 in the shoulder by more than 0.1) | Any rebuild would move the shoulder the owner approved; the script must first copy the committed weights back |
 | The GBB Pistol's seven materials | Folding them into vertex colour makes the BB matte | Needs a stipple in the shader first |
 | First-person fingers on the Angled Grip, the AEG's far side and the SMG's far side | None closes with the hand where the owner approved it | His picture OK moves a hand |
-| The magazine change's free fingers | Closed with their neighbours on a side branch: hardly visible in first person | Not worth a rebuilt arms file |
+| The magazine change's free fingers | Closed with their neighbours on a side branch: hardly visible in first person | Left by the owner's word (question 22) |
 | Woodland's tunnel earth joints | A noise cut the colour step from 0.069 to 0.014 with no visible change | Nothing to gain |
 | Depot on the simpler renderer | The paints are fixed; the hall is still darker overall and the floor navy | The renderer's lighting, most likely its cap on lights an object: a look at its lights is Beta work |
 | Eye adaptation loses the glow in the cloud | Godot's source divides the glow and the picture by the same metered brightness, so the glow should keep its share | Points at the software driver: the owner's card decides |
@@ -335,30 +364,53 @@ Each of these was worked on, not just re-read. The row in `docs/KNOWN_ISSUES.md`
 
 ### 10.4 Balance on the final code
 
-Bot matches, 6v6, `tools/balance.sh` (reports: `playtest/aud2/balance/` in the shared files).
+Bot matches, 6v6, `tools/balance.sh` (reports: `playtest/aud2/balance/` in the shared files; the `public-kits-*`
+files are the final ones). The final figures were measured on `0f4fefb`, the first code on which bots carry the
+Compact SMG (the Breacher kit, on every field) and the Pump Shotgun (the Clearer, indoors) in an ordinary match.
 
-| Field, Normal, 12 seeds (on `748781e`) | Elimination: the west end | Elimination: Alpha | Attack / Defend: the attackers | Rounds on the clock |
+| Field, Normal, 16 seeds | Elimination: the west end | Elimination: Alpha | Attack / Defend: the attackers | Plant The Bomb: the attackers | Rounds on the clock |
+|---|---|---|---|---|---|
+| Depot | 51.3 % ±4.6 | 54.7 % ±4.6 | 43.1 % ±4.6 (band 38 to 67) | 34.2 % ±4.4; 37.9 % ±3.1 on 32 seeds (band 40 to 65: just under, within noise) | 0 |
+| Subway | 50.8 % ±4.5 | 49.2 % ±4.5 | 57.8 % ±4.4 (band 40 to 65) | 50.0 % ±4.6 | 0 |
+| Woodland | 53.6 % ±4.8 | 53.6 % ±4.8 | 53.7 % ±4.5 (band 40 to 65) | 37.5 % ±4.4; 37.2 % ±3.1 on 32 seeds (just under, within noise) | 1 of 353 |
+
+Elimination's band is 45 to 55 % and Plant The Bomb's 40 to 65 %. No figure is outside its band by two standard
+errors. Subway at Easy and Hard (16 seeds each) is in band too: at Easy the west end takes 53.2 % ±4.5 and the
+attackers 58.9 % ±4.6 (band 35 to 65); at Hard the west end 50.0 % ±4.6, Alpha 58.6 % ±4.6 and the attackers 58.4 %
+±4.4 (band 40 to 60), the last two near the edge. Depot at Easy and Hard is held by the pull request's match guards,
+which pass. Woodland's Elimination at 7v7, the size a known issue had at 58 % for one end on 8 seeds, gives the west
+end 51.9 % ±4.4 on 16 seeds with today's kits: in band, and the row is closed.
+
+**What moved, and what is known about why.** The same figures at three earlier points of this pull request, none
+of them with the two replicas in a bot's hands (Dev content was off in every bot match):
+
+| The attackers' share of Attack / Defend, Normal | First pass (12 seeds) | After the first bot fixes (`fd7f36e`, 12 seeds) | Before the replicas went public (`748781e`, 12 seeds) | Final (`0f4fefb`, 16 seeds) |
 |---|---|---|---|---|
-| Depot | 51.1 % ±5.3 | 48.9 % ±5.3 | 54.9 % ±5.5 (band 38 to 67) | 0 |
-| Subway | 43.5 % ±5.2 (band 45 to 55: outside, within noise) | 50.0 % ±5.2 | 61.8 % ±5.2 (band 40 to 65: near the edge) | 0 |
-| Woodland | 49.5 % ±5.2 | 51.6 % ±5.2 | 52.9 % ±5.4 (band 40 to 65) | 0 |
+| Depot | 46.2 % ±5.2 | | 54.9 % ±5.5 | 43.1 % ±4.6 |
+| Subway | 47.4 % ±5.1 | 57.6 % ±5.2 | 61.8 % ±5.2 | 57.8 % ±4.4 |
+| Woodland | 59 % ±3 (MB4, the day before, 32 seeds) | | 52.9 % ±5.4 | 53.7 % ±4.5 |
 
-Subway's two figures near their edges are being re-measured at 32 seeds, with Easy and Hard at 16, as this is
-written (about three hours of bot matches); the figures go into Subway's row of `docs/KNOWN_ISSUES.md`.
+Subway's attackers are ten points up on the first pass and still inside the band. The wagon squeeze (bots pass the
+works wagons on the track, a known issue's fix) shortens the attacking end's routes and is the likeliest cause, but
+it was not isolated: the run without the squeeze was stopped when the two replicas went public and made its
+figures stale. The owner kept the squeeze (question 19). Depot's swing from 54.9 % to 43.1 % is 1.6 standard errors
+of the difference between two runs: the Breacher and the Clearer both play on Depot, and nothing else in the
+simulation changed between the two commits, so the two kits are the likely cause, at a size the seeds can't yet
+tell from noise. Elimination's ends on `748781e` were 51.1 %, 43.5 % and 49.5 % (Depot, Subway, Woodland, ±5.2);
+Subway's west end is back at 50.8 %.
 
-What moved, against the first pass: Subway's attackers rose from 47.4 % to 57.6 % with the wagons squeezed past
-(routes on the track are shorter for the attacking end) and to 61.8 % with the SMG's full auto and the smoke routing
-on top; Depot's from 46.2 % to 54.9 %. Both changes are the owner's rulings; the figures stay inside their bands at
-12 seeds, Subway's close to the top of its band.
+**Plant The Bomb** (bots only, Normal, 6v6; `tools/balance.sh` plays it since this pass). With today's timings
+(fuse 30 s, defuse 6 s) and the two replicas in bots' hands the attackers take 37.9 % ±3.1 on Depot and 37.2 % ±3.1
+on Woodland (32 seeds each, re-measured because 16 seeds read under the band) and 50.0 % ±4.6 on Subway (16 seeds).
+Depot and Woodland sit just under the band's 40 %, each within one standard error of it: the defenders are a little
+ahead on both. Depot was there before the replicas went public (38.3 % ±4.3); Woodland was at 47.2 % ±4.4 and came
+down 10 points, 1.9 standard errors of the difference, with the Breacher's SMG now on the field. Three armed bombs
+went off in 440 armed rounds; an armed bomb is made safe 41 to 51 % of the time.
 
-**Plant The Bomb** (bots only, Normal, 6v6, 16 seeds; `tools/balance.sh` plays it since this pass). With today's
-timings (fuse 30 s, defuse 6 s) on the final code the attackers take 38.3 % ±4.3 on Depot (band 40 to 65: just
-under, within noise), 47.2 % ±4.4 on Woodland and 47.5 % ±4.6 on Subway. Before this pass's bot fixes the same
-timings gave 31.1 %, 31.0 % and 53.5 %; which fix moved Woodland was not isolated (the bushes priced on the grid
-and the Clearer kit kept indoors both act there). No armed
-bomb went off in 287 armed rounds; an armed bomb is made safe 40 to 50 % of the time.
+The timings tried, all measured before the two replicas went public (16 seeds), so each is a direction, not a
+figure to expect today:
 
-| Field | Fuse / defuse | The attackers' share | Armed bombs that go off |
+| Field | Fuse / defuse | The attackers' share then | Armed bombs that went off |
 |---|---|---|---|
 | Depot | 30 s / 6 s (today) | 38.3 % ±4.3 | 0 % |
 | Depot | 20 s / 8 s | 46.6 % ±4.6 | 7 % |
@@ -371,51 +423,22 @@ bomb went off in 287 armed rounds; an armed bomb is made safe 40 to 50 % of the 
 | Subway | 30 s / 6 s (today) | 47.5 % ±4.6 | 0 % |
 | Subway | 30 s / 8 s | 50.8 % ±4.5 | 2 % |
 
-Nothing was changed, and on these figures nothing needs to be before the owner plays it: every field is inside
-its band or within noise of it at today's timings (question 13, with that recommendation). If Depot plays
-one-sided for the defenders, a 20 s fuse and an 8 s defuse there is the measured nudge; a fuse a field needs a Fuse
-column in `data/maps.md`, as Raise has.
+Nothing was changed: the owner left the timings (question 13), answering on the figures from before the replicas
+went public, when Woodland read 47 %. With them in, Depot and Woodland both read about 38 %, so the question is his
+again after he plays it: leave them, or shorten the fuse and lengthen the defuse on those two fields (Depot 20 s and
+8 s, Woodland 25 s and 8 s were the measured nudges, about 8 points each then). A fuse a field needs a Fuse column in
+`data/maps.md`, as Raise has. The pull request's Plant The Bomb match guards pass on all three fields.
 
 ### 10.5 What still needs the owner
 
-**The second batch of questions** (2026-11-14; pictures in `playtest/aud2/` in the shared files; the recommendation
-in brackets). Questions 1 to 11, the replica and BBs of 12, the first trade of 14 and 22 are built and tested on
-side branches kept in the shared files (`audit/aud2-backup.bundle`); 19 and 20 are on the pull request; the rest are
-proposals.
+**His playtest** (the Dev 3 checklist, "The audit's second pass", and the dated notes under ten older items): what
+a cloud machine can't judge. Above all: whether the Hi-Cap's rattle gives you away fairly, whether SMG bots up close
+feel fair on Depot and Subway now that they are in every match, the frame time on his card (Ultra's hall, Woodland
+by night, the loading screens), the simpler renderer's look if he ever runs it, Report a Bug's long address on
+Windows, and whether Plant The Bomb on Depot and Woodland is too hard on the attackers (bots take about 38 % there
+with the two replicas in: 10.4).
 
-1. Subway's running tunnels: a faint glow on the arch on Low and Medium [yes].
-2. Subway's platform vaults: the same glow on every preset [yes].
-3. Depot's doors, roof steel and lamp fixtures take the walls' wear [yes].
-4. Figures lit by the baked light of the room they stand in [no for Dev 3: a player in shade is harder to see].
-5. A holstered bot swings its arms as it runs [yes].
-6. A switch between two rifles or two pistols plays a put-away and a draw [yes].
-7. The rifle on the back laid along the pack's diagonal [no].
-8. The Cyber Pistol's right thumb straightened, aimed [no].
-9. The Sniper Rifle's bolt home with the recording's last knock on every spring [yes].
-10. A cheaper replica grain on Mesh detail Low [yes].
-11. The range's sandbags, toilet and tote rebuilt rounder [yes].
-12. Dev › Retro filter: the replica and BBs wobble too, and the haze reaches 110 m [yes].
-13. Plant The Bomb: defuse 8 s, and a fuse a field (Depot 20 s, Woodland 25 s, Subway 30 s) [first yes; corrected
-    to leave them once the final code's figures were in: today's timings are in band, 10.4].
-14. Three performance trades that change the look (out-of-view figures posed every fourth frame, Woodland's night
-    shadows to 50 m, Ultra's figure lamp shadows under the nearest lamps only) [leave until a frame time needs them].
-15. The Compact SMG and the Pump Shotgun public in 0.1 Dev 3, not Dev content [decide after the playtest].
-16. Their unlock levels swapped (the Pump Shotgun at 10, the Compact SMG at 12) [leave until both are played].
-17. Git LFS for models, sounds and pictures [no: it uses the owner's LFS allowance and changes every checkout].
-18. The six ambience loops stored as OGG [no: it re-encodes his recordings to save repository size only].
-19. Keep the bots' squeeze past Subway's works wagons, given what it may have done to Attack / Defend there (10.4)
-    [yes]. It is on the pull request, as the fix of a known issue; the critic asked that its balance effect be his call.
-20. Keep the lift car's reflections still during a ride (pictured: no visible difference), or hold it until his F3
-    shows a dip [keep]. On the pull request.
-21. The heartbeat's two files written outside `SaveFile`: a second exception in the saves contract, or moved into
-    `SaveFile` [the exception]. Not changed: the contract is as it was.
-22. The magazine change's free fingers curled in with the others [leave: hardly visible].
-
-**His playtest** (the Dev 3 checklist, "The audit's second pass", 15 lines, and the notes under eight older items):
-what a cloud machine can't judge. Above all: whether the Hi-Cap's rattle now gives you away fairly, whether SMG
-bots up close feel fair on Depot and Subway, the frame time on his card (Ultra's hall, Woodland by night, the
-loading screens), the simpler renderer's look if he ever runs it, and Report a Bug's long address on Windows.
-
-**Left for Beta by his word:** bots smoking a crossing or flashing a room they hold, and the raised pose in the hit
-volume. Watching Here stays Hard only.
-
+**Left by his word:** for Beta, bots smoking a crossing or flashing a room they hold, and the raised pose in the hit
+volume; Watching Here stays Hard only; figures lit by the baked light, not for 0.1 Dev 3; the three performance
+trades, until a frame time needs them. The side branches of what he turned down are kept in the shared files
+(`audit/aud2-backup.bundle`).
