@@ -300,6 +300,8 @@ func press(c: Character, state: GameState, live: bool) -> void:
 ## it but `to`'s, nothing in the air to them yet, on to the nearest other teammate in reach with one to spare
 ## (MAG_ASK, a fresh ask's time), or ends it with its gap, refused as NOBODY, when there is none. An ask that can't be
 ## taken (its giver off to the pole) goes to someone who can at once, rather than standing ask_time unanswered.
+## PASS_ON (a giver busy bringing `to` one, who will be free again) passes on only the asks another teammate can
+## take: one nobody else can take stays standing with `c` and waits its turn, unrefused.
 func answer(c: Character, reply: PlayerCommand.MagAnswer, to: int, state: GameState, live: bool) -> void:
 	if not live or not Elimination.is_in_play(c):
 		return
@@ -310,6 +312,10 @@ func answer(c: Character, reply: PlayerCommand.MagAnswer, to: int, state: GameSt
 		return
 	for o in state.characters:
 		if o == c or o.id == to or o.mag.asked != c.id or o.mag.coming > 0 or not Elimination.is_in_play(o):
+			continue
+		if reply == PlayerCommand.MagAnswer.PASS_ON:
+			if _ask_except(o, state, o.mag.turned_down | bit(c.id), false):
+				o.mag.turned_down |= bit(c.id)
 			continue
 		o.mag.turned_down |= bit(c.id)
 		if not _ask_except(o, state, o.mag.turned_down):
@@ -400,7 +406,7 @@ func _ask(c: Character, state: GameState) -> void:
 
 
 ## _ask, passing over the teammates in `except` (a bit 1 << id each). False when it was refused.
-func _ask_except(c: Character, state: GameState, except: int) -> bool:
+func _ask_except(c: Character, state: GameState, except: int, refuse: bool = true) -> bool:
 	var best: Character = null
 	var best_d := cfg.ask_range
 	for o in state.characters:
@@ -413,7 +419,8 @@ func _ask_except(c: Character, state: GameState, except: int) -> bool:
 		best = o
 		best_d = d
 	if best == null:
-		_refuse(c, Refusal.NOBODY, -1, state.events)
+		if refuse:
+			_refuse(c, Refusal.NOBODY, -1, state.events)
 		return false
 	c.mag.asked = best.id
 	c.mag.asked_at = state.time

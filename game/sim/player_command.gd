@@ -68,8 +68,9 @@ var ping_target: Vector3 = Vector3.ZERO
 var mag_hand_off: bool = false
 ## The answer to the magazine asks standing with you (one-shot; MagShare.answer), from a controller that chooses (a bot):
 ## TAKE, setting off to bring `mag_answer_to` one (their line says so from then on); TURN_DOWN, every ask standing
-## with you but `mag_answer_to`'s (-1: every one) passed on to the next teammate with one to spare. NONE: no answer.
-enum MagAnswer { NONE, TAKE, TURN_DOWN }
+## with you but `mag_answer_to`'s (-1: every one) passed on to the next teammate with one to spare, or ended where
+## there is none; PASS_ON, the same but an ask nobody else can take stays with you and waits its turn. NONE: no answer.
+enum MagAnswer { NONE, TAKE, TURN_DOWN, PASS_ON }
 var mag_answer: MagAnswer = MagAnswer.NONE
 var mag_answer_to: int = -1
 ## Throw a bomb of this kind (one-shot; Grenades, SF1): NONE throws nothing.

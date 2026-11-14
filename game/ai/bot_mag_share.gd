@@ -95,9 +95,14 @@ static func answer(b: Bot, w: BotWorld, cmd: PlayerCommand, sharing: bool) -> vo
 		if not looked:
 			looked = true
 			pole = BotFlag.wants_flag(b, w)
-		if pole or (to != null and _anyone_else_to_ask(c, me, w)):
+		if pole:
 			cmd.mag_answer = PlayerCommand.MagAnswer.TURN_DOWN
 			cmd.mag_answer_to = to.id if to != null else -1
+			return
+		if to != null and _anyone_else_to_ask(c, me, w):
+			# only the asks someone else can take: one with nobody else to ask keeps waiting its turn here
+			cmd.mag_answer = PlayerCommand.MagAnswer.PASS_ON
+			cmd.mag_answer_to = to.id
 			return
 
 
