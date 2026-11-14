@@ -1736,6 +1736,8 @@ func _exit_tree() -> void:
 		_cover_out.clear()
 	ReplicaPaint.clear()
 	HeldMerge.clear()
+	# Nothing is held past the figures' build; a build cut short by an error must not leave a parts file instanced.
+	ReplicaParts.release()
 	if settings != null and settings.changed.is_connected(_apply_dev):
 		settings.changed.disconnect(_apply_dev)
 	if settings != null and settings.changed.is_connected(_apply_hud):

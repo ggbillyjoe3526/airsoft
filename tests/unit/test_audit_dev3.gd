@@ -112,6 +112,8 @@ func test_release_frees_what_keep_held() -> void:
 	assert_gt(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)), orphans, "the instances are held")
 	ReplicaParts.release()
 	assert_eq(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)), orphans, "nothing left behind")
+	# A second release, with nothing held (the session's teardown), is safe.
+	ReplicaParts.release()
 	# After release a take is a plain one again: its file's instance is freed with it.
 	_free(ReplicaParts.take(&"aeg", TORCH, true))
 	assert_eq(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)), orphans, "a plain take keeps none")
