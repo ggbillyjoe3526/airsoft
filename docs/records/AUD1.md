@@ -88,3 +88,55 @@ not merged by its thread (his word, for his playtest).
 - Added: the lift car's probe (Performance, playtest), figures out of view animated in full (Performance), small
   costs outside a match's frame (Performance), Match rules' double retune (UI), the balance report without Plant The
   Bomb (Tools), the heartbeat's files outside `SaveFile` (Report).
+
+## Second pass (2026-11-14, attempt 3)
+
+The owner, on reading the report: "Make all recommended changes and fix as many checklist/known issues as possible
+... you must attempt all fixes no matter the status ... If any change significantly affects the look/feel of the game
+ask me what to do before actioning it." The account is `AUDIT_REPORT.md` › 10.
+
+**Decisions**
+
+- **Every row is attempted; a change to look, feel or balance is asked first.** Two batches of numbered questions
+  went to him (7 in the morning, 18 in the afternoon). His first answers: the Hi-Cap's rattle is heard at a run and a
+  sprint; a simulated round counts for the score only; Customise shows the chosen field's air; bots with the Compact
+  SMG may go full auto indoors inside 12 m; bots route round smoke (the two missing bomb plays are Beta); Watching
+  Here stays Hard only; the raised pose in the hit volume is Beta. The second batch's builds wait on side branches
+  (`audit/aud2-backup.bundle` in the shared files), not on the pull request.
+- **Seven groups worked in parallel** in worktrees of their own (two simulation, menus, performance, two graphics,
+  models), each row attempted and its outcome written to one tracker; the thread picked their commits onto the
+  branch, hunted bugs over the pass's own diff (seven fixed) and re-measured the balance.
+- **The cloud draws Forward+ now** (Mesa's software Vulkan under Xvfb), one render at a time. Every "unchecked on
+  Forward+" row was drawn; the pictures are in `playtest/aud2/` in the shared files. Frame times stay the owner's.
+- **Smoke is a price, not a wall** (`NavSmoke`, `NavConfig.smoke_cost` 4, a power of two so a price comes off
+  exactly): a route from inside a cloud, or with no way round, still goes. A carried cloud is priced again a step a
+  metre (`smoke_move`; the performance review's advisory: it was every half cell).
+- **The SMG's close range has a metre of slack** (`BotConfig.close_auto_slack`): full auto starts inside 11 m and is
+  kept out to 12 m, so the selector doesn't flick at the edge.
+- **A busy giver passes an ask on** (`PlayerCommand.MagAnswer.PASS_ON`): only where someone else can take it, and
+  without the NOBODY refusal a turned-down ask ends in.
+- **Subway's track floors reach 1 cm under their tunnel walls** (`UNDER_WALL` in `tools/subway/layout.py`): the grid
+  builder reads a floor edge exactly on a row of cell centres as not covering it. 2 cm put the floor 3 cm inside
+  the wall with the generator's own grow, over the field rules' 2.5 cm (CI caught it). The builder's tie is a row
+  in the known issues.
+- **Lamps hang 1 m clear of a tall model** in a ceilinged Subway room (the generator): the plant room's props drew
+  black because their lamps hung straight over them.
+- **The simpler renderer's paints** go through `look_colour.gdshaderinc` (`LOOK_ALBEDO`, `LOOK_LINEAR`), the
+  identity on Forward+: the colours were converted from sRGB twice there.
+- **The figure's body is not rebuilt.** `tools/blender/body.py` does not reproduce `human.glb`'s weights (11,856
+  vertices differ, 4 in the shoulder by more than 0.1), so the sleeve, glove and strap rows would move the shoulder
+  the owner approved (33fa48b). A row in the known issues says how a rebuild must start.
+- **The Dev 3 checklist** got a second item (the pass's play checks) and dated notes under eight older items.
+
+**Verified**
+
+- The pass's eight test files (`test_aud2_*.gd`, 96 tests) and every test file its changes touch pass here; gdlint,
+  the wiki and changelog checks and the smoke test pass; the whole suite and the match guards ran green on the pull
+  request's checks at `626ceb8` and run again on each push.
+- Balance on the final simulation code (`748781e`), Normal, 12 seeds a field: no figure outside its band by two
+  standard errors; Subway's west end (43.5 % ±5.2) and attackers (61.8 % ±5.2) are the two to watch
+  (`AUDIT_REPORT.md` › 10.4).
+- QA: Pass, 11 tests added, two advisories fixed (two tests waited by frame count; the kits table now says a Fields
+  typo drops its kit). Performance: Pass, one advisory fixed (the carried cloud). Critic: @CRITIC@.
+- Not verified here: frame times on a graphics card, the look on a real display, Windows' long address for Report a
+  Bug, V-Sync and a second monitor. Each is a playtest row or a line on the checklist.

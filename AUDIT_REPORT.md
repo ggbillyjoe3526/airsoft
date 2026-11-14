@@ -9,6 +9,9 @@ files), under "The audit's fixes".
 `claude/project-thread-5u1mdg`, so the work is there. Nothing was force-pushed, no history rewritten, no branch
 deleted, no repository setting changed. The pull request is open and **not merged**.
 
+**A second pass followed the same day** at the owner's word (attempt every known issue, ask before a change to
+look or feel). Sections 1 to 9 are the first pass as it was reported; section 10 is the second.
+
 ## 1. Summary
 
 | | Before (`main` at `c6bf874`) | After |
@@ -233,4 +236,172 @@ audit, and on Depot after it, sits just outside within noise at 12 seeds), and n
 1. Play the Dev 3 checklist (step 2 of the release). The audit's own checks are one item with 16 short lines.
 2. Decide on the balance recommendations above after play.
 3. After the playtest: fold `changelog.d/` into `CHANGELOG.md`, then tag `0.1-dev.3` (step 3).
-4. For 0.1 Beta 1: the performance rows in section 8, and add Plant The Bomb to the balance report.
+4. For 0.1 Beta 1: the performance rows in section 8. (Plant The Bomb is in the balance report since the second
+   pass, section 10.4.)
+
+## 10. Second pass (2026-11-14, the same day and pull request)
+
+After reading the report the owner asked for more: "Make all recommended changes and fix as many checklist/known
+issues as possible ... you must attempt all fixes no matter the status. If any change significantly affects the
+look/feel of the game ask me what to do before actioning it." So every row of `docs/KNOWN_ISSUES.md` got a real
+attempt, "can wait" and "document" rows included; a change to how the game looks, sounds, plays or is balanced was
+put to him as a numbered question first, with pictures where it is a look. Sections 1 to 9 above describe the first
+pass and are left as written; where this pass overtakes a line of section 8, the table below says so.
+
+| | After the first pass | After the second |
+|---|---|---|
+| Known issues rows | 122 | 97 (32 closed, 7 added for what the pass found; the rest re-read, and re-worded with what was measured or drawn) |
+| Unit tests | 6,694 | 6,790 (96 new) |
+| Headless import, gdlint, smoke test, licence notices, wiki and changelog checks | pass | pass |
+| A map's longest stop on its loading screen (headless) | 0.67 to 1.53 s | 0.24 to 0.49 s |
+| Customise and Armory part pictures (a page's draw, headless) | 50 to 64 ms | 26 to 29 ms |
+| Skipping a round (the cover going up, headless) | 3.4 ms | 2.4 ms |
+| Bot route: the string-pulling (Depot, Subway) | 0.71, 1.21 ms | 0.57, 0.83 ms, every route the same |
+| The AEG's parts file | 4.03 MB (96 % of its cap) | 3.57 MB (85 %) |
+
+### 10.1 What the owner ruled, and what was built from it
+
+His answers of 11:15 to the first seven questions:
+
+| Question | His answer | Built |
+|---|---|---|
+| The Hi-Cap's rattle while running and sprinting | yes | It adds its 7 m to a run's and a sprint's reach (18 m and 23 m), and bots hear it |
+| A round decided by SIMULATE | yes | Score and streak count; no XP, no records |
+| Customise's reach in the chosen field's air | yes | The Loadout and Customise show reach, speed and the flight picture for the field picked on the Match page, and say which |
+| Bots with the Compact SMG on full auto indoors | yes | Inside 12 m (from 11 m in, kept out to 12 m, so the selector doesn't flick at the edge); every other replica keeps NA1 |
+| Bots and smoke | "make them route around" | A standing cloud costs four times a step on the nav grid: round it where a way is open, through it where it is the only way. Smoking a crossing and flashing a held room are left for Beta |
+| Watching Here for Normal bots | Hard only | Nothing changed |
+| The raised pose in the hit volume | leave for Beta | Nothing changed |
+
+A second batch of 18 questions went to him the same afternoon (10.5). Most are already built on side branches, not
+on this pull request, and go in when he says yes.
+
+**What became of section 8's recommendations.** Balance: 1 measured and put to him (question 13); 2 built
+(`tools/balance.sh` plays Plant The Bomb); 3 being measured (10.4); 4 built (the Clearer kit is indoors only); 5 and 8
+put to him (questions 16 and 15); 6 and 7 are play checks on the checklist. Performance and code: 1 fixed (the lift
+car's probe); 2 built on a side branch and put to him (question 14); 3 done another way (the wear masks moved out
+beside the parts files: Godot 4.7.2's importer refuses the quantised export, tried); 4 and 5 put to him (questions
+17 and 18); 6, 7, 8, 9 and 10 fixed; 11 left as it was (the helpers are used by tests or planned content).
+
+### 10.2 Fixed without a ruling (no change to look, feel or balance beyond the bug itself)
+
+| Area | Fix |
+|---|---|
+| Subway | Bots squeeze past the works wagons on the track as a player does (they climbed to the platform); a rider whose lift stops somewhere unexpected plans again; a BB passes an ajar lift doorway where no door leaf stands; the plant room's fan housings and switch cabinet are lit (their lamps hung straight over them and moved about 2 m); a lift car's reflections are no longer redrawn every frame of a ride; the lockers clank |
+| Depot | The steel lockers clank and ring when run into or shot (they were silent to run into) |
+| Woodland | Bushes are priced on the nav grid, so bots go round one where that is quicker (leaves walked fell from 3.3 m to 0.9 m a route) |
+| Bots | Lead by the replica in hand (the row was stale: already so; a test now holds it); the Clearer kit is carried indoors only; a magazine ask a busy bot can't take goes on to another teammate, and the HUD says who was asked |
+| Range | The fastest moving targets are swept between ticks, so a hit counts all through their swing |
+| Menus | The Match page's Custom rules retune once a click and save once a drag; the Match page says Woodland's 9 s flag raise; a pressed button's dip is drawn only, so a click on a card's edge is never lost; Report a Bug retries with a 2,000-character address if the system refuses the long one; a crash screen that was seen is marked seen even when the run record can't be written |
+| Renderer | On the simpler renderer (Compatibility, the fallback for old cards) the paints had their colours converted twice and drew far too dark and saturated; they now match Forward+. The soft shadow under a figure fades there as it jumps. Stencils, the flag's cloth and its ring take the baked light |
+| Figures | A figure that comes into view half way through a switch carries on with it; a crouched figure firing over a top lifts its replica by the replica's lowest point |
+| Loading | A map's views and the wood are built a piece a frame; Practice skips the bots' groundwork |
+| Wiki and tools | Patch Notes can mark a note as replaced later; `tools/balance.sh` plays Plant The Bomb; `tools/menu_pictures.gd`, `tools/display_probe.gd` and the eye pictures (Subway lit and dressed as a match) are new or mended |
+| CI | The Normal night guards are split in halves (each 11 to 13 minutes) |
+
+A bug hunt over the pass's own code found seven more and fixed them: a busy giver answering for asks nobody else
+could take; a seen crash marking the run under way; the wood leaked when a load was left half way; the SMG's
+selector flicking at 12 m; a drag on the round time cut short by the page hiding; a Subway track floor 3 cm inside
+its wall (the field rules' own check caught it in CI); and the flight picture's marker drawn through its label.
+
+### 10.3 Attempted and left, with what the attempt found
+
+Each of these was worked on, not just re-read. The row in `docs/KNOWN_ISSUES.md` now carries what was found.
+
+| Row | What the attempt found | Why it stays |
+|---|---|---|
+| A bot route's search costs 1.2 to 2.9 ms | The time is the engine's native search. A cache would almost never hit (466 searches on Depot asked 464 different pairs) | The cheap cuts change routes, or when a bot gets one: a ruling |
+| Woodland's nav grid: 4.3 to 5.5 s, 300 MB | 275 MB is AStar3D's per-point neighbour maps, 2.4 to 3.6 s the engine linking points | No change keeps every route the same |
+| Lamp shadows redrawn every frame on Ultra | On Depot, 23 of 91 lamps have a figure in range at a round's start and 66 mid-round | Godot 4.7 can't keep the still casters' map; the fallback changes the look (question 14) |
+| Far lamps light through a roof on High | 59 of Depot's 93 lamps' cones reach under a rack's or container's roof, seen only from 20 m or more | The exact fixes cost more shadow maps than the leak is worth |
+| The figure's sleeve edge, glove cloth and strap opening | The body's build script does not reproduce the committed weights (11,856 vertices differ, 4 in the shoulder by more than 0.1) | Any rebuild would move the shoulder the owner approved; the script must first copy the committed weights back |
+| The GBB Pistol's seven materials | Folding them into vertex colour makes the BB matte | Needs a stipple in the shader first |
+| First-person fingers on the Angled Grip, the AEG's far side and the SMG's far side | None closes with the hand where the owner approved it | His picture OK moves a hand |
+| The magazine change's free fingers | Closed with their neighbours on a side branch: hardly visible in first person | Not worth a rebuilt arms file |
+| Woodland's tunnel earth joints | A noise cut the colour step from 0.069 to 0.014 with no visible change | Nothing to gain |
+| Depot on the simpler renderer | The paints are fixed; the hall is still darker overall and the floor navy | The renderer's lighting, most likely its cap on lights an object: a look at its lights is Beta work |
+| Eye adaptation loses the glow in the cloud | Godot's source divides the glow and the picture by the same metered brightness, so the glow should keep its share | Points at the software driver: the owner's card decides |
+| Game speed over 100 % looks uneven | 17 view scripts step by frame; only whole multiples are even | A Dev setting |
+| Menus at 4K and 720p | Every screen drawn at both (51 pictures): no clipped text, overlap or unscaled part | A real display, the mouse wheel and typing a rename are his |
+| Window modes, F11, Alt+Enter, the frame limit | All work against a real X11 server under Xvfb | V-Sync, a second monitor and a non-US layout can't be checked in the cloud |
+| Draws a frame on Forward+ | Depot 738 to 746; Woodland 685 to 707 by day and 1,101 to 1,124 by night (1.93 million primitives) | The 150-draw line was counted on the simpler renderer and can't be a Forward+ total: restate it as a frame time on his PC |
+| Occlusion culling | Saved no draws on Woodland on Forward+ (692 with and without) | Its CPU cost and gain want a real card |
+| Ping markers | 3 draws each on Forward+ | One canvas item each would be 1; small |
+| Ground beyond the walls unlit by the bake | No player can see it on either baked field | Closed |
+| The range floor's baked look | Already fixed by an earlier change (pictured, mean difference 0.11) | Closed |
+| Sounds still to record, and standing rulings | His recordings; his rulings | Not Claude's to make |
+
+
+### 10.4 Balance on the final code
+
+Bot matches, 6v6, `tools/balance.sh` (reports: `playtest/aud2/balance/` in the shared files).
+
+| Field, Normal, 12 seeds (on `748781e`) | Elimination: the west end | Elimination: Alpha | Attack / Defend: the attackers | Rounds on the clock |
+|---|---|---|---|---|
+| Depot | 51.1 % ±5.3 | 48.9 % ±5.3 | 54.9 % ±5.5 (band 38 to 67) | 0 |
+| Subway | 43.5 % ±5.2 (band 45 to 55: outside, within noise) | 50.0 % ±5.2 | 61.8 % ±5.2 (band 40 to 65: near the edge) | 0 |
+| Woodland | 49.5 % ±5.2 | 51.6 % ±5.2 | 52.9 % ±5.4 (band 40 to 65) | 0 |
+
+Subway's two figures near their edges are being re-measured at 32 seeds, with Easy and Hard at 16, as this is
+written (about three hours of bot matches); the figures go into Subway's row of `docs/KNOWN_ISSUES.md`.
+
+What moved, against the first pass: Subway's attackers rose from 47.4 % to 57.6 % with the wagons squeezed past
+(routes on the track are shorter for the attacking end) and to 61.8 % with the SMG's full auto and the smoke routing
+on top; Depot's from 46.2 % to 54.9 %. Both changes are the owner's rulings; the figures stay inside their bands at
+12 seeds, Subway's close to the top of its band.
+
+**Plant The Bomb** (bots only, Normal, 6v6, 16 seeds; `tools/balance.sh` plays it since this pass). With today's
+timings (fuse 30 s, defuse 6 s) the attackers take 38.3 % ±4.3 on Depot on the final code (31.1 % before the pass's bot changes; Woodland was 31.0 % ±4.3 and Subway
+53.5 % ±4.4 then, both being re-measured). Timings tried:
+
+| Field | Fuse / defuse | The attackers' share | Armed bombs that go off |
+|---|---|---|---|
+| Depot | 30 s / 6 s (today) | 38.3 % ±4.3 | 0 % |
+| Depot | 20 s / 8 s | 46.6 % ±4.6 | 7 % |
+| Depot | 22 s / 8 s | 40.0 % ±4.5 | |
+| Depot | 20 s / 6 s | 34.5 % ±4.5 | |
+| Depot | 30 s / 9 s | 30.1 % ±4.5 | |
+| Depot | 16 s / 8 s, 18 s / 10 s | 58.6 %, 58.5 % (older code) | |
+| Woodland | 20 s / 8 s | 70.0 % ±4.2 | 31 % |
+| Woodland | 25 s / 8 s | 54.1 % ±4.5 | 10 % |
+| Subway | 30 s / 8 s | 50.8 % ±4.5 | 2 % |
+
+Nothing was changed: the timings are the owner's playtest call (question 13). The proposal is a defuse of 8 s on
+every field and a fuse a field (Depot 20 s, Woodland 25 s, Subway 30 s), which needs a Fuse column in
+`data/maps.md`, as Raise has.
+
+
+### 10.5 What still needs the owner
+
+**The second batch of questions** (2026-11-14; pictures in `playtest/aud2/` in the shared files; the recommendation
+in brackets). Questions 1 to 11, the replica and BBs of 12 and the first trade of 14 are built and tested on side
+branches kept in the shared files (`audit/aud2-backup.bundle`); the rest are proposals.
+
+1. Subway's running tunnels: a faint glow on the arch on Low and Medium [yes].
+2. Subway's platform vaults: the same glow on every preset [yes].
+3. Depot's doors, roof steel and lamp fixtures take the walls' wear [yes].
+4. Figures lit by the baked light of the room they stand in [no for Dev 3: a player in shade is harder to see].
+5. A holstered bot swings its arms as it runs [yes].
+6. A switch between two rifles or two pistols plays a put-away and a draw [yes].
+7. The rifle on the back laid along the pack's diagonal [no].
+8. The Cyber Pistol's right thumb straightened, aimed [no].
+9. The Sniper Rifle's bolt home with the recording's last knock on every spring [yes].
+10. A cheaper replica grain on Mesh detail Low [yes].
+11. The range's sandbags, toilet and tote rebuilt rounder [yes].
+12. Dev › Retro filter: the replica and BBs wobble too, and the haze reaches 110 m [yes].
+13. Plant The Bomb: defuse 8 s, and a fuse a field (Depot 20 s, Woodland 25 s, Subway 30 s) [yes].
+14. Three performance trades that change the look (out-of-view figures posed every fourth frame, Woodland's night
+    shadows to 50 m, Ultra's figure lamp shadows under the nearest lamps only) [leave until a frame time needs them].
+15. The Compact SMG and the Pump Shotgun public in 0.1 Dev 3, not Dev content [decide after the playtest].
+16. Their unlock levels swapped (the Pump Shotgun at 10, the Compact SMG at 12) [leave until both are played].
+17. Git LFS for models, sounds and pictures [no: it uses the owner's LFS allowance and changes every checkout].
+18. The six ambience loops stored as OGG [no: it re-encodes his recordings to save repository size only].
+
+**His playtest** (the Dev 3 checklist, "The audit's second pass", 15 lines, and the notes under eight older items):
+what a cloud machine can't judge. Above all: whether the Hi-Cap's rattle now gives you away fairly, whether SMG
+bots up close feel fair on Depot and Subway, the frame time on his card (Ultra's hall, Woodland by night, the
+loading screens), the simpler renderer's look if he ever runs it, and Report a Bug's long address on Windows.
+
+**Left for Beta by his word:** bots smoking a crossing or flashing a room they hold, and the raised pose in the hit
+volume. Watching Here stays Hard only.
+
