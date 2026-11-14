@@ -99,3 +99,47 @@ func test_a_skip_holds_every_figure_and_the_frame_after_it_poses_them() -> void:
 	for f in session._figures:
 		if f.visible:
 			assert_false(f._snap, "%s: posed on the first frame the field shows" % f.name)
+
+
+# --- A menu's part pictures ---
+
+
+func test_a_kept_menu_part_and_its_inside_are_a_plain_takes_nodes() -> void:
+	for slot: StringName in [&"optic", &"barrel", &"magazine"]:
+		for part: StringName in PartsFor.of(slot):
+			var plain := _part_lines(&"aeg", slot, part)
+			ReplicaParts.keep()
+			var kept := _part_lines(&"aeg", slot, part)
+			var again := _part_lines(&"aeg", slot, part)
+			ReplicaParts.release()
+			assert_ne(plain, "", "%s %s taken" % [slot, part])
+			assert_eq(kept, plain, "%s %s: the same nodes kept" % [slot, part])
+			assert_eq(again, plain, "%s %s: and again from the kept file" % [slot, part])
+
+
+func test_part_pictures_keep_the_parts_files_for_the_frame_only() -> void:
+	var pictures := ReplicaPictures.new()
+	add_child_autofree(pictures)
+	pictures.part_extent(&"aeg", &"optic", &"redDot")
+	pictures.part_extent(&"aeg", &"optic", &"scope2x")
+	assert_true(ReplicaParts._keeping, "kept while the frame makes its pictures")
+	assert_eq(ReplicaParts._kept.size(), 2, "one parts file and one inside file")
+	await wait_process_frames(1)
+	assert_false(ReplicaParts._keeping, "let go at the frame's end")
+	assert_eq(ReplicaParts._kept.size(), 0, "their instances freed")
+	pictures.part_extent(&"aeg", &"barrel", &"long")
+	remove_child(pictures)
+	assert_false(ReplicaParts._keeping, "and when the pictures leave the tree")
+	assert_eq(ReplicaParts._kept.size(), 0)
+	pictures.let_go_parts()
+
+
+## The parts of `slot` the AEG's parts file holds, by Key.
+class PartsFor:
+	static func of(slot: StringName) -> Array[StringName]:
+		match slot:
+			&"optic":
+				return [&"redDot", &"scope2x", &"scopeVar"]
+			&"barrel":
+				return [&"long", &"tightBore"]
+		return [&"hiCap", &"lowCap"]

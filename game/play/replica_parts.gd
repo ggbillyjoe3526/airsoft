@@ -301,22 +301,31 @@ static func _carry_markers(part: Node3D, copy: Node3D) -> void:
 
 
 ## What part `part` for `slot` of replica `key` puts inside the replica, placed in the replica's space, owned by nothing;
-## null if it puts nothing there. The part's own picture draws it beside the part.
+## null if it puts nothing there. The part's own picture draws it beside the part. Between `keep` and `release` it is a
+## copy out of one instance of the file, as `take`'s are.
 static func inside(key: StringName, slot: StringName, part: StringName) -> Node3D:
 	var path := "%s%s.glb" % [INSIDE_DIR, ReplicaConfig.model_of(key)]
 	if not ResourceLoader.exists(path):
 		return null
-	var scene := load(path) as PackedScene
-	if scene == null:
-		return null
-	var holder := scene.instantiate() as Node3D
+	var holder := _kept.get(path) as Node3D
+	if holder == null:
+		var scene := load(path) as PackedScene
+		if scene == null:
+			return null
+		holder = scene.instantiate() as Node3D
+		if _keeping:
+			_kept[path] = holder
 	var node := holder.get_node_or_null("%s_%s%s" % [slot, part, INSIDE_SUFFIX]) as Node3D
 	if node != null:
-		holder.remove_child(node)
+		if _keeping:
+			node = node.duplicate() as Node3D
+		else:
+			holder.remove_child(node)
 		node.owner = null
 		for child in node.find_children("*", "", true, false):
 			child.owner = null
-	holder.free()
+	if not _keeping:
+		holder.free()
 	return node
 
 

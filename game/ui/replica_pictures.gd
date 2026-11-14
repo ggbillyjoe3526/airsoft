@@ -72,6 +72,10 @@ var _grenade_shots: Dictionary[int, Shot] = {}
 var _bomb_shot: Shot = null
 ## The longer side of a replica's picture (px): a page that shows replicas small asks for less.
 var replica_side: int = LONG_SIDE
+## Whether the part pictures made this frame come out of one instance of each parts file (ReplicaParts.keep), let go at
+## the frame's end or when the pictures leave the tree: a part tab makes all its pictures at once, and each instanced a
+## whole parts file (and its inside file) for one part.
+var _parts_kept: bool = false
 
 
 ## The picture of replica `key` (a pool.md Key) in `paint`, with `parts` fitted (part slot -> part Key, as Kit.parts and
@@ -296,11 +300,27 @@ func _restyle(mesh: MeshInstance3D, material: String, colour: Color) -> void:
 			mesh.set_surface_override_material(i, shown)
 
 
+## Ends the frame's ReplicaParts.keep (`_part_shot`): its parts files' instances are freed.
+func _let_parts_files_go() -> void:
+	if _parts_kept:
+		_parts_kept = false
+		ReplicaParts.release()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_PREDELETE:
+		_let_parts_files_go()
+
+
 func _part_shot(key: StringName, slot: StringName, part: StringName) -> Shot:
 	var id := "%s/%s/%s" % [key, slot, part]
 	var shot := _part_shots.get(id) as Shot
 	if shot != null:
 		return shot
+	if not _parts_kept:
+		_parts_kept = true
+		ReplicaParts.keep()
+		_let_parts_files_go.call_deferred()
 	var taken := ReplicaParts.take(key, {slot: part}, false)
 	if taken.is_empty():
 		return null
