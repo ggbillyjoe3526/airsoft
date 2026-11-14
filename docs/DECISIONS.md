@@ -179,7 +179,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   colour on Subway's running tunnels' arch while Lamp light is off (`StationLook.arch_fill` 0.3) and on the platform
   vaults on every preset (`vault_fill` 0.2); yes to the doors, the roof's steel and lamps and the light fixtures
   taking the props' wear; yes to a cheaper replica grain on Mesh detail Low; yes to the range's sandbags, toilet and
-  tote rebuilt rounder; yes to Dev › Retro filter snapping your replica and the BBs and its haze reaching 110 m. No
+  tote rebuilt rounder (not in yet: the rebuild failed the models rule, a known issue); yes to Dev › Retro filter snapping your replica and the BBs and its haze reaching 110 m. No
   to figures lit by the baked light of the room they stand in for 0.1 Dev 3 (a player in shade is harder to see), to
   a rifle laid along the pack's diagonal, to the Cyber Pistol's thumb straightened and to the magazine change's
   fingers. The three performance trades that change the look (out-of-view figures posed every fourth frame,

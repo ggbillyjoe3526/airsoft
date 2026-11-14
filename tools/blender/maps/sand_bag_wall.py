@@ -24,12 +24,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import range_kit as rk  # noqa: E402
 
 OUT = os.path.join(rk.PROPS, "sandbags.glb")
-BUDGET = 4200  # the plan said 800; sixteen round bags, each with a seam and a tied neck (RM1); AUD2: 20 points round
+BUDGET = 2400  # the plan said 800; sixteen round bags, each with a seam and a tied neck, at 144 (RM1 record)
 LONG, DEEP, HIGH = 1.2, 0.6, 0.9
 COURSES = 4  # a bag 0.6 x 0.3 m lies about 0.23 m high (the photos' 2:1 in plan and 2.5:1 on the face)
 BAG = 0.6  # a bag's length
 # Points round a bag: most on its visible arc (sides and top), one on its flat underside on the course below.
-ARC = [math.radians(-25.0 + 12.0 * i) for i in range(20)]  # -25 to 203 degrees: no facet reads on the round (AUD2)
+ARC = [math.radians(a) for a in (-25.0, -5.0, 15.0, 40.0, 65.0, 90.0, 115.0, 140.0, 165.0, 185.0, 205.0)]
 UNDER = [math.radians(a) for a in (270.0,)]
 RING = len(ARC) + len(UNDER)
 
@@ -62,8 +62,8 @@ def bag(kit: rk.Kit, a0: float, a1: float, across: float, cz: float, ry: float, 
     n = a1 - a0
     # (along from the seam, across, up, lift): the seam, the shoulder, the belly, the shoulder, the neck.
     body = [(0.0, 0.9, 0.16, 0.25), (0.06 / n, 0.96, 0.8, 0.06), (0.5, 1.0, 1.0, 0.0),
-            (1.0 - 0.1 / n, 0.82, 0.78, 0.04), (1.0 - 0.035 / n, 0.36, 0.4, 0.2)]
-    ear = [(1.0 - 0.035 / n, 0.38, 0.42, 0.2), (1.0, 0.4, 0.28, 0.26)]
+            (1.0 - 0.1 / n, 0.82, 0.78, 0.04), (1.0 - 0.035 / n, 0.26, 0.3, 0.2)]
+    ear = [(1.0 - 0.035 / n, 0.28, 0.32, 0.2), (1.0, 0.3, 0.2, 0.26)]
 
     def place(along: float, side: float, z: float) -> tuple:
         return (side, along, z) if header else (along, side, z)

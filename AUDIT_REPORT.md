@@ -288,7 +288,7 @@ answer (16:49): "Go with defaults for 1-14. 15-16: yes. 17-22: defaults." The de
 | 8 | The Cyber Pistol's thumb straightened | no | Left |
 | 9 | The Sniper Rifle's bolt home with the last knock on every spring | yes | Merged (only the drawn bolt's timing) |
 | 10 | A cheaper replica grain on Mesh detail Low | yes | Merged (3 reads a fragment there, 7 elsewhere) |
-| 11 | The range's sandbags, toilet and tote rounder | yes | Merged (three models rebuilt by their scripts) |
+| 11 | The range's sandbags, toilet and tote rounder | yes | Not in. The rebuild was merged, then taken out when the critic judged it against the models rule: hardly different from the old models, and the sandbag wall short of the bar (gaps between courses, faceted necks, shiny sacking). A rebuild against his photo is a row in the known issues |
 | 12 | Dev › Retro filter: replica and BBs wobble, haze to 110 m | yes | Merged; the haze constant changed |
 | 13 | Plant The Bomb's timings | leave them | Nothing changed. He answered on figures from before answer 15 put the two replicas in bots' hands; with them in, Depot and Woodland read about 38 % for the attackers (10.4), so it goes back to him after his playtest |
 | 14 | Three performance trades that change the look | leave until a frame time needs them | Nothing changed |

@@ -64,7 +64,6 @@
 - Subway's platform vaults glow a little of their own colour on every preset, so they no longer read darker and cooler than the walls.
 - Depot and the other fields: doors, the roof's steel and lamps, and the light fixtures are worn like the props beside them.
 - Mesh detail Low: the replica in your hands draws its grain more cheaply.
-- Practice range: the sandbags, the site toilet and the tote are rounder up close.
 - Dev › Retro filter: your replica and BBs in flight wobble with the field, and the haze reaches 110 m (was 70 m).
 
 ### Loading and speed

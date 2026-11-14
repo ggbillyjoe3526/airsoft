@@ -107,7 +107,9 @@ ask me what to do before actioning it." The account is `AUDIT_REPORT.md` › 10.
 - **His answers to the 22 (16:49: "Go with defaults for 1-14. 15-16: yes. 17-22: defaults.")**, the defaults being
   the picks sent with each question: built in are the tunnel arch's and the platform vaults' glow, the wear on doors,
   roof steel and fixtures, the holstered arm swing, the same-class switch, the sniper's bolt, the cheaper grain on
-  Mesh detail Low, the rounder range props, and the Retro filter's wobble with its haze out to 110 m. Left by his
+  Mesh detail Low, and the Retro filter's wobble with its haze out to 110 m. The rounder range props (his yes to
+  11) were merged, then taken out when the critic failed them against the models rule (attempt 4): hardly different
+  from the old models, the sandbag wall short of the bar; a known issue asks for the rebuild. Left by his
   word: figures in the baked light, the rifle on the pack, the Cyber Pistol's thumb, the magazine fingers, Plant
   The Bomb's timings, the three performance trades, Git LFS and OGG loops. Kept: the wagon squeeze and the lift
   probe. The heartbeat is the saves contract's second exception. `AUDIT_REPORT.md` › 10.1 has the table.

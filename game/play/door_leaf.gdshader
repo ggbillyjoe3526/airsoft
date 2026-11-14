@@ -21,13 +21,16 @@ varying vec3 wear_at;
 varying float wear_foot;
 varying vec3 wear_normal;
 
+// How far along the wear's noise one leaf stands from the next (m): no two leaves of a field wear alike.
+const float LEAF_WEAR_STEP = 3.7;
+
 void vertex() {
 	// COLOR is the vertex colour times the instance colour (the light down the model's z)
 	lit = COLOR.rgb * mix(vec3(1.0), INSTANCE_CUSTOM.rgb, clamp(0.5 + 0.5 * NORMAL.z, 0.0, 1.0));
 	// Each leaf's wear its own: the leaves' places along the model's x set apart by their instance.
 	vec3 scale = vec3(length(MODEL_MATRIX[0].xyz), length(MODEL_MATRIX[1].xyz), length(MODEL_MATRIX[2].xyz));
 	float world_y = (MODEL_MATRIX * vec4(VERTEX, 1.0)).y;
-	wear_at = vec3(VERTEX.x * scale.x + float(INSTANCE_ID) * 3.7, world_y, VERTEX.z * scale.z);
+	wear_at = vec3(VERTEX.x * scale.x + float(INSTANCE_ID) * LEAF_WEAR_STEP, world_y, VERTEX.z * scale.z);
 	wear_foot = world_y - (MODEL_MATRIX * vec4(0.0, wear_floor, 0.0, 1.0)).y;
 	wear_normal = NORMAL;
 	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1).
