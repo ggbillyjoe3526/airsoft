@@ -166,7 +166,7 @@ TRACK_WALL_Z = 12.5  # the tunnel wall's face beside each track (z, the south on
 # GROW alone the north track's floor edge lies on a row of the bots' grid's cell centres, and the grid's 32-bit
 # rounding left that row without floor, so it stamped a drop 9 cm inside the wall's face, whose clearance shut the
 # one-cell lane past the works wagons. Both tracks alike (the south edge stays between two rows either way).
-UNDER_WALL = 0.02
+UNDER_WALL = 0.01
 
 
 def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: float) -> None:
