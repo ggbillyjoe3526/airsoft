@@ -7,7 +7,8 @@ files), under "The audit's fixes".
 
 **Branch.** The brief asked for `audit/2026-11-14`. This session may push to one branch only,
 `claude/project-thread-5u1mdg`, so the work is there. Nothing was force-pushed, no history rewritten, no branch
-deleted, no repository setting changed. The pull request is open and **not merged**.
+deleted, no repository setting changed. The pull request (#350) was held open for the owner and **merged at his
+word** on 2026-11-14 at 20:15, after the second pass (section 10).
 
 **A second pass followed the same day** at the owner's word (attempt every known issue, ask before a change to
 look or feel). Sections 1 to 9 are the first pass as it was reported; section 10 is the second.
