@@ -129,7 +129,7 @@ func test_the_running_tunnels_arch_alone_is_marked_for_the_fill() -> void:
 	var marked := 0
 	var stray := 0
 	for v in at.size():
-		if colours[v].a < 0.5:
+		if colours[v].a < 0.25:
 			marked += 1
 			# the running tunnels' vaults (lining) lie east of the platforms, x 50 to 82
 			if at[v].x < 49.9:
@@ -152,3 +152,19 @@ func test_the_arch_fill_is_on_only_while_no_lamp_lights_the_tunnels() -> void:
 		GraphicsApply.apply_field(table.preset(preset), null, null, null, level)
 		assert_almost_eq(float(level.station_material().get_shader_parameter(&"arch_fill")), 0.0, 1e-6,
 				"%s: the tunnel lamps light it" % preset)
+
+
+func test_the_platform_vaults_take_the_vault_fill_on_every_preset() -> void:
+	var look := play.station_look
+	var mesh := StationSurface.mesh(map, play.map_style, look, play.site_look.props.named_only())
+	var arrays := mesh.surface_get_arrays(0)
+	var at: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var colours: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	var marked := 0
+	for v in at.size():
+		if absf(colours[v].a - StationSurface.VAULT_MARK) < 0.1:
+			marked += 1
+			assert_lt(at[v].x, 50.1, "only the platforms' vaults (x -52 to 50)")
+	assert_gt(marked, 0, "the platform vaults are marked")
+	var mat := StationSurface.material(look)
+	assert_almost_eq(float(mat.get_shader_parameter(&"vault_fill")), look.vault_fill, 1e-6, "set from the look")
