@@ -137,3 +137,38 @@ func test_a_holstered_figure_stepping_swings_a_share_of_the_sprint_s_pump() -> v
 	for i in 60:
 		_frame(v, c)
 	assert_eq(v.body().tree.get(FigureGraph.P_HOLSTER_MIX), 0.0, "standing, the arms hang")
+
+
+## Runs a switch to slot `to` of `frames` frames on `v` from `c`, stopping at frame `stop` (the draw's share there).
+func _switch_to(v: FigureView, c: Character, to: int, frames: int, stop: int) -> void:
+	var a := c.armament
+	a.active = to
+	a.draw_total = frames * FRAME
+	for i in stop + 1:
+		a.draw_left = a.draw_total - i * FRAME
+		_frame(v, c)
+
+
+func test_a_switch_between_two_pistols_plays_out_to_the_hand_over_and_back() -> void:
+	var frames := 40
+	# Two pistols: the default loadout's pistol in both slots.
+	var two := _character()
+	two.armament.replicas[0] = two.armament.replicas[1]
+	two.armament.active = 0
+	var same := _view(two)
+	# The rifle-to-pistol switch, its hand-over at switch_pistol_from of the draw.
+	var cross_c := _character()
+	var cross := _view(cross_c)
+	for i in 5:
+		_frame(same, two)
+		_frame(cross, cross_c)
+	_switch_to(same, two, 1, frames, frames / 2)
+	_switch_to(cross, cross_c, 1, frames, roundi(frames * config.switch_pistol_from))
+	var gap := _arm_gap(same, cross)
+	gut.p("two pistols at half the draw against rifle to pistol at its hand-over: %.2f°" % rad_to_deg(gap))
+	assert_lt(gap, deg_to_rad(2.0), "at half the draw the pistol's arms are where the clip hands over")
+	assert_eq(same.body().hands.in_hand, 1, "the new pistol from half the draw")
+	for i in range(frames / 2 + 1, frames):
+		two.armament.draw_left = two.armament.draw_total - i * FRAME
+		_frame(same, two)
+	assert_true(same.body().tree.get(FigureGraph.P_SWITCH_ACTIVE), "still switching near the draw's end")

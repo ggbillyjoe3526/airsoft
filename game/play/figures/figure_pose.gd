@@ -59,10 +59,13 @@ var on_back: int = -1
 var in_holster: int = -1
 var hanging: bool = false
 ## A switch between replicas under way (the Switch clip: backwards to a rifle), whether it began since the last read
-## (the clip is fired once), how long the draw takes in all (s) and its share done (0..1; 1 with none under way).
+## (the clip is fired once), how long the draw takes in all (s) and its share done (0..1; 1 with none under way). A
+## switch between two replicas of one class (`switch_same`) plays the clip out to its hand-over and back, from the
+## rifle's end (forwards) for two rifles and from the pistol's (backwards) for two pistols.
 var switching: bool = false
 var switch_started: bool = false
 var switch_back: bool = false
+var switch_same: bool = false
 var draw_seconds: float = 0.0
 var draw_share: float = 1.0
 ## A reload under way (FI4) in slot `reload_slot` (-1 none; not while holstered or calling the hit), whether it began
@@ -194,7 +197,8 @@ func read_hands(a: Armament, called: bool, alive: bool = true) -> void:
 		_switch_from = in_hand
 		switching = not _from_holster and _switch_from >= 0 and _switch_from != a.active
 		switch_started = switching
-		switch_back = switching and not _is_pistol(a, a.active)
+		switch_same = switching and _is_pistol(a, a.active) == _is_pistol(a, _switch_from)
+		switch_back = switching and (_is_pistol(a, a.active) if switch_same else not _is_pistol(a, a.active))
 	if not drawing:
 		_from_holster = false
 		switching = false
@@ -211,7 +215,7 @@ func read_hands(a: Armament, called: bool, alive: bool = true) -> void:
 		holster = 1.0 if share < swap else clampf((1.0 - share) / maxf(1.0 - swap, 1e-6), 0.0, 1.0)
 	pistol = 1.0 if _is_pistol(a, a.active) else 0.0
 	in_hand = -1 if put_away else a.active
-	if switching and share < switch_share(switch_back):
+	if switching and share < (_config.switch_same_from if switch_same else switch_share(switch_back)):
 		in_hand = _switch_from
 	var rifle := _first_rifle(a)
 	on_back = rifle if rifle != in_hand else -1

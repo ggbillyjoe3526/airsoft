@@ -317,6 +317,13 @@ func _animate_upper(pose: FigurePose, hits: HitConfig, fired: bool) -> void:
 		tree.set(FigureGraph.P_SWITCH, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	elif not pose.switching and tree.get(FigureGraph.P_SWITCH_ACTIVE):
 		tree.set(FigureGraph.P_SWITCH, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+	if pose.switching and pose.switch_same and pose.draw_seconds > 0.0:
+		# One class to the same: out to the hand-over (switch_pistol_from of the clip from the replica's own end) and
+		# back, seeked every frame.
+		var half := _config.switch_same_from
+		var turn := pose.draw_share / half if pose.draw_share < half else (1.0 - pose.draw_share) / (1.0 - half)
+		var reach := 1.0 - _config.switch_pistol_from if pose.switch_back else _config.switch_pistol_from
+		tree.set(FigureGraph.P_SWITCH_SEEK, clampf(turn, 0.0, 1.0) * reach * _switch_seconds)
 	_animate_reload(pose)
 
 
