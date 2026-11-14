@@ -1,10 +1,10 @@
 extends SceneTree
 ## Plays the balance report's matches and writes it (BR1): tools/balance.sh runs this headless. Every map in MAPS whose
 ## id contains the filter plays each level in the levels list against itself through MatchRunner: Normal on seeds 1 to
-## the seed count, the others on 1 to their own count, in Elimination and, on a map with a pole, Attack / Defend; the
-## figures and verdicts are BalanceReport's. Arguments after `--`: the report's path, the commit, the seed count, then
+## the seed count, the others on 1 to their own count, in Elimination and, on a map with a pole, Attack / Defend and,
+## on a map with bomb sites, Plant The Bomb (AUD1); the figures and verdicts are BalanceReport's. Arguments after `--`: the report's path, the commit, the seed count, then
 ## optionally a filter, the levels (comma-separated, Normal's by default), the other levels' seed count (Normal's by
-## default), the modes ("elimination", "flag" or both comma-separated, both by default) and the team size (each map's
+## default), the modes ("elimination", "flag", "plant", comma-separated, all three by default) and the team size (each map's
 ## standard by default; one a map doesn't offer plays its standard there, TS1).
 
 ## Every field (the range is not a match map). Each plays at the team size the game gives it (MatchRunner.sized_for:
@@ -12,6 +12,11 @@ extends SceneTree
 const MAPS: Array[String] = ["depot", "woodland", "subway"]
 ## Match time a match may take (s), as the guards allow.
 const MAX_MATCH_SECONDS := 30.0 * 60.0
+## Each mode's name in the log.
+const MODE_NAMES: Dictionary[RoundState.Mode, String] = {
+	RoundState.Mode.ELIMINATION: "Elimination", RoundState.Mode.ATTACK_DEFEND: "Attack / Defend",
+	RoundState.Mode.PLANT_THE_BOMB: "Plant The Bomb",
+}
 
 
 func _initialize() -> void:
@@ -42,7 +47,7 @@ func _run() -> void:
 			return
 	var other_seeds := args[5].to_int() if args.size() > 5 and args[5].is_valid_int() else seeds
 	other_seeds = maxi(other_seeds, 1)
-	var modes := PackedStringArray(["elimination", "flag"])
+	var modes := PackedStringArray(["elimination", "flag", "plant"])
 	if args.size() > 6 and args[6] != "":
 		modes = args[6].split(",", false)
 	var size := args[7].to_int() if args.size() > 7 and args[7].is_valid_int() else 0
@@ -73,6 +78,9 @@ func _run() -> void:
 			if modes.has("flag") and runner.map.has_pole:
 				rows.append_array(BalanceReport.flag_figures(map_id, name,
 						_play(runner, RoundState.Mode.ATTACK_DEFEND, count, name, level), StringName(level)))
+			if modes.has("plant") and runner.map.has_bomb_sites:
+				rows.append_array(BalanceReport.plant_figures(name,
+						_play(runner, RoundState.Mode.PLANT_THE_BOMB, count, name, level), StringName(level)))
 		if by_level.has(&"easy") and by_level.has(&"normal"):
 			var easy: Array[MatchRunner.MatchTally] = []
 			easy.assign(by_level[&"easy"])
@@ -107,7 +115,7 @@ func _play(runner: MatchRunner, mode: RoundState.Mode, count: int, name: String,
 	runner.mode = mode
 	for seed_value in range(1, count + 1):
 		matches.append(runner.play(seed_value, MAX_MATCH_SECONDS))
-	print("%s, %s, %s: %d matches in %.0f s" % [name, "Elimination" if mode == RoundState.Mode.ELIMINATION
-			else "Attack / Defend", BalanceReport.level_name(StringName(level)), matches.size(),
+	print("%s, %s, %s: %d matches in %.0f s" % [name, MODE_NAMES.get(mode, "?"),
+			BalanceReport.level_name(StringName(level)), matches.size(),
 			(Time.get_ticks_msec() - started) / 1000.0])
 	return matches

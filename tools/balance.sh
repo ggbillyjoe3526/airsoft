@@ -2,18 +2,18 @@
 # The bot balance report (BR1): seeded headless bot matches on each field, every figure judged against its band and
 # its standard error, written to pipeline/out/balance-report.md (balance-report-N.md with SIZE=N). Measured, never
 # asserted: the checks and CI don't run it; the bug pass reads it (docs/DECISIONS.md › Bots and balance). Each level
-# plays against itself: Normal on 32 seeds a map, Easy and Hard on 16, in Elimination and Attack / Defend, on every
-# field at its standard size (6v6): many hours, so play one map (`tools/balance.sh woodland`) or fewer seeds and
-# levels.
+# plays against itself: Normal on 32 seeds a map, Easy and Hard on 16, in Elimination, Attack / Defend and Plant The
+# Bomb (AUD1), on every field at its standard size (6v6): many hours, so play one map (`tools/balance.sh woodland`)
+# or fewer seeds, levels and modes.
 # Usage: tools/balance.sh [filter]   (a map id or part of one; SEEDS=n for Normal's seed count, LEVEL_SEEDS=n for the
-# other levels', LEVELS=normal,hard to choose the levels, MODES=flag or MODES=elimination for one mode, SIZE=n to
-# play n a side where a map offers it (TS1); GODOT=/path/to/godot)
+# other levels', LEVELS=normal,hard to choose the levels, MODES=elimination,flag,plant to choose the modes (all three
+# by default), SIZE=n to play n a side where a map offers it (TS1); GODOT=/path/to/godot)
 set -uo pipefail
 GODOT="${GODOT:-godot}"
 SEEDS="${SEEDS:-32}"
 LEVEL_SEEDS="${LEVEL_SEEDS:-16}"
 LEVELS="${LEVELS:-normal,easy,hard}"
-MODES="${MODES:-elimination,flag}"
+MODES="${MODES:-elimination,flag,plant}"
 SIZE="${SIZE:-}"
 cd "$(dirname "$0")/.."
 mkdir -p pipeline/out

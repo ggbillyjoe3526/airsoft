@@ -30,6 +30,11 @@ const ON_TIME_MAX := 0.1
 const ATTACK_BANDS: Dictionary[StringName, Vector2] = {&"easy": Vector2(0.35, 0.65), &"hard": Vector2(0.4, 0.6)}
 const ATTACK_NORMAL_BANDS: Dictionary[String, Vector2] = {"depot": Vector2(0.38, 0.67)}
 const ATTACK_NORMAL_BAND := Vector2(0.4, 0.65)
+## Plant The Bomb: the attackers' share of all rounds. No band of its own has been ruled (PB1 measured only), so it
+## is judged by Attack / Defend's, the other mode with a side that must come to the defenders (AUD1).
+const PLANT_BANDS: Dictionary[StringName, Vector2] = {
+	&"easy": Vector2(0.35, 0.65), &"normal": ATTACK_NORMAL_BAND, &"hard": Vector2(0.4, 0.6),
+}
 
 
 ## One figure: a share (`of` > 0, value 0..1) or a plain number in `unit`, with its band (either end may be open).
@@ -198,6 +203,48 @@ static func flag_figures(map_id: String, map_name: String, matches: Array[MatchR
 			"%d of %d rounds" % [on_time, rounds]))
 	out.append(share("%s: rounds won by raising the flag" % at, captures, rounds, -INF, INF,
 			"%d of %d rounds" % [captures, rounds]))
+	out.append(number("%s: median round length" % at, median(lengths), "s", "%d rounds" % lengths.size()))
+	return out
+
+
+## Plant The Bomb's figures at `level` (AUD1): the attackers' share of all rounds against PLANT_BANDS, the clock
+## against ON_TIME_MAX, and, measured only, how often the bomb is armed, an armed bomb made safe, and a bomb goes off.
+static func plant_figures(map_name: String, matches: Array[MatchRunner.MatchTally],
+		level: StringName = &"normal") -> Array[Figure]:
+	var rounds := 0
+	var attack_wins := 0
+	var on_time := 0
+	var armed := 0
+	var defused := 0
+	var went_off := 0
+	var lengths := PackedFloat32Array()
+	for m in matches:
+		for r in m.rounds:
+			rounds += 1
+			lengths.append(r.seconds)
+			if r.winner >= 0 and r.winner == r.attackers:
+				attack_wins += 1
+			if r.planted_at >= 0.0:
+				armed += 1
+			if r.reason == GameEvent.RoundEnd.TIME:
+				on_time += 1
+			elif r.reason == GameEvent.RoundEnd.DEFUSED:
+				defused += 1
+			elif r.reason == GameEvent.RoundEnd.WENT_OFF:
+				went_off += 1
+	var at := "%s, Plant The Bomb, %s" % [map_name, level_name(level)]
+	var band: Vector2 = PLANT_BANDS.get(level, ATTACK_NORMAL_BAND)
+	var out: Array[Figure] = []
+	out.append(share("%s: the attackers' share of rounds" % at, attack_wins, rounds, band.x, band.y,
+			"%d of %d rounds" % [attack_wins, rounds]))
+	out.append(share("%s: rounds that run out the clock" % at, on_time, rounds, -INF, ON_TIME_MAX,
+			"%d of %d rounds" % [on_time, rounds]))
+	out.append(share("%s: rounds the bomb is armed in" % at, armed, rounds, -INF, INF,
+			"%d of %d rounds" % [armed, rounds]))
+	out.append(share("%s: armed bombs made safe" % at, defused, armed, -INF, INF,
+			"%d of %d armed" % [defused, armed]))
+	out.append(share("%s: armed bombs that go off" % at, went_off, armed, -INF, INF,
+			"%d of %d armed" % [went_off, armed]))
 	out.append(number("%s: median round length" % at, median(lengths), "s", "%d rounds" % lengths.size()))
 	return out
 
