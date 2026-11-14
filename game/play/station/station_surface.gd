@@ -365,7 +365,10 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 	var tint := look.tint_of(finish, null)
 	var pbr := look.pbr_of(finish)
 	var size := look.scale_of(finish)
-	st.set_color(tint.srgb_to_linear())
+	var colour := tint.srgb_to_linear()
+	# Its alpha marks the arc the arch fill lights (StationLook.arch_fill: 0 filled, 1 not); the shader draws no alpha.
+	colour.a = 0.0 if look.arch_fill_finishes.has(finish) else 1.0
+	st.set_color(colour)
 	st.set_custom(0, Color(float(look.layer_of(finish)), pbr.y, pbr.x, NO_FLOOR))
 	for k in steps:
 		var a := -half + 2.0 * half * float(k) / float(steps)

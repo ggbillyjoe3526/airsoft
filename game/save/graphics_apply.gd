@@ -342,6 +342,7 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		dust.set_share(values.wind_dust / PERCENT)
 	if level != null:
 		level.set_baked_light(values.baked_light, lamps != null and values.lamp_lights != GraphicsQuality.LampLights.OFF)
+		level.set_arch_fill(values.lamp_lights == GraphicsQuality.LampLights.OFF)
 	if kicked != null:
 		kicked.set_on(values.wind_dust > 0)
 	if woods != null:

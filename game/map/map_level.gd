@@ -423,6 +423,13 @@ func set_detail(detail: GraphicsQuality.MeshDetail) -> void:
 		_station_material.set_shader_parameter(&"low", detail == GraphicsQuality.MeshDetail.LOW)
 
 
+## The station's arch fill (StationLook.arch_fill) on while no lamp lights the running tunnels (Lamp light off), else
+## off. Nothing on a map with no station.
+func set_arch_fill(on: bool) -> void:
+	if _station_material != null:
+		_station_material.set_shader_parameter(&"arch_fill", _station.arch_fill if on else 0.0)
+
+
 ## Sloping ground's tiles (WL4), row by row; empty on a map without sloping ground.
 func ground_tiles() -> Array[MeshInstance3D]:
 	return _tiles

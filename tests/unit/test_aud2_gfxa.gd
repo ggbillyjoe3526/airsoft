@@ -118,3 +118,37 @@ func test_a_riding_car_leaves_its_probe_where_it_stopped_and_takes_it_back_at_th
 	var inside := car.global_position + Vector3(0.0, tuning.lifts.car_height * 0.5, 0.0)
 	assert_false(probe.top_level, "stopped: the probe is the car's again")
 	assert_almost_eq(probe.global_position.distance_to(inside), 0.0, 1e-4, "stopped: the probe fills the car")
+
+
+func test_the_running_tunnels_arch_alone_is_marked_for_the_fill() -> void:
+	var look := play.station_look
+	var mesh := StationSurface.mesh(map, play.map_style, look, play.site_look.props.named_only())
+	var arrays := mesh.surface_get_arrays(0)
+	var at: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var colours: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	var marked := 0
+	var stray := 0
+	for v in at.size():
+		if colours[v].a < 0.5:
+			marked += 1
+			# the running tunnels' vaults (lining) lie east of the platforms, x 50 to 82
+			if at[v].x < 49.9:
+				stray += 1
+	assert_gt(marked, 0, "the running tunnels' arch is marked")
+	assert_eq(stray, 0, "nothing else (the platforms' vaults keep their light)")
+
+
+func test_the_arch_fill_is_on_only_while_no_lamp_lights_the_tunnels() -> void:
+	var level := MapLevel.new()
+	add_child_autofree(level)
+	level.build(map, play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting, null, map,
+			LightingConfig.DAY), false, play.site_look, tuning.lifts, play.station_look)
+	var table := GraphicsTable.shared()
+	for preset: StringName in [&"low", &"medium"]:
+		GraphicsApply.apply_field(table.preset(preset), null, null, null, level)
+		assert_almost_eq(float(level.station_material().get_shader_parameter(&"arch_fill")),
+				play.station_look.arch_fill, 1e-6, "%s: the arch filled" % preset)
+	for preset: StringName in [&"high", &"ultra"]:
+		GraphicsApply.apply_field(table.preset(preset), null, null, null, level)
+		assert_almost_eq(float(level.station_material().get_shader_parameter(&"arch_fill")), 0.0, 1e-6,
+				"%s: the tunnel lamps light it" % preset)
