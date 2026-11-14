@@ -457,6 +457,15 @@ func _on_round_time_release(_value_changed: bool) -> void:
 	_settings.save_if_dirty(save_path)
 
 
+## A drag cut short (the page hidden or closed with the knob still held, when the slider sends no release) ends here:
+## its steps are saved, and a later key or click on the track saves at once again.
+func _notification(what: int) -> void:
+	if not _dragging:
+		return
+	if what == NOTIFICATION_EXIT_TREE or (what == NOTIFICATION_VISIBILITY_CHANGED and not is_visible_in_tree()):
+		_on_round_time_release(true)
+
+
 ## Off is the first button, On the second.
 func _on_friendly_fire(index: int) -> void:
 	_settings.custom_rules.friendly_fire = index == 1

@@ -74,6 +74,23 @@ func test_a_dragged_round_time_is_saved_once_on_release() -> void:
 	assert_eq(_saved_time(), 270.0, "a step after the release saves again")
 
 
+## The bug hunt: a page hidden with the knob still held gets no release from the slider, so the drag's steps stayed
+## unsaved and every later step, taken for part of the drag, was not saved either.
+func test_a_drag_cut_short_by_the_page_hiding_is_saved_and_ended() -> void:
+	var settings := Settings.new()
+	var page := _page(settings)
+	var slider := page.rules_box().round_time_slider()
+	slider.drag_started.emit()
+	slider.value = 210.0
+	assert_true(settings.dirty, "held: not written yet")
+	page.hide()
+	assert_false(settings.dirty, "hidden mid-drag: written")
+	assert_eq(_saved_time(), 210.0)
+	page.show()
+	slider.value = 150.0
+	assert_eq(_saved_time(), 150.0, "and a step afterwards saves at once, the drag being over")
+
+
 # --- row 29: the drawing dips, the control does not ---
 
 func test_the_dip_transform_is_the_one_a_scale_about_the_middle_gives() -> void:
