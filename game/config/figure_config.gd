@@ -211,6 +211,10 @@ extends Resource
 @export var holster_clip: StringName = &"Holster"
 @export var holster_sprint_clip: StringName = &"Holster_Sprint"
 @export var holster_sprint_pace_clip: StringName = &"Sprint"
+## Holstered and stepping short of a sprint, the arms swing this share of Holster_Sprint's pump on the same stride (the
+## sprint's pump at a walk's pace, smaller), all of it from holster_step_speed (m/s, a run) and less at a slower step.
+@export var holster_step_mix: float = 0.45
+@export var holster_step_speed: float = 4.2
 ## How fast the upper body settles (s, as the legs' settle times): between the rifle's and the pistol's aim (hold); the
 ## switch and the trigger press faded in (overlay).
 @export var settle_hold: float = 0.06

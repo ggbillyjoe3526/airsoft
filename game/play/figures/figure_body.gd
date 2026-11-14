@@ -279,8 +279,9 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 
 ## The upper body's parameters: a trigger press when `fired`; the upper body's weight, its gate shut (not evaluated)
 ## under FigureConfig.gate_below; then, while it shows, the aim by pitch, the hold, the holster (its arms' and the aim's
-## gates shut at none and at full; Holster_Sprint on the walk cycle), a switch begun or shown again (forwards to a
-## pistol, backwards to a rifle, scaled to the draw from its share), cut when the draw is (a holster, a hit).
+## gates shut at none and at full; Holster_Sprint on the walk cycle, a share of it at a step), a switch begun or shown
+## again (forwards to a pistol, backwards to a rifle, scaled to the draw from its share), cut when the draw is (a
+## holster, a hit).
 func _animate_upper(pose: FigurePose, fired: bool) -> void:
 	tree.set(FigureGraph.P_FIRE_HOLD, pose.pistol_weight)
 	if fired:
@@ -303,7 +304,10 @@ func _animate_upper(pose: FigurePose, fired: bool) -> void:
 	_hold_gate = _gate(FigureGraph.P_HOLD_GATE, _hold_gate, holster < 1.0)
 	_holster_gate = _gate(FigureGraph.P_HOLSTER_GATE, _holster_gate, holster > 0.0)
 	tree.set(FigureGraph.P_HOLSTER, holster)
-	tree.set(FigureGraph.P_HOLSTER_MIX, pose.sprint_weight)
+	var step_mix := 0.0
+	if pose.stepping():
+		step_mix = _config.holster_step_mix * clampf(pose.speed / _config.holster_step_speed, 0.0, 1.0)
+	tree.set(FigureGraph.P_HOLSTER_MIX, maxf(pose.sprint_weight, step_mix))
 	if pose.stepping():
 		tree.set(FigureGraph.P_HOLSTER_SPRINT_SEEK, fposmod(pose.cycle, TAU))
 	if pose.switching and pose.draw_seconds > 0.0 and (pose.switch_started or pose.snapped):

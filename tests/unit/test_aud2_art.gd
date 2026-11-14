@@ -115,3 +115,25 @@ func test_a_slow_sprung_sniper_rifle_s_bolt_is_home_with_the_recorded_knock() ->
 		gut.p("a %.2f s cycle: the bolt home %.3f s after the shot, %.3f s before it can fire" % [cycle, home,
 				cycle - home])
 		assert_almost_eq(home, minf(cycle, vm.bolt_knock_at), 1e-4, "home with the last knock, never after it")
+
+
+func test_a_holstered_figure_stepping_swings_a_share_of_the_sprint_s_pump() -> void:
+	var c := _character()
+	c.armament.holstered = true
+	var v := _view(c)
+	for i in 60:
+		c.prev_walk_cycle = c.walk_cycle
+		c.velocity = Vector3(0.0, 0.0, -config.holster_step_speed)
+		c.walk_cycle += 0.2
+		_frame(v, c)
+	var mix: float = v.body().tree.get(FigureGraph.P_HOLSTER_MIX)
+	assert_almost_eq(mix, config.holster_step_mix, 0.02, "at a run, holster_step_mix of the pump")
+	c.velocity = Vector3(0.0, 0.0, -config.holster_step_speed * 0.5)
+	for i in 60:
+		_frame(v, c)
+	mix = v.body().tree.get(FigureGraph.P_HOLSTER_MIX)
+	assert_almost_eq(mix, config.holster_step_mix * 0.5, 0.02, "at half the speed, half of that")
+	c.velocity = Vector3.ZERO
+	for i in 60:
+		_frame(v, c)
+	assert_eq(v.body().tree.get(FigureGraph.P_HOLSTER_MIX), 0.0, "standing, the arms hang")
