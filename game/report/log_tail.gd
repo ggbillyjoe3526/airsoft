@@ -99,7 +99,11 @@ static func _newlines_before(file: FileAccess, end: int) -> int:
 	var count := 0
 	file.seek(0)
 	while file.get_position() < end:
-		count += file.get_buffer(mini(COUNT_BYTES, end - file.get_position())).count(NEWLINE)
+		var piece := file.get_buffer(mini(COUNT_BYTES, end - file.get_position()))
+		# a log cut short meanwhile ends the count rather than looping on nothing
+		if piece.is_empty():
+			break
+		count += piece.count(NEWLINE)
 	return count
 
 
