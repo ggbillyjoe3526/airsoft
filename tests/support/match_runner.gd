@@ -211,6 +211,8 @@ var overtime_flag: bool = true
 ## The kit each bot of the match being played picked, by character id (MatchTally.kits), for an `each_tick` watch.
 var kits_now: PackedStringArray = PackedStringArray()
 var _kits: BotKits = null
+## The kind of field the match is on, for the kits' Fields (BotKits.field_kind), as the game picks them.
+var _field: StringName = &""
 var _kit_rules: LoadoutRules = null
 var config: BotConfig = null
 var map: MapData = null
@@ -234,6 +236,7 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 	config = bot_config if bot_config != null else BotConfig.load_default()
 	var style := MapStyle.new()
 	map = given if given != null else MapData.load_map(map_id, style, tuning.rounds.team_size)
+	_field = BotKits.field_kind(MapCatalog.shared().find(map_id))
 	world = SubViewport.new()
 	world.own_world_3d = true
 	world.render_target_update_mode = SubViewport.UPDATE_DISABLED
@@ -319,7 +322,7 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 		t.personalities.append(personality)
 		var kit_level := levels[0 if i < size else 1]
 		var plan := _kits.pick(kit_level, _kit_rules, Seeds.kit_seed(seed_value, i), personality,
-				config.kit_suit_lean) if kitted else null
+				config.kit_suit_lean, _field) if kitted else null
 		kit_names.append(plan.kit_name if plan != null else "")
 		if plan == null:
 			state.characters.append(Character.new(i, 0 if i < size else 1, Vector3.ZERO, 0.0, loadout))

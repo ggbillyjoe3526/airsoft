@@ -733,12 +733,15 @@ func _start_simulation(map: MapData) -> void:
 		teams.append(player_team if i < _tuning.rounds.team_size - 1 else opponent_team())
 	_identities = BotRoster.draw(match_seed, ids, teams, BotsFile.shared())
 	var kit_rules := _bot_kit_rules()
+	# Some kits are carried on indoor fields only (data/bot-kits.md Fields: the Clearer's Pump Shotgun, out-ranged in
+	# the open).
+	var field := BotKits.field_kind(listed)
 	for i in ids.size():
 		var id := ids[i]
 		var team := teams[i]
 		var who: BotRoster.Identity = _identities.get(id)
 		var plan := BotKits.shared().pick(difficulty, kit_rules, Seeds.kit_seed(match_seed, id),
-				who.personality if who != null else &"", _bot_config.kit_suit_lean)
+				who.personality if who != null else &"", _bot_config.kit_suit_lean, field)
 		if plan == null:
 			state.characters.append(Character.new(id, team, Vector3.ZERO, 0.0, loadout))
 			continue

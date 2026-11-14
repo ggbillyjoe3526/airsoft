@@ -34,6 +34,10 @@ The kits are the bots' own: what you have unlocked never changes them.
 - **Grenades** lists the bombs the kit carries, one a grenade slot (two slots, as on your Loadout), separated by commas:
   Smoke or Flash, the same twice if you like ("Flash, Flash"). Empty, or not two: the default pick, one smoke and one
   flash. The column may be left out.
+- **Fields** keeps a kit to one kind of field: `indoor` (a field the breeze doesn't reach, Wind 0 in maps.md: Depot,
+  Subway) or `outdoor` (any other: Woodland, Stockade). Empty: every field. The Clearer is indoor only: its Pump
+  Shotgun is out-ranged in the open (on Woodland its carriers took about three hits for each one they gave). The column
+  may be left out.
 - **Easy**, **Normal** and **Hard** are each difficulty's weight for the kit: how likely a bot on that
   difficulty is to carry it, against the other kits in the same column. The columns here add up to about 100, so the weights
   read roughly as a chance in 100, but they don't have to: a kit weighted 2 is picked twice as often as one weighted 1. 0 (or
@@ -51,15 +55,15 @@ and Sniper, flankers to Stealth, Pointman, the Breacher and the Clearer, careful
 
 ## Kits
 
-| Kit | Primary | Primary parts | Secondary | Secondary parts | Suits | Grenades | Easy | Normal | Hard |
-|---|---|---|---|---|---|---|---|---|---|
-| Factory | AEG Rifle | | GBB Pistol | | | Smoke, Flash | 30 | 10 | 0 |
-| Rifleman | AEG Rifle | Red Dot, Vertical Grip | GBB Pistol | | careful | Smoke, Flash | 25 | 20 | 15 |
-| Marksman | AEG Rifle | 2x Scope, Tight-Bore Barrel, Vertical Grip | GBB Pistol | Red Laser | anchor, careful | Smoke, Smoke | 10 | 15 | 20 |
-| Support | AEG Rifle | Red Dot, Vertical Grip, Hi-Cap Magazine, 11.1 V LiPo Battery | GBB Pistol | Extended Magazine | anchor, rusher | Smoke, Flash | 10 | 20 | 20 |
-| Stealth | AEG Rifle | Red Dot, Silencer, Low-Cap Magazine | GBB Pistol | Silencer | flanker | Flash, Flash | 10 | 15 | 20 |
-| Pointman | AEG Rifle | Red Dot, Angled Grip | GBB Pistol | Red Laser, Extended Magazine, Red Gas | rusher, flanker | Flash, Flash | 15 | 18 | 23 |
-| Cyber | Cyber Pistol | | GBB Pistol | Red Laser | rusher | Flash, Flash | 0 | 2 | 2 |
-| Sniper | Sniper Rifle | | GBB Pistol | | anchor, careful | Smoke, Smoke | 3 | 6 | 8 |
-| Breacher | Compact SMG | Red Dot | GBB Pistol | | rusher, flanker | Flash, Flash | 3 | 6 | 8 |
-| Clearer | Pump Shotgun | Red Dot | GBB Pistol | | rusher, flanker | Flash, Flash | 3 | 6 | 8 |
+| Kit | Primary | Primary parts | Secondary | Secondary parts | Suits | Grenades | Fields | Easy | Normal | Hard |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Factory | AEG Rifle | | GBB Pistol | | | Smoke, Flash | | 30 | 10 | 0 |
+| Rifleman | AEG Rifle | Red Dot, Vertical Grip | GBB Pistol | | careful | Smoke, Flash | | 25 | 20 | 15 |
+| Marksman | AEG Rifle | 2x Scope, Tight-Bore Barrel, Vertical Grip | GBB Pistol | Red Laser | anchor, careful | Smoke, Smoke | | 10 | 15 | 20 |
+| Support | AEG Rifle | Red Dot, Vertical Grip, Hi-Cap Magazine, 11.1 V LiPo Battery | GBB Pistol | Extended Magazine | anchor, rusher | Smoke, Flash | | 10 | 20 | 20 |
+| Stealth | AEG Rifle | Red Dot, Silencer, Low-Cap Magazine | GBB Pistol | Silencer | flanker | Flash, Flash | | 10 | 15 | 20 |
+| Pointman | AEG Rifle | Red Dot, Angled Grip | GBB Pistol | Red Laser, Extended Magazine, Red Gas | rusher, flanker | Flash, Flash | | 15 | 18 | 23 |
+| Cyber | Cyber Pistol | | GBB Pistol | Red Laser | rusher | Flash, Flash | | 0 | 2 | 2 |
+| Sniper | Sniper Rifle | | GBB Pistol | | anchor, careful | Smoke, Smoke | | 3 | 6 | 8 |
+| Breacher | Compact SMG | Red Dot | GBB Pistol | | rusher, flanker | Flash, Flash | | 3 | 6 | 8 |
+| Clearer | Pump Shotgun | Red Dot | GBB Pistol | | rusher, flanker | Flash, Flash | indoor | 3 | 6 | 8 |

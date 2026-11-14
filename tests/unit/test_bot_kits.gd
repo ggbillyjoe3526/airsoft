@@ -183,7 +183,7 @@ func test_in_a_session_every_bot_on_both_teams_carries_its_kit() -> void:
 			continue
 		# Its kit leans towards its personality (BN1); your teammates pick theirs the same way (B4).
 		var plan := k.pick(&"hard", s._bot_kit_rules(), Seeds.kit_seed(11, c.id), s._identities[c.id].personality,
-				s._bot_config.kit_suit_lean)
+				s._bot_config.kit_suit_lean, BotKits.field_kind(MapCatalog.shared().find(s.map_id)))
 		assert_not_null(plan, "Hard never carries the replicas as they come")
 		var kit := BotKits.kit_of(plan, s._bot_kit_rules())
 		assert_eq(c.armament.replicas.size(), kit.size())

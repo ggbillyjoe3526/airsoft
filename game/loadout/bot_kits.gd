@@ -15,6 +15,11 @@ const KIT_COLUMN := "Kit"
 const SUITS_COLUMN := "Suits"
 ## The bombs a kit carries (BP8), a slot each, by Loadout.BOMB_NAMES; optional, empty: the default pick.
 const GRENADES_COLUMN := "Grenades"
+## Optional: the fields a kit is carried on (AUD2): `indoor` (a field with still air, data/maps.md Wind 0) or `outdoor`
+## (any other); empty, every field.
+const FIELDS_COLUMN := "Fields"
+const INDOOR := &"indoor"
+const OUTDOOR := &"outdoor"
 ## Each replica column, primary first, and its parts column.
 const REPLICA_COLUMNS: PackedStringArray = ["Primary", "Secondary"]
 const PARTS_COLUMNS: PackedStringArray = ["Primary parts", "Secondary parts"]
@@ -44,6 +49,12 @@ class Plan:
 	var weights: Dictionary[StringName, float] = {}
 	## The bomb in each grenade slot (empty: the default pick, GrenadeConfig.default_picks).
 	var bombs: Array[Grenade.Kind] = []
+	## The kind of field it is carried on (INDOOR or OUTDOOR), &"" for every field.
+	var fields: StringName = &""
+
+	## Whether it is carried on a field of `kind` (INDOOR, OUTDOOR, or &"" for a field of no known kind: any kit).
+	func fits_field(kind: StringName) -> bool:
+		return fields == &"" or kind == &"" or fields == kind
 
 	## Every pool ID it holds: its replicas and what is fitted to them.
 	func items() -> PackedStringArray:
@@ -118,13 +129,14 @@ static func parse(text: String, pool: Pool, known: PackedStringArray = PackedStr
 
 
 ## The kit a bot at `difficulty` carries, drawn by the weights from `seed_value` (Seeds.kit_seed) among the kits whose
-## every item `rules` offers (dev gear only with its Dev content on), leaning towards those that suit its `personality`
-## by `lean` (weights); null (the replicas as they come) when none is weighted above 0.
+## every item `rules` offers (dev gear only with its Dev content on) and that are carried on a field of `field`'s kind
+## (field_kind; &"": any), leaning towards those that suit its `personality` by `lean` (weights); null (the replicas as
+## they come) when none is weighted above 0.
 func pick(difficulty: StringName, rules: LoadoutRules, seed_value: int, personality: StringName = &"",
-		lean: float = 1.0) -> Plan:
+		lean: float = 1.0, field: StringName = &"") -> Plan:
 	var candidates: Array[Plan] = []
 	for k in kits:
-		if k.weights.get(difficulty, 0.0) > 0.0 and offers(rules, k):
+		if k.weights.get(difficulty, 0.0) > 0.0 and k.fits_field(field) and offers(rules, k):
 			candidates.append(k)
 	var w := weights(candidates, difficulty, personality, lean)
 	var total := 0.0
@@ -163,6 +175,14 @@ static func weights(candidates: Array[Plan], difficulty: StringName, personality
 		if not k.suits.is_empty():
 			out[i] *= (lean if k.suits.has(String(personality)) else 1.0) * scale
 	return out
+
+
+## The kind of field (INDOOR or OUTDOOR) `listed` is for the kits' Fields: indoors where no breeze reaches (data/maps.md
+## Wind 0, still air); &"" for a field the catalogue doesn't list.
+static func field_kind(listed: MapCatalog.Entry) -> StringName:
+	if listed == null:
+		return &""
+	return INDOOR if listed.wind <= 0.0 else OUTDOOR
 
 
 ## Whether `rules` offers everything `plan` holds: each replica playable and each item public, or dev with Dev content.
@@ -268,6 +288,10 @@ func _read_row(row: DataTable.Row, pool: Pool, known: PackedStringArray) -> Stri
 		if k != Grenade.Kind.SMOKE and k != Grenade.Kind.FLASH:
 			return "Grenades \"%s\" isn't Smoke or Flash" % bomb
 		plan.bombs.append(k as Grenade.Kind)
+	var fields := row.cell(FIELDS_COLUMN).strip_edges().to_lower()
+	if fields != "" and fields != INDOOR and fields != OUTDOOR:
+		return "Fields \"%s\" isn't %s or %s" % [row.cell(FIELDS_COLUMN), INDOOR, OUTDOOR]
+	plan.fields = StringName(fields)
 	for difficulty: StringName in WEIGHT_COLUMNS:
 		var raw := row.cell(WEIGHT_COLUMNS[difficulty])
 		var w := 0.0 if raw == "" else DataTable.parse_number(raw)
