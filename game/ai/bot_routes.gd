@@ -130,7 +130,7 @@ static func follow(b: Bot, w: BotWorld, dt: float, while_planning: bool = false)
 	var lift := w.nav.lift_leg(b.route_from, wp)
 	if lift >= 0:
 		return BotLifts.ride(b, w, lift, dt)
-	if BotLifts.hold_aboard(b, w):
+	if BotLifts.hold_aboard(b, w, wp):
 		return true
 	var vault := w.nav.is_vault_leg(b.route_from, wp)
 	b.vault_leg = vault and _leg_share(b.route_from, wp, p, 0.0) < 0.5

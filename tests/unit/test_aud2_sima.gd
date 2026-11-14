@@ -167,3 +167,68 @@ func test_a_route_goes_round_a_bush_where_that_is_quicker_and_keeps_round_it() -
 	var bare := NavGrid.build(_bush_field(false, 2.0), tuning.nav, tuning.body)
 	assert_true(bare.find_route(Vector3(-8.0, 0.0, 1.0), Vector3(8.0, 0.0, 1.0), route))
 	assert_eq(route.size(), 1, "one straight leg")
+
+
+# --- A route planned aboard a lift, and the car stopping on the way (KNOWN_ISSUES: out on the wrong floor's leg) ---
+
+
+func test_a_rider_whose_car_stops_on_the_way_plans_again_there_and_walks_out_where_its_route_starts() -> void:
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
+	var level := MapLevel.new()
+	add_child(level)
+	level.build(m, MapStyle.new(), tuning.body, null, null, false, null, tuning.lifts)
+	var nav := NavGrid.build(m, tuning.nav, tuning.body)
+	var config := BotConfig.load_default()
+	NavLifts.link(nav, level.query(), tuning.lifts, tuning.movement.run_speed, config.lift_wait)
+	var q := level.query()
+	var spec := q.lifts[0]
+	assert_eq(spec.stops.size(), 3, "Subway's west lift: platforms, mezzanine, hall")
+	var state := GameState.new(5, tuning)
+	state.characters.append(Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout()))
+	var bots := BotController.new(state, -1, m, nav, q, tuning, config)
+	var w := bots.world
+	w.lifts = LiftState.new()
+	Lifts.new(tuning, q).reset(w.lifts)
+	var b: Bot = w.bots[0]
+	var me := b.character
+	# Riding up from the platforms, making for the hall: the route is planned from the hall's landing.
+	w.lifts.phase[0] = LiftState.Phase.MOVING
+	w.lifts.y[0] = (spec.stops[0] + spec.stops[1]) * 0.5
+	w.lifts.to[0] = 2
+	me.position = spec.car_point(w.lifts.y[0]) + Vector3(0.0, tuning.body.rest_gap, 0.0)
+	var goal := spec.landing_point(2, tuning.lifts) + Vector3(-3.0, 0.0, -3.0)
+	assert_true(nav.find_route(me.position, goal, b.route, true, w.lifts))
+	assert_almost_eq(b.route[0].y, spec.stops[2], tuning.body.max_step, "from the hall's landing")
+	b.route_from = me.position
+	b.route_leg = 0
+	b.route_state = Bot.RouteState.OK
+	assert_true(BotRoutes.follow(b, w, DT), "aboard while it rides")
+	assert_eq(b.move_dir, Vector3.ZERO, "standing")
+	# The car stops at the mezzanine on the way (called meanwhile) and opens there.
+	w.lifts.phase[0] = LiftState.Phase.OPEN
+	w.lifts.stop[0] = 1
+	w.lifts.y[0] = spec.stops[1]
+	w.lifts.to[0] = -1
+	me.position = spec.car_point(spec.stops[1]) + Vector3(0.0, tuning.body.rest_gap, 0.0)
+	assert_true(BotRoutes.follow(b, w, DT))
+	assert_eq(b.move_dir, Vector3.ZERO, "it doesn't walk out on the mezzanine on the hall's leg")
+	assert_eq(b.route_state, Bot.RouteState.WANTED, "it wants its route again from here")
+	assert_true(nav.find_route(me.position, goal, b.route, true, w.lifts))
+	assert_almost_eq(b.route[0].y, spec.stops[1], tuning.body.max_step, "now from the mezzanine's landing")
+	b.route_from = me.position
+	b.route_leg = 0
+	b.route_state = Bot.RouteState.OK
+	assert_true(BotRoutes.follow(b, w, DT))
+	assert_ne(b.move_dir, Vector3.ZERO, "and walks out onto it, as its route says")
+	# Open where its route starts, it walks straight out.
+	w.lifts.stop[0] = 2
+	w.lifts.y[0] = spec.stops[2]
+	me.position = spec.car_point(spec.stops[2]) + Vector3(0.0, tuning.body.rest_gap, 0.0)
+	assert_true(nav.find_route(me.position, goal, b.route, true, w.lifts))
+	b.route_from = me.position
+	b.route_leg = 0
+	b.route_state = Bot.RouteState.OK
+	assert_true(BotRoutes.follow(b, w, DT))
+	assert_ne(b.move_dir, Vector3.ZERO, "out at the hall")
+	assert_eq(b.route_state, Bot.RouteState.OK)
+	level.free()
