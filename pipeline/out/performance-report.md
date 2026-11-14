@@ -1,18 +1,16 @@
-Task: HA1 · head 9f3de58 · Verdict: Pass
-Run: no Godot run (QA holds it); arms.glb measured statically from its glTF JSON · budget: docs/CC0_ASSETS.md > Size limits (no perf-budget.json lines), compared with attempt 3 (ef9d94f)
-Metrics (measured, now / attempt 3 / limit):
-- File size 6.48 MB / 6.48 MB / 8 MB (ok)
-- Materials 4 / 4 / 4 (ok)
-- Images 9 / 9 / 2K (unchanged; git shows only arms.glb changed under assets/models/arms)
-- Triangles drawn, gloved: 38,900 / 38,900 / 40,000 (ok; Arm 2x2976 + GloveKit 2x2824 + HandSurface 2x13650)
-- Triangles drawn, bare: 34,452 / 34,452 / 40,000 (ok; Arm + Skin 2x13650 + Nails 2x600)
-- Mesh objects 10, index counts identical to attempt 3
-- Clips 28 / 28; sampler key data 31,887 keys (small, no growth in file size)
+Task: HA1 · head db5afd5 · Verdict: Pass
+Run: static only (no Godot run, per brief; glTF JSON of both files read) · budget: docs/CC0_ASSETS.md Size limits; perf-budget.json has no lines (no baseline yet), judged against those limits and attempt 4 (9f3de58)
+Metrics (now / attempt 4 / limit):
+- arms.glb size 6,477,004 B (6.18 MB) / 6,476,164 B / 8 MB (ok, +840 B)
+- Materials 4 / 4 / 4 (ok); images 9 / 9 (2K limit unchanged, no image touched)
+- Triangles, gloved look (Arm 2976 + GloveKit 2824 + HandSurface 13650, x2 sides): 38,900 / 38,900 / 40,000 (ok, 97 %)
+- Triangles, bare look (Arm 2976 + Skin 13650 + Nails 600, x2): 34,452 / 34,452 / 40,000 (ok)
+- Per-mesh triangle counts identical to attempt 4 (10 meshes, 67,400 total, only 2 looks drawn at once)
+- Clips 28 / 28; animation keys 31,887 / 31,887 (re-bake changed values, not counts)
 Regressions (> 10 % worse): none
 Blocking findings: none
-Advisory: none
-- Diff since ef9d94f touches no runtime code of HA1: the only file under assets/ is the rebuilt arms.glb (re-baked left-hand finger poses); tools/blender/arms/*.py are build tools (not shipped); test_ha1_rifle_hold.gd is test only (CPU vertex loops, run only in GUT, not in game).
-- game/ changes in the range (ui/hud*, weapon_rail, replica_pictures) come from the merged origin/main work (PB3, AU11), reviewed by their own threads; not reviewed here.
-- No new material, particle or shader, so no prewarm entry is needed; no preset bypass.
-Fixes: none needed
-Unexplained: none. Frame time, draw calls, orphan nodes and static memory were not measured (no Godot run allowed); nothing in the delta can move them, since mesh, material and image data are unchanged.
+Advisory:
+- tests/unit/test_ha1_qa4.gd, test_ha1_qa5.gd, test_ha1_qa3.gd: CPU vertex and bone loops, test only, not shipped (judgment).
+- tools/blender/arms/{pose,hold_solve,hold_tables,sight}.py: build tools, not shipped (judgment).
+- No file under game/ changed, so no new per-frame or per-tick allocation, node, resource, prewarm or preset path (measured by diff stat).
+Unexplained: none
