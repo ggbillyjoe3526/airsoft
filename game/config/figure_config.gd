@@ -103,9 +103,9 @@ extends Resource
 @export var aim_pitch: float = PI / 3.0
 @export var aim_reach: float = 0.55
 ## Muzzle up at a wall (FB5): armed, the rifle reaches about 0.72 m ahead (a pistol 0.6 m) of the 0.32 m body, so with
-## level geometry within raise_reach_rifle (raise_reach_pistol) along the aim, from raise_drop below the eyes, the
-## drawn upper body blends to a high ready by how close it is, fully raised at raise_full (m): the aim clips to level,
-## the spine leant raise_lean (rad) back, and the replica (FigureReady) turned raise_angle (rad) muzzle up about the
+## level geometry within raise_reach_rifle (raise_reach_pistol) along the aim, from raise_drop_rifle (raise_drop_pistol)
+## below the eyes, the drawn upper body blends to a high ready by how close it is, fully raised at raise_full (m): the
+## aim clips to level, the spine leant raise_lean (rad) back, and the replica (FigureReady) turned raise_angle (rad) muzzle up about the
 ## grip, canted raise_cant (rad, the magazine out to the right) and drawn raise_back and raise_down (m) in to the chest,
 ## the arms (raise_arm_bones: upper arm, forearm, hand, an arm at a time, the right arm first) reaching for it. The ray
 ## looks raise_lead (s) ahead at the figure's speed, once every raise_stride poses; the blend settles in settle_raise
@@ -114,7 +114,11 @@ extends Resource
 @export var raise_reach_rifle: float = 1.25
 @export var raise_reach_pistol: float = 0.7
 @export var raise_full: float = 0.35
-@export var raise_drop: float = 0.2
+## The ray runs at the replica's lowest point over cover (AUD2): a shouldered rifle's underside 1.386 m off the floor
+## standing, 0.234 m under the 1.62 m eyes, a pistol's 1.41 m (measured in test_aud2_simb), so a top just under the
+## eyes' line still raises a rifle before its magazine meets it.
+@export var raise_drop_rifle: float = 0.24
+@export var raise_drop_pistol: float = 0.2
 @export var raise_lead: float = 0.1
 @export var raise_stride: int = 2
 @export var settle_raise: float = 0.08

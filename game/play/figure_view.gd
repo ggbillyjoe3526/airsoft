@@ -588,7 +588,8 @@ func _raise_target(c: Character) -> float:
 func _raise_share(cfg: FigureConfig) -> float:
 	var yaw := rotation.y
 	var h := Character.eye_height(_pose.crouch, _body_config)
-	var from := _pose.feet + Vector3(0.0, h - cfg.raise_drop, 0.0) \
+	var drop := lerpf(cfg.raise_drop_rifle, cfg.raise_drop_pistol, _pose.pistol)
+	var from := _pose.feet + Vector3(0.0, h - drop, 0.0) \
 			+ Lean.offset(h, _pose.lean, _pose.crouch, yaw, _hits)
 	var cp := cos(_pose.pitch)
 	var way := Vector3(-sin(yaw) * cp, sin(_pose.pitch), -cos(yaw) * cp)

@@ -256,3 +256,55 @@ func test_a_swinger_in_flight_is_swept_by_the_bbs_path() -> void:
 	assert_eq(out.index, 0)
 	assert_false(out.post)
 	assert_almost_eq(out.at, 2.0, 1e-3, "on its face")
+
+
+# --- KNOWN_ISSUES 84: a rifle over a top just under the wall ray ---
+
+
+## The lowest point (m) of the held replica's vertices over the cover (z under `face`), and how many lie under `top`,
+## for a standing figure holding replica `slot` 3 cm behind a `top` m wall, firing or not.
+func _over_cover(slot: int, top: float, fire: bool) -> Vector3:
+	var cfg := FigureConfig.new()
+	var models := FigureModels.new(cfg)
+	models.load_kinds()
+	var c := Character.new(1, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
+	c.grounded = true
+	c.armament.active = slot
+	var face := -tuning.body.radius - 0.03
+	var world := BoxWorld.new(tuning.body)
+	world.add_box(Vector3(0.0, top * 0.5, face - 0.6), Vector3(3.0, top, 1.2))
+	var v := FigureView.new()
+	add_child_autofree(v)
+	v.setup(c, Color.RED, tuning.hits, null)
+	v.set_body(models, FigureMix.HUMAN, cfg.lod_high)
+	v.set_world(world, tuning.body)
+	for i in 24:
+		if fire:
+			v.on_shot()
+		v.update(c, 1.0)
+		v.animate(c, 1.0, DT, Vector3(0.0, 1.6, 5.0))
+		await wait_process_frames(1)
+	var held := v.body().hands.replica(slot)
+	var faces := held.mesh.get_faces()
+	var low := INF
+	var under := 0
+	for p in faces:
+		var w := held.global_transform * p
+		if w.z < face:
+			low = minf(low, w.y)
+			under += int(w.y < top)
+	return Vector3(v._pose.raise_target, low, under)
+
+
+func test_a_rifle_over_a_1_4_m_top_is_raised_clear_and_lifts_clear_firing() -> void:
+	var cfg := FigureConfig.new()
+	var level: Vector3 = await _over_cover(0, 1.3, false)
+	assert_eq(level.x, 0.0, "a 1.3 m top is under the rifle: no raise")
+	assert_eq(int(level.z), 0)
+	var idle: Vector3 = await _over_cover(0, 1.4, false)
+	assert_eq(idle.x, 1.0, "the second ray meets a 1.4 m top under the first: the high ready")
+	assert_eq(int(idle.z), 0, "nothing of the rifle in the top")
+	var firing: Vector3 = await _over_cover(0, 1.4, true)
+	assert_almost_eq(firing.x, cfg.raise_fire_most, 1e-6, "firing, lifted only the approved share")
+	assert_eq(int(firing.z), 0, "and that lifts it clear of a 1.4 m top")
+	assert_gt(firing.y, 1.4)
