@@ -62,7 +62,8 @@ you can skip. The trigger held as you were hit doesn't skip: let go and click ag
 Don't want to wait? Turn on **Simulate skipped rounds** in [Settings](Settings#gameplay) (it starts off). While the
 round is skipping, a **SIMULATE** button and the pointer show above the countdown: click the button and the round
 is decided at once instead of played out (a second click elsewhere doesn't, so a double click never simulates). The side with more players still in has the better chance, and attackers who
-already have their flag part way up get a boost. The result says **Simulated**.
+already have their flag part way up get a boost. The result says **Simulated**. A simulated round counts for the
+score, but gives no XP and counts for no records: its Round won, and its hits and BBs, are left out.
 
 ## BBs are real projectiles
 

@@ -387,3 +387,53 @@ func test_your_own_run_with_a_rattling_magazine_plays_the_rattle_with_the_step()
 		for v in audio._own:
 			rattled = rattled or (v.playing and rattle.has(v.stream))
 		assert_eq(rattled, slot >= 0, "the rattle with the step only with a rattling magazine (slot %d)" % slot)
+
+
+# --- KNOWN_ISSUES 58 (owner 2026-11-14): a simulated round keeps its score, gives no XP and sets no records ---
+
+
+func _tick_events(state: GameState, list: Array) -> void:
+	state.events.clear()
+	for spec: Array in list:
+		var e := state.events.add(spec[0])
+		e.actor = spec[1]
+		e.target = spec[2]
+		e.value = spec[3]
+		e.value2 = spec[4] if spec.size() > 4 else 0
+
+
+func test_a_simulated_round_gives_no_round_won_and_its_hits_and_bbs_count_for_nothing() -> void:
+	var state := GameState.new(1)
+	var me := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
+	var them := Character.new(1, 1, Vector3.ZERO, 0.0, loadout)
+	state.characters.append_array([me, them])
+	var tally := PlayerTally.new(0)
+	var played := GameEvent.RoundEnd.ELIMINATED
+	# Round 1, played out and won: one shot, one hit.
+	_tick_events(state, [[GameEvent.Kind.ROUND_START, -1, -1, 1], [GameEvent.Kind.SHOT, 0, -1, 0],
+			[GameEvent.Kind.CHARACTER_HIT, 0, 1, 0]])
+	tally.on_tick(state)
+	_tick_events(state, [[GameEvent.Kind.ROUND_OVER, -1, -1, 0, played]])
+	tally.on_tick(state)
+	# Round 2: two shots and a hit, then out, skipped and simulated as a win for your team.
+	_tick_events(state, [[GameEvent.Kind.ROUND_START, -1, -1, 2], [GameEvent.Kind.SHOT, 0, -1, 0],
+			[GameEvent.Kind.SHOT, 0, -1, 0], [GameEvent.Kind.CHARACTER_HIT, 0, 1, 0]])
+	tally.on_tick(state)
+	me.status = Character.Status.OUT
+	_tick_events(state, [[GameEvent.Kind.ROUND_OVER, -1, -1, 0, GameEvent.RoundEnd.SIMULATED],
+			[GameEvent.Kind.MATCH_OVER, -1, -1, 0]])
+	tally.on_tick(state)
+	assert_eq([tally.hits, tally.bbs_fired, tally.rounds_won], [1, 1, 1], "only the round played out counts")
+	assert_true(tally.is_over(), "the match still ends")
+	var table := LevelTable.read_file(Pool.read_file())
+	var p := Progress.new(table)
+	var r := Records.new()
+	var s := tally.settle(p, r, false, 0, 5, "elimination", &"normal", &"normal")
+	assert_not_null(s.earned, "the match settles and gives its XP")
+	var round_won := 0
+	for line in s.earned.lines:
+		if line.key == &"round_won":
+			round_won = line.count
+	assert_eq(round_won, 1, "Round won only for the round played out")
+	assert_eq(r.win_loss(&"normal", "elimination"), PackedInt32Array([1, 0]), "the match's win is kept: its score counts")
+	assert_eq(r.streak, 1)
