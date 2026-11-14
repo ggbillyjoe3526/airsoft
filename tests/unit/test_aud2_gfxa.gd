@@ -50,3 +50,12 @@ func test_the_eye_pictures_light_the_station_as_a_match_does() -> void:
 	assert_string_contains(tool, "GraphicsApply.apply_station(values, lifts, station_fixtures)")
 	var session := FileAccess.get_file_as_string("res://game/play/play_session.gd")
 	assert_string_contains(session, "GraphicsApply.apply_station(values, _lifts, _station_fixtures)")
+
+
+func test_the_eye_pictures_light_an_underground_field_and_dress_a_station_as_a_match_does() -> void:
+	# Without set_underground the pictures lit Subway with the sky's ambient light, so its plant room's props, black in
+	# a match on High, drew lit (AUD2 row 19); and they stood a model in every box, unpainted.
+	var tool := FileAccess.get_file_as_string("res://tools/eye_pictures.gd")
+	assert_string_contains(tool, "lighting.set_underground(map.roof_underground)")
+	assert_string_contains(tool, "PropDress.build(map, cfg, play.site_look.prop_paint)")
+	assert_string_contains(tool, "play.site_look.props.named_only() if station")

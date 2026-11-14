@@ -84,6 +84,8 @@ func _run() -> void:
 	level.set_baked_light(true)
 	play.look.push_globals()
 	var lighting := FieldLighting.build(sun, play.look)
+	# Underground (UL1: no sky in the ambient light or the reflections), as a match lights it.
+	lighting.set_underground(map.roof_underground)
 	lighting.add_probes(map)
 	port.add_child(lighting)
 	var site := SiteDress.build(map, play.site_look, level.site_material(), play.skyline)
@@ -95,7 +97,7 @@ func _run() -> void:
 	if roof != null:
 		port.add_child(roof)
 	# An outdoor field's props, wood and bushes as a match draws them on High (WR3: Woodland's pictures).
-	add_woods(port, map, play)
+	add_woods(port, map, play, level.station_material() != null)
 	# What its lights stand on or hang from (WG4), and with `night` their pools of light.
 	var fixtures := LightFixtures.build(map, play.light_fixtures, sun)
 	if fixtures != null:
@@ -199,9 +201,11 @@ func _run() -> void:
 
 
 ## The map's wood as a match draws it on High by day (WoodsView: crowns, the forest, tufts, puddles and the floor), its
-## bushes (BushView) and, with no site dress, its CC0 props (PropDress, WR3), each if it has them.
-static func add_woods(port: Node, map: MapData, play: PlayTuning) -> void:
-	var props := PropDress.build(map, play.site_look.props) if map.site == null else null
+## bushes (BushView) and, with no site dress, its CC0 props (PropDress, WR3) in their paints, each if it has them; on
+## a station (`station`) only the models its blocks name (SD1), as PlaySession dresses it (not yet its trains, SM1).
+static func add_woods(port: Node, map: MapData, play: PlayTuning, station: bool = false) -> void:
+	var cfg := play.site_look.props.named_only() if station else play.site_look.props
+	var props := PropDress.build(map, cfg, play.site_look.prop_paint) if map.site == null else null
 	if props != null:
 		port.add_child(props)
 	var woods := WoodsView.build(map, play.woods, play.skyline, play.lighting, play.map_style)
