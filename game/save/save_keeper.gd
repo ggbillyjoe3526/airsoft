@@ -139,9 +139,8 @@ func replace(bundle: SaveBundle, what: What) -> bool:
 	if current.refusal() != "":
 		return _fail("the save now holds a store from a newer version (%s); this build won't replace it" % current.refusal(),
 				Refusal.HOLDS_NEWER)
-	for kind: String in current.damaged:
-		push_warning("save: %s is damaged; set aside before it is replaced" % kind)
-		SaveFile.quarantine(store_paths[SaveBundle.KINDS.find(kind)])
+	# The copies as they are, a damaged store's too, before anything moves: a refusal below then leaves the save
+	# exactly as it was found (a damaged store still in its place, so the next start still says it is damaged).
 	var snaps: Array[SaveFile.Snapshot] = []
 	for path: String in store_paths:
 		snaps.append(SaveFile.snapshot(path))
@@ -153,6 +152,10 @@ func replace(bundle: SaveBundle, what: What) -> bool:
 		var slot := {"what": WHAT_NAMES[what], "taken_at": _now(), "save": current.to_dict()}
 		if not SaveFile.write(undo_path, UNDO_KIND, UNDO_VERSION, slot):
 			return _fail("the save couldn't be kept for Undo", Refusal.NOT_WRITTEN)
+	# Only now, with nothing left that can refuse before the stores are written: a damaged store goes aside.
+	for kind: String in current.damaged:
+		push_warning("save: %s is damaged; set aside before it is replaced" % kind)
+		SaveFile.quarantine(store_paths[SaveBundle.KINDS.find(kind)])
 	if not bundle.write(store_paths) or (what == What.UNDO and not SaveFile.remove(undo_path)):
 		var back := true
 		for snap: SaveFile.Snapshot in snaps:
