@@ -30,6 +30,11 @@ items on those topics are held for them.
   roll of the skill's dodge chance inside 16 m. You, on a bot's team, get the call in the feed and look away yourself.
   Tests: three in `tests/unit/test_pp1_balance_qa.gd` (two more by QA), one in `tests/unit/test_callouts.gd`. The
   bots' five copies of the same character lookup became one, `BotWorld.character` (the critic's ask).
+- **Found by CI on the pull request:** a Depot Normal match (seed 4) had a bot shoot a teammate standing still 9 m off,
+  past a doorway's edge 1.5 m ahead: its line-of-fire check took the wall as stopping a miss, but the BB left from
+  where the tick's step (4 cm, strafing) took its eye, just past the edge. The wall-edge probes now stand as far to
+  either side as that step (`BotCombat._friendly_reach`). Test: `tests/unit/test_bc1_line_of_fire.gd`; the match
+  now has no teammate hit. The callouts' pace guard also learnt that Flash out may cut into the gaps.
 - **Checked without play** (below): every mechanical claim was matched to the tests that hold it (all green on `main`
   at a8e9863, CI run 43660324307), and where none did, checked fresh: whole bot matches, a load of every map by day
   and night on the simpler renderer, pictures of every menu, and the code.
