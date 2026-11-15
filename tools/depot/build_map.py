@@ -55,12 +55,12 @@ def block(kind: str, x1: float, y1: float, z1: float, x2: float, y2: float, z2: 
 
 
 def blocks() -> list[dict]:
-    out = [block("floor", -L.W, -0.5, -L.H, L.W, 0.0, L.H)]
+    out = [block("floor", L.X_WEST, -0.5, -L.H, L.W, 0.0, L.H)]
     # The hall's shell, up to the roof.
     t = 0.5
-    out.append(block("wall", -L.W - t, 0, -L.H - t, L.W + t, L.ROOF, -L.H))
-    out.append(block("wall", -L.W - t, 0, L.H, L.W + t, L.ROOF, L.H + t))
-    out.append(block("wall", -L.W - t, 0, -L.H, -L.W, L.ROOF, L.H))
+    out.append(block("wall", L.X_WEST - t, 0, -L.H - t, L.W + t, L.ROOF, -L.H))
+    out.append(block("wall", L.X_WEST - t, 0, L.H, L.W + t, L.ROOF, L.H + t))
+    out.append(block("wall", L.X_WEST - t, 0, -L.H, L.X_WEST, L.ROOF, L.H))
     out.append(block("wall", L.W, 0, -L.H, L.W + t, L.ROOF, L.H))
     boxes: list[list] = []
     for p in L.pieces:
@@ -262,7 +262,7 @@ def build() -> dict:
         "spawns": [[spot(x, z, EYE_FACING_EAST) for x, z in L.SPAWNS_W],
                    [spot(x, z, EYE_FACING_WEST) for x, z in L.SPAWNS_E]],
         "deadZones": [dead_zone(*L.DEAD_W, EYE_FACING_EAST), dead_zone(*L.DEAD_E, EYE_FACING_WEST)],
-        "lanes": [[{"x": x, "y": 0, "z": z} for x, z in L.LANES[k]] for k in ("n", "m", "s")],
+        "lanes": [[{"x": x, "y": 0, "z": z} for x, z in L.LANES[k]] for k in L.LANE_ORDER],
         "flags": [{"x": x, "y": 0, "z": z} for x, z in L.FLAGS],
         "bombSites": [bomb_site(*s) for s in L.BOMB_SITES],
         "overtimeFlag": {"x": L.OT_FLAG[0], "y": 0, "z": L.OT_FLAG[1]},
