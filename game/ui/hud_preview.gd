@@ -62,7 +62,7 @@ func _init() -> void:
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = Vector2(0.0, HEIGHT)
-	var tag := MenuTag.make(HudStyle.caps("SETTINGS_PREVIEW"), GameTheme.ACCENT_INK, GameTheme.ACCENT, GameTheme.ACCENT)
+	var tag := MenuTag.make(HudStyle.caps("SETTINGS_PREVIEW"), GameTheme.accent_ink, GameTheme.accent, GameTheme.accent)
 	tag.position = Vector2(EDGE, EDGE)
 	add_child(tag)
 	_hit_chip = _chip("SETTINGS_PREVIEW_HIT")
@@ -99,7 +99,7 @@ func _init() -> void:
 	_ghost_tag.text = HudStyle.caps("SETTINGS_PREVIEW_DASHED")
 	_ghost_tag.add_theme_stylebox_override("normal", HudStyle.panel_box(GHOST_TAG_BACKING, GHOST_TAG_PAD.x,
 			GHOST_TAG_PAD.y))
-	_size_tag = MenuTag.make("", GameTheme.ACCENT_INK, GameTheme.ACCENT, GameTheme.ACCENT)
+	_size_tag = MenuTag.make("", GameTheme.accent_ink, GameTheme.accent, GameTheme.accent)
 	_size_tag.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, EDGE)
 	_size_tag.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	add_child(_size_tag)

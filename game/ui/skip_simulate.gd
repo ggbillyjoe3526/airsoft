@@ -22,7 +22,7 @@ func _init() -> void:
 	_button.name = "Simulate"
 	_button.text = tr("HUD_SIMULATE").to_upper()
 	_button.focus_mode = Control.FOCUS_NONE
-	GameTheme.small_button(_button, GameTheme.ACCENT)
+	GameTheme.small_button(_button, GameTheme.accent)
 	_button.pressed.connect(func() -> void: simulate_pressed.emit())
 	add_child(_button)
 

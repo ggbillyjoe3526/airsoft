@@ -141,7 +141,7 @@ func set_level(level: int, into: float = 0.0, levelling_off: bool = false) -> vo
 	_level.text = tr("MENU_LEVEL_SHORT") % maxi(0, level)
 	_level_fill.custom_minimum_size.x = LEVEL_BAR.x * clampf(into, 0.0, 1.0)
 	_level.add_theme_color_override("font_color", GameTheme.DIM if levelling_off else GameTheme.TEXT)
-	_level_fill.color = GameTheme.DIM if levelling_off else GameTheme.ACCENT
+	_level_fill.color = GameTheme.DIM if levelling_off else GameTheme.accent
 	_level_box.tooltip_text = tr("MENU_LEVEL_OFF_TIP") if levelling_off else ""
 
 
@@ -180,7 +180,7 @@ func _build_tab(tab: Tab) -> Control:
 	# rule anchored top to bottom before the button had a size pushed it RULE_INSET past the card's foot)
 	var rule := ColorRect.new()
 	rule.name = "Rule"
-	rule.color = GameTheme.ACCENT
+	rule.color = GameTheme.accent
 	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rule.anchor_top = 0.0
 	rule.anchor_bottom = 1.0
@@ -243,11 +243,11 @@ func _build_back() -> Button:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.add_theme_constant_override("separation", BACK_GAP)
-	var words := MenuParts.head_text(tr("MENU_BACK_TO_PRACTICE"), BACK_SIZE, 700, GameTheme.ACCENT_INK, TAB_SPACING)
+	var words := MenuParts.head_text(tr("MENU_BACK_TO_PRACTICE"), BACK_SIZE, 700, GameTheme.accent_ink, TAB_SPACING)
 	words.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	words.autowrap_mode = TextServer.AUTOWRAP_WORD
 	column.add_child(words)
-	var cap := MenuParts.key_chip(KeyNames.of_action(&"loadout"), BACK_KEY_SIZE, GameTheme.ACCENT_INK, BACK_KEY_PAD)
+	var cap := MenuParts.key_chip(KeyNames.of_action(&"loadout"), BACK_KEY_SIZE, GameTheme.accent_ink, BACK_KEY_PAD)
 	cap.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_back_key = cap.get_child(0) as Label
 	column.add_child(cap)
@@ -284,7 +284,7 @@ func _build_level() -> VBoxContainer:
 	track.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	track.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_level_fill = ColorRect.new()
-	_level_fill.color = GameTheme.ACCENT
+	_level_fill.color = GameTheme.accent
 	_level_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_level_fill.anchor_bottom = 1.0
 	track.add_child(_level_fill)

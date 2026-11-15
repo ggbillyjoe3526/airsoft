@@ -11,8 +11,8 @@ func test_an_off_switch_is_a_quiet_grey_outline_with_no_fill() -> void:
 	assert_eq(off[1], GameTheme.DIM, "a grey knob")
 	assert_eq(off[2], GameTheme.DIM, "a grey outline")
 	var on := MenuSwitch.colours(true, false, false)
-	assert_eq(on[0], GameTheme.ACCENT)
-	assert_eq(on[1], GameTheme.ACCENT_INK)
+	assert_eq(on[0], GameTheme.accent)
+	assert_eq(on[1], GameTheme.accent_ink)
 	var dim := MenuSwitch.colours(false, false, true)
 	assert_lt(dim[2].a, off[2].a, "a greyed switch is fainter still")
 

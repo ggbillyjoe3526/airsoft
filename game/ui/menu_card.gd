@@ -15,7 +15,7 @@ const SPOKEN_JOIN := ", "
 
 var fill: Color = GameTheme.CARD
 var picked_fill: Color = GameTheme.CARD_HI
-var accent: Color = GameTheme.ACCENT
+var accent: Color = GameTheme.accent
 var ring: bool = false
 ## The left bar's colour (transparent: none), and how much of it shows while the card isn't picked.
 var bar: Color = Color(0.0, 0.0, 0.0, 0.0)

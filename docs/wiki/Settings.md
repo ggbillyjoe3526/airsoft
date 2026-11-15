@@ -42,6 +42,8 @@ is from a long way off; a silenced replica carries half as far.
   the game drops to 30 frames a second. The menus never draw more frames than your screen shows, whatever
   the limit.
 - **Field of view** (87° by default, 70° to 110°) and **Show FPS** (the figure sits in the bottom-right corner).
+- **Interface colour:** the colour of the main buttons, what you have picked and the comms wheel's lit button: blue
+  (the default), beige, red, green, pink, orange or violet. The menus change as you click. Team colours don't change.
 
 ## Graphics
 

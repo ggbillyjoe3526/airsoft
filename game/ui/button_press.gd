@@ -80,7 +80,7 @@ func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	visible = false
 	_box = GameTheme.focus_box()
-	_box.border_color = GameTheme.ACCENT
+	_box.border_color = GameTheme.accent
 	_box.set_border_width_all(RING_WIDTH)
 	_box.set_expand_margin_all(RING_GAP + RING_WIDTH)
 
