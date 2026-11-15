@@ -522,11 +522,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 ## Bots and balance
 
 - **The audit's play questions (owner, 2026-11-14, AUD1).** Bots keep squeezing past Subway's works wagons on the
-  track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a
-  6 s defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots
-  only. (The fuse is replaced by each field's own on 2026-11-15, PB4, below.) A holstered bot's arms swing as it steps, a switch between two replicas of one class plays its own put-away
-  and draw, and a slow-sprung Sniper Rifle's bolt is home with the recording's last knock: looks only, the timing of
-  a shot or a switch is unchanged.
+  track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a 6 s
+  defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots only.
+  (The fuse is replaced by each field's own on 2026-11-15, PB4, below.) A holstered bot's arms swing as it steps, a
+  switch between two replicas of one class plays its own put-away and draw, and a slow-sprung Sniper Rifle's bolt is
+  home with the recording's last knock: looks only, the timing of a shot or a switch is unchanged.
 - **Plant The Bomb's fuse is each field's own (owner's ask, 2026-11-15, PB4; the values are Claude's).** He asked for
   the attackers' win rate to be made fairer. The fuse is the lever (data/maps.md `Fuse (s)`, the game's 30 s where a
   field has none), set from bot matches to near half the rounds for the attackers: Depot 16 s, Subway 22 s, Woodland 23

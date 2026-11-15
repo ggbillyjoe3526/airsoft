@@ -1,6 +1,6 @@
 # PB4 · Plant The Bomb: a fuse for each field
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 The owner's ask (2026-11-15): "Balance plant the bomb attackers win rate so it's more fair." The Dev 3 audit
 (AUDIT_REPORT.md 10.4) had the attackers at 37.9 % on Depot and 37.2 % on Woodland, under the 40 to 65 % band, with the
@@ -10,7 +10,7 @@ fuse 30 s and the defuse 6 s on every field.
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (lint, wiki, touched unit files; the rest in CI) | 7/8 Accept | – (check 8: the record's Hard placeholder and seed count, a decision line over 120 columns; fixed) |
 
 ## What the bots showed
 
@@ -34,15 +34,16 @@ MatchRunner, as `tools/balance.sh` plays Plant The Bomb, with the fuse set per r
 | **Stockade** | **20 s** | **40.3 % ±3.2** (94 of 233) | 48 % | 67 % | 7 |
 | Stockade | 17 s | 40.4 % ±3.2 | 46 % | 72 % | 16 |
 
-At Hard (16 seeds; band 40 to 60 %) with the new fuses: Depot 42.1 % ±4.5, Woodland 58.4 % ±4.9 (14 seeds), Subway
-HARD_SUBWAY.
+At Hard (16 seeds; band 40 to 60 %) with the new fuses: Depot 42.1 % ±4.5 (armed in 50 % of rounds), Woodland 56.4 %
+±4.6, Subway 58.3 % ±4.4 (the same 58.3 % at 30 s: the fuse doesn't move Subway at Hard). All three are in the band,
+Depot and Subway near its two ends.
 
-Why the fuse: with 30 s an armed bomb was settled by the fight long before the fuse mattered. A defuse came a median
-16 s after the plant on Depot, 21 s on Woodland, 13.5 s on Subway and 15 s on Stockade, nearly always once the last
-attacker was out (PB1's finding). A fuse near that time makes the defenders win the fight *and* reach the bomb in
-time, so the attackers holding the site are worth something. The attackers who never arm the bomb almost never win
-(1 of 74 such rounds on Depot, 7 of 74 on Woodland, 4 of 40 on Subway), so the fuse moves only the armed rounds, and the share of
-rounds armed stays where it was on every field.
+Why the fuse: with 30 s an armed bomb was settled by the fight long before the fuse mattered. A defuse came a median 16
+s after the plant on Depot, 21 s on Woodland, 13.5 s on Subway and 15 s on Stockade, nearly always once the last
+attacker was out (PB1's finding). A fuse near that time makes the defenders win the fight *and* reach the bomb in time,
+so the attackers holding the site are worth something. The attackers who never arm the bomb almost never win (1 of 74
+such rounds on Depot, 7 of 74 on Woodland, 4 of 40 on Subway), so the fuse moves only the armed rounds, and the share
+of rounds armed stays where it was on every field.
 
 ## Decisions
 
@@ -59,6 +60,15 @@ rounds armed stays where it was on every field.
 - **A defending player still has time.** Within BotConfig.plant_player_claim (15 m) of the bomb no bot defuses until the
   fuse leaves the defuse plus plant_takeover_margin (4 s): on Depot's 16 s that is 6 s to come and start, against a
   2.4 s sprint from 15 m (`test_pb4_fuse` holds every field to it).
+- **A defender at the far site has a race, not a sure thing.** On Depot the sites are 53 m apart in a straight line:
+  a sprint there takes about 9 to 10 s of the 16 s, leaving the 6 s defuse with nothing to spare unless they set off
+  while the bomb is being keyed in (3.5 s, heard within the bots' hearing of it). That is the same bargain as a
+  rotate in any bomb game, and it is the first play check (docs/PLAYTEST.md › PB4). Woodland's sites are 77 m apart:
+  about 13 s of its 23 s.
+- **What moved:** the share of rounds armed barely changed (Depot 70 % to 67 %); the attackers now win more of the
+  rounds they arm (Depot 53 % to 76 %, with 46 bombs going off in 239 rounds where 1 did). The balance comes from a
+  plant being harder to undo, not from reaching the site more often: the map redesign work is where reaching it
+  changes.
 - **The Match page says the field's fuse** under the rules whenever Plant The Bomb is picked ("An armed bomb goes off
   after 16 s on this field."): every field now has its own, so the note doesn't name "the others". The wiki's Maps
   table gains a Bomb fuse column.
