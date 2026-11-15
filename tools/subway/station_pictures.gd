@@ -78,6 +78,7 @@ const EXTRA_SHOTS: Array[Array] = [
 	["stair-top-pipe-bulkhead", Vector3(24.5, 10.6, -6.0), Vector3(20.0, 12.2, -9.5)],
 	["hall-clock-street-wall", Vector3(-50.5, 10.8, 2.0), Vector3(-55.0, 12.0, 4.5)],
 	["pipe-end-from-concourse", Vector3(-15.5, 10.6, -7.0), Vector3(-18.5, 12.2, -9.7)],
+	["pipe-end-south-from-concourse", Vector3(-15.5, 10.6, 7.0), Vector3(-18.5, 12.2, 9.7)],
 ]
 ## The trains' pictures (SM1), with `trains` as the third argument instead of the station's.
 const TRAIN_SHOTS: Array[Array] = [

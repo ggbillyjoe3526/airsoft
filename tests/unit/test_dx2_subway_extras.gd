@@ -170,3 +170,23 @@ func _solid(m: MapData, p: Vector3) -> bool:
 		if AABB(b.center - b.size * 0.5, b.size).has_point(p):
 			return true
 	return false
+
+
+func test_the_end_length_s_pipes_are_capped_at_both_ends() -> void:
+	# pipe_run_1 finishes a run either way round (north walls end at its far end, south walls at its origin), and past
+	# the concourse's 0.5 m return its front stands open to view: each of its seven pipes and cables needs a cap at
+	# each end (at least 40 triangles flat in each end's plane: 4 cables of 4, 2 claddings of 8, the main's 8)
+	var mesh := PropDressConfig.load_mesh(play.station_fixtures.path_of(&"pipe_run_1"))
+	var flat := [0, 0]
+	for s in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(s)
+		var pos: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var index: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		for t in index.size() / 3:
+			for e in 2:
+				var x := float(e)
+				if absf(pos[index[t * 3]].x - x) < 0.001 and absf(pos[index[t * 3 + 1]].x - x) < 0.001 \
+						and absf(pos[index[t * 3 + 2]].x - x) < 0.001:
+					flat[e] += 1
+	assert_gte(flat[0], 40, "capped at its origin")
+	assert_gte(flat[1], 40, "capped at its far end")

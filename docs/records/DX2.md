@@ -1,6 +1,6 @@
 # DX2 · Depot's wall extras in Subway
 
-**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
+**Review:** pending
 
 The owner (2026-11-15), of DX1's new Depot models: "Can any of these new models be used in Subway map?", then "Add the
 models in Subway where suitable." Look only: the station's cover, sight lines and balance stay as they are.
@@ -11,7 +11,8 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (build thread) | passed | Accept 7/8 | check 8: two pipe runs ended in the open, 1 m short of a wall |
 | 2026-11-15 | 2 | Opus 5.5 (build thread) | passed | Accept 7/8 | check 8: the 1 m end length's front 11 cm stood past the concourse's 0.5 m return, its pipes open-ended |
-| 2026-11-15 | 3 | Opus 5.5 (build thread) | passed | pending | – |
+| 2026-11-15 | 3 | Opus 5.5 (build thread) | passed | Retry 7/8 | the south wall's end length capped only at its far end, its open end by the return; QA and performance on old heads |
+| 2026-11-15 | 4 | Opus 5.5 (build thread) | passed | pending | – |
 
 ## What changed
 
@@ -30,10 +31,11 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
   chunks. A length is checked for solid wall every 0.25 m behind it and kept 2 cm clear of every other fixture (the
   hall's cameras and clock); a fitted length whose drop would meet something under it (the ticket office's roof) is
   laid plain.
-- **pipe_run_1** (`depot_extras.py`, 300 triangles): a 1 m length to finish a run at a wall, with no bracket of its
-  own (the next length's and the wall hold it), its pipes and cables capped at its far end: where the hall's runs
+- **pipe_run_1** (`depot_extras.py`, 340 triangles): a 1 m length to finish a run at a wall, with no bracket of its
+  own (the next length's and the wall hold it), its pipes and cables capped at both ends (a north wall's run ends at
+  its far end, a south wall's at its origin): where the hall's runs
   meet the concourse's 0.5 m return, the main's and the basket's front 11 cm stand past the return's corner and show
-  closed ends. Depot doesn't lay it. A test checks every run is laid end to end with a wall past both its ends.
+  closed ends. Depot doesn't lay it. Tests check every run is laid end to end with a wall past both its ends, and the end length's caps.
 - **The ticket hall's clock** (SM5's) moves from the south wall at -51 to the street-end wall, 3.4 m up as before, so
   the south run reaches the corner.
 - **Pictures:** `tools/subway/station_pictures.gd` `extras` (EXTRA_SHOTS); the owner's sheets in
