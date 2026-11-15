@@ -106,6 +106,8 @@ func test_robot_arms_keep_the_glove_shell_and_never_the_bare_hand() -> void:
 
 
 func test_the_aimed_pistols_fade_reaches_the_bare_hand_and_its_nails() -> void:
+	# No replica fades its hands since HA2: the knob is tested with the pistols put in it.
+	cfg.aim_hands_hint = [&"pistol", &"cyber"]
 	for id: Variant in [&"pistol", &"cyber"]:
 		var arms := _arms()
 		arms.hold(id, arms.get_parent() as Node3D)

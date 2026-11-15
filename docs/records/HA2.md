@@ -1,6 +1,6 @@
 # HA2 · Pistols at the rifles' place, no arm ends on Inspect
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 1 attempt · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner's playtest notes of 2026-11-15, items 3 and 4, and his note on the pictures: "make the pistol take up less space on screen. it should
 roughly be same scale/angle as rifle" and "when inspecting rifles the player can see the end of the arm models".
@@ -9,7 +9,7 @@ roughly be same scale/angle as rifle" and "when inspecting rifles the player can
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
