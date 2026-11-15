@@ -1,12 +1,12 @@
 # UA1 · The UI highlight is blue, and the player can pick its colour (UA2)
 
-**Review:** REVIEW_LINE
+**Review:** 1 attempt · critic Accept 7/8 (Opus) · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | CRITIC_ROW | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | Accept 7/8 | – (check 8: ARCHITECTURE, config README and FEATURES named the bone accent; fixed after) |
 
 ## Goal
 

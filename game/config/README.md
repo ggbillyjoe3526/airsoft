@@ -71,6 +71,7 @@ leaves out ships as null and the exported game crashes. `tests/unit/test_saved_c
 | `range_view_config.gd` | The practice range drawn: plate, post, figure and gear paint and sizes, a hit plate's swing, a figure's fall, the challenge's lit glow and START plate, the floor lines and wall boards |
 | `minimap_config.gd` | The minimap: the panel's size, ring and caption room, what sits under it, the pinned markers' steps, the markers' sizes and the patches' look, how far it shows, the field drawing's scale, rules and colours, how far each sound places an enemy and how their patches blur, last and fade |
 | `team_config.gd` | Team names (translation keys), colours and the figures' paint glow |
+| `ui_colours.gd` | The interface colours a player can pick (Settings › Display › Interface, UA2): `GameTheme`'s accent and its ink for each, their names, blue by default |
 | `accessibility_table.gd`, `team_colours.gd` | Read `data/accessibility.md`: the team colour sets (Standard, High contrast) for figures and the HUD with their day glow, Reduced motion's share of each movement, the props allowed near a team's hue; one set resolved for a match, day or night |
 | `accessibility_config.gd` | Settings › Accessibility's fixed numbers: the sound cue ring (life, fade, far opacity, markers, radius) and the sound cue size and HUD size sliders' ranges |
 | `bot_config.gd`, `bot_tuning.tres` | How bots play (`BotConfig.load_default()`): senses, aim, firing, lanes and holds, routes, cover, searching, hunting, the holster; `for_map` gives a copy with a map's own `botSight` |
