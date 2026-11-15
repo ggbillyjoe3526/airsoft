@@ -28,7 +28,10 @@ split face broken by a crease; no chip that rests on nothing; the top's pieces a
 neighbour, the crossing ones inside the end courses, the end's top piece no higher than the crest. The thirteenth
 pass: no cut at a join: every section shares the pieces standing across it (join_column), each drawing its part, so
 the halves meet as whole pieces; the face pieces' split sides shaded; the end courses' long pieces and top course
-round logs; split faces creased deeper. The same budget.
+round logs; split faces creased deeper. The fourteenth pass: the end courses split pieces as the face's (a log split
+down one side showing at most 6 cm of split face, wedges, quarters, a whole round log at most one course in two), each
+drawn through a middle profile so no split face is one plane its whole length, a third standing 2 to 5 cm past the
+face so the ends are not flush; the top course bark up and closed; round sawn ends of 10 sides. The same budget.
 
 The cordwood section fills its grid cell (PropDressConfig.grid_cells): its pieces' ends standing out of the faces by
 0.3 to 5 cm (WS1: each a solid end, its sides barked or split back to the core, its face tilted a little) over a dark
@@ -105,8 +108,10 @@ END_SET = 0.28          # m the face's pieces and the stack's end stand inside a
 END_OUT = 0.09          # m an end piece stands out of the stack's end, about (twelfth pass: 0.12 was the most)
 END_COURSE_SET = 0.04   # m a course stands in or out of that, its own way (twelfth pass)
 END_TURN = 8.0          # degrees a course lies turned off front to back, seen from above (twelfth pass)
-END_LONG = 0.2          # the share of end pieces that are long: round logs pushed out past the others by END_LONG_OUT
-END_LONG_OUT = (0.10, 0.15)
+END_STICK = (0.02, 0.05)  # m an end piece's face end stands past the face, when it does (fourteenth pass), so the
+END_STICK_SHARE = 0.35  # ends never line up flush; this share of them
+END_GAP_TOP = 0.004     # m between the top course's front and back pieces (fourteenth pass: closed, seen from above)
+END_SPLIT_W = 0.06      # m a log split down one side shows at most this much pale split face (fourteenth pass)
 END_WEDGE = 1.3         # a wedge stands out at most this many of its course's half height (twelfth pass: no blades)
 END_CREASE = 0.025      # m a split face is broken out or in along a line, so no piece reads as a plank (was 1.2 cm)
 JOIN_SEED = 1399        # (RM2, thirteenth pass) the join's own pieces, the same in every section: see join_column
@@ -118,7 +123,7 @@ CHIP_NEAR = 0.2         # m from the end
 TOP_SINK = 0.004        # m the core's top lies under its top pieces' edges
 END_REACH = 0.16        # m at most a log end's flat side is drawn in over the dark to the face's last piece
 END_ARC = 5             # a round log's side's segments (34 degrees each, drawn smooth: _round_ends; thirteenth pass: 4)
-END_CAP = 7             # a round log's sawn end's sides (a half round: 8 with its flat side), and the sawn face's
+END_CAP = 10            # a round log's sawn end's sides (a half round: 11 with its flat side), and the sawn face's
 END_CAP_IN = 3          # inside its rim
 END_RIM = 0.14          # the bark rim's share of the sawn end's radius
 END_H = (0.1, 0.2)      # m an end course's height (RM2: 0.115 to 0.15 in the ninth pass, each course alike; 0.08 low)
@@ -126,7 +131,7 @@ END_TILT = (1.0, 3.0)   # degrees a course lies off level, either way, front to 
 END_SETIN = (0.0, 0.02)  # m each piece stands in from its course, its own way
 END_GAP = (0.01, 0.03)  # m between a course's front and back pieces where they meet, each closed by its sawn end
 END_KINDS = ("round", "flat", "wedge", "quarter")  # (RM2, eleventh pass) an end piece: a round log, bark all round;
-END_KIND_W = (0.25, 0.35, 0.25, 0.15)  # a log split down one side, a flat pale face out between bark; a wedge, point
+END_KIND_W = (0.1, 0.3, 0.35, 0.25)  # a log split down one side, a flat pale face out between bark; a wedge, point
                         # out, two split faces; a quarter, a split face and a bark round
 END_BARK = ("EndBark", "EndBarkDark", "EndBarkLight", "Rim", "EndBark")  # their bark: warm grey-brown
 END_TOP = 0.0           # m the end's top piece stands over the stack's crest (twelfth pass: was 3 cm, a lid)
@@ -143,10 +148,14 @@ SMOOTH = 45.0           # degrees: faces meeting at less than this are drawn smo
 END_PAINTS = {"EndPale": 0xC4AF7F, "EndLight": 0xBDA56B, "EndWarm": 0xB69D5B, "EndDeep": 0xAC924D, "EndTan": 0xA28843,
               "EndBrown": 0x927B3C, "EndOld": 0xAF9D75, "Rim": 0x5F543C,
               "EndHeart": 0x7C6838, "EndBark": 0x6B614A, "EndBarkDark": 0x5B5340, "EndBarkLight": 0x7A6F55,
-              "SplitSide": 0x6E634A}
+              "SplitSide": 0x6E634A, "EndSplit": 0x9C8C62}
 SPLIT_SIDE = "SplitSide"  # (thirteenth pass) a face piece's split sides, in the stack's shade: seen edge on, the pale
 # split read as slivers and scratches across the face
-END_MATS = tuple(k for k in END_PAINTS if k not in ("Rim", "EndHeart", SPLIT_SIDE) and not k.startswith("EndBark"))
+END_MATS = tuple(k for k in END_PAINTS
+                 if k not in ("Rim", "EndHeart", SPLIT_SIDE, "EndSplit") and not k.startswith("EndBark"))
+# (fourteenth pass) an end piece's long split faces: most weathered to a mid tan, a few fresh, so the end reads as
+# split wood and not pale planks
+END_SPLITS = ("EndSplit", "EndSplit", "EndOld", "Split")
 # Rim: a split piece's bark, a warm brown; EndBark*: the end pieces' (eleventh pass); EndHeart: its heart, darker
 # (RM2, the photo's pieces)
 HEART_SHARE = 0.45      # how far out from a wedge's point its dark heart reaches
@@ -160,7 +169,8 @@ TOP_BARK = ("Bark", "BarkDark", "BarkFurrow", "Rim", "BarkDark")  # the top's pi
 TOP_SPLIT = 0.4         # the share of the top's pieces lying point up: pale split sides meeting at a ridge (RM2)
 TOP_CROSS = (2, 3)      # pieces lying over the top course, turned 20 to 40 degrees off front to back (RM2, eleventh
 TOP_CROSS_TURN = (20.0, 40.0)  # pass), so the top is never an even row
-TOP_BY_END = 0.25       # the end columns' top pieces rise this share of the others', under the end's top piece
+TOP_BED = 0.3           # (fourteenth pass) of their rise bedded down in the stack, so their crown stays low
+TOP_BY_END = 0.5        # the top pieces beside an end rise this share of the others (was 0.25; bedded down)
 TOP_APART = 0.3         # the share of the top's pieces lying apart from their neighbours, TOP_GAP each side
 TOP_GAP = (0.015, 0.03)
 TOP_RIDE = 0.2          # the share lying half on a neighbour: TOP_RIDE_W of their width over it (twelfth pass)
@@ -414,6 +424,7 @@ def top_course(b: hs.Builder, top: random.Random, lo: float, hi: float, core: fl
         edges[-2] = (e_a, min(max(k_a, last_e[1] - (e_b - e_a) + 0.04), last_e[1] + (e_b - e_a) - 0.04))
         edges[-1] = last_e
     rounded = ((0.0, 0.0), (1.0 / 3.0, 0.75), (2.0 / 3.0, 0.75), (1.0, 0.0))
+    rounder = ((0.0, 0.0), (0.15, 0.6), (0.38, 0.95), (0.62, 0.95), (0.85, 0.6), (1.0, 0.0))
     last, ridged = "", False
 
     def ground(x: float, y: float) -> float:
@@ -437,9 +448,12 @@ def top_course(b: hs.Builder, top: random.Random, lo: float, hi: float, core: fl
                 rise = (e1 - e0) * top.uniform(0.22, 0.32)
                 mat = "Split"
             else:
-                across = rounded
+                across = rounder if by_end else rounded
                 rise = TOP_LOG * (e1 - e0) * top.uniform(0.4, 1.1) * (TOP_BY_END if by_end else 1.0)
-                mat = top.choice([m for m in TOP_BARK if m != last])
+                mat = top.choice([m for m in (END_BARK if by_end else TOP_BARK) if m != last])
+            # (fourteenth pass) beside the end, a round log bedded down in the stack (its crown no higher than
+            # before), in the end's warm bark, so it reads round from above and not as a flat grey board
+            bed = rise * TOP_BED if by_end else 0.0
             last = mat
             lift = (top.uniform(0.7, 1.0), top.uniform(0.7, 1.0))  # at its two ends
             # (twelfth pass) touching its neighbours, or narrower (a gap each side), or half on a neighbour
@@ -457,7 +471,7 @@ def top_course(b: hs.Builder, top: random.Random, lo: float, hi: float, core: fl
                 a, c = e0 + k0 * y / core + trim[0], e1 + k1 * y / core - trim[1]
                 x = a + (c - a) * f
                 base = ground(x, y) + ride[0] * (1.0 - f) + ride[1] * f
-                return (x, y, base + rise * kx * (lift[0] + (lift[1] - lift[0]) * v))
+                return (x, y, base - bed + rise * kx * (lift[0] + (lift[1] - lift[0]) * v))
 
             for (fa, ka), (fb, kb) in zip(across, across[1:]):
                 q = wk.verts(b, [at(fa, 0.0, ka), at(fb, 0.0, kb), at(fb, 1.0, kb), at(fa, 1.0, ka)])
@@ -511,9 +525,11 @@ def top_course(b: hs.Builder, top: random.Random, lo: float, hi: float, core: fl
                     top.choice(END_MATS), axis * way)
 
 
-def _profile(kind: str, bulge: float, rz: float, r: object) -> tuple:
+def _profile(kind: str, bulge: float, rz: float, r: object, hh: float = 0.1, bark_up: bool = False) -> tuple:
     """(RM2, eleventh pass) An end piece's outline out of the stack's end, from its foot to its top: (out, up) points
-    (m, from the end's plane and the piece's middle) and each side's paint, "bark" or "Split" (its pale split face)."""
+    (m, from the end's plane and the piece's middle) and each side's paint, "bark" or "Split" (its pale split face).
+    (Fourteenth pass) A log split down one side shows at most END_SPLIT_W of split face (`hh`: the course's half
+    height, m); a quarter `bark_up` keeps its bark on top."""
     lo, hi = math.radians(-86.0), math.radians(86.0)
     foot, head = (bulge * math.cos(lo), rz * math.sin(lo)), (bulge * math.cos(hi), rz * math.sin(hi))
     if kind == "round":
@@ -525,7 +541,8 @@ def _profile(kind: str, bulge: float, rz: float, r: object) -> tuple:
                 (a[1] + c[1]) * 0.5 + rz * r.uniform(-0.15, 0.15))
 
     if kind == "flat":  # split down one side: a flat pale face between its bark edges, a half to two-thirds round
-        a0, a1 = math.radians(-r.uniform(30.0, 60.0)), math.radians(r.uniform(30.0, 60.0))
+        lim = math.degrees(math.asin(min(0.9, END_SPLIT_W * 0.5 / max(hh, 1e-3))))
+        a0, a1 = -math.radians(lim * r.uniform(0.6, 1.0)), math.radians(lim * r.uniform(0.6, 1.0))
         p0, p1 = (bulge * math.cos(a0), rz * math.sin(a0)), (bulge * math.cos(a1), rz * math.sin(a1))
         # (thirteenth pass) its bark round in two steps each side, not one flat
         m0 = (bulge * math.cos((lo + a0) * 0.5), rz * math.sin((lo + a0) * 0.5))
@@ -534,14 +551,19 @@ def _profile(kind: str, bulge: float, rz: float, r: object) -> tuple:
     if kind == "wedge":  # point out: two split faces meeting at its edge, now and then one of them its bark
         foot, head = (0.003, -rz), (0.003, rz)
         tip = (bulge * r.uniform(0.85, 1.0), rz * r.uniform(-0.35, 0.35))
-        if r.random() < 0.5:  # one side its bark, rounded (thirteenth pass: half of them, was 0.3)
+        if r.random() < 0.75:  # one side its bark, rounded (thirteenth pass: half of them, was 0.3; fourteenth: 0.75)
             return [foot, crease(foot, tip), tip, head], ["bark", "bark", "Split"]
         return [foot, crease(foot, tip), tip, crease(tip, head), head], ["Split"] * 4
     # a quarter: a split face out from its foot (or down from its top), then its bark round
     p0, p1 = (0.003, -rz), (bulge * r.uniform(0.85, 1.0), -rz * r.uniform(0.3, 0.55))
     pts = [p0, crease(p0, p1), p1, (bulge * 0.72, rz * 0.55), (bulge * 0.12, rz)]
     mats = ["Split", "Split", "bark", "bark"]
-    if r.random() < 0.5:  # bark below, split face on top
+    if bark_up:  # (fourteenth pass) the end's top piece: its bark a round in four steps, so it reads round from above
+        a0 = math.asin(max(-1.0, p1[1] / rz))
+        arc = [a0 + (math.radians(84.0) - a0) * t for t in (0.25, 0.5, 0.75)]
+        pts = [p0, crease(p0, p1), p1] + [(bulge * math.cos(a), rz * math.sin(a)) for a in arc] + [(bulge * 0.12, rz)]
+        mats = ["Split", "Split", "bark", "bark", "bark", "bark"]
+    if r.random() < 0.5 and not bark_up:  # bark below, split face on top
         pts = [(x, -z) for x, z in reversed(pts)]
         mats = mats[::-1]
     return pts, mats
@@ -559,13 +581,15 @@ def _reach(pieces: list, base: float, s: float, z: float) -> float:
 
 
 def end_column(b: hs.Builder, r: object, base: float, s: float, core: float, crest: dict, faces: dict) -> None:
-    """(RM2, ninth to twelfth passes) A stack's closed end (`base`, s: -1 or 1): courses of split pieces from the ground
-    to each face's crest (END_TOP), each END_H high, tilted a little (the ground course level), set in or out
-    (END_COURSE_SET) and turned (END_TURN) its own way, one piece in four a long one (END_LONG, END_LONG_OUT), a front
+    """(RM2, ninth to fourteenth passes) A stack's closed end (`base`, s: -1 or 1): courses of split pieces from the
+    ground to each face's crest (END_TOP), each END_H high, tilted a little (the ground course level), set in or out
+    (END_COURSE_SET) and turned (END_TURN) its own way, a share standing past the face (END_STICK), a front
     and a back piece lying front to back and meeting in front of or behind the middle by turns, so the joints stagger,
-    an END_GAP between them; each its own kind (END_KINDS: a round log, a log split down one side, a wedge point out, a
-    quarter), its split faces flat and pale with crisp edges, its bark warm grey-brown and drawn smooth; each set its
-    own way in from the end (END_SETIN), a little fuller or slimmer at its joint end, and closed at both ends by its
+    an END_GAP between them (the top course END_GAP_TOP, bark up); each its own kind (END_KINDS, END_KIND_W: a round
+    log at most one course in two, a log split down one side, a wedge point out, a quarter), drawn through a middle
+    profile of its own (fuller or slimmer, its creases moved), its split faces flat and pale with crisp edges, its bark
+    warm grey-brown and drawn smooth; each set its own way in from the end (END_SETIN), a little fuller or slimmer at
+    its joint end, and closed at both ends by its
     sawn end: a round log's a half round of END_CAP sides, a bark rim round a sawn face; at the face, in the face's
     plane, its flat side drawn in to the face's pieces beside it (sampled at its foot, middle and top), so no dark seam
     runs up the corner. Each piece a closed shell with the end's dark behind it, so nothing is seen through."""
@@ -589,35 +613,43 @@ def end_column(b: hs.Builder, r: object, base: float, s: float, core: float, cre
         return crest[-1.0] + (crest[1.0] - crest[-1.0]) * (y + core) / (2.0 * core) + END_TOP
 
     way = r.choice((-1.0, 1.0))
+    last_round = -2  # (fourteenth pass) a whole round log at most one course in two
     for k in range(len(lines)):
         way = -way
         joint = way * core * r.uniform(*END_JOINT)
-        gap = r.uniform(*END_GAP) * 0.5
+        top_k = k == len(lines) - 1
+        # (fourteenth pass) the top course's front and back pieces meet close, so no inside shows from above
+        gap = (END_GAP_TOP if top_k else r.uniform(*END_GAP)) * 0.5
         # (twelfth pass) the course set in or out its own way, and turned off front to back seen from above
         c_set = r.uniform(-END_COURSE_SET, END_COURSE_SET)
         c_turn = math.tan(math.radians(r.uniform(-END_TURN, END_TURN)))
+        hh = (line(k + 1, 0.0) - line(k, 0.0)) * 0.5  # the course's half height at its middle
         for side in (1.0, -1.0):
-            y_face, y_joint = side * (core + END_PROUD), joint + side * gap
-            hh = (line(k + 1, 0.0) - line(k, 0.0)) * 0.5  # the course's half height at its middle
-            rx = hh  # a round log's radius out of the end, as its course is high (thirteenth pass: round)
-            cx = 0.0
-            if r.random() < END_LONG:  # (thirteenth pass) a round log pushed on past the others, its bark run back
-                kind, bulge = "long", END_OUT + c_set + r.uniform(*END_LONG_OUT)
-                cx = max(0.01, bulge - rx)  # its middle, out of the end
-                arc = [math.radians(-90.0 + 180.0 * i / (END_ARC + 1)) for i in range(END_ARC + 2)]
-                pts = [(0.003, -1.0)] + [(cx + rx * math.cos(a), math.sin(a)) for a in arc] + [(0.003, 1.0)]
-                mats = ["bark"] * (len(pts) - 1)
-            elif k == len(lines) - 1:  # the top course: round logs, bark up, so the end's top never reads as boards
-                kind, bulge = "round", max(END_OUT * 0.4, END_OUT + c_set - r.uniform(*END_SETIN))
-                pts, mats = _profile(kind, bulge, 1.0, r)
+            # (fourteenth pass) split pieces as the face's: a log split down one side, a wedge, a quarter, now and
+            # then a whole round log; the top course bark up; each its own length, some standing past the face
+            if top_k:
+                kind = "quarter"
             else:
                 kind = r.choices(END_KINDS, END_KIND_W)[0]
-                bulge = max(END_OUT * 0.4, END_OUT + c_set - r.uniform(*END_SETIN))
-                if kind == "wedge":  # no thin blade: its point at most END_WEDGE of the course's half height out
-                    bulge = min(bulge, hh * END_WEDGE)
-                pts, mats = _profile(kind, bulge, 1.0, r)
-            own = r.choice(END_BARK)
+                if kind == "round" and k - last_round < 2:
+                    kind = "wedge"
+            last_round = k if kind == "round" else last_round
+            bulge = max(END_OUT * 0.4, END_OUT + c_set - r.uniform(*END_SETIN))
+            if kind == "wedge":  # no thin blade: its point at most END_WEDGE of the course's half height out
+                bulge = min(bulge, hh * END_WEDGE)
+            pts, mats = _profile(kind, bulge, 1.0, r, hh, bark_up=top_k)
+            # its profile at its middle: a little fuller or slimmer, its creases moved, so no split face runs its
+            # whole length as one plane
+            fat = r.uniform(0.9, 1.08)
+            mid_pts = [pts[0]] + [(x * fat + (r.uniform(-0.5, 0.5) * END_CREASE if mats[i - 1] != "bark" else 0.0),
+                                   max(-1.0, min(1.0, z + r.uniform(-0.1, 0.1))))
+                                  for i, (x, z) in enumerate(pts[1:-1], 1)] + [pts[-1]]
+            own, split = r.choice(END_BARK), r.choice(END_SPLITS)
             swell = r.uniform(0.88, 1.06)  # at its joint end
+            stick = r.uniform(*END_STICK) if r.random() < END_STICK_SHARE else 0.0
+            y_plane, y_joint = side * (core + END_PROUD), joint + side * gap
+            y_face = y_plane + side * stick
+            y_mid = y_joint + (y_face - y_joint) * r.uniform(0.4, 0.6)
 
             def at(y: float, out: float, up: float) -> Vector:
                 z0, z1 = line(k, y), line(k + 1, y)
@@ -626,32 +658,30 @@ def end_column(b: hs.Builder, r: object, base: float, s: float, core: float, cre
                                (z0 + z1) * 0.5 + (z1 - z0) * 0.5 * up))
 
             outer = [at(y_face, ox, oz) for ox, oz in pts]
+            middle = [at(y_mid, ox * (1.0 + swell) * 0.5, oz) for ox, oz in mid_pts]
             inner = [at(y_joint, ox * swell, oz) for ox, oz in pts]
             for i, mat in enumerate(mats):
-                q = wk.verts(b, [outer[i], inner[i], inner[i + 1], outer[i + 1]])
                 way_out = Vector((s * 0.6, 0.0, (pts[i][1] + pts[i + 1][1]) * 0.5))
-                wk.face(b, q, own if mat == "bark" else mat, way_out)
-            if k == len(lines) - 1:  # the top piece's inside, over the end's dark: its split side, closed
-                q = wk.verts(b, [outer[0], inner[0], inner[-1], outer[-1]])
-                wk.face(b, q, "Split", Vector((-s, 0.0, 0.0)))
-            # its sawn end at the joint, facing along it, and at the face (drawn in to the face's pieces)
-            for y, ring, fac, at_face in ((y_joint, inner, swell, False), (y_face, outer, 1.0, True)):
-                fy = Vector((0.0, -side if not at_face else side, 0.0))
-                inward = []
-                if at_face:
-                    for t in (0.9, 0.0, -0.9):
-                        p = at(y, 0.0, t)
-                        p.x = base - s * min(END_REACH, _reach(faces[side], base, s, p.z) + 0.01)
-                        inward.append(p)
-                if kind == "long":
-                    # its run back in the end's dark, and its sawn end round on it: a bark rim round a sawn face
-                    wk.face(b, wk.verts(b, _wound(list(ring) + inward, fy)), "Gap")
-                    for f, mat, m, lift in ((1.0, "Rim", END_CAP + 1, 0.002), (1.0 - END_RIM, None, END_CAP_IN + 3,
-                                                                                   0.004)):
-                        disc = [at(y, (cx + rx * f * math.cos(a)) * fac, f * math.sin(a)) + fy * lift
-                                for a in (2.0 * math.pi * i / m for i in range(m))]
-                        wk.face(b, wk.verts(b, _wound(disc, fy)), mat or r.choices(END_MATS, END_WEIGHTS)[0])
-                elif kind == "round":
+                for near, far in ((outer, middle), (middle, inner)):
+                    q = wk.verts(b, [near[i], far[i], far[i + 1], near[i + 1]])
+                    wk.face(b, q, own if mat == "bark" else split, way_out)
+            if top_k:  # the top piece's inside, over the end's dark: its split side, closed
+                for near, far in ((outer, middle), (middle, inner)):
+                    q = wk.verts(b, [near[0], far[0], far[-1], near[-1]])
+                    wk.face(b, q, "Split", Vector((-s, 0.0, 0.0)))
+            # its sawn end at the joint, facing along it, and at the face; in the face's plane, its sawn end (or,
+            # standing past the face, the dark round it) drawn in to the face's pieces
+            inward = []
+            for t in (0.9, 0.0, -0.9):
+                p = at(y_plane, 0.0, t)
+                p.x = base - s * min(END_REACH, _reach(faces[side], base, s, p.z) + 0.01)
+                inward.append(p)
+            caps = [(y_joint, inner, swell, -side, False), (y_face, outer, 1.0, side, stick == 0.0)]
+            if stick:
+                caps.append((y_plane, [at(y_plane, ox, oz) for ox, oz in pts], 1.0, side, True))
+            for y, ring, fac, fy_s, fill in caps:
+                fy = Vector((0.0, fy_s, 0.0))
+                if kind == "round" and not (stick and fill):
                     cap = [at(y, bulge * fac * math.cos(a), math.sin(a))
                            for a in (math.radians(-86.0 + 172.0 * i / END_CAP) for i in range(END_CAP + 1))]
                     sawn = []
@@ -659,12 +689,13 @@ def end_column(b: hs.Builder, r: object, base: float, s: float, core: float, cre
                         a = math.radians(-86.0 + 172.0 * i / END_CAP_IN)
                         f = 1.0 if i in (0, END_CAP_IN) else 1.0 - END_RIM
                         sawn.append(at(y, bulge * fac * f * math.cos(a), f * math.sin(a)) + fy * 0.003)
-                    if at_face:
+                    if fill:
                         sawn[0].x, sawn[-1].x = inward[-1].x, inward[0].x
-                    wk.face(b, wk.verts(b, _wound(cap + inward, fy)), "Rim")
+                    wk.face(b, wk.verts(b, _wound(cap + (inward if fill else []), fy)), "Rim")
                     wk.face(b, wk.verts(b, _wound(sawn, fy)), r.choices(END_MATS, END_WEIGHTS)[0])
                 else:
-                    wk.face(b, wk.verts(b, _wound(list(ring) + inward, fy)), r.choices(END_MATS, END_WEIGHTS)[0])
+                    wk.face(b, wk.verts(b, _wound(list(ring) + (inward if fill else []), fy)),
+                            r.choices(END_MATS, END_WEIGHTS)[0])
 
 
 def _round_ends(ob: object, lo: float, hi: float) -> None:

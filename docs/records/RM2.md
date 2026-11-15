@@ -168,10 +168,21 @@ ATTEMPT_ROWS
   `TOP_PIN` 1.83 m) pin every section's bounds to the same box. A new test checks every pair of sections meets at
   its join (`test_woodpile_sections_meet_piece_by_piece_at_every_join`, failing on the twelfth pass's models).
   3,142 / 3,073 / 2,890 the middle sections, 3,046 / 3,196 / 3,180 the end ones (hearts thinned to fit).
+- **Fourteenth woodpile pass (critic attempt 13: the end read as boards and pipes):** the end courses are split
+  pieces like the face's: a log split down one side (at most 6 cm of split face, `END_SPLIT_W`), wedges (three in four
+  with a bark back), quarters, and a whole round log at most one course in two. Each piece is drawn through a middle
+  profile of its own (a little fuller or slimmer, its creases moved), so no split face is one plane its whole length;
+  a third of them stand 2 to 5 cm past the face (`END_STICK`), so the ends are not flush; their long split faces are
+  mostly a weathered mid tan (`EndSplit` #9C8C62), a few fresh. The top course is bark up, rounded in four steps and
+  closed (4 mm between its front and back pieces), and the top pieces beside an end are round logs in the end's warm
+  bark, bedded down a little (`TOP_BED`), not flat grey boards. Round sawn ends have 10 sides; the long round logs
+  (and the stubs they made at the single section's sides) are gone. 3,142 / 3,073 / 2,890 the middle sections
+  (unchanged), 3,185 / 3,199 / 3,189 the end ones.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
-  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth, v9 the ninth, v10 the tenth, v11 the eleventh, v12 the twelfth and v13 the thirteenth: the woodpiles).
+  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth, v9 the ninth, v10 the tenth, v11 the eleventh, v12 the twelfth, v13 the thirteenth and v14 the
+  fourteenth: the woodpiles).
 
 ## Known issues left
 
