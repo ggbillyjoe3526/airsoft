@@ -665,6 +665,9 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
 - [ ] **Peek, duck, peek again (AIM1).** On Normal, step out past a corner a bot watches for under half a second, duck
   back, and step out again half a second later: it should rarely hit you on either peek (its first BBs go wide again),
   but stand out for a second and a half and it should. On Hard, re-peeking the same corner is riskier.
+- [ ] **Noticed, and shooting back (AIM2).** On Normal, step into a bot's view from its side 30 m off: it should take a
+  moment longer to answer than when you step out right in front of it close by. Then trade shots with one: a BB past
+  its head should make its next shots go wider for a moment.
 - [ ] **The bots' kits (BG1).** Opponents carry kits from `bot-kits.md`: Easy the plainest, each level up more scoped,
   silenced or red-dot, Hard never plain. Spectate a few: the optic shows on their rifle and a silenced bot is heard
   nearer. Does gear make Normal unfair or Hard too easy?

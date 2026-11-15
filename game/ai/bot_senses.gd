@@ -199,7 +199,7 @@ static func notice_time(viewer: Character, target: Character, dist: float, cfg: 
 	var dx := target.position.x - viewer.position.x
 	var dz := target.position.z - viewer.position.z
 	var facing := clampf((-sin(viewer.yaw) * dx - cos(viewer.yaw) * dz) / maxf(dist, 1e-3), -1.0, 1.0)
-	var off := clampf(acos(facing) / (deg_to_rad(cfg.fov_deg) * 0.5), 0.0, 1.0)
+	var off := clampf(acos(facing) / maxf(deg_to_rad(cfg.fov_deg) * 0.5, 1e-3), 0.0, 1.0)
 	var t := cfg.notice_edge_time * off * off + cfg.notice_far_time * clampf(dist / cfg.view_distance, 0.0, 1.0)
 	var speed := Vector2(target.velocity.x, target.velocity.z).length()
 	return t * (cfg.notice_moving_share if speed >= cfg.notice_moving_speed else 1.0)
