@@ -1,6 +1,6 @@
 extends SceneTree
 ## Pictures of the menus at a chosen window size (AUD2, KNOWN_ISSUES 111 to 119): the Match page (Skirmish and Custom),
-## Loadout, Customise (each tab), the Armory, the Settings, Report a Bug, the loading screen, the pause menu, and the
+## Loadout, Customise (each tab), the Armory, the Settings (and its Graphics tab), Report a Bug, the loading screen, the pause menu, and the
 ## end-of-match XP, grabbed whole to `<folder>/<name>_<W>x<H>.png`. Needs a display and OpenGL, and a scratch save
 ## folder (the menus read and write the player's own); under xvfb:
 ##   XDG_DATA_HOME=/tmp/x XDG_CONFIG_HOME=/tmp/xc xvfb-run -a -s "-screen 0 3840x2160x24" godot --path . \
@@ -77,6 +77,11 @@ func _run() -> void:
 	if only.is_empty() or only.has("settings"):
 		main._on_tab(NavRail.Tab.SETTINGS)
 		await _grab("settings")
+		# its Graphics tab too (VF1: the rows with four choices)
+		var screens := main.find_children("*", "SettingsScreen", true, false)
+		if not screens.is_empty():
+			(screens[0] as SettingsScreen).show_graphics()
+			await _grab("settings_graphics")
 	if only.is_empty() or only.has("report"):
 		main._show_report()
 		await _grab("report")

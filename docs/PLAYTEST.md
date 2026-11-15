@@ -208,11 +208,11 @@ own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a 
   grip's back; the SMG sits as the rifles do. A pistol is held tight in both hands, no left
   fingers showing, the right thumb resting on the left hand, the Cyber Pistol held as the GBB is; over the sights no
   gap shows between the left hand and the grip. Raise the sight: a
-  rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and only the top of the
-  hands shows under a pistol's slide. Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
+  rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and a pistol's hands stay
+  whole under its slide, never faded (HA2). Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
   should hold up close on Inspect (Y); the right index finger and the skin between wrist and thumb look natural.
-  The pistols sit 25 cm from the eye (the owner's pick): judge their size at the hip, through a reload and on
-  Inspect. Skin-only arms on a pistol: the bare hands should read as hands (knuckle folds, the thumb's tendon, veins
+  The pistols sit low on the right as the rifles do, turned a little in (HA2): judge their size and angle beside a
+  rifle at the hip, through a reload and on Inspect. Skin-only arms on a pistol: the bare hands should read as hands (knuckle folds, the thumb's tendon, veins
   at the wrist, nails, a tapered thumb), not plastic. Close to a bot holding an AEG with no grip: its left fingers
   lie open under the handguard.
 - [ ] **The replica moves with you** (HA1). Walk, sprint, strafe, jump and land, crouch, stand, fire, switch: a
@@ -665,6 +665,9 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
 - [ ] **Peek, duck, peek again (AIM1).** On Normal, step out past a corner a bot watches for under half a second, duck
   back, and step out again half a second later: it should rarely hit you on either peek (its first BBs go wide again),
   but stand out for a second and a half and it should. On Hard, re-peeking the same corner is riskier.
+- [ ] **Noticed, and shooting back (AIM2).** On Normal, step into a bot's view from its side 30 m off: it should take a
+  moment longer to answer than when you step out right in front of it close by. Then trade shots with one: a BB past
+  its head should make its next shots go wider for a moment.
 - [ ] **The bots' kits (BG1).** Opponents carry kits from `bot-kits.md`: Easy the plainest, each level up more scoped,
   silenced or red-dot, Hard never plain. Spectate a few: the optic shows on their rifle and a silenced bot is heard
   nearer. Does gear make Normal unfair or Hard too easy?
@@ -1717,6 +1720,40 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
   you go at once; your bots still leave the defuse to you while you are close.
 - [ ] **Attacking is worth it now.** Attack on the same fields and hold the site after the plant.
   Pass: holding the site feels like it wins rounds; the bomb goes off now and then, not every time.
+
+## The interface colour (UA1, UA2)
+
+- [ ] **Blue reads as the highlight, never as a team.** At 1080p and on your 4K screen go through Match, Loadout,
+  Customise, Armory, Settings and the pause menu, then play a round on Alpha and open the comms wheel (hold Z).
+  Pass: PLAY, RESUME, the picked field and mode, focus rings and the lit wheel button are a soft cornflower blue with
+  dark words that read easily; next to Alpha's score block and markers they are clearly a different, paler blue; with
+  Settings › Accessibility › High contrast on, the highlight still doesn't look like Alpha's sky blue.
+- [ ] **Every colour in Settings › Display › Interface › Colour.** Click each of the seven swatches (hover shows its
+  name), then Back, and look at Match, Loadout and Armory; also pick one from the pause menu's Settings in a match.
+  Pass: the menus change at once with the click and stay that colour after a restart; dark words read on every
+  colour; red, orange and blue never look like a team or a warning; from the pause menu, Resume and the settings
+  change at once and the HUD follows from the next match.
+
+## Pistols at the rifles' place, arms on Inspect (HA2)
+
+- [ ] **A pistol takes about a rifle's share of the screen.** Switch between the AEG and the GBB Pistol, then the
+  Cyber Pistol, standing still, walking and after a shot.
+  Pass: the pistol sits low on the right at about the rifle's angle, both hands on it and no forearm showing; it
+  comes up to the sight smoothly and squares up as it does, the hands whole and never fading.
+- [ ] **No arm ends on Inspect.** Press Y with each replica, at your field of view and at 110, on a wide screen if you
+  have one. Pass: both sleeves run off the edge of the screen all through the turn; no green end or blob comes up in
+  front of you; both hands stay on the replica.
+
+## Volumetric haze in four levels (VF1)
+
+- [ ] **Each level's look and cost on your card.** Settings › Graphics › Volumetric haze now offers Off, Low, Medium
+  and High (Medium preset Low, High preset Medium, Ultra High, Low none). In Depot's hall with the lamps on, on
+  Woodland facing the sun and on Subway's platform, press F3 and step the row through Off, Low, Medium and High.
+  Pass: near you the haze is the same at every level; going up it reaches farther (the hall's far end hazier) and its
+  light shafts get finer and smoother; Low has no flicker or crawling blocks that bother you; the frame time grows a
+  little each step (on the laptop at Medium, Low haze should cost well under 1 ms); High looks as the old "on" did.
+- [ ] **An old Custom setting.** If you had Volumetric haze switched on in a Custom preset before this change, it now
+  reads High.
 
 ## Reporting what you find
 

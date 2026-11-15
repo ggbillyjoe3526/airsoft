@@ -23,6 +23,9 @@ enum Reflections { OFF, PROBES, SCREEN }
 ## An indoor field's roof lamps as real lights (RoofLamps): none (the hall lit by the preset's overhead sun alone), the
 ## lamps near you, or the lamps out to the hall's far end; every real lamp casts the sun's grade of shadow.
 enum LampLights { OFF, NEAR, FAR }
+## The volumetric haze's quality (VF1): none, or the same haze reaching farther from the eye with its light worked out
+## on a finer grid at each level (LookConfig.fog_reach, fog_grid, fog_filtered); its strength is the same at every level.
+enum VolumetricFog { OFF, LOW, MEDIUM, HIGH }
 
 ## The choice that is a preset with your own rows over it.
 const CUSTOM := &"custom"
@@ -71,7 +74,7 @@ const CHOICES: Dictionary[StringName, Array] = {
 	LAMP_LIGHTS: ["off", "near", "far"],
 	GLOW: ["off", "on"],
 	EYE_ADAPTATION: ["off", "on"],
-	VOLUMETRIC_FOG: ["off", "on"],
+	VOLUMETRIC_FOG: ["off", "low", "medium", "high"],
 	WEAR_MARKS: ["off", "on"],
 }
 ## The widest range the file may give a range row (a typo guard): the render scale within what the viewport takes, in
@@ -110,8 +113,8 @@ var lamp_lights: LampLights = LampLights.OFF
 var glow: bool = false
 ## The picture brightens in the dark and steadies in bright light, as eyes do (FieldLighting.set_eye_adaptation).
 var eye_adaptation: bool = false
-## A faint haze the light shines through (shafts and depth).
-var volumetric_fog: bool = false
+## A faint haze the light shines through (shafts and depth), and how finely its light is worked out.
+var volumetric_fog: VolumetricFog = VolumetricFog.OFF
 ## Oil stains and tyre tracks on the floors (WearMarks, WM1).
 var wear_marks: bool = false
 
@@ -203,7 +206,7 @@ func level(row: StringName) -> int:
 		EYE_ADAPTATION:
 			return int(eye_adaptation)
 		VOLUMETRIC_FOG:
-			return int(volumetric_fog)
+			return volumetric_fog
 		WEAR_MARKS:
 			return int(wear_marks)
 	return GraphicsTable.NO_LEVEL
@@ -252,7 +255,7 @@ func set_level(row: StringName, value: int) -> void:
 		EYE_ADAPTATION:
 			eye_adaptation = value != 0
 		VOLUMETRIC_FOG:
-			volumetric_fog = value != 0
+			volumetric_fog = value as VolumetricFog
 		WEAR_MARKS:
 			wear_marks = value != 0
 

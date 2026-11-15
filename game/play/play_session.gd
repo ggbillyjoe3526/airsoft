@@ -1167,7 +1167,7 @@ func _build_views_rest(ui: CanvasLayer) -> void:
 	track.bg_color = Color(GameTheme.TEXT, 0.18)
 	_skip_bar.add_theme_stylebox_override("background", track)
 	var fill := StyleBoxFlat.new()
-	fill.bg_color = GameTheme.ACCENT
+	fill.bg_color = GameTheme.accent
 	_skip_bar.add_theme_stylebox_override("fill", fill)
 	_skip_bar.anchor_left = 0.0
 	_skip_bar.anchor_right = 1.0

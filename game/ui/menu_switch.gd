@@ -41,7 +41,7 @@ func _init(on_words: String = "", off_words: String = "") -> void:
 		_ring = StyleBoxFlat.new()
 		_ring.draw_center = false
 		_ring.set_border_width_all(GameTheme.FOCUS_BORDER)
-		_ring.border_color = GameTheme.ACCENT
+		_ring.border_color = GameTheme.accent
 		_ring.set_corner_radius_all(int((PILL.y + RING_GAP * 2.0) * 0.5))
 	for icon: String in ["checked", "unchecked", "checked_disabled", "unchecked_disabled", "checked_mirrored",
 			"unchecked_mirrored", "checked_disabled_mirrored", "unchecked_disabled_mirrored"]:
@@ -72,8 +72,8 @@ static func colours(on: bool, hovered: bool, dimmed: bool) -> PackedColorArray:
 	var knob := GameTheme.DIM
 	var outline := GameTheme.DIM
 	if on:
-		fill = GameTheme.ACCENT
-		knob = GameTheme.ACCENT_INK
+		fill = GameTheme.accent
+		knob = GameTheme.accent_ink
 		outline = fill
 	if hovered and not dimmed:
 		fill = fill.lightened(HOVER_LIGHTEN)

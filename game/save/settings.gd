@@ -12,9 +12,14 @@ signal changed
 
 const PATH := "user://settings.save"
 const KIND := "settings"
-## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1); an older file is brought over once by
-## `migrate_defaults`.
-const VERSION := 3
+## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1), 4 made Volumetric haze four levels (VF1); an older
+## file is brought over once by `migrate_defaults`.
+const VERSION := 4
+## A Custom Volumetric haze row saved by a version 3 file or older, when it was one switch, and the level its "on"
+## drew: the finest grid, which High still draws (VF1). Its "off" is still Off.
+const FOG_ROW_V3 := "volumetric_fog"
+const FOG_ON_V3 := "on"
+const FOG_ON_NOW := "high"
 ## The keys this build reads (with two it reads once and no longer writes: "dev_enabled", FB3, and "robots", FI6); any
 ## other key in the file is kept as it was.
 const KNOWN_KEYS: Array[String] = [
@@ -23,7 +28,7 @@ const KNOWN_KEYS: Array[String] = [
 	"what_got_you", "hud", "custom_rules", "practice_challenge", "dev", "dev_enabled", "graphics_base",
 	"graphics_choice", "graphics_custom", "frame_limit", "monitor", "last_fullscreen", "renderer", "first_start_seen",
 	"team_colours", "gauge_patterns", "sound_cues", "sound_cue_size", "sound_cue_colour", "read_out", "reduced_motion",
-	"robots", "simulate_skips",
+	"robots", "simulate_skips", "ui_colour",
 ]
 ## Windowed leaves the window as it is (the project starts maximised); the other two are the DisplayServer's
 ## borderless and exclusive fullscreen. The first start is Exclusive (WINDOW_MODE_DEFAULT).
@@ -121,6 +126,8 @@ var renderer: Renderer = Renderer.AUTO
 var first_start_seen: bool = false
 ## Replica colours: every bold scheme shows as its plain family colour (LO3).
 var realistic_colours: bool = false
+## The interface's colour (Settings › Display, UA2): the accent of the main buttons and the selection.
+var ui_colour: UiColours.Pick = UiColours.DEFAULT
 ## The "What got you" card once you are hit: Auto shows it against Hard bots only.
 var what_got_you: WhatGotYou = WhatGotYou.AUTO
 ## Simulate skipped rounds (BP8, owner: off by default): a skip's cover offers SIMULATE, which decides the rest of the
@@ -197,12 +204,19 @@ func load_file(path: String = PATH) -> void:
 
 
 ## `data` as a version `version` file's, with every value still at the old default moved to the new one (a value the
-## player changed is kept): the volumes (from version 1 or 2), Windowed and V-Sync (from version 1). The current
-## version or later is returned as it is. A new dictionary; `data` is not changed.
+## player changed is kept): the volumes (from version 1 or 2), Windowed and V-Sync (from version 1); and a Custom
+## Volumetric haze row of "on" (version 3 or older) as the level it drew, High. The current version or later is
+## returned as it is. A new dictionary; `data` is not changed.
 static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	if version >= VERSION:
 		return data
 	var moved := data.duplicate(true)
+	var custom: Variant = moved.get("graphics_custom")
+	if custom is Dictionary and (custom as Dictionary).get(FOG_ROW_V3) is String \
+			and (custom as Dictionary)[FOG_ROW_V3] == FOG_ON_V3:
+		(custom as Dictionary)[FOG_ROW_V3] = FOG_ON_NOW
+	if version >= 3:
+		return moved
 	var old_volumes := VOLUME_DEFAULTS_V1 if version < 2 else VOLUME_DEFAULTS_V2
 	var saved_vol: Variant = moved.get("volumes")
 	if saved_vol is Dictionary:
@@ -262,7 +276,7 @@ func to_dict() -> Dictionary:
 		"wheel_pick": int(wheel_pick), "mouse_dpi": mouse_dpi,
 		"bindings": bindings.to_dict(), "volumes": vol, "window_mode": int(window_mode), "vsync": vsync,
 		"fov": fov, "show_fps": show_fps, "realistic_colours": realistic_colours, "what_got_you": int(what_got_you),
-		"simulate_skips": simulate_skips,
+		"simulate_skips": simulate_skips, "ui_colour": int(ui_colour),
 		"hud": hud.to_dict(), "custom_rules": custom_rules.to_dict(), "practice_challenge": practice_challenge,
 		"dev": dev.to_dict(), "graphics_base": String(graphics_base),
 		"graphics_custom": graphics_custom.duplicate(), "frame_limit": frame_limit, "monitor": monitor,
@@ -305,6 +319,8 @@ func from_dict(data: Dictionary) -> void:
 	vsync = _flag(data, "vsync", VSYNC_DEFAULT)
 	fov = _number(data, "fov", FOV_DEFAULT, FOV_MIN, FOV_MAX)
 	show_fps = _flag(data, "show_fps", false)
+	var colours := UiColours.Pick.size() - 1.0
+	ui_colour = roundi(_number(data, "ui_colour", UiColours.DEFAULT, 0.0, colours)) as UiColours.Pick
 	realistic_colours = _flag(data, "realistic_colours", false)
 	what_got_you = roundi(_number(data, "what_got_you", WhatGotYou.AUTO, 0.0, WhatGotYou.size() - 1.0)) as WhatGotYou
 	var saved_hud: Variant = data.get("hud")
