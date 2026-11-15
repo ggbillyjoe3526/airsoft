@@ -9,7 +9,7 @@ extends GutTest
 const BAYS: Array[StringName] = [&"wrapped_racking", &"drum_ibc_stack", &"parts_cage"]
 const BAY_BUDGET := 1500
 const EXTRA_BUDGETS := {
-	&"fire_point": 385, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500,
+	&"fire_point": 425, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500,
 	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
 	&"depot_sign_ppe": 52, &"depot_sign_pallet_storage": 52, &"depot_sign_fire_exit": 52,
 }

@@ -176,6 +176,34 @@ def glare(p: prop.Prop, x0: float, x1: float, z0: float, z1: float, y: float, se
                 (u, y - 0.0005, zz + 0.012)], wrinkle)
 
 
-def film_roll(p: prop.Prop, x0: float, x1: float, y: float, z: float, paint: str, r: float = 0.03) -> None:
-    """The film's soft roll over a load's top front edge (y, z), where the last turns are pulled over the top."""
-    p.lathe([(x0, r), (x1, r)], paint, 8, (0.0, y + r * 0.6, z - r * 0.6), axis="x", cap=False)
+def facing(p: prop.Prop, pts: list, paint: str, toward: tuple) -> None:
+    """One flat face through `pts`, turned to look along `toward`."""
+    f = p.quad(pts, paint)[0]
+    f.normal_update()
+    if f.normal.dot(prop.Vector(toward)) < 0.0:
+        f.normal_flip()
+
+
+def film_cap(p: prop.Prop, x0: float, x1: float, y0: float, y1: float, zt: float, paint: str, edge: str,
+             b: float = 0.05) -> None:
+    """The film pulled over a load's top (photos 2 to 4 and 7): a pale sheet a hair over the top, its front and side
+    edges bevelled down `b` so it bulges softly over the corners as the film does, the bevels (`edge`) catching the
+    light brighter than the top."""
+    up = zt + 0.012
+    o = 0.004
+    facing(p, [(x0 + b, y0 + b, up), (x1 - b, y0 + b, up), (x1 - b, y1, up), (x0 + b, y1, up)], paint, (0, 0, 1))
+    facing(p, [(x0 + b, y0 - o, zt - b), (x1 - b, y0 - o, zt - b), (x1 - b, y0 + b, up), (x0 + b, y0 + b, up)], edge,
+           (0, -1, 1))
+    for x, xi, s in ((x0 - o, x0 + b, -1.0), (x1 + o, x1 - b, 1.0)):
+        facing(p, [(x, y0 + b, zt - b), (xi, y0 + b, up), (xi, y1, up), (x, y1, zt - b)], edge, (s, 0, 1))
+        facing(p, [(x, y0 + b, zt - b), (xi, y0 - o, zt - b), (xi, y0 + b, up)], edge, (s, -1, 1))
+
+
+def streaks(p: prop.Prop, x0: float, x1: float, z0: float, z1: float, y: float, seed: int, paint: str) -> None:
+    """One or two sharp specular streaks where the film's tight over a load's face, slanting up across it."""
+    k = (seed * 7) % 5
+    for j in range(1 + seed % 2):
+        u = x0 + (x1 - x0) * (0.12 + 0.08 * k + 0.4 * j)
+        za = z0 + (z1 - z0) * (0.18 + 0.05 * k)
+        p.quad([(u, y, za), (u + 0.012, y, za), (u + 0.24, y, za + (z1 - z0) * 0.55),
+                (u + 0.228, y, za + (z1 - z0) * 0.55)], paint)

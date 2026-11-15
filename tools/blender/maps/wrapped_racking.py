@@ -27,11 +27,12 @@ Y1 = bk.BACK
 DECK = ["crate*1.0", "timber*1.12", "crate*0.92", "plywood*0.95"]
 
 
-def film_ends(p: prop.Prop, x0: float, x1: float, z_deck: float, z_top: float, y: float, roll: str = "sand*1.1") -> None:
-    """The film where it leaves the load: gathered over the pallet's top board below and rolled softly over the top
-    edge."""
+def film_ends(p: prop.Prop, x0: float, x1: float, z_deck: float, z_top: float, y: float, cap: str = "sand*1.16",
+              edge: str = "plaster*1.0") -> None:
+    """The film where it leaves the load: gathered over the pallet's top board below, and pulled over the top, its
+    bevelled cap bulging over the top edges and corners."""
     p.front_decal(x0 + 0.01, x1 - 0.01, z_deck - 0.03, z_deck + 0.035, y - 0.004, FILM)
-    bk.film_roll(p, x0 + 0.02, x1 - 0.02, y, z_top, roll)
+    bk.film_cap(p, x0, x1, y, Y1, z_top, cap, edge)
 
 
 def ticket(p: prop.Prop, x: float, z: float, y: float) -> None:
@@ -63,7 +64,7 @@ def kraft(p: prop.Prop, cx: float, z: float, w: float, h: float, cols: int, rows
         for i in range(len(edges) - 1):
             carton = shades[(r * 3 + i + seed) % len(shades)]
             if bk.in_sheen((edges[i] + edges[i + 1]) / 2, z + (r + 0.5) * ch, x0, x1, z, z + h, seed):
-                carton += "*1.09"  # the film's sheen over it
+                carton += "*1.2"  # the film's sheen over it
             bk.carton_face(p, edges[i], edges[i + 1], z + r * ch, z + (r + 1) * ch, Y0, carton,
                            label=(r + i + seed) % 2 == 0 and edges[i + 1] - edges[i] > 0.25)
         # the cartons down the load's sides, seen at a rack's end
@@ -71,7 +72,7 @@ def kraft(p: prop.Prop, cx: float, z: float, w: float, h: float, cols: int, rows
             bk.side_decal(x, Y0 + 0.03, Y0 + 0.4, z + r * ch + 0.006, z + (r + 1) * ch - 0.006,
                           shades[(r + seed + 1) % len(shades)], p, out)
     bk.sheen(p, x0, x1, z + 0.04, z + h - 0.03, Y0 - 0.003, seed, "crate*1.08", "plywood*1.08")
-    bk.glare(p, x0, x1, z, z + h, Y0 - 0.004, seed)
+    bk.streaks(p, x0, x1, z, z + h, Y0 - 0.005, seed, "plaster*1.02")
     film_ends(p, x0, x1, z, z + h, Y0)
     ticket(p, x0 + 0.08 + 0.3 * (seed % 3), z + h * 0.5, Y0 - 0.005)
     tail(p, x1 if seed % 2 else x0, z, Y0 - 0.005, 1.0 if seed % 2 else -1.0)
@@ -124,7 +125,7 @@ def silver(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> 
     for sx in (cx - w * 0.22, cx + w * 0.22):
         p.box((sx - 0.016, Y0 - 0.006, z - 0.12), (sx + 0.016, Y0, z + h), STRAP)
         p.box((sx - 0.016, Y0, z + h), (sx + 0.016, 0.0, z + h + 0.005), STRAP)
-    film_ends(p, x0, x1, z, z + h, Y0, "concrete*1.05")
+    film_ends(p, x0, x1, z, z + h, Y0, "concrete*1.08", "concrete*1.18")
     ticket(p, cx - 0.075, z + h * 0.45, Y0 - 0.007)
 
 
@@ -149,6 +150,8 @@ def hood(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> No
     for sx in (cx - w * 0.3, cx + w * 0.3):
         p.box((sx - 0.018, Y0 - 0.022, z - 0.12), (sx + 0.018, Y0 - 0.014, z + h), STRAP)
     p.box((x0 - 0.014, Y0 - 0.02, z + h * 0.62), (x1 + 0.014, Y0 - 0.014, z + h * 0.62 + 0.036), STRAP)
+    # the film pulled over the cap and the hood's top (photo 5's load is filmed over its cap)
+    bk.film_cap(p, x0 - 0.02, x1 + 0.02, Y0 - 0.02, Y1, z + h, "sand*1.16", "plaster*1.0")
     # the straps' ratchet buckles, and the weave's courses across
     for sx in (cx - w * 0.3, cx + w * 0.3):
         p.box((sx - 0.03, Y0 - 0.045, z + h * 0.4), (sx + 0.03, Y0 - 0.022, z + h * 0.4 + 0.1), "concrete*0.8")

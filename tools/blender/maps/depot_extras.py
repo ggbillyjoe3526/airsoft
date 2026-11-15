@@ -102,7 +102,7 @@ def fire_point() -> sk.Mesh:
     the fire action notice and the red document tube, over the red moulded housing that hides the two extinguishers,
     its raised ears, its dark viewing slot and its latch. Its foot at y = 0 (hung 0.3 m off the floor)."""
     m = sk.Mesh("fire_point")
-    w, b0, b1, d = 0.31, 0.42, 1.55, 0.03
+    w, b0, b1, d = 0.32, 0.42, 1.55, 0.03
     # the board: its rounded corners by chamfers, its edge, its moulded grid, the handle's three slots
     pts = [(-w, b0), (w, b0), (w, b1 - 0.07), (w - 0.07, b1), (-w + 0.07, b1), (-w, b1 - 0.07)]
     m.face([(x, y, d) for x, y in pts], "board")
@@ -139,19 +139,25 @@ def fire_point() -> sk.Mesh:
     m.lathe([(0.0, 0.22), (0.047, 0.22), (0.047, 0.28), (0.0, 0.28)], 8, (0.0, b0 + 0.3, d + 0.045), "black", axis="x")
     m.face([(0.02, b0 + 0.3, d + 0.0905), (0.17, b0 + 0.3, d + 0.0905), (0.17, b0 + 0.33, d + 0.0905),
             (0.02, b0 + 0.33, d + 0.0905)], "white")
-    # the moulded housing over the extinguishers (photo 3): an inset foot, a front that bulges out a little, the lid
-    # sloping back up to the board between two raised ears, the wide dark viewing slot and the latch at its foot
-    hw, hd, top = 0.33, 0.28, 0.47
-    m.prism_x([(0.0, 0.0), (0.0, hd - 0.06), (0.09, hd - 0.06), (0.13, hd), (0.24, hd + 0.018), (0.33, hd + 0.01),
-               (0.39, hd - 0.02), (top, 0.13), (top, 0.0)][::-1], -hw, hw, "fire", open_edges=(8,))
-    for x0, x1 in ((-hw - 0.005, -hw + 0.06), (hw - 0.06, hw + 0.005)):
-        m.prism_x([(top - 0.1, 0.0), (top - 0.1, 0.17), (top + 0.04, 0.12), (top + 0.04, 0.0)][::-1], x0, x1, "fire",
+    # the moulded housing over the extinguishers (photo 3), as wide as the board: a narrower foot under it, its front
+    # bulging out a little (smooth), the side panels stepped out, the lid sloping back up to the board between two
+    # raised ears, the wide dark viewing slot under its moulded hood, and the latch on the foot
+    hw, hd, top, foot = w, 0.28, 0.46, 0.25
+    m.prism_x([(0.0, 0.0), (0.0, hd - 0.08), (0.03, hd - 0.05), (0.13, hd - 0.05), (0.13, 0.0)][::-1], -foot, foot,
+              "fire", open_edges=(4,))
+    m.prism_x([(0.11, 0.0), (0.11, hd - 0.03), (0.15, hd), (0.27, hd + 0.018), (0.36, hd + 0.01), (0.4, hd - 0.02),
+               (top, 0.13), (top, 0.0)][::-1], -hw, hw, "fire", open_edges=(7,), smooth=True)
+    for side in (-1.0, 1.0):
+        x0, x1 = sorted((side * hw, side * (hw + 0.012)))
+        m.box((x0, 0.15, 0.02), (x1, 0.37, hd - 0.05), "fire", skip="b")
+        e0, e1 = sorted((side * (hw - 0.06), side * (hw + 0.005)))
+        m.prism_x([(top - 0.1, 0.0), (top - 0.1, 0.17), (top + 0.04, 0.12), (top + 0.04, 0.0)][::-1], e0, e1, "fire",
                   open_edges=(3,))
     slot = [(-0.15, 0.27), (0.15, 0.27), (0.17, 0.29), (0.17, 0.32), (0.15, 0.34), (-0.15, 0.34), (-0.17, 0.32),
             (-0.17, 0.29)]
     m.face([(x, y, hd + 0.0185) for x, y in slot], "black")
+    m.box((-0.2, 0.345, hd), (0.2, 0.37, hd + 0.05), "fire", skip="b")
     m.box((-0.022, 0.025, hd - 0.062), (0.022, 0.11, hd - 0.03), "black", skip="b")
-    m.box((-0.012, 0.11, hd - 0.004), (0.012, 0.14, hd + 0.01), "black", skip="b")
     return m
 
 
@@ -226,8 +232,8 @@ def _fittings(m: sk.Mesh, rm: float, ym: float, zm: float) -> None:
     m.box((vx - 0.04, ym - 0.04, zb), (vx + 0.04, ym + 0.04, zb + 0.09), "fire_dark")
     m.tube([(vx, ym, zb + 0.09), (vx, ym, zb + 0.15)], 0.008, "galv", sides=4)
     # the handwheel: a ring on its two spokes, open between them
-    m.lathe([(0.072, zb + 0.13), (0.085, zb + 0.13), (0.085, zb + 0.15), (0.072, zb + 0.15)], 8, (vx, ym, 0.0),
-            "fire", axis="z", cap_top=False, cap_bottom=False, smooth=False)
+    m.lathe([(0.085, zb + 0.13), (0.085, zb + 0.15), (0.072, zb + 0.15), (0.072, zb + 0.13)], 12, (vx, ym, 0.0),
+            "fire", axis="z", cap_top=False, cap_bottom=False)
     m.box((vx - 0.075, ym - 0.006, zb + 0.134), (vx + 0.075, ym + 0.006, zb + 0.146), "fire_dark")
     m.box((vx - 0.006, ym - 0.075, zb + 0.134), (vx + 0.006, ym + 0.075, zb + 0.146), "fire_dark")
     # a drop off the main's front at 3.4 m, out past the lagged pipe and down to a pendant sprinkler head
@@ -245,13 +251,12 @@ def _fittings(m: sk.Mesh, rm: float, ym: float, zm: float) -> None:
     m.box((0.5, -0.16, 0.585), (0.7, 0.05, 0.63), "slot")
     m.face_toward([(0.53, -0.04, 0.6305), (0.67, -0.04, 0.6305), (0.67, 0.0, 0.6305), (0.53, 0.0, 0.6305)],
                   (0, 0, 1), "board")
-    m.tube([(0.6, -0.16, 0.607), (0.6, -0.24, 0.6), (0.6, -0.26, 0.5), (0.6, -0.26, 0.0)], 0.012, "charcoal", sides=4)
-    m.box((0.57, -0.28, 0.0), (0.63, -0.24, 0.03), "galv", skip="b")
+    m.tube([(0.6, -0.16, 0.607), (0.6, -0.26, 0.56), (0.6, -0.26, 0.0)], 0.012, "charcoal", sides=4)
 
 
 def main() -> None:
     # budgets: look-only extras on every wall, kept lean; the pipework is laid along the whole hall
-    sk.export(fire_point(), "fire_point", 385)
+    sk.export(fire_point(), "fire_point", 425)
     sk.export(call_point(), "call_point", 50)
     sk.export(pipe_run(), "pipe_run", 790)
     sk.export(pipe_run(fittings=True, name="pipe_run_b"), "pipe_run_b", 1100)

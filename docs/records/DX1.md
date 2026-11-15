@@ -16,7 +16,8 @@ on the lower part of the wall at roughly eye height."
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (build thread) | passed | Retry | the film didn't read as film; fire point and pipework not after the photos; a cable reel with no photo |
 | 2026-11-15 | 2 | Opus 5.5 (build thread) | passed | Retry 6/8 | fire point's cabinet proportions; film still a frame; IBC side bars past the posts; parts cage goods past its ends; no pipework close-up; stale comments |
-| 2026-11-15 | 3 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-15 | 3 | Opus 5.5 (build thread) | passed | Retry 7/8 | kraft film still read as carton shades; fire point's foot and hood; a faceted handwheel |
+| 2026-11-15 | 4 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## What changed
 
@@ -26,16 +27,18 @@ on the lower part of the wall at roughly eye height."
   40 m chunks, no shadow). The third bays (the owner's ask for variety): racking with photo 7's capped load and finer
   cartons, two IBC towers side by side topped with empty pallets (photo 2), and photo 4's store with a deck across
   the bay over flattened cartons and totes. The wrapped loads show their film as a broad sheen rising across the face
-  (the cartons under it a shade lighter, so their joints still show through), slanting wrinkles and a soft roll over
-  the top edge. 1,338 to 1,480 triangles of the bay's 1,500.
+  (the cartons under it a fifth lighter, so their joints still show through), one or two sharp specular streaks, and
+  a pale film cap over the top whose front and side edges bevel down so it bulges over the corners (the purple hooded
+  loads filmed over their caps too). 1,324 to 1,454 triangles of the bay's 1,500.
 - **Which blocks:** `tools/depot/extras.py` `rack_dress` gives each `dead` piece a `dress` in turn (racking, wrapped
   racking, drums and IBCs, racking, parts cage), the two 108 m strips along the long walls staying racking: 24 of
   Depot's 48 rack blocks. The blocks' boxes are untouched (the map's blocks match the old file's but for `dress`), so
   collision, nav, cover, sight lines and the baked light (its hash covers kind, place and size, not dress) are as
   they were: no rebake.
 - **Wall extras** (`depot_extras.py`, the signs' sheet by `depot_signs.py` with cells in `depot_cells.py`): photo 3's
-  wall-mounted fire point board (its moulded cabinet 30 % of its height, with raised ears and a wide viewing slot), a call point, 4 m and 2 m lengths of pipework (every third 4 m length, `pipe_run_b`,
-  with a gate valve and its handwheel, a drop to a pendant sprinkler head and a junction box with its conduit), and seven safety signs. They are
+  wall-mounted fire point board (its moulded cabinet as wide as the board and 31 % of its height, on a foot 0.8
+  of its width, with stepped side panels, raised ears, a smooth bulging front and the viewing slot under a hood), a call point, 4 m and 2 m lengths of pipework (every third 4 m length, `pipe_run_b`,
+  with a gate valve and its 12-sided handwheel, a drop to a pendant sprinkler head and a junction box with its conduit), and seven safety signs. They are
   `MapData.fixtures` (`dressing.fixtures`, read by `StationDressing.read_fixtures`), drawn by StationFixtures as
   Subway's extras are: one MultiMesh a model, no collider, no shadow; a model may print from its own sheet
   (`StationFixturesConfig.sheets`).
