@@ -609,21 +609,24 @@ Once the rest of step 26 lands:
 
 ### Subway (Dev content, MT1)
 
-A closed metro station on three levels: the Street team starts in the ticket hall at street level, the Tunnel team in
-a cross-passage between the running tunnels, and they swap at half time. Turn on Settings › Dev › Dev content.
+A closed metro station on two levels since SW1: the Street team starts in the ticket hall, on one level with the
+concourse, the Tunnel team in a cross-passage between the running tunnels, and they swap at half time. Turn on
+Settings › Dev › Dev content.
 
 - [ ] **Listed only as Dev content (MT1).** With Dev content off, the Match page shows no Subway; on, it does, with
   its picture, 5 to 8 a side and 6 standard.
 - [ ] **Named Subway (owner, 2026-11-10).** The Match page's card and the loading screen say Subway (SUBWAY),
   never Kingsmere. If the last match you played before the rename was on Kingsmere, the Match page opens on Subway.
-- [ ] **Every way down (MT1).** From the ticket hall: the escalators to the concourse and on down to the lower hall;
-  the spiral stair in the hall's corner to the booking hall; the ordinary stair from the stair top down past flag B's
-  half landing to the platforms. Nothing snags you on a step, a balustrade or a landing.
+- [ ] **Every way down (MT1, SW1).** From the ticket hall and concourse: the escalators down to the lower hall; the
+  spiral stair by the gates, eight flights down to the south platform; the ordinary stair from the stair
+  top down past the half landing to the platforms; the lifts, two stops (Ticket hall, Platforms), 4 s a ride. Nothing
+  snags you on a step, a balustrade or a landing, and bots take the spiral stair too.
 - [ ] **The tracks and trains (MT1, CL1).** Drop off a platform's edge into the track: no steps lead back up; you
   climb out over the edge (Jump). Walk through the north train's open doors, and the south train from its
   platform doors to its east cab door and down the steps into the south tunnel.
-- [ ] **Close quarters above, long lines below (MT1).** Above the platforms no line runs much past 28 m; the
-  platforms open to about 58 m. Does each level play as meant, and do the bots hold and push through all three?
+- [ ] **Close quarters above, long lines below (MT1, SW1).** Above the platforms no line runs past about 57 m (the
+  hall to the passages, with fewer lockers since SW1); the platforms open to about 58 m. Does each level play as
+  meant, and do the bots hold and push through both?
 - [ ] **The flags (MT1).** Attack / Defend: flag A stands inside the south train's first car, B on the stair's half
   landing, both on short poles that fit under the roof; Elimination's overtime flag rises in the lower hall.
 - [ ] **The lift shafts stand shut (MT1).** The two lifts come in their own step (MT2); until then their shafts are

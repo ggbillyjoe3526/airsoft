@@ -97,6 +97,8 @@ block("railing", C, -33.12, -27.88, 0.38, 0.5, 1.1)
 block("railing", C, -33.12, -33.0, 0.5, 5.62, 1.1)
 block("railing", C, -28.0, -27.88, 0.5, 5.62, 1.1)
 block("railing", C, -33.0, SPIRAL_WAY[0], 5.5, 5.62, 1.1)
+# The top landing's west edge, over the well (the south flights 3 to 4 m down): the owner, 2026-11-15, SW1.
+block("railing", C, -29.57, -29.45, 4.05, 5.5, 1.1)
 ESC_MID = 0.6     # an escalator bank's middle deck's half width: as wide as an escalator, as in the photos
 ESC_LANE = 1.2    # each escalator, 1.2 m between its balustrades (two abreast, the owner 2026-11-12)
 
