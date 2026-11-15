@@ -64,7 +64,8 @@ func _json(extra: Dictionary) -> String:
 func test_depot_has_flag_a_on_a_site_and_flag_b_on_b_site() -> void:
 	var m := MapData.load_map("depot", MapStyle.new(), 6)
 	assert_eq(m.warnings, [] as Array[String])
-	assert_eq(m.poles, PackedVector3Array([Vector3(44.0, 0.0, -27.0), Vector3(45.0, 0.0, 28.0)]), "A, then B")
+	assert_eq(m.poles, PackedVector3Array([Vector3(36.5, 0.0, -26.5), Vector3(37.0, 0.0, 27.5)]),
+			"A, then B (DC1: 8 m in from the sites' far ends)")
 	assert_true(m.has_pole)
 	assert_eq(m.pole, m.poles[0], "pole is flag A's")
 	assert_eq([MapAreas.area_at(m.areas, m.poles[0]), MapAreas.area_at(m.areas, m.poles[1])], ["A site", "B site"])

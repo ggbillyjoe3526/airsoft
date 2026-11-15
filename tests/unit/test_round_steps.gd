@@ -263,7 +263,8 @@ func test_the_nav_grid_and_the_blocks_still_take_the_box() -> void:
 	for b in m.blocks:
 		if b.kind == &"drum" or b.kind == &"barrel":
 			drums += 1
-	assert_eq(drums, 22, "Depot's drum and barrel blocks are still one block each")
+	# 21 since DC1's compact hall left the old Mid exit's barrels out (it is the west spawn room now).
+	assert_eq(drums, 21, "Depot's drum and barrel blocks are still one block each")
 	var nav := NavGrid.build(m, tuning.nav, tuning.body)
 	for b in m.blocks:
 		if b.kind != &"drum":

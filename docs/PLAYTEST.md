@@ -1723,7 +1723,7 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 
 ## Plant The Bomb's fuse on each field (PB4)
 
-- [ ] **A short fuse is fair to the defenders.** Defend on Depot (16 s fuse), Woodland (27 s) and Subway (22 s) at
+- [ ] **A short fuse is fair to the defenders.** Defend on Depot (24 s fuse), Woodland (27 s) and Subway (22 s) at
   Normal and Hard; let the attackers arm the bomb on the site nearest you and on the one farthest away, then go for
   it. The Match page says the field's fuse under the rules.
   Pass: from the near site you always have time to defuse it yourself; from the far site it is a race you can win if
@@ -1797,6 +1797,21 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
   little each step (on the laptop at Medium, Low haze should cost well under 1 ms); High looks as the old "on" did.
 - [ ] **An old Custom setting.** If you had Volumetric haze switched on in a Custom preset before this change, it now
   reads High.
+
+## Depot's compact hall (DC1)
+
+- [ ] **The west start is a room, not a corridor.** Play Elimination on Depot as Beta (the west) and Attack / Defend
+  as the attackers. From the start, go out each way: east through the gap past the crate rack into Upper mid, north up
+  the stairs to the Yard, south down the stairs to the Pens.
+  Pass: each way out is quick and clear; the crate screens never block you or a bot; from Upper mid, the Yard or the
+  Pens you never see into the start.
+- [ ] **Fights spread over the hall.** Play three rounds of Elimination and three of Attack / Defend on Depot at
+  Normal.
+  Pass: fights happen in the Shoot House rooms, the Lounge, the Offices, the Pens, the Huts and between the containers,
+  not only in the Chrono hall and on the sites; the first fight comes sooner than before (about 12 to 15 s).
+- [ ] **Defending a site has ground in front of it.** Defend on Depot in Attack / Defend and Plant The Bomb.
+  Pass: the poles and the bomb sites stand at the hall's end of A and B; your bots hold the Offices door, Lower mid
+  and the end of the Containers, and the attack meets them there before it reaches a pole.
 
 ## Reporting what you find
 

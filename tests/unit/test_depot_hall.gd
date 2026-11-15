@@ -4,6 +4,10 @@ extends GutTest
 ## sight, the overhead sun, no spawn seen from the floor, and the run times the concept was balanced on.
 
 const SIDE := 8
+## Where the side rooms are timed (m east of the field's middle, at the spot's z): the concept's spots in the Lounge
+## (-3, -24) and the Box yard (1, 18), before the compact hall (DC1) moved the middle.
+const LOUNGE_FROM_MIDDLE := -5.0
+const BOX_YARD_FROM_MIDDLE := 2.5
 
 var tuning: SimTuning = SimTuning.new()
 var style: MapStyle = MapStyle.new()
@@ -27,7 +31,7 @@ func test_it_reads_clean_with_eight_a_side() -> void:
 	if entry != null:
 		assert_eq([entry.team_min, entry.team_standard, entry.team_max], [5, 6, 8],
 				"5 v 5 to 8 v 8, 6 v 6 its standard (TS1)")
-	assert_eq(map.lanes.size(), 3, "three lanes")
+	assert_eq(map.lanes.size(), 5, "five lanes (DC1): two corridors, two through the rooms and the middle")
 	assert_true(map.has_pole and map.has_overtime_flag)
 
 
@@ -90,7 +94,7 @@ func test_no_spawn_is_seen_from_the_floor() -> void:
 		var room := "Staging" if e == 0 else "Loading bay"
 		for s in map.ends[e].spawns:
 			var from := s.position + Vector3.UP * eye
-			for i in range(-53, 54, 1):
+			for i in range(-43, 54, 1):
 				for j in range(-35, 36, 1):
 					var p := Vector3(i + 0.5, 0.0, j + 0.5)
 					# Everywhere on the floor but the spawn's own room: both sites, the stairs and the ramp too.
@@ -109,9 +113,9 @@ func test_all_the_floor_outside_the_named_areas_is_racking_or_plywood_rooms() ->
 		if blk.center.y + blk.size.y * 0.5 >= 2.0:
 			tall.append(blk)
 	var open := PackedStringArray()
-	for i in 216:
+	for i in 196:
 		for j in 144:
-			var p := Vector3(-54.0 + 0.25 + i * 0.5, 0.0, -36.0 + 0.25 + j * 0.5)
+			var p := Vector3(-44.0 + 0.25 + i * 0.5, 0.0, -36.0 + 0.25 + j * 0.5)
 			if MapAreas.area_at(map.areas, p) != "":
 				continue
 			var inside := false
@@ -138,11 +142,34 @@ func test_both_teams_reach_the_middle_together_and_each_owns_a_side_lane() -> vo
 	var run := tuning.movement.run_speed
 	var hall := _fastest(nav, 0, map.overtime_flag) - _fastest(nav, 1, map.overtime_flag)
 	assert_lt(absf(hall) / run, 1.5, "the Chrono hall is even (%.1f s apart)" % (hall / run))
-	var lounge := (_fastest(nav, 0, Vector3(-3, 0, -24)) - _fastest(nav, 1, Vector3(-3, 0, -24))) / run
-	var box_yard := (_fastest(nav, 0, Vector3(1, 0, 18)) - _fastest(nav, 1, Vector3(1, 0, 18))) / run
+	# The Lounge and the Box yard are timed where the concept timed them from the field's middle (the line halfway
+	# between the spawns' centres, across the way between them): DC1 moved the west spawn 10 m in, and the middle with it.
+	var lounge_at := _off_middle(LOUNGE_FROM_MIDDLE, -24.0)
+	var box_yard_at := _off_middle(BOX_YARD_FROM_MIDDLE, 18.0)
+	var lounge := (_fastest(nav, 0, lounge_at) - _fastest(nav, 1, lounge_at)) / run
+	var box_yard := (_fastest(nav, 0, box_yard_at) - _fastest(nav, 1, box_yard_at)) / run
 	assert_between(lounge, -4.0, -1.0, "end 0 reaches the Lounge first (%.1f s)" % lounge)
 	assert_between(box_yard, 1.0, 4.0, "end 1 reaches the Box yard first (%.1f s)" % box_yard)
-	assert_lt(absf(lounge + box_yard), 1.5, "each end's lead is about the same")
+	assert_lt(absf(lounge + box_yard), 1.5, "each end's lead is about the same (%.1f s, %.1f s)" % [lounge, box_yard])
+
+
+## The floor spot `east` m east of the field's middle at `z`: the middle is the line through the point halfway between
+## the two ends' spawn centres, square to the way between them.
+func _off_middle(east: float, z: float) -> Vector3:
+	var home := _centre(0)
+	var way := _centre(1) - home
+	way.y = 0.0
+	var mid := home + way * 0.5
+	var across := way.normalized()
+	# On the middle line, (p - mid) . across == 0, so x = mid.x - (z - mid.z) * across.z / across.x.
+	return Vector3(mid.x - (z - mid.z) * across.z / across.x + east, 0.0, z)
+
+
+func _centre(e: int) -> Vector3:
+	var c := Vector3.ZERO
+	for s in map.ends[e].spawns:
+		c += s.position
+	return c / float(map.ends[e].spawns.size())
 
 
 ## The shortest walk (m) from any of end `e`'s spawns to `goal`.
