@@ -209,6 +209,8 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	var ready := w.live and BotSenses.has_reacted(b, w) and not cmd.sprint and b.mode != Bot.Mode.COVER
 	if not ready or target == null or off_aim >= deg_to_rad(cfg.fire_cone_deg):
 		b.pause_left = maxf(0.0, b.pause_left - dt)
+		# A burst under way ends once it is off its target (FV1): it lets off, as on full auto.
+		cmd.stop_burst = true
 		return
 	var dir := Vector3(-sin(b.aim_yaw) * cos(b.aim_pitch), sin(b.aim_pitch), -cos(b.aim_yaw) * cos(b.aim_pitch))
 	var dist := eye.distance_to(_aim_point)
@@ -218,8 +220,10 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	if bolt_waits(b, w, dist) or pattern_too_wide(b, cfg, dist):
 		return
 	if _line_of_fire_blocked(b, w, eye, dir, dist, dt):
-		# Seen through glass or leaves it can't shoot through (BQ1): counted, so it goes round in time.
+		# Seen through glass or leaves it can't shoot through (BQ1): counted, so it goes round in time. A burst under way
+		# ends there, a teammate stepped in front, as full auto lets off (FV1).
 		b.no_shot_for = b.no_shot_for + dt if _level_in_line else 0.0
+		cmd.stop_burst = true
 		return
 	b.no_shot_for = 0.0
 	var begun := b.burst_left <= 0.0 and b.pause_left <= 0.0

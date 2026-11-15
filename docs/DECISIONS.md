@@ -679,8 +679,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   comes on full auto, any replica now or later and the bots' too, to semi (or burst) at the start of every round
   there; the player can still switch to auto in the round. Bots may too, but only for a target in open space down a
   long sight line, and not every time (owner, 2026-11-02: "It's an option; it doesn't mean they have to";
-  `BotFireMode`). Both hold on every map later given a Start mode (owner, 2026-11-02). Depot, the one fully indoor
-  field, starts on semi; the other fields start replicas as they come and
+  `BotFireMode`). Both hold on every map later given a Start mode (owner, 2026-11-02). The indoor fields (Depot,
+  Subway) start on burst (owner, 2026-11-15, FV1; semi before): the AEG on burst, a replica without burst (the
+  Compact SMG) on semi, one that comes on semi (the Cyber) on semi; a bot on burst taps a burst at a time at a
+  player's pace (`semi_tap_gap` after each burst ends). The other fields start replicas as they come and
   keep a selector as set for the match. The owner's exception (2026-11-14, AUD2): bots holding the Compact SMG go
   full auto there at a target within 12 m (`BotConfig.close_auto_replicas`, `close_auto_range`; they go to it from
   11 m in and keep it out to 12, `close_auto_slack`, so the selector doesn't flick at the edge); beyond that, and for
@@ -1024,6 +1026,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   coat (about half metallic, a broad highlight, near black when painted black) and polymer draws its paint nearly
   as it is; white polymer stays a touch off-white and no replica is wood. He answered "Perfect" to the pictures; the
   values are not re-tuned without him (docs/records/MQ4.md).
+- **The AEG's delta ring, handguard gaps and forward assist (owner, 2026-11-15, AF1).** On the all-angles sheet,
+  against an M4 quad-rail photo: the ring "should go around the full body" (the rail covered its top), the handguard
+  "should have gaps in between the rails (not the rails themselves)" and the forward assist was "too small and
+  recessed. It should be slightly larger and stick out at more of an angle." So the upper's top rail stops at the
+  ring and the handguard's starts in front of it; the handguard is hollow with a row of oval slots in each corner
+  between two rails (the lower ones a little shorter, as on the photo), the barrel and a gas tube seen through them;
+  the left rail cover is a rail's height; the forward assist's axis turns 18 degrees out toward the back. The bots'
+  copy keeps a solid handguard: at its 3,000 triangles the slots frayed (docs/records/AF1.md).
 - **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
   handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
   sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip
@@ -1207,6 +1217,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   fullscreen (on the display it opens on). V-Sync is off. Edge smoothing is Off, on every graphics preset (a player who
   turns it on keeps it, as Custom). A save from before (settings version 1) moves a value still equal to the old default
   to the new one, once; a value the player changed is kept. Reset to defaults gives the new values.
+- **First-start defaults, 15 November (owner, 2026-11-15; FV1).** Field of view 87 (was 90). Volumes: master 90 %,
+  effects 80 %, power source 80 %, ambience 30 %, interface 40 %; the Power source bus plays 1.25 times its slider
+  (`Settings.VOLUME_GAINS`), so 80 % is the old 100 % and 100 % is louder than before. A version 1 to 4 save still on
+  its old defaults moves to these, once; a Power source the player set is divided by its gain so it sounds the same;
+  any other value the player changed is kept.
 - **Reloads are manual by default (owner, 2026-10-29; RL2).** "Weapons currently automatically reload. This shouldn't
   happen. By default a prompt should come up for the player to press the R button. In the settings there can be a
   setting to toggle between manual and automatic reloads." Settings › Controls › Reload: Manual (the default; an empty
