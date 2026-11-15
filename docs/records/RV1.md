@@ -98,7 +98,8 @@ the same end and role: 1 is the same ground every round.
 
 The owner asked (2026-11-15) for route variety to be re-measured once the compact Depot (DC1, #368), Woodland's new
 routes (WB1, #362) and the two-level Subway (SW1, #369) merged. Main `2851ca0`, `tools/map_heat.gd`, Normal 6v6,
-seeds 1 to 32. Nothing is out of band, so no values changed.
+seeds 1 to 32. Nothing is out of band, so no values changed. The Plant The Bomb rows ran at the fuses then on main
+(Woodland 27 s); PB5 (#372) has since re-measured the fuses on these layouts (Woodland 25 s).
 
 | Map, mode | Win rate (± 1 SE) | Band | First hit (median) | Route sameness (RV1 on the old maps) |
 |---|---|---|---|---|
