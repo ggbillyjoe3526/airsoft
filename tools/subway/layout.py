@@ -108,8 +108,8 @@ block("barrier", C, -14.0, -13.4, 3.6, 5.6, 1.1, dress="crowd_barrier")
 block("cabinet", C, -9.0, -7.6, -8.4, -7.0, 2.2, dress="help_point")  # help points / map boards
 block("cabinet", C, -9.0, -7.6, 7.0, 8.4, 2.2, dress="help_point")
 block("furniture", C, -17.4, -16.8, 5.5, 8.5, 0.8, dress="station_bench_long", facing="+x")  # bench
-block("wall", C, -12.6, -11.4, -9.5, -6.5, 4.0)  # piers: break the passage-to-passage line and the hall's down the
-block("wall", C, -12.6, -11.4, 6.5, 9.5, 4.0)    # north wall (SW1: out to the passages' line, no seam beside them)
+block("wall", C, -12.6, -11.4, -9.5, -6.9, 4.0)            # piers: break the passage-to-passage line
+block("wall", C, -12.6, -11.4, 6.9, 9.5, 4.0)
 block("container", C, -12.4, -10.4, -2.6, 2.6, 2.8, 0x8a8478, dress="kiosk_long")  # shut newsagent's kiosk between the
 #                                                                escalator banks:
 #                                                                no line from the lower hall up both flights
