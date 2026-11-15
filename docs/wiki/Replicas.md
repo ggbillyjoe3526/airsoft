@@ -65,8 +65,8 @@ with it back, the barrel shows in front of it.
 It is the quickest replica to bring up, so switching to it beats any reload, and for a pistol it groups tightly,
 tighter still from the hip. Against that it kicks the hardest and holds the fewest BBs. Gas drives it, so the gas
 you load sets its energy: stronger gas pushes harder and kicks harder. It is a compact
-striker pistol: a squared slide with rounded edges, a chamfered nose and serrations at the front and back, a
-railed dust cover, a raked grip with stippled panels
+striker pistol: a squared slide with rounded edges, a chamfered nose, serrations at the front and back and
+a lined cover plate on its back, a railed dust cover, a raked grip with stippled panels
 and finger grooves, and a thumb rest. Its sights are a white U at the back and a post with a white dot at the front:
 aimed, the post sits in the U. It takes a laser, a silencer and an extended magazine. It is in your kit from
 the start.

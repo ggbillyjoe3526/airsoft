@@ -112,15 +112,15 @@ COVER_DEPTH = 0.0010
 COVER_LINES = 5
 COVER_LINE_Z = 0.0133
 COVER_LINE_PITCH = 0.00097
-COVER_LINE_H = 0.0003
-COVER_LINE_DEPTH = 0.0003
+COVER_LINE_H = 0.0002
+COVER_LINE_DEPTH = 0.00015
 RECESS_HW = 0.0078
-RECESS_DEPTH = 0.0035
+RECESS_DEPTH = 0.0055
 TONGUE_HW = 0.0027
 RECESS_TONGUE_FOOT = 0.0040
 BLOCKS = (((-0.0068, -0.0031), 0.0072), ((0.0030, 0.0058), 0.0061))
 BLOCK_FOOT = 0.0034
-BLOCK_INSET = 0.0012
+BLOCK_INSET = 0.0022
 # The frame's walls under the rear serrations stay this far inside the grooves' floor (owner 2026-11-15: they showed
 # through as grey squares at the grooves' feet).
 SERRATION_CLEAR = 0.0003
@@ -378,9 +378,12 @@ def slide() -> object:
               (COVER_HW + 0.001, y0 + 0.0001 + COVER_LINE_DEPTH, z + 0.5 * COVER_LINE_H), "Body")
         lines.append(c.build())
     hs.cut(plate_ob, lines)
-    b = hs.Builder("RecessBlocks", ["Body"])
+    b = hs.Builder("RecessBlocks", ["Body", "Detail"])
     for (xa, xb), zt in BLOCKS:
         b.box((xa, y0 + BLOCK_INSET, BLOCK_FOOT), (xb, y0 + RECESS_DEPTH + 0.0002, zt), "Body")
+    # The recess's floor in the dark detail colour, so it reads as a hollow behind the blocks as the photos' does.
+    b.box((-RECESS_HW - 0.0002, y0 + RECESS_DEPTH - 0.0001, SLIDE_FOOT),
+          (RECESS_HW + 0.0002, y0 + RECESS_DEPTH + 0.0003, COVER_FOOT + 0.0002), "Detail")
     blocks = hs.finish(b.build(), 0.0002, 1)
     parts = [ob, hs.finish(plate_ob, 0.0002, 1), blocks]
     # The extractor and the sights.
@@ -1195,7 +1198,10 @@ def build() -> None:
                 total += n
             print("  %-16s %6d triangles" % (ob.name, n))
     print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
-    wear.apply(seed=2, heavier=HEAVIER_WEAR)  # RW1: light use-wear in the hands
+    # RW1: light use-wear in the hands; none in the slide's back recess (GB1: its inside corners gathered grime marks).
+    y0 = SLIDE_Y[0]
+    wear.apply(seed=2, heavier=HEAVIER_WEAR, clean=(((-RECESS_HW - 0.0005, y0 - 0.0005, SLIDE_FOOT - 0.001),
+                                                     (RECESS_HW + 0.0005, y0 + RECESS_DEPTH + 0.0005, COVER_FOOT + 0.0012)),))
     hs.export(OUT, True)
     print("wrote", OUT)
     build_parts()
