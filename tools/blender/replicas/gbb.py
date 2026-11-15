@@ -238,6 +238,10 @@ MATERIALS = {
     "Body": (0x26292e, 0.5, 0.0), "Furniture": (0x2f333a, 0.56, 0.0), "Detail": (0x2b2e33, 0.5, 0.0),
     "Accent": (0xf2f0ea, 0.5, 0.0), "Metal": (0x3c4046, 0.38, 0.6), "Stipple": (0x22252a, 0.95, 0.0),
     "BB": (0xf4f1e8, 0.3, 0.0),
+    # The slide's back recess's floor (GB1): near black in every paint (no Surface kind, so the game draws it as the
+    # file has it), so the recess reads as a hollow as the owner's photos' does. Metallic, so its near-black colour is
+    # also its reflectance: a dielectric's 4 % would mirror the sky and lift it to most of the slide's brightness.
+    "Cavity": (0x0d0e10, 0.9, 1.0),
 }
 
 
@@ -378,12 +382,13 @@ def slide() -> object:
               (COVER_HW + 0.001, y0 + 0.0001 + COVER_LINE_DEPTH, z + 0.5 * COVER_LINE_H), "Body")
         lines.append(c.build())
     hs.cut(plate_ob, lines)
-    b = hs.Builder("RecessBlocks", ["Body", "Detail"])
+    b = hs.Builder("RecessBlocks", ["Body", "Cavity"])
     for (xa, xb), zt in BLOCKS:
         b.box((xa, y0 + BLOCK_INSET, BLOCK_FOOT), (xb, y0 + RECESS_DEPTH + 0.0002, zt), "Body")
-    # The recess's floor in the dark detail colour, so it reads as a hollow behind the blocks as the photos' does.
-    b.box((-RECESS_HW - 0.0002, y0 + RECESS_DEPTH - 0.0001, SLIDE_FOOT),
-          (RECESS_HW + 0.0002, y0 + RECESS_DEPTH + 0.0003, COVER_FOOT + 0.0002), "Detail")
+    # The recess's floor, near black whatever the paint, so it reads as a hollow behind the blocks as the photos'
+    # does; its foot a hair over the slide's underside (no two faces in one plane).
+    b.box((-RECESS_HW - 0.0002, y0 + RECESS_DEPTH - 0.0001, SLIDE_FOOT + 0.0001),
+          (RECESS_HW + 0.0002, y0 + RECESS_DEPTH + 0.0003, COVER_FOOT + 0.0002), "Cavity")
     blocks = hs.finish(b.build(), 0.0002, 1)
     parts = [ob, hs.finish(plate_ob, 0.0002, 1), blocks]
     # The extractor and the sights.
