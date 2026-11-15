@@ -128,12 +128,23 @@ ATTEMPT_ROWS
   edges across the depth, each turned up to 10 degrees (at least 4 cm apart at the faces); a third of the pieces the
   whole depth long, the rest two meeting 0 to 40 % off the middle; ridge pieces solid wedges closed by sawn ends
   (none in the end columns, where the pieces are lower), bark pieces 0.4 to 1.1 of their full rise. Paid for: each
-  core side one polygon, fewer drying checks (15 %) and fewer hearts. 3,188 / 3,189 / 3,065 triangles (hearts on
-  about 25 / 33 / 100 % of the wedges): Woodland draws no more.
+  core side one polygon, fewer drying checks (15 %) and fewer hearts. Eleventh pass (the critic's attempt 10): the
+  end's pieces are split wood, not pipes, each its own kind (a quarter round logs, bark all round and smooth; a
+  third logs split down one side, a flat pale face out between bark edges; a quarter wedges point out, two flat split
+  faces; the rest quarters, a split face and a bark round), split faces crisp, bark a warmer grey-brown (`EndBark`,
+  `EndBarkDark`, `EndBarkLight`, just off Beta orange's hue); each course lies on the one under it (the lines between
+  courses tilted 1 to 3 degrees, so no course stands into the next and no slot opens under one at a face); the front
+  and back pieces meet 1 to 3 cm apart, each closed there by its own sawn end (a round log's a half round of 8 sides
+  with a bark rim); each piece's sawn end at the face lies in the face's plane, just behind the face's pieces, drawn in
+  to the face's nearest piece at its foot, middle and top (up to 16 cm), so no straight dark seam runs up a corner;
+  the end's top piece stands 3 cm over the crest, its inside closed, and the top's end pieces lie low under it. The
+  top: pieces 0.45 to 1.6 of 16 cm wide, turned up to 12 degrees; none stops short of a face (no flat backs showing);
+  two or three pieces lie over the course turned 20 to 40 degrees. 3,193 / 3,189 / 3,044 triangles (hearts on about
+  a fifth of the wedges in A and B, all in C): Woodland draws no more.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
-  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth, v9 the ninth and v10 the tenth: the woodpiles).
+  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth, v9 the ninth, v10 the tenth and v11 the eleventh: the woodpiles).
 
 ## Known issues left
 
