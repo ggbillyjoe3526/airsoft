@@ -89,8 +89,8 @@ kits that suit it.
 <!-- wiki:bot-kits -->
 
 Under the Factory kit house rule every bot carries the AEG Rifle and the GBB Pistol as they come. Bots fire full auto wherever their replica has it,
-except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there they fire single shots and only now and
-then switch to full auto, at someone out in the open down a long sight line. Each bot decides that once per opponent
+except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there they fire 3-round bursts (single shots with a
+replica that has no burst) and only now and then switch to full auto, at someone out in the open down a long sight line. Each bot decides that once per opponent
 each round. A bot carrying the Compact SMG is the one exception: indoors it goes full auto at a target within 12 m.
 
 ## Bots in Attack / Defend

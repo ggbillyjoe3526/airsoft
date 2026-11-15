@@ -46,7 +46,7 @@ round a corner, three BBs at once. The **Compact SMG** is close quarters on the 
 
 An electric rifle (an AEG, "automatic electric gun"), with a motor whirr on every shot. It fires **single shots,
 3-round bursts or full auto**: press **B** to change mode, and the fire selector on the replica shows the mode you
-are in. On an indoor field (Depot) it starts each round on single shots: [no full auto indoors](Maps#depot).
+are in. On an indoor field (Depot) it starts each round on 3-round bursts: [no full auto indoors](Maps#depot).
 A battery drives it, so the battery you fit sets its rate of fire. It is a short carbine, about 67 cm long: a
 quad-rail handguard with a ribbed cover, an A-frame front sight, a small ghost-ring rear sight, a raked grip moulded
 in one piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the
@@ -120,8 +120,8 @@ over the pump.
 A compact electric SMG built for shooting on the move, unlocked at level 12. It fires **single shots or full auto**
 (no burst) faster than any other replica, you move a little quicker with it than with a rifle, and moving spreads its
 shots only half as much as it does the others', so on the run it groups tighter than the AEG Rifle. It is the
-quickest of the rifles to bring up and to reload. On an indoor field it starts each round on single shots, as the AEG
-Rifle does ([no full auto indoors](Maps#depot)).
+quickest of the rifles to bring up and to reload. On an indoor field it starts each round on single shots, having
+no burst ([no full auto indoors](Maps#depot)).
 
 Against that, its reach is short, its shots are a little wider aimed, and a magazine is empty in under three seconds
 with the trigger held. It takes an optic, the Red Laser or Weapon Torch and a muzzle part; no grip, barrel or

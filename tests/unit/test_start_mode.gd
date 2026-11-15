@@ -1,7 +1,8 @@
 extends GutTest
 ## NA1: "no full auto indoors" (owner, 2026-11-02). data/maps.md's Start mode holds every replica that comes on full
 ## auto, any replica now or added later, the bots' too, to a lower mode at the start of every round on that field
-## (Depot: semi); B still switches to auto in the round. Fields without one start replicas as they come, kept all match.
+## (Depot and Subway: burst since FV1); B still switches to auto in the round. Fields without one start replicas as
+## they come, kept all match.
 
 const DT := 1.0 / 60.0
 const SEMI := ReplicaConfig.FireMode.SEMI
@@ -61,10 +62,11 @@ func _press_selector(c: Character) -> void:
 	Armament.step(c, cmd, Vector3.ZERO, 1.0, true, pool, Seeds.stream(1), events, tuning, DT)
 
 
-func test_depot_is_the_one_shipped_field_with_no_full_auto_to_start() -> void:
+func test_the_indoor_fields_are_the_shipped_ones_with_no_full_auto_to_start() -> void:
 	var cat := MapCatalog.read_file()
 	assert_eq(cat.problems, [] as Array[String])
-	assert_eq(cat.find("depot").start_mode, SEMI)
+	for id: String in ["depot", "subway"]:
+		assert_eq(cat.find(id).start_mode, BURST, "%s: burst (owner, 2026-11-15, FV1; semi before)" % id)
 	for id: String in ["woodland", "range"]:
 		assert_eq(cat.find(id).start_mode, AUTO, "%s starts replicas as they come" % id)
 

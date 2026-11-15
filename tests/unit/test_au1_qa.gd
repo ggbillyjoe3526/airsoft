@@ -17,6 +17,9 @@ var you: Character = null
 var enemy: Character = null
 
 
+## The ambience a fresh start has (FV1: 30 %, back where it was before AU1).
+var ambience_default: float = Settings.VOLUME_DEFAULTS[&"Ambience"]
+
 func before_each() -> void:
 	_n += 1
 	dir = "%s/%d" % [ROOT, _n]
@@ -100,8 +103,8 @@ func _voices(prefix: String) -> Array[AudioStreamPlayer3D]:
 func test_a_version_2_file_with_the_old_ambience_default_loads_at_20_percent() -> void:
 	var t := _load(2, {"volumes": {"Master": 1.0, "Effects": 0.7, "Power": 1.0, "Ambience": 0.3, "Interface": 0.4}})
 	assert_eq(t.load_message, "", "an older file is not a damaged one")
-	assert_eq(t.volumes[&"Ambience"], 0.2)
-	assert_eq(t.volumes[&"Effects"], 0.7)
+	assert_eq(t.volumes[&"Ambience"], ambience_default)
+	assert_eq(t.volumes[&"Effects"], Settings.VOLUME_DEFAULTS[&"Effects"])
 
 
 func test_a_version_2_file_with_a_chosen_ambience_keeps_it() -> void:
@@ -117,21 +120,23 @@ func test_a_version_3_file_keeps_an_ambience_the_player_set_to_the_old_default()
 
 func test_a_version_1_file_untouched_lands_on_the_newest_ambience_in_one_step() -> void:
 	var t := _load(1, {"volumes": {"Ambience": 0.6, "Master": 1.0, "Effects": 0.8, "Power": 1.0, "Interface": 0.5}})
-	assert_eq(t.volumes[&"Ambience"], Settings.VOLUME_DEFAULTS[&"Ambience"], "0.6 goes to 0.2, not stopping at 0.3")
+	assert_eq(t.volumes[&"Ambience"], ambience_default, "0.6 goes to 0.2, not stopping at 0.3")
 	assert_eq(t.volumes[&"Effects"], Settings.VOLUME_DEFAULTS[&"Effects"])
 
 
 func test_a_version_2_file_without_or_with_a_bad_volumes_entry_gets_the_defaults() -> void:
-	assert_eq(_load(2, {}).volumes[&"Ambience"], 0.2, "no volumes")
-	assert_eq(_load(2, {"volumes": "loud"}).volumes[&"Ambience"], 0.2, "volumes not a dictionary")
-	assert_eq(_load(2, {"volumes": {"Ambience": "0.3"}}).volumes[&"Ambience"], 0.2, "a string keeps the default")
-	assert_eq(_load(2, {"volumes": {"Ambience": 3.0}}).volumes[&"Ambience"], 0.2, "out of range keeps the default")
-	assert_eq(_load(2, {"volumes": {"Ambience": null}}).volumes[&"Ambience"], 0.2, "null keeps the default")
+	assert_eq(_load(2, {}).volumes[&"Ambience"], ambience_default, "no volumes")
+	assert_eq(_load(2, {"volumes": "loud"}).volumes[&"Ambience"], ambience_default, "volumes not a dictionary")
+	assert_eq(_load(2, {"volumes": {"Ambience": "0.3"}}).volumes[&"Ambience"], ambience_default,
+			"a string keeps the default")
+	assert_eq(_load(2, {"volumes": {"Ambience": 3.0}}).volumes[&"Ambience"], ambience_default,
+			"out of range keeps the default")
+	assert_eq(_load(2, {"volumes": {"Ambience": null}}).volumes[&"Ambience"], ambience_default, "null keeps the default")
 
 
 func test_the_move_happens_once_a_later_choice_of_30_percent_survives_restarts() -> void:
 	var t := _load(2, {"volumes": {"Ambience": 0.3}})
-	assert_eq(t.volumes[&"Ambience"], 0.2)
+	assert_eq(t.volumes[&"Ambience"], ambience_default)
 	t.volumes[&"Ambience"] = 0.3
 	assert_true(t.save(path))
 	assert_eq(int(SaveFile.read(path, Settings.KIND).version), Settings.VERSION, "saved as the newest version")
@@ -160,7 +165,7 @@ func test_a_bundle_holding_version_2_settings_migrates_the_ambience_on_load() ->
 	assert_true(bundle.write(paths))
 	var t := Settings.new(PlayTuning.new())
 	t.load_file(paths[SaveBundle.KINDS.find(Settings.KIND)])
-	assert_eq(t.volumes[&"Ambience"], 0.2)
+	assert_eq(t.volumes[&"Ambience"], ambience_default)
 	assert_eq(t.volumes[&"Effects"], 0.9)
 
 
@@ -168,14 +173,14 @@ func test_migrating_a_version_2_dictionary_leaves_the_one_it_was_given_alone() -
 	var data := {"volumes": {"Ambience": 0.3}}
 	var moved := Settings.migrate_defaults(data, 2)
 	assert_eq((data["volumes"] as Dictionary)["Ambience"], 0.3)
-	assert_eq((moved["volumes"] as Dictionary)["Ambience"], 0.2)
+	assert_eq((moved["volumes"] as Dictionary)["Ambience"], ambience_default)
 
 
 func test_a_reset_gives_the_new_ambience_default() -> void:
 	var s := Settings.new(PlayTuning.new())
 	s.volumes[&"Ambience"] = 0.9
 	s.reset_save(path)
-	assert_eq(s.volumes[&"Ambience"], 0.2)
+	assert_eq(s.volumes[&"Ambience"], ambience_default)
 
 
 # --- the shot ---

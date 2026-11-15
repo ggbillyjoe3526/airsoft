@@ -112,7 +112,8 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## a target moving about at the range's edge would otherwise turn the selector back and forth with each step.
 @export var close_auto_slack: float = 1.0
 ## There, the least time between a bot's pulls on semi (s): a quick player's tapping, five a second, against the AEG's
-## 13 BBs a second on full auto. Elsewhere a bot on semi pulls as fast as the replica cycles, as it always has.
+## 13 BBs a second on full auto; on burst, from the end of one burst to the next pull (FV1). Elsewhere a bot on semi
+## pulls as fast as the replica cycles, as it always has.
 @export var semi_tap_gap: float = 0.2
 ## Aims at this share of the target's hit-volume height (the chest), or its head when only that shows.
 @export var aim_height_fraction: float = 0.7
