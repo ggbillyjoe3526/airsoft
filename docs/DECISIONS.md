@@ -546,7 +546,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Plant The Bomb's fuse is each field's own (owner's ask, 2026-11-15, PB4; the values are Claude's).** He asked for
   the attackers' win rate to be made fairer. The fuse is the lever (data/maps.md `Fuse (s)`, the game's 30 s where a
   field has none), set from bot matches to near half the rounds for the attackers: Depot 16 s, Subway 22 s, Woodland 23
-  s (27 s on WB1's layout, below). The defuse stays 6 s and the plant 3.5 s, the lengths of his recordings. A field whose layout
+  s; on the reworked layouts with the bots' route variety (PB5, measured again on main 2851ca0): Depot 24 s, Subway 22
+  s, Woodland 25 s. The defuse stays 6 s and the plant 3.5 s, the lengths of his recordings. A field whose layout
   changes has its fuse measured again (32 seeds at Normal, `docs/records/PB4.md`), and every fuse leaves a defending
   player within 15 m of the bomb time to reach it before a bot takes the defuse over.
 - **Bots throw their bombs as a player would (2026-10-30, SF2; Claude's defaults).** A smoke when pinned in cover
@@ -1016,7 +1017,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   6.0 m). The Fort and the Sawmill keep their other pieces and names as the defenders' ground behind the flags; the
   areas at the poles are A site and B site; the Box lantern and the Sawmill's work lamp moved to the flags. The middle
   route ends at Hut row; the two middle routes' last posts are the concept's, 14 m and 10 m short of their poles on
-  the way the attack comes (by the poles the attackers won 64 % ±3). Woodland's fuse is 27 s.
+  the way the attack comes (by the poles the attackers won 64 % ±3). Woodland's fuse is 27 s (25 s since PB5).
   Bots, 6v6, Normal, seeds 1 to 32, on main with RV1's route variety: Attack / Defend attackers 55 % ±3, the first
   hit at 20 s (24 s before), half the knock-outs outside the defenders' third (12 %); Plant The Bomb attackers 47 % ±3
   at 27 s (before RV1 merged: 59 % at the old 23 s, 51 % at 27 s). The ground a bot stands on in at least one round
