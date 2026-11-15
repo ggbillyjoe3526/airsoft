@@ -25,6 +25,9 @@ class Contact:
 	var held: bool = false
 	var acquired_at: float = 0.0
 	var react_at: float = 0.0
+	## When its reaction now under way (or last run) began: first seen, or seen again after a moment out of sight
+	## (BotConfig.reacquire_after; AIM1). The aim settles only once that reaction is over (BotAim.settling).
+	var reaction_from: float = 0.0
 
 
 var character: Character = null

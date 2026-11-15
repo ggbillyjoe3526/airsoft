@@ -21,8 +21,9 @@ Bots know only what they see and hear:
 - They see about 55 to 60 m by day, depending on the field. A BB that lands by a bot, or hits its teammate close to
   it, gives the shooter away: for a few seconds the bot makes them out to 70 m, so a long shot from out of sight is
   answered.
-- They react after a moment, and their aim settles before it is steady. They never fire with a teammate in the way,
-  or where a teammate could step into the shot before the BBs arrive.
+- They react after a moment, and their aim settles before it is steady. Duck back behind cover and step out again and
+  a bot has to find you again: it answers a moment later, and its first BBs go wide again. They never fire with a
+  teammate in the way, or where a teammate could step into the shot before the BBs arrive.
 
 ### At night
 
