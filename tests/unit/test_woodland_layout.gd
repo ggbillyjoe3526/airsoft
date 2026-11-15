@@ -385,6 +385,7 @@ func test_a_crouched_body_walks_through_each_tunnel_and_a_standing_one_can_t() -
 # door facing the enemy shut). WB1 (the owner, 2026-11-15, Concept B): A in Fern hollow, B between the woodpiles at Log
 # stacks, each nearer the stream than the Fort and the Sawmill.
 const FLAG_A := Vector2(42.2, -41.4)
+const FLAG_RING := 1.6  # FlagConfig's radius (m)
 const FLAG_B := Vector2(40.0, 42.0)
 const HUT_DOORS := 8
 const SHUT_DOORS := 4
@@ -418,6 +419,22 @@ func test_attack_defend_has_flag_a_in_fern_hollow_and_b_at_log_stacks() -> void:
 	gut.p("B flag: attackers %.1f s, defenders %.1f s" % [attack, defend])
 	assert_between(attack, 30.0, 45.0, "attackers take a while to reach B")
 	assert_lt(defend, 15.0, "defenders are home at B first")
+
+
+## WB1: the pole's crouch crate (MB1's, at the Fort's old pole) moved with flag A, to its stream side, outside the ring.
+func test_flag_a_has_its_crouch_crate_on_the_stream_side_outside_the_ring() -> void:
+	var found := 0
+	for b in map.blocks:
+		if b.kind != &"crate" or b.size.y > 1.6:
+			continue
+		var c := Vector2(b.center.x, b.center.z)
+		if c.distance_to(FLAG_A) > 3.0:
+			continue
+		found += 1
+		assert_lt(c.x, FLAG_A.x, "west of the pole, the side the attack comes by")
+		var gap := Vector2(maxf(absf(c.x - FLAG_A.x) - b.size.x * 0.5, 0.0), maxf(absf(c.y - FLAG_A.y) - b.size.z * 0.5, 0.0))
+		assert_gt(gap.length(), FLAG_RING, "the crate is outside the pole's ring")
+	assert_eq(found, 1, "one low crate by flag A")
 
 
 func test_a_skirmish_round_here_is_three_minutes_and_custom_keeps_its_own() -> void:

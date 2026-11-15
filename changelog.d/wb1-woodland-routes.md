@@ -6,6 +6,6 @@
 - Plant The Bomb's fuse on Woodland is 27 s, so attackers and defenders each win about half.
 - Bots use six routes through the wood, not three: new ones along the north edge, the Berm north of the Clearing and across the Clearing's south side.
 - Defenders meet the attack around the stream too, at the Tower, Hut row and the Culvert, as well as at the flags.
-- In Attack / Defend the first shot comes about 21 s in, down from about 28 s; half the knock-outs now happen away from the defenders' end, up from 1 in 10.
+- In Attack / Defend the first shot comes about 20 s in, down from about 24 s; half the knock-outs now happen away from the defenders' end, up from 1 in 8.
 - The map is the same size and the road stays clear; the Fort and the Sawmill stay behind the flags.
 - At night a lantern hangs by each flag.

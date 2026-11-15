@@ -1002,10 +1002,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   areas at the poles are A site and B site; the Box lantern and the Sawmill's work lamp moved to the flags. The middle
   route ends at Hut row; the two middle routes' last posts are the concept's, 14 m and 10 m short of their poles on
   the way the attack comes (by the poles the attackers won 64 % ±3). Woodland's fuse is 27 s.
-  Bots, 6v6, Normal, seeds 1 to 32, on main: Attack / Defend attackers 55 % ±3, the first hit at 21 s, half the
-  knock-outs outside the defenders' third; Plant The Bomb attackers 51 % ±3 at 27 s (59 % at the old 23 s). With
-  RV1's route variety Attack / Defend read 54 % ±3 (55 % on the old layout), the first hit at 20 s (24 s), and the
-  ground a bot stands on in at least one round in ten grew by 28 % in Elimination and in Attack / Defend.
+  Bots, 6v6, Normal, seeds 1 to 32, on main with RV1's route variety: Attack / Defend attackers 55 % ±3, the first
+  hit at 20 s (24 s before), half the knock-outs outside the defenders' third (12 %); Plant The Bomb attackers 47 % ±3
+  at 27 s (before RV1 merged: 59 % at the old 23 s, 51 % at 27 s). The ground a bot stands on in at least one round
+  in ten grew by 28 % in Elimination and in Attack / Defend.
 - **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the
