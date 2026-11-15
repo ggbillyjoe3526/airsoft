@@ -628,14 +628,16 @@ LANE_PATHS = {
     "ne": [(-76, -10), (-71, -30), (-62, -45), (-48, -50), (-34, -52), (-20, -52), (-7.9, -50.9), (0.5, -52.5),
            (16, -50), (19, -47), (42, -44)],
     # The north middle: between the two west thickets, along the Berm's north side, over the stream north of the
-    # Clearing, north of Hut row, then up the Hollow way to flag A's south-east side, before the Fort's west gate (WB1
-    # critic: every lane's post by a pole stands within 4.5 m of it, as the first three's do).
+    # Clearing, north of Hut row, to the Hollow way's head south of flag A. Its posts are the concept's: north of Hut
+    # row and the Hollow way's head, 14 m short of the pole on the way the attack comes (with both middle routes' posts
+    # by their poles, 3 m off, A / D attackers won 64 % ±3 for 55 % ±3 at these, 32 seeds: docs/records/WB1.md).
     "nm": [(-74, -4), (-60.5, -18.3), (-49.5, -24.7), (-38, -27), (-26, -31), (-14, -28), (-6, -22), (2, -16),
-           (12, -10), (24, -12), (43.4, -37.8)],
+           (12, -10), (24, -12), (40, -28)],
     # The south middle: south of the Cabin, the Clearing's south side, over the stream by the Knoll, up to the north of
-    # Log stacks and flag B; its post by the pole is the pocket's east mouth, between two of the stacks.
+    # Log stacks and flag B. Its posts are the concept's too: the Knoll's east side and the north of Log stacks, 10 m
+    # short of the pole on the way the attack comes.
     "sm": [(-74, 10), (-62, 14), (-48, 12), (-37, 14), (-26, 14), (-15, 15), (-4.7, 15.3), (1, 15.5), (6, 15.5),
-           (17.3, 18.5), (43.0, 41.8)],
+           (17.3, 18.5), (34, 34)],
 }
 # The lanes in the map file's order: the first three keep their places (tests and records name them by number).
 LANE_ORDER = ("n", "m", "s", "ne", "nm", "sm")

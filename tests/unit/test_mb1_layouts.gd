@@ -11,8 +11,9 @@ const MAPS: Array[String] = ["depot", "woodland", "subway"]
 const DEPTH_SLACK := 3.5
 ## The farthest a lane's last two points (the defender posts) may stand from the nearest flag (m).
 const POST_REACH := 30.0
-## WB1: on Woodland every lane's last post stands by its pole (the forward one holds the stream side).
-const WOODLAND_HOME_REACH := 4.5
+## WB1: on Woodland every lane's last post stands on its flag's site: by the pole (2 to 4 m) on the north, north edge
+## and south lanes, on the way the attack comes (10 and 14 m short) on the two middle ones, as the concept has them.
+const WOODLAND_HOME_REACH := 15.0
 ## Woodland's Long road from the west camp's gate to the Culvert (its centreline, tools/woodland/layout.py ROAD; the
 ## strip is walked 2 m either side of it), flag B's pole, the ring a body stands in to raise or hold it, its two
 ## defender posts, and the chest below the eye (m).

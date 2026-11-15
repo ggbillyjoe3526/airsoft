@@ -530,7 +530,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Plant The Bomb's fuse is each field's own (owner's ask, 2026-11-15, PB4; the values are Claude's).** He asked for
   the attackers' win rate to be made fairer. The fuse is the lever (data/maps.md `Fuse (s)`, the game's 30 s where a
   field has none), set from bot matches to near half the rounds for the attackers: Depot 16 s, Subway 22 s, Woodland 23
-  s. The defuse stays 6 s and the plant 3.5 s, the lengths of his recordings. A field whose layout
+  s (27 s on WB1's layout, below). The defuse stays 6 s and the plant 3.5 s, the lengths of his recordings. A field whose layout
   changes has its fuse measured again (32 seeds at Normal, `docs/records/PB4.md`), and every fuse leaves a defending
   player within 15 m of the bomb time to reach it before a bot takes the defuse over.
 - **Bots throw their bombs as a player would (2026-10-30, SF2; Claude's defaults).** A smoke when pinned in cover
@@ -969,24 +969,27 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   flag B (64 seeds, 7 s), so flag B's cover was not it, and sending more defenders to pull a flag down
   (`BotConfig.retakers` 3 or 4 for 2) moved it by less than the noise (`docs/records/MB3.md`).
 - **Woodland is Concept B of the map action redesign (owner, 2026-11-15, WB1).** He picked the recommended concepts
-  ("Go with the recommended options"; report https://claude.ai/artifact/MJvwgMNiyip7EaH5Mxa6Sz). The field keeps its
-  size and its road stays clear. Six bot routes, the first three in their places: the north edge (Pine slope, the
-  Ridge's far side, the stream's north end in its valley, the Tower), the north middle (between the west thickets,
-  along the Berm, over the stream north of the Clearing to the Hollow way's head) and the south middle (the
-  Clearing's south side, over the stream by the Knoll, to Log stacks) join the north, middle and south. Flag A stands
-  in Fern hollow at (42.2, -41.4), beside the oak west of the Fort (the concept's (41, -42), 1.4 m off so its trunk
-  is out of the ring); flag B at Log stacks, (40, 42), in the pocket of three cordwood stacks south of the road. The
-  concept's (36, 40) was on the gravel's edge, and anywhere on that verge the road's S, 40 m west, saw the pole down
-  the Culvert's straight, a line that runs along the strip itself, so no piece could shut it (MB2's rule that the
-  road west of the Culvert sees nothing of B holds). Plant The Bomb's sites follow the flags. Each route's forward
-  defender post holds the stream side (the Tower, the Hollow way's head, Hut row, the Knoll's east side, the
-  Culvert's east head), the other one is by its pole; the middle route ends at Hut row. The Fort and the Sawmill stay
-  as the defenders' ground behind the flags and keep their names; the areas at the poles are A site and B site. The
-  Box lantern and the Sawmill's work lamp moved to the flags. Bots, 6v6, Normal, seeds 1 to 32, both with RV1's route
-  variety: Attack / Defend attackers 54 % ±3 (55 % ±3 before), the first hit at 20 s (24 s), 53 % of knock-outs
-  outside the defenders' third (12 %); Plant The Bomb attackers 53 % ±3 at the 23 s fuse (46 % ±3 before), so the
-  fuse stays; Elimination (16 seeds) the west end 47 % ±4.5 (45 %). Ground a bot stands on in at least one round in
-  ten grew by 28 % in Elimination and 28 % in Attack / Defend (`docs/records/WB1.md`).
+  ("Go with the recommended options"; report https://claude.ai/artifact/MJvwgMNiyip7EaH5Mxa6Sz). His pick: the field
+  keeps its size and its road stays clear; six bot routes, the north edge (Pine slope, the Ridge's far side, the
+  stream's north end, the Tower), the north middle (between the west thickets, along the Berm, over the stream north
+  of the Clearing to the Hollow way's head) and the south middle (the Clearing's south side, over the stream by the
+  Knoll, to Log stacks) joining the north, middle and south; flag A in Fern hollow beside the oak west of the Fort and
+  flag B at Log stacks, about 14 m nearer the stream, the bomb sites with them; each route's forward defender post on
+  the stream side of its flag.
+  WB1's own choices (Claude's defaults, `docs/records/WB1.md`): flag A at (42.2, -41.4), 1.4 m off the concept's
+  (41, -42) so the oak's trunk is out of the ring; flag B at (40, 42) in the pocket of three cordwood stacks, because
+  the concept's (36, 40) was on the gravel's edge and anywhere else on that verge the road's S, 40 m west, saw the
+  pole down the Culvert's straight, a line along the strip itself that no piece could shut (MB2's rule that the road
+  west of the Culvert sees nothing of B holds). The pole's crouch crate moved with flag A, to its west side; at B the
+  pocket's stacks stand where the Sawmill's cover stood from the old pole (2.6, 4.2 and 4.7 m off, for 2.9, 4.3 and
+  6.0 m). The Fort and the Sawmill keep their other pieces and names as the defenders' ground behind the flags; the
+  areas at the poles are A site and B site; the Box lantern and the Sawmill's work lamp moved to the flags. The middle
+  route ends at Hut row; the two middle routes' last posts are the concept's, 14 m and 10 m short of their poles on
+  the way the attack comes (by the poles the attackers won 64 % ±3). Woodland's fuse is 27 s.
+  Bots, 6v6, Normal, seeds 1 to 32, on main: Attack / Defend attackers 55 % ±3, the first hit at 21 s, half the
+  knock-outs outside the defenders' third; Plant The Bomb attackers 51 % ±3 at 27 s (59 % at the old 23 s). With
+  RV1's route variety Attack / Defend read 54 % ±3 (55 % on the old layout), the first hit at 20 s (24 s), and the
+  ground a bot stands on in at least one round in ten grew by 28 % in Elimination and in Attack / Defend.
 - **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the
