@@ -286,7 +286,7 @@ func test_an_old_file_without_the_graphics_fields_loads_and_keeps_its_values() -
 	assert_eq(got.renderer, Settings.Renderer.AUTO)
 	assert_false(got.first_start_seen)
 	assert_eq(got.load_message, "", "no complaint")
-	assert_eq(Settings.VERSION, 4, "4 since FV1 moved the field of view's and the volumes' defaults")
+	assert_eq(Settings.VERSION, 5, "5 since FV1 moved the field of view's and the volumes' defaults")
 	var raw := SaveFile.read(path, Settings.KIND)
 	assert_eq(int(raw.version), Settings.VERSION)
 

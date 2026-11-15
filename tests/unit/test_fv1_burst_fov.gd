@@ -102,7 +102,7 @@ func test_the_default_field_of_view_is_87_in_the_settings_and_the_camera() -> vo
 
 
 func test_an_older_save_still_on_90_moves_to_87_and_one_the_player_set_is_kept() -> void:
-	for version: int in [1, 2, 3]:
+	for version: int in [1, 2, 3, 4]:
 		assert_eq(Settings.migrate_defaults({"fov": 90.0}, version)["fov"], Settings.FOV_DEFAULT, "v%d on 90" % version)
 		assert_eq(Settings.migrate_defaults({"fov": 90}, version)["fov"], Settings.FOV_DEFAULT, "v%d whole 90" % version)
 		assert_eq(Settings.migrate_defaults({"fov": 95.0}, version)["fov"], 95.0, "v%d set by the player" % version)
@@ -175,3 +175,15 @@ func test_a_bot_s_stop_burst_ends_a_burst_under_way_and_a_player_s_burst_runs_it
 		var burst := w.tuning.replica_rules.burst_shots
 		assert_eq(shots, 1 if stop else burst, "stopped after one" if stop else "a whole burst")
 	assert_false(PlayerCommand.new().stop_burst, "never set unless a bot sets it")
+
+
+func test_a_version_4_save_from_the_haze_build_moves_its_old_defaults_and_keeps_its_haze() -> void:
+	var data := {"fov": 90.0, "graphics_custom": {"volumetric_fog": "on"},
+			"volumes": {"Master": 1.0, "Effects": 0.7, "Power": 0.5, "Ambience": 0.2, "Interface": 0.4}}
+	var moved := Settings.migrate_defaults(data, 4)
+	assert_eq(moved["fov"], Settings.FOV_DEFAULT)
+	var vol: Dictionary = moved["volumes"]
+	assert_eq(vol["Master"], Settings.VOLUME_DEFAULTS[&"Master"])
+	assert_almost_eq(float(vol["Power"]), 0.4, 1e-6, "a set Power source sounds the same")
+	assert_eq((moved["graphics_custom"] as Dictionary)["volumetric_fog"], "on",
+			"version 4 already reads haze levels: VF1's step is for version 3 and older")

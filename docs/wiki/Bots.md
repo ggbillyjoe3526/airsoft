@@ -96,6 +96,23 @@ except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there the
 replica that has no burst) and only now and then switch to full auto, at someone out in the open down a long sight line. Each bot decides that once per opponent
 each round. A bot carrying the Compact SMG is the one exception: indoors it goes full auto at a target within 12 m.
 
+## How a team plays a round
+
+Each round a bot team follows a plan: spread one to a lane, move up in pairs, or stack on one lane, with each lane
+walked in its own order. The plan is the same kind of thing every round, but how they carry it out changes, so you
+can't learn one route and wait for it:
+
+- **Tempo.** A team moves up quickly, steadily or slowly, drawn each round: a quick team barely stops at its lane
+  points and meets you early, a slow one holds each point longer.
+- **Their own half first.** Bots hurry through ground their team holds and slow down past the middle, where the fight
+  will be.
+- **Their own line.** Each bot walks its lane up to <!-- wiki:config bot_config.lane_shift --> m to one side or the
+  other, the same side all round: the far side of a row of crates one round, the near side the next.
+- **Changing lanes.** Now and then a bot cuts across to another lane, the nearest one with the fewest teammates on it,
+  once a round at most and never back towards its own end: on Woodland that's a flank through the trees.
+- **A forward defender.** In Attack / Defend and Plant The Bomb, in some rounds one defender holds well up its lane,
+  towards the middle, to catch attackers on their way in.
+
 ## Bots in Attack / Defend
 
 Attacking bots walk their lanes to just past the middle, then make for the pole. The nearest attacker raises the flag

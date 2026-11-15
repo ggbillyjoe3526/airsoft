@@ -43,7 +43,7 @@ func test_a_set_power_source_stays_in_range_and_odd_values_are_left_alone() -> v
 	assert_eq(s.fov, Settings.FOV_DEFAULT)
 
 
-func test_a_migrated_file_is_moved_once_and_a_version_4_file_is_never_moved() -> void:
+func test_a_migrated_file_is_moved_once_and_a_current_version_file_is_never_moved() -> void:
 	var path := "user://test_fv1_qa_settings.save"
 	assert_true(SaveFile.write(path, Settings.KIND, 3, {"fov": 90.0, "volumes": {"Power": 0.5, "Master": 1.0}}))
 	var s := Settings.new(PlayTuning.new())
@@ -53,9 +53,9 @@ func test_a_migrated_file_is_moved_once_and_a_version_4_file_is_never_moved() ->
 	assert_true(s.save(path))
 	var again := Settings.new(PlayTuning.new())
 	again.load_file(path)
-	assert_almost_eq(again.volumes[&"Power"], 0.4, 1e-6, "saved as version 4: not divided a second time")
+	assert_almost_eq(again.volumes[&"Power"], 0.4, 1e-6, "saved as the current version: not divided a second time")
 	assert_eq(again.volumes[&"Master"], 0.9)
-	# A version 4 file on the numbers that were defaults before is a choice now.
+	# A current-version file on the numbers that were defaults before is a choice now.
 	assert_true(SaveFile.write(path, Settings.KIND, Settings.VERSION, {"fov": 90.0, "volumes": {"Power": 1.0}}))
 	var kept := Settings.new(PlayTuning.new())
 	kept.load_file(path)

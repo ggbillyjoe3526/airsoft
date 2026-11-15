@@ -687,6 +687,11 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
   arrive ready for you there a moment later. Get two or more ahead in Elimination: your bots stop holding and go hunting.
   The last bot of a team walks and checks corners. In an open fight they take a knee for each burst. Do they feel
   smarter, and still beatable on Normal?
+- [ ] **Routes vary round to round (RV1).** Play five or six rounds of Elimination on one map and of Attack / Defend
+  on another, and spectate once you're out. The enemy still follows a plan (spread out, a pair, or a stack on one
+  lane), but some rounds they rush and some they creep, each bot walks its lane a little to one side, and now and
+  then one switches lanes. Do fights start sooner, without you crossing half the map first? In Attack / Defend, now
+  and then one defender waits further out. Does it feel less predictable, and still fair?
 - [ ] **Anchors (BP5).** In Elimination with over a minute left, give an anchor teammate Follow me (F), then end it
   with F again: it goes hunting.
 
@@ -1745,6 +1750,17 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 - [ ] **No arm ends on Inspect.** Press Y with each replica, at your field of view and at 110, on a wide screen if you
   have one. Pass: both sleeves run off the edge of the screen all through the turn; no green end or blob comes up in
   front of you; both hands stay on the replica.
+
+## Volumetric haze in four levels (VF1)
+
+- [ ] **Each level's look and cost on your card.** Settings › Graphics › Volumetric haze now offers Off, Low, Medium
+  and High (Medium preset Low, High preset Medium, Ultra High, Low none). In Depot's hall with the lamps on, on
+  Woodland facing the sun and on Subway's platform, press F3 and step the row through Off, Low, Medium and High.
+  Pass: near you the haze is the same at every level; going up it reaches farther (the hall's far end hazier) and its
+  light shafts get finer and smoother; Low has no flicker or crawling blocks that bother you; the frame time grows a
+  little each step (on the laptop at Medium, Low haze should cost well under 1 ms); High looks as the old "on" did.
+- [ ] **An old Custom setting.** If you had Volumetric haze switched on in a Custom preset before this change, it now
+  reads High.
 
 ## Reporting what you find
 

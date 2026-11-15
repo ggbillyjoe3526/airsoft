@@ -40,10 +40,10 @@ in its own thread) was not re-run: its fuse is re-measured on the new layout, as
   set it (open ground down a long line, now and then; the Compact SMG inside 12 m).
 - **Field of view 87 by default; volumes 90/80/80/30/40, the Power source bus at 1.25 times its slider**
   (`Settings.VOLUME_GAINS`, owner ruling in `docs/DECISIONS.md` › First-start defaults, 15 November). Settings
-  version 4: a v1 to v3 save still on its old default moves (FOV 90, and each volume); a Power source the player set
+  version 5: a v1 to v4 save still on its old default moves (FOV 90, and each volume); a Power source the player set
   is divided by 1.25 so it sounds as it did; any other value the player set is kept.
-- The haze thread's pull request also bumps Settings to version 4; whichever merges second takes 5 and adds its step
-  on top.
+- The haze pull request (VF1) merged first with Settings version 4, so this one is version 5: a version 4 file
+  (the haze build's) is on the old field of view and volumes too, and moves the same way.
 
 ## Known issues left
 

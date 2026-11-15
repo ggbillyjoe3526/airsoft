@@ -76,7 +76,8 @@ func test_set_effects_after_the_lamps_do_not_bring_the_sun_back() -> void:
 	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, rs, null, null, null, lamps)
 	var sky := lighting.environment.ambient_light_energy
 	var v := table.preset(&"ultra")
-	lighting.set_effects(v.global_illumination, v.reflections, v.glow, v.volumetric_fog, true)
+	lighting.set_effects(v.global_illumination, v.reflections, v.glow,
+			v.volumetric_fog != GraphicsQuality.VolumetricFog.OFF, true)
 	assert_false(lighting.sun.visible)
 	assert_almost_eq(lighting.sun.light_energy, 0.0, 0.001)
 	assert_almost_eq(lighting.environment.ambient_light_energy, sky, 0.001)

@@ -12,9 +12,15 @@ signal changed
 
 const PATH := "user://settings.save"
 const KIND := "settings"
-## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1), 4 the field of view's and the volumes' (FV1, with
-## the Power source's scale); an older file is brought over once by `migrate_defaults`.
-const VERSION := 4
+## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1), 4 made Volumetric haze four levels (VF1), 5 moved
+## the field of view's and the volumes' defaults (FV1, with the Power source's scale); an older file is brought over
+## once by `migrate_defaults`.
+const VERSION := 5
+## A Custom Volumetric haze row saved by a version 3 file or older, when it was one switch, and the level its "on"
+## drew: the finest grid, which High still draws (VF1). Its "off" is still Off.
+const FOG_ROW_V3 := "volumetric_fog"
+const FOG_ON_V3 := "on"
+const FOG_ON_NOW := "high"
 ## The keys this build reads (with two it reads once and no longer writes: "dev_enabled", FB3, and "robots", FI6); any
 ## other key in the file is kept as it was.
 const KNOWN_KEYS: Array[String] = [
@@ -66,7 +72,7 @@ const VOLUME_DEFAULTS_V2: Dictionary[StringName, float] = {
 	&"Ambience": 0.3,
 	&"Interface": 0.4,
 }
-## The volumes a version 3 file started with (AU1).
+## The volumes a version 3 or 4 file started with (AU1; VF1 left them as they were).
 const VOLUME_DEFAULTS_V3: Dictionary[StringName, float] = {
 	&"Master": 1.0,
 	&"Effects": 0.7,
@@ -85,7 +91,7 @@ const VSYNC_DEFAULT_V1 := true
 const FOV_MIN := 70.0
 const FOV_MAX := 110.0
 const FOV_DEFAULT := 87.0
-## The field of view a version 1 to 3 file started with: one still on it was never moved, and goes to FOV_DEFAULT.
+## The field of view a version 1 to 4 file started with: one still on it was never moved, and goes to FOV_DEFAULT.
 const FOV_DEFAULT_V3 := 90.0
 ## The frame-rate limits offered besides Unlimited (UNLIMITED, 0); a saved number that isn't one reads as the nearest,
 ## the higher on a tie (the browser game's FRAME_RATE_CAPS, with katanashotgun's 165 and 360).
@@ -215,9 +221,10 @@ func load_file(path: String = PATH) -> void:
 
 
 ## `data` as a version `version` file's, with every value still at the old default moved to the new one (a value the
-## player changed is kept): the volumes (from version 1 to 3), Windowed and V-Sync (from version 1), the field of view
-## (from version 1 to 3). A Power source volume the player set before version 4 is scaled by its new gain, so it
-## sounds as it did. The current version or later is returned as it is. A new dictionary; `data` is not changed.
+## player changed is kept): the volumes and the field of view (from version 1 to 4), Windowed and V-Sync (from version
+## 1); and a Custom Volumetric haze row of "on" (version 3 or older) as the level it drew, High. A Power source volume
+## the player set before version 5 is scaled by its new gain, so it sounds as it did. The current version or later is
+## returned as it is. A new dictionary; `data` is not changed.
 static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	if version >= VERSION:
 		return data
@@ -225,6 +232,11 @@ static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	var fov_saved: Variant = moved.get("fov")
 	if (fov_saved is float or fov_saved is int) and is_equal_approx(float(fov_saved), FOV_DEFAULT_V3):
 		moved["fov"] = FOV_DEFAULT
+	if version < 4:
+		var custom: Variant = moved.get("graphics_custom")
+		if custom is Dictionary and (custom as Dictionary).get(FOG_ROW_V3) is String \
+				and (custom as Dictionary)[FOG_ROW_V3] == FOG_ON_V3:
+			(custom as Dictionary)[FOG_ROW_V3] = FOG_ON_NOW
 	var old_volumes := VOLUME_DEFAULTS_V1 if version < 2 else VOLUME_DEFAULTS_V2 if version < 3 else VOLUME_DEFAULTS_V3
 	var saved_vol: Variant = moved.get("volumes")
 	if saved_vol is Dictionary:
