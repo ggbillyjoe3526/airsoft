@@ -111,6 +111,8 @@ END_WEDGE = 1.3         # a wedge stands out at most this many of its course's h
 END_CREASE = 0.025      # m a split face is broken out or in along a line, so no piece reads as a plank (was 1.2 cm)
 JOIN_SEED = 1399        # (RM2, thirteenth pass) the join's own pieces, the same in every section: see join_column
 JOIN_SHARE = (0.3, 0.7)  # the share of a join piece's width on the join's -x side
+PIN = 0.0015            # m: the specks that pin a section's bounds (thirteenth pass), facing down, too small to see
+TOP_PIN = 1.83          # m: the top's pin, over the highest any section's top reaches, so all stretch alike
 CHIP = 0.075            # m: a face piece smaller than this each way near a closing end is taken off (no loose chips)
 CHIP_NEAR = 0.2         # m from the end
 TOP_SINK = 0.004        # m the core's top lies under its top pieces' edges
@@ -355,9 +357,19 @@ def cordwood(seed: int, hearts: float = 1.0, ends: tuple = (False, False)) -> ob
         w = SECTION / LOOSE * r.uniform(0.25, 0.4)
         z = min(crown(faces[1.0], x), crown(faces[-1.0], x))
         wk.ridge(b, x, w, z, r.uniform(0.03, 0.055), core, ("Bark", "Split", "BarkLight")[k % 3])
+    # (thirteenth pass) every section stretched to its box the same way, so the join's pieces meet: its bounds pinned
+    # at the same box (BOUNDS) by a speck facing down at each foot corner, under the stack, and one over its top
+    y_ref = core + PROUD[1] + 0.006  # a piece's sawn face, rim and cracks at most this far out
+    for sx, sy in ((-1.0, -1.0), (1.0, -1.0), (1.0, 1.0), (-1.0, 1.0)):
+        x, y = sx * half_x, sy * y_ref
+        pin = [(x, y, 0.0), (x - sx * PIN, y, 0.0), (x, y - sy * PIN, 0.0)]
+        wk.face(b, wk.verts(b, pin), "Gap", Vector((0, 0, -1)))
+    wk.face(b, wk.verts(b, [(0.0, 0.0, TOP_PIN), (PIN, 0.0, TOP_PIN), (0.0, PIN, TOP_PIN)]), "Gap", Vector((0, 0, -1)))
     ob = b.build()
     wk.finish(ob, SMOOTH)
     _round_ends(ob, lo, hi)
+    for v in ob.data.vertices:  # (nothing reaches it: the highest top is about 1.82 m; held to it all the same)
+        v.co.z = min(v.co.z, TOP_PIN)
     wk.fit_box(ob, (-half_x, -half_y, 0.0), (half_x, half_y, HEIGHT))
     return ob
 
@@ -936,7 +948,7 @@ def piece_end(b: hs.Builder, outline: list, depth: float, out: Vector, end_mat: 
 
     def proud(p: Vector) -> Vector:
         d = depth + tilt[0] * (p.x - c0.x) + tilt[1] * (p.z - c0.z)
-        return p + out * max(0.003, d)
+        return p + out * min(PROUD[1], max(0.003, d))  # (thirteenth pass) never past the box's face
 
     def face(pts: list, mat: str, way: Vector) -> None:
         if clip:

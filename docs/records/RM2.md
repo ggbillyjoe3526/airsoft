@@ -162,8 +162,12 @@ ATTEMPT_ROWS
   courses are 10 to 20 cm high; their long pieces (one in five) are round logs pushed 10 to 15 cm out (their run
   back dark, a round sawn end with a bark rim on it), the top course round logs; a round log's sides have 5
   segments (were 4), a log split down one side two bark steps a side, half the wedges one bark side, every split face
-  creased 2.5 cm. The top: no two neighbouring columns lie point up. 3,137 / 3,068 / 2,885 the middle sections, 3,041 /
-  3,193 / 3,181 the end ones (hearts thinned to fit).
+  creased 2.5 cm. The top: no two neighbouring columns lie point up. Every section is stretched to its box alike
+  (QA's attempt 13: each was stretched by its own bounds, so the shared pieces missed by 1 to 2 cm): a piece stands
+  at most 5 cm out, and four specks facing down under the stack's foot corners and one over its top (1.5 mm, `PIN`,
+  `TOP_PIN` 1.83 m) pin every section's bounds to the same box. A new test checks every pair of sections meets at
+  its join (`test_woodpile_sections_meet_piece_by_piece_at_every_join`, failing on the twelfth pass's models).
+  3,142 / 3,073 / 2,890 the middle sections, 3,046 / 3,196 / 3,180 the end ones (hearts thinned to fit).
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the

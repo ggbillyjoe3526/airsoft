@@ -87,6 +87,39 @@ func test_cordwood_sections_stay_inside_their_box_and_budget() -> void:
 		assert_almost_eq(box.position.y, 0.0, 0.05, "%s stands on its floor" % model)
 
 
+## The model's vertices on its x = `at` plane (within 0.5 mm), in model space, as millimetre keys.
+func _on_plane(model: StringName, at: float) -> Dictionary:
+	var keys := {}
+	var root := (load("res://assets/models/props/%s.glb" % model) as PackedScene).instantiate()
+	add_child_autofree(root)
+	for n in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		for s in mi.mesh.get_surface_count():
+			for v: Vector3 in mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX] as PackedVector3Array:
+				var p := mi.global_transform * v
+				if absf(p.x - at) < 0.0005:
+					keys[Vector3i(0, roundi(p.y * 1000.0), roundi(p.z * 1000.0))] = true
+	return keys
+
+
+func test_woodpile_sections_meet_piece_by_piece_at_every_join() -> void:
+	# thirteenth woodpile pass: the pieces across a join are the same in every section, each drawing its part, and
+	# every section is stretched to its box alike; so what one section has on its +x end, any other has on its -x end
+	var lefts: Array[StringName] = [&"cordwood", &"cordwood_b", &"cordwood_c", &"cordwood_start"]
+	var rights: Array[StringName] = [&"cordwood", &"cordwood_b", &"cordwood_c", &"cordwood_end"]
+	for a in lefts:
+		var at_a := _on_plane(a, 1.0)
+		assert_gt(at_a.size(), 100, "%s has its join's pieces on its +x end" % a)
+		for b in rights:
+			var at_b := _on_plane(b, -1.0)
+			var shared := 0
+			for k: Vector3i in at_a:
+				shared += 1 if at_b.has(k) else 0
+			var share := float(shared) / float(maxi(at_a.size(), at_b.size()))
+			assert_gt(share, 0.95, "%s meets %s at their join (%d of %d / %d points)" % [a, b, shared, at_a.size(),
+					at_b.size()])
+
+
 # ---- attempt 2: sandbag lines closed by end models ----
 
 const BAG := AABB(Vector3(-0.6, 0.0, -0.3), Vector3(1.2, 0.9, 0.6))
