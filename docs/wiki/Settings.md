@@ -27,8 +27,9 @@ These were on Controls and HUD before; your saved choices are kept.
 ## Audio
 
 Volumes for **Master**, **Effects**, **Power source** (the motor or gas part of a shot), **Ambience** and
-**Interface**. A new game starts with Master at 100 %, Effects 70 %, Power source 100 %, Ambience 20 % and Interface
-40 %. If you delete your save, they come back. Gunfire carries across the whole field, so you can hear where a fight
+**Interface**. A new game starts with Master at 90 %, Effects 80 %, Power source 80 %, Ambience 30 % and Interface
+40 %. If you delete your save, they come back. The Power source has room to go louder: 80 % is as loud as 100 % used
+to be, and 100 % is louder still. Gunfire carries across the whole field, so you can hear where a fight
 is from a long way off; a silenced replica carries half as far.
 
 ## Display
@@ -40,7 +41,7 @@ is from a long way off; a silenced replica carries half as far.
 - **V-Sync** (off by default) and a **Frame-rate limit**: 30 to 360 frames a second, or Off for no limit. In the background
   the game drops to 30 frames a second. The menus never draw more frames than your screen shows, whatever
   the limit.
-- **Field of view** and **Show FPS** (the figure sits in the bottom-right corner).
+- **Field of view** (87° by default, 70° to 110°) and **Show FPS** (the figure sits in the bottom-right corner).
 - **Interface colour:** the colour of the main buttons, what you have picked and the comms wheel's lit button: blue
   (the default), beige, red, green, pink, orange or violet. The menus change as you click. Team colours don't change.
 

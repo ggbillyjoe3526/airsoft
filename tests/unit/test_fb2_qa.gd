@@ -56,14 +56,16 @@ func test_each_volume_alone_at_its_old_default_moves_and_the_others_stay() -> vo
 		vol[String(bus)] = OLD_VOLUMES[String(bus)]
 		var t := _load(1, {"volumes": vol})
 		for other: StringName in Settings.VOLUME_BUSES:
-			var want: float = Settings.VOLUME_DEFAULTS[other] if other == bus else 0.123
+			# A Power source the player set is scaled by its gain so it sounds the same (FV1).
+			var kept: float = 0.123 / Settings.VOLUME_GAINS.get(other, 1.0)
+			var want: float = Settings.VOLUME_DEFAULTS[other] if other == bus else kept
 			assert_almost_eq(t.volumes[other], want, 1e-6, "%s alone at its old default (%s)" % [bus, other])
 
 
 func test_a_volume_saved_as_a_whole_number_is_read_like_a_float() -> void:
 	var t := _load(1, {"volumes": {"Master": 1, "Power": 1, "Effects": 0}})
-	assert_eq(t.volumes[&"Master"], 1.0)
-	assert_eq(t.volumes[&"Power"], 1.0)
+	assert_eq(t.volumes[&"Master"], Settings.VOLUME_DEFAULTS[&"Master"], "the old default as 1: moved")
+	assert_eq(t.volumes[&"Power"], Settings.VOLUME_DEFAULTS[&"Power"], "the old default as 1: moved")
 	assert_eq(t.volumes[&"Effects"], 0.0, "muted is the player's own")
 
 
@@ -114,7 +116,7 @@ func test_migrating_does_not_change_the_dictionary_it_was_given() -> void:
 	var moved := Settings.migrate_defaults(data, 1)
 	assert_eq(data, before, "the argument is untouched")
 	assert_ne(moved, before)
-	assert_eq((moved["volumes"] as Dictionary)["Effects"], 0.7)
+	assert_eq((moved["volumes"] as Dictionary)["Effects"], Settings.VOLUME_DEFAULTS[&"Effects"])
 
 
 func test_the_current_version_and_later_pass_through_unchanged() -> void:
@@ -156,7 +158,7 @@ func test_a_version_0_file_is_refused_not_migrated() -> void:
 
 func test_a_value_chosen_after_the_move_is_kept_on_every_later_start() -> void:
 	var t := _load(1, {"volumes": {"Effects": 0.8}})
-	assert_eq(t.volumes[&"Effects"], 0.7)
+	assert_eq(t.volumes[&"Effects"], Settings.VOLUME_DEFAULTS[&"Effects"])
 	t.volumes[&"Effects"] = 0.8 # the player picks the old default on purpose
 	t.window_mode = Settings.WindowMode.WINDOWED
 	t.vsync = true

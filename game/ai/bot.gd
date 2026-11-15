@@ -169,7 +169,7 @@ var auto_rolled: int = 0
 ## The burst under way found its target, one it went to full auto for, in the open (BotFireMode.on_burst): full auto
 ## only then (BP3).
 var auto_open: bool = false
-## There, on semi: the world time it may next pull (BotFireMode.pull, BotConfig.semi_tap_gap).
+## There, on semi or burst: the world time it may next pull (BotFireMode.pull, BotConfig.semi_tap_gap).
 var next_tap: float = -INF
 ## Who last shot at it or its teammate from where it could tell (SN3: a near miss or a hit call), made out to
 ## BotConfig.revealed_view_distance until the world time revealed_until (-1: nobody).
