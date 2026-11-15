@@ -159,6 +159,8 @@ const GLOBAL_DUST := &"look_dust"
 	&"plaster": Color8(0xec, 0xe2, 0xcf), &"grey": Color8(0x8c, 0x8a, 0x96), &"pebble": Color8(0xa0, 0x9a, 0x92),
 	&"stone": Color8(0x8c, 0x84, 0x78), &"ceiling": Color8(0x52, 0x4a, 0x72), &"umber": Color8(0x61, 0x59, 0x4f),
 	&"moss": Color8(0xb3, 0xb8, 0x91),
+	# Depot's fire points, hazard marks and sprinkler main (DX1): a fire red leaning crimson, clear of the team hues
+	&"fire": Color8(0xac, 0x22, 0x64),
 	# Woodland's (WA1): bark and heartwood, the leaves from a sunlit canopy down to the deep forest, the meadow, leaf
 	# litter and earth underfoot, tyre rubber, and the puddles' water and mud.
 	&"bark": Color8(0x7b, 0x6f, 0x62), &"heartwood": Color8(0xe4, 0xdc, 0xcd), &"canopy": Color8(0x5c, 0x9a, 0x50),

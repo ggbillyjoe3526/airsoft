@@ -13,7 +13,7 @@
 The hall's walls are laid by PropLayout._bays as bays of the hall wall model (hall_wall.py) on an 8 m grid, with a
 column at each bay's ends and up to two feature bays a wall (a shutter or a fire exit, taken in turn) where the wall
 is open in front. `feature_bays` follows that rule, so the extras keep off the shutters and the exits' own signs;
-tests/unit/test_depot_extras.gd checks it against PropLayout.
+tests/unit/test_dx1_depot_props.gd checks it against PropLayout.
 """
 from __future__ import annotations
 
@@ -45,6 +45,7 @@ SIGN_HALF = 0.3
 BESIDE = 0.9       # (m) a fire point's, a cable reel's or a high sign's middle from its column
 FIRE_POINT_APART = 20.0
 CABLE_REELS = 3
+SPARE_APART = 6.0  # (m) a cable reel or an eye-height sign from another extra on its wall
 REEL_Y = 1.9       # the cable reel's bracket, on the blockwork
 EYE_SIGNS = ["depot_sign_defib", "depot_sign_fire_action", "depot_sign_assembly"]
 EYE_Y = 1.6
@@ -227,12 +228,11 @@ def fixtures(blocks: list[dict], middle: tuple) -> list[dict]:
             out.append(_on(w, "fire_point", s, 0.0, BLOCK_FACE + 0.01))
     used = list(taken)
     spare = [p for p in floor_spots if all(p[0] != t[0] or abs(p[2] - t[2]) > 2 * BESIDE + 0.01 for t in taken)]
-    # spread the spare spots' picks out along the hall: every other one
     reels = 0
     eye = 0
-    for wi, cell, s in spare[::2]:
+    for wi, cell, s in spare:
         w = walls[wi]
-        if any(u[0] == wi and abs(u[2] - s) < 4.0 for u in used):
+        if any(u[0] == wi and abs(u[2] - s) < SPARE_APART for u in used):
             continue
         if reels < CABLE_REELS:
             out.append(_on(w, "cable_reel", s, REEL_Y, BLOCK_FACE))

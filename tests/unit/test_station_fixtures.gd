@@ -3,7 +3,7 @@ extends GutTest
 ## map names them (dressing.station.fixtures) and each stands in its room's air, a wall model's back on a wall, a
 ## hanging sign's top at its ceiling and well over the floor, a bin and an edge warning on the floor, none inside a
 ## block; StationFixtures draws one MultiMesh a model with no shadow, glowing lenses and the printed sheet, and nothing
-## on the other maps; the ceilings' strip lamps are the model, turned along rooms running along z; no colour reads as
+## on the other maps but Depot's wall extras (DX1); the ceilings' strip lamps are the model, turned along rooms running along z; no colour reads as
 ## a team; a malformed or unknown fixture is warned about and left out.
 
 const BUDGETS: Dictionary[StringName, int] = {
@@ -13,7 +13,19 @@ const BUDGETS: Dictionary[StringName, int] = {
 	&"poster_k": 40, &"poster_l": 40, &"poster_m": 40, &"poster_wide_a": 40, &"poster_wide_b": 40, &"poster_wide_c": 40,
 	&"name_board": 40, &"line_map": 40, &"info_panel": 40, &"notice_smoking": 40, &"notice_handrail": 40,
 	&"notice_cctv": 40, &"wall_sign_out": 40, &"wall_sign_platforms": 40, &"departures_n": 90, &"departures_s": 90,
+	# Depot's wall extras (DX1, tests/unit/test_dx1_depot_props.gd checks where they stand)
+	&"fire_point": 700, &"call_point": 50, &"cable_reel": 380, &"pipe_run": 790, &"pipe_run_2": 500,
+	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
+	&"depot_sign_ppe": 52, &"depot_sign_pallet_storage": 52, &"depot_sign_fire_exit": 52,
 }
+## The models only Depot's walls carry (DX1: MapData.fixtures), not Subway's station.
+const DEPOT: Array[StringName] = [&"fire_point", &"call_point", &"cable_reel", &"pipe_run", &"pipe_run_2",
+		&"depot_sign_assembly", &"depot_sign_fire_action", &"depot_sign_defib", &"depot_sign_no_riding",
+		&"depot_sign_ppe", &"depot_sign_pallet_storage", &"depot_sign_fire_exit"]
+## Depot's models printing from Depot's own sheet (StationFixturesConfig.sheets).
+const DEPOT_PRINTED: Array[StringName] = [&"fire_point", &"depot_sign_assembly", &"depot_sign_fire_action",
+		&"depot_sign_defib", &"depot_sign_no_riding", &"depot_sign_ppe", &"depot_sign_pallet_storage",
+		&"depot_sign_fire_exit"]
 const HUNG: Array[StringName] = [&"way_sign", &"departures_n", &"departures_s"]
 const LENSED: Array[StringName] = [&"strip_lamp", &"tunnel_lamp"]
 const PRINTED: Array[StringName] = [&"way_sign", &"edge_sign", &"platform_clock", &"poster_a", &"poster_b",
@@ -91,7 +103,10 @@ func test_every_model_loads_within_its_budget_with_its_glass_or_print() -> void:
 		assert_between(_tris(mesh), int(BUDGETS[model] * 0.8), BUDGETS[model], "%s uses its budget, within it" % model)
 		var surfaces := _surfaces(mesh)
 		assert_eq(surfaces.has(StationFixtures.LENS_SURFACE), LENSED.has(model), "%s's glass: %s" % [model, surfaces])
-		assert_eq(surfaces.has(StationFixtures.SIGN_SURFACE), PRINTED.has(model), "%s's print: %s" % [model, surfaces])
+		assert_eq(surfaces.has(StationFixtures.SIGN_SURFACE), PRINTED.has(model) or DEPOT_PRINTED.has(model),
+				"%s's print: %s" % [model, surfaces])
+		if DEPOT_PRINTED.has(model):
+			assert_eq(cfg.sheet_of(model), "res://assets/textures/depot/signs.png", "%s prints Depot's sheet" % model)
 	for model in cfg.models:
 		assert_true(BUDGETS.has(StringName(model)), "%s has a budget here" % model)
 
@@ -129,7 +144,8 @@ func test_subway_names_every_model_and_the_tunnels_their_lamps() -> void:
 	for f in m.station.fixtures:
 		counts[f.model] = counts.get(f.model, 0) + 1
 	for model in cfg.models:
-		assert_gt(counts.get(StringName(model), 0), 0, "%s placed" % model)
+		if not DEPOT.has(StringName(model)):
+			assert_gt(counts.get(StringName(model), 0), 0, "%s placed" % model)
 	assert_between(counts.get(&"tunnel_lamp", 0), 10, 14, "about 12 tunnel lamps (the model list)")
 	assert_gte(counts.get(&"name_board", 0), 8, "the station's name along both platforms")
 
@@ -190,7 +206,7 @@ func test_the_view_draws_one_multimesh_a_model_glowing_and_printed_with_no_shado
 				assert_not_null((mat as ShaderMaterial).get_shader_parameter(&"sheet"), "the sheet is printed")
 			elif mat is ShaderMaterial and (mat as ShaderMaterial).get_shader_parameter(&"glow") != null:
 				glow += 1
-	assert_eq(view.views().size(), cfg.models.size(), "one MultiMesh a model")
+	assert_eq(view.views().size(), cfg.models.size() - DEPOT.size(), "one MultiMesh a model")
 	assert_eq(total, m.station.fixtures.size(), "every fixture drawn")
 	assert_eq(glow, 1, "the tunnel lamp's glass glows")
 	assert_eq(printed, PRINTED.size(), "every printed model prints the sheet")
@@ -227,12 +243,16 @@ func test_each_tunnel_lamp_lights_its_running_tunnel_s_arch_from_its_glass() -> 
 
 
 func test_no_other_map_has_fixtures_and_freeing_leaves_no_orphans() -> void:
-	for id: String in ["depot", "woodland", "range"]:
+	for id: String in ["woodland", "range"]:
 		assert_null(StationFixtures.build(_map(id), cfg), "%s has none" % id)
 	assert_null(StationFixtures.build(null, cfg))
-	var view := StationFixtures.build(_map("subway"), cfg)
-	add_child(view)
-	view.free()
+	for id: String in ["subway", "depot"]:
+		var view := StationFixtures.build(_map(id), cfg)
+		assert_not_null(view, "%s's fixtures drawn (Depot's: its wall extras, DX1)" % id)
+		if view == null:
+			continue
+		add_child(view)
+		view.free()
 	assert_no_new_orphans()
 
 

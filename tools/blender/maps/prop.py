@@ -35,8 +35,8 @@ PALETTE = {
     "pebble": 0xa09a92, "stone": 0x8c8478, "umber": 0x61594f, "moss": 0xb3b891, "bark": 0x7b6f62,
     "heartwood": 0xe4dccd, "rubber": 0x3d3b45, "lilac": 0xb9a8d6, "butter": 0xe6d478, "sage": 0xa9c48e,
     "seafoam": 0x7fb8ad, "olive": 0x8c9a48, "slab": 0x7c7670, "walnut": 0x70625b,
-    # Depot's fire points and safety signs (DX1): a fire red leaning a little to crimson, 27 degrees off Beta's hue
-    "fire": 0xc8303c,
+    # Depot's fire points, hazard marks and sprinkler main (DX1): a fire red leaning crimson, clear of the team hues
+    "fire": 0xac2264,
 }
 
 # The vertical gradient: a corner at the model's foot takes this share of its paint, one at the top all of it.

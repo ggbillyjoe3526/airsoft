@@ -34,9 +34,9 @@ import depot_cells  # noqa: E402
 import stationkit as sk  # noqa: E402
 
 sk.PAINTS.update({
-    # the props' fire red (prop.PALETTE "fire"), its shade and the moulded stand's; aluminium cladding; the strut's
+    # the props' fire red (prop.PALETTE "fire") and its shade (the moulded stand's); aluminium cladding; the strut's
     # galvanising; the safety yellow of the reel
-    "fire": 0xC8303C, "fire_dark": 0x8E2230, "cladding": 0xC4C3C0, "cladding_lap": 0xA9A8A5, "galv": 0xB5B1AA,
+    "fire": 0xAC2264, "fire_dark": 0x6E1640, "cladding": 0xC4C3C0, "cladding_lap": 0xA9A8A5, "galv": 0xB5B1AA,
     "reel_yellow": 0xE4CA46, "board": 0xEDEBE6, "slot": 0x4A4A50,
 })
 

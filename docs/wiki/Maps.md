@@ -26,7 +26,12 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Links** join the lanes: open cuts and galleries, a tight alley by B, and two **tunnels**, one in each half. The
   tunnels are unlit and bend twice: dark, but never pitch black.
 - **The building:** blockwork walls under cladding, with galvanised steel columns, roller shutters and fire exits;
-  steel pillars with hazard bands; scaffold walls hung with camouflage netting; a polished concrete floor.
+  steel pillars with hazard bands; scaffold walls hung with camouflage netting; a polished concrete floor. Pipework
+  and cable baskets run along the walls high up, with safety signs over the racking, fire points and cable reels on
+  the open walls, and a call point and extinguisher on each pillar.
+- **The storage:** the racking you can't enter holds shrink-wrapped pallets, stacks of chemical tanks and drums, or
+  a mesh parts cage stacked with shelves and boxes. Every stack is as solid as the next: you can't shoot through the
+  gaps.
 - **The roof:** galvanised steel trusses, purlins and rooflights under a pale grey liner, red sprinkler mains and cable
   trays, with rows of high-bay lamps hanging on cables. A BB fired up stops at the roof. The lamps are not all new:
   some burn dimmer and warmer, a few flicker now and then, and a couple are dead, the same ones every match.
