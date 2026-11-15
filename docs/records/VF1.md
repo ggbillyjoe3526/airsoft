@@ -1,12 +1,12 @@
 # VF1 · Volumetric haze in four levels
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | touched tests, smoke test; CI | Accept 7/8 | – (doc fixes and the per-level reach after the first pictures, re-checked: Accept 7/8) |
 
 ## Goal
 
@@ -32,7 +32,9 @@ each level on Depot, Woodland and Subway.
 ## Cost
 
 The cloud draws on software Vulkan (lavapipe), so these are shares of a frame, not a real card's milliseconds. Each
-map's card view, Low preset with only the haze row changed, 1600 x 900, mean of 12 frames after settling:
+map's card view, Low preset with only the haze row changed, 1600 x 900, mean of 12 frames after settling (measured
+before the levels got their own reach; the froxel counts are unchanged, and the High-preset pictures taken after it,
+8 frames each, agree: Depot +4 / +15 / +34 %, Woodland +5 / +16 / +23 % over Off):
 
 | Map | Off | Low | Medium | High |
 |---|---|---|---|---|
@@ -48,6 +50,7 @@ card's figures are a play check (`docs/PLAYTEST.md` › Volumetric haze in four 
 - **Medium preset gets Low haze** (before: none below Ultra). Low haze is the engine's own default grid, unsmoothed,
   about a tenth of a Low-preset frame on the software renderer; Medium already pays for sun shadows and glow, and the
   haze is part of the look. Low (the preset) keeps none for its 60 FPS floor.
+- **Same haze, finer (owner, 2026-11-15, decision card):** the levels don't change the haze's thickness.
 - **Reach as well as grid (attempt 1, after the first pictures):** with grid and filter alone, Low, Medium and High
   drew the same still picture (mean difference under 1 of 255 against 4 for Off), so a player would see no reason to
   pick one. A shorter reach at the lower levels keeps the far end of a long view clearer, which the pictures show, and

@@ -23,8 +23,8 @@ enum Reflections { OFF, PROBES, SCREEN }
 ## An indoor field's roof lamps as real lights (RoofLamps): none (the hall lit by the preset's overhead sun alone), the
 ## lamps near you, or the lamps out to the hall's far end; every real lamp casts the sun's grade of shadow.
 enum LampLights { OFF, NEAR, FAR }
-## The volumetric haze's quality (VF1): none, or its light worked out on a coarser to finer grid (LookConfig's
-## Volumetric fog group); the haze's strength and reach are the same at every level.
+## The volumetric haze's quality (VF1): none, or the same haze reaching farther from the eye with its light worked out
+## on a finer grid at each level (LookConfig.fog_reach, fog_grid, fog_filtered); its strength is the same at every level.
 enum VolumetricFog { OFF, LOW, MEDIUM, HIGH }
 
 ## The choice that is a preset with your own rows over it.
