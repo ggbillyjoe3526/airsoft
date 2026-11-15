@@ -1,6 +1,6 @@
 # DX2 · Depot's wall extras in Subway
 
-**Review:** pending
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 The owner (2026-11-15), of DX1's new Depot models: "Can any of these new models be used in Subway map?", then "Add the
 models in Subway where suitable." Look only: the station's cover, sight lines and balance stay as they are.
@@ -9,7 +9,7 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | passed | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | passed | Accept 7/8 | – (check 8: the open pipe ends had no KNOWN_ISSUES row or PLAYTEST line; added) |
 
 ## What changed
 
@@ -48,4 +48,4 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
 
 - A pipe run ends in the open where a wall's length isn't a whole number of lengths (the hall's north run 1 m short
   of the concourse, the stair top's 1 m short of the passage's bulkhead), as Depot's end-wall runs do. How it looks in
-  play is play check N21.
+  play is play check N21 (`docs/PLAYTEST.md` › Subway); a row in `docs/KNOWN_ISSUES.md`.
