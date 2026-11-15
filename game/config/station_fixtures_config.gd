@@ -15,7 +15,7 @@ extends Resource
 	"line_map", "info_panel", "notice_smoking", "notice_handrail", "notice_cctv", "wall_sign_out", "wall_sign_platforms",
 	"departures_n", "departures_s",
 	# Depot's wall extras (DX1, tools/blender/maps/depot_extras.py)
-	"fire_point", "call_point", "cable_reel", "pipe_run", "depot_sign_assembly", "depot_sign_fire_action",
+	"fire_point", "call_point", "cable_reel", "pipe_run", "pipe_run_2", "depot_sign_assembly", "depot_sign_fire_action",
 	"depot_sign_defib", "depot_sign_no_riding", "depot_sign_ppe", "depot_sign_pallet_storage", "depot_sign_fire_exit",
 ])
 ## Every printed face's picture (tools/blender/maps/station_signs.py: an invented station name, the way-out signs,

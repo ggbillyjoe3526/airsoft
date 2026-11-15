@@ -172,13 +172,14 @@ def cable_reel() -> sk.Mesh:
     return m
 
 
-def pipe_run() -> sk.Mesh:
-    """4 m of services along a hall wall from x 0 to 4, out to 0.62 m from it, its foot at y = 0: the cable basket
-    lowest, the two lagged pipes over it and the sprinkler main on top, on strut brackets at 1 and 3 m."""
-    m = sk.Mesh("pipe_run")
-    L = PIPE_LENGTH
+def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run") -> sk.Mesh:
+    """`L` m (4, or 2 to make up a wall's short end bay) of services along a hall wall from x 0 to L, out to 0.62 m from
+    it, its foot at y = 0: the cable basket lowest, the two lagged pipes over it and the sprinkler main on top, on
+    strut brackets every 2 m from 1 m in."""
+    m = sk.Mesh(name)
+    brackets = int(L / 2.0)
     # the strut brackets: a channel down the wall and an arm out at each run, a 2 m pitch from 1 m in
-    for k in range(2):
+    for k in range(brackets):
         x = 1.0 + 2.0 * k
         m.box((x - 0.02, -0.05, 0.0), (x + 0.02, 0.62, 0.04), "galv", skip="b")
         for y in (0.0, 0.2):
@@ -196,7 +197,7 @@ def pipe_run() -> sk.Mesh:
     for z, y, band in ((0.36, 0.3, "green"), (0.54, 0.3, "violet")):
         r = 0.07
         m.lathe([(r, 0.0), (r, L)], 10, (0.0, y, z), "cladding", axis="x", cap_top=False, cap_bottom=False)
-        for k in range(2):
+        for k in range(brackets):
             x = 0.5 + 2.0 * k
             m.lathe([(r + 0.004, x), (r + 0.004, x + 0.05)], 10, (0.0, y, z), "cladding_lap", axis="x",
                     cap_top=False, cap_bottom=False)
@@ -207,14 +208,14 @@ def pipe_run() -> sk.Mesh:
                            (x + 0.3, y + 0.025, z + r + 0.003), (x + 0.16, y + 0.025, z + r + 0.003)], (0, 0, 1),
                           "sign_black")
         # its clamps on the brackets' arms
-        for k in range(2):
+        for k in range(brackets):
             m.lathe([(r + 0.01, 0.98 + 2.0 * k), (r + 0.01, 1.02 + 2.0 * k)], 10, (0.0, y, z), "galv", axis="x",
                     cap_top=False, cap_bottom=False, smooth=False)
     # the sprinkler main on top, its grooved couplings and the drop rods it hangs from to the arms
     rm, ym, zm = 0.055, 0.5, 0.42
     m.lathe([(rm, 0.0), (rm, L)], 10, (0.0, ym, zm), "fire", axis="x", cap_top=False, cap_bottom=False)
     m.lathe([(rm + 0.012, 0.0), (rm + 0.012, 0.06)], 10, (0.0, ym, zm), "fire_dark", axis="x", smooth=False)
-    for k in range(2):
+    for k in range(brackets):
         x = 1.0 + 2.0 * k
         m.lathe([(rm + 0.006, x - 0.02), (rm + 0.006, x + 0.02)], 10, (0.0, ym, zm), "galv", axis="x",
                 cap_top=False, cap_bottom=False, smooth=False)
@@ -229,6 +230,7 @@ def main() -> None:
     sk.export(call_point(), "call_point", 50)
     sk.export(cable_reel(), "cable_reel", 380)
     sk.export(pipe_run(), "pipe_run", 790)
+    sk.export(pipe_run(2.0, "pipe_run_2"), "pipe_run_2", 500)
     for cell, w, h in SIGNS:
         sk.export(sign(cell, w, h), "depot_sign_" + cell, 52)
 
