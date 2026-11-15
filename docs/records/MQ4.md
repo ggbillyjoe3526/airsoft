@@ -1,13 +1,13 @@
 # MQ4 · Metal and polymer evened to a close shade
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (metal and polymer thread) | ✓ | 7/8 Retry (QA Pass, performance Pass) | Judgment, check 1: read the outside side views' pale frame as the slide still shining; the Tan magazine's brown; the closeness test passed on the old look too |
-| 2026-11-15 | 2 | Opus 5.5 (metal and polymer thread) | ✓ | pending | – |
+| 2026-11-15 | 2 | Opus 5.5 (metal and polymer thread) | ✓ | 8/8 Accept (QA Pass, performance Pass) | – |
 
 ## What changed
 
