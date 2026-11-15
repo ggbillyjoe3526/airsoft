@@ -13,7 +13,7 @@ const PITCH := 0.0050
 const GROOVE_W := 0.0026
 const GROOVES := 7
 const RECESS_HW := 0.0078
-const RECESS_DEPTH := 0.0035
+const RECESS_DEPTH := 0.0054
 const MM := 1000.0
 
 var model: Node3D
@@ -68,7 +68,7 @@ func test_the_slides_back_has_an_open_recess_under_the_cover_plate() -> void:
 	assert_false(hit.is_empty(), "the ray meets the slide")
 	if not hit.is_empty():
 		var depth := bf.x - (hit["position"] as Vector3).z / MM
-		assert_almost_eq(depth, RECESS_DEPTH, 0.0005, "the recess is 3.5 mm deep")
+		assert_almost_eq(depth, RECESS_DEPTH, 0.0005, "the recess is 5.4 mm deep (its dark floor 0.1 mm in front of the cut)")
 	# Beside the recess the slide's back stays flush.
 	var flush := faces.intersect_ray(Vector3(RECESS_HW + 0.002, bf.y + 0.002, bf.x + 0.01) * MM, Vector3.FORWARD)
 	assert_false(flush.is_empty())
