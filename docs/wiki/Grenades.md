@@ -67,7 +67,8 @@ moment.
 - **A bot pinned in cover** by someone shooting at it from range may smoke the line between them.
 - **A bot pushing round a corner** to where it heard you may flash it first, then look away until the bang and come
   through. It never flashes where a teammate close by would see it, counting teammates heading that way, and it
-  checks again as it throws.
+  checks again as it throws. It calls the flash as it goes, and its bot teammates look away from it; you hear no
+  call, so keep an eye on a teammate winding up a throw.
 - **A Normal or Hard bot that sees your flash coming** may turn away from it until the bang, and isn't blinded
   (Hard more often; an Easy bot never does). A flash that lands out of its sight is surest.
 - **Bots walk round a standing smoke cloud** where the way round is open, yours or their own, and through it only

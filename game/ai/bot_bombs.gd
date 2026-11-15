@@ -54,28 +54,35 @@ static func step(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand, dt:
 
 
 ## Someone else's flash in the air or down within flash_dodge_reach, in its view and sight: one roll of the skill's
-## flash_dodge_chance, and on a win the bot looks away from it until just past its bang (PP1).
+## flash_dodge_chance, and on a win the bot looks away from it until just past its bang (PP1). A teammate's flash, called
+## as it goes ("Flash out!"), is always looked away from, at every level and out to the flash's own reach: the thrower
+## can't see a mate step into view after the throw, nor where a bounce takes it (BC1: two of five dazzles in 12 Depot
+## matches were a mate's).
 static func _judge_flash(b: Bot, w: BotWorld) -> void:
 	var chance := b.skill.flash_dodge_chance
-	if chance <= 0.0:
-		return
 	var me := b.character
 	var eye := BotSenses.eye_of(me, w.tuning)
 	var fuse := w.tuning.grenades.flash_fuse
 	# The one in view that bangs soonest: turning from a later one would face the sooner one's bang.
 	var soonest: Grenade = null
+	var soonest_mates := false
 	var bang_in := INF
 	for g in w.grenades:
-		if not g.active or g.kind != Grenade.Kind.FLASH or g.owner == me.id or fuse - g.age >= bang_in \
-				or _flat(eye, g.position) > w.cfg.flash_dodge_reach or not BotSenses.in_view(me, g.position, w.cfg) \
-				or not BotSenses.sight_clear(w.query, eye, g.position):
+		if not g.active or g.kind != Grenade.Kind.FLASH or g.owner == me.id or fuse - g.age >= bang_in:
+			continue
+		var thrower := _character(w, g.owner)
+		var mates := thrower != null and thrower.team == me.team
+		if (not mates and chance <= 0.0) \
+				or _flat(eye, g.position) > (w.tuning.grenades.flash_reach if mates else w.cfg.flash_dodge_reach) \
+				or not BotSenses.in_view(me, g.position, w.cfg) or not BotSenses.sight_clear(w.query, eye, g.position):
 			continue
 		soonest = g
+		soonest_mates = mates
 		bang_in = maxf(fuse - g.age, 0.0)
 	if soonest == null:
 		return
 	b.flash_judged_until = w.time + bang_in
-	if b.bomb_rng.randf() < chance:
+	if soonest_mates or b.bomb_rng.randf() < chance:
 		b.bomb_away_until = w.time + bang_in + w.cfg.flash_wait_after
 		b.bomb_away_yaw = atan2(soonest.position.x - eye.x, soonest.position.z - eye.z)
 
@@ -242,6 +249,14 @@ static func _hold_still(cmd: PlayerCommand) -> void:
 	cmd.sprint = false
 	cmd.walk = false
 	cmd.jump = false
+
+
+## The character of id `id` in `w`, or null.
+static func _character(w: BotWorld, id: int) -> Character:
+	for c in w.characters:
+		if c.id == id:
+			return c
+	return null
 
 
 static func _flat(a: Vector3, b: Vector3) -> float:

@@ -201,6 +201,46 @@ func test_a_teammate_s_flash_is_turned_from_as_someone_else_s() -> void:
 	assert_eq(s.characters[0].dazzle_left, 0.0, "looked away from its mate's bang")
 
 
+## BC1: a mate's flash is called as it goes, so it is looked away from at every level, with no roll, out to the
+## flash's own reach (in 12 Depot matches two of five dazzles were a mate's, inside the thrower's checks).
+func test_a_teammate_s_flash_is_turned_from_without_a_roll_even_by_a_bot_that_never_dodges() -> void:
+	var m := _match(Vector3(0.0, 0.0, -30.0))
+	var s: GameState = m[1]
+	var b: Bot = m[2]
+	b.skill.flash_dodge_chance = 0.0
+	var state := b.bomb_rng.state
+	_flash_at(m, Vector3(0.0, 0.1, -5.0), 1)
+	_run(m, _fuse_ticks())
+	assert_eq(s.characters[0].dazzle_left, 0.0, "looked away from its mate's bang")
+	assert_eq(b.bomb_rng.state, state, "no roll taken for a mate's flash")
+
+
+func test_an_enemy_flash_is_still_rolled_for_and_a_bot_that_never_dodges_is_dazzled() -> void:
+	var m := _match(Vector3(0.0, 0.0, -30.0))
+	var s: GameState = m[1]
+	var b: Bot = m[2]
+	b.skill.flash_dodge_chance = 0.0
+	_flash_at(m, Vector3(0.0, 0.1, -5.0), 2)
+	_run(m, _fuse_ticks())
+	assert_gt(s.characters[0].dazzle_left, 0.0, "an enemy's flash still dazzles a bot that never turns")
+
+
+func test_a_teammate_s_flash_past_the_dodge_reach_but_inside_its_dazzle_is_turned_from() -> void:
+	var away := (bots.flash_dodge_reach + g.flash_reach) * 0.5
+	assert_true(away > bots.flash_dodge_reach and away < g.flash_reach)
+	var m := _match(Vector3(0.0, 0.0, -30.0))
+	var b: Bot = m[2]
+	_flash_at(m, Vector3(0.0, 0.1, -away), 1)
+	_run(m, 2)
+	assert_gt(b.flash_judged_until, -INF, "a mate's flash is judged out to the flash's reach")
+	assert_true(b.bomb_away_until > 0.0, "and turned from")
+	var e := _match(Vector3(0.0, 0.0, -30.0))
+	var eb: Bot = e[2]
+	_flash_at(e, Vector3(0.0, 0.1, -away), 2)
+	_run(e, 2)
+	assert_eq(eb.flash_judged_until, -INF, "an enemy's that far is not judged")
+
+
 func test_a_flash_past_the_reach_is_not_judged() -> void:
 	var m := _match(Vector3(0.0, 0.0, -30.0))
 	var b: Bot = m[2]
