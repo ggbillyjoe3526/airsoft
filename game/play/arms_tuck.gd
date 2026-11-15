@@ -9,9 +9,13 @@ extends RefCounted
 ## too, which hides it where the fore-end can't. ArmsView draws it over the pose its clip gave, each frame the sight
 ## is raised at all.
 
-const UPPER := "UpperArm_L"
-const FORE := "Forearm_L"
-const HAND := "Hand_L"
+## The arm's bones, each this followed by the side (tools/blender/arms/arms.py): `_L` for the left arm drawn in as the
+## sight comes up, `_R` for the right arm, held at its shoulder through an inspect only (HA2).
+const UPPER := "UpperArm"
+const FORE := "Forearm"
+const HAND := "Hand"
+const LEFT := "_L"
+const RIGHT := "_R"
 ## Lengths under this (m) leave nothing to turn.
 const NO_LINE := 1e-4
 ## The arm is never drawn out quite straight (the share of its length it may span).
@@ -24,10 +28,10 @@ var _hand: int = -1
 var _bones: PackedInt32Array = PackedInt32Array()
 
 
-func _init(skeleton: Skeleton3D) -> void:
-	_upper = skeleton.find_bone(UPPER)
-	_fore = skeleton.find_bone(FORE)
-	_hand = skeleton.find_bone(HAND)
+func _init(skeleton: Skeleton3D, side: String = LEFT) -> void:
+	_upper = skeleton.find_bone(UPPER + side)
+	_fore = skeleton.find_bone(FORE + side)
+	_hand = skeleton.find_bone(HAND + side)
 	_bones = PackedInt32Array([_upper, _fore, _hand])
 
 
@@ -50,8 +54,12 @@ func clear(skeleton: Skeleton3D) -> void:
 
 ## Draws the arm of `skeleton`, posed by its clip, in: the shoulder moved by `shift`, the hand by `slide` (turned as
 ## the clip turned it) and the elbow turned `share` (0..1) of the way from where the clip has it to straight along
-## `down` (all in the skeleton's space).
-func draw_in(skeleton: Skeleton3D, shift: Vector3, slide: Vector3, down: Vector3, share: float) -> void:
+## `down` (all in the skeleton's space). `still` (the skeleton's space) carries a point that would be at rest with the
+## replica to where it is with the replica turned over in an inspect (HA2): the shoulder and the elbow's way stay where
+## your body has them while the replica turns in your hands, and the shoulder comes only as near the hand as the arm
+## must to keep hold.
+func draw_in(skeleton: Skeleton3D, shift: Vector3, slide: Vector3, down: Vector3, share: float,
+		still: Transform3D = Transform3D.IDENTITY) -> void:
 	if not fits():
 		return
 	skeleton.force_update_all_bone_transforms()
@@ -60,14 +68,18 @@ func draw_in(skeleton: Skeleton3D, shift: Vector3, slide: Vector3, down: Vector3
 	var hand := skeleton.get_bone_global_pose(_hand)
 	var first := upper.origin.distance_to(fore.origin)
 	var second := fore.origin.distance_to(hand.origin)
-	var shoulder := upper.origin + shift
+	var shoulder := still * upper.origin + shift
 	var reach := hand.origin + slide - shoulder
-	var span := minf(reach.length(), (first + second) * REACH_MOST)
-	if first < NO_LINE or second < NO_LINE or span < NO_LINE:
+	var longest := (first + second) * REACH_MOST
+	if first < NO_LINE or second < NO_LINE or reach.length() < NO_LINE:
 		return
 	var line := reach.normalized()
+	if reach.length() > longest:
+		# Out of reach (an inspect's turn holds the replica further off): the shoulder comes after the hand.
+		shoulder = hand.origin + slide - line * longest
+	var span := minf(reach.length(), longest)
 	# The elbow stands off the line toward `pole`: where the clip had it, turned toward straight down.
-	var pole := (fore.origin - upper.origin).slerp(down * first, share)
+	var pole := (still.basis * (fore.origin - upper.origin)).slerp(still.basis * down * first, share)
 	pole -= line * pole.dot(line)
 	if pole.length() < NO_LINE:
 		return
