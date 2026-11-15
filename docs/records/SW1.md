@@ -1,6 +1,6 @@
 # SW1 · Subway on two levels
 
-**Review:** 2 attempts · critic CRITIC_SCORE · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner's ask (2026-11-15, after the map redesign proposals, MR1): "make Subway map more compact. Ticket hall and
 concourse should be one single level now. That means removing the escalator between the levels and also adjust the
@@ -14,7 +14,7 @@ recommended Subway concept A (two more lanes, the north passage's and the west p
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (lint, wiki, smoke, 9 touched unit files 127/127; the rest in CI) | 7/8 Retry | check 6: a 66.8 m line from the Street spawn into the north passage, the exception raised to fit it |
-| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ (lint, wiki, smoke, 11 touched unit files 142/142; the rest in CI) | CRITIC_ROW | – |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ (lint, wiki, smoke, 11 touched unit files 142/142; the rest in CI) | 8/8 Accept | – |
 
 ## What changed
 
@@ -85,8 +85,8 @@ The map heat tool (`tools/map_heat.gd`, 8 seeds a mode, the MR1 report's measure
   west end (the Street team's spawn) slipping past a mouth's corner into the north passage (critic, attempt 1). A short
   pier on each mouth's inner side (0.6 by 0.8 m, the mouth 2.2 m wide) closes it (running the concourse's piers out to
   the passages' line as well changed no line and was taken back): the longest upper line is 57 m, the hall's west end to
-  a passage's mouth, and from the spawn spots 3 of about 1,100 passage points are seen, all at a mouth. The Subway
-  exception stays 60 m.
+  a passage's mouth, and from the spawn spots 3 of about 1,100 passage points are seen, all within about 6.5 m of a
+  mouth, 51 to 55 m off. The Subway exception stays 60 m.
 - **Two lanes added, the spiral's and the north passage's (MR1 concept A).** DECISIONS' lane rule (no lane on a way a
   bot is slow on) now lets the spiral stair have one: it is a 6 s walk.
 - **The cable drums and booking counter stay** in the new hall: SM4's and SM3's models and tests need them, and they
