@@ -526,7 +526,8 @@ func test_shelving_lines_only_faces_nobody_is_against() -> void:
 	var m := _map("depot")
 	var hidden := 0
 	for b in m.blocks:
-		if look.props.backs(b) and b.center.z > 30.0 and b.size.x > 100.0:
+		# The south rack runs the hall's width (98 m since DC1's compact hall).
+		if look.props.backs(b) and b.center.z > 30.0 and b.size.x > 90.0:
 			assert_true(PropLayout.face_hidden(m, b, Vector3(0.0, 0.0, 1.0)), "the south rack's back is against the wall")
 			assert_false(PropLayout.face_hidden(m, b, Vector3(0.0, 0.0, -1.0)), "its front faces the hall")
 			hidden += 1

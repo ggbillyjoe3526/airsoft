@@ -11,7 +11,7 @@ const SWITCHES := 12
 ## left it in WL1, its ground drawn at last; WA1 repainted the greybox kinds from the look's palette; SL1 the grass.
 const BASE_HASHES: Dictionary[String, String] = {
 	# The hall (DR1), the palette's colours (WA1), SL1's darker grass outside, MB1's crate stacks at the flags.
-	"depot": "7c95128a2e308a13",
+	"depot": "51ace474e71b1c14",
 	"range": "dae60d51779a9749", # SL1's darker grass outside
 }
 

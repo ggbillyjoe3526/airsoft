@@ -114,10 +114,10 @@ func test_every_spawn_walks_out_through_its_chicane_to_the_floor_without_a_vault
 	var lost := PackedStringArray()
 	var long_way := PackedStringArray()
 	var route := PackedVector3Array()
-	# Out of Staging by each stairs mouth and the Mid exit; out of the Loading bay by the A stairs, the ramp and
-	# the Garage.
+	# Out of Staging by each stairs mouth and its mouth into Upper mid (DC1: the room 10 m east, where the Mid exit
+	# was); out of the Loading bay by the A stairs, the ramp and the Garage.
 	var outside: Array = [
-		[Vector3(-49.0, 0, -17.0), Vector3(-45.0, 0, 10.0), Vector3(-38.0, 0, -2.0)],
+		[Vector3(-39.0, 0, -17.0), Vector3(-38.5, 0, 10.0), Vector3(-30.0, 0, -2.0)],
 		[Vector3(49.0, 0, -12.0), Vector3(49.0, 0, 15.0), Vector3(40.0, 0, 4.0)],
 	]
 	for e in 2:
@@ -147,9 +147,10 @@ func test_the_middle_of_every_chicane_gap_is_open_to_the_nav_grid() -> void:
 	var shut := PackedStringArray()
 	# The middle of each outer screen's gap (the stairs' two, the A stairs' and the ramp's), of each inner screen's gap
 	# and of each corridor between screens (the chicanes as widened on attempt 3).
-	for p: Vector3 in [Vector3(-51.0, 0, -13.0), Vector3(-51.0, 0, 5.0), Vector3(51.75, 0, -4.5),
-			Vector3(51.75, 0, 13.5), Vector3(-47.7, 0, -9.0), Vector3(-47.7, 0, 1.0), Vector3(47.7, 0, -0.5),
-			Vector3(47.7, 0, 9.5), Vector3(-49.5, 0, -11.0), Vector3(-49.5, 0, 3.0), Vector3(49.5, 0, -2.5),
+	# The west's 10 m east of the concept's since DC1's compact hall.
+	for p: Vector3 in [Vector3(-41.0, 0, -13.0), Vector3(-41.0, 0, 5.0), Vector3(51.75, 0, -4.5),
+			Vector3(51.75, 0, 13.5), Vector3(-37.7, 0, -9.0), Vector3(-37.7, 0, 1.0), Vector3(47.7, 0, -0.5),
+			Vector3(47.7, 0, 9.5), Vector3(-39.5, 0, -11.0), Vector3(-39.5, 0, 3.0), Vector3(49.5, 0, -2.5),
 			Vector3(49.5, 0, 11.5)]:
 		if not nav.is_walkable_at(p):
 			shut.append(str(p))
@@ -227,10 +228,42 @@ func test_the_overtime_flank_point_from_every_side_is_on_the_flags_floor_and_rea
 			worst = maxf(worst, len)
 			if len > 20.0:
 				gut.p("long %d deg goal %s route %.1f" % [deg, g, len])
-	assert_gt(both_covered, 0, "some approach has both side points covered, which the old code gave up on")
+	# DC1 moved the hut to the open middle, where no approach has both side points covered any more: that case is
+	# held by test_a_flank_point_is_found_where_both_side_points_are_covered.
+	gut.p("approaches with both side points covered: %d" % both_covered)
 	gut.p("worst route %.1f" % worst)
 	gut.p("flank points found %d, none %d, no straight walk to flag %d" % [found, none, no_wall.size()])
 	assert_gt(found, 0)
 	assert_eq(none, 0, "a flank point from every side")
 	assert_eq(wrong_floor.size(), 0, "off the flag's floor: %s" % [wrong_floor.slice(0, 5)])
 	assert_eq(cut_off.size(), 0, "no way on foot to the flag: %s" % [cut_off.slice(0, 5)])
+
+
+func test_a_flank_point_is_found_where_both_side_points_are_covered() -> void:
+	# A flag in Staging's north chicane corridor, come at from the Yard to the north: both nominal side points, 6 m back
+	# and 6 m either side, stand in the racking (one past the hall's west wall), which the old code gave up on. The
+	# flank point snaps to the nearest walkable floor on the flag's floor instead.
+	var cfg := BotConfig.load_default()
+	var spot := Vector3(-39.5, 0.0, -11.0)
+	var world := BotWorld.new()
+	world.cfg = cfg
+	world.tuning = tuning
+	world.nav = nav
+	world.query = level.query()
+	var body := Character.new(0, 1, Vector3(spot.x, 0.0, spot.z - 20.0), 0.0, ReplicaStats.default_loadout())
+	var b := Bot.new(body, 1, cfg.skill_for(&"normal"), 1)
+	var u := Vector2(0.0, 1.0)
+	var covered := 0
+	for side: float in [-1.0, 1.0]:
+		var sx: float = spot.x - u.x * cfg.overtime_flank_back - u.y * cfg.overtime_flank_offset * side
+		var sz: float = spot.z - u.y * cfg.overtime_flank_back + u.x * cfg.overtime_flank_offset * side
+		if not BotMovement._on_same_floor(world, spot, sx, sz):
+			covered += 1
+	assert_eq(covered, 2, "both side points are covered here")
+	for seed_value in 4:
+		b.rng = Seeds.stream(seed_value)
+		b.flanking = false
+		BotMovement._overtime_flank_point(b, world, spot)
+		assert_true(b.flanking, "a flank point all the same (seed %d)" % seed_value)
+		assert_true(nav.is_walkable_at(b.flank_goal), "on walkable floor: %s" % b.flank_goal)
+		assert_lt(absf(b.flank_goal.y - spot.y), tuning.body.max_step, "on the flag's floor")

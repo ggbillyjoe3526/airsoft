@@ -319,20 +319,20 @@ BOMB_SITES = [(36.5, -25.5, 0), (37.0, 26.5, 0)]
 # rooms: the north rooms through the Shoot House's north row, the Lounge and the Offices rooms; the south rooms down the
 # South stairs, through the Pens, the Huts, the Box yard's south and between the containers. Attack / Defend's
 # defenders hold a lane's last two points (RoundPlanner): with the sites 8 m in, those are posts forward of the poles,
-# at the Offices door, in Lower mid, by the Garage and at the end of Containers, so the defenders have ground in front
-# of them to hold. No lane starts or ends in a spawn room (the chicanes' outer mouths and Upper mid by the spawn's).
+# at the Offices door, in Lower mid (behind its low crate) and at the end of Containers (behind theirs), so the
+# defenders have ground in front of them to hold. No lane starts or ends in a spawn room (the chicanes' outer mouths and Upper mid by the spawn's).
 # MB1: each lane has one point about 4.5 m short of the field's middle and one as far past it, none between: a squad
 # sweeps to the first point past the middle, so the two ends' first points past it are kept about as deep. With the
 # west spawn 10 m in, the middle (halfway between the spawns' centres) is at x 5, not 0.
 LANES = {
     "n": [(-41.2, -14.5), (-38.5, -17), (-38, -24.5), (-28, -24.5), (-19, -21), (-11.5, -22.6), (-2.7, -21.7),
           (2.5, -21.5), (11.7, -23.5), (18, -24), (25, -24), (31, -21)],
-    "nr": [(-39, -15.5), (-39, -19), (-38, -31), (-30, -31), (-22, -31), (-15, -31), (-3.5, -30.5), (3.4, -31.5),
+    "nr": [(-39, -15.5), (-39, -19), (-38, -31), (-30, -31), (-24.5, -31.5), (-15, -31), (-3.5, -30.5), (3.4, -31.5),
            (12.5, -31.5), (22, -30), (33, -30)],
     "m": [(-32.5, -2), (-30, -8.5), (-23, -12.5), (-16, -12.5), (-9, -7.5), (-3.1, -7.1), (1.2, -7.5), (10.1, -6.5),
-          (15, 0), (19, 5.5), (24, 3.5), (31, 3)],
+          (15, 0), (19, 5.5), (24, 3.5), (29, -2.2)],
     "sr": [(-38.5, 7), (-38.5, 13), (-39, 24), (-38.5, 30.5), (-33, 30.5), (-24, 30), (-16, 29), (-6, 28), (-2, 26),
-           (7, 26), (14, 26), (22, 25.5), (33.5, 31)],
+           (7, 26), (14, 26), (26.5, 24.5), (33.5, 31)],
     "s": [(-32.5, 0.5), (-29.5, 4), (-29, 8.5), (-23.5, 12), (-23.5, 18), (-14, 24.5), (-8, 19.5), (-1.3, 18.7),
           (7.7, 18.6), (20, 18.6), (27.5, 18.4), (31, 21)],
 }
