@@ -532,6 +532,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Bots and balance
 
+- **Bot teams vary how they carry out their plan (owner, 2026-11-15, RV1; Claude's defaults).** The plan (split, pair,
+  stack over the authored lanes) is drawn as before; each round adds a team tempo, shorter pauses in a bot's own half,
+  a per-bot lane shift and the odd lane crossing, and in Attack / Defend and Plant The Bomb sometimes a defender held
+  further up its lane. All on streams of their own, so the plan draws don't move. Values and figures:
+  `docs/records/RV1.md`; numbers in `game/config/bot_config.gd` › Lanes and holds.
 - **The audit's play questions (owner, 2026-11-14, AUD1).** Bots keep squeezing past Subway's works wagons on the
   track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a 6 s
   defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots only.
@@ -1006,6 +1011,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   coat (about half metallic, a broad highlight, near black when painted black) and polymer draws its paint nearly
   as it is; white polymer stays a touch off-white and no replica is wood. He answered "Perfect" to the pictures; the
   values are not re-tuned without him (docs/records/MQ4.md).
+- **The AEG's delta ring, handguard gaps and forward assist (owner, 2026-11-15, AF1).** On the all-angles sheet,
+  against an M4 quad-rail photo: the ring "should go around the full body" (the rail covered its top), the handguard
+  "should have gaps in between the rails (not the rails themselves)" and the forward assist was "too small and
+  recessed. It should be slightly larger and stick out at more of an angle." So the upper's top rail stops at the
+  ring and the handguard's starts in front of it; the handguard is hollow with a row of oval slots in each corner
+  between two rails (the lower ones a little shorter, as on the photo), the barrel and a gas tube seen through them;
+  the left rail cover is a rail's height; the forward assist's axis turns 18 degrees out toward the back. The bots'
+  copy keeps a solid handguard: at its 3,000 triangles the slots frayed (docs/records/AF1.md).
 - **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
   handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
   sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip

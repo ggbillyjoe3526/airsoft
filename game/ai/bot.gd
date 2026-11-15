@@ -118,6 +118,12 @@ var lane_dir: int = 1
 var lane_index: int = -1
 var lane_points: int = 0
 var lane_goal: Vector3 = Vector3.ZERO
+## This round's way of walking it (RV1, RoundPlanner): every lane point moved lane_shift m across the way to the enemy
+## (one side or the other, the same for the whole lane), its pauses' scale (its team's tempo), and the lanes it has
+## crossed onto this round.
+var lane_shift: float = 0.0
+var pace: float = 1.0
+var lanes_crossed: int = 0
 ## Its lane swept: it hunts the stalest spot its team hasn't checked.
 var hunting: bool = false
 var hunt_goal: Vector3 = Vector3.ZERO
@@ -345,6 +351,9 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	lane_dir = 1 if character.end == 0 else -1
 	lane_index = -1
 	lane_points = points
+	lane_shift = 0.0
+	pace = 1.0
+	lanes_crossed = 0
 	site_guard = -1
 	hunting = false
 	hunt_picked_at = -INF

@@ -27,10 +27,11 @@ func after_all() -> void:
 	level.free()
 
 
-## Depot in `mode` (team 0 attacks first), every bot at `level`, lane points never jittered.
+## Depot in `mode` (team 0 attacks first), every bot at `level`, lane points never jittered or shifted (RV1).
 func _start(level_id: StringName, mode: RoundState.Mode = RoundState.Mode.ATTACK_DEFEND) -> BotWorld:
 	var cfg: BotConfig = config.duplicate()
 	cfg.lane_jitter = 0.0
+	cfg.lane_shift = 0.0
 	var sim := Simulation.new(tuning, level.query(), level.mover(tuning.body), map.ends, map.kill_y)
 	sim.nav = nav
 	state = GameState.new(5, tuning)
