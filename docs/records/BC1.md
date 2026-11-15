@@ -1,6 +1,6 @@
 # BC1 · The 0.1 Beta 1 checklist, cleared without play and rewritten
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass (attempt 3: attempt 1 asked for a real "Flash out!" call and one character lookup, attempt 2 for every bot to call every flash)
 
 The owner, 2026-11-15 06:11: go through all 120 open items of `playtest/0.1-beta1-checklist.md` (the project's shared
 files) and attempt each one; leave a smaller checklist of only the items that need him, each stating the issue and the
