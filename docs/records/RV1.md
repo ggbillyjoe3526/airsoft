@@ -47,7 +47,9 @@ across the map before anything happens".
   up to four rounds, not two: with the new timing their seed's first two rounds could end in fights before anyone
   reached the ledge. `test_fg2_qa` allows the one pushed defender past point 2. The match runner's held-up guard counts a bot waiting
   on a landing for its route's lift as waiting on purpose (it gives up after `lift_patience`): Subway seed 11 had one
-  wait about 10 s for a car parked at the far landing, which read as held up.
+  wait about 10 s for a car parked at the far landing, which read as held up. Its Follow me guard no
+  longer judges a follower while it stands still to throw a smoke or flash of its own (`BotBombs.busy`), as it already
+  left out a dazzled one: on Depot seed 3 one fell 8.4 m behind after a throw (the bar is 8 m).
 
 ## Verified
 

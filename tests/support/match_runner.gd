@@ -23,7 +23,9 @@ const HELD_UP_REACH := 2.0
 ## A character that ends a round in play without ever getting this far from its spawn (m) stayed home that round.
 const LEAVES_SPAWN := 8.0
 ## Follow me (follow_leader): a follower is judged once it has carried out the order FOLLOW_REJOIN seconds in a row
-## (back from a fight, cover or a flash's dazzle, when it ducks blind where it stands, it gets that long to rejoin);
+## (back from a fight, cover or a flash's dazzle, when it ducks blind where it stands, or a smoke or flash of its own,
+## when it stands still to throw: BotBombs.busy; RV1, Depot seed 3, 8.4 m behind after a throw, it gets that long to
+## rejoin);
 ## near within the follow distance, catch_up_gap and FOLLOW_NEAR_SLACK (m) of the leader; standing still slower than
 ## STILL_SPEED (m/s) while the leader moves.
 const FOLLOW_REJOIN := 3.0
@@ -620,7 +622,8 @@ func _watch_follow(state: GameState, bots: BotController, t: MatchTally, followi
 		var c := b.character
 		if c.team != leader.team or c == leader:
 			continue
-		var carried := b.order == SquadOrder.Kind.FOLLOW and b.mode == Bot.Mode.ORDER and c.dazzle_left <= 0.0
+		var carried := b.order == SquadOrder.Kind.FOLLOW and b.mode == Bot.Mode.ORDER and c.dazzle_left <= 0.0 \
+				and not BotBombs.busy(b, bots.world)
 		following[c.id] = following[c.id] + DT if carried else 0.0
 		# The ring's oldest entry, CHASE_TICKS ago, is the one this tick overwrites.
 		var slot := t.ticks % CHASE_TICKS
