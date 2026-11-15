@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (metal and polymer thread) | pending | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (metal and polymer thread) | ✓ | 7/8 Retry (QA Pass, performance Pass) | Judgment, check 1: read the outside side views' pale frame as the slide still shining; the Tan magazine's brown; the closeness test passed on the old look too |
+| 2026-11-15 | 2 | Opus 5.5 (metal and polymer thread) | ✓ | pending | – |
 
 ## What changed
 
@@ -35,9 +36,18 @@ to models for attachments and accessories. Make sure all in game images are upda
   Ultra pictures.
 - Tests (`test_replica_surfaces.gd`): metal and polymer gains within 0.15 of each other, metal at most 0.6 metallic
   with a floor of at most 0.05, polymer's gain at least 0.85 and under 1 (white polymer still off-white), metal still
-  the smoother.
+  the smoother, and (attempt 2) the light a black steel or aluminium face sends back (scattered plus reflected, as the
+  shader and Godot work it out) between 1 and 1.5 times black polymer's: 1.13 and 1.15 now, 4.45 and 4.97 on MQ1's
+  values, so the test fails on the old look.
 
 ## Decisions
+
+- **A Tan magazine is the scheme's own dark brown** (default, attempt 2): the AEG's magazine wears the paint's Detail
+  colour (Tan: `564a39`); MQ1's metal floor and 85 % metallic greyed it to gunmetal, now it shows the colour the
+  scheme names. A different colour is a one-cell change in `ReplicaSchemes.FAMILIES` if the owner wants one.
+- **The side views' fill lamp** (attempt 2): `render_fp`'s outside views carry a small lamp beside the camera, so
+  the face nearest it (the pistol's frame, polymer) reads lightest; the hip views and the studio sheets are the fair
+  comparison.
 
 - **Bots' copies unchanged** (default): they wear ReplicaPaint's flat paints, where only the `Metal` part is a little
   metallic (0.4) and the rest is matte; the studio pictures show metal and polymer already a close shade there.

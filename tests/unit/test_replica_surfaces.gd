@@ -31,6 +31,12 @@ const LEAST_METAL := 0.35
 const MOST_METAL := 0.6
 const MOST_FLOOR := 0.05
 const LEAST_POLYMER_GAIN := 0.85
+## The black paint's body colour (ReplicaSchemes "black", the Body part), the reflectance of a dielectric at specular 1
+## (Godot: 0.16 x specular squared), and the most a black metal face may send back against black polymer (MQ1 drew
+## steel at about 4.8 times it).
+const BLACK_PAINT := Color("26292e")
+const DIELECTRIC_REFLECTANCE := 0.16
+const MOST_SHADE_RATIO := 1.5
 ## The AEG Rifle's Body material is two things: forged aluminium receivers and a polymer pistol grip.
 const MIXED := ["aeg", "Body", "Body", [&"aluminium", &"polymer"]]
 
@@ -146,6 +152,28 @@ func test_metal_keeps_a_light_paints_colour_and_only_bare_metal_is_brushed() -> 
 		assert_eq(len(shine), ReplicaSurfaces.SLOTS, "a row per slot")
 	assert_eq(dressed.get_shader_parameter(&"wood_stain_share"), ReplicaSurfaces.WOOD_STAIN_SHARE,
 			"wood is stained, the paint only tints it")
+
+
+## How much light a face in kind `kind` sends back under even light (the light it scatters plus what it reflects at
+## normal incidence) in the black paint's body colour, as replica_surface.gdshaderinc and Godot's lighting work it out:
+## the kind's gain on the paint, metal lifted to its floor by its metallic, a dielectric's reflectance 0.16 x
+## specular squared.
+func _black_shade(kind: StringName) -> float:
+	var look: Dictionary = ReplicaSurfaces.LOOKS[kind]
+	var paint := BLACK_PAINT.srgb_to_linear().get_luminance() * float(look["gain"])
+	var metal := float(look["metallic"])
+	var albedo := lerpf(paint, maxf(paint, float(look["floor"])), metal)
+	var dielectric := DIELECTRIC_REFLECTANCE * pow(float(look["specular"]), 2.0)
+	return albedo * (1.0 - metal) + lerpf(dielectric, albedo, metal)
+
+
+func test_black_metal_and_black_polymer_are_a_close_shade() -> void:
+	var polymer := _black_shade(&"polymer")
+	for kind: StringName in [&"steel", &"aluminium"]:
+		var ratio := _black_shade(kind) / polymer
+		gut.p("%s against polymer in black: %.2f" % [kind, ratio])
+		assert_between(ratio, 1.0, MOST_SHADE_RATIO,
+				"%s is a touch brighter than the polymer beside it (it shines), never a silver band (MQ4)" % kind)
 
 
 func test_an_unknown_kind_and_part_fall_back() -> void:
