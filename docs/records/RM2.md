@@ -140,11 +140,23 @@ ATTEMPT_ROWS
   the end's top piece stands 3 cm over the crest, its inside closed, and the top's end pieces lie low under it. The
   top: pieces 0.45 to 1.6 of 16 cm wide, turned up to 12 degrees; none stops short of a face (no flat backs showing);
   two or three pieces lie over the course turned 20 to 40 degrees. 3,193 / 3,189 / 3,044 triangles (hearts on about
-  a fifth of the wedges in A and B, all in C): Woodland draws no more.
+  a fifth of the wedges in A and B, all in C): Woodland draws no more. Twelfth pass (the critic's attempt 11): a
+  stack's middle sections are cut flush at both ends, their face pieces clipped at the cut (one paint, square on), so
+  a join reads as one stack; only its first and last sections (`cordwood_start`, `cordwood_end`, and
+  `cordwood_single` for a one-section stack, through `grid_ends`; woodpiles are now laid unturned) have end courses.
+  A piece cut at a section's end keeps its own kind, paint and bark rim, the rim and its side along the cut drawn
+  flush, so the two sections' pieces meet as pieces do. The end courses are 8 to 20 cm high, each set in or out up to
+  4 cm and turned up to 8 degrees from above, sharing their lines so no two overlap; one piece in four is a long one,
+  a log split down one side pushed 10 to 15 cm out with its bark top and foot running out to its split face (long
+  wedges read as pale blades and slabs from above); a wedge's point stands out at most 1.3 of its course's half
+  height (`END_WEDGE`); every split face has a crease; a chip under 7.5 cm near a closed end is dropped; the end's
+  top piece no longer stands over the crest. The top's pieces lie apart (1.5 to 3 cm) about a third of the time and
+  a fifth ride half on a neighbour; the crossing pieces stay inside the end courses. 2,915 / 2,844 / 2,585 triangles
+  the middle sections, 2,791 / 2,924 / 2,974 the end ones, all hearts drawn.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
-  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth, v9 the ninth, v10 the tenth and v11 the eleventh: the woodpiles).
+  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth, v9 the ninth, v10 the tenth, v11 the eleventh and v12 the twelfth: the woodpiles).
 
 ## Known issues left
 

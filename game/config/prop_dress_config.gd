@@ -99,6 +99,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"cordwood": "res://assets/models/props/cordwood.glb",
 	&"cordwood_b": "res://assets/models/props/cordwood_b.glb",
 	&"cordwood_c": "res://assets/models/props/cordwood_c.glb",
+	&"cordwood_start": "res://assets/models/props/cordwood_start.glb",
+	&"cordwood_end": "res://assets/models/props/cordwood_end.glb",
+	&"cordwood_single": "res://assets/models/props/cordwood_single.glb",
 	&"boards": "res://assets/models/props/boards.glb",
 	&"sawbench": "res://assets/models/props/sawbench.glb",
 	&"earth_bank": "res://assets/models/props/earth_bank.glb",
@@ -287,8 +290,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## stops a BB). Seeded by the block's place, so a stand is the same every build and nothing else's random draws move.
 @export var grid_scatter: Dictionary[StringName, float] = {&"spruce": 0.38}
 ## GRID models laid all one way round, never turned at random: a net wall's sections match only edge to edge as
-## modelled (DH1), and a sandbag wall's lock into each other, a bag running on from one section into the next (RM2).
-@export var grid_unturned: PackedStringArray = PackedStringArray(["camo_net", "sandbags"])
+## modelled (DH1), a sandbag wall's lock into each other, a bag running on from one section into the next, and a
+## woodpile's sections are cut flush to run on into the next, closed only by its end models (RM2).
+@export var grid_unturned: PackedStringArray = PackedStringArray(["camo_net", "sandbags", "cordwood"])
 ## GRID models whose line of cells is closed at each end by a model of its own, [the -x end's, the +x end's] (each in
 ## `models`, the same size as the model): a sandbag wall's sections run a bag on into the next, so the wall's first
 ## and last sections end it in a whole bag instead (RM2). A line one cell long takes the third model, closed at both
@@ -296,6 +300,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## keep one shade along the line, so its joins don't show as steps.
 @export var grid_ends: Dictionary[StringName, PackedStringArray] = {
 	&"sandbags": PackedStringArray(["sandbags_start", "sandbags_end", "sandbags_single"]),
+	&"cordwood": PackedStringArray(["cordwood_start", "cordwood_end", "cordwood_single"]),
 }
 ## STAKES: each model's stake spacing (m, about: whole stakes stretched to fill the box), and its rails' model. The
 ## stakes stand as thick as the box less its rails (at most `stake_thick` times their spacing, so neighbours meet and

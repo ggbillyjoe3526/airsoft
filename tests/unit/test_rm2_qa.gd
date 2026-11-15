@@ -3,7 +3,8 @@ extends GutTest
 ## three Range models stay within 5,000 triangles, and a cordwood section's pieces never pass its box.
 
 const RANGE_MODELS: Array[StringName] = [&"sandbags", &"site_toilet", &"water_tote"]
-const CORDWOOD: Array[StringName] = [&"cordwood", &"cordwood_b", &"cordwood_c"]
+const CORDWOOD: Array[StringName] = [&"cordwood", &"cordwood_b", &"cordwood_c", &"cordwood_start", &"cordwood_end",
+		&"cordwood_single"]
 
 var play: PlayTuning = PlayTuning.load_default()
 
@@ -191,7 +192,7 @@ func test_other_grid_models_lay_out_as_they_did_and_keep_their_stream() -> void:
 	# a model with no ends: shade drawn from the stream as before; and the stream after a sandbag line is the
 	# same as after any other same-sized line (the closed line still draws its shades and turns)
 	var cfg := play.site_look.props
-	for model: StringName in [&"cordwood", &"crate", &"camo_net"]:
+	for model: StringName in [&"crate", &"camo_net"]:
 		assert_false(cfg.grid_ends.has(model), "%s has no end models" % model)
 	var a := RandomNumberGenerator.new()
 	var b := RandomNumberGenerator.new()
@@ -201,9 +202,37 @@ func test_other_grid_models_lay_out_as_they_did_and_keep_their_stream() -> void:
 	var o2: Dictionary[StringName, PropLayout.Placed] = {}
 	var picks: Array[StringName] = [&"sandbags"]
 	PropLayout._grid(o1, picks, _boxes(), Vector3.ZERO, Vector3(4.8, 0.9, 0.6), Vector3(1.2, 0.9, 0.6), cfg, a, &"sandbags")
-	var picks2: Array[StringName] = [&"cordwood"]
-	PropLayout._grid(o2, picks2, _boxes(), Vector3.ZERO, Vector3(4.8, 0.9, 0.6), Vector3(1.2, 0.9, 0.6), cfg, b, &"cordwood")
+	var picks2: Array[StringName] = [&"crate"]
+	PropLayout._grid(o2, picks2, _boxes(), Vector3.ZERO, Vector3(4.8, 0.9, 0.6), Vector3(1.2, 0.9, 0.6), cfg, b, &"crate")
 	assert_eq(a.randi(), b.randi(), "a sandbag line spends the same draws as an unclosed one, as unturned models do")
+
+
+func test_a_woodpile_line_is_closed_by_its_end_models_and_its_middle_sections_vary() -> void:
+	# twelfth woodpile pass: the middle sections are cut flush and run on into each other; the line's first and last
+	# sections close it, a one-section line takes the model closed at both ends, and nothing is turned
+	var cfg := play.site_look.props
+	var boxes := _boxes()
+	for n: StringName in [&"cordwood_b", &"cordwood_c", &"cordwood_start", &"cordwood_end", &"cordwood_single"]:
+		boxes[n] = BAG
+	var picks: Array[StringName] = [&"cordwood", &"cordwood_b", &"cordwood_c"]
+	for cells: int in [1, 2, 5]:
+		var out: Dictionary[StringName, PropLayout.Placed] = {}
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 11
+		PropLayout._grid(out, picks, boxes, Vector3.ZERO, Vector3(1.2 * cells, 0.9, 0.6), Vector3(1.2, 0.9, 0.6), cfg,
+				rng, &"cordwood")
+		var count := 0
+		for k: StringName in out:
+			count += out[k].transforms.size()
+			for t: Transform3D in out[k].transforms:
+				assert_almost_eq(t.basis.get_euler().y, 0.0, 0.001, "%s is never turned" % k)
+		assert_eq(count, cells, "%d cells laid" % cells)
+		if cells == 1:
+			assert_eq(out.keys(), [&"cordwood_single"] as Array, "one section closes at both ends")
+		else:
+			assert_true(out.has(&"cordwood_start") and out.has(&"cordwood_end"), "%d cells: both ends closed" % cells)
+			assert_eq(out[&"cordwood_start"].transforms.size(), 1, "one start section")
+			assert_false(out.has(&"cordwood_single"), "no single section in a longer line")
 
 
 func test_the_end_models_share_the_sandbag_box_and_load_with_the_range_and_stockade() -> void:

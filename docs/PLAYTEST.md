@@ -1726,7 +1726,7 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   ends show split wood, not pipes: round logs, logs with a flat pale split face, wedges and quarters, in courses the
   size of the face's pieces, each course a little off level, pieces in and out, a small break where each course's
   front and back pieces meet, no flat tab sticking out and no black slot down the middle; no straight dark line runs
-  up a corner, and where two 2 m sections meet the ends read as wood, not a dark seam; from a raised spot the top
+  up a corner, and along a stack no join between its 2 m sections shows as a line, pale or dark; from a raised spot the top
   shows split pieces (pale ridges and dark bark) of mixed widths, some turned and two or three lying across, not a
   black lid, a sheet or a ribbed roof, and nothing stands up over a corner.
 
