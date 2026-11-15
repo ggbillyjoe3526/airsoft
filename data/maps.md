@@ -47,6 +47,6 @@ warning; a map with no row is not listed.
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | depot | Depot | field | public | 5 | 6 | 8 |  |  | 16 | semi | 0 | 20 | An indoor airsoft hall: three lanes, two dark tunnels. |
 | woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 23 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
-| subway | Subway | field | dev | 5 | 6 | 8 |  |  | 22 | semi | 0 | 14 | A closed metro station on three levels, from the ticket hall down to the trains. |
+| subway | Subway | field | dev | 5 | 6 | 8 |  |  | 22 | semi | 0 | 14 | A closed metro station on two levels, from the ticket hall and concourse down to the trains. |
 | stockade | Stockade | field | dev | 5 | 6 | 8 |  |  |  |  | 0.5 | 15 | A plywood village inside a log fort: fenced courts, a market green, close fights. |
 | range | Range | range | public | 1 | 1 | 1 |  |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |

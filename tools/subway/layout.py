@@ -1,20 +1,20 @@
 """Subway's layout as data: a closed deep-level metro station (the owner's concept v2, 2026-11-10;
 /mnt/project-files/concepts/metro/v2/). Dev content until the owner makes it public.
 
-Asymmetric. The Street team (end 0) starts in the ticket hall at street level; the Tunnel team (end 1) starts in a
-cross-passage between the two running tunnels east of the platforms. Teams swap ends at half time.
+Asymmetric. The Street team (end 0) starts in the ticket hall; the Tunnel team (end 1) starts in a cross-passage
+between the two running tunnels east of the platforms. Teams swap ends at half time.
 
-Metres, x west to east, z north (-) to south (+), y up. The levels are written as the concept has them, from the
-street down (G 0, concourse -10, platforms -18, track bed -18.9); build_map.py lifts them all by LIFT so the track
-bed is the game's floor at 0.
+Metres, x west to east, z north (-) to south (+), y up. The levels are written as the concept has them (concourse
+-10, platforms -18, track bed -18.9; the street level at 0 went in SW1, the owner 2026-11-15: "Ticket hall and
+concourse should be one single level now"); build_map.py lifts them all by LIFT so the track bed is the game's floor
+at 0.
 
 ROOMS are walkable volumes: a box of air from its floor up `h` m (a ramp room's floor runs from `ya` at x0 to `yb` at
 x1). Rooms that touch along an edge, with their air overlapping at least OPEN m, open into each other there; every
 other edge of a room gets a wall, and every room a floor and a ceiling. A sealed edge (a train's side, the spiral
 stair's well) is walled from the inside but for its `gaps`. BLOCKS are the cover, `h` m over the floor they stand on.
-The links between levels: two upper escalators (0 to -10), two lower ones (-10 to -18), one spiral stair (0 to -10)
-and one ordinary stair (-10 to -18, a half landing on the way), and two lifts (LIFTS: 0, -10 and -18) in a pair of
-shafts by the ticket hall's gate line.
+The links between the two levels: two escalators (-10 to -18), one spiral stair and one ordinary stair (a half
+landing on the way), and two lifts (LIFTS) in a pair of shafts in the ticket hall.
 
 Edit this file, then run `python3 tools/subway/build_map.py` to write data/maps/subway.json.
 """
@@ -56,51 +56,50 @@ def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: fl
                        squeeze=squeeze, noise=noise))
 
 
-# ---------------- Street level, 0 m: the ticket hall (Street team's start) ----------------
-room("hall", "Ticket hall", -62, -38, -10, 10, G, h=6.0)
-block("wall", G, -62, -56, -10, -6.5, 3.0, dress="ticket_office")  # closed ticket office
-block("container", G, -48, -45, 7.4, 10, 2.5, 0x8a8478, dress="kiosk")  # shuttered kiosk
+# ---------------- The ticket hall and concourse, -10 m: one level (SW1) ----------------
+# The owner (2026-11-15): "Ticket hall and concourse should be one single level now". The ticket hall stands on the
+# concourse's level at its west end (the Street team's start): no street level, no escalators down to it, the old
+# booking hall and west passage taken into the hall. From the street end, east: the spawns and the ticket office,
+# the lifts' shafts, the gate line, the spiral stair's hole, then the concourse (upper) with the lower escalators.
+HALL_H = 4.5
+room("hall", "Ticket hall", -55, -18, -10, 10, C, h=HALL_H)  # 20 m: seven gates a side
+block("wall", C, -55, -49, -10, -6.5, 3.0, dress="ticket_office")  # closed ticket office
+block("container", C, -49, -46, 7.4, 10, 2.5, 0x8a8478, dress="kiosk")  # shuttered kiosk
+block("cabinet", C, -55.0, -54.4, 2.5, 8.0, 2.0, dress="ticket_machine")
+block("furniture", C, -48.5, -42.5, -10, -9.1, 1.1, dress="booking_counter")  # the old ticket counter, waist high
+# Cable drums left from the works where the west passage was: cover along the hall's north wall, and no line down it
+# into the north passage.
+block("crate", C, -31, -29, -10, -8.6, 1.8, dress="cable_drum")
+block("crate", C, -25, -23, -8.4, -7.0, 1.8, dress="cable_drum")
 # Ticket gates (the owner: lanes one person wide, paddle doors each side): a slim pedestal 0.49 m wide and 1.4 m along
-# the lane, its reader at the street end, seven a side from the hall column to the wall with a 1 m lane between
-# each two (the paddles across it are GatePaddles', look only: they swing open as anyone walks up).
+# the lane, its reader at the street end, seven a side from the hall column to the wall with a 1 m lane between each
+# two (the paddles across it are GatePaddles', look only: they swing open as anyone walks up).
+# The gate line stands east of the lifts' shafts, between the hall and the spiral stair.
 GATE_W, GATE_LANE = 0.49, 1.0
+GATE_X = (-39.4, -38.0)
 for zs in (-1, 1):
     for k in range(7):
         near = 0.5 + k * (GATE_W + GATE_LANE)
-        block("cabinet", G, -51.4, -50.0, *sorted((zs * near, zs * (near + GATE_W))), 1.0, dress="ticket_gate",
+        block("cabinet", C, *GATE_X, *sorted((zs * near, zs * (near + GATE_W))), 1.0, dress="ticket_gate",
               facing="+x")
-block("cabinet", G, -55.0, -54.4, 2.5, 8.0, 2.0, dress="ticket_machine")
-block("pillar", G, -50.2, -49.2, -0.5, 0.5, 6.0)           # hall column in the gate line
+block("pillar", C, -39.2, -38.2, -0.5, 0.5, HALL_H)        # hall column in the gate line
 
-# The spiral stair's well: 5 x 5 m in the hall's north-east corner, down to the lower booking hall. Its flights are
-# built by build_map.py (SPIRAL); its rail round the hole in the hall floor here.
-SPIRAL = dict(x0=-43.0, x1=-38.0, z0=-10.0, z1=-5.0, flight=1.3, y0=C, y1=G, sides=10, top=6.0,
+# The spiral stair's well: 5 x 5 m in the hall floor past the gates, down to the south platform (the owner,
+# 2026-11-15: "fix that so players can use it to get down to the platform"). Eight flights of a metre, one up each
+# side in turn (build_map.py, SPIRAL): its foot opens south onto the platform at its south-east corner, its top
+# lands in the same corner, where the rail round the hole has its gap.
+SPIRAL = dict(x0=-33.0, x1=-28.0, z0=0.5, z1=5.5, flight=1.3, y0=P, y1=C, sides=8, top=HALL_H,
               dress="spiral_stair")  # the model over its flights and landings, not the core (SM2)
-room("spiral", "Spiral stair", -43, -38, -10, -5, C, h=G - C + 0.01, ceil=False,
-     seal={"n": [], "e": [], "w": [], "s": [(-39.4, -38.0)]})
-block("railing", G, -43.0, -38.0, -5.0, -4.88, 1.1)
-block("railing", G, -43.12, -43.0, -8.6, -4.88, 1.1)
+SPIRAL_WAY = (-29.4, -28.0)   # the gap at its foot onto the platform, and in the rail at its top (both south)
+room("spiral", "Spiral stair", -33, -28, 0.5, 5.5, P, h=C - P + 0.01, ceil=False,
+     seal={"n": [], "e": [], "w": [], "s": [SPIRAL_WAY]})
+block("railing", C, -33.12, -27.88, 0.38, 0.5, 1.1)
+block("railing", C, -33.12, -33.0, 0.5, 5.62, 1.1)
+block("railing", C, -28.0, -27.88, 0.5, 5.62, 1.1)
+block("railing", C, -33.0, SPIRAL_WAY[0], 5.5, 5.62, 1.1)
+ESC_MID = 0.6     # an escalator bank's middle deck's half width: as wide as an escalator, as in the photos
+ESC_LANE = 1.2    # each escalator, 1.2 m between its balustrades (two abreast, the owner 2026-11-12)
 
-# Upper escalators: 10 m down at 1:2. Two escalators, each 1.2 m between its balustrades (two abreast, the owner
-# 2026-11-12), a wide deck between them with its uplighters and a deck from each to the wall. The decks are blocks on
-# the ramp: build_map.py follows its slope.
-ESC_LANE = 1.2
-ESC_MID = 0.6     # the middle deck's half width: as wide as an escalator, as in the photos
-room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2, dress="escalator_upper")
-for z0, z1 in ((-3.5, -ESC_MID - ESC_LANE), (-ESC_MID, ESC_MID), (ESC_MID + ESC_LANE, 3.5)):
-    block("barrier", None, -38, -18, z0, z1, 1.0, dress="escalator_upper")
-
-# ---------------- Concourse, -10 m: close quarters ----------------
-room("bk_w", "Booking hall", -52, -43, -9.5, -1.2, C, h=4.0)
-room("bk_s", "Booking hall", -43, -36, -5, -1.2, C, h=4.0)
-room("bk_e", "Booking hall", -38, -36, -9.5, -5, C, h=4.0)
-block("furniture", C, -50, -44, -9.5, -8.6, 1.1, dress="booking_counter")  # old ticket counter, waist high
-block("crate", C, -48.5, -47, -5.5, -4, 1.4, dress="crate")
-# lockers: screen the spiral foot from the passage
-block("cabinet", C, -36.9, -36.0, -4.2, -1.2, 2.0, dress="locker", noise="clank")
-room("wpass", "West passage", -36, -18, -9.5, -7, C, h=3.0)
-block("crate", C, -31, -29, -9.5, -8.1, 1.8, dress="cable_drum")  # cable drums staggered: no line down the passage
-block("crate", C, -25, -23, -8.4, -7.0, 1.8, dress="cable_drum")
 room("upper", "Concourse", -18, -6, -9.5, 9.5, C, h=4.0)
 block("barrier", C, -14.0, -13.4, -5.6, -3.6, 1.1, dress="crowd_barrier")
 block("barrier", C, -14.0, -13.4, 3.6, 5.6, 1.1, dress="crowd_barrier")
@@ -121,11 +120,11 @@ room("spass", "South passage", -6, 20, 6.5, 9.5, C, h=3.0)
 for zs in (-1, 1):
     a, b = sorted((zs * 9.5, zs * 7.7))
     c, d = sorted((zs * 8.3, zs * 6.5))
-    block("cabinet", C, 1, 2.2, a, b, 2.0, dress="locker", noise="clank")  # lockers, a chicane down each passage
+    # Lockers down each passage, one on each side (the owner, 2026-11-15: "remove some of the metal lockers to give
+    # longer sight lines"; SW1 took out the pair at the passages' mouths and the pair at their east ends).
+    block("cabinet", C, 1, 2.2, a, b, 2.0, dress="locker", noise="clank")
     block("cabinet", C, 7, 8.2, c, d, 2.0, dress="locker", noise="clank")
-    block("cabinet", C, 13, 14.2, a, b, 2.0, dress="locker", noise="clank")
     block("crate", C, 16.5, 18, c, d, 1.2, dress="crate")
-    block("cabinet", C, -4, -2.8, c, d, 2.0, dress="locker", noise="clank")  # at the passage mouth
 room("plant", "Plant room", 4, 18, -4, 4, C, h=3.5)
 room("pdoor_n", "Plant room", 9.5, 11.5, -6.5, -4, C, h=2.2)
 room("pdoor_s", "Plant room", 9.5, 11.5, 4, 6.5, C, h=2.2)
@@ -311,7 +310,8 @@ for zs in (-1, 1):
     block("hoarding", P, -4, -1, *edge, 2.4, dress="works_hoarding")  # works chicane at the platform middle
     block("shed", P, 4, 6, *back, 2.6, dress="staff_booth", facing=face)  # booth
     block("crate", P, 28, 29.4, *sorted((zs * 9, zs * 7.8)), 1.4, dress="crate")
-    block("crate", P, -30, -28.6, *back, 1.4, dress="crate")
+    # The south one stands west of the spiral stair's foot (SPIRAL_WAY), the doorway between it and the booth.
+    block("crate", P, *((-31.8, -30.4) if zs > 0 else (-30, -28.6)), *back, 1.4, dress="crate")
     block("hoarding", P, -34, -32, *edge, 2.4, dress="works_hoarding_short")
     block("shed", P, -27, -25.4, *back, 2.6, dress="staff_booth_mid", facing=face)
     block("hoarding", P, 30, 32, *sorted((zs * 9, zs * 6.6)), 2.4, dress="works_hoarding_deep")
@@ -369,20 +369,22 @@ block("cabinet", T, 66, 68, TRACK_Z - 0.85, TRACK_Z + 0.85, 1.2, dress="platelay
 # Two shafts side by side, x -46.3 to -40.8 and z -1.2 to 1.2, their walls SHAFT_T thick and a partition between,
 # from a pit under the platforms up to the ticket hall's ceiling; build_map.py cuts them out of the shell and walls
 # them, a door in the north wall at each stop. Each car runs in its well (inside the walls), its doors facing north
-# (-z) onto the hall, the booking hall (west car) or its south end (east car) and the lift landing. The concept's
-# defaults (2026-11-10): one car waits at the hall, the other at the platforms.
-SHAFT = dict(x0=-46.3, x1=-40.8, z0=-1.2, z1=1.2, pit=0.5, top=G + 6.0)
+# (-z) onto the ticket hall and the lift landing. Two stops since SW1 (the owner, 2026-11-15: "adjust the elevator so
+# it only goes between two levels"): 8 m in LiftConfig.floor_time, 4 s, 2 m/s as a station lift runs. One car waits
+# at the hall, the other at the platforms.
+SHAFT = dict(x0=-46.3, x1=-40.8, z0=-1.2, z1=1.2, pit=0.5, top=C + HALL_H)
 SHAFT_T = 0.3
 LIFT_DOOR_W = 1.1    # each car's door, centred on its well
 LIFT_DOOR_H = 2.1
-LIFTS = [dict(name="west", x0=-46.0, x1=-43.7, start=G), dict(name="east", x0=-43.4, x1=-41.1, start=P)]
-LIFT_STOPS = [P, C, G]
-LIFT_STOP_NAMES = ["Platforms", "Concourse", "Ticket hall"]
+LIFTS = [dict(name="west", x0=-46.0, x1=-43.7, start=C), dict(name="east", x0=-43.4, x1=-41.1, start=P)]
+LIFT_STOPS = [P, C]
+LIFT_STOP_NAMES = ["Platforms", "Ticket hall"]
 
 # ---------------- Ends, flags, lanes ----------------
-SPAWNS_W = [(x, z) for x in (-60.6, -58.6) for z in (-4.5, -1.5, 1.5, 4.5)]
+SPAWN_Y_W = C                                         # the Street team starts in the ticket hall (SW1)
+SPAWNS_W = [(x, z) for x in (-52.6, -50.6) for z in (-4.5, -1.5, 1.5, 4.5)]
 SPAWNS_E = [(75.5, z) for z in (-7.5, -5.4, -3.2, -1.1, 1.1, 3.2, 5.4, 7.5)]
-DEAD_W = [(x, z) for x in (-61.2, -60.4) for z in (6.4, 7.2, 8.0, 8.8)]          # the hall's south-west corner
+DEAD_W = [(x, z) for x in (-53.6, -52.8) for z in (6.4, 7.2, 8.0, 8.8)]          # the hall's south-west corner
 DEAD_E = [(x, z) for x in (80.4, 81.2) for z in (-12.0, -11.2, -10.4, -9.6)]    # the north tunnel's blocked end
 # MB1: flag B stands on the north platform, between its east hoarding and booth (it stood on the stair's half landing,
 # 8 m from A: one fight at the stair top decided every round). The two poles are now a platform apart, each 12 m from
@@ -400,20 +402,25 @@ OT_FLAG = (12.0, 2.4, P)                              # the lower hall's west en
 # defender (Attack / Defend, the Tunnel team) holds its lane's last point or the one before (RoundPlanner), so the last
 # two are its posts. The Tunnel team walks out of the tunnel to its lanes' ends.
 # MB1: n takes the lifts to the lift landing and the north platform's whole length past the north train to flag B
-# (posts: the lower hall's north doors and B's east side); m the escalators, the lower hall and the south platform to
-# train A's doors (its posts); s the escalators, the south passage and the stair (posts: the half landing and the
-# stair's foot, between the two flags). Before, all three met in the concourse and two shared the stair: the
-# platforms' west half, the lifts and the north train saw nobody. No lane takes the spiral stair: a bot was 40 s on
-# it, out of the round's first fight; it is a way round for whoever wants one. Each lane has a point either side of
-# the field's middle (x 7.95), about equally deep: n's are 4.45 m each way (with one at 9 and the next at -7 the
-# Tunnel team's squad walked 15 m past the middle and the Street team's 1 m).
+# (posts: the lower hall's north doors and B's east side); m the lower escalators, the lower hall and the south
+# platform to train A's doors (its posts); s the south passage and the stair (posts: the half landing and the stair's
+# foot, between the two flags).
+# SW1 (the owner, 2026-11-15, his pick of concept A): two more, through the parts nobody walked. np down the north
+# passage to the stair and the east passage (posts: the stair's lower flight and the east passage); sp down the spiral
+# stair to the south platform's west end, through the mid passage to the north platform and the lower hall to flag B.
+# Each lane has a point either side of the field's middle (x 11.95, between the two ends' spawns), about equally deep.
 LANES = {
-    "n": [(-56, -3, G), (-44.85, -2.6, G), (-44.85, -2.8, P), (-44, -5.25, P), (-44, -7.3, P), (-20.5, -7.0, P),
-          (-7, -6.3, P), (3.5, -7.0, P), (12.4, -7.5, P), (16, -7.3, P), (26, -6.8, P), (37, -8.3, P)],
-    "m": [(-56, 0, G), (-44, 2.5, G), (-37, 1.2, G - 0.5), (-28, 1.2, -5.5), (-19, 1.2, C), (-10, 0, C),
-          (-5, 1.2, C), (2, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P),
-          (46.5, 7.0, P)],
-    "s": [(-56, 3, G), (-44, 4, G), (-37, -1.2, G - 0.5), (-28, -1.2, -5.5), (-19, -1.2, C), (-10, 6, C), (-5, 8, C),
-          (4, 7.2, C), (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (31, -0.5, -12.0),
-          (36.2, -1.0, LANDING), (41.5, 0, -16.0)],
+    "n": [(-50, -3, C), (-44.85, -2.6, C), (-44.85, -2.8, P), (-44, -5.25, P), (-44, -7.3, P), (-20.5, -7.0, P),
+          (-7, -6.3, P), (7.5, -7.0, P), (16.4, -7.3, P), (26, -6.8, P), (37, -8.3, P)],
+    "m": [(-50, 0, C), (-44, 2.5, C), (-38.7, 1.49, C), (-24, 1.2, C), (-19, 1.2, C), (-10, 0, C), (-5, 1.2, C),
+          (2, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P), (46.5, 7.0, P)],
+    "s": [(-50, 3, C), (-44, 4.5, C), (-38.7, 4.47, C), (-30, 7.5, C), (-10, 6, C), (-5, 8, C), (4, 7.2, C),
+          (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (31, -0.5, -12.0), (36.2, -1.0, LANDING),
+          (41.5, 0, -16.0)],
+    "np": [(-50, -4.5, C), (-38.7, -4.47, C), (-24, -6.0, C), (-14, -8.0, C), (-4, -7.2, C), (4.5, -7.2, C),
+           (10, -8.5, C), (16, -8.0, C), (23.5, -6.5, C), (26, 0.5, C), (31, -0.5, -12.0), (36.2, -1.0, LANDING),
+           (41.5, 0, -16.0), (46.5, -4.0, P)],
+    "sp": [(-50, 1.5, C), (-38.7, 2.98, C), (-28.7, 6.6, C), (-28.7, 6.6, P), (-21, 7.2, P), (-20.5, 0, P),
+           (-20.5, -6.8, P), (-8, -6.5, P), (7.5, -6.8, P), (16.4, -3.0, P), (20, -1.0, P), (26, -6.8, P),
+           (37, -8.3, P)],
 }

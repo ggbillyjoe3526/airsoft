@@ -101,7 +101,7 @@ func test_subway_s_escalators_and_stairs_fill_their_blocks_unstretched() -> void
 	var cfg := PlayTuning.load_default().map_style
 	var m := MapData.load_map("subway", cfg, 6)
 	var props := PropDressConfig.new()
-	for model: StringName in [&"escalator_upper", &"escalator_lower", &"spiral_stair", &"platform_stair"]:
+	for model: StringName in [&"escalator_lower", &"spiral_stair", &"platform_stair"]:
 		assert_eq(props.model_lays[model], PropDressConfig.Lay.SET, "%s is laid over its blocks" % model)
 		var box := PropDressConfig.set_box(m, model)
 		assert_gt(box.size.x, 1.0, "%s names blocks" % model)

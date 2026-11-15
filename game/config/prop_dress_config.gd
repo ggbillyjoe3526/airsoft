@@ -84,8 +84,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"sawmill_shed": "res://assets/models/props/sawmill_shed.glb",
 	&"hut_roof": "res://assets/models/props/hut_roof.glb",
 	# Subway's stairs and escalators (Dev 3 SM2, tools/blender/maps/), each laid over its ramps and their barriers
-	# (SET): the two escalator banks, the spiral stair round its core and the stair down to the platforms.
-	&"escalator_upper": "res://assets/models/props/escalator_upper.glb",
+	# (SET): the escalator bank (the upper one archived in SW1), the spiral stair round its core and the stair down to
+	# the platforms.
 	&"escalator_lower": "res://assets/models/props/escalator_lower.glb",
 	&"spiral_stair": "res://assets/models/props/spiral_stair.glb",
 	&"platform_stair": "res://assets/models/props/platform_stair.glb",
@@ -229,7 +229,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"pine_young": Lay.TREE, &"pine_grown": Lay.TREE, &"pine_old": Lay.TREE, &"oak": Lay.TREE, &"birch": Lay.TREE,
 	&"plywood_header": Lay.RUN,
 	&"palisade": Lay.STAKES, &"watch_tower": Lay.SET, &"footbridge": Lay.SET, &"sawmill_shed": Lay.SET,
-	&"escalator_upper": Lay.SET, &"escalator_lower": Lay.SET, &"spiral_stair": Lay.SET, &"platform_stair": Lay.SET,
+	&"escalator_lower": Lay.SET, &"spiral_stair": Lay.SET, &"platform_stair": Lay.SET,
 	&"cordwood": Lay.GRID, &"fallen_log_5": Lay.GROUND, &"fallen_log_6": Lay.GROUND, &"fallen_log_8": Lay.GROUND,
 	&"root_plate": Lay.GROUND, &"sawbench": Lay.GROUND, &"boards": Lay.GROUND,
 	&"log_tunnel_side": Lay.SIDE, &"log_tunnel_roof": Lay.LINED,
@@ -391,7 +391,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"pine_young_crown": 0.95, &"pine_grown_crown": 0.95, &"pine_old_crown": 0.95, &"oak_crown": 0.95,
 	&"birch_crown": 0.95,
 	# Subway's escalators' brushed stainless (SM2): a soft sheen.
-	&"escalator_upper": 0.4, &"escalator_lower": 0.4,
+	&"escalator_lower": 0.4,
 }
 ## How worn the props are drawn (SL2, look_vertex.gdshader's `wear`; LookConfig.wear scales it): grime up their feet,
 ## streaks, stains and dust on top. Models worn otherwise (each its own material): the trees' crowns are clean, as
@@ -404,12 +404,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	# a thicket's spruce is all boughs (FT1: worn, the dust on its upturned tiers drew its sunlit tops pale beige)
 	&"spruce": 0.0,
 	# Subway's escalators and stairs, swept daily: full dust drew their steps and decks beige (SM2)
-	&"escalator_upper": 0.08, &"escalator_lower": 0.08, &"spiral_stair": 0.12, &"platform_stair": 0.12,
+	&"escalator_lower": 0.08, &"spiral_stair": 0.12, &"platform_stair": 0.12,
 }
 ## Models whose painted parts keep their whole colour, not the look's weathered share of it (LookConfig
 ## .paint_saturation): Subway's escalators' and stairs' safety yellow, which the pull drew cream (SM2). Their other
 ## paints are steel, rubber and stone greys, which the pull leaves as they are.
-@export var full_colour: Array[StringName] = [&"escalator_upper", &"escalator_lower", &"spiral_stair", &"platform_stair"]
+@export var full_colour: Array[StringName] = [&"escalator_lower", &"spiral_stair", &"platform_stair"]
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.
 var _meshes: Dictionary[String, Mesh] = {}

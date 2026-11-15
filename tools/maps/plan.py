@@ -220,7 +220,8 @@ def figure(field: Field, title: str):
     fw = 15.0
     fh = fw * h / w * n + 0.9 * n + 0.6
     fig, axes = plt.subplots(n, 1, figsize=(fw, fh), squeeze=False)
-    names = ["Platforms and track", "Concourse", "Ticket hall"] if n == 3 else [""]
+    names = {3: ["Platforms and track", "Concourse", "Ticket hall"],
+             2: ["Platforms and track", "Ticket hall and concourse"]}.get(n, [""] * n)
     order = list(range(n))[::-1]   # top storey first
     for row, storey in enumerate(order):
         axes[row][0].set_title((names[storey] + "  " if names[storey] else "") + (title if row == 0 else ""), fontsize=11,

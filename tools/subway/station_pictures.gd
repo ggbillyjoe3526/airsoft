@@ -6,16 +6,19 @@ extends SceneTree
 ## TRAIN_SHOTS (SM1: the trains' models). Needs a display
 ## (the cloud's lavapipe Vulkan draws Forward+):
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver vulkan -s \
-##       res://tools/subway/station_pictures.gd -- <folder> [low|medium|high|ultra] [fixtures|trains]
+##       res://tools/subway/station_pictures.gd -- <folder> [low|medium|high|ultra] [all|fixtures|trains] [names]
+## (`names`: only the shots named, comma-separated).
 ## Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
 ## Each picture: its name, the eye and the point it looks at (the game's metres: track 0, platforms 0.9, landing 4.9,
-## concourse 8.9, ticket hall 18.9).
+## ticket hall and concourse 8.9, one level since SW1).
 const SHOTS: Array[Array] = [
-	["ticket-hall", Vector3(-60.0, 20.6, 1.0), Vector3(-44.0, 19.6, -1.0)],
-	["escalators-down", Vector3(-38.6, 20.6, 2.0), Vector3(-24.0, 12.5, 2.0)],
-	["spiral-stair", Vector3(-39.0, 20.6, -3.4), Vector3(-41.0, 15.5, -8.0)],
+	["ticket-hall", Vector3(-53.0, 10.6, 1.0), Vector3(-38.0, 10.0, -1.0)],
+	["hall-to-concourse", Vector3(-36.0, 10.6, -6.0), Vector3(-10.0, 10.0, 0.0)],
+	["spiral-stair", Vector3(-27.4, 10.6, 6.4), Vector3(-29.6, 6.2, 2.4)],
+	["spiral-inside", Vector3(-30.2, 9.1, 1.3), Vector3(-32.6, 6.9, 3.0)],
+	["spiral-foot", Vector3(-28.7, 2.6, 8.7), Vector3(-28.7, 1.4, 4.0)],
 	["concourse", Vector3(-17.0, 10.6, 1.0), Vector3(-6.0, 10.0, -5.0)],
 	["north-platform", Vector3(-50.0, 2.6, -7.0), Vector3(30.0, 2.2, -8.0)],
 	["south-train-inside", Vector3(31.0, 2.6, 10.75), Vector3(44.0, 2.0, 10.75)],
@@ -25,7 +28,7 @@ const SHOTS: Array[Array] = [
 	["south-track", Vector3(-28.0, 1.7, 10.0), Vector3(-6.0, 0.4, 10.75)],
 	["north-train-inside", Vector3(-42.0, 2.6, -10.75), Vector3(-30.0, 2.0, -10.75)],
 	["lower-hall", Vector3(11.0, 2.6, 2.0), Vector3(21.0, 1.6, -2.0)],
-	["lifts-ticket-hall", Vector3(-43.5, 20.6, -6.0), Vector3(-43.5, 19.9, -0.9)],
+	["lifts-ticket-hall", Vector3(-43.5, 10.6, -6.0), Vector3(-43.5, 9.9, -0.9)],
 	# TB1: across the south platform's tunnel to the trackside wall, and down it to the tunnel mouth at its east end.
 	["south-platform-across", Vector3(-47.0, 2.5, 5.9), Vector3(-38.0, 3.9, 12.5)],
 	["north-platform-east-end", Vector3(24.0, 2.5, -6.2), Vector3(50.0, 3.4, -9.5)],
@@ -47,16 +50,16 @@ const FIXTURE_SHOTS: Array[Array] = [
 	["way-out-sign", Vector3(-24.5, 10.4, -8.6), Vector3(-28.0, 11.8, -8.25)],
 	["cctv-camera", Vector3(-46.0, 2.2, -7.8), Vector3(-49.0, 3.5, -5.6)],
 	["north-tunnel-lamps", Vector3(51.0, 1.7, -10.4), Vector3(76.0, 2.2, -11.8)],
-	["ticket-hall-clock", Vector3(-55.0, 20.8, 6.0), Vector3(-51.0, 22.0, 9.5)],
+	["ticket-hall-clock", Vector3(-53.0, 10.8, 6.0), Vector3(-51.0, 12.0, 9.5)],
 	["strip-lamp-from-below", Vector3(-17.5, 1.7, -6.8), Vector3(-14.875, 3.85, -7.25)],
 	["tunnel-lamp-close", Vector3(60.4, 2.1, -10.4), Vector3(62.0, 2.55, -12.3)],
 	["trackside-posters-north", Vector3(43.0, 2.4, -8.6), Vector3(33.0, 2.4, -12.5)],
 	["trackside-posters-south", Vector3(-41.0, 2.3, 7.4), Vector3(-34.0, 2.4, 12.5)],
-	["escalator-posters", Vector3(-36.5, 19.85, 0.0), Vector3(-24.0, 13.9, -1.0)],
+	["escalator-posters", Vector3(-6.5, 10.6, 0.0), Vector3(4.0, 5.9, -1.0)],
 	["departure-board", Vector3(-15.0, 2.3, -6.6), Vector3(-10.75, 3.45, -7.25)],
 	["line-map", Vector3(-28.5, 2.5, -8.4), Vector3(-28.5, 2.5, -5.5)],
 	["concourse-way-out", Vector3(-11.0, 10.6, 1.0), Vector3(-18.0, 12.2, 0.0)],
-	["hall-notices", Vector3(-51.5, 20.5, 6.6), Vector3(-51.5, 20.7, 10.0)],
+	["hall-notices", Vector3(-51.5, 10.5, 6.0), Vector3(-51.5, 10.7, 9.5)],
 	["lower-hall-info", Vector3(16.5, 2.6, -1.0), Vector3(22.0, 2.5, 2.4)],
 ]
 ## The trains' pictures (SM1), with `trains` as the third argument instead of the station's.
@@ -100,6 +103,14 @@ func _run() -> void:
 	var shots: Array[Array] = SHOTS
 	if args.size() > 2:
 		shots = FIXTURE_SHOTS if args[2] == "fixtures" else TRAIN_SHOTS if args[2] == "trains" else SHOTS
+	if args.size() > 3:
+		# Only the shots named (comma-separated), from whichever list.
+		var named := args[3].split(",")
+		var some: Array[Array] = []
+		for shot in shots:
+			if named.has(shot[0]):
+				some.append(shot)
+		shots = some
 	DirAccess.make_dir_recursive_absolute(folder)
 	root.size = SIZE
 	var session := PlaySession.new()

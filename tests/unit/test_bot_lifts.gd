@@ -40,8 +40,8 @@ func _lift_legs(route: PackedVector3Array, start: Vector3) -> Array[int]:
 
 
 func test_subway_has_a_link_each_way_between_every_two_stops_of_each_lift() -> void:
-	assert_eq(nav.lift_to.size(), 12, "2 lifts, 3 stops: 6 rides each")
-	assert_eq(NavLifts.link(nav, level.query(), tuning.lifts, 4.2, 4.0), 12, "a second call adds none")
+	assert_eq(nav.lift_to.size(), 4, "2 lifts, 2 stops (SW1): 2 rides each")
+	assert_eq(NavLifts.link(nav, level.query(), tuning.lifts, 4.2, 4.0), 4, "a second call adds none")
 	for l in nav.lift_to.size():
 		var spec := level.query().lifts[nav.lift_of[l]]
 		assert_almost_eq(nav.floor_y[nav.lift_from[l]], spec.stops[nav.lift_stop_from[l]], tuning.body.max_step)
@@ -51,14 +51,14 @@ func test_subway_has_a_link_each_way_between_every_two_stops_of_each_lift() -> v
 func test_a_bot_s_route_from_the_platforms_lift_landing_to_the_hall_rides_and_a_walk_off_walks() -> void:
 	var spec := level.query().lifts[1]
 	var start := spec.landing_point(0, tuning.lifts)
-	var goal := spec.landing_point(2, tuning.lifts) + Vector3(-2.0, 0.0, -3.0)
+	var goal := spec.landing_point(1, tuning.lifts) + Vector3(-2.0, 0.0, -3.0)
 	var route := PackedVector3Array()
 	assert_true(nav.find_route(start, goal, route, true))
 	var legs := _lift_legs(route, start)
 	assert_eq(legs.size(), 1, "one ride")
 	if legs.size() == 1:
 		assert_eq(nav.lift_stop_from[legs[0]], 0)
-		assert_eq(nav.lift_stop_to[legs[0]], 2, "straight up to the hall")
+		assert_eq(nav.lift_stop_to[legs[0]], 1, "straight up to the hall")
 	var walk := PackedVector3Array()
 	assert_true(nav.find_route(start, goal, walk, false))
 	assert_eq(_lift_legs(walk, start).size(), 0, "a walk-off goes by the stairs")
@@ -93,7 +93,7 @@ func test_a_bot_calls_boards_rides_and_walks_out_at_the_hall() -> void:
 	me.prev_position = me.position
 	me.grounded = true
 	state.characters[1].position = Vector3(75.5, 0.04, 7.5)
-	var goal := spec.landing_point(2, tuning.lifts) + Vector3(-2.0, 0.0, -3.0)
+	var goal := spec.landing_point(1, tuning.lifts) + Vector3(-2.0, 0.0, -3.0)
 	assert_true(nav.find_route(me.position, goal, bot.route, true))
 	bot.route_from = me.position
 	bot.route_leg = 0
@@ -124,7 +124,7 @@ func test_a_bot_calls_boards_rides_and_walks_out_at_the_hall() -> void:
 	assert_true(rode, "aboard on the way")
 	assert_eq(departs, 2, "down for it, up with it")
 	assert_true(BotRoutes.arrived(bot), "at its goal in the hall")
-	assert_almost_eq(me.position.y, spec.stops[2] + tuning.body.rest_gap, 0.1, "on the hall's floor")
+	assert_almost_eq(me.position.y, spec.stops[1] + tuning.body.rest_gap, 0.1, "on the hall's floor")
 
 
 func test_one_too_many_aboard_the_highest_id_steps_back_out() -> void:
@@ -134,20 +134,20 @@ func test_one_too_many_aboard_the_highest_id_steps_back_out() -> void:
 	var spec := q.lifts[0]
 	var n := tuning.lifts.capacity + 1
 	for i in n:
-		var at := spec.car_point(spec.stops[2]) + Vector3(0.1 * i - 0.2, tuning.body.rest_gap, 0.0)
+		var at := spec.car_point(spec.stops[1]) + Vector3(0.1 * i - 0.2, tuning.body.rest_gap, 0.0)
 		state.characters.append(Character.new(i, i % 2, at, 0.0, loadout))
 	var bots := BotController.new(state, -1, map, nav, q, tuning, config)
 	var sim := Simulation.new(tuning, q, level.mover(tuning.body), map.ends, map.kill_y)
 	sim.start_match(state)
 	for c in state.characters:
-		c.position = spec.car_point(spec.stops[2]) + Vector3(0.1 * c.id - 0.2, tuning.body.rest_gap, 0.0)
+		c.position = spec.car_point(spec.stops[1]) + Vector3(0.1 * c.id - 0.2, tuning.body.rest_gap, 0.0)
 	bots.world.lifts = state.lifts
 	var link := -1
 	for l in nav.lift_to.size():
-		if nav.lift_of[l] == 0 and nav.lift_stop_from[l] == 2 and nav.lift_stop_to[l] == 0:
+		if nav.lift_of[l] == 0 and nav.lift_stop_from[l] == 1 and nav.lift_stop_to[l] == 0:
 			link = l
 	assert_gt(link, -1, "a ride from the hall down")
-	assert_true(state.lifts.open_at(0, 2), "the west car stands open at the hall")
+	assert_true(state.lifts.open_at(0, 1), "the west car stands open at the hall")
 	var out := Vector3(spec.out.x, 0.0, spec.out.y)
 	var last: Bot = bots.world.bots[n - 1]
 	assert_true(BotLifts.ride(last, bots.world, link, DT))
@@ -228,15 +228,15 @@ func test_a_full_car_leaves_while_a_fifth_waits_and_the_call_button_isn_t_presse
 	var state: GameState = m[1]
 	var bots: BotController = m[2]
 	var spec := level.query().lifts[0]
-	var link := _link(0, 2, 0)
+	var link := _link(0, 1, 0)
 	assert_gt(link, -1)
-	assert_true(state.lifts.open_at(0, 2), "the west car stands open at the hall")
+	assert_true(state.lifts.open_at(0, 1), "the west car stands open at the hall")
 	var n := tuning.lifts.capacity
 	for i in n:
-		_stand(state.characters[i], spec.car_point(spec.stops[2]) + Vector3(0.3 * (i % 2) - 0.15, 0.0,
+		_stand(state.characters[i], spec.car_point(spec.stops[1]) + Vector3(0.3 * (i % 2) - 0.15, 0.0,
 				0.3 * (i / 2) - 0.15))
 	var fifth := state.characters[n]
-	_stand(fifth, spec.landing_point(2, tuning.lifts))
+	_stand(fifth, spec.landing_point(1, tuning.lifts))
 	var cmds := _commands(n + 1)
 	var buttons := 0
 	var left_at := -1.0
@@ -261,11 +261,11 @@ func test_four_riders_board_and_the_doors_shut_within_the_dwell() -> void:
 	var state: GameState = m[1]
 	var bots: BotController = m[2]
 	var spec := level.query().lifts[0]
-	var link := _link(0, 2, 0)
+	var link := _link(0, 1, 0)
 	var n := tuning.lifts.capacity
 	var out := Vector3(spec.out.x, 0.0, spec.out.y)
 	for i in n:
-		_stand(state.characters[i], spec.landing_point(2, tuning.lifts) + out * 0.3 * (i / 2)
+		_stand(state.characters[i], spec.landing_point(1, tuning.lifts) + out * 0.3 * (i / 2)
 				+ Vector3(0.4 * (i % 2) - 0.2, 0.0, 0.0))
 	var cmds := _commands(n)
 	var all_in := -1.0
@@ -275,13 +275,13 @@ func test_four_riders_board_and_the_doors_shut_within_the_dwell() -> void:
 		if all_in < 0.0 and sim.lifts.aboard(0, state.lifts, state.characters) == n:
 			all_in = state.time
 		assert_false(cues.has(Lifts.Cue.DEPART) and all_in < 0.0, "never off with one left behind")
-		if all_in >= 0.0 and cues.has(Lifts.Cue.SHUTTING) and state.lifts.stop[0] == 2:
+		if all_in >= 0.0 and cues.has(Lifts.Cue.SHUTTING) and state.lifts.stop[0] == 1:
 			shut_at = state.time
 			break
 	assert_gt(all_in, 0.0, "all four aboard: %d" % sim.lifts.aboard(0, state.lifts, state.characters))
 	assert_gt(shut_at, 0.0, "the doors shut")
 	assert_lte(shut_at - all_in, tuning.lifts.dwell + DT, "within the dwell of the last one in")
-	assert_false(sim.lifts.doorway_blocked(0, 2, state.characters), "nobody in the doorway")
+	assert_false(sim.lifts.doorway_blocked(0, 1, state.characters), "nobody in the doorway")
 	for c in state.characters:
 		var depth := (c.position.z - spec.face_at()) * -spec.out.y
 		assert_gt(depth, tuning.body.radius, "%d stands a body's width in from the door's face" % c.id)
@@ -296,12 +296,12 @@ func test_a_route_planned_mid_ride_starts_at_the_car_s_destination_and_a_walk_of
 	Lifts.new(tuning, q).reset(lifts)
 	lifts.phase[0] = LiftState.Phase.MOVING
 	lifts.y[0] = 4.0
-	lifts.to[0] = 2
+	lifts.to[0] = 1
 	var inside := spec.car_point(4.0) + Vector3(0.0, tuning.body.rest_gap, 0.0)
-	var goal := spec.landing_point(2, tuning.lifts) + Vector3(-3.0, 0.0, -3.0)
+	var goal := spec.landing_point(1, tuning.lifts) + Vector3(-3.0, 0.0, -3.0)
 	var route := PackedVector3Array()
 	assert_true(nav.find_route(inside, goal, route, true, lifts))
-	assert_almost_eq(route[0].y, spec.stops[2], tuning.body.max_step, "from the hall's landing, where it is going")
+	assert_almost_eq(route[0].y, spec.stops[1], tuning.body.max_step, "from the hall's landing, where it is going")
 	assert_true(nav.find_route(inside, goal, route, true))
 	assert_almost_eq(route[0].y, spec.stops[0], tuning.body.max_step, "without the cars: the nearest stop's")
 	var c := Character.new(0, 0, inside, 0.0, ReplicaStats.default_loadout())
@@ -312,9 +312,9 @@ func test_a_route_planned_mid_ride_starts_at_the_car_s_destination_and_a_walk_of
 	assert_true(c.walk_off_route_pending)
 	assert_false(Elimination.walk_off_due(c, nav, lifts))
 	lifts.phase[0] = LiftState.Phase.OPEN
-	lifts.stop[0] = 2
-	lifts.y[0] = spec.stops[2]
+	lifts.stop[0] = 1
+	lifts.y[0] = spec.stops[1]
 	lifts.to[0] = -1
-	c.position = spec.car_point(spec.stops[2]) + Vector3(0.0, tuning.body.rest_gap, 0.0)
+	c.position = spec.car_point(spec.stops[1]) + Vector3(0.0, tuning.body.rest_gap, 0.0)
 	assert_true(Elimination.plan_walk_off_routes(chars, nav, lifts), "once it stands open")
-	assert_almost_eq(c.walk_off_route[0].y, spec.stops[2], tuning.body.max_step, "out at the hall")
+	assert_almost_eq(c.walk_off_route[0].y, spec.stops[1], tuning.body.max_step, "out at the hall")
