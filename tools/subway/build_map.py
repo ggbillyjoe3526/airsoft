@@ -348,6 +348,12 @@ def spiral() -> tuple[list[dict], list[list[float]]]:
         ramps.append(dict(x0=a, x1=b, z0=c, z1=d, y0=y, y1=y + rise, rise=way, dress=s.get("dress", "")))
         ca, cb, cc, cd = corners[corner]
         top = y + rise
+        if k == s["sides"] - 1:
+            # The top landing runs out under the well's walls to its edges, flush with the floor round the hole: the
+            # way in through the rail's gap has no slot in it (SW1: the bots' grid took the wall's 15 cm for a drop
+            # and never walked the stair).
+            ca, cb = (s["x0"], cb) if ca == x0 else (ca, s["x1"])
+            cc, cd = (s["z0"], cd) if cc == z0 else (cc, s["z1"])
         boxes.append([ca, cb, top - FT, top, cc, cd])
     boxes.append([x0 + f, x1 - f, s["y0"], s["y1"] + s["top"], z0 + f, z1 - f])  # the core
     return ramps, boxes
@@ -718,12 +724,12 @@ def build() -> dict:
         "name": "Subway",
         "blocks": blocks,
         "killY": -5,
-        "storeys": [0, r(L.C + LIFT), r(L.G + LIFT)],
-        "spawns": [[spot(x, z, L.G, EYE_FACING_EAST) for x, z in L.SPAWNS_W],
+        "storeys": [0, r(L.C + LIFT)],
+        "spawns": [[spot(x, z, L.SPAWN_Y_W, EYE_FACING_EAST) for x, z in L.SPAWNS_W],
                    [spot(x, z, L.T, EYE_FACING_WEST) for x, z in L.SPAWNS_E]],
-        "deadZones": [[spot(x, z, L.G, EYE_FACING_EAST) for x, z in L.DEAD_W],
+        "deadZones": [[spot(x, z, L.SPAWN_Y_W, EYE_FACING_EAST) for x, z in L.DEAD_W],
                       [spot(x, z, L.T, EYE_FACING_WEST) for x, z in L.DEAD_E]],
-        "lanes": [[lane_point(*p) for p in L.LANES[k]] for k in ("n", "m", "s")],
+        "lanes": [[lane_point(*p) for p in lane] for lane in L.LANES.values()],
         "flags": [{"x": x, "y": r(y + LIFT), "z": z} for x, z, y in L.FLAGS],
         "bombSites": [{"x": x, "y": r(y + LIFT), "z": z, "radius": radius} for x, z, y, radius in L.BOMB_SITES],
         "overtimeFlag": {"x": L.OT_FLAG[0], "y": r(L.OT_FLAG[2] + LIFT), "z": L.OT_FLAG[1]},

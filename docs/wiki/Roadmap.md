@@ -29,9 +29,9 @@ The rest of this wiki describes all of it.
 
 - **0.1 Beta 1:** 0.1 Dev 3 was the last Dev build. The Beta builds add no new systems: they are for balance, fixes,
   speed and polish, from the playtests, up to 0.1 and Early Access.
-- **In development:** Subway, a closed metro station on three levels, from the ticket hall down escalators, stairs
-  and working lifts to the platforms, the trains and the tunnels, tiled, terrazzo-floored and lamp-lit, its shots
-  ringing off the tiles.
+- **In development:** Subway, a closed metro station on two levels, from the ticket hall and concourse down
+  escalators, a spiral stair, a stair and working lifts to the platforms, the trains and the tunnels, tiled,
+  terrazzo-floored and lamp-lit, its shots ringing off the tiles.
 
 ## Early Access: the themed updates
 

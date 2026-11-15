@@ -54,6 +54,6 @@ func test_materials_are_shared_per_key_and_full_ones_are_separate() -> void:
 
 
 func test_the_default_full_colour_list_is_the_escalators_and_stairs() -> void:
-	var want: Array[StringName] = [&"escalator_upper", &"escalator_lower", &"spiral_stair", &"platform_stair"]
+	var want: Array[StringName] = [&"escalator_lower", &"spiral_stair", &"platform_stair"]
 	for m: StringName in want:
 		assert_true(look.props.full_colour.has(m), String(m))

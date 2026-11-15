@@ -1,6 +1,6 @@
 extends GutTest
 ## Woodland as the owner's concept 3 (WR1, 2026-10-31, built by tools/woodland/build_map.py): a 176 x 120 m wood on
-## sloping ground with a dry stream down the middle, three lanes, the Ridge, the Clearing and the road. The file reads
+## sloping ground with a dry stream down the middle, six lanes (WB1), the Ridge, the Clearing and the road. The file reads
 ## clean with eight a side (TS1), by day or by night; its ground, crossings and pieces stand where the concept put them;
 ## no spawn is seen from outside its camp; both ends reach the overtime flag together and their own site first; a body
 ## walks every lane end to end; bots take cover at its pieces; and bots play a whole match on it.
@@ -65,7 +65,7 @@ func test_it_reads_clean_with_eight_a_side_by_day_or_night() -> void:
 	if entry != null:
 		assert_eq([entry.team_min, entry.team_standard, entry.team_max], [5, 6, 8],
 				"5 v 5 to 8 v 8, 6 v 6 its standard (TS1)")
-	assert_eq(map.lanes.size(), 3, "three lanes")
+	assert_eq(map.lanes.size(), 6, "six lanes (WB1: the north edge, north middle and south middle added)")
 	assert_true(map.has_pole and map.has_overtime_flag)
 	assert_eq(map.lighting_presets, [LightingConfig.DAY, LightingConfig.NIGHT] as Array[StringName],
 			"day by default, night by the Time of day setting")
@@ -382,9 +382,11 @@ func test_a_crouched_body_walks_through_each_tunnel_and_a_standing_one_can_t() -
 
 
 # WR2: the huts' doors, the two flags and the 3:00 round (concept 3: doors on the Cabin, the Hut row and the Box, the
-# door facing the enemy shut; A at the Fort, B at the Sawmill).
-const FLAG_A := Vector2(55.0, -38.5)
-const FLAG_B := Vector2(49.0, 38.5)
+# door facing the enemy shut). WB1 (the owner, 2026-11-15, Concept B): A in Fern hollow, B between the woodpiles at Log
+# stacks, each nearer the stream than the Fort and the Sawmill.
+const FLAG_A := Vector2(42.2, -41.4)
+const FLAG_RING := 1.6  # FlagConfig's radius (m)
+const FLAG_B := Vector2(40.0, 42.0)
 const HUT_DOORS := 8
 const SHUT_DOORS := 4
 ## How far (m) a leaf's foot may sit off the ground under it.
@@ -405,18 +407,34 @@ func test_the_huts_hang_eight_doors_half_shut_each_standing_on_its_doorway() -> 
 	assert_eq(shut, SHUT_DOORS, "each hut's door facing the enemy starts shut")
 
 
-func test_attack_defend_has_flag_a_at_the_fort_and_b_at_the_sawmill() -> void:
+func test_attack_defend_has_flag_a_in_fern_hollow_and_b_at_log_stacks() -> void:
 	assert_eq(map.poles.size(), 2, "two flags")
 	if map.poles.size() < 2:
 		return
-	assert_almost_eq(Vector2(map.poles[0].x, map.poles[0].z), FLAG_A, Vector2(0.01, 0.01), "A at the Fort")
-	assert_almost_eq(Vector2(map.poles[1].x, map.poles[1].z), FLAG_B, Vector2(0.01, 0.01), "B at the Sawmill")
+	assert_almost_eq(Vector2(map.poles[0].x, map.poles[0].z), FLAG_A, Vector2(0.01, 0.01), "A in Fern hollow")
+	assert_almost_eq(Vector2(map.poles[1].x, map.poles[1].z), FLAG_B, Vector2(0.01, 0.01), "B at Log stacks")
 	var run := tuning.movement.run_speed
 	var attack := _fastest(0, map.poles[1]) / run
 	var defend := _fastest(1, map.poles[1]) / run
 	gut.p("B flag: attackers %.1f s, defenders %.1f s" % [attack, defend])
 	assert_between(attack, 30.0, 45.0, "attackers take a while to reach B")
 	assert_lt(defend, 15.0, "defenders are home at B first")
+
+
+## WB1: the pole's crouch crate (MB1's, at the Fort's old pole) moved with flag A, to its stream side, outside the ring.
+func test_flag_a_has_its_crouch_crate_on_the_stream_side_outside_the_ring() -> void:
+	var found := 0
+	for b in map.blocks:
+		if b.kind != &"crate" or b.size.y > 1.6:
+			continue
+		var c := Vector2(b.center.x, b.center.z)
+		if c.distance_to(FLAG_A) > 3.0:
+			continue
+		found += 1
+		assert_lt(c.x, FLAG_A.x, "west of the pole, the side the attack comes by")
+		var gap := Vector2(maxf(absf(c.x - FLAG_A.x) - b.size.x * 0.5, 0.0), maxf(absf(c.y - FLAG_A.y) - b.size.z * 0.5, 0.0))
+		assert_gt(gap.length(), FLAG_RING, "the crate is outside the pole's ring")
+	assert_eq(found, 1, "one low crate by flag A")
 
 
 func test_a_skirmish_round_here_is_three_minutes_and_custom_keeps_its_own() -> void:

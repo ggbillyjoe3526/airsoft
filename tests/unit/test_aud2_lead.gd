@@ -21,7 +21,7 @@ func test_subways_steel_lockers_clank_as_depots_do() -> void:
 			assert_eq(b.noise, &"clank", "a steel locker names the steel props' sound")
 		if b.noise != &"":
 			clanking += 1
-	assert_eq(lockers, 9, "the five banks of lockers, in the boxes the generator cuts them to")
+	assert_eq(lockers, 4, "two lockers down each passage (SW1 took out five)")
 	assert_eq(clanking, lockers, "nothing else on Subway names a sound of its own")
 	var level := MapLevel.new()
 	add_child(level)

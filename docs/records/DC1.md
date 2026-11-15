@@ -71,8 +71,9 @@ On RV1's branch with DC1 (bot route variety, before it merged): Elimination's we
   Attack / Defend measured 53 % with them as they are.
 - **The east strip was not trimmed** (the concept's optional 6 m): it would rebuild the Loading bay and its chicanes,
   and the figures are in band without it.
-- **Fuse 24 s, not 23:** 23 s measured nearest half (51.4 %), but Woodland's is 23 and a Match page test needs the
-  fields' fuses to differ to prove a map switch rewrites the note; 24 s (48.4 %) is as near half and in band.
+- **Fuse 24 s, not 23:** 23 s (51.4 %) and 24 s (48.4 %) are as near half; 24 s was taken while Woodland's was
+  23, which a Match page test needs to differ. WB1 has since moved Woodland's to 27 s; PB4's follow-up re-measures
+  every field's fuse.
 
 ## Known issues left
 
@@ -80,7 +81,7 @@ On RV1's branch with DC1 (bot route variety, before it merged): Elimination's we
   measured again once the map reworks and RV1 are in (`docs/KNOWN_ISSUES.md` › Modes, PB4's follow-up).
 - How the new west end plays, the re-rendered Match picture and the minimap in a window are play checks
   (`docs/PLAYTEST.md` › Depot's compact hall; the owner's checklist).
-- `test_pb4_qa`'s map-switch test needs Woodland's and Depot's fuses to differ (why Depot's is 24 s, not 23); it
-  should pick two fields it sets itself (critic; can wait).
+- `test_pb4_qa`'s map-switch test needs Woodland's and Depot's fuses to differ; it should pick two fields it sets
+  itself (critic; can wait).
 - Each pole now stands west of its MB1 crate stack (flag-raise wins 43 % to 31 %): whether a defender at the pole is
   too open to the site doors is a play check (`docs/PLAYTEST.md` › Depot's compact hall).
