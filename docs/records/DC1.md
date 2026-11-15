@@ -1,6 +1,6 @@
 # DC1 · Depot's compact hall
 
-**Review:** 1 attempt · critic pending · qa Pass · performance Pass
+**Review:** 1 attempt · critic Accept (7/8) · qa Pass · performance Pass
 
 The owner's pick (2026-11-15, "Go with the recommended options") of the map redesign's concept B for Depot
 (report https://claude.ai/artifact/MJvwgMNiyip7EaH5Mxa6Sz; mock-ups `/mnt/project-files/maps-redesign/prototypes/`).
@@ -11,7 +11,7 @@ the defenders stood within 8 m of their spawn, so the attackers walked 95 m befo
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (lint, wiki, smoke, all 209 Depot test files; the rest in CI) | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (CI all green on 5399c833: lint, unit tests, smoke, match guards) | Accept 7/8 (docs named a Garage post; fixed) | – |
 
 ## What changed
 
@@ -80,3 +80,7 @@ On RV1's branch with DC1 (bot route variety, before it merged): Elimination's we
   measured again once the map reworks and RV1 are in (`docs/KNOWN_ISSUES.md` › Modes, PB4's follow-up).
 - How the new west end plays, the re-rendered Match picture and the minimap in a window are play checks
   (`docs/PLAYTEST.md` › Depot's compact hall; the owner's checklist).
+- `test_pb4_qa`'s map-switch test needs Woodland's and Depot's fuses to differ (why Depot's is 24 s, not 23); it
+  should pick two fields it sets itself (critic; can wait).
+- Each pole now stands west of its MB1 crate stack (flag-raise wins 43 % to 31 %): whether a defender at the pole is
+  too open to the site doors is a play check (`docs/PLAYTEST.md` › Depot's compact hall).

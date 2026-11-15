@@ -1772,8 +1772,8 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
   Pass: fights happen in the Shoot House rooms, the Lounge, the Offices, the Pens, the Huts and between the containers,
   not only in the Chrono hall and on the sites; the first fight comes sooner than before (about 12 to 15 s).
 - [ ] **Defending a site has ground in front of it.** Defend on Depot in Attack / Defend and Plant The Bomb.
-  Pass: the poles and the bomb sites stand at the hall's end of A and B; your bots hold the Offices door, Lower mid,
-  the Garage and the end of the Containers, and the attack meets them there before it reaches a pole.
+  Pass: the poles and the bomb sites stand at the hall's end of A and B; your bots hold the Offices door, Lower mid
+  and the end of the Containers, and the attack meets them there before it reaches a pole.
 
 ## Reporting what you find
 

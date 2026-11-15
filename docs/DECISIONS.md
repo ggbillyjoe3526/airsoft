@@ -808,7 +808,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   on them puff and sound as earth and never ricochet. A point on sloping ground is checked against the ground under it
   (field.onFloor), not its nav cell's middle.
 - **Depot is an indoor hall, built from concept 3 (owner, 2026-10-31, DR1).** 108 x 72 m under a roof (no sky; 98 x 72
-  m since DC1, below), three bent lanes round dead space (plywood rooms and racking 3 m tall), nine links (two tight
+  m since DC1, below), three bent lanes round dead space (plywood rooms and racking 3 m tall), nine links (eight and one tight alley since DC1) (two tight
   alleys, two unlit tunnels:
   dark, never pitch black), not mirrored but timed even: both ends reach the Chrono hall within 1.5 s, and each owns a
   side lane by 1 to 4 s. 5v5 or 6v6 only; bots see 55 m there (`botSight`); no catwalks; the Range stays its own map.

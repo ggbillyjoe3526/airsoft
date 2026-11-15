@@ -47,8 +47,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Doors:** some of the plywood rooms and huts have wooden [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)). Each pole stands at the hall's end of its site, beside a crate stack,
-  so the defenders have ground in front of it to hold: bots defending post at the Offices door, in Lower mid, by the
-  Garage and at the end of the Containers, and the fight starts there, not on the pole. Plant The Bomb's two sites
+  so the defenders have ground in front of it to hold: bots defending post at the Offices door, in Lower mid and at the
+  end of the Containers, and the fight starts there, not on the pole. Plant The Bomb's two sites
   are round the same poles.
 - **The look:** a real warehouse in daylight: concrete and plywood with their grain, weathered paint in muted
   crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest. Walls, crates and containers
