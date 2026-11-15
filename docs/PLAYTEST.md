@@ -1721,6 +1721,32 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
   round the eyes as the bot moves,
   and none along the opening's lower hem on the cap (look at 1 m too).
 
+## The Range's props and Woodland's woodpiles (RM2)
+
+On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west camp's woodpile in the sun.
+
+- [ ] **The sandbag walls** (the firing point's low wall and the backstop's long line) read as heavy filled sacks:
+  pillows full in the middle and thinner at their sewn ends, the ends' corners standing out as ears, a tied corner
+  here and there; the courses' lines wander up and down, no joint runs straight up the wall and no bag ends flat
+  anywhere along the backstop, and from 5 to 10 m the bags and knots don't repeat every 1.2 m; no light shows between
+  the bags; no shine on the sacking. Each wall's two ends are closed by bags laid across it or eared ends, rounded,
+  never a cut bag or a flat cap, and a wall one section long is closed at both ends.
+- [ ] **The site toilet's** side and back panels have sweeping scoops pressed into them (a shadow along each one's
+  upper edge), ending short of the corner posts with no dark holes; the door has two the same; the roof is a firm
+  white moulding with a square lip all round.
+- [ ] **The water tote's** valve sits back in a recess in the tank's foot, behind the cage, with no bar running
+  through it or its yellow lever; the cage's top corners are bent round; the water's line shows through the tank from
+  10 m.
+- [ ] **The woodpiles** look stacked by hand: pieces of every shape and size, no neat rows, no square blocks; the top
+  line near level with no pale shard standing up out of it and no deep V; the wood is a warm brown at eye height, not
+  pale cream; each corner shows a column of log ends with a bark rim, no thin pale card or black flap; the stack's
+  ends show split wood, not pipes: round logs, logs with a flat pale split face, wedges and quarters, in courses the
+  size of the face's pieces, each course a little off level, pieces in and out, a small break where each course's
+  front and back pieces meet, no flat tab sticking out and no black slot down the middle; no straight dark line runs
+  up a corner, and along a stack no join between its 2 m sections shows as a line, pale or dark; from a raised spot
+  the top shows split pieces (pale ridges and dark bark) of mixed widths, some turned and two or three lying across,
+  not a black lid, a sheet or a ribbed roof, and nothing stands up over a corner.
+
 ## Plant The Bomb's fuse on each field (PB4)
 
 - [ ] **A short fuse is fair to the defenders.** Defend on Depot (24 s fuse), Woodland (27 s) and Subway (22 s) at

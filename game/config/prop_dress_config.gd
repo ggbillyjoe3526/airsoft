@@ -111,6 +111,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"cordwood": "res://assets/models/props/cordwood.glb",
 	&"cordwood_b": "res://assets/models/props/cordwood_b.glb",
 	&"cordwood_c": "res://assets/models/props/cordwood_c.glb",
+	&"cordwood_start": "res://assets/models/props/cordwood_start.glb",
+	&"cordwood_end": "res://assets/models/props/cordwood_end.glb",
+	&"cordwood_single": "res://assets/models/props/cordwood_single.glb",
 	&"boards": "res://assets/models/props/boards.glb",
 	&"sawbench": "res://assets/models/props/sawbench.glb",
 	&"earth_bank": "res://assets/models/props/earth_bank.glb",
@@ -142,6 +145,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"range_wall": "res://assets/models/props/range_wall.glb",
 	&"range_backstop": "res://assets/models/props/range_backstop.glb",
 	&"sandbags": "res://assets/models/props/sandbags.glb",
+	&"sandbags_b": "res://assets/models/props/sandbags_b.glb",
+	&"sandbags_c": "res://assets/models/props/sandbags_c.glb",
+	&"sandbags_start": "res://assets/models/props/sandbags_start.glb",
+	&"sandbags_end": "res://assets/models/props/sandbags_end.glb",
+	&"sandbags_single": "res://assets/models/props/sandbags_single.glb",
 	&"site_toilet": "res://assets/models/props/site_toilet.glb",
 	&"water_tote": "res://assets/models/props/water_tote.glb",
 	&"generator": "res://assets/models/props/generator.glb",
@@ -226,7 +234,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## wall.
 @export var kind_max_depth: Dictionary[StringName, float] = {&"plywood": 0.5}
 ## Other models a lining model (TILE) takes turns with, place by place along a rack, never the same twice in a row,
-## and a GRID model's cells pick among at random (WG2: Woodland's woodpiles, three sections each its own ragged top),
+## and a GRID model's cells pick among at random (WG2: Woodland's woodpiles, three sections each its own ragged top;
+## RM2: the Range's sandbag sections, which share the bags over their ends),
 ## so a long rack wall or stack never reads as one bay repeated (the owner, 2026-11-09: the racking loaded three ways;
 ## five drew three times the hall's draws on Low). Each is in `models`, the same size as the model it stands in for.
 ## Their chunks are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
@@ -236,6 +245,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"drum_ibc_stack": PackedStringArray(["drum_ibc_stack_b", "drum_ibc_stack_c"]),
 	&"parts_cage": PackedStringArray(["parts_cage_b", "parts_cage_c"]),
 	&"cordwood": PackedStringArray(["cordwood_b", "cordwood_c"]),
+	&"sandbags": PackedStringArray(["sandbags_b", "sandbags_c"]),
 }
 ## How a prop a block names (MapData.Block.dress, WR3) is laid in it; one not listed is fitted to the box (FIT, long
 ## side along the box's).
@@ -296,8 +306,18 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## stops a BB). Seeded by the block's place, so a stand is the same every build and nothing else's random draws move.
 @export var grid_scatter: Dictionary[StringName, float] = {&"spruce": 0.38}
 ## GRID models laid all one way round, never turned at random: a net wall's sections match only edge to edge as
-## modelled (DH1).
-@export var grid_unturned: PackedStringArray = PackedStringArray(["camo_net"])
+## modelled (DH1), a sandbag wall's lock into each other, a bag running on from one section into the next, and a
+## woodpile's sections are cut flush to run on into the next, closed only by its end models (RM2).
+@export var grid_unturned: PackedStringArray = PackedStringArray(["camo_net", "sandbags", "cordwood"])
+## GRID models whose line of cells is closed at each end by a model of its own, [the -x end's, the +x end's] (each in
+## `models`, the same size as the model): a sandbag wall's sections run a bag on into the next, so the wall's first
+## and last sections end it in a whole bag instead (RM2). A line one cell long takes the third model, closed at both
+## ends, where one is listed, else the -x end's. The cells
+## keep one shade along the line, so its joins don't show as steps.
+@export var grid_ends: Dictionary[StringName, PackedStringArray] = {
+	&"sandbags": PackedStringArray(["sandbags_start", "sandbags_end", "sandbags_single"]),
+	&"cordwood": PackedStringArray(["cordwood_start", "cordwood_end", "cordwood_single"]),
+}
 ## STAKES: each model's stake spacing (m, about: whole stakes stretched to fill the box), and its rails' model. The
 ## stakes stand as thick as the box less its rails (at most `stake_thick` times their spacing, so neighbours meet and
 ## nothing is seen between them), each `stake_drop` m under the box's top at most and turned a quarter at random (a
@@ -408,6 +428,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"birch_crown": 0.95,
 	# Subway's escalators' brushed stainless (SM2): a soft sheen.
 	&"escalator_lower": 0.4,
+	# The Range's sandbags' sacking (RM2): matt, as the site's own bags (SiteLook's fabric), never a pillow's sheen.
+	&"sandbags": 0.97, &"sandbags_b": 0.97, &"sandbags_c": 0.97, &"sandbags_start": 0.97, &"sandbags_end": 0.97,
+	&"sandbags_single": 0.97,
 }
 ## How worn the props are drawn (SL2, look_vertex.gdshader's `wear`; LookConfig.wear scales it): grime up their feet,
 ## streaks, stains and dust on top. Models worn otherwise (each its own material): the trees' crowns are clean, as
