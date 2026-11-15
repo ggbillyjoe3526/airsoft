@@ -49,12 +49,12 @@ func _run() -> void:
 		var text := (label as Label).text
 		if text.contains("HIT") or text.begins_with("Hand up"):
 			(label as Label).visible = false
-	var wheel := OrderWheelPointer.new(controls.wheel_reach, controls.wheel_dead_zone, controls.wheel_orders.size())
+	var layout := OrderWheelLayout.new(controls)
+	var wheel := OrderWheelPointer.new(layout)
 	var outcome := SquadOrders.Outcome.new()
 	var slot := controls.wheel_orders.find(SquadOrder.Kind.WATCH)
-	var angle := TAU * slot / controls.wheel_orders.size()
 	wheel.start()
-	wheel.at = Vector2(sin(angle), -cos(angle)) * controls.wheel_reach
+	wheel.at = layout.box(slot).get_center()
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
 	hud.place_hold_marker(camera, SPOT, false)
 	await _shot(folder + "/wheel_pick.png")
