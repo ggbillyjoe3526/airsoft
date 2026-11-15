@@ -16,8 +16,9 @@ rebinds through the InputMap, which `PlayerInput` reads live (a key held across 
 
 Squad orders (M22, M23): an order key fills the next tick's `PlayerCommand.squad_order` once (given again, the bots'
 side cancels it). Holding the order wheel's key moves the wheel's own pointer instead of the view (`ControlsConfig`
-`wheel_gain` times the sensitivity, within `wheel_reach`, nothing within `wheel_dead_zone`; slices clockwise from the
-top); feet still move, the mouse wheel switches nothing, and fire and aim need a fresh press once it closes. Hover (the
+`wheel_gain` times the sensitivity, kept within the buttons; CW1: `OrderWheelLayout` places Spotted's circle in the
+middle and four same-size buttons a side, nothing straight above or below the circle); a tap (`wheel_tap`) spots
+without showing it; feet still move, the mouse wheel switches nothing, and fire and aim need a fresh press once it closes. Hover (the
 default) gives the order pointed at on letting go, Click only on a click (a click gives it either way); the wheel's
 orders, keys and names are `ControlsConfig` data, Hover or Click a saved setting. It closes giving nothing on pause or
 focus loss (`release`), once you are out, and on the range (`allow_orders`). The wheel on screen is the HUD's (`HudOrderWheel`).
@@ -25,7 +26,8 @@ focus loss (`release`), once you are out, and on the range (`allow_orders`). The
 Ping (PN1, the middle mouse button, "Squad: ping a spot"): a press fills the next tick's `PlayerCommand.ping` once,
 dead on the range as the order keys are (`allow_orders`); the simulation drops one while you are out or between rounds.
 Go there (FM1, mouse button 4, "Squad: go there", and the order wheel's Go There) is a ping with `ping_move` set.
-Watching here (BP8, the order wheel's Watching Here, no key) is a ping with `ping_watch` set.
+Watching here (BP8, the order wheel's Watching Here, no key) is a ping with `ping_watch` set. Spotted (CW1, a tap of
+the order wheel's key or its middle) is a ping with `ping_spot` set.
 
 The full-screen map (FM1, M held, "Map (hold)"): like the wheel, the mouse moves its own pointer (`MapPointer`,
 `ControlsConfig.map_gain` times the sensitivity, kept on the map's square, which the HUD frames each frame) instead of
@@ -39,7 +41,8 @@ range).
 | `player_input.gd` | `PlayerInput`, above |
 | `key_bindings.gd` | `KeyBindings`: two keys per action by physical key or mouse button; a key belongs to one action, a taken key swaps, Fire and the moves are never stranded, Esc, PrintScreen, Pause, F11 and the debug keys F3, F4 and F5 can't be bound (the browser game's keyBindings.ts); writes the InputMap |
 | `map_pointer.gd` | `MapPointer`: the full-screen map's pointer, kept on its square, and the point of the field under it |
-| `order_wheel_pointer.gd` | `OrderWheelPointer`: the order wheel's pointer, within reach of the middle, and which slice it is on (the browser game's orderWheel.ts) |
+| `order_wheel_layout.gd` | `OrderWheelLayout`: where the order wheel's Spotted circle and buttons are, which one a point is on, and the pointer kept within them (CW1) |
+| `order_wheel_pointer.gd` | `OrderWheelPointer`: the order wheel's pointer, which button or the middle it is on, and whether the key was held or tapped |
 | `key_names.gd` | `KeyNames`: a binding's name in the player's keyboard layout, mouse buttons named too |
 | `sensitivity.gd` | `Sensitivity`: cm/360 at a DPI and back (the browser game's sensitivity.ts) |
 

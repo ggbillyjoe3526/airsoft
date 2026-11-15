@@ -1,50 +1,51 @@
 class_name OrderWheelPointer
 extends RefCounted
-## The order wheel's own pointer (the browser game's input/orderWheel.ts, M23): while the wheel is open the mouse moves
-## this instead of the view. It starts in the middle each time the wheel opens and stays within reach of it, so a big
-## flick still lands on an order and coming back needs no more than that. Positions are px from the middle, y down.
-## Plain state and math; PlayerInput feeds it, the HUD (later) draws it. Allocates nothing.
+## The order wheel's own pointer (CW1; M23 and the browser game's input/orderWheel.ts before it): while the wheel is
+## open the mouse moves this instead of the view. It starts in the middle, on Spotted, each time the wheel opens, and
+## moves over the wheel's drawing itself (OrderWheelLayout, px of the HUD's 1920 x 1080 layout from the middle, y
+## down), kept on the wheel's buttons, so a big flick still lands on one. It knows when it opened, so a tap of the key
+## (ControlsConfig.wheel_tap) is told from a hold. Plain state and math; PlayerInput feeds it, the HUD draws it.
+## Allocates nothing.
 
-## No order pointed at.
-const NONE := -1
+## On nothing, and on Spotted (the circle in the middle).
+const NONE := OrderWheelLayout.NONE
+const SPOT := OrderWheelLayout.SPOT
 
 var open: bool = false
 var at: Vector2 = Vector2.ZERO
-var _reach: float = 90.0
-var _dead_zone: float = 24.0
-var _count: int = 0
+## When it last opened (ms, Time.get_ticks_msec).
+var opened_ms: int = 0
+var layout: OrderWheelLayout = null
 
 
-## A pointer for `count` orders round a wheel, kept within `reach` px of the middle and on no order within `dead_zone`.
-func _init(reach: float = 90.0, dead_zone: float = 24.0, count: int = 0) -> void:
-	_reach = reach
-	_dead_zone = dead_zone
-	_count = count
+## A pointer over `layout`'s wheel (none: every point is on nothing).
+func _init(wheel_layout: OrderWheelLayout = null) -> void:
+	layout = wheel_layout
 
 
-## Which of `count` orders round a wheel the point `p` (px from the middle, y down) is on: 0 at the top, then
-## clockwise, each owning an equal slice centred on its own direction. NONE within `dead_zone` of the middle.
-static func slice(p: Vector2, count: int, dead_zone: float) -> int:
-	if count <= 0 or p.length() < dead_zone:
-		return NONE
-	var angle := atan2(p.x, -p.y) # 0 up, PI/2 right
-	return posmod(roundi(angle / (TAU / count)), count)
-
-
-## Opens in the middle, on nothing.
-func start() -> void:
+## Opens in the middle, on Spotted, at `now_ms` (ms, Time.get_ticks_msec).
+func start(now_ms: int = 0) -> void:
 	open = true
 	at = Vector2.ZERO
+	opened_ms = now_ms
 
 
-## Moves the pointer by `delta` px, kept within reach of the middle.
+## Moves the pointer by `delta` px, kept on the wheel.
 func move(delta: Vector2) -> void:
-	at = (at + delta).limit_length(_reach)
+	at = layout.keep(at + delta) if layout != null else at + delta
 
 
-## The order pointed at (an index into the wheel's orders), or NONE (closed, or in the middle).
+## What the pointer is on: a button (an index into the wheel's orders), SPOT, or NONE (closed, or between the columns).
 func pick() -> int:
-	return slice(at, _count, _dead_zone) if open else NONE
+	if not open or layout == null:
+		return NONE
+	return layout.pick(at)
+
+
+## Whether the wheel, open since opened_ms, is held past a tap at `now_ms` (`tap`: s), or the pointer has left the
+## circle: then it is drawn, and letting go is no tap.
+func held(now_ms: int, tap: float) -> bool:
+	return open and (now_ms - opened_ms >= roundi(tap * 1000.0) or pick() != SPOT)
 
 
 ## Closed, back in the middle.

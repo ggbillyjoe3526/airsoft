@@ -259,7 +259,7 @@ static func move(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 	if giver == null:
 		return false
 	match b.order:
-		SquadOrder.Kind.HOLD, SquadOrder.Kind.MOVE, SquadOrder.Kind.WATCH:
+		SquadOrder.Kind.HOLD, SquadOrder.Kind.MOVE, SquadOrder.Kind.WATCH, SquadOrder.Kind.COVER:
 			# No way there: it holds where it got to.
 			if b.route_state == Bot.RouteState.FAILED:
 				b.order_goal = b.character.position

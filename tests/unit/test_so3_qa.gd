@@ -55,7 +55,7 @@ func test_a_mouse_button_works_as_the_wheels_key() -> void:
 	Input.action_press(&"order_wheel")
 	input._unhandled_input(down)
 	assert_true(input.wheel().open, "the button opens it")
-	_move(0.0, -200.0)
+	_move(200.0, -29.0)
 	var up := InputEventMouseButton.new()
 	up.button_index = MOUSE_BUTTON_MIDDLE
 	up.pressed = false
@@ -63,7 +63,7 @@ func test_a_mouse_button_works_as_the_wheels_key() -> void:
 	input._unhandled_input(up)
 	assert_false(input.wheel().open)
 	input.fill(cmd)
-	assert_eq(cmd.squad_order, SquadOrder.Kind.FOLLOW, "letting go of the button gave the top order")
+	assert_eq(cmd.squad_order, SquadOrder.Kind.FOLLOW, "letting go of the button gave the order pointed at")
 	assert_almost_eq(input.view_yaw, 0.0, 1e-6, "the view stayed put")
 
 
@@ -130,7 +130,7 @@ func test_a_reload_pressed_before_or_during_the_wheel_still_reloads() -> void:
 
 func test_a_click_pick_with_the_key_still_down_gives_one_order_and_letting_go_adds_none() -> void:
 	_event(&"order_wheel", true)
-	_move(0.0, -200.0)
+	_move(200.0, -29.0)
 	_event(&"fire", true)
 	_event(&"fire", false)
 	input.fill(cmd)
@@ -167,12 +167,14 @@ func test_a_wheel_with_no_orders_opens_and_closes_giving_nothing() -> void:
 	assert_eq(cmd.squad_order, SquadOrder.Kind.NONE)
 
 
-func test_a_huge_sensitivity_flick_stays_within_reach() -> void:
+func test_a_huge_sensitivity_flick_stays_on_the_wheel() -> void:
 	controls.sensitivity = 1000.0
 	_event(&"order_wheel", true)
 	_move(1.0e6, 1.0e6)
 	controls.sensitivity = 1.0
-	assert_lte(input.wheel().at.length(), controls.wheel_reach + 0.001)
+	var half := OrderWheelLayout.new(controls).half_extent()
+	assert_lte(absf(input.wheel().at.x), half.x + 0.001)
+	assert_lte(absf(input.wheel().at.y), half.y + 0.001)
 	assert_false(is_nan(input.wheel().at.x))
 
 

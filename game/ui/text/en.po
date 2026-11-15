@@ -202,9 +202,6 @@ msgstr "Help · %d m"
 msgid "HUD_COVER_MARKER"
 msgstr "Cover · %d m"
 
-msgid "HUD_ORDER_ACTIVE"
-msgstr "Active"
-
 msgid "HUD_ORDER_CANCELLED"
 msgstr "Back to the\nteam plan"
 
@@ -971,6 +968,9 @@ msgstr "Friendly fire"
 
 msgid "RULE_FLAG_RAISE_NOTE"
 msgstr "The flag takes %s s to raise on this field (%s s on the others)."
+
+msgid "RULE_BOMB_FUSE_NOTE"
+msgstr "An armed bomb goes off after %s s on this field."
 
 msgid "RULE_ON"
 msgstr "On"
@@ -2201,6 +2201,10 @@ msgstr "Watching Here"
 msgid "ORDER_REGROUP"
 msgstr "Regroup"
 
+# The order wheel's Cover Me (CW1): one teammate stays and covers the way you look while you move on.
+msgid "ORDER_COVER"
+msgstr "Cover Me"
+
 msgid "ORDER_TEAM_PLAN"
 msgstr "Team Plan"
 
@@ -2210,6 +2214,10 @@ msgstr "Need a Mag"
 
 msgid "ORDER_MAG_TOSS"
 msgstr "Toss a Mag"
+
+# The order wheel's middle (CW1): a tap of its key, or letting go there, marks the enemy you aim at for your team.
+msgid "ORDER_SPOT"
+msgstr "Spotted"
 
 # The hand-off line under the crosshair (MH3; concept step27/mag-hand-off.png): never a key or a control. %s is a
 # teammate's name, %d metres or BBs.

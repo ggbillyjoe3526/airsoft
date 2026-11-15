@@ -62,8 +62,8 @@ var _ricochets: MenuChoice = null
 var _subs: Dictionary[String, Label] = {}
 ## The Day / Night row (shown on a map offering both) and the presets each map offers, read once a map.
 var _time_rows: VBoxContainer = null
-## The line saying a field's own flag raise (data/maps.md Raise, MB3), under the chips or the rows where the picked
-## field and mode have one.
+## The line saying a field's own flag raise (data/maps.md Raise, MB3) or, in Plant The Bomb, its bomb's fuse (data/maps.md
+## Fuse, PB4), under the chips or the rows where the picked field and mode have one.
 var _flag_note: Label = null
 var _flag_pad: Control = null
 var _time: MenuChoice = null
@@ -226,16 +226,22 @@ func show_tuning(tuning: SimTuning) -> void:
 	_show_time_of_day()
 
 
-## The flag note for the picked field and mode: shown only where the field's flag raise differs from the game's (the
-## others play the game's, which the note names), in Attack / Defend, the one mode with a flag to raise.
+## The flag note for the picked field and mode: in Attack / Defend, the one mode with a flag to raise, shown only where
+## the field's flag raise differs from the game's (the others play the game's, which the note names); in Plant The
+## Bomb, the field's fuse (PB4: the fields' fuses differ, so it is always said).
 func show_flag_note() -> void:
-	# The game's own raise time, from the loaded tuning the Match page builds on (MatchOptions.match_tuning's base):
+	# The game's own times, from the loaded tuning the Match page builds on (MatchOptions.match_tuning's base):
 	# `_tuning` is the round tuning, which already holds the picked field's.
-	var base := SimTuning.load_default().flag.raise_time
-	var seconds := MatchOptions.field_raise(_picks.mode, MapCatalog.shared().find(_picks.map_id), base)
-	_flag_pad.visible = seconds > 0.0 and not _unused
+	var loaded := SimTuning.load_default()
+	var map := MapCatalog.shared().find(_picks.map_id)
+	var base := loaded.flag.raise_time
+	var seconds := MatchOptions.field_raise(_picks.mode, map, base)
+	var fuse := MatchOptions.field_fuse(_picks.mode, map, loaded.plant.fuse_time)
+	_flag_pad.visible = (seconds > 0.0 or fuse > 0.0) and not _unused
 	if seconds > 0.0:
 		_flag_note.text = tr("RULE_FLAG_RAISE_NOTE") % [MatchOptions.seconds_text(seconds), MatchOptions.seconds_text(base)]
+	elif fuse > 0.0:
+		_flag_note.text = tr("RULE_BOMB_FUSE_NOTE") % MatchOptions.seconds_text(fuse)
 
 
 ## The flag note's words, "" while it is hidden.

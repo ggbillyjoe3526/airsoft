@@ -66,6 +66,11 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## How long (s) a bot keeps a teammate's ping in mind (PN1, Pings): longer than memory_time, so a far ping is still
 ## worth the walk; real news of an enemy (a sighting, a noise) writes over it sooner.
 @export var ping_memory: float = 20.0
+## A player's ping of a spot says "I'm heading there, come with me" (CW1, owner 2026-11-15; not an order: Go There is
+## the order): each bot teammate within ping_follow_reach (m) of them and under no squad order comes along on a roll of
+## ping_follow_chance (Pings.follow); the rest carry on with their own play.
+@export var ping_follow_reach: float = 40.0
+@export var ping_follow_chance: float = 0.6
 ## An enemy BB landing this close (m) puts a bot under fire for suppression_time (s): it wants cover.
 @export var suppression_radius: float = 1.6
 @export var suppression_time: float = 0.4

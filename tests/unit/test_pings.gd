@@ -21,7 +21,7 @@ const BACKSTOP: Array[Vector3] = [Vector3(0.0, 2.0, 20.0), Vector3(0.4, 4.0, 20.
 const ENEMY_AT := Vector3(-10.0, 0.0, 20.0)
 
 var tuning: SimTuning = SimTuning.load_default()
-var config: BotConfig = BotConfig.load_default()
+var config: BotConfig = BotConfig.load_default().duplicate() as BotConfig
 var cfg: PingConfig = tuning.pings
 
 var map: MapData = null
@@ -73,6 +73,8 @@ static func _block(kind: StringName, center: Vector3, size: Vector3) -> MapData.
 ## 1 live and half a second gone. `walls`, `bushes` as _field; `people` your teammates' personalities (bots.md keys).
 func _squad(enemy: Vector3 = SPOTS[3], walls: Array = [], bushes: Array = [], enemy_bot: bool = false,
 		people: Array = []) -> void:
+	# Every teammate comes along to a spot you ping (CW1's roll and reach: test_cw1_spotted.gd).
+	config.ping_follow_chance = 1.0
 	var f := _field(walls, bushes)
 	var w: BoxWorld = f[1]
 	map = f[0]

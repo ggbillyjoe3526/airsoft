@@ -401,6 +401,15 @@ def raise_of(m: dict) -> str:
     return f"{fmt(seconds)} s"
 
 
+def fuse_of(m: dict) -> str:
+    """The seconds an armed bomb takes to go off on a field (its Fuse cell, else the bomb tuning's); none on the range."""
+    if m["Kind"] == "range":
+        return "–"
+    own = m.get("Fuse (s)", "").strip()
+    seconds = num(own) if own else float(gd_defaults(ROOT / "game/config/plant_config.gd")["fuse_time"])
+    return f"{fmt(seconds)} s"
+
+
 def gen_maps(_arg: str) -> str:
     rows = []
     for m in maps():
@@ -408,8 +417,9 @@ def gen_maps(_arg: str) -> str:
             continue
         kind = {"field": "Field", "range": "Practice range"}.get(m["Kind"], m["Kind"])
         rows.append([f"**[{m['Name']}](Maps#{slug(m['Name'])})**", kind, team_sizes(m), round_of(m), raise_of(m),
-                     start_of(m), m["Blurb"]])
-    return table(["Map", "Kind", "Team sizes", "Round", "Flag raise", "Selectors start on", "About"], rows)
+                     fuse_of(m), start_of(m), m["Blurb"]])
+    return table(["Map", "Kind", "Team sizes", "Round", "Flag raise", "Bomb fuse", "Selectors start on", "About"],
+                 rows)
 
 
 def start_of(m: dict) -> str:

@@ -11,4 +11,6 @@ class_name SquadOrder
 ## here once they are all there. WATCH: Watching here (BP8), never given as an order either: the order wheel's Watching
 ## Here is a ping along the view (PlayerCommand.ping_watch) that the bots' controller hands out as this order: the spot
 ## is yours to cover, the nearest free teammate joins you on it and the rest keep off it (SquadOrderBook.give_watch).
-enum Kind { NONE, FOLLOW, HOLD, REGROUP, TEAM_PLAN, MAG, MOVE, WATCH }
+## COVER: Cover me (CW1, owner 2026-11-15; the order wheel's, no key): one teammate covers the way its giver looks
+## while they move on (SquadOrderBook.give_cover).
+enum Kind { NONE, FOLLOW, HOLD, REGROUP, TEAM_PLAN, MAG, MOVE, WATCH, COVER }

@@ -115,8 +115,9 @@ var _order_from_wheel: bool = false
 ## Ping pressed since the last tick, whether a Go there (FM1), and whether on the map at _ping_target.
 var _ping_latch: bool = false
 var _ping_move_latch: bool = false
-## The ping latched is a Watching here (BP8: the wheel's Watching Here).
+## The ping latched is a Watching here (BP8: the wheel's Watching Here), or a Spotted (CW1: the wheel's middle).
 var _ping_watch_latch: bool = false
+var _ping_spot_latch: bool = false
 var _ping_on_map: bool = false
 var _ping_hold_latch: bool = false
 var _ping_target: Vector3 = Vector3.ZERO
@@ -139,7 +140,7 @@ var _map_allowed: bool = false
 func setup(controls: ControlsConfig, max_pitch: float) -> void:
 	_controls = controls
 	_max_pitch = max_pitch
-	_wheel = OrderWheelPointer.new(controls.wheel_reach, controls.wheel_dead_zone, controls.wheel_orders.size())
+	_wheel = OrderWheelPointer.new(OrderWheelLayout.new(controls))
 
 
 ## The order wheel's pointer (read-only for the HUD): open, where, and the order pointed at.
@@ -358,11 +359,12 @@ func _latch_order(kind: SquadOrder.Kind, from_wheel: bool) -> void:
 	_order_from_wheel = from_wheel
 
 
-## A ping along the view latched for the next tick (`move`: a Go there; `watch`: a Watching here).
-func _latch_ping(move: bool, watch: bool = false) -> void:
+## A ping along the view latched for the next tick (`move`: a Go there; `watch`: a Watching here; `spot`: a Spotted).
+func _latch_ping(move: bool, watch: bool = false, spot: bool = false) -> void:
 	_ping_latch = true
 	_ping_move_latch = move
 	_ping_watch_latch = watch
+	_ping_spot_latch = spot
 	_ping_on_map = false
 	_ping_hold_latch = false
 
@@ -375,6 +377,7 @@ func _latch_map_ping(move: bool, hold: bool = false) -> void:
 	_ping_latch = true
 	_ping_move_latch = move
 	_ping_watch_latch = false
+	_ping_spot_latch = false
 	_ping_hold_latch = hold
 	_ping_on_map = true
 	_ping_target = _map.world()
@@ -384,6 +387,7 @@ func _clear_ping() -> void:
 	_ping_latch = false
 	_ping_move_latch = false
 	_ping_watch_latch = false
+	_ping_spot_latch = false
 	_ping_on_map = false
 	_ping_hold_latch = false
 
@@ -439,13 +443,14 @@ func _map_input(event: InputEvent) -> bool:
 func _open_wheel() -> void:
 	if not _wheel_allowed:
 		return
-	_wheel.start()
+	_wheel.start(Time.get_ticks_msec())
 	hold_fire()
 
 
-## An event while the wheel is open: true if the wheel took it. The mouse moves its pointer; a click on an order gives
-## it; letting go of the key gives the order pointed at (Hover) and closes the wheel; aim waits for a fresh press; the
-## mouse wheel switches nothing. Everything else (the keys that move you) goes on as usual.
+## An event while the wheel is open: true if the wheel took it. The mouse moves its pointer; a click on a button gives
+## its order, on Spotted spots; letting go of the key gives what the pointer is on (Hover), and a tap of it spots either
+## way (CW1); aim waits for a fresh press; the mouse wheel switches nothing. Everything else (the keys that move you)
+## goes on as usual.
 func _wheel_input(event: InputEvent) -> bool:
 	var motion := event as InputEventMouseMotion
 	if motion != null:
@@ -455,8 +460,9 @@ func _wheel_input(event: InputEvent) -> bool:
 		return false
 	if event.is_action_released(ORDER_WHEEL):
 		var pick := _wheel.pick()
-		if pick != OrderWheelPointer.NONE and _controls.wheel_pick == ControlsConfig.WheelPick.HOVER:
-			_latch_order(_controls.wheel_orders[pick], true)
+		var tap := not _wheel.held(Time.get_ticks_msec(), _controls.wheel_tap)
+		if _controls.wheel_pick == ControlsConfig.WheelPick.HOVER or (tap and pick == OrderWheelPointer.SPOT):
+			_give_from_wheel(pick)
 		_close_wheel()
 		return true
 	if not event.is_pressed():
@@ -464,7 +470,7 @@ func _wheel_input(event: InputEvent) -> bool:
 	if event.is_action(FIRE):
 		var pick := _wheel.pick()
 		if pick != OrderWheelPointer.NONE:
-			_latch_order(_controls.wheel_orders[pick], true)
+			_give_from_wheel(pick)
 			_close_wheel()
 		return true
 	if event.is_action(AIM):
@@ -472,6 +478,17 @@ func _wheel_input(event: InputEvent) -> bool:
 		return true
 	return event.is_action(NEXT_SLOT) or event.is_action(PREVIOUS_SLOT) or event.is_action(ZOOM_IN) \
 			or event.is_action(ZOOM_OUT)
+
+
+## What the wheel's pointer is on (`pick`) given: Spotted, a ping along the view where you looked opening the wheel;
+## a button, its order (a free button, nothing); NONE, nothing.
+func _give_from_wheel(pick: int) -> void:
+	if pick == OrderWheelPointer.SPOT:
+		if _orders_allowed:
+			_latch_ping(false, false, true)
+	elif pick >= 0 and pick < _controls.wheel_orders.size() \
+			and _controls.wheel_orders[pick] != SquadOrder.Kind.NONE:
+		_latch_order(_controls.wheel_orders[pick], true)
 
 
 ## Closes the wheel; fire stays held back until it is let go (a click that picked an order is not a shot).
@@ -595,6 +612,7 @@ func fill_order(cmd: PlayerCommand) -> void:
 	cmd.ping = _ping_latch
 	cmd.ping_move = _ping_latch and _ping_move_latch
 	cmd.ping_watch = _ping_latch and _ping_watch_latch and not _ping_on_map
+	cmd.ping_spot = _ping_latch and _ping_spot_latch and not _ping_on_map
 	cmd.ping_on_map = _ping_latch and _ping_on_map
 	cmd.ping_hold = _ping_latch and _ping_on_map and _ping_hold_latch
 	cmd.ping_target = _ping_target
