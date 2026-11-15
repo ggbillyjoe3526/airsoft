@@ -99,10 +99,10 @@ func _boxes() -> Dictionary[StringName, AABB]:
 
 
 ## Lays `model` in a box of `size` at `foot` with the config's own rules; returns what _grid placed.
-func _line(model: StringName, size: Vector3, seed_: int = 7) -> Dictionary[StringName, PropLayout.Placed]:
+func _line(model: StringName, size: Vector3, rng_seed: int = 7) -> Dictionary[StringName, PropLayout.Placed]:
 	var out: Dictionary[StringName, PropLayout.Placed] = {}
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_
+	rng.seed = rng_seed
 	var picks: Array[StringName] = [model]
 	PropLayout._grid(out, picks, _boxes(), Vector3(10.0, 0.0, -4.0), size, Vector3(1.2, 0.9, 0.6),
 			play.site_look.props, rng, model)
@@ -225,11 +225,13 @@ func test_end_models_stay_inside_their_blocks_on_range_and_stockade() -> void:
 		assert_gt(boxes.size(), 0, "%s has sandbag blocks" % map_id)
 		for e: StringName in [&"sandbags_start", &"sandbags_end", &"sandbags"]:
 			var mesh := dress.mesh_of(e).get_aabb()
-			for v: MultiMeshInstance3D in dress.views_of(e):
-				var mm := v.multimesh
-				for i in mm.instance_count:
-					var w := mm.get_instance_transform(i) * mesh
-					var ok := false
-					for bx: AABB in boxes:
-						ok = ok or bx.grow(0.05).encloses(w)
-					assert_true(ok, "%s #%d on %s stays in a block" % [e, i, map_id])
+			var placed: PropLayout.Placed = dress.placed().get(e, null)
+			assert_not_null(placed, "%s is laid on %s" % [e, map_id])
+			if placed == null:
+				continue
+			for i in placed.transforms.size():
+				var w := placed.transforms[i] * mesh
+				var ok := false
+				for bx: AABB in boxes:
+					ok = ok or bx.grow(0.05).encloses(w)
+				assert_true(ok, "%s #%d on %s stays in a block" % [e, i, map_id])
