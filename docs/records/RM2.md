@@ -106,20 +106,25 @@ ATTEMPT_ROWS
   attempt 7): the top line near level (at most 10 cm under the cell's top, 5 cm from one of nine points to the next;
   was up to 45 cm); the face's crown read every 2 cm and opened over 10 cm each way, and a piece standing more than
   4 cm over that cut level there (a point broken off, its end plain) or taken off when less than 0.45 of it is left,
-  so nothing stands up out of the top and no hole opens; a notch narrower than 16 cm bridged by the top's pieces. The
-  face's pieces stop 12 cm short of each end (none cut there, so no card shows edge on); the end a column of half logs
-  lying front to back, their bark round and creased along one line, never fuller than 1.25 times their half height,
-  their sawn ends (a bark rim round a sawn face, the flat side split) with the face's pieces' ends, filling the face to
-  the section's end and drawn in to the last piece, so each corner shows a column of log ends and no dark seam; where
-  the front and back logs meet, a dark panel both ways, so nothing is seen through a log's open inner end; the core's
-  sides stop at the end (no flap). The top two rows of pieces meeting along a wandering line about the middle, each
-  row's joints its own, 0.5 to 1.5 of 16 cm wide, rising up to 0.4 of their width, dark barks never the same as the
-  one beside, three in ten stopping 10 to 20 cm short of their face over a paler piece's back. 3,195 / 3,191 / 2,872
-  triangles (hearts on 79 / 92 / 100 % of the wedges): Woodland draws no more.
+  so nothing stands up out of the top and no hole opens; a notch narrower than 16 cm bridged by the top's pieces. Ninth
+  pass (the critic's attempt 8): the face's pieces stop 12 cm short of each end (none cut there, so no card shows edge
+  on); the end courses of logs the face's pieces' size (11.5 to 15 cm high, 12 to 15 a column), each course a front
+  and a back log lying front to back and meeting in front of or behind the middle by turns (8 to 30 % of the way to a
+  face), drawn in to 0.7 where they meet, each its own bark with a darker furrow beside a crease, one closed shell
+  with the end's dark behind it (no middle panel, no straight dark slot); each log closed at its face by its sawn end
+  (a bark rim round a sawn face, the flat side split, drawn in to the face's last piece), so every corner shows a
+  column of log ends and no dark seam; the core's sides stop at the end (no flap). The top two rows of pieces meeting
+  along a wandering line about the middle, each row's joints its own, 0.5 to 1.5 of 16 cm wide: four in ten point up
+  (two pale split faces meeting at a ridge, 0.22 to 0.32 of their width high), the rest bark up and rounded (up to 0.4
+  of their width, dark barks never the same as the one beside); each the same along its length and closed at both
+  ends by a sawn end, its face end at the core's face, behind the face's pieces (no lip); three in ten stop 10 to 20
+  cm short of their face over a paler piece's back. Paid for: the core's top read at 20 places (were 30) and fewer
+  drying checks (22 %). 3,190 / 3,192 / 2,885 triangles (hearts on about 63 / 85 / 100 % of the wedges): Woodland
+  draws no more.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
-  fourth, v5 the fifth, v6 the sixth, v7 the seventh and v8 the eighth: the woodpiles).
+  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth and v9 the ninth: the woodpiles).
 
 ## Known issues left
 

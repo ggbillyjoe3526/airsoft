@@ -1722,10 +1722,10 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   10 m.
 - [ ] **The woodpiles** look stacked by hand: pieces of every shape and size, no neat rows, no square blocks; the top
   line near level with no pale shard standing up out of it and no deep V; the wood is a warm brown at eye height, not
-  pale cream; each corner shows a column of half-round log ends with a bark rim, no thin pale card or black flap; the
-  stack's ends show round, creased bark logs, not flat slabs, and where two 2 m sections meet the log ends read as
-  round logs, not a dark seam; from a raised spot the top shows pieces in dark bark in broken lengths, not a black
-  lid or a corrugated sheet.
+  pale cream; each corner shows a column of log ends with a bark rim, no thin pale card or black flap; the stack's
+  ends show courses of logs the size of the face's pieces, their joints staggered, with no black slot down the
+  middle, and where two 2 m sections meet the log ends read as logs, not a dark seam; from a raised spot the top
+  shows split pieces (pale ridges and dark bark) in broken lengths, not a black lid, a sheet or a tiled roof.
 
 ## Reporting what you find
 
