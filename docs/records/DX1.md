@@ -19,7 +19,8 @@ on the lower part of the wall at roughly eye height."
 | 2026-11-15 | 3 | Opus 5.5 (build thread) | passed | Retry 7/8 | kraft film still read as carton shades; fire point's foot and hood; a faceted handwheel |
 | 2026-11-15 | 4 | Opus 5.5 (build thread) | passed | Retry 7/8 | the fire point's window a letterbox; its cabinet a box on a box |
 | 2026-11-15 | 5 | Opus 5.5 (build thread) | passed | Retry 7/8 | the fire point's body too tall, window high, a visor not in the photo, no latch panel (past the attempt cap: the owner's ruling, keep fixing until the critic passes) |
-| 2026-11-15 | 6 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-15 | 6 | Opus 5.5 (build thread) | passed | Retry 7/8 | the fire point's lip a floating rail, its latch panel small and not sunk, the haunches banded, no door seams, the window not tapered |
+| 2026-11-15 | 7 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## What changed
 
