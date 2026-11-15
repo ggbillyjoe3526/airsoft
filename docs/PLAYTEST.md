@@ -1704,6 +1704,20 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
   round the eyes as the bot moves,
   and none along the opening's lower hem on the cap (look at 1 m too).
 
+## The Range's props and Woodland's woodpiles (RM2)
+
+On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west camp's woodpile in the sun.
+
+- [ ] **The sandbag walls** (the firing point's low wall and the backstop's long line) read as heavy sacks: soft
+  rounded loaves, a dark crease between every bag, no light showing between the courses or under the bottom row, and
+  no shine on the sacking under the sun. The small tied knots show on both faces of the wall.
+- [ ] **The site toilet's** side and back ribs look moulded into the walls (a swoosh with a shadow under it), not
+  tubes stuck on; the roof is a smooth white dome.
+- [ ] **The water tote's** cage tubes look round, the rows sitting outside the uprights, the cage's shadow on the
+  tank.
+- [ ] **The woodpiles** look stacked by hand: pieces of every shape and size, no neat rows, no dark line up the stack
+  where two 2 m sections meet; the stack's ends show bark and pale split sides, not dark brickwork.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
