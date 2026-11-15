@@ -30,16 +30,18 @@ MatchRunner, as `tools/balance.sh` plays Plant The Bomb, with the fuse set per r
 | Subway | 26 s | 45.9 % ±3.3 | 82 % | 54 % | 1 |
 | **Subway** | **22 s** | **49.0 % ±3.2** (117 of 239) | 82 % | 57 % | 8 |
 | Subway | 20 s | 48.9 % ±3.3 | 82 % | 57 % | 11 |
-| Stockade | 30 s (before) | 37.1 % ±3.2 (86 of 232) | 49 % | 59 % | 1 |
-| **Stockade** | **20 s** | **40.3 % ±3.2** (94 of 233) | 48 % | 67 % | 7 |
-| Stockade | 17 s | 40.4 % ±3.2 | 46 % | 72 % | 16 |
+
+On main after BC1 (#354, bots' senses and combat) and MQ4 merged in, the same 32 seeds with the new fuses: Depot
+51.6 % ±3.2, Woodland 54.8 % ±3.2, Subway 54.9 % ±3.1. Subway rose with BC1, not the fuse (it barely moves
+between 20 and 30 s); it stays inside the band, and the bot route thread measures Subway's attackers about 8 points
+lower with its change, so 22 s is kept.
 
 At Hard (16 seeds; band 40 to 60 %) with the new fuses: Depot 42.1 % ±4.5 (armed in 50 % of rounds), Woodland 56.4 %
 ±4.6, Subway 58.3 % ±4.4 (the same 58.3 % at 30 s: the fuse doesn't move Subway at Hard). All three are in the band,
 Depot and Subway near its two ends.
 
 Why the fuse: with 30 s an armed bomb was settled by the fight long before the fuse mattered. A defuse came a median 16
-s after the plant on Depot, 21 s on Woodland, 13.5 s on Subway and 15 s on Stockade, nearly always once the last
+s after the plant on Depot, 21 s on Woodland, and 13.5 s on Subway, nearly always once the last
 attacker was out (PB1's finding). A fuse near that time makes the defenders win the fight *and* reach the bomb in time,
 so the attackers holding the site are worth something. The attackers who never arm the bomb almost never win (1 of 74
 such rounds on Depot, 7 of 74 on Woodland, 4 of 40 on Subway), so the fuse moves only the armed rounds, and the share
@@ -54,7 +56,7 @@ of rounds armed stays where it was on every field.
 - **The defuse stays 6 s, the plant 3.5 s:** the owner's recordings (AU11, "the kit at work" and "keying the code") are
   cut to those lengths and `test_au11_qa` holds them to the tuning; a longer defuse would also give a defending
   player less of the fuse to reach the bomb.
-- **Depot 16 s, Woodland 23 s, Subway 22 s, Stockade 20 s.** Each is the measured value nearest 50 %, rounded to a
+- **Depot 16 s, Woodland 23 s, Subway 22 s.** Each is the measured value nearest 50 %, rounded to a
   whole second. Subway changes little between 26 and 20 s (its defuses come quickly), so 22 s, the longer of the two
   that read 49 %, gives a player more time.
 - **A defending player still has time.** Within BotConfig.plant_player_claim (15 m) of the bomb no bot defuses until the
@@ -72,10 +74,10 @@ of rounds armed stays where it was on every field.
 - **The Match page says the field's fuse** under the rules whenever Plant The Bomb is picked ("An armed bomb goes off
   after 16 s on this field."): every field now has its own, so the note doesn't name "the others". The wiki's Maps
   table gains a Bomb fuse column.
-- **Stockade (dev only) stays near 40 %.** Its attackers arm the bomb in only 48 % of rounds; a shorter fuse can't win
-  rounds where nothing is armed (17 s read the same as 20 s). That is a layout matter, left to the map redesign
-  work.
+- **Stockade has no fuse of its own:** the owner is having it removed from the game (2026-11-15). Before that it read
+  37.1 % at 30 s and 40.3 % at 20 s: its attackers armed the bomb in only about half their rounds.
 
 ## Known issues left
 
-- Stockade's attackers at about 40 % (in band at its bottom): they lose before the plant.
+- A field whose layout or bots change needs its fuse measured again: the map redesign and bot route threads are
+  both changing what decides these rounds.
