@@ -22,11 +22,11 @@ func test_no_shipped_item_or_map_is_dev_and_the_range_is_listed() -> void:
 	for e in cat.listed(false):
 		ids.append(e.id)
 	assert_eq(ids, PackedStringArray(["depot", "woodland", "range"]))
-	# The dev maps are Subway, the metro station, until the owner makes it public (MT1, 2026-11-10), and Stockade (SK1:
-	# the owner's "dev only maps", 2026-11-12).
-	assert_eq(cat.listed(true).size(), cat.listed(false).size() + 2, "two dev maps")
+	# The dev map is Subway, the metro station, until the owner makes it public (MT1, 2026-11-10). Stockade is out of
+	# the game (owner, 2026-11-15).
+	assert_eq(cat.listed(true).size(), cat.listed(false).size() + 1, "one dev map")
 	assert_true(cat.is_dev("subway"))
-	assert_true(cat.is_dev("stockade"))
+	assert_null(cat.find("stockade"))
 	var pool := Pool.read_file()
 	var every: Array[Pool.Item] = []
 	every.append_array(pool.replicas)

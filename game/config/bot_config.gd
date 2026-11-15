@@ -82,8 +82,13 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var hit_moving_speed: float = 0.5
 
 @export_group("Aim")
-## Seconds someone can be out of sight and still be the same contact (no new reaction delay).
+## Seconds someone can be out of sight and still be the same contact (no new full reaction delay).
 @export var contact_grace: float = 1.2
+## Out of sight longer than this (s) but within contact_grace, someone seen again is picked up again (AIM1): a short
+## reaction (BotSkill.reacquire_time) before it fires, and its aim kept only partly settled (reacquire_settled), off to
+## one side again. Without it a bot watching where you ducked fired the instant you showed again, its aim already
+## settled. Longer than two sight checks (think_interval), so a pole flicking past the line is no new pick-up.
+@export var reacquire_after: float = 0.25
 ## A bot stays on its target unless another in sight is at least this much closer (m).
 @export var target_switch_margin: float = 3.0
 ## A fresh contact's first aim is at least this share of its full error off, to one side, tilted at most this far from
@@ -96,6 +101,17 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## How fast the aim error drifts (Hz), and how fast it eases to each new drift goal (a multiple of that rate).
 @export var aim_wander_rate: float = 0.7
 @export var aim_wander_settle: float = 3.0
+## A near miss's flinch (BotSkill.aim_error_under_fire_deg) eases away over this long (s; AIM2).
+@export var flinch_time: float = 0.6
+## Noticing someone (AIM2): a fresh sighting is answered later, on top of the reaction, the further off the middle of
+## the view and the further away it is: up to notice_edge_time (s) at the edge of the view (by the square of the share
+## of the half-view), up to notice_far_time (s) at view_distance, a share notice_moving_share of that for someone
+## moving at least notice_moving_speed (m/s: movement catches the eye) and none within close_awareness. The same at
+## every level: it is how anyone sees (DECISIONS 2026-10-01), the reaction after it is the level's.
+@export var notice_edge_time: float = 0.3
+@export var notice_far_time: float = 0.25
+@export var notice_moving_share: float = 0.5
+@export var notice_moving_speed: float = 1.5
 ## Fires only with its view within this of its (erroneous) aim point (degrees).
 @export var fire_cone_deg: float = 3.0
 ## On a field with a start mode ("no full auto indoors", NA1, BotFireMode): a bot may go to full auto only down a sight

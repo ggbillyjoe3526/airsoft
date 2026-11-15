@@ -9,6 +9,8 @@ const KILL_Y := -10.0
 ## A link rising or falling more than this is a climb or a drop (a vault lands at most VaultConfig max_climb higher,
 ## on a slope a cell or so more; a climb rises at least min_height).
 const STEP := 0.5
+## The most rounds the pit test plays looking for a climb and a drop.
+const CLIMB_ROUNDS := 6
 
 var tuning: SimTuning = SimTuning.load_default()
 var config: BotConfig = BotConfig.load_default()
@@ -143,7 +145,9 @@ func test_bots_climb_out_of_the_pit_and_drop_into_it_on_their_way() -> void:
 	var was_high: Array[bool] = []
 	for c in state.characters:
 		was_high.append(c.position.y > 0.45)
-	for t in roundi(tuning.rounds.round_time / DT) * 2:
+	# Up to CLIMB_ROUNDS rounds, until both a climb and a drop are seen: which round a bot's lane first takes it over the
+	# step swings with any change to how bots fight (AIM1's re-pick-up took both past seed 21's first two rounds).
+	for t in roundi(tuning.rounds.round_time / DT) * CLIMB_ROUNDS:
 		bots.think(state, commands, DT)
 		sim.step(state, commands, DT)
 		bots.observe(state)
@@ -162,7 +166,7 @@ func test_bots_climb_out_of_the_pit_and_drop_into_it_on_their_way() -> void:
 			if was_high[i] and not high and c.position.x < -0.3:
 				drops += 1
 			was_high[i] = high
-		if rounds >= 2:
+		if rounds >= CLIMB_ROUNDS or (climbs > 0 and drops > 0):
 			break
 	gut.p("climb field: %d climbs, %d drops, %d rounds" % [climbs, drops, rounds])
 	assert_gt(climbs, 0, "bots climbed out of the pit")
@@ -171,7 +175,7 @@ func test_bots_climb_out_of_the_pit_and_drop_into_it_on_their_way() -> void:
 
 
 func test_subway_pits_join_their_platforms_by_climbs_and_drops_and_no_other_map_climbs() -> void:
-	for id: String in ["depot", "range", "woodland", "subway", "stockade"]:
+	for id: String in ["depot", "range", "woodland", "subway"]:
 		var map := MapData.load_map(id, MapStyle.new(), tuning.rounds.team_size)
 		var level := MapLevel.new()
 		add_child(level)
@@ -233,7 +237,7 @@ func _prop_climbs(query: WorldQuery, vault: VaultConfig, names: Array[String]) -
 ## sofa, Subway's benches, the Range's long crate and sandbags), on every shipped map; Subway's platform edges are still
 ## climbed from the track.
 func test_no_map_s_prop_is_climbed_and_subway_s_platform_edge_is() -> void:
-	for id: String in ["depot", "range", "woodland", "subway", "stockade"]:
+	for id: String in ["depot", "range", "woodland", "subway"]:
 		var map := MapData.load_map(id, MapStyle.new(), tuning.rounds.team_size)
 		var level := MapLevel.new()
 		add_child(level)

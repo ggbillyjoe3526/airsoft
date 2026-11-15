@@ -1,6 +1,7 @@
 extends GutTest
 ## HA1 QA (attempt 2): the bare hand's own meshes (Skin_, Nails_) against the glove's (HandSurface_, GloveKit_): one look
-## at a time on every hold, live switches, fades and the pistols at 25 cm from the eye.
+## at a time on every hold, live switches and fades (the pistols' hip place:
+## test_ha2_hold_place.gd).
 
 const IDS: Array[StringName] = [&"aeg", &"sniper", &"smg", &"shotgun", &"pistol", &"cyber", &"smoke", &"flash"]
 const BUDGET := 40000
@@ -105,6 +106,8 @@ func test_robot_arms_keep_the_glove_shell_and_never_the_bare_hand() -> void:
 
 
 func test_the_aimed_pistols_fade_reaches_the_bare_hand_and_its_nails() -> void:
+	# No replica fades its hands since HA2: the knob is tested with the pistols put in it.
+	cfg.aim_hands_hint = [&"pistol", &"cyber"]
 	for id: Variant in [&"pistol", &"cyber"]:
 		var arms := _arms()
 		arms.hold(id, arms.get_parent() as Node3D)
@@ -150,19 +153,3 @@ func test_the_bomb_in_hand_arms_follow_the_dev_setting_live() -> void:
 	for skin: Variant in [true, false, true]:
 		v.set_arms_skin(skin)
 		_check(arms, skin, not cfg.one_hand.has(&"smoke"), "grenade skin %s" % skin)
-
-
-func test_the_pistols_hip_is_the_old_place_drawn_in_along_the_same_line() -> void:
-	var old := Vector3(0.05, -0.07, -0.34)
-	var old_move := Vector3(0.1, 0.06, 0.0)
-	for id: Variant in [&"pistol", &"cyber"]:
-		var hip: Vector3 = cfg.hip[id]
-		assert_almost_eq(-hip.z, 0.25, 1e-4, "25 cm")
-		var k := hip.z / old.z
-		assert_lt((hip - old * k).length(), 2e-3, "%s: on the old line from the eye" % id)
-		assert_lt((cfg.reload_move(id) - old_move * k).length(), 2e-3, "%s: the reload scaled with it" % id)
-		# The reload peak stays in front of the eye and inside a 75 degree half-field.
-		var peak := hip + cfg.reload_move(id)
-		assert_lt(peak.z, -0.1)
-		assert_lt(maxf(absf(peak.x), absf(peak.y)) / -peak.z, tan(deg_to_rad(37.5)) * 1.0)
-

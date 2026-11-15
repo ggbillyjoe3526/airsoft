@@ -211,8 +211,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   far as its magazine lets the palm stay on the replica; the forearm lower in the view). "Keep that version"
   (06:34, of the vertical grip's fourth-look hold). The pistols' size at the hip (08:38, on a picture of three
   distances beside his reference shots, the reviewer having found them small): he chose "25 cm, clearly larger" over
-  keeping 34 cm and over 29 cm, so both pistols sit 25 cm from the eye, on the same line from it as his place of
-  2026-11-06 (`ViewModelConfig.hip`). The bare hands (14:01, on the repainted skin in game): "Remove the white
+  keeping 34 cm and over 29 cm, so both pistols sat 25 cm from the eye, on the same line from it as his place of
+  2026-11-06 (`ViewModelConfig.hip`; replaced by HA2 below). The bare hands (14:01, on the repainted skin in game): "Remove the white
   finger nail tips, make the tendons more subtle", and of the skin's texture "Keep the texture as is": the nails have
   no white free edge and a faint moon, the tendons a little under half their shade and height
   (`skin.NAIL_TONE`, `MOON`, `TENDON_FORM`, `TENDON`); of that picture, "Perfect" (14:17). The AEG's far side (21:21, on a card: its
@@ -221,6 +221,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   about 1 cm past the handguard's end. Default taken: the bots stay one-handed on pistols (HG1 below; they copy
   `<id>_Hold`).
   His reference pictures are other games' and set hand placement and framing only; the art is our own.
+- **Pistols at the rifles' place; your shoulders stay put through an inspect (owner, 2026-11-15, HA2).** "make the
+  pistol take up less space on screen. it should roughly be same scale/angle as rifle" (replacing his 25 cm pick
+  above) and "when inspecting rifles the player can see the end of the arm models". Both pistols sit low on the right
+  as the rifles do, 35 cm from the eye, turned 0.15 rad in so their side shows (`ViewModelConfig.hip`, `hip_turn`,
+  gone as the sight comes up); the reload move follows, so a reload crosses the same share of the screen as before,
+  and an inspect turns from the new place. Inspected, the arms no longer turn rigidly with the replica: each
+  shoulder stays where your body has it (coming only as near as the hand needs to keep hold) and the elbow's way with
+  it (`ArmsTuck`, both sides), so a sleeve's cut-off end never turns into view, checked at the widest field of view on
+  a 21:9 screen. Defaults taken: 35 cm and 0.15 rad from pictures beside the AEG and the Compact SMG at the hip; he
+  called the pictures "perfect" (11:50) and added "the pistol ADS shows the hand fading, it shouldn't do this", so
+  aimed a pistol's hands are drawn whole (`aim_hands_hint` empty; it replaces his HA1 pick of the tops only).
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands
   copy the first-person holds he approved (`assets/models/arms/arms.glb`), so a change to a first-person hold changes
   the bots' too: the right hand high on the grip, index on the trigger, thumb along the grip's left side ("the thumb
@@ -981,11 +992,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the upper level's longest line is 57 m, the hall's west end to a passage's mouth (it was 28 m); a short pier at each
   mouth keeps the hall's spawn from seeing down the passages. Its lanes are five: concept A's (MR1) north passage lane
   and a spiral stair lane join the three. Bot matches (6v6 Normal): see `docs/records/SW1.md`.
-- **Stockade has no Bell tower (owner, 2026-11-13, SK1).** Concept 1's tower, built from Woodland's watch tower, put a
-  standing eye 5 m up that saw over every 2.6 m wall (3,839 lines over 34 m, the longest 65 m to the attackers' gate).
-  Asked whether to keep it, he chose "Leave the tower out": a Bell house stands across Main Street's east end in its
-  place, a door onto the street behind and one onto the Green. Its bots keep to the outer ways, not through the Forge
-  and the Barn (owner, 2026-11-13: "Leave it to your playtest"; lanes through them cost the attackers about 10 points).
+- **Stockade is out of the game (owner, 2026-11-15: "Completely remove stockades map from game").** The dev-only
+  Plant The Bomb field (SK1, #344) is gone with its data, tools, pictures and tests; its build is in git before this
+  change and its record stays in `docs/records/SK1.md`. Plant The Bomb plays on Depot, Woodland and Subway.
 
 ## Replicas, Loadout and levels
 

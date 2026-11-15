@@ -21,7 +21,7 @@ extends Node3D
 ## HA1 (the owner): aimed, a rifle's hands are out of view, never faded: the replica hides them, and as the sight comes
 ## up (`aim`) the left arm is drawn in under it and its hand slides back behind the receiver (ArmsTuck,
 ## ViewModelConfig.aim_tuck and aim_slide), so forearm and hand lie behind it too.
-## A replica in ViewModelConfig.aim_hands_hint (a pistol) keeps the tops of its hands: what lies further under the
+## A replica in ViewModelConfig.aim_hands_hint (none since HA2) keeps the tops of its hands: what lies further under the
 ## sight line fades (ArmsFade's copies of the materials, worn only while the sight is raised at all).
 
 const MODEL := "res://assets/models/arms/arms.glb"
@@ -74,6 +74,8 @@ var _faded: bool = false
 ## The left arm drawn in as the sight comes up, and whether the bones carry it now.
 var _tuck: ArmsTuck = null
 var _tucked: bool = false
+## The right arm held at its shoulder while the replica is turned over in an inspect (HA2).
+var _tuck_right: ArmsTuck = null
 var _kind: int = FigureMix.HUMAN
 ## Skin-only arms (Dev), worn by a human's arms.
 var _skin: bool = false
@@ -118,6 +120,7 @@ func setup(cfg: ViewModelConfig) -> void:
 	if _skeleton != null:
 		_throw = ArmsThrow.new(_skeleton, cfg)
 		_tuck = ArmsTuck.new(_skeleton)
+		_tuck_right = ArmsTuck.new(_skeleton, ArmsTuck.RIGHT)
 		_hand = _skeleton.find_bone(LEFT_HAND)
 	for node: Node in _model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node := node as MeshInstance3D
@@ -144,6 +147,7 @@ func hold(id: StringName, root: Node3D, grip: StringName = &"") -> void:
 	# A hold starts from its clip alone: no clip keys the shoulder's place, so the last hold's drawn-in arm goes here.
 	if _tucked:
 		_tuck.clear(_skeleton)
+		_tuck_right.clear(_skeleton)
 		_tucked = false
 	var mark := _model.find_child(HOLD_PREFIX + id, true, false) as Node3D
 	var base := clip_base(id, grip)
@@ -274,11 +278,13 @@ func set_shown(on: bool) -> void:
 ## Poses and dresses the arms for the sight raised `raise` (0 at the hip, 1 up, as drawn): the left arm drawn in
 ## under the replica and its hand slid back behind it (ViewModelConfig.aim_tuck, aim_slide); on a replica in
 ## aim_hands_hint, what lies below the sight line faded out over aim_hint_span's span of the raise (aim_hint_below),
-## the tops of the hands left. Call each frame, after `follow`.
-func aim(raise: float) -> void:
+## the tops of the hands left. `still` (the replica's space) carries a point at rest with the replica to where it is
+## with the replica turned over in an inspect (HA2): both shoulders and elbows stay where your body has them, so an
+## arm's cut-off end never turns into view. Call each frame, after `follow`.
+func aim(raise: float, still: Transform3D = Transform3D.IDENTITY) -> void:
 	if _model == null or _on == &"":
 		return
-	_draw_in(raise)
+	_draw_in(raise, still)
 	var hint := 0.0
 	if _cfg.aim_hands_hint.has(_on):
 		hint = smoothstep(_cfg.aim_hint_span.x, _cfg.aim_hint_span.y, raise)
@@ -299,23 +305,30 @@ func hinted() -> float:
 
 ## The left arm drawn in under the replica for the sight raised `raise`, its hand slid back over aim_slide_span's
 ## span of the raise, over the pose the clip gives: the clip's pose is put back first, since the last frame's is
-## still in the bones.
-func _draw_in(raise: float) -> void:
+## still in the bones; the shoulder held still while the replica turns over (`still`, as `aim`).
+func _draw_in(raise: float, still: Transform3D) -> void:
 	if _tuck == null or _anim == null or _anim.assigned_animation == "":
 		return
 	var shift: Vector3 = _cfg.aim_tuck.get(_on, Vector3.ZERO) * raise
 	var slide: Vector3 = _cfg.aim_slide.get(_on, Vector3.ZERO) \
 			* smoothstep(_cfg.aim_slide_span.x, _cfg.aim_slide_span.y, raise)
-	var moved := not (shift.is_zero_approx() and slide.is_zero_approx())
+	var inspected := not still.is_equal_approx(Transform3D.IDENTITY)
+	var moved := inspected or not (shift.is_zero_approx() and slide.is_zero_approx())
 	if not moved and not _tucked:
 		return
 	_tuck.clear(_skeleton)
+	_tuck_right.clear(_skeleton)
 	_anim.seek(_anim.current_animation_position, true)
 	_tucked = moved
 	if _tucked:
 		# The replica's axes (x right, y up), in the skeleton's.
-		var to_bones := _skeleton.global_basis.inverse() * (_model.get_parent() as Node3D).global_basis
-		_tuck.draw_in(_skeleton, to_bones * shift, to_bones * slide, to_bones * Vector3.DOWN, raise)
+		var root := _model.get_parent() as Node3D
+		var to_bones := _skeleton.global_basis.inverse() * root.global_basis
+		var bones_from_root := _skeleton.global_transform.affine_inverse() * root.global_transform
+		var still_bones := bones_from_root * still * bones_from_root.affine_inverse()
+		_tuck.draw_in(_skeleton, to_bones * shift, to_bones * slide, to_bones * Vector3.DOWN, raise, still_bones)
+		if inspected:
+			_tuck_right.draw_in(_skeleton, Vector3.ZERO, Vector3.ZERO, to_bones * Vector3.DOWN, 0.0, still_bones)
 
 
 ## Takes the hold on now as the one a throw starts from, the pin's ring's middle at `ring` (the model's frame: the
