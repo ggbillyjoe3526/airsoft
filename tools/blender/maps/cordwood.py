@@ -10,9 +10,11 @@ stacked in layers held apart by stickers (thin battens) so the air gets through,
 
 RM2 (the owner, 2026-11-15: "improve the stacks of wood logs"): the pieces mixed as the photos' are, not one size of
 quarter laid in rows like scales: wedges from narrow to wide (55 to 125 degrees at the heart), a tenth of them half
-logs, more small rounds, a third free to lie on their side and up to 24 degrees off square, each 0.72 to 1 of a row
-high, so the rows break up; the stack's ends barked in every shade with a pale split side here and there. The same
-budget: the bark arcs in 4 segments (were 5).
+logs, more small rounds, a third free to lie on their side and up to 24 degrees off square, each 0.68 to 1 of a row
+high, so the rows break up; no square heart pieces; each bark arc in about 24 degree steps (3 to 6); warmer tans and a
+brown among the sawn ends; the stack's ends built from the end pieces' own round bark sides (a pale split side now
+and then), each from the face its sawn end shows on to the middle, the dark of the stack between them. The same
+budget.
 
 The cordwood section fills its grid cell (PropDressConfig.grid_cells): its pieces' ends standing out of the faces by
 0.3 to 5 cm (WS1: each a solid end, its sides barked or split back to the core, its face tilted a little) over a dark
