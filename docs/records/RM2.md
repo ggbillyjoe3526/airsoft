@@ -119,12 +119,21 @@ ATTEMPT_ROWS
   of their width, dark barks never the same as the one beside); each the same along its length and closed at both
   ends by a sawn end, its face end at the core's face, behind the face's pieces (no lip); three in ten stop 10 to 20
   cm short of their face over a paler piece's back. Paid for: the core's top read at 20 places (were 30) and fewer
-  drying checks (22 %). 3,190 / 3,192 / 2,885 triangles (hearts on about 63 / 85 / 100 % of the wedges): Woodland
-  draws no more.
+  drying checks (22 %). Tenth pass (the critic's attempt 9): the end logs round (4 segments a side, every edge
+  between them drawn smooth, so no facet steps); each course tilted 1 to 3 degrees front to back by turns (the ground
+  course level), each log set in 0 to 5 cm its own way, so the end is ragged; at the joint the fuller log shows its
+  sawn end and the other is drawn in a fifth, a real step; half the logs show a pale split side between barked edges;
+  the end bark warm grey-brown (no neutral grey); each log's sawn end a half round of 8 sides with a bark rim 14 % of
+  its radius, flush with the face's sawn ends (drawn in to the face's last piece, at most 7 cm). The top: one set of
+  edges across the depth, each turned up to 10 degrees (at least 4 cm apart at the faces); a third of the pieces the
+  whole depth long, the rest two meeting 0 to 40 % off the middle; ridge pieces solid wedges closed by sawn ends
+  (none in the end columns, where the pieces are lower), bark pieces 0.4 to 1.1 of their full rise. Paid for: each
+  core side one polygon, fewer drying checks (15 %) and fewer hearts. 3,188 / 3,189 / 3,065 triangles (hearts on
+  about 25 / 33 / 100 % of the wedges): Woodland draws no more.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
-  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth and v9 the ninth: the woodpiles).
+  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth, v9 the ninth and v10 the tenth: the woodpiles).
 
 ## Known issues left
 
