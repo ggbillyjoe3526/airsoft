@@ -116,16 +116,22 @@ const GLOBAL_DUST := &"look_dust"
 @export var ssr_depth_tolerance: float = 0.2
 
 @export_group("Volumetric fog")
-## Graphics › Volumetric fog: a faint haze the sun and the bounce light up, so light has shafts and depth. Density (per
-## m), its colour, how forward it scatters, how far it reaches (m), how much bounce light it takes in, and the
-## froxel grid (cells across and deep).
+## Graphics › Volumetric haze: a faint haze the sun and the bounce light up, so light has shafts and depth. Density (per
+## m), its colour, how forward it scatters, how far it reaches (m) and how much bounce light it takes in, the same at
+## every level, so each level is the same look drawn more or less finely (VF1).
 @export var fog_density: float = 0.006
 @export var fog_albedo: Color = Color8(0xf4, 0xec, 0xda)
 @export var fog_anisotropy: float = 0.45
 @export var fog_length: float = 80.0
 @export var fog_gi_inject: float = 1.0
-@export var fog_volume_size: int = 128
-@export var fog_volume_depth: int = 128
+## Each level's froxel grid (cells across the screen, and deep), Low, Medium and High: the haze's cost grows with the
+## cells (Low's is the engine's own, an eighth of High's). High is the grid the haze had when it was one switch.
+@export var fog_grid_low: Vector2i = Vector2i(64, 64)
+@export var fog_grid_medium: Vector2i = Vector2i(96, 96)
+@export var fog_grid_high: Vector2i = Vector2i(128, 128)
+## The lowest level whose haze is smoothed across its cells (the engine's fog filter): below it the light on the haze
+## is blockier and its shafts' edges harder, for less work.
+@export var fog_filter_from: GraphicsQuality.VolumetricFog = GraphicsQuality.VolumetricFog.MEDIUM
 
 @export_group("Eye adaptation")
 ## How fast the eyes adapt (Graphics › Eye adaptation, UG3): the share of the way to the new brightness covered in a
@@ -176,6 +182,23 @@ const GLOBAL_DUST := &"look_dust"
 
 
 ## The palette's colour `name`, or magenta with a warning for a name it doesn't have (a typo shows at once).
+## The froxel grid the volumetric haze is drawn on at `level`, Vector2i.ZERO for Off.
+func fog_grid(level: GraphicsQuality.VolumetricFog) -> Vector2i:
+	match level:
+		GraphicsQuality.VolumetricFog.LOW:
+			return fog_grid_low
+		GraphicsQuality.VolumetricFog.MEDIUM:
+			return fog_grid_medium
+		GraphicsQuality.VolumetricFog.HIGH:
+			return fog_grid_high
+	return Vector2i.ZERO
+
+
+## True if the volumetric haze at `level` is smoothed across its cells (`fog_filter_from`).
+func fog_filtered(level: GraphicsQuality.VolumetricFog) -> bool:
+	return level != GraphicsQuality.VolumetricFog.OFF and level >= fog_filter_from
+
+
 func colour(name: StringName) -> Color:
 	if palette.has(name):
 		return palette[name]

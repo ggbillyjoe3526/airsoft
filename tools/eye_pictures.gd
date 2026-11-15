@@ -9,7 +9,10 @@ extends SceneTree
 ## Yaw 0 looks along -z (north), 90 along -x (west); pitch is up from level; a fifth number is the floor's height the
 ## eye stands on (a map built in storeys), else the ground's. An argument `preset=<low|medium|high|ultra>`
 ## draws that Graphics preset's values (GraphicsApply) instead of High; `fov=<degrees>` a narrower or wider view (the
-## range's card is 40); `night` the map's night preset, its lights' pools and fixtures lit (WG4). An argument `card`
+## range's card is 40); `night` the map's night preset, its lights' pools and fixtures lit (WG4); `fog=<off|low|medium|
+## high>` that Volumetric haze level over the preset's (VF1); `measure=<frames>` prints each picture's mean render time
+## over that many frames after it settles (the cloud's software Vulkan: a level against another, never a real card's
+## milliseconds). An argument `card`
 ## writes a map's pictures instead: the loading screen's, drawn at 1920 x 1080
 ## (BP7 row 93: it draws it full screen), and beside it in `cards/` the Match page's and the menus' backdrop's copy at
 ## THUMB_SIZE (BP7: the page shows all four at once, so it holds the small ones), each at the map
@@ -42,12 +45,20 @@ func _run() -> void:
 	var card := false
 	var night := false
 	var fov := FOV
+	var fog := ""
+	var measure := 0
 	for a: String in args.duplicate():
 		if a.begins_with("preset="):
 			preset = StringName(a.trim_prefix("preset="))
 			args.erase(a)
 		elif a.begins_with("fov="):
 			fov = a.trim_prefix("fov=").to_float()
+			args.erase(a)
+		elif a.begins_with("fog="):
+			fog = a.trim_prefix("fog=")
+			args.erase(a)
+		elif a.begins_with("measure="):
+			measure = a.trim_prefix("measure=").to_int()
 			args.erase(a)
 		elif a == "card":
 			card = true
@@ -139,6 +150,13 @@ func _run() -> void:
 	if not map.targets.is_empty():
 		add_range(port, play, tuning, map)
 	var values := GraphicsTable.shared().preset(preset)
+	if fog != "":
+		var fog_level := GraphicsTable.shared().level_of(GraphicsQuality.VOLUMETRIC_FOG, fog)
+		if fog_level == GraphicsTable.NO_LEVEL:
+			push_error("eye_pictures: fog=%s is not a Volumetric haze level" % fog)
+			quit(1)
+			return
+		values.volumetric_fog = fog_level as GraphicsQuality.VolumetricFog
 	GraphicsApply.apply(values, port)
 	# The roof's lamps as real lights where the preset lights them (Lamp light, UG1), the sun dimmed as a match does.
 	GraphicsApply.apply_field(values, lighting, null, null, level, null, null,
@@ -157,7 +175,9 @@ func _run() -> void:
 		pole.relight(lights)
 	if site != null:
 		site.relight(lights)
-	print("[eye_pictures] drawn on %s" % preset)
+	print("[eye_pictures] drawn on %s%s" % [preset, " fog=%s" % fog if fog != "" else ""])
+	if measure > 0:
+		RenderingServer.viewport_set_measure_render_time(port.get_viewport_rid(), true)
 	var camera := Camera3D.new()
 	camera.fov = fov
 	port.add_child(camera)
@@ -180,6 +200,15 @@ func _run() -> void:
 			settle = maxi(settle, FIRST_SETTLE_FRAMES)
 		for i in settle:
 			await RenderingServer.frame_post_draw
+		if measure > 0:
+			var gpu := 0.0
+			var cpu := 0.0
+			for i in measure:
+				await RenderingServer.frame_post_draw
+				gpu += RenderingServer.viewport_get_measured_render_time_gpu(port.get_viewport_rid())
+				cpu += RenderingServer.viewport_get_measured_render_time_cpu(port.get_viewport_rid())
+			print("[eye_pictures] %s render gpu %.2f ms cpu %.2f ms (mean of %d)" % [parts[0], gpu / measure,
+					cpu / measure, measure])
 		var path := "%s/%s.jpg" % [args[1].trim_suffix("/"), parts[0]]
 		var image := port.get_texture().get_image()
 		if card:

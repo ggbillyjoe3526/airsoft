@@ -59,6 +59,8 @@ const SSIL_ADAPTIVE := "rendering/environment/ssil/adaptive_target"
 const SSIL_BLUR := "rendering/environment/ssil/blur_passes"
 const SSIL_FADE_FROM := "rendering/environment/ssil/fadeout_from"
 const SSIL_FADE_TO := "rendering/environment/ssil/fadeout_to"
+## The volumetric fog's filter (0 off, 1 on), which the RenderingServer starts with.
+const FOG_FILTER := "rendering/environment/volumetric_fog/use_filter"
 ## Each GlobalIllumination as the screen-space bounce's quality and whether it is drawn at half size: Screen (High)
 ## medium at half size, Scene (Ultra) ultra (adaptive, LookConfig.fine_adaptive) at full size with SDFGI at full
 ## resolution.
@@ -92,9 +94,10 @@ class Server:
 	var ssao_half: bool = ProjectSettings.get_setting(SSAO_HALF) as bool
 	var ssao_quality: int = ProjectSettings.get_setting(SSAO_QUALITY) as int
 	## The global illumination's and the volumetric fog's quality as last sent (GlobalIllumination, -1 never sent; the
-	## fog's froxel grid, zero never sent).
+	## fog's froxel grid, zero never sent, and its filter, at first the project's).
 	var gi_quality: int = -1
 	var fog_grid: Vector2i = Vector2i.ZERO
+	var fog_filter: bool = (ProjectSettings.get_setting(FOG_FILTER) as int) != 0
 	## The replica surfaces' detail as last sent: at first the project's 1.
 	var surface_detail: float = 1.0
 	## The values last drawn (`apply_settings`), or null before the first.
@@ -145,12 +148,14 @@ class Server:
 		lamp_soft = quality
 		RenderingServer.positional_soft_shadow_filter_set_quality(quality as RenderingServer.ShadowQuality)
 
-	## The volumetric fog's froxel grid (cells across, deep).
-	func set_fog_grid(grid: Vector2i) -> void:
-		if grid == fog_grid:
-			return
-		fog_grid = grid
-		RenderingServer.environment_set_volumetric_fog_volume_size(grid.x, grid.y)
+	## The volumetric fog's froxel grid (cells across, deep) and its filter, each sent only when it changes.
+	func set_fog_quality(grid: Vector2i, filter: bool) -> void:
+		if grid != fog_grid:
+			fog_grid = grid
+			RenderingServer.environment_set_volumetric_fog_volume_size(grid.x, grid.y)
+		if filter != fog_filter:
+			fog_filter = filter
+			RenderingServer.environment_set_volumetric_fog_filter_active(filter)
 
 	## Ambient occlusion for `ao` (on): half size or full, and its quality (SSAO_QUALITY_OF, Full's adaptive from `look`).
 	func set_ao(ao: GraphicsQuality.AmbientOcclusion, look: LookConfig) -> void:
@@ -347,9 +352,10 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 			to.set_ao(values.ambient_occlusion, look)
 		if values.global_illumination != GraphicsQuality.GlobalIllumination.OFF:
 			to.set_gi_quality(values.global_illumination, look)
-		if values.volumetric_fog:
-			to.set_fog_grid(Vector2i(look.fog_volume_size, look.fog_volume_depth))
-		lighting.set_effects(values.global_illumination, values.reflections, values.glow, values.volumetric_fog,
+		var fog := values.volumetric_fog != GraphicsQuality.VolumetricFog.OFF
+		if fog:
+			to.set_fog_quality(look.fog_grid(values.volumetric_fog), look.fog_filtered(values.volumetric_fog))
+		lighting.set_effects(values.global_illumination, values.reflections, values.glow, fog,
 				sun_shadows(values, lighting) and values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
 		lighting.set_eye_adaptation(values.eye_adaptation)
 	if dust != null:

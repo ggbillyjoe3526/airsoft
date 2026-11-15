@@ -2604,6 +2604,9 @@ msgstr "Oil stains and tyre tracks on the floors."
 msgid "GRAPHICS_VOLUMETRIC_FOG"
 msgstr "VOLUMETRIC HAZE"
 
+msgid "GRAPHICS_VOLUMETRIC_FOG_NOTE"
+msgstr "A faint haze the light shines through. Higher levels draw its light shafts finer and smoother; the haze itself is the same."
+
 msgid "GRAPHICS_LAMP_LIGHTS"
 msgstr "LAMP LIGHT"
 

@@ -30,7 +30,8 @@ never stops the game from starting.
   temporal smoothing, sun shadows, baked light and occlusion culling `off, on`; shadow detail `1024, 2048, 4096, 8192` (the sun's shadow map, in
   pixels); shadow softness `hard, soft, softer, softest`; ambient occlusion `off, half, full`; texture filtering
   `off, 2x, 4x, 8x, 16x`; mesh detail `low, medium, high, ultra`; global illumination `off, screen, scene`;
-  reflections `off, probes, screen`; lamp light `off, near, far`; glow, eye adaptation, volumetric fog and wear marks `off, on`. Render scale is
+  reflections `off, probes, screen`; lamp light `off, near, far`; volumetric fog `off, low, medium, high`; glow, eye
+  adaptation and wear marks `off, on`. Render scale is
   10–200 % at most, shadow range 10–500 m and wind dust 0–100 %.
 
 ## Rows
@@ -57,7 +58,7 @@ never stops the game from starting.
 | lamp_lights | GRAPHICS_LAMP_LIGHTS | off, near, far | 3 | forward_plus | off | off | near | far |
 | glow | GRAPHICS_GLOW | off, on | 1 | all | off | on | on | on |
 | eye_adaptation | GRAPHICS_EYE_ADAPTATION | off, on | 1 | forward_plus, mobile | off | off | on | on |
-| volumetric_fog | GRAPHICS_VOLUMETRIC_FOG | off, on | 3 | forward_plus | off | off | off | on |
+| volumetric_fog | GRAPHICS_VOLUMETRIC_FOG | off, low, medium, high | 3 | forward_plus | off | low | medium | high |
 
 - **Low** holds 60 FPS on a reasonably modern low-powered gaming PC: no sun shadows, ambient occlusion, baked light,
   dust, bounce light, probes, glow or haze, and an 80 % render scale sharpened back up by FSR 1. The look's shared
@@ -71,7 +72,7 @@ never stops the game from starting.
   light) the bake is drawn without the sun's bounce, as no sun gets under the roof.
 - **Ultra** is the top end: the whole scene's bounce light (SDFGI in 10 cm cells near the eye, six cascades out to
   410 m, 128 rays a probe, with screen-space bounce at the engine's Ultra quality and full size), screen-space
-  reflections over the probes at full size, volumetric fog the sun and the bounce light up, the sharpest and farthest
+  reflections over the probes at full size, High volumetric haze the sun and the bounce light up, the sharpest and farthest
   shadows with contact hardening (Softest: the sun given a size, so a shadow is sharp at its foot and soft away from
   it), full-size ambient occlusion at the engine's Ultra quality and the finest mesh detail (UG4: the finer light,
   `LookConfig`'s Global illumination group and `fine_adaptive`; High keeps the project's medium quality at half
@@ -105,8 +106,13 @@ never stops the game from starting.
   floor or a muddy tread outdoors, faded in and out at their ends; each a decal faded out past 40 m (`MarksConfig`).
   They add to the floor's own grime and dust (SL1, SL2) rather than repeat it: Depot's vans and forklift in the
   Loading bay, the Garage and the hall, and Woodland's pickup up its road. No boot prints (owner, 2026-11-10).
-- **Glow** blooms only what is brighter than white (lamp panels, a lit sky), softly. **Volumetric fog** is a faint
-  haze lit by the sun and the bounce light (LookConfig's Volumetric fog group).
+- **Glow** blooms only what is brighter than white (lamp panels, a lit sky), softly.
+- **Volumetric haze** (the `volumetric_fog` row) is a faint haze lit by the sun, the lamps and the bounce light, so
+  light has shafts and the far end of a hall or a wood its depth. Its strength and reach are the same at every level
+  (LookConfig's Volumetric fog group); the level is how finely its light is worked out (VF1): Low on the engine's own
+  64 x 64 grid, unsmoothed (its shafts blockier, an eighth of High's work), Medium on 96 x 96, smoothed, and High on
+  128 x 128, smoothed: the haze as it was when it was one switch (Ultra). A saved Custom "on" reads as High. Low (the
+  preset) draws none, for its 60 FPS floor.
 - **Temporal smoothing** is off on every preset: it smears the thin, fast BB streaks. It and FSR 2 are there for
   players who want them.
 - **Wind dust** is a share of the specks `game/config/effects_config.gd` sets (`dust_count`), lit by the sun so they
