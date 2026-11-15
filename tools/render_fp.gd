@@ -20,6 +20,8 @@ const SETTLE_FRAMES := 90
 const DT := 1.0 / 60.0
 const MAP := "depot"
 const PRESET := &"high"
+## How many numbers a `spot:` names.
+const SPOT_FIELDS := 4
 ## Where you stand: x, z, yaw and pitch (degrees), as render_arms.gd's spot.
 const SPOT := Vector4(0.0, 0.0, 0.0, 0.0)
 const OUTSIDE_FOV := 40.0
@@ -71,6 +73,10 @@ func _run() -> void:
 			_map = args[i].trim_prefix("map:")
 		elif args[i].begins_with("spot:"):
 			var at := args[i].trim_prefix("spot:").split_floats(",")
+			if at.size() != SPOT_FIELDS:
+				push_error("render_fp: spot:<x>,<z>,<yaw>,<pitch>, not %s" % args[i])
+				quit(1)
+				return
 			_spot = Vector4(at[0], at[1], at[2], at[3])
 		else:
 			shots.append(args[i])
@@ -188,7 +194,7 @@ func _shoot(shot: String, folder: String) -> int:
 	hands.skin_arms = opts.has("skin")
 	_camera.add_child(hands)
 	var paints: Array[StringName] = []
-	if opts.has("paint"):
+	if opts.get("paint", "") != "":
 		paints.append(StringName(opts["paint"]))
 	hands.setup(_play.viewmodel, loadout, BoxWorld.new(), paints, false, parts, _play.view, _camera)
 	_play.viewmodel.depth_scale = kept_depth
