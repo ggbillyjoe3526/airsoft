@@ -136,6 +136,8 @@ var _minimap: HudMinimap = null
 var _field_map: HudFieldMap = null
 ## Your team's ping markers (PN2), and where the ones pinned at a side go.
 var _pings: HudPingMarkers = null
+## Spotted's arrows over the enemies your team marked (CW1), placed each frame (place_spots).
+var _spots: HudSpotArrows = null
 var _ping_stack := HudPingMarkers.Stack.new()
 ## The sound cue ring round the crosshair (AC4), and whether Settings › Accessibility has it on.
 var _sound_cues: HudSoundCues = null
@@ -275,6 +277,8 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	# The ping markers, one per teammate made in setup_field, placed each frame (place_pings).
 	_pings = HudPingMarkers.new()
 	add_child(_pings)
+	_spots = HudSpotArrows.new()
+	add_child(_spots)
 	# Banners and the hit call, centre.
 	var middle := VBoxContainer.new()
 	_middle = middle
@@ -422,6 +426,8 @@ func setup_field(query: WorldQuery, body: BodyConfig, names: PackedStringArray, 
 	_pings.setup(_cfg, _sim.pings.lifetime, characters, _player, _teams.colours[_player.team],
 			_teams.colours[1 - _player.team])
 	_pings.hud_size = _hud_size
+	_spots.setup(_cfg, _sim, characters, _player)
+	_spots.hud_size = _hud_size
 	_feed.set_names(names)
 	_round_result.set_names(names)
 	_summary.set_names(names)
@@ -619,6 +625,7 @@ func set_hud_size(hud_size: float) -> void:
 	_team_markers.hud_size = s
 	_flag_marker.hud_size = s
 	_pings.hud_size = s
+	_spots.hud_size = s
 	if _hold_marker != null:
 		_hold_marker.hud_size = s
 	queue_redraw()
@@ -1291,13 +1298,13 @@ func setup_orders(controls: ControlsConfig) -> void:
 ## Mag while a toss is in reach, a refusal of it picked on the wheel shows in the middle, and the hand-off's line hides
 ## while the wheel is open (and under the scoreboard or the match's summary).
 func update_orders(wheel: OrderWheelPointer, in_force: SquadOrder.Kind, outcome: SquadOrders.Outcome,
-		delta: float) -> void:
+		delta: float, now_ms: int = -1) -> void:
 	if _mag_line != null:
 		var told := _mag_line.take_wheel_notice()
 		if not told.is_empty():
 			_order_wheel.tell(told)
 		_order_wheel.set_mag_toss(_mag_line.toss_ready())
-	_order_wheel.update(wheel, in_force, outcome, _player.id, delta)
+	_order_wheel.update(wheel, in_force, outcome, _player.id, delta, now_ms)
 	if _mag_line != null:
 		_mag_line.update(wheel.open, _summary.visible or _board.visible)
 
@@ -1352,9 +1359,20 @@ func place_pings(camera: Camera3D, book: Pings, now: float, show: bool) -> void:
 	_pings.place(camera, book, now, true, size, stack)
 
 
-## Hides the ping markers at once (the pause menu opening).
+## Hides the ping markers at once (the pause menu opening), and Spotted's arrows.
 func hide_pings() -> void:
 	_pings.hide_all()
+	_spots.place(null, null, 0.0, false, size)
+
+
+## Places Spotted's arrows (CW1) over the enemies `spots` marks for your team at `now` (s of match time), as `camera`
+## sees them; none when `show` is false (the scoreboard or the match's summary hide them too). Allocates nothing.
+func place_spots(camera: Camera3D, spots: Spots, now: float, show: bool) -> void:
+	_spots.place(camera, spots, now, show and not _board.visible and not _summary.visible, size)
+
+
+func spot_arrows() -> HudSpotArrows:
+	return _spots
 
 
 func ping_markers() -> HudPingMarkers:
@@ -1554,7 +1572,7 @@ func _build_step_line(parent: Control) -> void:
 	var box := HudStyle.panel_box(STEP_BACKING, STEP_PAD.z, STEP_PAD.y)
 	box.content_margin_left = STEP_PAD.x
 	box.content_margin_bottom = STEP_PAD.w
-	box.border_color = GameTheme.ACCENT
+	box.border_color = GameTheme.accent
 	box.border_width_left = roundi(HudStyle.BANNER_RULE)
 	_step_line.add_theme_stylebox_override("panel", box)
 	_step_line.visible = false
@@ -1563,7 +1581,7 @@ func _build_step_line(parent: Control) -> void:
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", STEP_GAP)
 	_step_line.add_child(row)
-	var kicker := HudStyle.label(row, STEP_KICKER_SIZE, 800, GameTheme.ACCENT, HORIZONTAL_ALIGNMENT_LEFT,
+	var kicker := HudStyle.label(row, STEP_KICKER_SIZE, 800, GameTheme.accent, HORIZONTAL_ALIGNMENT_LEFT,
 			STEP_KICKER_SPACING)
 	kicker.text = tr("HUD_GRAPHICS_KICKER").to_upper()
 	kicker.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -1580,7 +1598,7 @@ func _build_skip_hint(parent: Control) -> void:
 	_skip_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_skip_hint.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var box := HudStyle.panel_box(HudStyle.BACKING_CLOCK, 12, 8)
-	box.border_color = GameTheme.ACCENT
+	box.border_color = GameTheme.accent
 	box.border_width_left = roundi(HudStyle.BANNER_RULE)
 	_skip_hint.add_theme_stylebox_override("panel", box)
 	_skip_hint.visible = false

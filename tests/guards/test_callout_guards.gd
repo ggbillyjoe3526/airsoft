@@ -2,9 +2,9 @@ extends GutTest
 ## The callouts' guards (CO1; the browser game's depotMatch.callouts.test.ts, CL1): whole bot matches with the shipped
 ## data/callouts.md. On every field (Depot in both modes, Woodland at night) a seeded match plays the same with the
 ## callouts as without: the same shots, hits, rounds and flag; a replay says the same calls. On every map every call
-## keeps the pace (one a team a tick, the team's and the bot's gaps), comes from a bot in play during a live round and
-## fits a feed line, and the calls come at a steady rate; the rates print beside the browser's for the record. Run by
-## tools/match_guards.sh, a CI job of its own.
+## keeps the pace (one a team a tick, the team's and the bot's gaps, which Flash out alone may cut into: BC1), comes
+## from a bot in play during a live round and fits a feed line, and the calls come at a steady rate; the rates print
+## beside the browser's for the record. Run by tools/match_guards.sh, a CI job of its own.
 
 const SLACK := 1e-6
 ## Calls a team a minute of live play: enough to hear the team, never a stream (the team's gap alone allows 40).
@@ -62,9 +62,11 @@ class Heard:
 			if teams.has(c.team):
 				problems.append("%s: a second call for the team this tick" % at)
 			teams.append(c.team)
-			if t - _team_said[c.team] < pace.team_gap - SLACK:
+			# Flash out goes at once, past both gaps: the bang is only a moment off (callouts.md, BC1).
+			var urgent := c.event == CalloutsFile.Event.FLASH_OUT
+			if not urgent and t - _team_said[c.team] < pace.team_gap - SLACK:
 				problems.append("%s: the team spoke %.2f s ago" % [at, t - _team_said[c.team]])
-			if t - _bot_said.get(c.speaker_id, -INF) < pace.bot_gap - SLACK:
+			if not urgent and t - _bot_said.get(c.speaker_id, -INF) < pace.bot_gap - SLACK:
 				problems.append("%s: the bot spoke within its gap" % at)
 			if c.line == "" or c.line.length() > CalloutsFile.LINE_MAX or c.line.contains("{") or c.line.contains("}"):
 				problems.append("%s: not a filled line that fits" % at)

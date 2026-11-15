@@ -2,6 +2,7 @@
 colours in the shared light, its `Lens` glowing and its `Sign` faces printed from the sign sheet, into one picture.
 
 Usage: python3 -I tools/blender/maps/station_render.py <out.jpg> "<title>" <name[:view,view]> ... <repo root>
+(SIGN_SHEET=<png> to print from another sheet: Depot's extras, assets/textures/depot/signs.png.)
 Views: front, quarter, side, below, rear, top (default: front quarter side). Dev tool: tools/ never ships.
 """
 
@@ -16,7 +17,8 @@ from PIL import Image, ImageDraw, ImageFont
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = sys.argv[-1] if os.path.isdir(sys.argv[-1]) else os.path.normpath(os.path.join(HERE, "..", "..", ".."))
 PROPS = os.path.join(ROOT, "assets", "models", "props")
-SHEET = os.path.join(ROOT, "assets", "textures", "station", "signs.png")
+# the sign sheet the `Sign` faces print from: the station's, or another's named by SIGN_SHEET (Depot's, DX1)
+SHEET = os.environ.get("SIGN_SHEET") or os.path.join(ROOT, "assets", "textures", "station", "signs.png")
 PANEL = (640, 520)
 VIEWS = {
     "front": (0.0, 6.0, "front"), "quarter": (-38.0, 16.0, "front quarter"), "side": (-90.0, 4.0, "side"),

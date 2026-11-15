@@ -27,3 +27,12 @@ extends Resource
 @export var lifetime: float = 8.0
 ## One character's pings are at least this far apart (s): a double click is one ping.
 @export var min_gap: float = 0.25
+## Spotted (CW1, owner 2026-11-15; Spots): the enemy spotted is the one the view passes within spot_cone_deg of
+## (their chest or head; more forgiving than a ping's enemy_cone_deg), seen by the bots' sight rules as far as `reach`.
+## They stay marked for the spotter's team spot_time (s), a yellow arrow over their head seen through walls; while
+## marked, the spotter's bot teammates within spot_share_radius (m) of them hear where they are every spot_share_gap
+## (s), and go after them or watch them as their own play decides; teammates further off carry on.
+@export var spot_cone_deg: float = 4.0
+@export var spot_time: float = 10.0
+@export var spot_share_radius: float = 30.0
+@export var spot_share_gap: float = 1.0

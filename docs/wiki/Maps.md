@@ -13,38 +13,48 @@ colours, with the finished models coming later ([Roadmap](Roadmap)).
 
 ## Depot
 
-**An indoor airsoft hall**, 108 by 72 metres under one roof, in 6v6 (5v5 to 8v8 under Custom). Alpha starts at the east
+**An indoor airsoft hall**, 98 by 72 metres under one roof, in 6v6 (5v5 to 8v8 under Custom). Alpha starts at the east
 end and Beta in the west in Elimination, and the teams swap ends at half time.
 
 ![Depot's hall under its grey roof trusses and hanging lamps](images/depot-chrono-hall.jpg)
 
 - **Three lanes** wind from end to end between plywood rooms and racking you can't enter: the **Shoot House** and
   the dim **Lounge** to the north, the open **Chrono hall** in the middle, the **Huts** and the **Box yard** to the
-  south. No lane runs straight; each bends round the dead space.
-- **Links** join the lanes: open cuts and galleries, two tight alleys, and two **tunnels**, one in each half. The
+  south. No lane runs straight; each bends round the dead space. Bots take five routes through them: down each side's
+  corridor, through each side's rooms (the Shoot House, the Lounge and the Offices; the Pens, the Huts and between the
+  containers) and down the middle, so every room sees a fight.
+- **Links** join the lanes: open cuts and galleries, a tight alley by B, and two **tunnels**, one in each half. The
   tunnels are unlit and bend twice: dark, but never pitch black.
 - **The building:** blockwork walls under cladding, with galvanised steel columns, roller shutters and fire exits;
-  steel pillars with hazard bands; scaffold walls hung with camouflage netting; a polished concrete floor.
+  steel pillars with hazard bands; scaffold walls hung with camouflage netting; a polished concrete floor. Pipework
+  and cable baskets run along the walls high up, with valves and sprinkler drops; fire points and safety signs at
+  eye height on the open walls, and a call point and extinguisher on each pillar.
+- **The storage:** the racking you can't enter holds shrink-wrapped pallets, stacks of chemical tanks and drums, or
+  a mesh parts cage stacked with shelves and boxes. Every stack is as solid as the next: you can't shoot through the
+  gaps.
 - **The roof:** galvanised steel trusses, purlins and rooflights under a pale grey liner, red sprinkler mains and cable
   trays, with rows of high-bay lamps hanging on cables. A BB fired up stops at the roof. The lamps are not all new:
   some burn dimmer and warmer, a few flicker now and then, and a couple are dead, the same ones every match.
 - **It sounds like a big empty hall:** a quiet hum of the building, with the odd creak from the roof.
 - **No full auto indoors:** as at a real indoor site, every replica that can fire full auto starts each round on
-  single shots here, bots' too. Press **B** to switch to auto during the round if you want it. Bots switch only now
+  3-round bursts here (single shots if it has no burst), bots' too. Press **B** to switch to auto during the round if you want it. Bots switch only now
   and then, at someone out in the open down one of Depot's long sight lines.
 - **Long sight lines** down the Chrono hall and the yards: bots on Depot see 55 metres, further than on other fields.
 - **The Box** sits in the Box yard: a roofed container you can fight inside, and container rows with ports guard
   B site.
 - **Not mirrored:** the halves differ, but they're balanced. Both teams reach the Chrono hall together; Beta reaches
   the Lounge first and Alpha the Box yard, by about the same margin.
-- **Spawn rooms** open by two crate chicanes each, so nobody sees into a spawn from the floor outside it.
+- **Spawn rooms** open by two crate chicanes each, so nobody sees into a spawn from the floor outside it. Beta's (the
+  west's) **Staging** opens straight onto Upper mid behind a rack of crates, with stairs north to the Yard and south
+  to the Pens.
 - **Noisy props:** running into a container, a steel drum, the steel lockers, a plastic barrel, a rack or a crate stack
   makes a noise bots hear, and a BB rings off the steel ([Movement](Movement#paces)).
 - **Doors:** some of the plywood rooms and huts have wooden [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
-  raise either ([Modes](Modes#attack--defend)). Each pole stands between two crate stacks: one hides it from the
-  site's doors, the other from the stairs (A) or the ramp (B). Defenders hold the pole from behind them, and whoever
-  raises the flag has cover on two sides, so the fight is on the site.
+  raise either ([Modes](Modes#attack--defend)). Each pole stands at the hall's end of its site, beside a crate stack,
+  so the defenders have ground in front of it to hold: bots defending post at the Offices door, in Lower mid and at the
+  end of the Containers, and the fight starts there, not on the pole. Plant The Bomb's two sites
+  are round the same poles.
 - **The look:** a real warehouse in daylight: concrete and plywood with their grain, weathered paint in muted
   crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest. Walls, crates and containers
   are worn: grime at their feet, streaks down their sides, dust on top.
@@ -84,10 +94,12 @@ it; a line under the crosshair tells you which.
 ## Woodland
 
 **A big open wood, 176 by 120 m, by day or by night**, in 6v6 (5v5 to 8v8 under Custom). A shallow stream runs down the
-middle, and three lanes cross it: the **north** over the Ridge, the North bridge and the Tower to the Fort; the
-**middle** past the Cabin and the Woodpile to the Clearing, over the Ford to Hut row; the **south** along the gravel
-road, round the Truck bend, over the Culvert to the Log stacks and the Sawmill. Attackers start in the west camp and
-defenders in the east camp.
+middle, and six routes cross it: the **north** over the Ridge, the North bridge and the Tower to Fern hollow; the
+**north edge** up the Pine slope, along the Ridge's far side and over the stream's north end; the **north middle**
+along the Berm, over the stream north of the Clearing to the Hollow way; the **middle** past the Cabin and the Woodpile
+to the Clearing, over the Ford to Hut row; the **south middle** across the Clearing's south side and over the stream
+by the Knoll to Log stacks; and the **south** along the gravel road, round the Truck bend, over the Culvert to Log
+stacks. Bots use all six. Attackers start in the west camp and defenders in the east camp.
 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above. A level
@@ -104,7 +116,7 @@ defenders in the east camp.
   and a log stack at the North bridge's two heads, the Long road's double bend between two stands of spruce west of
   the Culvert, and two spruce thickets on the Ford's east bank break the long lines. Nothing stands on the road
   itself: its woodpiles and its one fallen tree are on the verges. The road is close work through the bend and a
-  longer look from the Culvert up to the Sawmill, the Clearing a mid-range fight, with a fallen tree in its
+  longer look from the Culvert up to Log stacks, the Clearing a mid-range fight, with a fallen tree in its
   middle and the Ford and its ramp, 5 m wide, up to Hut row, and the north lane over the bridge is the long one.
 - **Few walls:** cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres,
   wooden crates, the violet pickup wreck and the trunks of the trees themselves, and the camps and the field's edge are
@@ -119,24 +131,26 @@ defenders in the east camp.
   Clearing; the Badger run, another hollow log through the Knoll between the middle and the south; and the Culvert,
   the concrete-lined stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots
   crouch through too. The stream bed under the North bridge is crouch height as well, a fourth low way along the bed.
-- **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two wooden [doors](#doors)
+- **The huts:** the Cabin, the two huts of Hut row and the Box in the Fort have windows and two wooden [doors](#doors)
   each. The door facing the other team's end starts each round shut and the one facing your own end open, so a hut
   is walked into from its own side and opened, loudly, from the other, under shake roofs. The Tower is a timber watch
   tower, its deck 3.4 m up a stair, walled in all round but the stair's head by waist-high board walls under a roof;
   the North bridge is a log bridge with closed slab sides; the Sawmill is an open timber shed under a corrugated roof,
   with a saw bench, rounds and a stack of sawn boards.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
-  camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge: campfires in stone rings,
+  camps, the huts, the Clearing, both flags, the Fort, the Truck bend and the North bridge: campfires in stone rings,
   and hurricane lanterns hung from a roof, a post or a hooked pole, which stand cold by day. Bots see you from about
   40 m in their light, 25 m under the moon and 10 m under the trees ([Bots](Bots#at-night)); by day they see 60 m.
   At night, fit a [weapon torch](Parts-and-Power#lights) and load [glowing BBs](Loadout#customise).
 - Footsteps sound like grass, leaf litter, gravel or boards, and a BB that hits the ground puffs like earth. By day
   and by night the wood sounds like a real one; owls and creaking branches call from it.
-- **Attack / Defend** puts flag **A** in the Fort and flag **B** at the Sawmill ([Modes](Modes#attack--defend)); in
-  Elimination's overtime the flag stands in the Clearing. The Fort is walled on its west side as well, with a firing
-  window and a doorway, so flag A is fought for inside the walls; at the Sawmill a log stack stands beside flag B.
-  The two flags stand far apart, so a flag here takes longer to raise than on Depot (the table at the top of this
-  page), which gives the defenders at the other flag time to come across.
+- **Attack / Defend** puts flag **A** in Fern hollow, under an oak beside a wind-thrown tree just west of the Fort,
+  and flag **B** at Log stacks, in a pocket between three woodpiles just south of the road ([Modes](Modes#attack--defend)); Plant
+  The Bomb's sites A and B are in the same places. Both stand well out from the defenders' camp, so the defenders
+  have ground to hold in front of them: some meet the attack at the stream crossings, the Tower and Hut row, and the
+  rest hold by the flags, with the walled Fort and the Sawmill's shed behind them. In Elimination's overtime the flag
+  stands in the Clearing. The two flags stand far apart, so a flag here takes longer to raise than on Depot (the table
+  at the top of this page), which gives the defenders at the other flag time to come across.
 
 ### Areas
 

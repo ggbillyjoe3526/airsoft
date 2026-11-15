@@ -1,7 +1,8 @@
 """Depot's layout as data (the owner's approved concept 3, 2026-10-31; /mnt/project-files/concepts/depot-redesign/v3/).
 
-Metres, x east, z south (north is up on the plan), the hall's middle at (0, 0). An indoor warehouse 108 x 72 m under a
-roof at 8 m. Walkable ZONES are carved out of a solid mass; whatever no zone covers is dead space (closed plywood rooms
+Metres, x east, z south (north is up on the plan). An indoor warehouse 98 x 72 m under a roof at 8 m, from x -44 to 54
+(DC1, the owner's pick of the compact hall, 2026-11-15: the west 10 m closed and the west spawn moved 10 m in; the
+concept's middle, the Chrono hall at x 0, stays where it was). Walkable ZONES are carved out of a solid mass; whatever no zone covers is dead space (closed plywood rooms
 and racking, 3 m tall). Then the cover: plywood walls with doorways, windows and doors, huts, containers, crates, drums,
 barrels, pillars and netting. Not mirrored: each end has its own shape, and fairness comes from measured timings
 (tools/depot/README.md).
@@ -10,7 +11,8 @@ Edit this file, then run `python3 tools/depot/build_map.py` to write data/maps/d
 """
 from __future__ import annotations
 
-W, H = 54.0, 36.0  # half sizes: 108 x 72 m
+W, H = 54.0, 36.0  # the east wall's x and the half depth: the concept's 108 x 72 m hall
+X_WEST = -44.0     # DC1: the west wall, 10 m in from the concept's -54
 T = 0.3            # a plywood wall's thickness
 ROOF = 8.0
 DEAD_H = 3.0
@@ -97,16 +99,17 @@ def zone(name, lane, x1, z1, x2, z2, light="lit"):
 
 
 # ================================================================ ZONES
-# West end (Beta in Elimination, attackers in Attack / Defend at the start)
-zone("Staging", "end", -54, -13, -44, 4.5)        # its chicanes too
-zone("North stairs", "n", -52, -22, -45, -13)
-zone("Yard", "n", -54, -35, -36, -22)
+# West end (Beta in Elimination, attackers in Attack / Defend at the start). DC1: Staging, its stairs and chicanes are
+# the concept's moved 10 m east, onto the old Mid exit, which the spawn room now is; the Yard and the Pens lose their
+# west 10 m, the Side alley goes (the North stairs are the Yard's way to the spawn).
+zone("Staging", "end", -44, -13, -34, 4.5)        # its chicanes too
+zone("North stairs", "n", -42, -22, -35, -13)
+zone("Yard", "n", -44, -35, -36, -22)
 zone("Shoot House", "n", -36, -35, -10, -20)
-zone("Mid exit", "m", -44, -6, -34, 2)
 zone("Upper mid", "m", -34, -16, -20, 2)
 zone("Doors", "m", -20, -16, -12, -8)
-zone("South stairs", "s", -52, 4.5, -45, 16)
-zone("Pens", "s", -54, 16, -36, 35)
+zone("South stairs", "s", -42, 4.5, -35, 16)
+zone("Pens", "s", -44, 16, -36, 35)
 zone("Huts", "s", -36, 18, -12, 35)
 # Centre
 zone("Lounge", "n", -10, -33, 10, -18, light="dim")
@@ -123,9 +126,8 @@ zone("B ramp", "s", 46, 13, 53, 17)
 zone("Containers", "s", 12, 16, 32, 35)
 zone("B site", "s", 32, 17, 54, 35)
 
-# Links. Open links are 4 to 6 m wide; the two alleys stay tight (3 m); one unlit tunnel each half.
+# Links. Open links are 4 to 6 m wide; the B alley stays tight (3 m; DC1 closed the west one); one unlit tunnel each half.
 zone("Cut", "x", -30, -20.5, -25, -15.5)                         # Shoot House <-> Upper mid, open
-zone("Side alley", "x", -40, -22.5, -37, -5.5)                   # Yard <-> Mid exit, tight
 zone("Gallery", "x", -6, -18.5, 0, -13.5)                        # Lounge <-> Chrono hall, open
 zone("Drum alley", "x", -8, 7.5, -2, 13.5)                       # Chrono hall <-> Box yard, open
 zone("West tunnel", "x", -31, 1.5, -28, 9.5, light="dark")       # Upper mid <-> Huts, unlit, two bends
@@ -141,27 +143,27 @@ zone("Dock", "x", 18, 11.5, 24, 16.5)                            # Lower mid <->
 zone("B alley", "x", 38, 7.5, 41, 17.5)                          # Garage <-> B site, tight
 
 # ================================================================ PIECES
-# --- Staging (west spawn): gear racks screen the spawn from the Mid exit
-add("crates", -46.4, -8.6, -45.6, 1.2)
+# --- Staging (west spawn; DC1: the concept's moved 10 m east): gear racks screen the spawn from its mouth into Upper
+# mid, a gap 8 m wide (the concept's Mid exit mouth) in plywood that closes the rest of its east side
+add("crates", -36.4, -8.6, -35.6, 1.2)
+add("wall", -34.15, -13, -33.85, -6)
 # Each stairs mouth is a chicane of two screens, so no straight line from the Yard, the Pens or the stairs reaches a
 # spawn (DR1 critic): in by the screen's west gap, along between them, out by the inner screen's east gap.
 # The corridor between is 3 m and the gaps 2 m (outer, by the stairs' rack) to 2.6 m, so a squad following its leader
 # out doesn't queue (the follow guard).
 # The outer screen's gap ends west of the spawn line and the inner one's starts east of it, so no line through both
 # reaches a spawn.
-add("crates", -50.0, -13.5, -45.0, -12.5)             # north stairs screen, gap west
-add("crates", -54.0, -9.5, -49.0, -8.5)               # inner screen, gap east
-add("crates", -50.0, 4.5, -45.0, 5.5)                 # south stairs screen, gap west
-add("crates", -54.0, 0.5, -49.0, 1.5)                 # inner screen, gap east
+add("crates", -40.0, -13.5, -35.0, -12.5)             # north stairs screen, gap west
+add("crates", -44.0, -9.5, -39.0, -8.5)               # inner screen, gap east
+add("crates", -40.0, 4.5, -35.0, 5.5)                 # south stairs screen, gap west
+add("crates", -44.0, 0.5, -39.0, 1.5)                 # inner screen, gap east
 # Eight a side (8v8, TS1), 1 m apart between the inner screens: 0.75 m clear of the north one, 1.25 m of the south.
-SPAWNS_W = [(-50.0, -7.75 + i) for i in range(8)]
-DEAD_W = (-52.8, -4.5)                                # the dead zone, behind the spawn line
+SPAWNS_W = [(-40.0, -7.75 + i) for i in range(8)]
+DEAD_W = (-42.8, -4.5)                                # the dead zone, behind the spawn line
 
-# --- Yard (18 x 13): the west end room
-box("crates", -46.0, -29.0, 2.4, 2.4)
-box("lowcrate", -50.5, -25.0, 3.0, 1.0)
+# --- Yard (8 x 13): the west end room, its west 10 m closed (DC1)
 box("drums", -40.0, -31.5, 1.8, 1.8)
-box("barrels", -52.2, -33.5, 1.3, 0.65)
+box("barrels", -43.2, -33.5, 1.3, 0.65)
 box("lowcrate", -42.0, -24.5, 1.0, 2.6)
 
 # --- Shoot House (26 x 15): two rows of rooms
@@ -180,15 +182,12 @@ box("crates", -27.5, -6.5, 2.4, 2.4)
 box("lowcrate", -31.0, -12.5, 3.0, 1.0)
 box("lowcrate", -22.5, -1.0, 1.0, 2.6)
 box("barrels", -21.0, -12.0, 0.65, 1.3)
-box("barrels", -38.0, 0.5, 1.3, 0.65)
 wall("wall", -16, -16, -16, -8, [(-14, -11, "door")])
 
-# --- Pens (18 x 19): netting pens
-wall("net", -46, 16, -46, 22)
-wall("net", -46, 27, -41, 27)
+# --- Pens (8 x 19): netting pens, their west 10 m closed (DC1)
+wall("net", -44, 27, -41, 27)
 box("crates", -41.0, 21.0, 2.4, 2.4)
-box("lowcrate", -50.0, 30.5, 3.0, 1.0)
-box("drums", -51.0, 20.0, 1.8, 1.8)
+box("drums", -42.6, 17.6, 1.8, 1.8)
 box("barrels", -43.0, 33.0, 1.3, 0.65)
 wall("net", -36, 16, -36, 35, [(20, 24, "door"), (28.5, 32.5, "door")])
 
@@ -197,8 +196,10 @@ hut(-32, 21, -26, 26, doors={"w": [(22, 24, "dshut")], "s": [(-30, -28)]}, windo
 hut(-21, 28, -15, 34.7, doors={"n": [(-19, -17, "dopen")]}, windows={"w": [(30, 31.5)]})
 box("drums", -23.8, 27.2, 1.8, 1.8)
 box("barrels", -19.0, 22.0, 1.3, 0.65)
-wall("wall", -12, 18, -12, 22.5)
-wall("wall", -12, 26.5, -12, 35)                  # Huts open into the Box yard through one 4 m gap, behind the Box
+wall("wall", -12, 18, -12, 24)
+wall("wall", -12, 28, -12, 35)                    # Huts open into the Box yard through one 4 m gap, behind the Box
+# DC1: the gap 1.5 m south of the concept's, so the west, 10 m nearer with its spawn moved in, still reaches the Box
+# yard about as far behind the east as it reaches the Lounge ahead of it (test_depot_hall).
 
 # --- Lounge (20 x 15, dim)
 add("wall", -0.15, -33, 0.15, -24)
@@ -210,7 +211,9 @@ box("crates", 4.5, -29.0, 2.0, 2.0)
 wall("wall", 10, -33, 10, -22, [(-31, -29, "dshut"), (-25, -23, "dopen")])
 
 # --- Chrono hall (26 x 22): the chrono hut holds the overtime flag
-hut(-3.5, -5.5, 2.5, -0.5, doors={"n": [(-1.5, 0.5, "dopen")], "s": [(-1.5, 0.5, "dshut")]}, windows={"w": [(-4.8, -3.4)], "e": [(-2.6, -1.2)]})
+# DC1: the hut and its flag 4.5 m east of the concept's, on the field's middle now the west spawn is 10 m in (both ends
+# walk about as far to the flag, FieldChecks.overtime_flag).
+hut(1.0, -5.5, 7.0, -0.5, doors={"n": [(3.0, 5.0, "dopen")], "s": [(3.0, 5.0, "dshut")]}, windows={"w": [(-4.8, -3.4)], "e": [(-2.6, -1.2)]})
 box("pillar", -6.0, -9.0, 0.6, 0.6)
 box("pillar", 8.0, 3.0, 0.6, 0.6)
 add("crates", -9.0, 0.0, -7.0, 5.0)
@@ -219,7 +222,7 @@ box("lowcrate", -4.0, 5.0, 2.6, 1.0)
 box("lowcrate", 10.5, -3.5, 1.0, 3.0)
 box("barrels", 12.0, 6.0, 1.3, 0.65)
 add("crates", -1.2, -14, 1.2, -11.6)               # off the Gallery mouth: no line from the Doors to the Arch
-OT_FLAG = (-0.5, -3.0)
+OT_FLAG = (4.0, -3.0)
 
 # --- Lower mid (16 x 18): the Arch is a wide opening into the hall
 wall("wall", 14, -6, 14, -2)
@@ -255,7 +258,7 @@ box("crates", 32.4, -23.5, 1.2, 2.4)                  # default box inside the O
 box("crates", 41.5, -27.2, 1.2, 2.4)                  # the flag stack
 box("crates", 46.2, -23.8, 2.4, 1.2)                  # the stairs stack
 box("pillar", 41.0, -20.5, 0.6, 0.6)
-FLAG_A = (44.0, -27.0)
+FLAG_A = (36.5, -26.5)                # DC1: 7.5 m in from the concept's, nearer the hall
 
 # --- Loading bay (east spawn)
 add("crates", 45.6, -1.2, 46.4, 8.6)
@@ -290,7 +293,7 @@ box("crates", 34.5, 21.0, 1.2, 3.0)                  # default box inside the no
 box("crates", 42.5, 27.6, 1.2, 2.4)                   # the flag stack
 box("crates", 47.0, 24.4, 2.4, 1.2)                   # the ramp stack
 box("pillar", 40.5, 26.5, 0.6, 0.6)
-FLAG_B = (45.0, 28.0)
+FLAG_B = (37.0, 27.5)                 # DC1: 8 m in
 
 # --- Box yard (24 x 19): the Box, a crate stack off each end
 wall("container", -5, 21.15, 7, 21.15, [(0, 2, "window")])
@@ -308,35 +311,41 @@ box("barrels", 8.5, 29.5, 1.3, 0.65)
 FLAGS = [FLAG_A, FLAG_B]
 # Plant The Bomb (PB1): the sites, A first, each (x, z, radius m; 0 the game's usual, PlantConfig.site_radius). Each
 # is its flag's site, its middle a metre towards the hall from the pole.
-BOMB_SITES = [(44.0, -26.0, 0), (45.0, 27.0, 0)]
+BOMB_SITES = [(36.5, -25.5, 0), (37.0, 26.5, 0)]
 
 # ================================================================ the bots' lanes (end 0's side to end 1's)
-# MB1: the north and south lanes end ON the sites. Attack / Defend's defenders hold a lane's last two points
-# (RoundPlanner), and those were the foot of the A stairs and the B ramp, outside the sites and open to them: now one
-# holds the pole from behind its flag stack and one the low crate by the stairs (ramp) mouth, across the pole from it.
-# The middle lane's two posts are behind the Garage dog-leg's two stacks (they stood in the open beside them).
-# Each lane has one point about 4.5 m short of the field's middle and one as far past it, none between: a squad
-# sweeps to the first point past the middle, and the old points sent the west 6 m deeper than the east down the Chrono
-# hall and 4 m deeper down the Box yard (the east 7 m deeper through the Lounge), so the west won 44 % of Elimination's
-# rounds. Dead even they gave it 55 %; the middle lane's two are 0.8 m east of even (the west 5.3 m past, the east 3.7).
+# DC1 (the compact hall, the owner's pick of the map redesign's concept B): five lanes where there were three, so the
+# rooms the bots never walked are walked. The north and south corridors, the middle, and a lane through each side's
+# rooms: the north rooms through the Shoot House's north row, the Lounge and the Offices rooms; the south rooms down the
+# South stairs, through the Pens, the Huts, the Box yard's south and between the containers. Attack / Defend's
+# defenders hold a lane's last two points (RoundPlanner): with the sites 8 m in, those are posts forward of the poles,
+# at the Offices door, in Lower mid (behind its low crate) and at the end of Containers (behind theirs), so the
+# defenders have ground in front of them to hold. No lane starts or ends in a spawn room (the chicanes' outer mouths and Upper mid by the spawn's).
+# MB1: each lane has one point about 4.5 m short of the field's middle and one as far past it, none between: a squad
+# sweeps to the first point past the middle, so the two ends' first points past it are kept about as deep. With the
+# west spawn 10 m in, the middle (halfway between the spawns' centres) is at x 5, not 0.
 LANES = {
-    "n": [(-51.2, -14.5), (-48.5, -16), (-46.5, -21.5), (-42.6, -26.4), (-36, -26), (-28, -24.5),
-          (-19, -21), (-11.5, -22.6), (-2.7, -21.7), (6.3, -21.4), (10, -24), (18, -24), (27, -24), (30, -23.5),
-          (36, -25), (41.5, -24.8), (42.9, -27.2), (47.7, -19.6)],
-    "m": [(-40, -1), (-30, -8.5), (-23, -12.5), (-16, -12.5), (-9, -7.5), (-3.1, -7.1), (5.8, -5.5), (8, -5),
-          (15, 0), (19, 5.5), (25.5, 4.6), (29.5, 2.2), (34, 2.2), (33.8, 6.3), (40.3, 2.3)],
-    "s": [(-51.2, 6.5), (-48.5, 10), (-48.5, 15), (-45, 19), (-37, 22), (-30, 19.5), (-21, 19.5),
-          (-14, 24.5), (-9.5, 24.6), (-8, 19.5), (-6.2, 18.9), (2.9, 18.7), (12, 18.6), (20, 18.6), (27.5, 18.4),
-          (31, 20.5), (33, 18.8), (39, 20.5), (42.8, 23.0), (43.9, 27.7), (47.6, 19.6)],
+    "n": [(-41.2, -14.5), (-38.5, -17), (-38, -24.5), (-28, -24.5), (-19, -21), (-11.5, -22.6), (-2.7, -21.7),
+          (2.5, -21.5), (11.7, -23.5), (18, -24), (25, -24), (31, -21)],
+    "nr": [(-39, -15.5), (-39, -19), (-38, -31), (-30, -31), (-24.5, -31.5), (-15, -31), (-3.5, -30.5), (3.4, -31.5),
+           (12.5, -31.5), (22, -30), (33, -30)],
+    "m": [(-32.5, -2), (-30, -8.5), (-23, -12.5), (-16, -12.5), (-9, -7.5), (-3.1, -7.1), (1.2, -7.5), (10.1, -6.5),
+          (15, 0), (19, 5.5), (24, 3.5), (29, -2.2)],
+    "sr": [(-38.5, 7), (-38.5, 13), (-39, 24), (-38.5, 30.5), (-33, 30.5), (-24, 30), (-16, 29), (-6, 28), (-2, 26),
+           (7, 26), (14, 26), (26.5, 24.5), (33.5, 31)],
+    "s": [(-32.5, 0.5), (-29.5, 4), (-29, 8.5), (-23.5, 12), (-23.5, 18), (-14, 24.5), (-8, 19.5), (-1.3, 18.7),
+          (7.7, 18.6), (20, 18.6), (27.5, 18.4), (31, 21)],
 }
+# The order the map file lists them in, north to south.
+LANE_ORDER = ("n", "nr", "m", "sr", "s")
 
 
 # ================================================================ dead space: what no zone covers, greedy-meshed
 def _dead_blocks(res: float = 0.5) -> list[tuple[float, float, float, float]]:
-    nx, nz = int(2 * W / res), int(2 * H / res)
+    nx, nz = int((W - X_WEST) / res), int(2 * H / res)
     open_ = [[False] * nz for _ in range(nx)]
     for zn in zones:
-        i1, i2 = int(round((zn["x1"] + W) / res)), int(round((zn["x2"] + W) / res))
+        i1, i2 = int(round((zn["x1"] - X_WEST) / res)), int(round((zn["x2"] - X_WEST) / res))
         j1, j2 = int(round((zn["z1"] + H) / res)), int(round((zn["z2"] + H) / res))
         for i in range(i1, i2):
             for j in range(j1, j2):
@@ -356,7 +365,7 @@ def _dead_blocks(res: float = 0.5) -> list[tuple[float, float, float, float]]:
             for a in range(i, i2 + 1):
                 for k in range(j, j2 + 1):
                     used[a][k] = True
-            out.append((-W + i * res, -H + j * res, -W + (i2 + 1) * res, -H + (j2 + 1) * res))
+            out.append((X_WEST + i * res, -H + j * res, X_WEST + (i2 + 1) * res, -H + (j2 + 1) * res))
     return out
 
 

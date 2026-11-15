@@ -271,11 +271,18 @@ SPAWNS_W = [(-83.0, -3.75 + 2.0 * i) for i in range(8)]   # Beta / attackers
 SPAWNS_E = [(79.5, -9.25 + 2.0 * i) for i in range(8)]    # Alpha / defenders
 DEAD_W = (-85.0, 26.0)
 DEAD_E = (84.5, -24.0)
-FLAG_A = (55.0, -38.5)
-FLAG_B = (49.0, 38.5)
+# WB1 (the owner, 2026-11-15, Concept B of the map action redesign): both flags 14 m nearer the stream, so the
+# defenders have ground in front of them to hold and the fights come mid-map. A stands in Fern hollow beside the oak,
+# west of the Fort; B at Log stacks, in the pocket between three cordwood stacks on the road's south verge, 6 m off the
+# road's centre line. The concept's (36, 40) was on the gravel's edge (the road stays clear), and anywhere else on that
+# verge the road's S, 40 m west, saw the pole down the Culvert's straight (test_mb1_layouts: MB2 shut that line, and
+# the road's strip is where it runs, so no piece can). The Fort and the Sawmill stay, the defenders' ground behind.
+FLAG_A = (42.2, -41.4)  # the concept's (41, -42), 1.4 m off the oak so its trunk is out of the pole's ring
+FLAG_B = (40.0, 42.0)
 OT_FLAG = (-3.0, 1.0)
 FLAGS = [FLAG_A, FLAG_B]
-# Plant The Bomb (PB1): the sites, A first, each (x, z, radius m; 0 the game's usual): A in the Fort, B at the Sawmill.
+# Plant The Bomb (PB1): the sites, A first, each (x, z, radius m; 0 the game's usual): at the flags (WB1: A in Fern
+# hollow, B at Log stacks).
 BOMB_SITES = [(FLAG_A[0], FLAG_A[1], 0), (FLAG_B[0], FLAG_B[1], 0)]
 
 # West camp: a log palisade with three gates; a screen inside each gate so no line reaches a spawn point
@@ -325,6 +332,9 @@ rect("log", 10.0, -48.5, 6.0, 0.7, 70)
 rect("crates", 31.0, -40.0, 2.4, 1.6, 15)
 rect("log", 36.0, -32.0, 6.0, 0.7, -40)
 rect("logpile", 27.0, -49.0, 4.0, 1.0, 0)
+# WB1: the pole's crouch cover moved with flag A (MB1 put it 2.4 m from the old pole, on the side the attackers came
+# in by; here that is the west, the stream side). A raise is still seen from the Fort's window and the north.
+rect("lowcrates", 39.8, -41.0, 1.0, 2.0, 0)
 
 # ------------------------------------------------------------------ A SITE: the Fort (plywood walls on the rise)
 FORT = [(46.0, -46.0), (64.0, -46.0), (64.0, -24.5)]
@@ -341,7 +351,6 @@ rect("tyrestack", 53.0, -43.0, 1.8, 1.8)
 rect("lowcrates", 58.0, -31.5, 2.0, 1.0, 0)
 rect("tyre", 49.0, -29.5, 1.7, 1.7)                          # MB1: the open corner's first cover for whoever comes in by it
 rect("windthrow", 41.5, -25.0, 6.0, 2.0, 0, top=2.2)         # MB1: 16 m out from the open corner: the last cover before it, and it ends the 45 m line up the Hollow way onto the pole
-rect("lowcrates", 52.6, -38.6, 1.0, 2.0, 0)                  # MB1: crouch cover at the pole on the gate's side: a raise is seen from the corner and the east gate
 
 # ------------------------------------------------------------------ MID LANE: Cabin > Woodpile > Birch stand > Clearing > Ford > Hut row
 hut(-52.0, 9.0, 6.0, 4.5, 0, [(0, 1.5, 3.0, "door"), (1, 1.4, 3.0, "door"), (2, 2.0, 4.0, "window"),
@@ -547,8 +556,8 @@ LIGHTS = [
     (-80.0, 1.0, "fire"), (80.0, -2.5, "fire"),                  # camp fires
     (-49.5, 6.0, "lantern"), (23.3, -3.2, "lantern"), (36.0, 8.0, "lantern"),  # Cabin, Hut row
     (-5.0, 3.0, "lantern"),                                       # the overtime flag
-    (58.0, -44.6, "lantern"), (66.0, -32.0, "lantern"),          # the Box, the Fort gate
-    (56.0, 33.0, "lamp"),                                        # Sawmill work lamp
+    (43.6, -44.4, "lantern"), (66.0, -32.0, "lantern"),          # flag A (WB1: the Box's, moved), the Fort gate
+    (41.8, 42.0, "lamp"),                                        # flag B: the Sawmill's work lamp (WB1: moved)
     (-27.4, 37.8, "fire"),                                        # campfire at the Truck bend, off the road (WG4)
     (2.0, -39.0, "lantern"),                                     # North bridge, west end
 ]
@@ -559,8 +568,11 @@ AREAS = [  # name, lane, polygon
     ("Ridge", "n", [(-52, -36), (-44, -52), (-6, -52), (-4, -34), (-24, -27), (-40, -28)]),
     ("North bridge", "n", [(-6, -52), (10, -52), (10, -34), (-4, -34)]),
     ("Tower", "n", [(10, -52), (26, -52), (26, -34), (10, -34)]),
-    ("Fern hollow", "n", [(26, -52), (46, -50), (46, -27), (36, -24), (26, -34)]),
-    ("A site", "n", [(46, -50), (64, -50), (64, -27), (46, -27)]),
+    # WB1: the sites are where the flags stand (callouts name the area a bomb is planted in); the Fort and the Sawmill
+    # behind them keep their own names.
+    ("A site", "n", [(35, -52), (46, -50), (46, -34), (35, -34)]),
+    ("Fern hollow", "n", [(26, -52), (35, -52), (35, -34), (46, -34), (46, -27), (36, -24), (26, -34)]),
+    ("Fort", "n", [(46, -50), (64, -50), (64, -27), (46, -27)]),
     ("Fort gate", "end", [(64, -36), (72, -32), (72, -16), (62, -16), (64, -27)]),
     ("East camp", "end", [(72, -16), (88, -16), (88, 14), (72, 14)]),
     ("Cabin", "m", [(-72, -2), (-50, -4), (-44, 4), (-44, 16), (-72, 16)]),
@@ -572,8 +584,9 @@ AREAS = [  # name, lane, polygon
     ("Road west", "s", [(-72, 20), (-60, 22), (-40, 30), (-36, 40), (-46, 44), (-68, 34), (-72, 30)]),
     ("Truck bend", "s", [(-36, 32), (-14, 36), (-14, 58), (-30, 58), (-40, 44)]),   # MB2: both reach the road's south bend
     ("Long road", "s", [(-14, 38), (6, 38), (6, 58), (-14, 58)]),
-    ("Log stacks", "s", [(18, 32), (38, 28), (40, 50), (20, 54)]),
-    ("B site", "s", [(40, 28), (66, 26), (66, 48), (40, 50)]),
+    ("B site", "s", [(28, 39), (42, 32.5), (42, 50), (28, 52)]),
+    ("Log stacks", "s", [(18, 32), (38, 28), (42, 32.5), (28, 39), (28, 52), (20, 54)]),
+    ("Sawmill", "s", [(40, 28), (66, 26), (66, 48), (40, 50)]),
     ("Back track", "end", [(62, 14), (72, 14), (76, 30), (66, 30)]),
 ]
 LINKS = [  # number, name, kind, where (label point), lanes joined
@@ -594,25 +607,40 @@ LANE_PATHS = {
     # bridge's west end, not at its middle: the west's point is on the deck's first metres and the east's 2 m off its
     # end, by the root plate. With the west's at the deck's east end both squads crossed the bridge, 1.8 m wide, and
     # the west lost the lane 133 to 187.
+    # WB1: a lane's last two points are Attack / Defend's defender posts, the first on the stream side of its flag, the
+    # second by the pole. The north lane's are under the Tower and at the Fern hollow windthrow.
     "n": [(-76, -10), (-65, -24.5), (-50, -34), (-36, -42), (-22.5, -40.5), (-18.4, -41.4), (-15.2, -43.8),
-          (-6.4, -41.6), (-2.8, -41.5), (1.8, -41.3), (12, -40.3), (19, -40), (32, -38), (48, -38), (56, -38)],
+          (-6.4, -41.6), (-2.8, -41.5), (1.8, -41.3), (12, -40.3), (19, -40), (38.5, -40.7)],
     # MB1: the middle lane goes round the Woodpile's north end and the Birch stand's stack, up the Ford's ramp north
-    # of its thickets and between them and hut 1, and ends in the Back yard, where Attack / Defend's middle
-    # defenders hold between the two sites (it ended in their camp).
+    # of its thickets and between them and hut 1. WB1: it ends at Hut row, whose two posts hold the middle between the
+    # two flags (it ended in the Back yard, behind them now).
     "m": [(-74, 4), (-52, 4), (-38, 0.5), (-26, -2.5), (-19, -2.0), (-6, 2), (-0.6, -1.6), (1.6, 1.7),
-          (9.5, 0.5), (15.5, -3.6), (20.6, -5.0), (22.4, 0.4), (22.6, 3.4), (31.2, 2.2), (36.5, 2.4), (40.5, 4.2),
-          (43.2, 1.0), (58, 4.5)],
+          (9.5, 0.5), (15.5, -3.6), (20.6, -5.0), (22.4, 0.4), (22.6, 3.4), (31.2, 2.2)],
     # MB2: the south lane keeps to the road, through its S between the Road stands (the road is clear: MB1's lane left
     # it for the north verge at a fallen tree and came back onto it past the stack). Its stops either side of the
-    # field's middle (x -0.2 along the spawn line) are the bend's east mouth and the Culvert's west head. Its last two
-    # points are flag B's defenders: one behind the crates north of the road mouth, off the road's line with a view of
-    # the pole, one behind the stack beside it. In the road mouth, at (44, 35), the forward defender
-    # was shot from the Culvert's stack, 25 m off, before a fight reached the flag: 80 of the 175 knock-outs the
-    # attackers scored round the pole, and they won 64 % of the rounds (55 % with him behind the crates).
+    # field's middle (x -0.2 along the spawn line) are the bend's east mouth and the Culvert's west head. WB1: its posts
+    # are the Culvert's east head and the gap between flag B's stacks on the road side, looking down the road.
     "s": [(-77, 21), (-66, 27), (-48, 33), (-34, 42), (-26, 45.5), (-14.5, 55.6), (-8.3, 46),
-          (-2.6, 43.3), (2.3, 47.7), (14, 48.3),
-          (22, 43.6), (32, 40), (44.6, 29.8), (49, 37)],
+          (-2.6, 43.3), (2.3, 47.7), (14, 48.3), (39, 40.3)],
+    # WB1 (Concept B): three more lanes through the ground the first three left empty (83 % of the floor saw a bot in
+    # fewer than 1 round in 10). The north edge: up the Pine slope, along the Ridge's north side, across the stream's
+    # north end in its valley, past the Tower to flag A.
+    "ne": [(-76, -10), (-71, -30), (-62, -45), (-48, -50), (-34, -52), (-20, -52), (-7.9, -50.9), (0.5, -52.5),
+           (16, -50), (19, -47), (42, -44)],
+    # The north middle: between the two west thickets, along the Berm's north side, over the stream north of the
+    # Clearing, north of Hut row, to the Hollow way's head south of flag A. Its posts are the concept's: north of Hut
+    # row and the Hollow way's head, 14 m short of the pole on the way the attack comes (with both middle routes' posts
+    # by their poles, 3 m off, A / D attackers won 64 % ±3 for 55 % ±3 at these, 32 seeds: docs/records/WB1.md).
+    "nm": [(-74, -4), (-60.5, -18.3), (-49.5, -24.7), (-38, -27), (-26, -31), (-14, -28), (-6, -22), (2, -16),
+           (12, -10), (24, -12), (40, -28)],
+    # The south middle: south of the Cabin, the Clearing's south side, over the stream by the Knoll, up to the north of
+    # Log stacks and flag B. Its posts are the concept's too: the Knoll's east side and the north of Log stacks, 10 m
+    # short of the pole on the way the attack comes.
+    "sm": [(-74, 10), (-62, 14), (-48, 12), (-37, 14), (-26, 14), (-15, 15), (-4.7, 15.3), (1, 15.5), (6, 15.5),
+           (17.3, 18.5), (34, 34)],
 }
+# The lanes in the map file's order: the first three keep their places (tests and records name them by number).
+LANE_ORDER = ("n", "m", "s", "ne", "nm", "sm")
 
 
 SPACING = {"wood": 3.6, "ridge": 5.6, "birch": 3.0, "fern": 3.4, "eastmid": 4.2}  # eastmid: v2, thinner east of the stream

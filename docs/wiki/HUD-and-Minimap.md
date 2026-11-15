@@ -10,7 +10,7 @@ One rounded bar: each team's score in its colour with pips filling toward the wi
 and the target ("FIRST TO 5").
 Your team is always on the left in its own colour (Alpha blue, Beta orange), even after the ends swap at half time.
 In Attack / Defend it adds **ATK** and **DEF** tags and the **FLAG** gauge, and "OT" on the clock in overtime. In
-Plant The Bomb it has the same tags; once the bomb is armed the clock turns to the accent colour and counts the fuse,
+Plant The Bomb it has the same tags; once the bomb is armed the clock turns to the interface colour and counts the fuse,
 and a gauge under it reads **BOMB ARMED**, whichever team armed it, and fills as someone defuses it (**DEFUSING**).
 While you key the bomb in, the gauge reads **PLANTING**. A prompt under the crosshair says when holding Use picks the bomb up, plants it or defuses it, and a
 marker points to the site your team is making for, or to the bomb once it is down or armed. Big
@@ -31,7 +31,7 @@ right of its row: your two replicas (1 and 2), then your smoke (4) and flash (5)
 carry (two icons side by side for two), with no numbers. A bomb you never carried has no row. In Plant The Bomb, while
 you carry the bomb it has a row of its own at the bottom, keyed with Use (<!-- wiki:key use_door -->), lit while you
 set it, and gone once it is armed or dropped. The one in your hand is
-bright with a pale accent edge; the rest are dim, and a bomb you have thrown stays as one dim icon. Nothing is lit while your
+bright with a pale edge in the interface colour; the rest are dim, and a bomb you have thrown stays as one dim icon. Nothing is lit while your
 replica is holstered. The notes above the ammo panel (RELOADING, a bomb in hand, the hop-up readout) show above the
 rail, so it never moves. The pictures come from the models
 themselves, so a new paint or replica shows as it is.
@@ -44,7 +44,7 @@ goes as the reload starts.
 
 The hit feed (top right, or bottom left if you like) shows each hit: who fired, the BB trail, who was hit and their red
 **HIT** call with a raised hand, in team colours, each on a rounded pill. Your own lines say "You" and are framed in
-the accent colour, and your own hit stays framed until the next round.
+the interface colour, and your own hit stays framed until the next round.
 
 Teammates wear a chevron in your team's colour over their heads, seen through walls: solid when you can see them,
 hollow when cover hides them, grey with a raised hand once they're hit. Markers never show over enemies and never

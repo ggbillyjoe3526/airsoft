@@ -21,8 +21,11 @@ Bots know only what they see and hear:
 - They see about 55 to 60 m by day, depending on the field. A BB that lands by a bot, or hits its teammate close to
   it, gives the shooter away: for a few seconds the bot makes them out to 70 m, so a long shot from out of sight is
   answered.
-- They react after a moment, and their aim settles before it is steady. They never fire with a teammate in the way,
-  or where a teammate could step into the shot before the BBs arrive.
+- They react after a moment, and their aim settles before it is steady. Like anyone, they notice you later at the edge
+  of their view or far off, sooner if you run, and at once up close. A BB that passes close makes them flinch, so
+  shooting back throws their aim off for a moment. Duck back behind cover and step out again and
+  a bot has to find you again: it answers a moment later, and its first BBs go wide again. They never fire with a
+  teammate in the way, or where a teammate could step into the shot before the BBs arrive.
 
 ### At night
 
@@ -89,9 +92,26 @@ kits that suit it.
 <!-- wiki:bot-kits -->
 
 Under the Factory kit house rule every bot carries the AEG Rifle and the GBB Pistol as they come. Bots fire full auto wherever their replica has it,
-except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there they fire single shots and only now and
-then switch to full auto, at someone out in the open down a long sight line. Each bot decides that once per opponent
+except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there they fire 3-round bursts (single shots with a
+replica that has no burst) and only now and then switch to full auto, at someone out in the open down a long sight line. Each bot decides that once per opponent
 each round. A bot carrying the Compact SMG is the one exception: indoors it goes full auto at a target within 12 m.
+
+## How a team plays a round
+
+Each round a bot team follows a plan: spread one to a lane, move up in pairs, or stack on one lane, with each lane
+walked in its own order. The plan is the same kind of thing every round, but how they carry it out changes, so you
+can't learn one route and wait for it:
+
+- **Tempo.** A team moves up quickly, steadily or slowly, drawn each round: a quick team barely stops at its lane
+  points and meets you early, a slow one holds each point longer.
+- **Their own half first.** Bots hurry through ground their team holds and slow down past the middle, where the fight
+  will be.
+- **Their own line.** Each bot walks its lane up to <!-- wiki:config bot_config.lane_shift --> m to one side or the
+  other, the same side all round: the far side of a row of crates one round, the near side the next.
+- **Changing lanes.** Now and then a bot cuts across to another lane, the nearest one with the fewest teammates on it,
+  once a round at most and never back towards its own end: on Woodland that's a flank through the trees.
+- **A forward defender.** In Attack / Defend and Plant The Bomb, in some rounds one defender holds well up its lane,
+  towards the middle, to catch attackers on their way in.
 
 ## Bots in Attack / Defend
 
@@ -135,7 +155,7 @@ to miss that close. That goes for you as for them; anyone with their hands off t
 Bots tell their team what they already do, in words in the [hit feed](HUD-and-Minimap#callouts)
 with a radio click, never a voice: a sighting ("Contact, Dock!"), a noise while nobody on the team sees anyone, the
 team's hits ("Two left!", "Last one!"), a reload under fire, setting off after someone, settling at a hold, the
-flag going up, and in Plant The Bomb the bomb being planted, armed, defused or dropped ("They're planting at A
+flag going up, a flash on its way ("Flash out!"), and in Plant The Bomb the bomb being planted, armed, defused or dropped ("They're planting at A
 site!"). A team speaks one call at a time, a moment apart, the most urgent first; each personality has its own
 lines and talks more or less. Hit players never talk, and what a bot says never changes how anyone plays. You see
 only your own team's words; an enemy close by is heard keying their radio.
@@ -162,7 +182,8 @@ each team the bot nearest the flag calls it, naming where it stands.
 Every bot carries a smoke and a flash bomb a round, as you do, and throws them: a smoke when pinned in cover by
 someone at range, a flash round a corner before it pushes, then it looks away until the bang. Harder bots throw more
 often. A Normal or Hard bot that sees someone else's flash coming may turn away from it too (Hard more often than
-Normal; an Easy bot never does), so a flash is surest thrown where it lands out of sight. Bots walk round a standing smoke cloud
+Normal; an Easy bot never does), so a flash is surest thrown where it lands out of sight. A bot calls its own flash as it
+throws ("Flash out!"), so every bot looks away from its teammates' flashes. Bots walk round a standing smoke cloud
 where the way round is open, and through it only where it is the only way. [Grenades](Grenades) has the rules.
 
 ## Magazines

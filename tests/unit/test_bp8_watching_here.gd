@@ -136,9 +136,8 @@ func test_watching_here_is_on_the_wheel_and_picked_there_is_a_watch_ping_along_t
 	e.action = &"order_wheel"
 	e.pressed = true
 	input._unhandled_input(e)
-	var angle := TAU * slot / controls.wheel_orders.size()
 	var m := InputEventMouseMotion.new()
-	m.screen_relative = Vector2(sin(angle) * 150.0, -cos(angle) * 150.0)
+	m.screen_relative = OrderWheelLayout.new(controls).box(slot).get_center() / controls.wheel_gain
 	input._unhandled_input(m)
 	Input.action_release(&"order_wheel")
 	var off := InputEventAction.new()

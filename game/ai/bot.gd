@@ -25,6 +25,9 @@ class Contact:
 	var held: bool = false
 	var acquired_at: float = 0.0
 	var react_at: float = 0.0
+	## When its reaction now under way (or last run) began: first seen, or seen again after a moment out of sight
+	## (BotConfig.reacquire_after; AIM1). The aim settles only once that reaction is over (BotAim.settling).
+	var reaction_from: float = 0.0
 
 
 var character: Character = null
@@ -79,6 +82,8 @@ var no_shot_for: float = 0.0
 ## last-known spot until real news writes another, kept in mind BotConfig.ping_memory (ping_in_mind).
 var ping_at: float = -INF
 var ping_spot: Vector3 = Vector3.ZERO
+## It took that ping to come along with its player (CW1, Pings.follow): it goes there even from a post it holds.
+var ping_joined: bool = false
 
 ## Its route: waypoints, the one it walks to, where the leg began, the goal and the route's state.
 var route: PackedVector3Array = PackedVector3Array()
@@ -113,6 +118,12 @@ var lane_dir: int = 1
 var lane_index: int = -1
 var lane_points: int = 0
 var lane_goal: Vector3 = Vector3.ZERO
+## This round's way of walking it (RV1, RoundPlanner): every lane point moved lane_shift m across the way to the enemy
+## (one side or the other, the same for the whole lane), its pauses' scale (its team's tempo), and the lanes it has
+## crossed onto this round.
+var lane_shift: float = 0.0
+var pace: float = 1.0
+var lanes_crossed: int = 0
 ## Its lane swept: it hunts the stalest spot its team hasn't checked.
 var hunting: bool = false
 var hunt_goal: Vector3 = Vector3.ZERO
@@ -158,7 +169,7 @@ var auto_rolled: int = 0
 ## The burst under way found its target, one it went to full auto for, in the open (BotFireMode.on_burst): full auto
 ## only then (BP3).
 var auto_open: bool = false
-## There, on semi: the world time it may next pull (BotFireMode.pull, BotConfig.semi_tap_gap).
+## There, on semi or burst: the world time it may next pull (BotFireMode.pull, BotConfig.semi_tap_gap).
 var next_tap: float = -INF
 ## Who last shot at it or its teammate from where it could tell (SN3: a near miss or a hit call), made out to
 ## BotConfig.revealed_view_distance until the world time revealed_until (-1: nobody).
@@ -317,6 +328,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	share_at = INF
 	share_id = -1
 	ping_at = -INF
+	ping_joined = false
 	bomb_kind = Grenade.Kind.NONE
 	bomb_aim_until = -INF
 	bomb_roll_at = -INF
@@ -339,6 +351,9 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	lane_dir = 1 if character.end == 0 else -1
 	lane_index = -1
 	lane_points = points
+	lane_shift = 0.0
+	pace = 1.0
+	lanes_crossed = 0
 	site_guard = -1
 	hunting = false
 	hunt_picked_at = -INF
@@ -414,6 +429,11 @@ func threat_in_mind(time: float, cfg: BotConfig) -> bool:
 ## (real news since, a sighting, a noise or a teammate's, writes another; a search that got there and looked forgets it).
 func ping_in_mind(time: float, cfg: BotConfig) -> bool:
 	return time - ping_at < cfg.ping_memory and on_ping_spot()
+
+
+## Whether it is coming along to the spot its player pinged (CW1): it joined, and the ping is still in mind.
+func joins_ping(time: float, cfg: BotConfig) -> bool:
+	return ping_joined and ping_in_mind(time, cfg)
 
 
 ## Whether its last-known spot is still the one a teammate's ping gave it, however long ago.

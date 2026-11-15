@@ -15,6 +15,9 @@ var _views: Dictionary[String, MultiMeshInstance3D] = {}
 var _boxes: Array[AABB] = []
 var _placed: Dictionary[String, Array] = {}
 var _material: ShaderMaterial = null
+## Where each model's floor goes (LookMaterials.draw_worn), and the materials copied to carry one.
+var _floors_by_material: bool = LookMaterials.floors_by_material()
+var _floor_copies: Dictionary = {}
 var _lamps: ShaderMaterial = null
 var _leds: ShaderMaterial = null
 var _glass: ShaderMaterial = null
@@ -212,11 +215,12 @@ func _add(path: String, mesh: Mesh, transforms: Array, material: Material) -> vo
 	var v := MultiMeshInstance3D.new()
 	v.name = path.get_file().get_basename().capitalize().replace(" ", "")
 	v.multimesh = mm
-	v.material_override = material
 	if material == _lamps or material == _leds or material == _glass:
+		v.material_override = material
 		v.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	else:
 		# the grime climbs from each model's own foot (SL2): a car's floor, a cab's buffer beam
-		v.set_instance_shader_parameter(&"wear_floor", mesh.get_aabb().position.y)
+		LookMaterials.draw_worn(v, material as ShaderMaterial, mesh.get_aabb().position.y, _floors_by_material,
+				_floor_copies)
 	add_child(v)
 	_views[path] = v

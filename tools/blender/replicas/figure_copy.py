@@ -34,8 +34,9 @@ MAGAZINE = "Magazine"
 FLASH_HIDER = "FlashHider"
 SIGHTS = ("FrontSightLeaf", "RearSightLeaf")
 NAME = "Figure"
-# Materials never seen at a figure's distance: their faces go.
-DROP = ("BB",)
+# Materials never seen at a figure's distance: their faces go (the BBs in a magazine; the dark floor of the GBB's back
+# recess, GB1).
+DROP = ("BB", "Cavity")
 # The flat runs merged first: faces within this angle of each other, of one material and not across a sharp edge.
 FLAT_ANGLE = math.radians(1.0)
 # Points this close are one (the hands' model is built of separate shells that touch).

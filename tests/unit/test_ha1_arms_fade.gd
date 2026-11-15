@@ -2,8 +2,10 @@ extends GutTest
 ## HA1 (the owner: "When aiming down sight no hands should be visible … on a pistol the hand should only be slightly
 ## visible"; then "the hands should not fade out of view. When the animation plays to ADS (except for pistols) the
 ## hands are simply out of view"): a rifle's arms are never faded or hidden, the replica hides them (ArmsTuck draws the
-## left arm in under it: test_ha1_arms_tuck.gd); a pistol's keep the tops of the hands, what lies further under the
-## sight line faded out (ArmsView.aim, ArmsFade, arms_fade.gdshader) through ViewModelConfig.aim_hint_span's span.
+## left arm in under it: test_ha1_arms_tuck.gd). A replica in ViewModelConfig.aim_hands_hint keeps the tops of its
+## hands, what lies further under the sight line faded out (ArmsView.aim, ArmsFade, arms_fade.gdshader) through
+## aim_hint_span's span. Since HA2 no replica is in it ("the pistol ADS shows the hand fading, it shouldn't do this":
+## test_ha2_hold_place.gd checks the pistols aimed are whole), so these tests put the pistols in it to test the knob.
 
 const DT := 1.0 / 60.0
 const EPS := 1e-4
@@ -15,6 +17,7 @@ var cfg: ViewModelConfig = null
 
 func before_each() -> void:
 	cfg = ViewModelConfig.new()
+	cfg.aim_hands_hint = [&"pistol", &"cyber"]
 
 
 func _hands(ids: Array) -> ReplicaView:

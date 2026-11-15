@@ -1167,7 +1167,7 @@ func _build_views_rest(ui: CanvasLayer) -> void:
 	track.bg_color = Color(GameTheme.TEXT, 0.18)
 	_skip_bar.add_theme_stylebox_override("background", track)
 	var fill := StyleBoxFlat.new()
-	fill.bg_color = GameTheme.ACCENT
+	fill.bg_color = GameTheme.accent
 	_skip_bar.add_theme_stylebox_override("fill", fill)
 	_skip_bar.anchor_left = 0.0
 	_skip_bar.anchor_right = 1.0
@@ -1392,6 +1392,7 @@ func _after_tick() -> void:
 	if heard:
 		_audio.on_order(_bots.order_outcome, PLAYER_ID)
 		_audio.on_ping(_bots.pings, PLAYER_ID)
+		_audio.on_spot(_bots.spots, PLAYER_ID)
 	_hud.on_tick(state, _input.mag_from_wheel)
 	if _bots.callouts != null:
 		# Every tick, skipped ones too: unheard calls are passed over there and then, never kept for the tick the cover
@@ -1638,6 +1639,8 @@ func _process(delta: float) -> void:
 	_show_orders(watched, delta)
 	# After the flag's and Hold here's markers, so pinned pings stack under them; through your own eyes only.
 	_hud.place_pings(_eyes.camera, _bots.pings, state.time, watched == player and not _input.field_map().open)
+	# Spotted's arrows over the enemies your team marked (CW1), watching anyone on your team.
+	_hud.place_spots(_eyes.camera, _bots.spots, state.time, watched.team == player.team and not _input.field_map().open)
 	if _intents != null:
 		_intents.visible = not intents_covered(watched)
 		if _intents.visible:

@@ -23,7 +23,9 @@ const HELD_UP_REACH := 2.0
 ## A character that ends a round in play without ever getting this far from its spawn (m) stayed home that round.
 const LEAVES_SPAWN := 8.0
 ## Follow me (follow_leader): a follower is judged once it has carried out the order FOLLOW_REJOIN seconds in a row
-## (back from a fight, cover or a flash's dazzle, when it ducks blind where it stands, it gets that long to rejoin);
+## (back from a fight, cover or a flash's dazzle, when it ducks blind where it stands, or a smoke or flash of its own,
+## when it stands still to throw: BotBombs.busy; RV1, Depot seed 3, 8.4 m behind after a throw, it gets that long to
+## rejoin);
 ## near within the follow distance, catch_up_gap and FOLLOW_NEAR_SLACK (m) of the leader; standing still slower than
 ## STILL_SPEED (m/s) while the leader moves.
 const FOLLOW_REJOIN := 3.0
@@ -260,9 +262,9 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 
 ## The round tuning a match on `map_id` plays in the guards and the balance report: `base` (the loaded tuning by
 ## default) where the map offers its team size and has no round length of its own, else a copy at the map's standard
-## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game), its round length and its flag raise
-## time, as a Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00 and a 9 s raise. With
-## `picked` (a Custom size, TS1), that size where the map offers it, else its standard.
+## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game), its round length, its flag raise time and
+## its bomb fuse, as a Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00, a 9 s raise and its
+## own fuse. With `picked` (a Custom size, TS1), that size where the map offers it, else its standard.
 static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -> SimTuning:
 	var t := base if base != null else SimTuning.load_default()
 	var entry := MapCatalog.shared().find(map_id)
@@ -271,7 +273,9 @@ static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -
 	var length := MatchOptions.round_time(entry, null, t.rounds.round_time)
 	var size := entry.team_size_for(picked if picked > 0 else t.rounds.team_size)
 	var raise := MatchOptions.raise_time(entry, t.flag.raise_time)
-	if size == t.rounds.team_size and t.rounds.round_time == length and t.flag.raise_time == raise:
+	var fuse := MatchOptions.fuse_time(entry, t.plant.fuse_time)
+	if size == t.rounds.team_size and t.rounds.round_time == length and t.flag.raise_time == raise \
+			and t.plant.fuse_time == fuse:
 		return t
 	var sized := t.duplicate() as SimTuning
 	sized.rounds = t.rounds.duplicate() as RoundConfig
@@ -279,6 +283,8 @@ static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -
 	sized.rounds.round_time = length
 	sized.flag = t.flag.duplicate() as FlagConfig
 	sized.flag.raise_time = raise
+	sized.plant = t.plant.duplicate() as PlantConfig
+	sized.plant.fuse_time = fuse
 	return sized
 
 
@@ -536,11 +542,16 @@ func _watch_held_up(state: GameState, bots: BotController, t: MatchTally, trail:
 
 
 ## A bot's errand for held_up_sample: its mode, and while it hunts, the spot it hunts (WR1: a Woodland hunter whose spot a
-## teammate checked first turned for one the way it came, out and back 57 m, and was judged going round in a loop).
+## teammate checked first turned for one the way it came, out and back 57 m, and was judged going round in a loop);
+## searching, the spot it searches (AIM1: a Depot bot off after one noise heard another behind it and walked back 10 m).
 static func errand_of(b: Bot, bot_mode: int) -> int:
-	if b == null or not b.hunting:
+	if b == null:
 		return bot_mode
-	return bot_mode + Bot.Mode.size() * (hash(b.hunt_goal) & 0xFFFFFF)
+	if b.hunting:
+		return bot_mode + Bot.Mode.size() * (hash(b.hunt_goal) & 0xFFFFFF)
+	if bot_mode == Bot.Mode.SEARCH and b.has_last_known:
+		return bot_mode + Bot.Mode.size() * (hash(b.last_known) & 0xFFFFFF)
+	return bot_mode
 
 
 ## Records this second's sample in `ring` (one a second for HELD_UP_SECONDS; INF for a second it wasn't on its way) and
@@ -611,7 +622,8 @@ func _watch_follow(state: GameState, bots: BotController, t: MatchTally, followi
 		var c := b.character
 		if c.team != leader.team or c == leader:
 			continue
-		var carried := b.order == SquadOrder.Kind.FOLLOW and b.mode == Bot.Mode.ORDER and c.dazzle_left <= 0.0
+		var carried := b.order == SquadOrder.Kind.FOLLOW and b.mode == Bot.Mode.ORDER and c.dazzle_left <= 0.0 \
+				and not BotBombs.busy(b, bots.world)
 		following[c.id] = following[c.id] + DT if carried else 0.0
 		# The ring's oldest entry, CHASE_TICKS ago, is the one this tick overwrites.
 		var slot := t.ticks % CHASE_TICKS
@@ -658,10 +670,12 @@ static func chasing(c: Character, leader: Character, catch_up: float, sprint_spe
 
 ## Standing still on purpose, not held up: an anchor settled at its post (bots.md › Holds until), a bot watching where
 ## someone ducked out of sight (Watch where you ducked), or one pausing at a lane point or waiting there for its team
-## (holding this tick, on its lane), or at its spot by the pole (Attack / Defend: its route there done).
+## (holding this tick, on its lane), or at its spot by the pole (Attack / Defend: its route there done), or one on a
+## landing waiting for the lift on its route (BotLifts: it gives up after BotConfig.lift_patience; RV1, Subway seed 11:
+## a car parked at the far landing takes about 10 s to come down 18 m and open).
 static func holding_on_purpose(b: Bot, time: float) -> bool:
 	return b.at_post or time < b.watch_until or (b.mode == Bot.Mode.ADVANCE and b.holding) \
-			or (b.mode == Bot.Mode.FLAG and b.route_state == Bot.RouteState.NONE)
+			or (b.mode == Bot.Mode.FLAG and b.route_state == Bot.RouteState.NONE) or b.lift_wait > 0.0
 
 
 static func _bot_of(bots: BotController, id: int) -> Bot:

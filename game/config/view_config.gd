@@ -2,9 +2,9 @@ class_name ViewConfig
 extends Resource
 ## The first-person camera (the browser game's config/renderView.ts RENDER). Read by FirstPersonView.
 
-## Horizontal field of view on a 16:9 screen (degrees; owner, 2026-10-04: 90). Wider screens see more to the sides with
-## the same vertical view ("Hor+"), so ultrawide doesn't fisheye.
-@export var horizontal_fov_16x9: float = 90.0
+## Horizontal field of view on a 16:9 screen (degrees; owner, 2026-11-15: 87, was 90; Settings.FOV_DEFAULT). Wider
+## screens see more to the sides with the same vertical view ("Hor+"), so ultrawide doesn't fisheye.
+@export var horizontal_fov_16x9: float = 87.0
 ## How far the view zooms with the sight fully raised (1: none).
 @export var aim_zoom: float = 1.2
 ## Clip planes (m).

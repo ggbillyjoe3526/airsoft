@@ -60,7 +60,7 @@ func test_the_page_shows_the_chips_the_summary_and_play() -> void:
 		assert_true(words.has(expected), expected)
 	# the map's line is its card's tooltip (UI1)
 	assert_eq(page.map_card("depot").tooltip_text,
-			"An indoor airsoft hall: three lanes, two dark tunnels.\nStill air, 20 °C.")
+			"An indoor airsoft hall: five lanes, two dark tunnels.\nStill air, 20 °C.")
 
 
 # --- modes ---
@@ -174,8 +174,8 @@ func test_a_map_that_cant_load_is_greyed_with_later_and_listed_last() -> void:
 	page.picks.map_id = "ghost"
 	page._offered = PackedStringArray()
 	page._list_maps()
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "subway", "stockade", "range", "ghost"]),
-			"Subway and Stockade with Dev content on (MT1, SK1)")
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "subway", "range", "ghost"]),
+			"Subway with Dev content on (MT1)")
 	var ghost := page.map_card("ghost")
 	assert_true(page.is_unloadable("ghost"))
 	assert_true(ghost.disabled)
@@ -483,7 +483,7 @@ func test_a_field_picture_is_cut_from_the_render_centre_to_the_cards_size() -> v
 ## compressed (lossy, as they were taken), smaller than the 700 x 400 pictures were; each has a small copy for the
 ## Match page's cards.
 func test_the_map_pictures_are_full_screen_and_ship_compressed() -> void:
-	for map_id: String in ["depot", "range", "subway", "woodland", "stockade"]:
+	for map_id: String in ["depot", "range", "subway", "woodland"]:
 		var path := "res://assets/maps/%s.jpg" % map_id
 		var picture := load(path) as Texture2D
 		assert_eq(Vector2i(picture.get_size()), Vector2i(1920, 1080), map_id)

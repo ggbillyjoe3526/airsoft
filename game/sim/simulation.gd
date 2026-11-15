@@ -302,7 +302,7 @@ static func _squad_order(c: Character, commands: Array[PlayerCommand], live: boo
 ## (or nothing: the sky). The bots' controller makes it a ping (Pings); nothing changes here. One placed on the
 ## full-screen map (FM1) has value 2 and the point picked as its position; a Go there (ping_move) has value2 1, and the
 ## controller hands it out as that order; Hold here's key on the map (ping_hold) has value2 PING_HOLD, a Hold here there;
-## a Watching here (ping_watch, BP8) has value2 PING_WATCH.
+## a Watching here (ping_watch, BP8) has value2 PING_WATCH; a Spotted (ping_spot, CW1) value2 PING_SPOT.
 func _ping(c: Character, commands: Array[PlayerCommand], live: bool, events: SimEvents) -> void:
 	var cmd: PlayerCommand = commands[c.id] if c.id >= 0 and c.id < commands.size() else null
 	if cmd == null or not cmd.ping or not live:
@@ -322,6 +322,8 @@ func _ping(c: Character, commands: Array[PlayerCommand], live: bool, events: Sim
 	var e := events.add(GameEvent.Kind.PING)
 	e.actor = c.id
 	e.value2 = 1 if cmd.ping_move else (GameEvent.PING_WATCH if cmd.ping_watch else 0)
+	if cmd.ping_spot:
+		e.value2 = GameEvent.PING_SPOT
 	e.position = eye
 	e.direction = dir
 	if reach > 0.0 and query.sight_ray(eye, eye + dir * reach, _ping_hit):

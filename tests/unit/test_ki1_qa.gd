@@ -223,11 +223,12 @@ func test_a_ping_pressed_and_the_wheel_closing_in_the_same_tick_pings_once_and_o
 	assert_false(input.wheel().open)
 	var c := PlayerCommand.new()
 	input.fill(c)
-	assert_false(c.ping, "pressed while it was open")
+	# CW1: the wheel's key let go at once is a tap, a Spotted; the middle click while it was open adds no ping of a spot.
+	assert_true(c.ping and c.ping_spot, "pressed while it was open: only the tap's Spotted")
 	_press(&"ping", false)
 	_press(&"ping")
 	input.fill(c)
-	assert_true(c.ping, "the wheel shut: pings")
+	assert_true(c.ping and not c.ping_spot, "the wheel shut: pings")
 	input.fill(c)
 	assert_false(c.ping, "once")
 

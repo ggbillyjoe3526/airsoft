@@ -9,6 +9,8 @@ import numpy as np
 import layout as L
 from layout import GX, GZ, NX, NZ, RES, W, H
 
+FLAG_CLEAR = 3.0  # WB1: no young tree within this of a flag (m)
+
 h = L.h  # ground (modified below by tunnel cuttings)
 
 
@@ -255,6 +257,9 @@ no_tree = (near_struct | (L.sd < L.BED_W + L.BANK + 0.8) | (L.rd < 4.0) | (L.hd 
            | in_poly(GX, GZ, [(45, -47), (65, -47), (65, -26), (45, -26)])
            | in_poly(GX, GZ, [(41, 29), (63, 29), (63, 43), (41, 43)])
            | ~np.isnan(OVER_FLOOR))
+# WB1: no young tree grows in a flag's ring (the hand-placed oaks stay: A stands under the Fern hollow oak)
+for (fx, fz) in L.FLAGS:
+    no_tree |= np.hypot(GX - fx, GZ - fz) < FLAG_CLEAR
 for t in L.TUNNELS:
     d, _ = L.seg_dist(GX, GZ, [t["a"], t["b"]])
     no_tree |= d < 3.0

@@ -17,6 +17,9 @@ const LIGHT_LIFT := 0.5
 ## By roughness (x), wear (y) and full colour (z, 1 or 0): the shared one and each model_roughness, model_wear or
 ## full_colour's.
 var _materials: Dictionary[Vector3, ShaderMaterial] = {}
+## Where each model's floor goes (LookMaterials.draw_worn), and the materials copied to carry one.
+var _floors_by_material: bool = LookMaterials.floors_by_material()
+var _floor_copies: Dictionary = {}
 var _cfg: PropDressConfig = null
 var _views: Dictionary[StringName, Array] = {} # each model's MultiMeshInstance3Ds, a chunk each
 var _meshes: Dictionary[StringName, Mesh] = {}
@@ -241,9 +244,9 @@ func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chu
 		var view := MultiMeshInstance3D.new()
 		view.name = "%s_%d_%d" % [String(model).capitalize(), cell.x, cell.y]
 		view.multimesh = mm
-		view.material_override = _material_of(model)
 		# its foot's grime climbs from the model's floor (its box's bottom), wherever its origin is (SL2)
-		view.set_instance_shader_parameter(&"wear_floor", mesh.get_aabb().position.y)
+		LookMaterials.draw_worn(view, _material_of(model), mesh.get_aabb().position.y, _floors_by_material,
+				_floor_copies)
 		if not shadow:
 			view.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(view)

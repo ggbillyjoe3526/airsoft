@@ -68,9 +68,9 @@ func test_a_notice_shows_for_a_key_pressed_with_the_wheel_open_and_for_an_order_
 	assert_false(w.visible)
 	# The same, picked on the wheel: point at Hold Here and let go (Hover).
 	_event(session, &"order_wheel", true)
-	_move(session, 87.0, -50.0)
+	_move(session, -200.0, 29.0)
 	await wait_process_frames(2)
-	assert_eq(w.lit_slice(), 1, "pointed at Hold Here")
+	assert_eq(w.lit_slice(), 6, "pointed at Hold Here")
 	var before := session._bots.order_outcome.serial
 	_event(session, &"order_wheel", false)
 	await wait_physics_frames(3)
@@ -172,24 +172,11 @@ func test_the_wheel_in_a_session_follows_a_rebound_key_the_pause_menu_and_being_
 	await _started(session)
 	var w := session.hud().order_wheel()
 	var marker := session.hud().hold_marker()
-	# A key rebound after the wheel was built shows at its next opening.
-	var original := InputMap.action_get_events(&"order_follow")
+	# No key is drawn on the wheel (CW1): its buttons are names alone.
 	_event(session, &"order_wheel", true)
+	_move(session, 200.0, -29.0)
 	await wait_process_frames(2)
-	assert_eq(w.slice_key(0), "F")
-	_event(session, &"order_wheel", false)
-	await wait_process_frames(2)
-	InputMap.action_erase_events(&"order_follow")
-	var g := InputEventKey.new()
-	g.physical_keycode = KEY_G
-	InputMap.action_add_event(&"order_follow", g)
-	_event(session, &"order_wheel", true)
-	await wait_process_frames(2)
-	var shown := w.slice_key(0)
-	InputMap.action_erase_events(&"order_follow")
-	for e in original:
-		InputMap.action_add_event(&"order_follow", e)
-	assert_eq(shown, "G", "the key the player bound, not the one it was built with")
+	assert_eq(w.slice_name(1), "FOLLOW ME")
 	# The pause menu opening with the wheel up: it is not left drawn under the menu.
 	session._input.release()
 	session.get_tree().paused = true
@@ -201,6 +188,7 @@ func test_the_wheel_in_a_session_follows_a_rebound_key_the_pause_menu_and_being_
 	assert_true(_hold(session))
 	session._input.active = true
 	_event(session, &"order_wheel", true)
+	_move(session, 200.0, -29.0)
 	await wait_process_frames(2)
 	assert_true(w.visible)
 	assert_ne(marker.text(), "")
@@ -234,7 +222,7 @@ func test_the_range_shows_no_wheel_and_no_marker() -> void:
 
 func _shut_pick(hud: Hud, wheel: OrderWheelPointer, outcome: SquadOrders.Outcome) -> void:
 	wheel.start()
-	wheel.at = Vector2(60.0, 0.0)
+	wheel.at = Vector2(200.0, -29.0)
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
 	wheel.close()
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
@@ -243,7 +231,7 @@ func _shut_pick(hud: Hud, wheel: OrderWheelPointer, outcome: SquadOrders.Outcome
 func test_the_notice_only_wheel_is_for_your_own_pick_and_reopens_clean() -> void:
 	var hud := _hud_with_orders()
 	var controls := ControlsConfig.new()
-	var wheel := OrderWheelPointer.new(controls.wheel_reach, controls.wheel_dead_zone, controls.wheel_orders.size())
+	var wheel := OrderWheelPointer.new(OrderWheelLayout.new(controls))
 	var outcome := SquadOrders.Outcome.new()
 	var w := hud.order_wheel()
 	_shut_pick(hud, wheel, outcome)
@@ -256,10 +244,10 @@ func test_the_notice_only_wheel_is_for_your_own_pick_and_reopens_clean() -> void
 	assert_eq(w.banded_slice(), -1, "no order marked while it only tells you")
 	# Opened again while it tells you: a clean wheel, the pointer back, no notice left over.
 	wheel.start()
-	wheel.at = Vector2(0.0, -60.0)
+	wheel.at = Vector2(200.0, -87.0)
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
 	assert_eq(w.notice_text(), "")
-	assert_eq(w.lit_slice(), 0, "the slice pointed at lights again")
+	assert_eq(w.lit_slice(), 0, "the button pointed at lights again")
 	wheel.close()
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
 	assert_false(w.visible, "shut with no answer owed: away at once")
@@ -268,7 +256,7 @@ func test_the_notice_only_wheel_is_for_your_own_pick_and_reopens_clean() -> void
 func test_the_notice_only_wheel_goes_when_the_pause_menu_opens() -> void:
 	var hud := _hud_with_orders()
 	var controls := ControlsConfig.new()
-	var wheel := OrderWheelPointer.new(controls.wheel_reach, controls.wheel_dead_zone, controls.wheel_orders.size())
+	var wheel := OrderWheelPointer.new(OrderWheelLayout.new(controls))
 	var outcome := SquadOrders.Outcome.new()
 	var w := hud.order_wheel()
 	_shut_pick(hud, wheel, outcome)

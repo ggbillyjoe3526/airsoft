@@ -367,8 +367,10 @@ static func step(c: Character, cmd: PlayerCommand, eye: Vector3, kick_scale: flo
 			# after the handle looked home but before the cycle ran out was lost, with no shot and no dry click).
 			a.pending_press += a.cooldown
 	var busy := a.draw_left > 0.0 or a.reload_left > 0.0
-	if a.burst_shots_left > 0 and (not can_fire or busy):
+	if a.burst_shots_left > 0 and (not can_fire or busy or cmd.stop_burst):
 		a.burst_shots_left = 0
+	if cmd.stop_burst:
+		a.pending_press = 0.0
 	if mode == ReplicaConfig.FireMode.BURST:
 		# One pull, one burst: a pull during a burst doesn't queue another (one just after it is buffered).
 		if a.burst_shots_left > 0:

@@ -254,7 +254,7 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	var aimed := Vector3(0.0, 0.0, _cfg.aim_forward.get(held.id, _cfg.aim_forward_default)) - held.rear_sight
 	var raise := aim * aim * (3.0 - 2.0 * aim)
 	var pos := hip.lerp(aimed, raise)
-	var rot := Vector3.ZERO
+	var rot: Vector3 = _cfg.hip_turn.get(held.id, Vector3.ZERO) * (1.0 - raise)
 
 	# Lag behind a turn, springing back.
 	var turn := Vector2(angle_difference(_last_yaw, view_yaw), view_pitch - _last_pitch)
@@ -338,7 +338,13 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		held.selector.mode = a.fire_mode()
 	if _arms != null:
 		_arms.follow(held.anim, delta, reload_share)
-		_arms.aim(raise)
+		# Turned over in an inspect, your shoulders stay where your body has them (HA2): what carries a point at
+		# rest with the replica to where the turn takes it.
+		var still := Transform3D.IDENTITY
+		if not (_inspect_turn.is_zero_approx() and _inspect_shift.is_zero_approx()):
+			still = Transform3D(Basis.from_euler(rot), pos).affine_inverse() \
+					* Transform3D(Basis.from_euler(rot - _inspect_turn), pos - _inspect_shift)
+		_arms.aim(raise, still)
 		_carry_magazine(held, reload_share)
 		# Working a bolt at the hip: canted toward the eye so the right hand stays on screen (BP7, row 17).
 		var work := _arms.work_share()

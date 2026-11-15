@@ -3,7 +3,8 @@ worn treads with bright yellow anti-slip nosings (photos 3 to 6) climbing round 
 station's own tiles: the column stays the map's pillar, StationSurface draws it), a black steel handrail on the outer
 wall on short brackets (photos 3, 5 and 6), and the stair's solid undersides seen from below.
 
-The map's stair is square: ten flights, one up each side of the well in turn, each a ramp a metre high, with a corner
+The map's stair is square: eight flights (ten before SW1 moved it to run from the platforms up to the ticket hall),
+one up each side of the well in turn, each a ramp a metre high, with a corner
 landing at the top of each (tools/subway/build_map.py, spiral(); layout.SPIRAL). The model is laid over those blocks
 (PropDressConfig Lay.SET, unturned): every flight and landing names it, so it fills their box exactly and the ramps stay
 the colliders. Each flight's five risers are equal (0.2 m); each tread is level, its middle on the ramp's slope, and

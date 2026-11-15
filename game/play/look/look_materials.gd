@@ -61,3 +61,31 @@ static func clear_colour(roughness: float) -> ShaderMaterial:
 	m.set_shader_parameter(&"roughness", roughness)
 	m.render_priority = Material.RENDER_PRIORITY_MIN
 	return m
+
+
+## True where a worn model's floor goes on its material, not its instance (look_wear.gdshaderinc): the Compatibility
+## renderer, whose instance uniforms run out at 256 drawn instances (BC1). Read once a build, handed to `draw_worn`.
+static func floors_by_material() -> bool:
+	return RenderingServer.get_current_rendering_method() == GraphicsPick.COMPATIBILITY
+
+
+## Draws `view` in `material` (look_vertex or door_leaf) with its foot's grime climbing from `foot` m up its model's y
+## (SL2): the floor set on `view` where instance uniforms are used; with `by_material` (floors_by_material), on a copy
+## of `material` that carries it, one copy a material and foot, kept in `copies` (the caller's, freed with it) for its
+## other views. A foot of 0 is the shader's default and draws in `material` itself.
+static func draw_worn(view: GeometryInstance3D, material: ShaderMaterial, foot: float, by_material: bool,
+		copies: Dictionary) -> void:
+	if not by_material:
+		view.material_override = material
+		view.set_instance_shader_parameter(&"wear_floor", foot)
+		return
+	if is_zero_approx(foot):
+		view.material_override = material
+		return
+	var mine: Dictionary = copies.get(material, {})
+	if not mine.has(foot):
+		var copy := material.duplicate() as ShaderMaterial
+		copy.set_shader_parameter(&"wear_floor", foot)
+		mine[foot] = copy
+		copies[material] = mine
+	view.material_override = mine[foot]

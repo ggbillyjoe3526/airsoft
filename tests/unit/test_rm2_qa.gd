@@ -268,8 +268,8 @@ func test_a_woodpile_line_is_closed_by_its_end_models_and_its_middle_sections_va
 			assert_false(out.has(&"cordwood_single"), "no single section in a longer line")
 
 
-func test_the_end_models_share_the_sandbag_box_and_load_with_the_range_and_stockade() -> void:
-	for map_id: String in ["range", "stockade"]:
+func test_the_end_models_share_the_sandbag_box_and_load_with_the_range() -> void:
+	for map_id: String in ["range"]:
 		var m := MapData.load_map(map_id, play.map_style, 1)
 		var used := PropDress._models_used(m, play.site_look.props)
 		assert_true(used.has(&"sandbags_start") and used.has(&"sandbags_end") and used.has(&"sandbags_single"),
@@ -286,8 +286,8 @@ func test_the_end_models_share_the_sandbag_box_and_load_with_the_range_and_stock
 			assert_lt(_tris(dress.mesh_of(e)), 5000, "%s within budget" % e)
 
 
-func test_end_models_stay_inside_their_blocks_on_range_and_stockade() -> void:
-	for map_id: String in ["range", "stockade"]:
+func test_end_models_stay_inside_their_blocks_on_the_range() -> void:
+	for map_id: String in ["range"]:
 		var m := MapData.load_map(map_id, play.map_style, 1)
 		var dress := PropDress.build(m, play.site_look.props)
 		add_child_autofree(dress)
@@ -358,8 +358,8 @@ func test_a_long_line_mixes_the_sections_between_its_ends() -> void:
 			assert_eq(s, 1.0, "one shade along the line")
 
 
-func test_section_variants_load_and_stay_in_their_blocks_on_range_and_stockade() -> void:
-	for map_id: String in ["range", "stockade"]:
+func test_section_variants_load_and_stay_in_their_blocks_on_the_range() -> void:
+	for map_id: String in ["range"]:
 		var m := MapData.load_map(map_id, play.map_style, 1)
 		var used := PropDress._models_used(m, play.site_look.props)
 		var dress := PropDress.build(m, play.site_look.props)

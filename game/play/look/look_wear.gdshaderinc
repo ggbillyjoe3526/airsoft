@@ -4,7 +4,14 @@
 // `wear_at` (world position) and `wear_foot` (metres over the model's floor), sets them in vertex() and hands them
 // with the world normal to look_worn().
 uniform float wear : hint_range(0.0, 1.0) = 0.0;
+// The model's floor (m up its own y). Compatibility holds instance uniforms for only 256 drawn instances (4096 slots, 16
+// an instance) and Woodland draws about 300 worn models, so there the floor is each material's own (LookMaterials.
+// draw_worn gives a copy a floor, BC1); Forward+ and Mobile set it on each instance.
+#if CURRENT_RENDERER == RENDERER_COMPATIBILITY
+uniform float wear_floor = 0.0;
+#else
 instance uniform float wear_floor = 0.0;
+#endif
 // How high (m) a foot's grime climbs, at most; how strong each wear is at full wear, of the paint it covers.
 uniform float grime_height = 0.9;
 uniform vec4 wear_strengths = vec4(0.6, 0.28, 0.15, 0.4); // foot grime, streaks, stains, dust

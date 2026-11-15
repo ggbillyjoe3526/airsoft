@@ -27,8 +27,9 @@ These were on Controls and HUD before; your saved choices are kept.
 ## Audio
 
 Volumes for **Master**, **Effects**, **Power source** (the motor or gas part of a shot), **Ambience** and
-**Interface**. A new game starts with Master at 100 %, Effects 70 %, Power source 100 %, Ambience 20 % and Interface
-40 %. If you delete your save, they come back. Gunfire carries across the whole field, so you can hear where a fight
+**Interface**. A new game starts with Master at 90 %, Effects 80 %, Power source 80 %, Ambience 30 % and Interface
+40 %. If you delete your save, they come back. The Power source has room to go louder: 80 % is as loud as 100 % used
+to be, and 100 % is louder still. Gunfire carries across the whole field, so you can hear where a fight
 is from a long way off; a silenced replica carries half as far.
 
 ## Display
@@ -40,7 +41,9 @@ is from a long way off; a silenced replica carries half as far.
 - **V-Sync** (off by default) and a **Frame-rate limit**: 30 to 360 frames a second, or Off for no limit. In the background
   the game drops to 30 frames a second. The menus never draw more frames than your screen shows, whatever
   the limit.
-- **Field of view** and **Show FPS** (the figure sits in the bottom-right corner).
+- **Field of view** (87° by default, 70° to 110°) and **Show FPS** (the figure sits in the bottom-right corner).
+- **Interface colour:** the colour of the main buttons, what you have picked and the comms wheel's lit button: blue
+  (the default), beige, red, green, pink, orange or violet. The menus change as you click. Team colours don't change.
 
 ## Graphics
 
@@ -70,7 +73,7 @@ every preset; turn it on if you want it.
   It saves the graphics card work and costs the processor a little, so it is off on Low and on from Medium.
 - **Light effects:** **Bounce light** is light bouncing off the field: Screen bounces what you see, Scene the whole
   field. **Reflections** on Probes show the room a shiny surface is in; Screen adds what is on screen. **Glow** makes
-  lamps bloom softly. **Eye adaptation** (High and Ultra) lets your eyes open up slowly in a dark tunnel or under the trees, so you can see what is there, and close again as you step back into the light; ordinary views look the same either way, and nights stay dark. **Volumetric haze** is a faint haze the light shines through. **Lamp light** makes an indoor
+  lamps bloom softly. **Eye adaptation** (High and Ultra) lets your eyes open up slowly in a dark tunnel or under the trees, so you can see what is there, and close again as you step back into the light; ordinary views look the same either way, and nights stay dark. **Volumetric haze** is a faint haze the light shines through, so light has shafts and a long hall its depth: Low, Medium and High draw the same haze, each reaching farther (30, 50 and 80 m) and drawing its shafts finer and smoother than the one below (Medium preset Low, High preset Medium, Ultra High; none on Low). **Lamp light** makes an indoor
   hall's roof lamps real lights that cast shadows (and, at night, fires and lanterns cast shadows too): Near (High)
   and Far (Ultra) light the whole hall with its lamps alone, as no sunlight gets indoors; Near shadows the lamps round
   you, Far every lamp and up to eight fires. The lamps' shadows follow your shadow settings.

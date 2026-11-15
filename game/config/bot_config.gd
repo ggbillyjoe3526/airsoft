@@ -66,6 +66,11 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## How long (s) a bot keeps a teammate's ping in mind (PN1, Pings): longer than memory_time, so a far ping is still
 ## worth the walk; real news of an enemy (a sighting, a noise) writes over it sooner.
 @export var ping_memory: float = 20.0
+## A player's ping of a spot says "I'm heading there, come with me" (CW1, owner 2026-11-15; not an order: Go There is
+## the order): each bot teammate within ping_follow_reach (m) of them and under no squad order comes along on a roll of
+## ping_follow_chance (Pings.follow); the rest carry on with their own play.
+@export var ping_follow_reach: float = 40.0
+@export var ping_follow_chance: float = 0.6
 ## An enemy BB landing this close (m) puts a bot under fire for suppression_time (s): it wants cover.
 @export var suppression_radius: float = 1.6
 @export var suppression_time: float = 0.4
@@ -77,8 +82,13 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var hit_moving_speed: float = 0.5
 
 @export_group("Aim")
-## Seconds someone can be out of sight and still be the same contact (no new reaction delay).
+## Seconds someone can be out of sight and still be the same contact (no new full reaction delay).
 @export var contact_grace: float = 1.2
+## Out of sight longer than this (s) but within contact_grace, someone seen again is picked up again (AIM1): a short
+## reaction (BotSkill.reacquire_time) before it fires, and its aim kept only partly settled (reacquire_settled), off to
+## one side again. Without it a bot watching where you ducked fired the instant you showed again, its aim already
+## settled. Longer than two sight checks (think_interval), so a pole flicking past the line is no new pick-up.
+@export var reacquire_after: float = 0.25
 ## A bot stays on its target unless another in sight is at least this much closer (m).
 @export var target_switch_margin: float = 3.0
 ## A fresh contact's first aim is at least this share of its full error off, to one side, tilted at most this far from
@@ -91,6 +101,17 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## How fast the aim error drifts (Hz), and how fast it eases to each new drift goal (a multiple of that rate).
 @export var aim_wander_rate: float = 0.7
 @export var aim_wander_settle: float = 3.0
+## A near miss's flinch (BotSkill.aim_error_under_fire_deg) eases away over this long (s; AIM2).
+@export var flinch_time: float = 0.6
+## Noticing someone (AIM2): a fresh sighting is answered later, on top of the reaction, the further off the middle of
+## the view and the further away it is: up to notice_edge_time (s) at the edge of the view (by the square of the share
+## of the half-view), up to notice_far_time (s) at view_distance, a share notice_moving_share of that for someone
+## moving at least notice_moving_speed (m/s: movement catches the eye) and none within close_awareness. The same at
+## every level: it is how anyone sees (DECISIONS 2026-10-01), the reaction after it is the level's.
+@export var notice_edge_time: float = 0.3
+@export var notice_far_time: float = 0.25
+@export var notice_moving_share: float = 0.5
+@export var notice_moving_speed: float = 1.5
 ## Fires only with its view within this of its (erroneous) aim point (degrees).
 @export var fire_cone_deg: float = 3.0
 ## On a field with a start mode ("no full auto indoors", NA1, BotFireMode): a bot may go to full auto only down a sight
@@ -107,7 +128,8 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## a target moving about at the range's edge would otherwise turn the selector back and forth with each step.
 @export var close_auto_slack: float = 1.0
 ## There, the least time between a bot's pulls on semi (s): a quick player's tapping, five a second, against the AEG's
-## 13 BBs a second on full auto. Elsewhere a bot on semi pulls as fast as the replica cycles, as it always has.
+## 13 BBs a second on full auto; on burst, from the end of one burst to the next pull (FV1). Elsewhere a bot on semi
+## pulls as fast as the replica cycles, as it always has.
 @export var semi_tap_gap: float = 0.2
 ## Aims at this share of the target's hit-volume height (the chest), or its head when only that shows.
 @export var aim_height_fraction: float = 0.7
@@ -163,6 +185,36 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Lane points move up to this far at random (m, onto walkable ground on their floor), in this many tries.
 @export var lane_jitter: float = 1.2
 @export var lane_jitter_tries: int = 6
+## Route variety (RV1): each round a team draws a tempo (quick, steady or slow, by these weights) that scales its bots'
+## pauses at lane points and their stagger setting off; the steady scale is 1.
+@export var tempo_quick_weight: float = 0.3
+@export var tempo_steady_weight: float = 0.45
+@export var tempo_slow_weight: float = 0.25
+@export var tempo_quick_pace: float = 0.45
+@export var tempo_slow_pace: float = 1.4
+## A pause at a lane point in its own half is this share of one in the enemy's half: bots move up quickly through
+## ground their team holds, and slow down where the fight will be.
+@export var own_half_pace: float = 0.55
+## Each round a bot that walks its lane (not a defender, nor an anchor holding its post) moves every lane point up to
+## this far (m) across the way to the enemy, one side or the other, the same for the whole lane (less far, or not at
+## all, where that isn't walkable on the point's floor in a straight line from it): the other side of a row of crates,
+## the far edge of a clearing.
+@export var lane_shift: float = 2.5
+## Where a shifted point isn't walkable, it tries again this many times, each this share of the last shift, before it
+## keeps the point itself.
+@export var lane_shift_tries: int = 2
+@export var lane_shift_fallback: float = 0.5
+## Setting off for its next lane point, a bot that walks its lane may (this chance) cross to another lane instead: the
+## nearest point of it within lane_cross_reach (m), no more than lane_cross_rise (m) above or below (the same storey; a
+## slope's rise is fine), no nearer its own end than where it is, each teammate walking that lane counting
+## lane_cross_crowd (m) further off; at most lane_cross_max times a round. Never a defender, the bomb carrier, a bot
+## under an order or a team stacked on one lane. Depot's and Subway's lanes run 2 to 20 m apart, Woodland's about
+## 40 m: a cross there is a flank through the trees.
+@export var lane_cross_chance: float = 0.1
+@export var lane_cross_reach: float = 45.0
+@export var lane_cross_rise: float = 1.5
+@export var lane_cross_crowd: float = 8.0
+@export var lane_cross_max: int = 1
 ## Bots sharing a lane: a lane point with a teammate holding there (or heading there to hold) within lane_hold_spacing
 ## (m) moves lane_hold_offset (m) to one side, across the way to the enemy, so the two hold side by side.
 @export var lane_hold_spacing: float = 1.5
@@ -356,6 +408,11 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Defending, a bot holds the first point of its lane (nearest home), or with this chance the second; the first of
 ## two on a shared lane always holds the second.
 @export var defend_forward_chance: float = 0.3
+## Route variety (RV1): each round, with this chance, one defending bot (drawn at random) holds well up its lane
+## instead: defend_push_share of the way from its post to the last point short of the middle, for an early pick on the
+## attackers' way in.
+@export var defend_push_chance: float = 0.35
+@export var defend_push_share: float = 0.35
 ## A defender goes after someone seen or heard within this far of the pole (m, and on the pole's floor:
 ## anchor_search_rise); further off, it watches that way from its post.
 @export var defend_search_radius: float = 12.0

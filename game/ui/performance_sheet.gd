@@ -181,7 +181,7 @@ func _build_row(into: Control, spec: Dictionary) -> Dictionary:
 	cell.custom_minimum_size = Vector2(VALUE_WIDTH, 0.0)
 	cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(cell)
-	var tag := MenuTag.make(TranslationServer.translate("PERF_CAPPED_TAG"), GameTheme.ACCENT, GameTheme.ACCENT)
+	var tag := MenuTag.make(TranslationServer.translate("PERF_CAPPED_TAG"), GameTheme.accent, GameTheme.accent)
 	tag.visible = false
 	cell.add_child(tag)
 	var value := MenuParts.text("", VALUE_SIZE, 800, GameTheme.TEXT)

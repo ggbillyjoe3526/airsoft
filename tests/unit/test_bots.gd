@@ -120,7 +120,9 @@ func test_whole_bot_matches_play_out_fairly_over_seeds() -> void:
 ## shoots a teammate directly, a stray bounce only rarely catches a teammate or its own shooter, and bounced BBs decide
 ## some hits but under a quarter (G12). Measured: 45 of 251 hits off a bounce, 4 on a teammate, 4 on the shooter. HV1
 ## (bots treat a crouched teammate as standing): 47 of 224, 3 and 10 here, and 17 on the shooter of 485 hits over the
-## browser's 16 seeds (3.5 %), so the shooter's bar is 5 % for these eight.
+## browser's 16 seeds (3.5 %), so the shooter's bar is 5 % for these eight. AIM1 (a bot picks someone up again after a
+## moment out of sight): 46 of 226 off a bounce (35 of 219 before; 64 of 242 while its unsettled aim went to one side,
+## so a re-pick-up's error now wanders any way off the target).
 func test_bot_matches_with_ricochets_counting_stay_playable() -> void:
 	tuning.hits.ricochets_count = true
 	var hits := 0
@@ -223,8 +225,10 @@ func test_a_bot_holds_fire_with_a_teammate_in_the_line() -> void:
 func test_a_bot_holds_fire_over_a_crouched_teammate_who_could_stand_into_the_line() -> void:
 	# HV1 (CI's Attack / Defend guard, Depot seed 9): a shot pressed over a crouched teammate's head fired as it stood
 	# up. Up East yard at an enemy raised 1.4 m, the line runs over the teammate's crouched head but through where its
-	# head is standing: the bot holds fire.
+	# head is standing: the bot holds fire. The case was found on the authored lanes: no per-round shift (RV1).
 	_start(6)
+	for b in bots.world.bots:
+		b.lane_shift = 0.0
 	var shooter := _bot(0)
 	var mate := state.characters[1]
 	var enemy := state.characters[3]

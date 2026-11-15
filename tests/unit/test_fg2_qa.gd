@@ -61,9 +61,13 @@ func test_the_roles_swap_with_the_attackers_at_half_time() -> void:
 		bots._new_round(state)
 		assert_eq(w.attackers, 1, "the planner reads the new attackers")
 		assert_ne(w.planner.plans[0], RoundPlanner.Plan.STACK, "round %d: team 0 defends, never stacked" % round)
+		# One defender a round may be pushed further up its lane (RV1, defend_push_chance); the rest hold point 1 or 2.
+		var pushed := 0
 		for id: int in [0, 1, 2]:
 			assert_eq(BotFlag.role(_bot(id), w), BotFlag.Role.DEFEND)
-			assert_lte(_bot(id).lane_points, 2, "round %d: a defender holds point 1 or 2" % round)
+			if _bot(id).lane_points > 2:
+				pushed += 1
+		assert_lte(pushed, 1, "round %d: a defender holds point 1 or 2, but for one pushed defender" % round)
 		for id: int in [3, 4, 5]:
 			var b := _bot(id)
 			assert_eq(BotFlag.role(b, w), BotFlag.Role.ATTACK)

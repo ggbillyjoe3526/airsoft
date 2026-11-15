@@ -3,26 +3,30 @@ extends Resource
 ## The replica in your hands (the browser game's config/renderView.ts VIEWMODEL, tuned by play there). Metres in the
 ## camera's space (x right, y up, -z forward), seconds, radians. Read by ReplicaView.
 
-## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The
-## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06), and
-## 25 cm from the eye, was 34, on the same line from it, which draws them a third larger in the same place on screen
-## (his pick of three on a picture, 2026-11-13: HA1); the
-## rifles sit near and low, so the left hand on the handguard shows and the right hand lies under the view's bottom
-## edge (HA1, the owner); the Compact SMG, a shorter replica, sits lower and further off than they do, which draws it
-## at their size and angle (the owner: "too high. It should be a similar angle and scale to the rifles"). The Pump
-## Shotgun has its own place, the hand out on its pump showing no more forearm than the rifles' (SH2). The arms
+## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The pistols
+## sit low on the right as the rifles do, 35 cm from the eye and turned a little in (`hip_turn`), so they take about the
+## rifles' share of the screen at about their angle, both hands and no forearm in view (HA2, the owner: "make the pistol
+## take up less space on screen. it should roughly be same scale/angle as rifle"; it was 25 cm out, centred and square
+## on, HA1); the rifles sit near and low, so the left hand on the handguard shows and the right hand lies under the
+## view's bottom edge (HA1, the owner); the Compact SMG, a shorter replica, sits lower and further off than they do,
+## which draws it at their size and angle (the owner: "too high. It should be a similar angle and scale to the rifles").
+## The Pump Shotgun has its own place, the hand out on its pump showing no more forearm than the rifles' (SH2). The arms
 ## model's holds (tools/blender/arms/hold_tables.py HOLDS) are solved for the Pump Shotgun's place and for the rifles'
 ## and the pistols' earlier ones (RIFLE_HIP, PISTOL_HIP); the arms ride the replica, so each hold is drawn where its
 ## replica is.
 @export var hip: Dictionary[StringName, Vector3] = {
 	&"aeg": Vector3(0.1, -0.135, -0.19),
-	&"pistol": Vector3(0.037, -0.051, -0.25),
-	&"cyber": Vector3(0.037, -0.051, -0.25),
+	&"pistol": Vector3(0.095, -0.09, -0.35),
+	&"cyber": Vector3(0.095, -0.09, -0.35),
 	&"sniper": Vector3(0.1, -0.135, -0.19),
 	&"smg": Vector3(0.1, -0.165, -0.24),
 	&"shotgun": Vector3(0.12, -0.21, -0.21),
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
+## How a replica is turned at the hip (rad, as the replica's rotation: x tilts the muzzle up, y turns it left, z rolls
+## the right side up), by replica id; none for others. Gone as the sight comes up.
+@export var hip_turn: Dictionary[StringName, Vector3] = {&"pistol": Vector3(0.0, 0.15, 0.0),
+		&"cyber": Vector3(0.0, 0.15, 0.0)}
 ## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it (the
 ## pistols near enough that the forearm drops out of view under the hand; the Pump Shotgun, which has no sights and is
 ## aimed along its top rail, near enough that its stock is behind the eye and you look over the receiver's back end:
@@ -45,11 +49,12 @@ extends Resource
 @export var aim_slide: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.0, -0.07, 0.22),
 		&"sniper": Vector3(0.02, -0.09, 0.22), &"smg": Vector3(0.0, -0.07, 0.22),
 		&"shotgun": Vector3(0.0, -0.07, 0.22)}
-## A replica in aim_hands_hint (the pistols) keeps the tops of its hands under the slide (the owner's pick of three
-## pictures): as the sight's raise (as drawn, 0..1) passes from aim_hint_span's x to its y, what lies below the sight
-## line fades out, whole down to aim_hint_below's x (m under it) and gone by its y.
+## A replica in aim_hands_hint keeps the tops of its hands under the sight: as the sight's raise (as drawn, 0..1) passes
+## from aim_hint_span's x to its y, what lies below the sight line fades out, whole down to aim_hint_below's x (m under
+## it) and gone by its y. None does: the pistols did (HA1, the owner's pick of three pictures) until he saw it in play,
+## "the pistol ADS shows the hand fading, it shouldn't do this" (HA2), so aimed their hands are drawn whole.
 @export var aim_hint_span: Vector2 = Vector2(0.3, 0.8)
-@export var aim_hands_hint: Array[StringName] = [&"pistol", &"cyber"]
+@export var aim_hands_hint: Array[StringName] = []
 @export var aim_hint_below: Vector2 = Vector2(0.08, 0.12)
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits
@@ -133,12 +138,12 @@ extends Resource
 ## its deeper grip holds your hands lower, and at the AEG's lift your left forearm shows past the wrist.
 ## The Pump Shotgun comes out less and no nearer (SH2): your left hand starts far forward on its pump, and at the
 ## AEG's move your forearm shows past the wrist on the way to the shell and back. The pistols' move is 0.1 and 0.06 m
-## drawn in with their hip place (HA1: 25 cm from the eye, was 34), so a reload crosses the same part of the screen.
+## at 34 cm from the eye, drawn out with their hip place (HA2: 35 cm), so a reload crosses the same share of the screen.
 @export var reload_cant_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.6, 0.0, -0.25),
 		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3),
 		&"smg": Vector3(0.6, 0.0, -0.25), &"shotgun": Vector3(0.6, 0.0, -0.25)}
 @export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.08, 0.04, 0.06),
-		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.074, 0.044, 0.0), &"cyber": Vector3(0.074, 0.044, 0.0),
+		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.103, 0.062, 0.0), &"cyber": Vector3(0.103, 0.062, 0.0),
 		&"smg": Vector3(0.06, 0.04, 0.06), &"shotgun": Vector3(0.04, 0.04, 0.0)}
 ## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share
 ## at the end (a rifle's magazine is out of the well in the first quarter: the cant is there by then, BP8); others ease
@@ -253,12 +258,13 @@ extends Resource
 	&"aeg": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), RIFLE_TURN, RIFLE_SHIFT,
 			PackedFloat32Array([0.06, 0.13, 0.27, 0.36, 0.65, 0.83]),
 			[&"selector", &"torchClick", &"selector", &"selector", &"dryFire", &"torchClick"]),
-	# Side on, the muzzle to the left, the top a little to the eye; nothing moves, the slide only ever back firing or
-	# locked empty (GS2).
+	# Side on, the muzzle to the left, the top a little to the eye (the hip turn adds 0.15 more since HA2); nothing
+	# moves, the slide only ever back firing or locked empty (GS2).
 	&"pistol": InspectPose.make(2.0, PackedFloat32Array([0.0, 0.22, 0.72, 1.0]),
 			[Vector3.ZERO, Vector3(0.05, 0.95, -0.1), Vector3(0.08, 1.0, -0.2), Vector3.ZERO],
 			PISTOL_SHIFT, PackedFloat32Array(), []),
-	# Side on, the muzzle to the left, the butt of the grip to the eye: the battery eased out of the grip and pushed home.
+	# Side on, the muzzle to the left, the butt of the grip to the eye (the hip turn adds 0.15 as the gas pistol's): the
+	# battery eased out of the grip and pushed home.
 	&"cyber": InspectPose.make(2.0, PackedFloat32Array([0.0, 0.22, 0.72, 1.0]),
 			[Vector3.ZERO, Vector3(-0.15, 0.95, -0.1), Vector3(-0.35, 1.0, -0.15), Vector3.ZERO],
 			PISTOL_SHIFT, PackedFloat32Array([0.17, 0.75]), [&"torchClick", &"magIn"]),
@@ -290,8 +296,8 @@ const LONG_TURN: Array[Vector3] = [Vector3.ZERO, Vector3(0.07, 0.9, -0.1), Vecto
 		Vector3(0.05, 0.88, -0.08), Vector3.ZERO]
 const LONG_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.15, 0.03, -0.2), Vector3(-0.16, 0.035, -0.2),
 		Vector3(-0.14, 0.03, -0.19), Vector3.ZERO]
-## The pistols' inspect shifts (the browser game's pistol and Cyber poses, to the same place from their higher, more
-## central hip).
+## The pistols' inspect shifts (the browser game's pistol and Cyber poses), in from their hip low on the right (HA2):
+## the owner saw these with it on pictures and called them "perfect".
 const PISTOL_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.06, 0.0, -0.04), Vector3(-0.065, 0.005, -0.04),
 		Vector3.ZERO]
 

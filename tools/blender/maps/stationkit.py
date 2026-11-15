@@ -166,11 +166,10 @@ class Mesh:
             self.face_toward([la, ca, cb, lb], out, paint, mat, smooth=True)
             self.face_toward([ca, ra, rb, cb], out, paint, mat, smooth=True)
 
-    def sign(self, cell: str, corners: list, paint: str = "white") -> None:
+    def sign(self, cell: str, corners: list, paint: str = "white", cells=station_cells) -> None:
         """A printed quad: `corners` bottom left, bottom right, top right, top left (as seen), the cell's picture on
-        it."""
-        uvs = [station_cells.uv(cell, 0.0, 1.0), station_cells.uv(cell, 1.0, 1.0), station_cells.uv(cell, 1.0, 0.0),
-               station_cells.uv(cell, 0.0, 0.0)]
+        it (a cell of `cells`' sheet: the station's, or Depot's, depot_cells.py)."""
+        uvs = [cells.uv(cell, 0.0, 1.0), cells.uv(cell, 1.0, 1.0), cells.uv(cell, 1.0, 0.0), cells.uv(cell, 0.0, 0.0)]
         self.face(corners, paint, "Sign", uvs)
 
     def disc_sign(self, cell: str, centre: tuple, radius: float, sides: int, facing: float, paint: str = "white") -> None:

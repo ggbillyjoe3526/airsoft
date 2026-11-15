@@ -344,5 +344,5 @@ func test_the_pause_menu_and_the_field_cards_say_the_weather() -> void:
 	assert_eq(PauseMenu.weather_line(20.0, 0.0), "Air 20 °C · still air")
 	var m := MapCatalog.read_file()
 	assert_eq(MatchPage.field_tip(m.find("depot"), tuning),
-			"An indoor airsoft hall: three lanes, two dark tunnels.\nStill air, 20 °C.")
+			"An indoor airsoft hall: five lanes, two dark tunnels.\nStill air, 20 °C.")
 	assert_string_ends_with(MatchPage.field_tip(m.find("woodland"), tuning), "\nOpen to the breeze, 16 °C by day.")

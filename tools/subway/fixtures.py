@@ -73,24 +73,24 @@ SIGN_OVER = 0.35   # a wall sign's middle over an escalator's or a stair's mouth
 # walls, ESC_STEP apart, their middles this far over the stairs' pitch line, clear of the first and last 2 m.
 ESC_SCALE = 0.6
 ESC_STEP = 2.0
-ESC_ROWS = [("esc_up", -35.0, -21.0, 2.1), ("esc_low", -3.5, 6.5, 1.9)]
+ESC_ROWS = [("esc_low", -3.5, 6.5, 1.9)]
 
 # The spots: (model, room, wall, along, height over the floor) for a wall model; (model, room, x, z) hung or on the
 # floor; a hung sign's yaw 90 puts "Way out" facing east, read by those heading west towards the street, and
 # "Platforms" by those heading east and down.
 WALL = [
-    # The ticket hall.
-    ("cctv_camera", "hall", "n", -47.0, 4.8), ("cctv_camera", "hall", "s", -54.0, 4.8),
-    ("platform_clock", "hall", "s", -51.0, 3.6),
-    ("poster_a", "hall", "s", -58.0, POSTER_Y), ("poster_b", "hall", "s", -42.0, POSTER_Y),
-    ("fire_extinguisher", "hall", "w", 5.5, EXTINGUISHER_Y),
-    # The booking hall, the west passage and the concourse.
-    ("poster_c", "bk_w", "w", -5.0, POSTER_Y),
-    ("poster_d", "wpass", "n", -33.0, POSTER_Y), ("poster_e", "wpass", "n", -27.0, POSTER_Y),
-    ("poster_f", "wpass", "n", -21.0, POSTER_Y), ("fire_extinguisher", "wpass", "s", -34.0, EXTINGUISHER_Y),
+    # The ticket hall, on the concourse's level since SW1 (its ceiling 4.5 m up).
+    ("cctv_camera", "hall", "n", -47.0, 3.9), ("cctv_camera", "hall", "s", -36.0, 3.9),
+    ("platform_clock", "hall", "s", -51.0, 3.4),
+    ("poster_b", "hall", "s", -41.0, POSTER_Y), ("poster_f", "hall", "s", -24.0, POSTER_Y),
+    ("poster_a", "hall", "n", -33.0, POSTER_Y), ("poster_c", "hall", "n", -27.0, POSTER_Y),
+    ("poster_d", "hall", "n", -21.0, POSTER_Y),
+    ("fire_extinguisher", "hall", "w", -3.0, EXTINGUISHER_Y), ("fire_extinguisher", "hall", "s", -34.0,
+                                                                EXTINGUISHER_Y),
+    # The concourse.
     ("poster_g", "upper", "n", -16.0, POSTER_Y), ("poster_h", "upper", "s", -16.0, POSTER_Y),
-    ("platform_clock", "upper", "w", 6.5, 3.4), ("cctv_camera", "upper", "e", -5.0, 3.4),
-    ("fire_extinguisher", "upper", "w", -6.0, EXTINGUISHER_Y),
+    ("platform_clock", "upper", "s", -15.0, 3.4), ("cctv_camera", "upper", "e", -5.0, 3.4),
+    ("fire_extinguisher", "upper", "s", -14.5, EXTINGUISHER_Y),
     # The north and south passages, the plant room, the stair top.
     ("poster_i", "npass", "n", -3.5, POSTER_Y), ("poster_j", "npass", "n", 4.5, POSTER_Y),
     ("poster_k", "npass", "n", 10.5, POSTER_Y), ("cctv_camera", "npass", "n", 19.0, 2.4),
@@ -110,7 +110,7 @@ WALL = [
     ("poster_wide_c", "trench", "s", 4.0, WIDE_Y), ("poster_wide_a", "trench", "s", 23.0, WIDE_Y),
     ("name_board", "plat_n", "s", -34.0, NAME_Y), ("name_board", "plat_n", "s", 1.0, NAME_Y),
     ("name_board", "plat_n", "s", 29.0, NAME_Y),
-    ("name_board", "plat_s", "n", -34.0, NAME_Y), ("name_board", "plat_s", "n", 1.0, NAME_Y),
+    ("name_board", "plat_s", "n", -35.0, NAME_Y), ("name_board", "plat_s", "n", 1.0, NAME_Y),
     ("name_board", "plat_s", "n", 29.0, NAME_Y),
     ("poster_c", "plat_n", "s", -16.0, POSTER_Y), ("poster_d", "plat_n", "s", 9.0, POSTER_Y),
     ("poster_e", "plat_n", "s", 42.5, POSTER_Y),
@@ -124,13 +124,11 @@ WALL = [
     # The second pass (William, 2026-11-12: signs and posters in every room). "Platforms" over the escalators' and
     # the stair's mouths on the way down (not where a hanging sign already stands in front of one), "Way out" over
     # the platforms' doors to the lower hall (the arrow points ahead).
-    ("wall_sign_platforms", "hall", "e", 0.0, 3.2 + SIGN_OVER),
     ("wall_sign_platforms", "upper", "e", 0.0, 2.8 + SIGN_OVER),
     ("wall_sign_platforms", "east", "e", 0.0, 3.0 + SIGN_OVER),
     ("wall_sign_out", "plat_n", "s", 12.75, 2.75), ("wall_sign_out", "plat_n", "s", 19.75, 2.75),
     ("wall_sign_out", "plat_s", "n", 12.75, 2.75), ("wall_sign_out", "plat_s", "n", 19.75, 2.75),
     # Hold the handrail at each escalator's head and foot; information panels, no smoking, CCTV notices.
-    ("notice_handrail", "esc_up", "n", -37.0, 1.9), ("notice_handrail", "esc_up", "s", -19.0, 1.9),
     ("notice_handrail", "esc_low", "n", -5.0, 1.8), ("notice_handrail", "esc_low", "s", 9.0, 1.8),
     ("info_panel", "hall", "n", -43.0, POSTER_Y), ("info_panel", "upper", "n", -9.0, POSTER_Y),
     ("info_panel", "lowc", "e", 2.4, POSTER_Y),
@@ -140,7 +138,7 @@ WALL = [
     ("notice_cctv", "plat_s", "n", -41.5, NOTICE_Y + 0.1),
     # The line's strip map along each platform's back wall, between the boards and posters.
     ("line_map", "plat_n", "s", -28.5, 1.7), ("line_map", "plat_n", "s", 16.25, 1.7),
-    ("line_map", "plat_s", "n", -28.5, 1.7), ("line_map", "plat_s", "n", 16.25, 1.7),
+    ("line_map", "plat_s", "n", -38.5, 1.7), ("line_map", "plat_s", "n", 16.25, 1.7),
     # More posters where there were none: the lower hall, the mid and east passages, the lift landing.
     ("poster_i", "lowc", "n", 16.25, POSTER_Y), ("poster_j", "lowc", "s", 16.25, POSTER_Y),
     ("poster_k", "midp", "w", -3.0, POSTER_Y), ("poster_l", "midp", "w", 3.0, POSTER_Y),
@@ -158,7 +156,7 @@ WALL = [
     ("tunnel_lamp", "run_s", "n", 79.0, LAMP_Y),
 ]
 HUNG = [
-    ("way_sign", "hall", -40.5, 6.0, 90.0), ("way_sign", "wpass", -28.0, -8.25, 90.0),
+    ("way_sign", "hall", -40.5, 6.0, 90.0), ("way_sign", "hall", -28.0, -6.0, 90.0),
     ("way_sign", "upper", -16.0, 0.0, 90.0), ("way_sign", "npass", 3.0, -8.0, 90.0),
     ("way_sign", "spass", 3.0, 8.0, 90.0), ("way_sign", "east", 22.5, 0.0, 90.0),
     ("way_sign", "lowc", 12.0, 0.0, 90.0), ("way_sign", "liftp", -40.0, -3.1, 90.0),

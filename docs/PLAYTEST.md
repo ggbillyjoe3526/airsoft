@@ -38,7 +38,8 @@ replays the same match.
 What to play in the build in your hands: your checklist of open checks is
 `/mnt/project-files/playtest/0.1-beta1-checklist.md` in the project's shared files (0.1 Dev 3's is
 `0.1-dev3-checklist.md`, 0.1 Dev 2's `0.1-dev2-checklist.md`, 0.1 Dev 1's `0.1-dev1-checklist.md`), and each pull
-request names its sections here. For the core slice:
+request names its sections here. On 2026-11-15 the Beta 1 list's 120 checks were cleared without play where they
+could be and the list rewritten to the 22 that need the owner; `docs/records/BC1.md` gives each old check's outcome. For the core slice:
 [Movement](#movement), [Shooting and reloads](#shooting-and-reloads), [BBs](#bbs), [Players and replicas](#players-and-replicas), [Rounds and matches](#rounds-and-matches),
 [Depot](#depot), [Bots](#bots) and [Builds and the desktop](#builds-and-the-desktop).
 
@@ -207,11 +208,11 @@ own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a 
   grip's back; the SMG sits as the rifles do. A pistol is held tight in both hands, no left
   fingers showing, the right thumb resting on the left hand, the Cyber Pistol held as the GBB is; over the sights no
   gap shows between the left hand and the grip. Raise the sight: a
-  rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and only the top of the
-  hands shows under a pistol's slide. Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
+  rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and a pistol's hands stay
+  whole under its slide, never faded (HA2). Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
   should hold up close on Inspect (Y); the right index finger and the skin between wrist and thumb look natural.
-  The pistols sit 25 cm from the eye (the owner's pick): judge their size at the hip, through a reload and on
-  Inspect. Skin-only arms on a pistol: the bare hands should read as hands (knuckle folds, the thumb's tendon, veins
+  The pistols sit low on the right as the rifles do, turned a little in (HA2): judge their size and angle beside a
+  rifle at the hip, through a reload and on Inspect. Skin-only arms on a pistol: the bare hands should read as hands (knuckle folds, the thumb's tendon, veins
   at the wrist, nails, a tapered thumb), not plastic. Close to a bot holding an AEG with no grip: its left fingers
   lie open under the handguard.
 - [ ] **The replica moves with you** (HA1). Walk, sprint, strafe, jump and land, crouch, stand, fire, switch: a
@@ -232,7 +233,7 @@ own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a 
 - [ ] **Lasers, the Dev Easter egg** (LZ1). With Settings › Dev › Lasers off (it starts off), BBs fly, arc and hit
   exactly as before. Turn it on: every replica, yours and the bots', fires a solid beam in its team colour that hits at
   once (no flight, no drop). Semi and the Sniper Rifle flash once a shot, burst flashes three times, and full auto keeps
-  the beam on while the trigger is held (try the AEG outdoors: indoor maps start on semi). The beam starts at the
+  the beam on while the trigger is held (try the AEG outdoors: indoor maps start on burst). The beam starts at the
   muzzle, ends on what it hit, and plays the laser sound instead of the shot. Bots hit more often (nothing to dodge);
   is it fun? Turn it off mid-match: the next shot is a BB again.
 - [ ] **Hit flinch.** Hit a bot side-on, then one from behind (with Dev › Robots on, try a robot too): its upper body
@@ -439,9 +440,10 @@ An asymmetric warehouse yard. Attackers start in the west yard, defenders in the
 flagpole stands in the walled loading bay. Three lanes lead there: **Dock Road** (north, along a raised loading dock),
 **Container Alley** (the middle, through the Main Gate) and the **Office** (south, close quarters).
 
-- [ ] **No full auto indoors** (NA1). Start a Depot match with the AEG: the selector (the replica and the HUD chip)
-  shows single shots. Press **B** twice: auto, and it fires full auto. Next round it is back on single shots. Bots on
-  Depot fire single shots (a quick tap-tap); only now and then, at you out in the open down a long line (the Chrono
+- [ ] **No full auto indoors** (NA1; burst since FV1). Start a Depot match with the AEG: the selector (the replica and
+  the HUD chip) shows burst. Press **B**: auto, and it fires full auto. Next round it is back on burst. With the
+  Compact SMG it starts on single shots. Bots on Depot fire 3-round bursts (a quick brrt, a short gap, again); only
+  now and then, at you out in the open down a long line (the Chrono
   hall), does one switch to a full-auto buzz, never at you in a cramped room or round a short corner. On Woodland
   the AEG starts on auto and keeps the mode you pick from round to round.
 - [ ] **Walk all three lanes from the west yard to the pole.** None has a dead end and you can tell which you're in.
@@ -608,21 +610,24 @@ Once the rest of step 26 lands:
 
 ### Subway (Dev content, MT1)
 
-A closed metro station on three levels: the Street team starts in the ticket hall at street level, the Tunnel team in
-a cross-passage between the running tunnels, and they swap at half time. Turn on Settings › Dev › Dev content.
+A closed metro station on two levels since SW1: the Street team starts in the ticket hall, on one level with the
+concourse, the Tunnel team in a cross-passage between the running tunnels, and they swap at half time. Turn on
+Settings › Dev › Dev content.
 
 - [ ] **Listed only as Dev content (MT1).** With Dev content off, the Match page shows no Subway; on, it does, with
   its picture, 5 to 8 a side and 6 standard.
 - [ ] **Named Subway (owner, 2026-11-10).** The Match page's card and the loading screen say Subway (SUBWAY),
   never Kingsmere. If the last match you played before the rename was on Kingsmere, the Match page opens on Subway.
-- [ ] **Every way down (MT1).** From the ticket hall: the escalators to the concourse and on down to the lower hall;
-  the spiral stair in the hall's corner to the booking hall; the ordinary stair from the stair top down past flag B's
-  half landing to the platforms. Nothing snags you on a step, a balustrade or a landing.
+- [ ] **Every way down (MT1, SW1).** From the ticket hall and concourse: the escalators down to the lower hall; the
+  spiral stair by the gates, eight flights down to the south platform; the ordinary stair from the stair
+  top down past the half landing to the platforms; the lifts, two stops (Ticket hall, Platforms), 4 s a ride. Nothing
+  snags you on a step, a balustrade or a landing, and bots take the spiral stair too.
 - [ ] **The tracks and trains (MT1, CL1).** Drop off a platform's edge into the track: no steps lead back up; you
   climb out over the edge (Jump). Walk through the north train's open doors, and the south train from its
   platform doors to its east cab door and down the steps into the south tunnel.
-- [ ] **Close quarters above, long lines below (MT1).** Above the platforms no line runs much past 28 m; the
-  platforms open to about 58 m. Does each level play as meant, and do the bots hold and push through all three?
+- [ ] **Close quarters above, long lines below (MT1, SW1).** Above the platforms no line runs past about 57 m (the
+  hall's west end to a passage's mouth, with fewer lockers since SW1); the platforms open to about 58 m. Does each
+  level play as meant, and do the bots hold and push through both?
 - [ ] **The flags (MT1).** Attack / Defend: flag A stands inside the south train's first car, B on the stair's half
   landing, both on short poles that fit under the roof; Elimination's overtime flag rises in the lower hall.
 - [ ] **The lift shafts stand shut (MT1).** The two lifts come in their own step (MT2); until then their shafts are
@@ -660,7 +665,13 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
 - [ ] **Every level hunts (M87).** Once their lane is swept, bots hunt the map's middle without walking into corners
   they already saw empty; a round shouldn't drag to the clock. On Woodland they now check inside the hut too (KI1).
 - [ ] **Up close, a fair moment.** Walk into a Normal bot at 5 to 10 m: its first BBs go wide and walk in (its first
-  hit takes about 1.5 s).
+  hit takes about 1 s; an Easy bot's about 1.7 s).
+- [ ] **Peek, duck, peek again (AIM1).** On Normal, step out past a corner a bot watches for under half a second, duck
+  back, and step out again half a second later: it should rarely hit you on either peek (its first BBs go wide again),
+  but stand out for a second and a half and it should. On Hard, re-peeking the same corner is riskier.
+- [ ] **Noticed, and shooting back (AIM2).** On Normal, step into a bot's view from its side 30 m off: it should take a
+  moment longer to answer than when you step out right in front of it close by. Then trade shots with one: a BB past
+  its head should make its next shots go wider for a moment.
 - [ ] **The bots' kits (BG1).** Opponents carry kits from `bot-kits.md`: Easy the plainest, each level up more scoped,
   silenced or red-dot, Hard never plain. Spectate a few: the optic shows on their rifle and a silenced bot is heard
   nearer. Does gear make Normal unfair or Hard too easy?
@@ -679,6 +690,11 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
   arrive ready for you there a moment later. Get two or more ahead in Elimination: your bots stop holding and go hunting.
   The last bot of a team walks and checks corners. In an open fight they take a knee for each burst. Do they feel
   smarter, and still beatable on Normal?
+- [ ] **Routes vary round to round (RV1).** Play five or six rounds of Elimination on one map and of Attack / Defend
+  on another, and spectate once you're out. The enemy still follows a plan (spread out, a pair, or a stack on one
+  lane), but some rounds they rush and some they creep, each bot walks its lane a little to one side, and now and
+  then one switches lanes. Do fights start sooner, without you crossing half the map first? In Attack / Defend, now
+  and then one defender waits further out. Does it feel less predictable, and still fair?
 - [ ] **Anchors (BP5).** In Elimination with over a minute left, give an anchor teammate Follow me (F), then end it
   with F again: it goes hunting.
 
@@ -1041,7 +1057,7 @@ file, Dev).
   bind; Reset All asks first. By keyboard only: Tab to a box, Enter, press a key.
 - [ ] **Your keyboard layout** (AZERTY or QWERTZ). Move forward shows as Z (AZERTY) and the order
   wheel as W or Y; the reload hint uses the same letters.
-- [ ] **Display.** Field of view starts at 90° (120° shows more at the sides, 80° less). Fullscreen (or F10) goes
+- [ ] **Display.** Field of view starts at 87° (FV1; a save still on the old 90° moves to it; 110° shows more at the sides, 80° less). Fullscreen (or F10) goes
   fullscreen and back with play carrying on ([Builds and the desktop](#builds-and-the-desktop)). No Tone mapping row
   here or in Graphics.
 - [ ] **Dev group.** Debug info, BB paths, Game speed (25 % to 200 %), Bottomless magazines and Ghost (BBs pass
@@ -1076,8 +1092,9 @@ Headphones help: direction (in front, behind, above) comes through best on them.
   stays clear. Pausing mid-burst and resuming makes no click.
 - [ ] **Settings › Audio.** Master, Effects, Power source volume (each replica's motor, gas and spring, yours and the
   bots'), Ambience and Interface (hit tick, marker, whistle), each at once and kept.
-- [ ] **Audio defaults (FB2).** A new save, and a delete-save, start Master 100 %, Effects 70 %, Power source 100 %,
-  Ambience 30 %, Interface 40 %. A save from before moves only the volumes you never touched; ones you set stay.
+- [ ] **Audio defaults (FV1).** A new save, and a delete-save, start Master 90 %, Effects 80 %, Power source 80 %,
+  Ambience 30 %, Interface 40 %. A save from before moves only the volumes you never touched; ones you set stay, and a
+  Power source you set is moved down so it sounds the same (Power source 80 % is the old 100 %; 100 % is louder).
 - [ ] **Output devices.** F3 shows the audio latency (about 10 to 40 ms). Anything that sounds like a firearm, harsh, or
   too loud? Say which.
 
@@ -1726,9 +1743,101 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   ends show split wood, not pipes: round logs, logs with a flat pale split face, wedges and quarters, in courses the
   size of the face's pieces, each course a little off level, pieces in and out, a small break where each course's
   front and back pieces meet, no flat tab sticking out and no black slot down the middle; no straight dark line runs
-  up a corner, and along a stack no join between its 2 m sections shows as a line, pale or dark; from a raised spot the top
-  shows split pieces (pale ridges and dark bark) of mixed widths, some turned and two or three lying across, not a
-  black lid, a sheet or a ribbed roof, and nothing stands up over a corner.
+  up a corner, and along a stack no join between its 2 m sections shows as a line, pale or dark; from a raised spot
+  the top shows split pieces (pale ridges and dark bark) of mixed widths, some turned and two or three lying across,
+  not a black lid, a sheet or a ribbed roof, and nothing stands up over a corner.
+
+## Plant The Bomb's fuse on each field (PB4)
+
+- [ ] **A short fuse is fair to the defenders.** Defend on Depot (24 s fuse), Woodland (27 s) and Subway (22 s) at
+  Normal and Hard; let the attackers arm the bomb on the site nearest you and on the one farthest away, then go for
+  it. The Match page says the field's fuse under the rules.
+  Pass: from the near site you always have time to defuse it yourself; from the far site it is a race you can win if
+  you go at once; your bots still leave the defuse to you while you are close.
+- [ ] **Attacking is worth it now.** Attack on the same fields and hold the site after the plant.
+  Pass: holding the site feels like it wins rounds; the bomb goes off now and then, not every time.
+
+## Woodland's nearer flags and six routes (WB1)
+
+- [ ] **The fight comes to the middle.** Attack on Woodland at Normal, by day: walk any route east without hurrying.
+  Pass: you meet defenders around the stream (the Tower, the Hollow way's head, Hut row, the Culvert) more often than
+  at the flags, and the first shot of a round comes about 20 s in, not half a minute.
+- [ ] **Flag A in Fern hollow.** Raise it from the west, then defend it from the Fort's window and from the
+  windthrow and the crouch crate beside it. Pass: it is readable where the pole stands (the oak beside it, not in the ring), the Fort's
+  window and gate are worth holding, and neither side gets a spot that wins every duel.
+- [ ] **Flag B between the woodpiles.** Raise it coming along the road, then from the north (the Knoll side). Defend
+  it from inside the pocket and from the road side. Pass: the road's double bend never sees the pole; whoever is in
+  the pocket can be flushed with a smoke or a flash; a raise there is a fair fight, not a free one either way.
+- [ ] **Bots use the whole wood.** Spectate a few Elimination and Attack / Defend rounds. Pass: bots walk the north
+  edge, the Berm and the Clearing's south side as well as the old three routes, nobody gets stuck on the new routes
+  (the stream's north end, the Knoll's slope), and none walk on top of each other.
+- [ ] **Plant The Bomb.** Attack and defend both sites with the 27 s fuse. Pass: from either site a defender has time
+  to come over; the pocket at B is hard but not hopeless to retake.
+- [ ] **At night** both flags have a lantern by them and the fights at them are lit, and the Box and the Sawmill,
+  without theirs now, aren't too dark to fight in.
+- [ ] **The map card** on the match page still reads right with flag A out of the Fort.
+
+## The interface colour (UA1, UA2)
+
+- [ ] **Blue reads as the highlight, never as a team.** At 1080p and on your 4K screen go through Match, Loadout,
+  Customise, Armory, Settings and the pause menu, then play a round on Alpha and open the comms wheel (hold Z).
+  Pass: PLAY, RESUME, the picked field and mode, focus rings and the lit wheel button are a soft cornflower blue with
+  dark words that read easily; next to Alpha's score block and markers they are clearly a different, paler blue; with
+  Settings › Accessibility › High contrast on, the highlight still doesn't look like Alpha's sky blue.
+- [ ] **Every colour in Settings › Display › Interface › Colour.** Click each of the seven swatches (hover shows its
+  name), then Back, and look at Match, Loadout and Armory; also pick one from the pause menu's Settings in a match.
+  Pass: the menus change at once with the click and stay that colour after a restart; dark words read on every
+  colour; red, orange and blue never look like a team or a warning; from the pause menu, Resume and the settings
+  change at once and the HUD follows from the next match.
+
+## The AEG Rifle's ring, handguard gaps and forward assist (AF1)
+
+- [ ] **The new shapes read in your hands.** Hold the AEG Rifle at the hip and aimed on Depot and Woodland, and
+  inspect it (**Y**).
+  Pass: the ribbed ring shows all the way round between the receiver and the handguard; the oval gaps between the
+  rails (a row in each corner, the lower ones shorter) show the barrel and gas tube with no flicker or seam of
+  daylight; the forward assist stands out at an angle behind the ejection port and your right hand clears it.
+- [ ] **Parts and bots.** Fit the Red Dot, the 2x Scope and the Variable Scope, a grip and a torch; look at a bot
+  carrying the AEG up close.
+  Pass: every optic sits on the receiver's rail as before; the bot's rifle shows the ring all round and a solid
+  handguard (its copy has no gaps: too small to read at a bot's distance) with clean side rails. Its top rail still
+  has one collapsed tooth, as before this change (KNOWN_ISSUES): say if it shows.
+
+## Pistols at the rifles' place, arms on Inspect (HA2)
+
+- [ ] **A pistol takes about a rifle's share of the screen.** Switch between the AEG and the GBB Pistol, then the
+  Cyber Pistol, standing still, walking and after a shot.
+  Pass: the pistol sits low on the right at about the rifle's angle, both hands on it and no forearm showing; it
+  comes up to the sight smoothly and squares up as it does, the hands whole and never fading.
+- [ ] **No arm ends on Inspect.** Press Y with each replica, at your field of view and at 110, on a wide screen if you
+  have one. Pass: both sleeves run off the edge of the screen all through the turn; no green end or blob comes up in
+  front of you; both hands stay on the replica.
+
+## Volumetric haze in four levels (VF1)
+
+- [ ] **Each level's look and cost on your card.** Settings › Graphics › Volumetric haze now offers Off, Low, Medium
+  and High (Medium preset Low, High preset Medium, Ultra High, Low none). In Depot's hall with the lamps on, on
+  Woodland facing the sun and on Subway's platform, press F3 and step the row through Off, Low, Medium and High.
+  Pass: near you the haze is the same at every level; going up it reaches farther (the hall's far end hazier) and its
+  light shafts get finer and smoother; Low has no flicker or crawling blocks that bother you; the frame time grows a
+  little each step (on the laptop at Medium, Low haze should cost well under 1 ms); High looks as the old "on" did.
+- [ ] **An old Custom setting.** If you had Volumetric haze switched on in a Custom preset before this change, it now
+  reads High.
+
+## Depot's compact hall (DC1)
+
+- [ ] **The west start is a room, not a corridor.** Play Elimination on Depot as Beta (the west) and Attack / Defend
+  as the attackers. From the start, go out each way: east through the gap past the crate rack into Upper mid, north up
+  the stairs to the Yard, south down the stairs to the Pens.
+  Pass: each way out is quick and clear; the crate screens never block you or a bot; from Upper mid, the Yard or the
+  Pens you never see into the start.
+- [ ] **Fights spread over the hall.** Play three rounds of Elimination and three of Attack / Defend on Depot at
+  Normal.
+  Pass: fights happen in the Shoot House rooms, the Lounge, the Offices, the Pens, the Huts and between the containers,
+  not only in the Chrono hall and on the sites; the first fight comes sooner than before (about 12 to 15 s).
+- [ ] **Defending a site has ground in front of it.** Defend on Depot in Attack / Defend and Plant The Bomb.
+  Pass: the poles and the bomb sites stand at the hall's end of A and B; your bots hold the Offices door, Lower mid
+  and the end of the Containers, and the attack meets them there before it reaches a pole.
 
 ## Reporting what you find
 

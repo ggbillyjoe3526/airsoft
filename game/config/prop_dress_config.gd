@@ -56,6 +56,18 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"desk": "res://assets/models/props/office_desk.glb",
 	&"locker": "res://assets/models/props/steel_locker.glb",
 	&"kit_rack": "res://assets/models/props/kit_rack.glb",
+	# Depot's other rack bays (DX1, the owner's photos, 2026-11-15), each three bays taking turns along a row: racking
+	# of shrink-wrapped pallets, stacks of IBC totes and drums, and a mesh-caged parts store. A rack block names one
+	# (its `dress`, tools/depot/build_map.py) and is laid as the racking is (TILE), on the same box.
+	&"wrapped_racking": "res://assets/models/props/wrapped_racking.glb",
+	&"wrapped_racking_b": "res://assets/models/props/wrapped_racking_b.glb",
+	&"wrapped_racking_c": "res://assets/models/props/wrapped_racking_c.glb",
+	&"drum_ibc_stack": "res://assets/models/props/drum_ibc_stack.glb",
+	&"drum_ibc_stack_b": "res://assets/models/props/drum_ibc_stack_b.glb",
+	&"drum_ibc_stack_c": "res://assets/models/props/drum_ibc_stack_c.glb",
+	&"parts_cage": "res://assets/models/props/parts_cage.glb",
+	&"parts_cage_b": "res://assets/models/props/parts_cage_b.glb",
+	&"parts_cage_c": "res://assets/models/props/parts_cage_c.glb",
 	# The game's own map models (DM1, tools/blender/maps): Depot's and Woodland's crates, Depot's plywood walls and
 	# containers.
 	&"crate": "res://assets/models/props/crate.glb",
@@ -84,8 +96,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"sawmill_shed": "res://assets/models/props/sawmill_shed.glb",
 	&"hut_roof": "res://assets/models/props/hut_roof.glb",
 	# Subway's stairs and escalators (Dev 3 SM2, tools/blender/maps/), each laid over its ramps and their barriers
-	# (SET): the two escalator banks, the spiral stair round its core and the stair down to the platforms.
-	&"escalator_upper": "res://assets/models/props/escalator_upper.glb",
+	# (SET): the escalator bank (the upper one archived in SW1), the spiral stair round its core and the stair down to
+	# the platforms.
 	&"escalator_lower": "res://assets/models/props/escalator_lower.glb",
 	&"spiral_stair": "res://assets/models/props/spiral_stair.glb",
 	&"platform_stair": "res://assets/models/props/platform_stair.glb",
@@ -229,6 +241,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## Their chunks are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
 @export var variants: Dictionary[StringName, PackedStringArray] = {
 	&"shelf": PackedStringArray(["shelf_b", "shelf_c"]),
+	&"wrapped_racking": PackedStringArray(["wrapped_racking_b", "wrapped_racking_c"]),
+	&"drum_ibc_stack": PackedStringArray(["drum_ibc_stack_b", "drum_ibc_stack_c"]),
+	&"parts_cage": PackedStringArray(["parts_cage_b", "parts_cage_c"]),
 	&"cordwood": PackedStringArray(["cordwood_b", "cordwood_c"]),
 	&"sandbags": PackedStringArray(["sandbags_b", "sandbags_c"]),
 }
@@ -239,11 +254,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"pine_young": Lay.TREE, &"pine_grown": Lay.TREE, &"pine_old": Lay.TREE, &"oak": Lay.TREE, &"birch": Lay.TREE,
 	&"plywood_header": Lay.RUN,
 	&"palisade": Lay.STAKES, &"watch_tower": Lay.SET, &"footbridge": Lay.SET, &"sawmill_shed": Lay.SET,
-	&"escalator_upper": Lay.SET, &"escalator_lower": Lay.SET, &"spiral_stair": Lay.SET, &"platform_stair": Lay.SET,
+	&"escalator_lower": Lay.SET, &"spiral_stair": Lay.SET, &"platform_stair": Lay.SET,
 	&"cordwood": Lay.GRID, &"fallen_log_5": Lay.GROUND, &"fallen_log_6": Lay.GROUND, &"fallen_log_8": Lay.GROUND,
 	&"root_plate": Lay.GROUND, &"sawbench": Lay.GROUND, &"boards": Lay.GROUND,
 	&"log_tunnel_side": Lay.SIDE, &"log_tunnel_roof": Lay.LINED,
 	&"range_wall": Lay.GRID, &"range_backstop": Lay.GRID, &"sandbags": Lay.GRID,
+	&"wrapped_racking": Lay.TILE, &"drum_ibc_stack": Lay.TILE, &"parts_cage": Lay.TILE,
 }
 ## How far (m) a SET model stands over the top of its box: thin parts drawn for the look only, which stop no one and
 ## no BB (SM2: the platform stair's handrails, over its ramps, as the ceiling's lamps hang under the roof). The model is
@@ -411,7 +427,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"pine_young_crown": 0.95, &"pine_grown_crown": 0.95, &"pine_old_crown": 0.95, &"oak_crown": 0.95,
 	&"birch_crown": 0.95,
 	# Subway's escalators' brushed stainless (SM2): a soft sheen.
-	&"escalator_upper": 0.4, &"escalator_lower": 0.4,
+	&"escalator_lower": 0.4,
 	# The Range's sandbags' sacking (RM2): matt, as the site's own bags (SiteLook's fabric), never a pillow's sheen.
 	&"sandbags": 0.97, &"sandbags_b": 0.97, &"sandbags_c": 0.97, &"sandbags_start": 0.97, &"sandbags_end": 0.97,
 	&"sandbags_single": 0.97,
@@ -423,16 +439,19 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 @export_range(0.0, 1.0) var wear: float = 1.0
 @export var model_wear: Dictionary[StringName, float] = {
 	&"shelf": 0.35, &"shelf_b": 0.35, &"shelf_c": 0.35, &"earth_bank": 0.0,
+	&"wrapped_racking": 0.35, &"wrapped_racking_b": 0.35, &"wrapped_racking_c": 0.35,
+	&"drum_ibc_stack": 0.35, &"drum_ibc_stack_b": 0.35, &"drum_ibc_stack_c": 0.35,
+	&"parts_cage": 0.35, &"parts_cage_b": 0.35, &"parts_cage_c": 0.35,
 	&"pine_young_crown": 0.0, &"pine_grown_crown": 0.0, &"pine_old_crown": 0.0, &"oak_crown": 0.0, &"birch_crown": 0.0,
 	# a thicket's spruce is all boughs (FT1: worn, the dust on its upturned tiers drew its sunlit tops pale beige)
 	&"spruce": 0.0,
 	# Subway's escalators and stairs, swept daily: full dust drew their steps and decks beige (SM2)
-	&"escalator_upper": 0.08, &"escalator_lower": 0.08, &"spiral_stair": 0.12, &"platform_stair": 0.12,
+	&"escalator_lower": 0.08, &"spiral_stair": 0.12, &"platform_stair": 0.12,
 }
 ## Models whose painted parts keep their whole colour, not the look's weathered share of it (LookConfig
 ## .paint_saturation): Subway's escalators' and stairs' safety yellow, which the pull drew cream (SM2). Their other
 ## paints are steel, rubber and stone greys, which the pull leaves as they are.
-@export var full_colour: Array[StringName] = [&"escalator_upper", &"escalator_lower", &"spiral_stair", &"platform_stair"]
+@export var full_colour: Array[StringName] = [&"escalator_lower", &"spiral_stair", &"platform_stair"]
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.
 var _meshes: Dictionary[String, Mesh] = {}

@@ -15,6 +15,7 @@ blocks read from `data/maps/woodland.json` (rerun a structure's script after `to
 | `camo_net.py` | `camo_net.glb` | Depot's net walls, a 2 m section a cell |
 | `roof_truss.py` | `roof_truss.glb`, `roof_lamp.glb` | Depot's roof bays and lamps (`RoofView`) |
 | `pallet_racking.py` | `pallet_racking.glb`, `_b`, `_c` | Depot's tall racks, three bays taking turns (`PropDressConfig.variants`) |
+| `wrapped_racking.py`, `drum_ibc_stack.py`, `parts_cage.py` (with `bay_kit.py`) | `wrapped_racking.glb`, `drum_ibc_stack.glb`, `parts_cage.glb`, each with a `_b` and a `_c` | Depot's other rack bays (DX1): racking of shrink-wrapped pallets, IBC totes and drums on pallets, a mesh parts cage; a rack block names one (`dress`, `tools/depot/extras.py`), laid as the racking is (`Lay.TILE`) |
 | `kit_rack.py` | `kit_rack.glb` | The Range's kit rack (its block names it) |
 | `steel_drum.py`, `pallet.py` | `steel_drum.glb`, `pallet.glb` | Depot's drum blocks, nine stacks on a pallet (CLUSTER) |
 | `plastic_barrel.py` | `plastic_barrel.glb` | Depot's barrel blocks, two a block (ROW) |
@@ -55,6 +56,7 @@ blocks read from `data/maps/woodland.json` (rerun a structure's script after `to
 | `platform_stair.py` | `platform_stair.glb` | Subway's stair to the platforms over its two flights (`Lay.SET`, its handrails `set_heads` over the box) |
 | `railing.py` | `railing_bar.glb`, `railing_top.glb`, `railing_foot.glb`, `railing_post.glb` | Every bar railing's pieces (`RailingMesh`, `MapStyle.railing_look`), fitted to the bars and rails a BB meets |
 | `station_lamps.py` | `strip_lamp.glb`, `tunnel_lamp.glb` | Subway's ceiling strip lamps (`RoofConfig.plain_lamp_model`, turned along their rooms) and the running tunnels' bulkhead lamps (SM5) |
+| `depot_extras.py`, `depot_signs.py`, `depot_cells.py` | `fire_point.glb`, `call_point.glb`, `pipe_run.glb`, `pipe_run_b.glb`, `pipe_run_2.glb`, `depot_sign_<cell>.glb`; `assets/textures/depot/signs.png` | Depot's look-only wall extras (DX1, `StationFixtures`, spots from `tools/depot/extras.py`); the safety signs print from Depot's own sheet (`StationFixturesConfig.sheets`; render with `SIGN_SHEET=` set for `station_render.py`) |
 | `station_extras.py` | `cctv_camera.glb`, `way_sign.glb`, `fire_extinguisher.glb`, `litter_bin.glb`, `edge_sign.glb`, `platform_clock.glb`, `poster_a..d.glb`, `name_board.glb` | Subway's look-only extras (`StationFixtures`, spots from `tools/subway/fixtures.py`) |
 | `ticket_gate.py` | `ticket_gate.glb`, `gate_paddle.glb` | Subway's gate line, a slim pedestal a block with 1 m lanes between, and the paddle door GatePaddles swings in each lane (SM3) |
 | `ticket_machine.py` | `ticket_machine.glb` | Subway's row of four ticket machines (SM3) |

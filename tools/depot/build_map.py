@@ -15,6 +15,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import extras  # noqa: E402
 import layout as L  # noqa: E402
 
 OUT = os.path.join(HERE, "..", "..", "data", "maps", "depot.json")
@@ -55,14 +56,15 @@ def block(kind: str, x1: float, y1: float, z1: float, x2: float, y2: float, z2: 
 
 
 def blocks() -> list[dict]:
-    out = [block("floor", -L.W, -0.5, -L.H, L.W, 0.0, L.H)]
+    out = [block("floor", L.X_WEST, -0.5, -L.H, L.W, 0.0, L.H)]
     # The hall's shell, up to the roof.
     t = 0.5
-    out.append(block("wall", -L.W - t, 0, -L.H - t, L.W + t, L.ROOF, -L.H))
-    out.append(block("wall", -L.W - t, 0, L.H, L.W + t, L.ROOF, L.H + t))
-    out.append(block("wall", -L.W - t, 0, -L.H, -L.W, L.ROOF, L.H))
+    out.append(block("wall", L.X_WEST - t, 0, -L.H - t, L.W + t, L.ROOF, -L.H))
+    out.append(block("wall", L.X_WEST - t, 0, L.H, L.W + t, L.ROOF, L.H + t))
+    out.append(block("wall", L.X_WEST - t, 0, -L.H, L.X_WEST, L.ROOF, L.H))
     out.append(block("wall", L.W, 0, -L.H, L.W + t, L.ROOF, L.H))
     boxes: list[list] = []
+    racks = iter(extras.rack_dress(L.pieces))
     for p in L.pieces:
         k, x1, z1, x2, z2, h = p["kind"], p["x1"], p["z1"], p["x2"], p["z2"], p["h"]
         kind = KINDS[k]
@@ -76,6 +78,8 @@ def blocks() -> list[dict]:
             boxes.append([kind, x1, 2.6, z1, x2, 2.6 + h, z2])
         elif k in DRESS:
             boxes.append([kind, x1, 0, z1, x2, h, z2, DRESS[k], SURFACE.get(k, ""), NOISE.get(k, "")])
+        elif k == "dead":
+            boxes.append([kind, x1, 0, z1, x2, h, z2, next(racks)])
         else:
             boxes.append([kind, x1, 0, z1, x2, h, z2])
     unseat(boxes)
@@ -255,14 +259,17 @@ def doors() -> list[dict]:
 
 
 def build() -> dict:
+    solid = blocks()
+    spawns = L.SPAWNS_W + L.SPAWNS_E
+    middle = (sum(x for x, _ in spawns) / len(spawns), sum(z for _, z in spawns) / len(spawns))
     return {
         "name": "Depot",
-        "blocks": blocks(),
+        "blocks": solid,
         "killY": -10,
         "spawns": [[spot(x, z, EYE_FACING_EAST) for x, z in L.SPAWNS_W],
                    [spot(x, z, EYE_FACING_WEST) for x, z in L.SPAWNS_E]],
         "deadZones": [dead_zone(*L.DEAD_W, EYE_FACING_EAST), dead_zone(*L.DEAD_E, EYE_FACING_WEST)],
-        "lanes": [[{"x": x, "y": 0, "z": z} for x, z in L.LANES[k]] for k in ("n", "m", "s")],
+        "lanes": [[{"x": x, "y": 0, "z": z} for x, z in L.LANES[k]] for k in L.LANE_ORDER],
         "flags": [{"x": x, "y": 0, "z": z} for x, z in L.FLAGS],
         "bombSites": [bomb_site(*s) for s in L.BOMB_SITES],
         "overtimeFlag": {"x": L.OT_FLAG[0], "y": 0, "z": L.OT_FLAG[1]},
@@ -277,7 +284,9 @@ def build() -> dict:
         "bakedLight": {"file": "depot", "dim": dims()},
         # The yard's dust: motes in the lamps' light and the grey puff feet kick up off the slab.
         "dressing": {"seed": 4127, "motes": {"tint": 14210767}, "kickedDust": {"tint": 12171184, "scale": 1},
-                     "site": site(), "wearMarks": marks()},
+                     "site": site(), "wearMarks": marks(),
+                     # the hall's wall extras (DX1): look only, drawn by StationFixtures
+                     "fixtures": extras.fixtures(solid, middle)},
         "areas": areas(),
     }
 

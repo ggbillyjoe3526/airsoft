@@ -431,7 +431,7 @@ func _build_range_note() -> Control:
 	var plate := HBoxContainer.new()
 	plate.add_theme_constant_override("separation", 0)
 	var rule := ColorRect.new()
-	rule.color = GameTheme.ACCENT
+	rule.color = GameTheme.accent
 	rule.custom_minimum_size = Vector2(NOTE_RULE, 0.0)
 	plate.add_child(rule)
 	var panel := PanelContainer.new()
@@ -444,7 +444,7 @@ func _build_range_note() -> Control:
 	panel.add_theme_stylebox_override("panel", face)
 	var words := VBoxContainer.new()
 	words.add_theme_constant_override("separation", NOTE_WORDS_GAP)
-	words.add_child(MenuParts.spaced(tr("LOADOUT_RANGE_KICKER").to_upper(), NOTE_KICKER_SIZE, 800, GameTheme.ACCENT,
+	words.add_child(MenuParts.spaced(tr("LOADOUT_RANGE_KICKER").to_upper(), NOTE_KICKER_SIZE, 800, GameTheme.accent,
 			NOTE_KICKER_SPACING))
 	var text := MenuParts.text(tr("LOADOUT_RANGE_NOTE"), NOTE_SIZE, 600, GameTheme.TEXT)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

@@ -8,9 +8,10 @@ You carry two at once, a primary and a sidearm, picked in your [Loadout](Loadout
 dark olive gloves and sleeves, holding the one in your hands. A rifle sits low and near at the hip, so you see your
 left hand under the handguard just ahead of the magazine, its thumb along the near side and its forearm running
 up beside the rifle, and your right hand stays below the screen. A pistol
-is held tight and close in both hands, the left wrapped round the right, a little right of the middle of the screen. Raise the
-sight and your hands leave the view: a rifle hides them behind itself, and only the top of them shows under a
-pistol's slide. With a grip fitted your left hand closes round the grip, high under the handguard.
+is held tight in both hands, the left wrapped round the right, low on the right of the screen as a rifle is, turned a
+little so you see its side. Raise the
+sight and a rifle hides your hands behind itself; a pistol comes up to the middle in both hands, held whole under
+its slide. With a grip fitted your left hand closes round the grip, high under the handguard.
 
 The replica moves with you: it bobs with your steps, rises and falls a little as you breathe, leans into a strafe,
 dips when you land and flicks lightly with each shot. With the sight raised it holds almost still, and **Reduced
@@ -46,9 +47,10 @@ round a corner, three BBs at once. The **Compact SMG** is close quarters on the 
 
 An electric rifle (an AEG, "automatic electric gun"), with a motor whirr on every shot. It fires **single shots,
 3-round bursts or full auto**: press **B** to change mode, and the fire selector on the replica shows the mode you
-are in. On an indoor field (Depot) it starts each round on single shots: [no full auto indoors](Maps#depot).
+are in. On an indoor field (Depot) it starts each round on 3-round bursts: [no full auto indoors](Maps#depot).
 A battery drives it, so the battery you fit sets its rate of fire. It is a short carbine, about 67 cm long: a
-quad-rail handguard with a ribbed cover, an A-frame front sight, a small ghost-ring rear sight, a raked grip moulded
+quad-rail handguard with open gaps between its rails and a ribbed cover on the left one, a ribbed ring behind it, an
+angled forward assist, an A-frame front sight, a small ghost-ring rear sight, a raked grip moulded
 in one piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the
 charging handle pulled back, the dust cover open and the hop-up dial turn.
 
@@ -65,8 +67,8 @@ with it back, the barrel shows in front of it.
 It is the quickest replica to bring up, so switching to it beats any reload, and for a pistol it groups tightly,
 tighter still from the hip. Against that it kicks the hardest and holds the fewest BBs. Gas drives it, so the gas
 you load sets its energy: stronger gas pushes harder and kicks harder. It is a compact
-striker pistol: a squared slide with rounded edges, a chamfered nose and serrations at the front and back, a
-railed dust cover, a raked grip with stippled panels
+striker pistol: a squared slide with rounded edges, a chamfered nose, serrations at the front and back and
+a lined cover plate on its back, a railed dust cover, a raked grip with stippled panels
 and finger grooves, and a thumb rest. Its sights are a white U at the back and a post with a white dot at the front:
 aimed, the post sits in the U. It takes a laser, a silencer and an extended magazine. It is in your kit from
 the start.
@@ -120,8 +122,8 @@ over the pump.
 A compact electric SMG built for shooting on the move, unlocked at level 12. It fires **single shots or full auto**
 (no burst) faster than any other replica, you move a little quicker with it than with a rifle, and moving spreads its
 shots only half as much as it does the others', so on the run it groups tighter than the AEG Rifle. It is the
-quickest of the rifles to bring up and to reload. On an indoor field it starts each round on single shots, as the AEG
-Rifle does ([no full auto indoors](Maps#depot)).
+quickest of the rifles to bring up and to reload. On an indoor field it starts each round on single shots, having
+no burst ([no full auto indoors](Maps#depot)).
 
 Against that, its reach is short, its shots are a little wider aimed, and a magazine is empty in under three seconds
 with the trigger held. It takes an optic, the Red Laser or Weapon Torch and a muzzle part; no grip, barrel or
@@ -163,7 +165,8 @@ the next match.
 In your hands a replica is made of what the real thing would be, under whatever colours it wears: the GBB Pistol's
 slide is coated steel with a satin sheen, the AEG Rifle's receiver and rail are anodised aluminium, the
 barrels and the Sniper Rifle's action are dark steel, and the grips, stocks and the pistol's frame are matte polymer with a
-moulded grain. The metal catches the light; the polymer does not.
+moulded grain. Metal and polymer in the same colours are a close shade: the metal has a soft satin sheen, the polymer
+is matte.
 The parts you fit are made of something too: scopes, the red dot, the silencer and the torch are anodised aluminium,
 grips are polymer, their pads and caps rubber, the Hi-Cap Magazine a steel shell and the Low-Cap polymer.
 

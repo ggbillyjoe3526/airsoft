@@ -50,10 +50,11 @@ func _again() -> Settings:
 func test_the_defaults_are_the_owners() -> void:
 	assert_false(s.crouch_toggle, "crouch is held (owner, 2026-10-18)")
 	assert_false(s.aim_toggle, "aim is held (owner, 2026-10-18)")
-	assert_eq(s.volumes[&"Master"], 1.0)
-	assert_eq(s.volumes[&"Effects"], 0.7)
-	assert_eq(s.volumes[&"Power"], 1.0)
-	assert_eq(s.volumes[&"Ambience"], 0.2, "ambience 20 % (owner, 2026-11-01; AU1)")
+	# Owner, 2026-11-15 (FV1): 90, 80, 80, 30, 40.
+	assert_eq(s.volumes[&"Master"], 0.9)
+	assert_eq(s.volumes[&"Effects"], 0.8)
+	assert_eq(s.volumes[&"Power"], 0.8)
+	assert_eq(s.volumes[&"Ambience"], 0.3)
 	assert_eq(s.volumes[&"Interface"], 0.4)
 	assert_eq(s.fov, tuning.view.horizontal_fov_16x9, "the field of view starts where the camera config does")
 	assert_eq(s.sensitivity, tuning.controls.sensitivity)
@@ -85,7 +86,7 @@ func test_settings_round_trip_through_the_save_file() -> void:
 	assert_eq(t.mouse_dpi, 1600)
 	assert_almost_eq(t.volumes[&"Effects"], 0.25, 1e-6)
 	assert_eq(t.volumes[&"Interface"], 0.0)
-	assert_eq(t.volumes[&"Master"], 1.0)
+	assert_eq(t.volumes[&"Master"], Settings.VOLUME_DEFAULTS[&"Master"])
 	assert_eq(t.window_mode, Settings.WindowMode.BORDERLESS)
 	assert_false(t.vsync)
 	assert_almost_eq(t.fov, 100.0, 1e-6)
@@ -118,11 +119,8 @@ func test_a_version_1_file_still_at_the_old_defaults_moves_to_the_new_ones() -> 
 	assert_eq(t.load_message, "")
 	assert_eq(t.window_mode, Settings.WindowMode.EXCLUSIVE)
 	assert_false(t.vsync)
-	assert_eq(t.volumes[&"Effects"], 0.7)
-	assert_eq(t.volumes[&"Ambience"], 0.2)
-	assert_eq(t.volumes[&"Interface"], 0.4)
-	assert_eq(t.volumes[&"Master"], 1.0)
-	assert_eq(t.volumes[&"Power"], 1.0)
+	for bus: StringName in Settings.VOLUME_BUSES:
+		assert_eq(t.volumes[bus], Settings.VOLUME_DEFAULTS[bus], String(bus))
 	assert_true(t.save(path), "saved again, now as version 2")
 	assert_eq(SaveFile.read(path, Settings.KIND).version, Settings.VERSION)
 
@@ -136,9 +134,9 @@ func test_a_version_1_file_keeps_what_the_player_changed() -> void:
 	assert_eq(t.window_mode, Settings.WindowMode.BORDERLESS, "chosen, so kept")
 	assert_false(t.vsync)
 	assert_eq(t.volumes[&"Master"], 0.9)
-	assert_eq(t.volumes[&"Power"], 0.5)
+	assert_almost_eq(t.volumes[&"Power"], 0.4, 1e-6, "50 % then sounds the same now: 40 % (FV1's gain)")
 	assert_eq(t.volumes[&"Interface"], 0.2)
-	assert_eq(t.volumes[&"Effects"], 0.7, "left at the old default: moved")
+	assert_eq(t.volumes[&"Effects"], Settings.VOLUME_DEFAULTS[&"Effects"], "left at the old default: moved")
 	SaveFile.write(path, Settings.KIND, 1, {"vsync": true, "volumes": {"Effects": 0.75}})
 	t = _again()
 	assert_false(t.vsync)
@@ -184,16 +182,14 @@ func test_reset_gives_the_new_defaults() -> void:
 	s.reset_save(path)
 	assert_eq(s.window_mode, Settings.WindowMode.EXCLUSIVE)
 	assert_false(s.vsync)
-	assert_eq(s.volumes[&"Effects"], 0.7)
-	assert_eq(s.volumes[&"Power"], 1.0)
-	assert_eq(s.volumes[&"Ambience"], 0.2)
-	assert_eq(s.volumes[&"Interface"], 0.4)
+	for bus: StringName in Settings.VOLUME_BUSES:
+		assert_eq(s.volumes[bus], Settings.VOLUME_DEFAULTS[bus], String(bus))
 
 
 func test_a_missing_file_is_silent_defaults() -> void:
 	s.load_file(path)
 	assert_eq(s.load_message, "")
-	assert_eq(s.volumes[&"Effects"], 0.7)
+	assert_eq(s.volumes[&"Effects"], Settings.VOLUME_DEFAULTS[&"Effects"])
 
 
 func test_a_damaged_file_falls_back_with_a_message() -> void:
@@ -247,9 +243,8 @@ func test_each_bad_value_keeps_its_own_default() -> void:
 	assert_false(t.vsync, "a number is not a flag: the default")
 	assert_true(t.show_fps)
 	assert_eq(t.volumes[&"Master"], 0.5)
-	assert_eq(t.volumes[&"Effects"], 0.7)
-	assert_eq(t.volumes[&"Power"], 1.0)
-	assert_eq(t.volumes[&"Ambience"], 0.2)
+	for bus: StringName in [&"Effects", &"Power", &"Ambience"]:
+		assert_eq(t.volumes[bus], Settings.VOLUME_DEFAULTS[bus], String(bus))
 	assert_eq(t.volumes[&"Interface"], 0.0)
 	assert_eq(Array(t.bindings.codes(&"reload")), [KEY_R])
 
@@ -293,7 +288,12 @@ func test_applying_volumes_sets_each_buss_db() -> void:
 	SettingsApply.apply_audio(s)
 	assert_almost_eq(AudioServer.get_bus_volume_db(AudioServer.get_bus_index(&"Master")), linear_to_db(0.5), 1e-3)
 	assert_almost_eq(AudioServer.get_bus_volume_db(AudioServer.get_bus_index(&"Effects")), linear_to_db(0.25), 1e-3)
-	assert_almost_eq(AudioServer.get_bus_volume_db(AudioServer.get_bus_index(&"Power")), 0.0, 1e-3)
+	var power_db := AudioServer.get_bus_volume_db(AudioServer.get_bus_index(&"Power"))
+	assert_almost_eq(power_db, linear_to_db(Settings.VOLUME_GAINS[&"Power"]), 1e-3, "100 %: louder than 0 dB (FV1)")
+	s.volumes[&"Power"] = 0.8
+	SettingsApply.apply_audio(s)
+	assert_almost_eq(AudioServer.get_bus_volume_db(AudioServer.get_bus_index(&"Power")), 0.0, 1e-3,
+			"80 % is the old 100 %: 0 dB")
 	var ambience := AudioServer.get_bus_index(&"Ambience")
 	assert_true(AudioServer.is_bus_mute(ambience), "0 % is silence")
 	assert_false(AudioServer.is_bus_mute(AudioServer.get_bus_index(&"Effects")))
@@ -382,7 +382,7 @@ func test_a_file_from_before_the_graphics_fields_loads_unchanged() -> void:
 		"show_fps": true, "volumes": {"Master": 0.7},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 3, "3 since AU1 moved the ambience's default; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 5, "5 since FV1 moved the field of view's and volumes' defaults; adding fields does not bump it")
 	assert_eq(t.load_message, "", "an older file is not a damaged one")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_eq(t.window_mode, Settings.WindowMode.BORDERLESS)
@@ -554,7 +554,7 @@ func test_a_file_from_before_the_accessibility_fields_loads_unchanged() -> void:
 		"sensitivity": 1.5, "fov": 95.0, "realistic_colours": true, "hud": {"colour": 2},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 3, "3 since AU1 moved the ambience's default; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 5, "5 since FV1 moved the field of view's and volumes' defaults; adding fields does not bump it")
 	assert_eq(t.load_message, "")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_almost_eq(t.fov, 95.0, 1e-6)

@@ -1,8 +1,8 @@
 class_name SettingsApply
 ## Puts Settings into the game, each group on its own so a slider only does its own work: the mouse and the camera (the
 ## PlayTuning that PlayerInput and the view read live), the audio buses' volumes, the window (its monitor and mode),
-## V-Sync and the frame-rate limit, the graphics (GraphicsApply, on the root viewport) and the key bindings (the
-## InputMap). Nothing is cached, so the change shows at once. The window goes through `screens()`, which a test swaps
+## V-Sync and the frame-rate limit, the graphics (GraphicsApply, on the root viewport), the key bindings (the
+## InputMap) and the interface's colour (GameTheme). Nothing is cached, so the change shows at once. The window goes through `screens()`, which a test swaps
 ## for a stand-in: the headless display server has no screens and never changes mode.
 
 ## Silence: the bus is muted at a volume of 0 rather than set to minus infinity.
@@ -17,6 +17,7 @@ static func apply_all(s: Settings) -> void:
 	apply_display(s, true)
 	apply_graphics(s)
 	apply_bindings(s)
+	apply_ui_colour(s)
 	s.changed.emit()
 
 
@@ -34,7 +35,13 @@ static func apply_controls(s: Settings) -> void:
 	s.tuning.view.horizontal_fov_16x9 = s.fov
 
 
-## Each bus's volume from its share.
+## The interface's colour (UA2): GameTheme's accent and the shared Theme. Whether it changed (the menus are then built
+## again, Main.restyle, as a page keeps the colours it was built with).
+static func apply_ui_colour(s: Settings) -> bool:
+	return GameTheme.use_colour(s.ui_colour)
+
+
+## Each bus's volume from its share, times its gain (Settings.VOLUME_GAINS).
 static func apply_audio(s: Settings) -> void:
 	for bus: StringName in Settings.VOLUME_BUSES:
 		var i := AudioServer.get_bus_index(bus)
@@ -42,8 +49,9 @@ static func apply_audio(s: Settings) -> void:
 			push_warning("settings: no audio bus %s" % bus)
 			continue
 		var v: float = s.volumes[bus]
+		var gain: float = Settings.VOLUME_GAINS.get(bus, 1.0)
 		AudioServer.set_bus_mute(i, v <= 0.0)
-		AudioServer.set_bus_volume_db(i, linear_to_db(v) if v > 0.0 else MUTE_DB)
+		AudioServer.set_bus_volume_db(i, linear_to_db(v * gain) if v > 0.0 else MUTE_DB)
 
 
 ## The window and the frame rate: with `place` (at start, and on picking a Monitor) the window onto the saved monitor

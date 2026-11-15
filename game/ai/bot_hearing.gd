@@ -19,7 +19,7 @@ static func observe(state: GameState, w: BotWorld) -> void:
 		var e := events.items[i]
 		match e.kind:
 			GameEvent.Kind.SHOT:
-				var shooter := _character(w, e.actor)
+				var shooter := w.character(e.actor)
 				if shooter != null:
 					var r := shooter.armament.replica()
 					var heard := w.cfg.hearing_distance * (r.heard_scale if r != null else 1.0)
@@ -27,34 +27,34 @@ static func observe(state: GameState, w: BotWorld) -> void:
 			GameEvent.Kind.CHARACTER_HIT:
 				_hit_call(e, w)
 			GameEvent.Kind.FOOTSTEP:
-				var walker := _character(w, e.actor)
+				var walker := w.character(e.actor)
 				if walker != null and Elimination.is_in_play(walker):
 					_hear(w, walker, walker.position, walker.position, footstep_reach(e, w.cfg), null)
 			GameEvent.Kind.VAULT:
-				var vaulter := _character(w, e.actor)
+				var vaulter := w.character(e.actor)
 				if vaulter != null and Elimination.is_in_play(vaulter):
 					_hear(w, vaulter, vaulter.position, vaulter.position, w.cfg.footstep_hearing_vault, null)
 			GameEvent.Kind.BB_IMPACT:
 				_near_miss(e, w)
 			GameEvent.Kind.PROP_KNOCK:
-				var knocker := _character(w, e.actor)
+				var knocker := w.character(e.actor)
 				if knocker != null and Elimination.is_in_play(knocker):
 					_hear(w, knocker, e.position, knocker.position, e.reach, null)
 			GameEvent.Kind.FLASH_BANG, GameEvent.Kind.SMOKE_POP:
 				# An enemy's bomb going off (SF2): news of someone where it went off, a flash's from further; none of a
 				# thrower already out (BP2: one hit before the pop sent bots searching for nobody, as a door's never does).
-				var thrower := _character(w, e.actor)
+				var thrower := w.character(e.actor)
 				if thrower != null and Elimination.is_in_play(thrower):
 					var reach := w.cfg.bang_hearing if e.kind == GameEvent.Kind.FLASH_BANG else w.cfg.pop_hearing
 					_hear(w, thrower, e.position, e.position, reach, null, e.position)
 			GameEvent.Kind.DOOR, GameEvent.Kind.LIFT:
 				# A door, or a lift's chime, doors or motor (MT2): news of whoever worked it, at the door.
-				var user := _character(w, e.actor)
+				var user := w.character(e.actor)
 				if user != null and Elimination.is_in_play(user):
 					_hear(w, user, e.position, e.position, e.reach, null, e.position, false, false, false)
 			GameEvent.Kind.PROP_RING:
 				# Heard where it rang, as a guess there, and faintly.
-				var shooter := _character(w, e.actor)
+				var shooter := w.character(e.actor)
 				if shooter != null and Elimination.is_in_play(shooter):
 					_hear(w, shooter, e.position, e.position, e.reach, null, e.position, false, true)
 
@@ -83,8 +83,8 @@ static func _footstep_range(kind: int, cfg: BotConfig) -> float:
 ## as the shooter stands up to how far gunfire carries (the shot was heard too), then off by hearing_error as any sound.
 ## Not from a BB fired by someone hit since (they are walking off).
 static func _hit_call(e: GameEvent, w: BotWorld) -> void:
-	var victim := _character(w, e.target)
-	var shooter := _character(w, e.actor)
+	var victim := w.character(e.target)
+	var shooter := w.character(e.actor)
 	if victim == null or shooter == null or not Elimination.is_in_play(shooter) or victim.team == shooter.team:
 		return
 	var flat := Vector2(e.direction.x, e.direction.z)
@@ -105,7 +105,7 @@ static func _hit_call(e: GameEvent, w: BotWorld) -> void:
 
 ## An enemy BB landing near a bot puts it under fire and gives away roughly where it came from, however far the shot.
 static func _near_miss(e: GameEvent, w: BotWorld) -> void:
-	var shooter := _character(w, e.actor)
+	var shooter := w.character(e.actor)
 	for b in w.bots:
 		if shooter != null and shooter.team == b.character.team:
 			continue
@@ -195,13 +195,6 @@ static func _guess(w: BotWorld, b: Bot, source: Vector3, dist: float) -> Vector3
 	var floor_y := w.nav.floor_at(out)
 	out.y = b.character.position.y if is_nan(floor_y) else floor_y
 	return out
-
-
-static func _character(w: BotWorld, id: int) -> Character:
-	for c in w.characters:
-		if c.id == id:
-			return c
-	return null
 
 
 ## Bot `b` was shot at by `shooter` (or a teammate by it was hit): it makes the shooter out to

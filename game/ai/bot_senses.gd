@@ -143,7 +143,7 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 			best_part = part
 			best_d = d
 	if best != null and best.id != b.target_id and b.target_id >= 0:
-		var cur := _character(w, b.target_id)
+		var cur := w.character(b.target_id)
 		if cur != null and Elimination.is_in_play(cur) and _flat(me.position, cur.position) - best_d < cfg.target_switch_margin:
 			var part := visible_part(me, cur, w, sight_reach(b, cur, w))
 			if part > 0.0:
@@ -156,12 +156,25 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 	if w.time - c.seen_at > cfg.contact_grace:
 		# Someone stepping out where the bot already aims (a held angle) is answered sooner and with a steadier aim.
 		var pre_aimed := _aimed_at(b, w, best, best_part)
-		c.react_at = w.time + b.pick(b.skill.pre_aim_reaction_time if pre_aimed else b.skill.reaction_time)
+		c.react_at = w.time + b.pick(b.skill.pre_aim_reaction_time if pre_aimed else b.skill.reaction_time) \
+				+ notice_time(me, best, best_d, cfg)
 		c.acquired_at = w.time - (b.skill.pre_aim_settled * b.skill.aim_settle_time if pre_aimed else 0.0)
 		c.first_seen_at = w.time
+		c.reaction_from = w.time
 		c.held = b.skill.holds_angles and b.holding and pre_aimed
 		BotAim.fresh_error(b, cfg, true)
 		BotRadio.saw(b, w, best)
+	elif w.time - c.seen_at > cfg.reacquire_after:
+		# Seen again after a moment out of sight (AIM1): the same contact, but it has to find them again. A reaction
+		# still under way runs on; its aim keeps no more than reacquire_settled of its settling, the error unsettled
+		# wandering any way off them, not to one side (a first aim beside a corner sent BBs off its edge to bounce on).
+		var kept := clampf(BotAim.settling(w.time, c, cfg), 0.0, b.skill.reacquire_settled * b.skill.aim_settle_time)
+		c.react_at = maxf(c.react_at, w.time + b.pick(b.skill.reacquire_time))
+		c.reaction_from = w.time
+		c.acquired_at = w.time - kept
+		BotAim.fresh_error(b, cfg, false)
+		b.first_yaw = 0.0
+		b.first_pitch = 0.0
 	elif c != b.contact:
 		# Back on someone seen moments ago: no new reaction, but this target's aim error, not the last one's.
 		BotAim.fresh_error(b, cfg, false)
@@ -178,6 +191,20 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 	b.has_last_known = true
 
 
+## How much later than its reaction `viewer` answers a fresh sighting of `target`, `dist` m away level (s; AIM2): more
+## off the middle of its view and further away, less for someone on the move, none within close_awareness.
+static func notice_time(viewer: Character, target: Character, dist: float, cfg: BotConfig) -> float:
+	if dist <= cfg.close_awareness:
+		return 0.0
+	var dx := target.position.x - viewer.position.x
+	var dz := target.position.z - viewer.position.z
+	var facing := clampf((-sin(viewer.yaw) * dx - cos(viewer.yaw) * dz) / maxf(dist, 1e-3), -1.0, 1.0)
+	var off := clampf(acos(facing) / maxf(deg_to_rad(cfg.fov_deg) * 0.5, 1e-3), 0.0, 1.0)
+	var t := cfg.notice_edge_time * off * off + cfg.notice_far_time * clampf(dist / cfg.view_distance, 0.0, 1.0)
+	var speed := Vector2(target.velocity.x, target.velocity.z).length()
+	return t * (cfg.notice_moving_share if speed >= cfg.notice_moving_speed else 1.0)
+
+
 ## The target `b` has in mind if it is still in play and not forgotten; a target that is out or forgotten is dropped (an
 ## enemy heard meanwhile is taken up instead).
 static func current_target(b: Bot, w: BotWorld) -> Character:
@@ -186,7 +213,7 @@ static func current_target(b: Bot, w: BotWorld) -> Character:
 	if w.time - b.last_seen_at() > w.cfg.memory_time:
 		b.forget_target()
 		return null
-	var c := _character(w, b.target_id)
+	var c := w.character(b.target_id)
 	if c != null and Elimination.is_in_play(c):
 		return c
 	b.forget_target()
@@ -262,13 +289,6 @@ static func _contact_for(b: Bot, id: int) -> Bot.Contact:
 		c = Bot.Contact.new()
 		b.contacts[id] = c
 	return c
-
-
-static func _character(w: BotWorld, id: int) -> Character:
-	for c in w.characters:
-		if c.id == id:
-			return c
-	return null
 
 
 static func _flat(a: Vector3, b: Vector3) -> float:

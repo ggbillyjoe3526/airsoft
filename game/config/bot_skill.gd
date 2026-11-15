@@ -23,6 +23,9 @@ extends Resource
 @export var aim_error_tracking: float = 0.11
 ## Share of the target's movement a bot leads by over the BB's flight.
 @export var lead_factor: float = 0.5
+## Extra aim error (degrees) the moment an enemy BB passes close (BotConfig.suppression_radius, AIM2), easing away over
+## BotConfig.flinch_time: a BB past the ear makes anyone flinch, so shooting back at a bot spoils its aim.
+@export var aim_error_under_fire_deg: float = 2.5
 ## Trigger held per burst, and the pause between bursts (s).
 @export var burst: Vector2 = Vector2(0.2, 0.45)
 @export var burst_pause: Vector2 = Vector2(0.3, 0.65)
@@ -46,6 +49,11 @@ extends Resource
 ## reaction_time (s), with this share of its aim settling already done. Below Hard the same as reaction_time, and none.
 @export var pre_aim_reaction_time: Vector2 = Vector2(0.35, 0.6)
 @export var pre_aim_settled: float = 0.0
+## Someone seen again after a moment out of sight (BotConfig.reacquire_after, within contact_grace; AIM1): it answers
+## in this time (s), its aim keeping at most this share of the settle time's settling, the first aim off to one side
+## again. You ducked back, so it has to find you again: shorter than a fresh reaction, never none.
+@export var reacquire_time: Vector2 = Vector2(0.25, 0.4)
+@export var reacquire_settled: float = 0.3
 ## Clearing corners (Hard): near the enemy (in their half, or with a threat in mind) it walks and aims at each corner
 ## ahead as it opens instead of where it walks, leaning out past a near one; closing in on someone heard or lost, at the
 ## corner they are behind. With a threat in mind it tops up its magazine only from cover.

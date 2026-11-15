@@ -211,8 +211,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   far as its magazine lets the palm stay on the replica; the forearm lower in the view). "Keep that version"
   (06:34, of the vertical grip's fourth-look hold). The pistols' size at the hip (08:38, on a picture of three
   distances beside his reference shots, the reviewer having found them small): he chose "25 cm, clearly larger" over
-  keeping 34 cm and over 29 cm, so both pistols sit 25 cm from the eye, on the same line from it as his place of
-  2026-11-06 (`ViewModelConfig.hip`). The bare hands (14:01, on the repainted skin in game): "Remove the white
+  keeping 34 cm and over 29 cm, so both pistols sat 25 cm from the eye, on the same line from it as his place of
+  2026-11-06 (`ViewModelConfig.hip`; replaced by HA2 below). The bare hands (14:01, on the repainted skin in game): "Remove the white
   finger nail tips, make the tendons more subtle", and of the skin's texture "Keep the texture as is": the nails have
   no white free edge and a faint moon, the tendons a little under half their shade and height
   (`skin.NAIL_TONE`, `MOON`, `TENDON_FORM`, `TENDON`); of that picture, "Perfect" (14:17). The AEG's far side (21:21, on a card: its
@@ -221,6 +221,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   about 1 cm past the handguard's end. Default taken: the bots stay one-handed on pistols (HG1 below; they copy
   `<id>_Hold`).
   His reference pictures are other games' and set hand placement and framing only; the art is our own.
+- **Pistols at the rifles' place; your shoulders stay put through an inspect (owner, 2026-11-15, HA2).** "make the
+  pistol take up less space on screen. it should roughly be same scale/angle as rifle" (replacing his 25 cm pick
+  above) and "when inspecting rifles the player can see the end of the arm models". Both pistols sit low on the right
+  as the rifles do, 35 cm from the eye, turned 0.15 rad in so their side shows (`ViewModelConfig.hip`, `hip_turn`,
+  gone as the sight comes up); the reload move follows, so a reload crosses the same share of the screen as before,
+  and an inspect turns from the new place. Inspected, the arms no longer turn rigidly with the replica: each
+  shoulder stays where your body has it (coming only as near as the hand needs to keep hold) and the elbow's way with
+  it (`ArmsTuck`, both sides), so a sleeve's cut-off end never turns into view, checked at the widest field of view on
+  a 21:9 screen. Defaults taken: 35 cm and 0.15 rad from pictures beside the AEG and the Compact SMG at the hip; he
+  called the pictures "perfect" (11:50) and added "the pistol ADS shows the hand fading, it shouldn't do this", so
+  aimed a pistol's hands are drawn whole (`aim_hands_hint` empty; it replaces his HA1 pick of the tops only).
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands
   copy the first-person holds he approved (`assets/models/arms/arms.glb`), so a change to a first-person hold changes
   the bots' too: the right hand high on the grip, index on the trigger, thumb along the grip's left side ("the thumb
@@ -521,12 +532,24 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Bots and balance
 
+- **Bot teams vary how they carry out their plan (owner, 2026-11-15, RV1; Claude's defaults).** The plan (split, pair,
+  stack over the authored lanes) is drawn as before; each round adds a team tempo, shorter pauses in a bot's own half,
+  a per-bot lane shift and the odd lane crossing, and in Attack / Defend and Plant The Bomb sometimes a defender held
+  further up its lane. All on streams of their own, so the plan draws don't move. Values and figures:
+  `docs/records/RV1.md`; numbers in `game/config/bot_config.gd` › Lanes and holds.
 - **The audit's play questions (owner, 2026-11-14, AUD1).** Bots keep squeezing past Subway's works wagons on the
-  track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a
-  6 s defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots
-  only. A holstered bot's arms swing as it steps, a switch between two replicas of one class plays its own put-away
-  and draw, and a slow-sprung Sniper Rifle's bolt is home with the recording's last knock: looks only, the timing of
-  a shot or a switch is unchanged.
+  track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a 6 s
+  defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots only.
+  (The fuse is replaced by each field's own on 2026-11-15, PB4, below.) A holstered bot's arms swing as it steps, a
+  switch between two replicas of one class plays its own put-away and draw, and a slow-sprung Sniper Rifle's bolt is
+  home with the recording's last knock: looks only, the timing of a shot or a switch is unchanged.
+- **Plant The Bomb's fuse is each field's own (owner's ask, 2026-11-15, PB4; the values are Claude's).** He asked for
+  the attackers' win rate to be made fairer. The fuse is the lever (data/maps.md `Fuse (s)`, the game's 30 s where a
+  field has none), set from bot matches to near half the rounds for the attackers: Depot 16 s, Subway 22 s, Woodland 23
+  s; on the reworked layouts with the bots' route variety (PB5, measured again on main 2851ca0): Depot 24 s, Subway 22
+  s, Woodland 25 s. The defuse stays 6 s and the plant 3.5 s, the lengths of his recordings. A field whose layout
+  changes has its fuse measured again (32 seeds at Normal, `docs/records/PB4.md`), and every fuse leaves a defending
+  player within 15 m of the bomb time to reach it before a bot takes the defuse over.
 - **Bots throw their bombs as a player would (2026-10-30, SF2; Claude's defaults).** A smoke when pinned in cover
   (an enemy BB close in the last 2 s) by someone 8 to 35 m off with no cloud between them yet, half way to them; a flash
   round a corner it is searching toward, 4 to 16 m off, landing before its bang and never where a teammate close by
@@ -605,6 +628,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   defaults).** An enemy counts only if the bots' own sight rules let you see them, and the mark stays over where they
   were seen, never following them, on screen and on the minimap (step 27 plan). One teammate answers each ping.
   Numbers: `legacy/browser/docs/records/PG1.md`.
+- **The comms wheel, Spotted, the ping as intention and Cover me (owner, 2026-11-15, CW1).** The order wheel is Spotted in a
+  circle in the middle with four same-size buttons a side, names only: right Watching Here, Follow Me, Cover Me, Need
+  a Mag; left Team Plan, Go There, Hold Here, Regroup. A tap of its key spots the enemy under the view: a yellow arrow
+  over them for 10 s, seen through cover, and bot teammates near them go after them or watch them. A ping of a spot
+  says you are heading there: teammates near you may come along, never must; Go There is the strict order. Claude's
+  defaults (`docs/records/CW1.md`): a 60 % roll within 40 m, shared within 30 m, Cover me as one helper beside you
+  until you are 30 m off.
 - **Bots ask the nearest teammate within 30 m for a magazine, and bring one when asked (2026-10-15, MG1).** Fights and
   cover come first. Dev settings › Bots run low on BBs (a cheat, off) shows the bot side.
 - **Routes are searched one a tick, bots and walk-offs sharing the turn (2026-10-18, BE1).** The search is Godot's
@@ -650,8 +680,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   comes on full auto, any replica now or later and the bots' too, to semi (or burst) at the start of every round
   there; the player can still switch to auto in the round. Bots may too, but only for a target in open space down a
   long sight line, and not every time (owner, 2026-11-02: "It's an option; it doesn't mean they have to";
-  `BotFireMode`). Both hold on every map later given a Start mode (owner, 2026-11-02). Depot, the one fully indoor
-  field, starts on semi; the other fields start replicas as they come and
+  `BotFireMode`). Both hold on every map later given a Start mode (owner, 2026-11-02). The indoor fields (Depot,
+  Subway) start on burst (owner, 2026-11-15, FV1; semi before): the AEG on burst, a replica without burst (the
+  Compact SMG) on semi, one that comes on semi (the Cyber) on semi; a bot on burst taps a burst at a time at a
+  player's pace (`semi_tap_gap` after each burst ends). The other fields start replicas as they come and
   keep a selector as set for the match. The owner's exception (2026-11-14, AUD2): bots holding the Compact SMG go
   full auto there at a target within 12 m (`BotConfig.close_auto_replicas`, `close_auto_range`; they go to it from
   11 m in and keep it out to 12, `close_auto_slack`, so the selector doesn't flick at the edge); beyond that, and for
@@ -778,8 +810,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the blocks' corner, `MapStyle`), which bots by night (WL6) share. Grass and leaves are `RayHit.Surface` 6 and 7: BBs
   on them puff and sound as earth and never ricochet. A point on sloping ground is checked against the ground under it
   (field.onFloor), not its nav cell's middle.
-- **Depot is an indoor hall, built from concept 3 (owner, 2026-10-31, DR1).** 108 x 72 m under a roof (no sky), three
-  bent lanes round dead space (plywood rooms and racking 3 m tall), nine links (two tight alleys, two unlit tunnels:
+- **Depot is an indoor hall, built from concept 3 (owner, 2026-10-31, DR1).** 108 x 72 m under a roof (no sky; 98 x 72
+  m since DC1, below), three bent lanes round dead space (plywood rooms and racking 3 m tall), nine links (eight and one tight alley since DC1) (two tight
+  alleys, two unlit tunnels:
   dark, never pitch black), not mirrored but timed even: both ends reach the Chrono hall within 1.5 s, and each owns a
   side lane by 1 to 4 s. 5v5 or 6v6 only; bots see 55 m there (`botSight`); no catwalks; the Range stays its own map.
   The layout lives in `tools/depot/layout.py` and `build_map.py` writes `data/maps/depot.json`: change the script,
@@ -905,13 +938,25 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   (`RoundPlanner._points_to_middle`), and the end sent deeper loses (Depot's west won 44 % of Elimination's rounds
   walking 6 m deeper down the Chrono hall, 55 % dead even, 50 % with the middle lane's pair 0.8 m east of even, before
   RP1's replicas; Woodland's west 40 to 44 % sent over the North bridge, 50 % stopped at its head). No
-  lane takes a way a bot is slow on (Subway's spiral stair, about 40 s against a lift's 10), and none goes through a
-  gap a squad can't pass abreast.
-- **Each of Depot's flags stands between two crate stacks (2026-11-12, MB1).** One hides the pole from the site's
+  lane takes a way a bot is slow on (Subway's spiral stair was, about 40 s against a lift's 10, until SW1 made it a
+  6 s walk and gave it a lane), and none goes through a gap a squad can't pass abreast.
+- **Each of Depot's flags stood between two crate stacks (2026-11-12, MB1; the poles moved 8 m in at DC1, below, the
+  stacks stayed).** One hid the pole from the site's
   doors, the other from the A stairs or the B ramp; the two corner stacks behind the poles are gone. The defenders'
   posts are behind them and the Garage's behind its dog-leg stacks, so Attack / Defend is fought on the sites (the
   knock-outs there went from 70 to 203 against the attackers to 148 to 208, at 10 m, not 16, and a flag goes up in
   45 % of rounds, not 27 %).
+- **Depot is the compact hall (owner, 2026-11-15, DC1: "Go with the recommended options", the map redesign's
+  concept B).** The west 10 m is closed (98 x 72 m, x -44 to 54); the west spawn room, its stairs and its two-screen
+  chicanes are the concept's moved 10 m east onto the old Mid exit, opening straight onto Upper mid behind a crate
+  rack. The mock-up closed 13 m with the spawn line in the open Mid exit, seen from Upper mid; a room with chicanes
+  needs the 10 m. Flags and bomb sites stand 8 m in from the sites' far ends (A 36.5, -26.5; B 37, 27.5), so the
+  defenders have ground in front of them. The chrono hut and its overtime flag moved 4.5 m east onto the new middle
+  (both ends walk about as far to it). Bots take five lanes: each side's corridor, each side's rooms and the middle,
+  and Depot's defender posts stand forward of the poles (the Offices door, Lower mid and the end of the Containers,
+  the last two behind low crates), not on the site: MB1's posts-on-the-site rule gives way here. The rule that both
+  ends reach the Chrono hall together and each owns a side room by 1 to 4 s still holds, timed from the new middle
+  (test_depot_hall). The quiet east strip behind the new sites (A stairs, B ramp) was left as it is.
 - **Woodland's lanes are broken by pieces on the high ground and by leaves (2026-11-12, MB1).** A hazel hedge on the
   Ridge's brow, a fallen tree and a log stack at the North bridge's heads, a west wall with a window and a doorway on
   the Fort, a fallen tree in the Clearing where the west's sweep ends, two spruce thickets on the Ford's east bank with
@@ -955,15 +1000,44 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   (231). By the pole the attackers stood nearer in a round's last 15 s they won 72 % ±3 at flag A and 65 % ±3 at
   flag B (64 seeds, 7 s), so flag B's cover was not it, and sending more defenders to pull a flag down
   (`BotConfig.retakers` 3 or 4 for 2) moved it by less than the noise (`docs/records/MB3.md`).
+- **Woodland is Concept B of the map action redesign (owner, 2026-11-15, WB1).** He picked the recommended concepts
+  ("Go with the recommended options"; report https://claude.ai/artifact/MJvwgMNiyip7EaH5Mxa6Sz). His pick: the field
+  keeps its size and its road stays clear; six bot routes, the north edge (Pine slope, the Ridge's far side, the
+  stream's north end, the Tower), the north middle (between the west thickets, along the Berm, over the stream north
+  of the Clearing to the Hollow way's head) and the south middle (the Clearing's south side, over the stream by the
+  Knoll, to Log stacks) joining the north, middle and south; flag A in Fern hollow beside the oak west of the Fort and
+  flag B at Log stacks, about 14 m nearer the stream, the bomb sites with them; each route's forward defender post on
+  the stream side of its flag.
+  WB1's own choices (Claude's defaults, `docs/records/WB1.md`): flag A at (42.2, -41.4), 1.4 m off the concept's
+  (41, -42) so the oak's trunk is out of the ring; flag B at (40, 42) in the pocket of three cordwood stacks, because
+  the concept's (36, 40) was on the gravel's edge and anywhere else on that verge the road's S, 40 m west, saw the
+  pole down the Culvert's straight, a line along the strip itself that no piece could shut (MB2's rule that the road
+  west of the Culvert sees nothing of B holds). The pole's crouch crate moved with flag A, to its west side; at B the
+  pocket's stacks stand where the Sawmill's cover stood from the old pole (2.6, 4.2 and 4.7 m off, for 2.9, 4.3 and
+  6.0 m). The Fort and the Sawmill keep their other pieces and names as the defenders' ground behind the flags; the
+  areas at the poles are A site and B site; the Box lantern and the Sawmill's work lamp moved to the flags. The middle
+  route ends at Hut row; the two middle routes' last posts are the concept's, 14 m and 10 m short of their poles on
+  the way the attack comes (by the poles the attackers won 64 % ±3). Woodland's fuse is 27 s (25 s since PB5).
+  Bots, 6v6, Normal, seeds 1 to 32, on main with RV1's route variety: Attack / Defend attackers 55 % ±3, the first
+  hit at 20 s (24 s before), half the knock-outs outside the defenders' third (12 %); Plant The Bomb attackers 47 % ±3
+  at 27 s (before RV1 merged: 59 % at the old 23 s, 51 % at 27 s). The ground a bot stands on in at least one round
+  in ten grew by 28 % in Elimination and in Attack / Defend.
 - **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the
   north lane has one stop 4.45 m either side of the field's middle. No block moved.
-- **Stockade has no Bell tower (owner, 2026-11-13, SK1).** Concept 1's tower, built from Woodland's watch tower, put a
-  standing eye 5 m up that saw over every 2.6 m wall (3,839 lines over 34 m, the longest 65 m to the attackers' gate).
-  Asked whether to keep it, he chose "Leave the tower out": a Bell house stands across Main Street's east end in its
-  place, a door onto the street behind and one onto the Green. Its bots keep to the outer ways, not through the Forge
-  and the Barn (owner, 2026-11-13: "Leave it to your playtest"; lanes through them cost the attackers about 10 points).
+- **Subway is a station on two levels (owner, 2026-11-15, SW1: "Ticket hall and concourse should be one single level
+  now").** The ticket hall stands on the concourse's level (game 8.9 m), over the old booking hall and west passage, and
+  the street level is gone, with the upper escalators (`escalator_upper.glb` in `_archive/`); the lifts stop twice
+  (Ticket hall, Platforms) and keep 4 s a stop, now for 8 m; the spiral stair (eight flights) runs from beside the gates
+  to the south platform's west half, and its top landing meets the hall floor flush, so bots walk it (its 15 cm slot
+  read as a drop and no bot ever used it). Five lockers went (two from each passage, one from the old booking hall), so
+  the upper level's longest line is 57 m, the hall's west end to a passage's mouth (it was 28 m); a short pier at each
+  mouth keeps the hall's spawn from seeing down the passages. Its lanes are five: concept A's (MR1) north passage lane
+  and a spiral stair lane join the three. Bot matches (6v6 Normal): see `docs/records/SW1.md`.
+- **Stockade is out of the game (owner, 2026-11-15: "Completely remove stockades map from game").** The dev-only
+  Plant The Bomb field (SK1, #344) is gone with its data, tools, pictures and tests; its build is in git before this
+  change and its record stays in `docs/records/SK1.md`. Plant The Bomb plays on Depot, Woodland and Subway.
 
 ## Replicas, Loadout and levels
 
@@ -978,6 +1052,20 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   should be less bright. I don't like the wooden sniper rifle so remove that and keep polymer." So black metal is
   the darkest, black polymer a shade lighter, white polymer an off-white, and the sniper's stock stays polymer; no
   replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
+- **Metal and polymer are a close shade (owner, 2026-11-15, MQ4; replaces the MQ1 shades above).** "Materials on guns
+  clash too much. Metal is too shiny and the polymer is relatively very dark. Materials should generally be a close or
+  similar shade but appear slightly more metallic (metals) or matte (polymer)." Steel and aluminium are now a satin
+  coat (about half metallic, a broad highlight, near black when painted black) and polymer draws its paint nearly
+  as it is; white polymer stays a touch off-white and no replica is wood. He answered "Perfect" to the pictures; the
+  values are not re-tuned without him (docs/records/MQ4.md).
+- **The AEG's delta ring, handguard gaps and forward assist (owner, 2026-11-15, AF1).** On the all-angles sheet,
+  against an M4 quad-rail photo: the ring "should go around the full body" (the rail covered its top), the handguard
+  "should have gaps in between the rails (not the rails themselves)" and the forward assist was "too small and
+  recessed. It should be slightly larger and stick out at more of an angle." So the upper's top rail stops at the
+  ring and the handguard's starts in front of it; the handguard is hollow with a row of oval slots in each corner
+  between two rails (the lower ones a little shorter, as on the photo), the barrel and a gas tube seen through them;
+  the left rail cover is a rail's height; the forward assist's axis turns 18 degrees out toward the back. The bots'
+  copy keeps a solid handguard: at its 3,000 triangles the slots frayed (docs/records/AF1.md).
 - **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
   handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
   sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip
@@ -1161,6 +1249,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   fullscreen (on the display it opens on). V-Sync is off. Edge smoothing is Off, on every graphics preset (a player who
   turns it on keeps it, as Custom). A save from before (settings version 1) moves a value still equal to the old default
   to the new one, once; a value the player changed is kept. Reset to defaults gives the new values.
+- **First-start defaults, 15 November (owner, 2026-11-15; FV1).** Field of view 87 (was 90). Volumes: master 90 %,
+  effects 80 %, power source 80 %, ambience 30 %, interface 40 %; the Power source bus plays 1.25 times its slider
+  (`Settings.VOLUME_GAINS`), so 80 % is the old 100 % and 100 % is louder than before. A version 1 to 4 save still on
+  its old defaults moves to these, once; a Power source the player set is divided by its gain so it sounds the same;
+  any other value the player changed is kept.
 - **Reloads are manual by default (owner, 2026-10-29; RL2).** "Weapons currently automatically reload. This shouldn't
   happen. By default a prompt should come up for the player to press the R button. In the settings there can be a
   setting to toggle between manual and automatic reloads." Settings › Controls › Reload: Manual (the default; an empty
@@ -1210,6 +1303,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   ARMORY, SETTINGS, the level and QUIT. Field pictures are photo-mode views from eye height, never overhead; replica
   pictures share one scale and fit inside their boxes; Customise keeps the replica fixed and can turn it in 3D; the HUD
   minimap is square and the equipped grenade's icon is the bigger one. Concepts: `/mnt/project-files/concepts/ui-redesign/`.
+- **The UI's highlight is blue, and the player can pick another (owner, 2026-11-15; UA1 and UA2, replaces Sunlit
+  Concrete's bone accent).** The accent (`GameTheme.accent`) lights the main buttons, the picked and focused items,
+  the rail marker and the comms wheel's lit button. Blue `#8fb0f0` by default; Settings › Display › Interface ›
+  Colour also offers beige, red, green, pink, orange and violet (`game/config/ui_colours.gd`). Each is a soft, light
+  shade with a dark ink, paler than the team colours so a highlight never reads as a team; team colours, signal
+  yellow and the off-white text don't change with it. A change restyles the menus at once (they are built again).
 - **There is no title screen (owner, 2026-11-02; UR1).** The game opens on the Match page. The version, the renderer,
   Report a Bug, Licences and Quit to desktop are in Settings › About (no title box there); QUIT is also at the rail's
   foot.

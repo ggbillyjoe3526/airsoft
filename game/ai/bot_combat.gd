@@ -36,8 +36,11 @@ static func aim(b: Bot, w: BotWorld, target: Character, eye: Vector3, walking: b
 		var across := Vector2(point.x - eye.x, point.z - eye.z)
 		var sideways := (v.x * across.y - v.z * across.x) / maxf(across.length(), 1e-3)
 		var since := BotAim.settling(w.time, b.contact, cfg)
-		var first := BotAim.first_error_size(since, dist, b.skill)
-		var error := BotAim.error_size(since, walking or cmd.right != 0.0, dist, sideways, b.skill)
+		# A re-pick-up (AIM1) has no first aim to one side: its whole error wanders, any way off the target.
+		var sided := b.first_yaw != 0.0 or b.first_pitch != 0.0
+		var first := BotAim.first_error_size(since, dist, b.skill) if sided else 0.0
+		var error := BotAim.error_size(since, walking or cmd.right != 0.0, dist, sideways, b.skill) \
+				+ flinch(b, w)
 		if scoped(b, cfg):
 			# Through a sniper's scope the hand's wander is finer (SN3): one shot a cycle has to count.
 			error *= cfg.scoped_error_scale
@@ -88,6 +91,15 @@ static func aim(b: Bot, w: BotWorld, target: Character, eye: Vector3, walking: b
 			_look_yaw += sin(TAU * b.team_wait / cfg.hold_sweep_period) * deg_to_rad(cfg.hold_sweep_deg)
 	BotAim.step(b, _look_yaw, _look_pitch, 0.0, 0.0, cfg, dt)
 	return INF
+
+
+## The extra aim error (rad) of a near miss (AIM2): the skill's aim_error_under_fire_deg as the BB passes, easing to
+## none over BotConfig.flinch_time.
+static func flinch(b: Bot, w: BotWorld) -> float:
+	var since := w.time - b.suppressed_at
+	if since >= w.cfg.flinch_time:
+		return 0.0
+	return deg_to_rad(b.skill.aim_error_under_fire_deg) * (1.0 - since / w.cfg.flinch_time)
 
 
 ## Slicing: leans out past `a`, the corner aimed at, once within slice_lean_distance of it (towards its open side).
@@ -197,6 +209,8 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	var ready := w.live and BotSenses.has_reacted(b, w) and not cmd.sprint and b.mode != Bot.Mode.COVER
 	if not ready or target == null or off_aim >= deg_to_rad(cfg.fire_cone_deg):
 		b.pause_left = maxf(0.0, b.pause_left - dt)
+		# A burst under way ends once it is off its target (FV1): it lets off, as on full auto.
+		cmd.stop_burst = true
 		return
 	var dir := Vector3(-sin(b.aim_yaw) * cos(b.aim_pitch), sin(b.aim_pitch), -cos(b.aim_yaw) * cos(b.aim_pitch))
 	var dist := eye.distance_to(_aim_point)
@@ -205,9 +219,11 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 		return
 	if bolt_waits(b, w, dist) or pattern_too_wide(b, cfg, dist):
 		return
-	if _line_of_fire_blocked(b, w, eye, dir, dist):
-		# Seen through glass or leaves it can't shoot through (BQ1): counted, so it goes round in time.
+	if _line_of_fire_blocked(b, w, eye, dir, dist, dt):
+		# Seen through glass or leaves it can't shoot through (BQ1): counted, so it goes round in time. A burst under way
+		# ends there, a teammate stepped in front, as full auto lets off (FV1).
 		b.no_shot_for = b.no_shot_for + dt if _level_in_line else 0.0
+		cmd.stop_burst = true
 		return
 	b.no_shot_for = 0.0
 	var begun := b.burst_left <= 0.0 and b.pause_left <= 0.0
@@ -342,8 +358,9 @@ static func flight_time(b: Bot, w: BotWorld, dist: float) -> float:
 ## True if `b` must hold fire along `dir` from `eye` at a target `dist` m away (_level_in_line says whether the level
 ## itself, glass or leaves, stood on the line to the aim point): cover on the line to the aim point, more
 ## leaves in the way than it shoots through (leaves_in_line), a wall close in front along the aim, or a body in the line
-## of fire (_body_in_line) up to where a miss would stop.
-static func _line_of_fire_blocked(b: Bot, w: BotWorld, eye: Vector3, dir: Vector3, dist: float) -> bool:
+## of fire (_body_in_line) up to where a miss would stop. `dt` is the tick the shot goes in: the BB leaves from where
+## this tick's step takes the eye.
+static func _line_of_fire_blocked(b: Bot, w: BotWorld, eye: Vector3, dir: Vector3, dist: float, dt: float) -> bool:
 	var cfg := w.cfg
 	_level_in_line = not BotSenses.shot_clear(w.query, eye, _aim_point) or leaves_in_line(w, eye, _aim_point)
 	if _level_in_line:
@@ -356,7 +373,9 @@ static func _line_of_fire_blocked(b: Bot, w: BotWorld, eye: Vector3, dir: Vector
 	if wall >= 0.0 and wall < dist * cfg.aim_wall_fraction:
 		return true
 	var stray := _stray_per_metre(b, cfg)
-	return _body_in_line(b, w, eye, dir, _friendly_reach(w, eye, dir, dist, wall, stray), dist, stray)
+	var me := b.character
+	var step := Vector2(me.velocity.x, me.velocity.z).length() * dt
+	return _body_in_line(b, w, eye, dir, _friendly_reach(w, eye, dir, dist, wall, stray, step), dist, stray)
 
 
 ## True if the line from `eye` to `aim_point` runs through more bush than a bot shoots through (FO1): more than
@@ -398,8 +417,10 @@ static func miss_reach(cfg: BotConfig, dist: float) -> float:
 
 ## How far along `dir` a miss can still hit someone: miss_reach, or friendly_past_wall past a wall in the way (`wall`
 ## m, or -1). Only a wall: it must also stand friendly_wall_clearance higher there and as far to either side as the BBs
-## stray, or they go over or round it.
-static func _friendly_reach(w: BotWorld, eye: Vector3, dir: Vector3, dist: float, wall: float, stray: float) -> float:
+## stray and the shooter's `step` (m) this tick moves the eye they leave from, or they go over or round it (BC1: a bot
+## strafing past a doorway's edge shot a teammate through it, its check 4 cm behind its BB).
+static func _friendly_reach(w: BotWorld, eye: Vector3, dir: Vector3, dist: float, wall: float, stray: float,
+		step: float = 0.0) -> float:
 	var cfg := w.cfg
 	var reach := miss_reach(cfg, dist)
 	if wall < 0.0:
@@ -410,7 +431,7 @@ static func _friendly_reach(w: BotWorld, eye: Vector3, dir: Vector3, dist: float
 	if not w.query.ray_past_railings(raised, raised + dir * probe, _hit):
 		return reach
 	var flat := Vector2(dir.x, dir.z).length()
-	var off := stray * wall / flat if flat > 0.0 else 0.0
+	var off := (stray * wall + step) / flat if flat > 0.0 else 0.0
 	for i in 2:
 		var side := 1.0 - 2.0 * i
 		var p := raised + Vector3(dir.z * off * side, -cfg.friendly_wall_clearance, -dir.x * off * side)
