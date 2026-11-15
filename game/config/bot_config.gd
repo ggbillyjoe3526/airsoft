@@ -183,12 +183,15 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var lane_shift_tries: int = 2
 @export var lane_shift_fallback: float = 0.5
 ## Setting off for its next lane point, a bot that walks its lane may (this chance) cross to another lane instead: the
-## point of it within lane_cross_reach (m), no more than lane_cross_rise (m) above or below (the same storey; a slope's
-## rise is fine), no nearer its own end than where it is, that the fewest teammates walk; at most lane_cross_max times
-## a round. Never a defender, the bomb carrier or a bot under an order. Most maps' lanes run 10 to 20 m apart.
-@export var lane_cross_chance: float = 0.12
-@export var lane_cross_reach: float = 20.0
+## nearest point of it within lane_cross_reach (m), no more than lane_cross_rise (m) above or below (the same storey; a
+## slope's rise is fine), no nearer its own end than where it is, each teammate walking that lane counting
+## lane_cross_crowd (m) further off; at most lane_cross_max times a round. Never a defender, the bomb carrier or a bot
+## under an order. Depot's and Subway's lanes run 2 to 20 m apart, Woodland's about 40 m: a cross there is a flank
+## through the trees.
+@export var lane_cross_chance: float = 0.1
+@export var lane_cross_reach: float = 45.0
 @export var lane_cross_rise: float = 1.5
+@export var lane_cross_crowd: float = 8.0
 @export var lane_cross_max: int = 1
 ## Bots sharing a lane: a lane point with a teammate holding there (or heading there to hold) within lane_hold_spacing
 ## (m) moves lane_hold_offset (m) to one side, across the way to the enemy, so the two hold side by side.

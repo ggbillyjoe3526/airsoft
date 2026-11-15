@@ -608,8 +608,8 @@ static func _shifted(b: Bot, w: BotWorld, point: Vector3) -> Vector3:
 
 ## Setting off for lane point `next`, maybe (lane_cross_chance, RV1) cross to another lane instead: to the point of it
 ## within lane_cross_reach of `next` and lane_cross_rise of its height, no nearer the bot's own end than `next`, among
-## those it would still walk on that lane, on the lane the fewest teammates walk (the nearer point on a tie). On a
-## cross, b.lane, b.lane_index (the point to make for) and b.lane_points are the new lane's; true. Never a defender,
+## those it would still walk on that lane: the nearest, each teammate walking that lane counting lane_cross_crowd
+## metres further. On a cross, b.lane, b.lane_index (the point to make for) and b.lane_points are the new lane's; true. Never a defender,
 ## the bomb carrier, a bot under a squad order, or one that crossed lane_cross_max times this round.
 static func _cross_lane(b: Bot, w: BotWorld, next: int) -> bool:
 	var cfg := w.cfg
@@ -625,8 +625,7 @@ static func _cross_lane(b: Bot, w: BotWorld, next: int) -> bool:
 	var from_progress := Vector2(from.x - home.x, from.z - home.z).dot(way)
 	var best_lane := -1
 	var best_index := -1
-	var best_mates := 0
-	var best_d := INF
+	var best_score := INF
 	for other in w.lanes.size():
 		if other == b.lane:
 			continue
@@ -645,11 +644,11 @@ static func _cross_lane(b: Bot, w: BotWorld, next: int) -> bool:
 			var d := Vector2(q.x - from.x, q.z - from.z).length()
 			if d > cfg.lane_cross_reach or Vector2(q.x - home.x, q.z - home.z).dot(way) < from_progress:
 				continue
-			if best_lane < 0 or mates < best_mates or (mates == best_mates and d < best_d):
+			var score := d + mates * cfg.lane_cross_crowd
+			if score < best_score:
 				best_lane = other
 				best_index = k
-				best_mates = mates
-				best_d = d
+				best_score = score
 	if best_lane < 0:
 		return false
 	b.lane = best_lane

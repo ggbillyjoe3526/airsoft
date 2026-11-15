@@ -105,8 +105,8 @@ can't learn one route and wait for it:
   will be.
 - **Their own line.** Each bot walks its lane up to <!-- wiki:config bot_config.lane_shift --> m to one side or the
   other, the same side all round: the far side of a row of crates one round, the near side the next.
-- **Changing lanes.** Now and then a bot crosses to another lane that runs within <!-- wiki:config bot_config.lane_cross_reach -->
-  m of its own, the one fewest teammates walk, once a round at most.
+- **Changing lanes.** Now and then a bot cuts across to another lane, the nearest one with the fewest teammates on it,
+  once a round at most and never back towards its own end: on Woodland that's a flank through the trees.
 - **A forward defender.** In Attack / Defend and Plant The Bomb, in some rounds one defender holds well up its lane,
   towards the middle, to catch attackers on their way in.
 
