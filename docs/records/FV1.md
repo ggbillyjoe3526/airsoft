@@ -1,6 +1,6 @@
 # FV1 · Burst indoors, field of view 87, the new volume mix
 
-**Review:** 1 attempt · critic pending · qa Pass · performance Pass
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 The owner's feedback (2026-11-15): "make burst the standard fire mode indoors instead of semi", "default fov should be
 87", and the new audio defaults "90 master, 80 effects, 80 power source, 30 ambience, 40 interface ... adjust power
@@ -10,7 +10,7 @@ source volumes so the current 100 is equal to 80".
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (gdlint, wiki, touched unit files, smoke test; the rest in CI) | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (gdlint, wiki, touched unit files, smoke test; the rest in CI) | 7/8 Accept | – (check 8: the Settings wiki page still had the old mix and no FOV default; fixed) |
 
 ## What the bots showed
 
