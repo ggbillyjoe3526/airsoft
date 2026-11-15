@@ -170,13 +170,7 @@ static func read(dressing: Variant, warnings: Array[String]) -> StationDressing:
 			warnings.append("dressing.station.trims %d needs a finish and a box [x0, x1, y0, y1, z0, z1]; left out" % i)
 			continue
 		out.trims.append(t)
-	var fixtures: Variant = d.get("fixtures", [])
-	for i in (fixtures as Array).size() if fixtures is Array else 0:
-		var f := _fixture((fixtures as Array)[i])
-		if f == null:
-			warnings.append("dressing.station.fixtures %d needs a model, x, y, z and yaw (degrees); left out" % i)
-			continue
-		out.fixtures.append(f)
+	out.fixtures = read_fixtures(d.get("fixtures", []), "dressing.station.fixtures", warnings)
 	out._index()
 	return out
 
@@ -343,6 +337,19 @@ static func _numbers(d: Dictionary, keys: Array[String]) -> bool:
 		if not (d.get(k) is float or d.get(k) is int):
 			return false
 	return true
+
+## The fixtures listed in `raw` (an array of {model, x, y, z, yaw (degrees), scale}), each malformed one left out with
+## a warning naming it under `label`: a station's (SM5) and a map's own wall extras (DX1, MapData.fixtures).
+static func read_fixtures(raw: Variant, label: String, warnings: Array[String]) -> Array[Fixture]:
+	var out: Array[Fixture] = []
+	for i in (raw as Array).size() if raw is Array else 0:
+		var f := _fixture((raw as Array)[i])
+		if f == null:
+			warnings.append("%s %d needs a model, x, y, z and yaw (degrees); left out" % [label, i])
+			continue
+		out.append(f)
+	return out
+
 
 static func _fixture(raw: Variant) -> Fixture:
 	if not raw is Dictionary:

@@ -160,7 +160,9 @@ func test_a_propped_box_draws_no_faces_and_leaves_the_baked_shadow_caster() -> v
 	var walls := m.blocks.filter(func(b: MapData.Block) -> bool: return b.kind == &"plywood" and b.dress == &"" \
 			and minf(b.size.x, b.size.z) <= look.props.kind_max_depth[&"plywood"]).size()
 	assert_gt(walls, 0, "its plywood walls are wall modules (DM1)")
-	var named := m.blocks.filter(func(b: MapData.Block) -> bool: return b.dress != &"").size()
+	# a rack block naming another bay (DX1) is laid as the racking is, its backing drawn, so not folded away
+	var named := m.blocks.filter(func(b: MapData.Block) -> bool: return b.dress != &"" \
+			and look.props.lay_of(b) != PropDressConfig.Lay.TILE).size()
 	assert_eq(hidden, _count(m, &"drum") + _count(m, &"barrel") + _count(m, &"sofa") + crates + walls
 			+ _count(m, &"container") + _count(m, &"wall", 6.0) + _count(m, &"pillar") + _count(m, &"net") + named,
 			"the props' boxes, every crate stack, plywood wall and container (DM1), the hall shell's (DH1) and the props"
@@ -203,7 +205,7 @@ func test_every_point_just_inside_a_rack_s_sides_is_shelving_or_backing() -> voi
 	var m := _map("depot")
 	var dress := _dress(m)
 	var shelves: Array[AABB] = []
-	for bay in look.props.variants_of(&"shelf"):
+	for bay in _tiled_bays():
 		var cell := dress.mesh_of(bay).get_aabb()
 		for t in dress.placed()[bay].transforms:
 			shelves.append((t * cell).grow(1e-3))
@@ -499,7 +501,8 @@ func test_shelving_is_drawn_in_chunks_that_cull_and_take_a_simpler_mesh_far_off(
 			assert_gt(views.size(), 1, "%s: spread round the hall, chunked so it culls (DH1)" % model)
 			continue
 		var many := placed[model].transforms.size() >= look.props.chunk_from
-		if not bays.has(model) and not many:
+		var tiled := _tiled_bays().has(model)
+		if not tiled and not many:
 			assert_eq(views.size(), 1, "%s: one view" % model)
 			continue
 		# the shelving in chunks, and a model laid many times (RK1: the drums, nine stacks a pallet) in larger ones
@@ -513,6 +516,16 @@ func test_shelving_is_drawn_in_chunks_that_cull_and_take_a_simpler_mesh_far_off(
 	for bay in bays:
 		var lods: Array = RenderingServer.mesh_get_surface(dress.mesh_of(bay).get_rid(), 0).get("lods", [])
 		assert_gt(lods.size(), 0, "%s has a simpler mesh for far chunks" % bay)
+
+
+## Every bay laid by TILE: the racking's (the rack kind's shelf) and the other bays a rack block may name (DX1), each
+## with the bays taking turns with it.
+func _tiled_bays() -> Array[StringName]:
+	var out: Array[StringName] = look.props.variants_of(&"shelf")
+	for base: StringName in look.props.model_lays:
+		if look.props.model_lays[base] == PropDressConfig.Lay.TILE:
+			out.append_array(look.props.variants_of(base))
+	return out
 
 
 func _views(dress: PropDress, models: Array[StringName]) -> Array[MultiMeshInstance3D]:

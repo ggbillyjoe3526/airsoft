@@ -15,6 +15,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import extras  # noqa: E402
 import layout as L  # noqa: E402
 
 OUT = os.path.join(HERE, "..", "..", "data", "maps", "depot.json")
@@ -63,6 +64,7 @@ def blocks() -> list[dict]:
     out.append(block("wall", L.X_WEST - t, 0, -L.H, L.X_WEST, L.ROOF, L.H))
     out.append(block("wall", L.W, 0, -L.H, L.W + t, L.ROOF, L.H))
     boxes: list[list] = []
+    racks = iter(extras.rack_dress(L.pieces))
     for p in L.pieces:
         k, x1, z1, x2, z2, h = p["kind"], p["x1"], p["z1"], p["x2"], p["z2"], p["h"]
         kind = KINDS[k]
@@ -76,6 +78,8 @@ def blocks() -> list[dict]:
             boxes.append([kind, x1, 2.6, z1, x2, 2.6 + h, z2])
         elif k in DRESS:
             boxes.append([kind, x1, 0, z1, x2, h, z2, DRESS[k], SURFACE.get(k, ""), NOISE.get(k, "")])
+        elif k == "dead":
+            boxes.append([kind, x1, 0, z1, x2, h, z2, next(racks)])
         else:
             boxes.append([kind, x1, 0, z1, x2, h, z2])
     unseat(boxes)
@@ -255,9 +259,12 @@ def doors() -> list[dict]:
 
 
 def build() -> dict:
+    solid = blocks()
+    spawns = L.SPAWNS_W + L.SPAWNS_E
+    middle = (sum(x for x, _ in spawns) / len(spawns), sum(z for _, z in spawns) / len(spawns))
     return {
         "name": "Depot",
-        "blocks": blocks(),
+        "blocks": solid,
         "killY": -10,
         "spawns": [[spot(x, z, EYE_FACING_EAST) for x, z in L.SPAWNS_W],
                    [spot(x, z, EYE_FACING_WEST) for x, z in L.SPAWNS_E]],
@@ -277,7 +284,9 @@ def build() -> dict:
         "bakedLight": {"file": "depot", "dim": dims()},
         # The yard's dust: motes in the lamps' light and the grey puff feet kick up off the slab.
         "dressing": {"seed": 4127, "motes": {"tint": 14210767}, "kickedDust": {"tint": 12171184, "scale": 1},
-                     "site": site(), "wearMarks": marks()},
+                     "site": site(), "wearMarks": marks(),
+                     # the hall's wall extras (DX1): look only, drawn by StationFixtures
+                     "fixtures": extras.fixtures(solid, middle)},
         "areas": areas(),
     }
 
