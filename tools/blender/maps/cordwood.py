@@ -8,6 +8,12 @@ rows, their sawn ends to the faces: pale wedges and quarters with bark on their 
 rows uneven so the face is ragged and the gaps between them dark; split pieces lying across the top. The boards are
 stacked in layers held apart by stickers (thin battens) so the air gets through, on bearers off the ground.
 
+RM2 (the owner, 2026-11-15: "improve the stacks of wood logs"): the pieces mixed as the photos' are, not one size of
+quarter laid in rows like scales: wedges from narrow to wide (55 to 125 degrees at the heart), a tenth of them half
+logs, more small rounds, a third free to lie on their side and up to 24 degrees off square, each 0.72 to 1 of a row
+high, so the rows break up; the stack's ends barked in every shade with a pale split side here and there. The same
+budget: the bark arcs in 4 segments (were 5).
+
 The cordwood section fills its grid cell (PropDressConfig.grid_cells): its pieces' ends standing out of the faces by
 0.3 to 5 cm (WS1: each a solid end, its sides barked or split back to the core, its face tilted a little) over a dark
 core, so nothing is seen through a stack that stops a BB. The boards fill their block's box
@@ -37,10 +43,10 @@ SECTION, DEPTH, HEIGHT = 2.0, 1.0, 1.8
 TOPS = 7                # points along the section where its ragged top is set
 SAG = 0.45              # how far under the cell's top the stack's top dips at most
 PROUD = (0.003, 0.05)   # how far a piece's end stands out of the core: the face's relief (WS1: solid ends, near flush)
-PROUD_MODE = 0.015      # most stand out about this far, a few flush or 5 cm out, as a stack built by hand
-TILT = 0.08             # an end face sawn off square: up to this much further out per metre across or up it
-ARC = 5                 # the bark arc's segments on a split piece (a pie slice of its log)
-ARC_SPAN = (75.0, 100.0)  # a split piece's angle at the log's heart (degrees): 1.2 to 1.5 times as wide as deep
+PROUD_MODE = 0.015     # most stand out about this far, a few flush or 5 cm out, as a stack built by hand
+TILT = 0.14             # an end face sawn off square: up to this much further out per metre across or up it
+ARC = 4                 # the bark arc's segments on a split piece (a pie slice of its log)
+ARC_SPAN = (55.0, 125.0)  # a split piece's angle at the log's heart (degrees): 1.2 to 1.5 times as wide as deep
 RIM = 0.07              # a ring of bark on a sawn end: this share of the way in from its edge (about 4 % across)
 BARK_RIM = 0.1          # a split piece's rim of bark inside its arc: this share of its radius
 CHECKS = (70, 18, 8, 4)  # how often a split piece shows no, one, two or three drying cracks from its heart
@@ -49,12 +55,12 @@ EDGE = 0.03             # the share of its row's height kept clear above and bel
 SHOWS = 0.035           # an end standing out less than this (m) shows no side
 UNDER_SEEN = 1.6        # a piece's end's sides facing down are left out below this (m): the eye looks down on them
 ROWS = 8
-ROUND = 0.03            # the share of pieces that are small rounds (a few, as in the photo)
-ROUND_RAD = (0.06, 0.08)  # a round's radius (m): about 0.6 of a split piece across
-ROUND_SIDES = 16        # a small round's sides
-HEART = 0.05            # the share of four-sided pieces split from a log's heart, no bark
-ASIDE = 0.12            # the share of wedges that may lie on their side
-LEAN = 14.0             # degrees a split piece may lie off square, as stacked by hand
+ROUND = 0.07            # the share of pieces that are small rounds (a few, as in the photo)
+ROUND_RAD = (0.045, 0.09)  # a round's radius (m): about 0.6 of a split piece across
+ROUND_SIDES = 12        # a small round's sides
+HEART = 0.06            # the share of four-sided pieces split from a log's heart, no bark
+ASIDE = 0.3             # the share of wedges that may lie on their side
+LEAN = 24.0             # degrees a split piece may lie off square, as stacked by hand
 FULL = 25               # pieces in a row that no longer fit under the top: the face is full
 LAY_STEP = 0.015        # m between the places along the face a piece is tried
 FILL_TRIES = 3000        # places tried for the smaller pieces pushed into the holes left
@@ -63,6 +69,9 @@ FILL_ARC = 4            # their bark arcs' segments
 CORE_COLS = 30          # places along the section where the core's top follows the pieces
 END_IN = 0.08           # m in from each end where the core's top is read from the pieces
 CROWN_SINK = 0.02       # m the core's top lies under the highest piece's top
+EDGE_CUT = 0.35         # how much of a piece's width may run past the section's end, cut off there (RM2)
+HALF = 0.1              # the share of split pieces that are half logs (RM2: the photos' mix)
+HALF_SPAN = (150.0, 175.0)
 LOOSE = 6               # split pieces lying across the top
 # the sawn ends' colours, each piece its own, from fresh pale to warm tan to weathered grey (as in the photo)
 # (warm as the photo's, each just off Beta orange's hue: woodkit.off_team)
@@ -123,21 +132,26 @@ def cordwood(seed: int) -> object:
     # its ends, seen at a stack's end: each row the bark sides of the two pieces lying across the stack, rounded
     # (a ridge along each), split where the front piece meets the back one, each standing out by its own amount
     for x, s, t in ((cols[0], -1.0, min(env[1.0][0], env[-1.0][0])), (cols[-1], 1.0, min(env[1.0][-1], env[-1.0][-1]))):
+        # (RM2: each row its own height, as the end pieces' sizes differ, not an even brick course)
+        steps = [r.uniform(0.6, 1.4) for _ in range(ROWS)]
+        marks = [t * sum(steps[:k]) / sum(steps) for k in range(ROWS + 1)]
         for k in range(ROWS):
-            z0, z1 = t * k / ROWS, t * (k + 1) / ROWS
+            z0, z1 = marks[k], marks[k + 1]
             split = r.uniform(-0.15, 0.15)
             base = x - s * 0.02  # the ends stand just inside the section's length, so the sections meet closely
             for y0, y1 in ((-core, split - 0.015), (split + 0.015, core)):
                 bulge = base + s * r.uniform(0.0, 0.008)
                 ridge = bulge + s * 0.012
                 zm = (z0 + z1) * 0.5 + r.uniform(-0.02, 0.02)
-                mat = ("Bark", "BarkLight", "BarkFurrow", "Bark")[r.randrange(4)]
+                # (RM2: bark of each shade and now and then a pale split side, as the photos' stack ends; was
+                # three dark barks)
+                mat = ("Bark", "BarkLight", "BarkGrey", "Split", "BarkLight")[r.randrange(5)]
                 wk.face(b, wk.verts(b, [(bulge, y0, z0 + 0.012), (bulge, y1, z0 + 0.012), (ridge, y1, zm),
                                         (ridge, y0, zm)]), mat, Vector((s, 0, -0.6)))
                 wk.face(b, wk.verts(b, [(ridge, y0, zm), (ridge, y1, zm), (bulge, y1, z1 - 0.012),
                                         (bulge, y0, z1 - 0.012)]), mat, Vector((s, 0, 0.6)))
             q = wk.verts(b, [(base, -core, z0), (base, core, z0), (base, core, z1), (base, -core, z1)])
-            wk.face(b, q, "BarkDark", Vector((s, 0, 0)))
+            wk.face(b, q, "BarkFurrow", Vector((s, 0, 0)))
         # and above its rows, up to each face's crown, so no hole opens at the section's end
         e0, e1 = env[-1.0][0 if s < 0 else -1], env[1.0][0 if s < 0 else -1]
         if max(e0, e1) > t + 1e-4:
@@ -174,17 +188,30 @@ def lay_face(r: object, half_x: float, top_at: object) -> list:
     misses = 0
     while misses < FULL:
         best = None
-        for kind, poly in piece_outline(r, h):
-            wide = max(px for px, _ in poly)
-            mid = _centroid_z(poly)
-            steps = int((2.0 * half_x - 2.0 * GAP - wide) / LAY_STEP)
+        for kind, whole in piece_outline(r, h):
+            wide0 = max(px for px, _ in whole)
+            # (RM2) a piece may run past the section's end, cut off flush there, so its neighbour section's pieces
+            # butt against it and no straight dark seam runs up the stack where two sections meet
+            over = wide0 * EDGE_CUT
+            steps = int((2.0 * half_x + 2.0 * over - wide0) / LAY_STEP)
             for i in range(steps + 1):
-                x = -half_x + GAP + i * LAY_STEP
+                x0 = -half_x - over + i * LAY_STEP
+                cut = _clip_x([(px + x0, pz) for px, pz in whole], -half_x + GAP, half_x - GAP)
+                if len(cut) < 3:
+                    continue
+                x = min(px for px, _ in cut)
+                poly = [(px - x, pz) for px, pz in cut]
+                wide = max(px for px, _ in poly)
+                if wide < wide0 * (1.0 - EDGE_CUT) - 1e-9:
+                    continue
                 z = rest(pieces, poly, x, wide)
                 if any(pz + z > top_at(px + x) - h * EDGE for px, pz in poly):
                     continue
+                mid = _centroid_z(poly)
                 if best is None or z + mid < best[0] - 1e-6:
-                    best = (z + mid, kind, [(px + x, pz + z) for px, pz in poly])
+                    # a piece cut at the section's end shows its sawn face whole, no bark rim (its heart may be gone)
+                    cut_kind = kind if wide >= wide0 - 1e-9 else "heart"
+                    best = (z + mid, cut_kind, [(px + x, pz + z) for px, pz in poly])
         if best is None:
             misses += 1
             continue
@@ -218,6 +245,23 @@ def lay_face(r: object, half_x: float, top_at: object) -> list:
     assert not any(overlaps(a[1], c[1]) for i, a in enumerate(pieces) for c in pieces[i + 1:]), "pieces cross"
     assert all(abs(px) <= half_x - GAP + 1e-9 for _, q in pieces for px, _ in q), "a piece past the section's end"
     return pieces
+
+
+def _clip_x(poly: list, lo: float, hi: float) -> list:
+    """A convex outline cut to lo <= x <= hi (Sutherland-Hodgman on the two lines), its points in order."""
+    for edge, keep in ((lo, lambda px: px >= lo - 1e-12), (hi, lambda px: px <= hi + 1e-12)):
+        out = []
+        for i in range(len(poly)):
+            a, c = poly[i], poly[(i + 1) % len(poly)]
+            if keep(a[0]):
+                out.append(a)
+            if keep(a[0]) != keep(c[0]):
+                t = (edge - a[0]) / (c[0] - a[0])
+                out.append((edge, a[1] + (c[1] - a[1]) * t))
+        poly = out
+        if len(poly) < 3:
+            return []
+    return poly
 
 
 def crown(pieces: list, x: float) -> float:
@@ -292,7 +336,10 @@ def piece_outline(r: object, h: float, arc_n: int = ARC, split_only: bool = Fals
         return [("heart", _from_zero([(r.uniform(0.0, 0.2) * w, 0.0), (w, r.uniform(0.0, 0.2) * tall),
                                       (w * r.uniform(0.8, 1.0), tall), (0.0, tall * r.uniform(0.8, 1.0))]))]
     span = math.radians(r.uniform(*ARC_SPAN))
-    rad = room * r.uniform(0.86, 1.0)
+    rad = room * r.uniform(0.68, 1.0)
+    if r.random() < HALF:
+        span = math.radians(r.uniform(*HALF_SPAN))
+        rad *= 0.7
     ways = (0.0, math.pi) + ((0.5 * math.pi, 1.5 * math.pi) if r.random() < ASIDE else ())
     out = []
     for turn in ways:

@@ -55,6 +55,9 @@ const SHOTS: Array = [
 	["treeline_north", Vector3(-20.0, EYE, -50.0), Vector3(-20.0, 9.0, -75.0), false],
 	["treeline_east", Vector3(84.0, EYE, -40.0), Vector3(100.0, 8.0, -20.0), false],
 	["thicket_spruces", Vector3(50.0, EYE, 7.0), Vector3(50.0, 3.0, 20.0), false],
+	# the west camp's woodpiles (RM2): close at eye height, and along the stack
+	["woodpile_near", Vector3(-77.5, EYE, -7.5), Vector3(-79.0, 1.4, -11.5), false],
+	["woodpile_along", Vector3(-72.5, EYE, -9.5), Vector3(-82.0, 1.4, -11.8), false],
 ]
 
 
