@@ -91,6 +91,28 @@ the same end and role: 1 is the same ground every round.
 - A cross only checks that the point it makes for is no nearer home, not the route there: on Depot or Subway, with
   45 m of reach, a route round a wall could double back for a stretch (the critic's advisory; none seen in the runs).
 
-- Woodland Elimination's west end at 43.5 % ±3.7 after the stack rule (24 seeds), outside within noise; Subway's
-  street end swung from 56.1 % to 50.3 % between two 24-seed runs, so these figures are noisy. Re-measured on 32
-  seeds on the reworked maps (this thread re-measures every map once the reworks merge).
+- Woodland Elimination's west end sits at its band's bottom edge on the reworked field (45.7 % ±2.3, below). Without
+  route variety it is lower (42.1 %), so it is the layout's lean; the row stays in KNOWN_ISSUES under Woodland by end.
+
+## Re-measured on the reworked maps
+
+The owner asked (2026-11-15) for route variety to be re-measured once the compact Depot (DC1, #368), Woodland's new
+routes (WB1, #362) and the two-level Subway (SW1, #369) merged. Main `2851ca0`, `tools/map_heat.gd`, Normal 6v6,
+seeds 1 to 32. Nothing is out of band, so no values changed. The Plant The Bomb rows ran at the fuses then on main
+(Woodland 27 s); PB5 (#372) has since re-measured the fuses on these layouts (Woodland 25 s).
+
+| Map, mode | Win rate (± 1 SE) | Band | First hit (median) | Route sameness (RV1 on the old maps) |
+|---|---|---|---|---|
+| Depot Elimination | end 0 52.0 % ±3.2 | 45-55 % | 12.4 s | 0.36 (0.42) |
+| Depot Attack / Defend | attackers 46.1 % ±3.2 | 38-67 % | 16.0 s | 0.42 (0.49) |
+| Depot Plant The Bomb | attackers 49.8 % ±3.2 | 40-65 % | 16.0 s | 0.43 (0.50) |
+| Woodland Elimination | end 0 45.7 % ±2.3 (64 seeds) | 45-55 % | 17.0 s | 0.29 (0.39) |
+| Woodland Attack / Defend | attackers 55.2 % ±3.2 | 40-65 % | 19.6 s | 0.32 (0.48) |
+| Woodland Plant The Bomb | attackers 46.6 % ±3.2 | 40-65 % | 20.0 s | 0.33 (0.48) |
+| Subway Elimination | end 0 50.2 % ±3.1 | 45-55 % | 14.6 s | 0.52 (0.56) |
+| Subway Attack / Defend | attackers 55.7 % ±3.2 | 40-65 % | 16.6 s | 0.57 (0.60) |
+| Subway Plant The Bomb | attackers 48.5 % ±3.3 | 40-65 % | 17.4 s | 0.57 (0.62) |
+
+- Woodland Elimination was 45.0 % ±3.2 on seeds 1 to 32 and 46.4 % on 33 to 64. The same 32 seeds with route
+  variety off (no tempo, own-half pace, shift, crossing or pushed defender) gave 42.1 % ±3.2 and sameness 0.35.
+- First hits come 1 to 6 s sooner than on the old maps, from the reworks' smaller fields and extra lanes.
