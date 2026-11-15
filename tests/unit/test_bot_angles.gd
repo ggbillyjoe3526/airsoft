@@ -223,8 +223,8 @@ func test_finds_the_same_corners_wherever_the_enemies_are() -> void:
 
 # --- reacting from a held angle ---
 
-## A fresh sighting 12 m ahead on `level`, the bot's view on the enemy or `off` degrees away: [reaction delay, aim
-## settling already done].
+## A fresh sighting 12 m ahead on `level`, the bot's view on the enemy or `off` degrees away: [reaction delay past the
+## noticing, aim settling already done].
 func _sighting(level: StringName, off: float, seed_value: int) -> Vector2:
 	var b := _bot(level, WorldQuery.new(), Vector3(0.0, 0.0, -12.0), seed_value)
 	var eye := BotSenses.eye_of(b.character, tuning)
@@ -233,7 +233,11 @@ func _sighting(level: StringName, off: float, seed_value: int) -> Vector2:
 	b.aim_pitch = BotAim.look_pitch(eye, chest)
 	BotSenses.perceive(b, _w)
 	assert_not_null(b.contact)
-	return Vector2(b.contact.react_at - _w.time, _w.time - b.contact.acquired_at)
+	# Less the time it takes anyone to notice someone there (AIM2), the same at every level: the level's reaction.
+	var you := _w.characters[1]
+	var notice := BotSenses.notice_time(b.character, you, Vector2(you.position.x - b.character.position.x,
+			you.position.z - b.character.position.z).length(), config)
+	return Vector2(b.contact.react_at - _w.time - notice, _w.time - b.contact.acquired_at)
 
 
 func test_answers_sooner_and_steadier_when_someone_steps_out_where_a_hard_bot_already_aims() -> void:
