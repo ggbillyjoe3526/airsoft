@@ -25,7 +25,7 @@ plays: the calls are what it already does, put into words.
   within its gap, and the same enemy is not called twice within its gap. A call the team gap holds back waits at most
   the last row's seconds, then is dropped.
 - **Personalities.** Talks (×) multiplies every chance: 1 changes nothing, above 1 is chattier. It never makes the
-  answers to your ping, or the asks and answers for a magazine, less likely. Every personality in [bots.md](bots.md) needs a row.
+  answers to your ping, the asks and answers for a magazine, or Flash out, less likely. Every personality in [bots.md](bots.md) needs a row.
 - **Marks.** A teammate calling Contact or Contacts that still sees the enemy may also mark them for you, a ping over
   where they are: the chance is how likely, and the team marks at most once in its seconds. Marks only show; they
   never change how anyone plays.
@@ -64,6 +64,9 @@ plays: the calls are what it already does, put into words.
 - **Defusing.** Plant The Bomb: it starts defusing the bomb. Fills nothing.
 - **Bomb down.** Plant The Bomb: the carrier was hit and dropped the bomb; the attacker nearest it says where. Fills
   `{area}`.
+- **Flash out.** It throws a flash bomb: it says so as it lets go, whatever the bot's or the team's gap, so you
+  can look away. Its bot teammates turn from the flash on the throw, whether the line shows or not (the call is what
+  it already does). Fills nothing.
 - **Going to your ping.** You ping a spot or an enemy (the Ping key) and a teammate sets off to look: the one nearest
   it says so. Fills `{area}` (the spot's). Its Checking, Pushing or Flanking is not called as well.
 - **Watching your ping.** As above, when none of them goes (under your order, at its post, holding): the nearest that
@@ -92,6 +95,7 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 
 | Event | Chance | Team gap (s) |
 |---|---|---|
+| Flash out | 1 | 0 |
 | Last one | 1 | 0 |
 | Down | 0.9 | 0 |
 | Tagged | 0.6 | 3 |
@@ -259,6 +263,10 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 | Bomb down | Any | Bomb's down at {area}! |
 | Bomb down | Any | Bomb's down! Somebody grab it! |
 | Bomb down | Rusher | Bomb's down, I'll get it! |
+| Flash out | Any | Flash out! |
+| Flash out | Any | Flash out, look away! |
+| Flash out | Rusher | Flash out, going in! |
+| Flash out | Careful | Flash out. Eyes away! |
 | Overtime | Any | Overtime! Flag's up, {area}! |
 | Overtime | Any | Flag's up! First hand on it wins! |
 | Overtime | Rusher | Flag's up! I'm going for it! |

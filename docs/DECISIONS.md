@@ -985,6 +985,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   should be less bright. I don't like the wooden sniper rifle so remove that and keep polymer." So black metal is
   the darkest, black polymer a shade lighter, white polymer an off-white, and the sniper's stock stays polymer; no
   replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
+- **Metal and polymer are a close shade (owner, 2026-11-15, MQ4; replaces the MQ1 shades above).** "Materials on guns
+  clash too much. Metal is too shiny and the polymer is relatively very dark. Materials should generally be a close or
+  similar shade but appear slightly more metallic (metals) or matte (polymer)." Steel and aluminium are now a satin
+  coat (about half metallic, a broad highlight, near black when painted black) and polymer draws its paint nearly
+  as it is; white polymer stays a touch off-white and no replica is wood. He answered "Perfect" to the pictures; the
+  values are not re-tuned without him (docs/records/MQ4.md).
 - **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
   handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
   sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip

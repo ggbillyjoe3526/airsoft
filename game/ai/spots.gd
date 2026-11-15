@@ -60,7 +60,7 @@ func clear() -> void:
 ## .enemy_under_view, spot_cone_deg) is marked for the pinger's team and told to their bot teammates near them at once.
 ## Returns them, or null when nobody is under the view or the pinger is out.
 func place(e: GameEvent, now: float, w: BotWorld, pings: Pings) -> Character:
-	var spotter := _character(w, e.actor)
+	var spotter := w.character(e.actor)
 	if spotter == null or not Elimination.is_in_play(spotter) or e.value == Pings.ON_MAP:
 		return null
 	var reach := e.reach if e.value == 1 else _cfg.reach
@@ -107,10 +107,3 @@ static func share(w: BotWorld, enemy: Character, team: int, radius: float) -> vo
 		m.has_last_known = true
 		m.heard_at = w.time
 		m.last_threat_at = w.time
-
-
-static func _character(w: BotWorld, id: int) -> Character:
-	for c in w.characters:
-		if c.id == id:
-			return c
-	return null

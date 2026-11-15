@@ -135,7 +135,7 @@ to miss that close. That goes for you as for them; anyone with their hands off t
 Bots tell their team what they already do, in words in the [hit feed](HUD-and-Minimap#callouts)
 with a radio click, never a voice: a sighting ("Contact, Dock!"), a noise while nobody on the team sees anyone, the
 team's hits ("Two left!", "Last one!"), a reload under fire, setting off after someone, settling at a hold, the
-flag going up, and in Plant The Bomb the bomb being planted, armed, defused or dropped ("They're planting at A
+flag going up, a flash on its way ("Flash out!"), and in Plant The Bomb the bomb being planted, armed, defused or dropped ("They're planting at A
 site!"). A team speaks one call at a time, a moment apart, the most urgent first; each personality has its own
 lines and talks more or less. Hit players never talk, and what a bot says never changes how anyone plays. You see
 only your own team's words; an enemy close by is heard keying their radio.
@@ -162,7 +162,8 @@ each team the bot nearest the flag calls it, naming where it stands.
 Every bot carries a smoke and a flash bomb a round, as you do, and throws them: a smoke when pinned in cover by
 someone at range, a flash round a corner before it pushes, then it looks away until the bang. Harder bots throw more
 often. A Normal or Hard bot that sees someone else's flash coming may turn away from it too (Hard more often than
-Normal; an Easy bot never does), so a flash is surest thrown where it lands out of sight. Bots walk round a standing smoke cloud
+Normal; an Easy bot never does), so a flash is surest thrown where it lands out of sight. A bot calls its own flash as it
+throws ("Flash out!"), so every bot looks away from its teammates' flashes. Bots walk round a standing smoke cloud
 where the way round is open, and through it only where it is the only way. [Grenades](Grenades) has the rules.
 
 ## Magazines

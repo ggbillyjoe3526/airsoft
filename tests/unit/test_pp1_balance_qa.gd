@@ -201,6 +201,46 @@ func test_a_teammate_s_flash_is_turned_from_as_someone_else_s() -> void:
 	assert_eq(s.characters[0].dazzle_left, 0.0, "looked away from its mate's bang")
 
 
+## BC1: a mate's flash is called as it goes, so it is looked away from at every level, with no roll, out to the
+## flash's own reach (in 12 Depot matches two of five dazzles were a mate's, inside the thrower's checks).
+func test_a_teammate_s_flash_is_turned_from_without_a_roll_even_by_a_bot_that_never_dodges() -> void:
+	var m := _match(Vector3(0.0, 0.0, -30.0))
+	var s: GameState = m[1]
+	var b: Bot = m[2]
+	b.skill.flash_dodge_chance = 0.0
+	var state := b.bomb_rng.state
+	_flash_at(m, Vector3(0.0, 0.1, -5.0), 1)
+	_run(m, _fuse_ticks())
+	assert_eq(s.characters[0].dazzle_left, 0.0, "looked away from its mate's bang")
+	assert_eq(b.bomb_rng.state, state, "no roll taken for a mate's flash")
+
+
+func test_an_enemy_flash_is_still_rolled_for_and_a_bot_that_never_dodges_is_dazzled() -> void:
+	var m := _match(Vector3(0.0, 0.0, -30.0))
+	var s: GameState = m[1]
+	var b: Bot = m[2]
+	b.skill.flash_dodge_chance = 0.0
+	_flash_at(m, Vector3(0.0, 0.1, -5.0), 2)
+	_run(m, _fuse_ticks())
+	assert_gt(s.characters[0].dazzle_left, 0.0, "an enemy's flash still dazzles a bot that never turns")
+
+
+func test_a_teammate_s_flash_past_the_dodge_reach_but_inside_its_dazzle_is_turned_from() -> void:
+	var away := (bots.flash_dodge_reach + g.flash_reach) * 0.5
+	assert_true(away > bots.flash_dodge_reach and away < g.flash_reach)
+	var m := _match(Vector3(0.0, 0.0, -30.0))
+	var b: Bot = m[2]
+	_flash_at(m, Vector3(0.0, 0.1, -away), 1)
+	_run(m, 2)
+	assert_gt(b.flash_judged_until, -INF, "a mate's flash is judged out to the flash's reach")
+	assert_true(b.bomb_away_until > 0.0, "and turned from")
+	var e := _match(Vector3(0.0, 0.0, -30.0))
+	var eb: Bot = e[2]
+	_flash_at(e, Vector3(0.0, 0.1, -away), 2)
+	_run(e, 2)
+	assert_eq(eb.flash_judged_until, -INF, "an enemy's that far is not judged")
+
+
 func test_a_flash_past_the_reach_is_not_judged() -> void:
 	var m := _match(Vector3(0.0, 0.0, -30.0))
 	var b: Bot = m[2]
@@ -278,3 +318,33 @@ func test_two_flashes_banging_together_take_one_roll() -> void:
 	once.randf()
 	assert_eq(b.bomb_rng.state, once.state, "one roll for the pair, not one each")
 	assert_almost_eq(b.flash_judged_until, g.flash_fuse, 0.05)
+
+
+## BC1 QA: a flash whose owner is in no character list can't be told for a mate, so it is an enemy's: rolled for.
+func test_a_flash_of_an_unknown_owner_is_judged_as_an_enemy_s_and_does_not_crash() -> void:
+	var m := _match(Vector3(0.0, 0.0, -30.0))
+	var b: Bot = m[2]
+	b.skill.flash_dodge_chance = 0.0
+	_flash_at(m, Vector3(0.0, 0.1, -5.0), 99)
+	_run(m, 2)
+	assert_eq(b.bomb_away_until, -INF, "an enemy's, not rolled for at chance 0: not turned from")
+	b.skill.flash_dodge_chance = 1.0
+	_run(m, 2)
+	assert_gt(b.bomb_away_until, 0.0, "with a sure roll it is turned from like any enemy's")
+
+
+## BC1 QA: an enemy's flash banging sooner than a mate's, at a bot that never dodges: the mate's, the only one it
+## judges, is turned from, and no roll is taken.
+func test_a_mate_s_later_flash_is_turned_from_when_a_sooner_enemy_flash_cannot_be_dodged() -> void:
+	var m := _match(Vector3(0.0, 0.0, -30.0))
+	var s: GameState = m[1]
+	var b: Bot = m[2]
+	b.skill.flash_dodge_chance = 0.0
+	_flash_at(m, Vector3(1.0, 0.1, -5.0), 2)
+	s.grenades[0].age = 1.0
+	_flash_at(m, Vector3(-1.0, 0.1, -5.0), 1)
+	var state := b.bomb_rng.state
+	_run(m, 1)
+	assert_almost_eq(b.flash_judged_until, g.flash_fuse, 0.05, "judged the mate's, which bangs later")
+	assert_gt(b.bomb_away_until, g.flash_fuse, "turned from it")
+	assert_eq(b.bomb_rng.state, state, "no roll")

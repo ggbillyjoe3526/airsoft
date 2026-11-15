@@ -11,11 +11,11 @@ const LINES: PackedStringArray = [
 	"Pushing {area}!", "Flanking {area}.", "Checking {area}.", "Holding {area}.", "Raising!", "Flag!",
 	"Overtime, {area}!", "Going to {area}.", "Watching {area}.", "Need a mag!", "Mag coming!", "Thanks for the mag!",
 	"Need help!", "Go round!", "Cover me!", "Watching with you.", "It's yours.", "Planting {area}!", "Bomb, {area}!",
-	"Armed, {area}!", "Defusing!", "Bomb down, {area}!",
+	"Armed, {area}!", "Defusing!", "Bomb down, {area}!", "Flash out!",
 ]
 ## The shipped order of urgency.
 const ORDER: Array[int] = [
-	E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING, E.WATCH_JOIN, E.WATCH_REST, E.NEED_MAG, E.MAG_COMING,
+	E.FLASH_OUT, E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING, E.WATCH_JOIN, E.WATCH_REST, E.NEED_MAG, E.MAG_COMING,
 	E.NEED_HELP, E.COVER_ME,
 	E.GO_ROUND, E.OVERTIME, E.FLAG,
 	E.RAISING, E.BOMB, E.BOMB_DOWN, E.PLANTING, E.DEFUSING, E.BOMB_ARMED, E.CONTACTS, E.CONTACT, E.RELOADING, E.MAG_THANKS, E.HEARD, E.PUSHING, E.FLANKING, E.CHECKING,
@@ -294,6 +294,32 @@ func test_plant_the_bomb_the_planter_says_so_and_a_defender_in_earshot_calls_the
 			_said([]))
 
 
+func test_a_bot_s_flash_is_called_by_its_thrower_even_inside_its_own_gap() -> void:
+	var r := _rig()
+	var flash := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 0, "position": YARD}
+	assert_eq(r.tick([{"kind": GameEvent.Kind.MAG_CATCH, "target": 0, "value": 30}]), _said(["0: Thanks for the mag!"]))
+	r.run(2.0) # the team's gap has passed, bot 0's own has not
+	assert_eq(r.tick([flash]), _said(["0: Flash out!"]), "the thrower warns its team (BC1)")
+	r.run(5.0)
+	# Inside the team's gap too: the bang is only a moment off.
+	assert_eq(r.tick([{"kind": GameEvent.Kind.MAG_CATCH, "target": 1, "value": 30}]), _said(["1: Thanks for the mag!"]))
+	assert_eq(r.tick([flash]), _said(["0: Flash out!"]), "said at once, the team's gap or not")
+	r.run(5.0)
+	# A smoke, and a throw by someone who is not a bot (you), are never called.
+	var smoke := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.SMOKE, "actor": 2, "position": YARD}
+	assert_eq(r.tick([smoke]), _said([]))
+	var yours := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 99, "position": YARD}
+	assert_eq(r.tick([yours]), _said([]))
+
+
+func test_a_quiet_personality_still_calls_every_flash_it_throws() -> void:
+	var r := _rig({}, {}, [4, 1.5, 10, 1.5], [0.5, 0.5]) # both talk half as much as the file's chances
+	var flash := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 0, "position": YARD}
+	for n in 20:
+		assert_eq(r.tick([flash]), _said(["0: Flash out!"]), "throw %d" % n)
+		r.run(5.0)
+
+
 func test_plant_the_bomb_armed_defusing_and_dropped_are_called_by_the_side_they_matter_to() -> void:
 	var r := _rig({}, {}, [0, 0, 0, 1.5])
 	r.state.round_state.attackers = 1
@@ -508,3 +534,23 @@ func test_a_warm_tick_makes_no_object_and_a_call_only_its_line() -> void:
 	assert_eq(r.director.said.total - said, 200, "a call every other tick")
 	assert_eq(objects_after, objects, "no objects")
 	assert_lte(memory_after, memory, "the ring's lines replaced, no more")
+
+
+func test_a_flash_out_inside_the_team_gap_leaves_other_waiting_calls_for_when_it_passes() -> void:
+	var r := _rig({}, {}, [4, 1.5, 10, 5])
+	var flash := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 0, "position": YARD}
+	assert_eq(r.tick([{"kind": GameEvent.Kind.MAG_CATCH, "target": 0, "value": 30}]), _said(["0: Thanks for the mag!"]))
+	r.bot(1).last_threat_at = r.state.time + 0.1
+	# Inside the team's gap: a flash is said at once, a Reloading (less urgent) waits and is not lost.
+	var out := r.tick([flash, {"kind": GameEvent.Kind.RELOAD_START, "actor": 1}])
+	assert_true(out.has("0: Flash out!"), "the flash goes inside the gap")
+	assert_false(out.has("1: Reloading!"), "the other call keeps waiting ")
+	assert_eq(r.run(0.5).size(), 0, "nothing else slips out inside the new gap")
+	assert_true(" ".join(r.run(2.0)).contains("1: Reloading!"), "and it is said once the gap has passed")
+
+
+func test_a_thrower_hit_in_the_same_tick_does_not_call_its_flash() -> void:
+	var r := _rig()
+	var flash := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 0, "position": YARD}
+	var out := r.tick([r.hit(0, 2), flash])
+	assert_false(out.has("0: Flash out!"), "a hit thrower says nothing")
