@@ -119,6 +119,21 @@ func test_a_hunt_for_another_spot_walking_back_does_not_count() -> void:
 			func(_s: int) -> int: return second), "round in a loop on one hunt")
 
 
+## A searcher off after one noise that hears another behind it and walks back (AIM1, Depot seed 11): two spots, two
+## errands, as two hunts are. One spot throughout is still one errand.
+func test_a_search_for_a_fresh_noise_walking_back_is_another_errand() -> void:
+	var b := _bot()
+	b.has_last_known = true
+	b.last_known = Vector3(-5.1, 0.0, -8.8)
+	var first := MatchRunner.errand_of(b, Bot.Mode.SEARCH)
+	assert_eq(MatchRunner.errand_of(b, Bot.Mode.SEARCH), first, "one spot, one errand")
+	b.last_known = Vector3(-23.4, 0.0, -16.4)
+	assert_ne(MatchRunner.errand_of(b, Bot.Mode.SEARCH), first, "another spot, another errand")
+	assert_eq(MatchRunner.errand_of(b, Bot.Mode.ADVANCE), int(Bot.Mode.ADVANCE), "on its lane: the mode")
+	b.has_last_known = false
+	assert_eq(MatchRunner.errand_of(b, Bot.Mode.SEARCH), int(Bot.Mode.SEARCH), "nothing known: the mode")
+
+
 func test_a_bot_that_gets_somewhere_does_not_count() -> void:
 	var ring := _ring()
 	var places: Array[Vector3] = []
