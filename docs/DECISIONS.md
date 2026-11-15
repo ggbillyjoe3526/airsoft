@@ -524,9 +524,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The audit's play questions (owner, 2026-11-14, AUD1).** Bots keep squeezing past Subway's works wagons on the
   track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a
   6 s defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots
-  only. A holstered bot's arms swing as it steps, a switch between two replicas of one class plays its own put-away
+  only. (The fuse is replaced by each field's own on 2026-11-15, PB4, below.) A holstered bot's arms swing as it steps, a switch between two replicas of one class plays its own put-away
   and draw, and a slow-sprung Sniper Rifle's bolt is home with the recording's last knock: looks only, the timing of
   a shot or a switch is unchanged.
+- **Plant The Bomb's fuse is each field's own (owner's ask, 2026-11-15, PB4; the values are Claude's).** He asked for
+  the attackers' win rate to be made fairer. The fuse is the lever (data/maps.md `Fuse (s)`, the game's 30 s where a
+  field has none), set from bot matches to near half the rounds for the attackers: Depot 16 s, Subway 22 s, Woodland 23
+  s, Stockade 20 s. The defuse stays 6 s and the plant 3.5 s, the lengths of his recordings. A field whose layout
+  changes has its fuse measured again (32 seeds at Normal, `docs/records/PB4.md`), and every fuse leaves a defending
+  player within 15 m of the bomb time to reach it before a bot takes the defuse over.
 - **Bots throw their bombs as a player would (2026-10-30, SF2; Claude's defaults).** A smoke when pinned in cover
   (an enemy BB close in the last 2 s) by someone 8 to 35 m off with no cloud between them yet, half way to them; a flash
   round a corner it is searching toward, 4 to 16 m off, landing before its bang and never where a teammate close by

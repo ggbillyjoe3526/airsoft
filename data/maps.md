@@ -22,6 +22,11 @@ warning; a map with no row is not listed.
   number from 3 to 20, or blank for the game's 7 (`game/config/flag_config.gd`). Skirmish and Custom both play it.
   Woodland's is 9: its two sites are 77 m apart and a defender's way to a pole is long. One that isn't such a number
   keeps the game's with a warning.
+- **Fuse (s)** is the seconds Plant The Bomb's armed bomb takes to go off there (PB4): a whole or decimal number from
+  15 to 60, or blank for the game's 30 (`game/config/plant_config.gd`). Skirmish and Custom both play it. Each field's
+  is set from bot matches so the attackers take about half the rounds: once the bomb is armed the fight is over in
+  13 to 21 s, so a fuse longer than that never mattered. Depot's is 16 (its sites lie near the defenders' start),
+  Subway's 22, Woodland's 23, Stockade's 20. One that isn't such a number keeps the game's with a warning.
 - **Start mode** is the most a fire selector starts each round on there: `semi` or `burst` holds every replica that
   comes on full auto to its highest mode no higher (SEMI, then BURST, then AUTO), any replica now or added later, the
   bots' too; you can still switch to auto in the round. Blank or `auto` starts every replica as it comes, and a
@@ -38,10 +43,10 @@ warning; a map with no row is not listed.
 
 ## Maps
 
-| Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Start mode | Wind (×) | Air (°C) | Blurb |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| depot | Depot | field | public | 5 | 6 | 8 |  |  | semi | 0 | 20 | An indoor airsoft hall: three lanes, two dark tunnels. |
-| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
-| subway | Subway | field | dev | 5 | 6 | 8 |  |  | semi | 0 | 14 | A closed metro station on three levels, from the ticket hall down to the trains. |
-| stockade | Stockade | field | dev | 5 | 6 | 8 |  |  |  | 0.5 | 15 | A plywood village inside a log fort: fenced courts, a market green, close fights. |
-| range | Range | range | public | 1 | 1 | 1 |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |
+| Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Fuse (s) | Start mode | Wind (×) | Air (°C) | Blurb |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| depot | Depot | field | public | 5 | 6 | 8 |  |  | 16 | semi | 0 | 20 | An indoor airsoft hall: three lanes, two dark tunnels. |
+| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 23 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
+| subway | Subway | field | dev | 5 | 6 | 8 |  |  | 22 | semi | 0 | 14 | A closed metro station on three levels, from the ticket hall down to the trains. |
+| stockade | Stockade | field | dev | 5 | 6 | 8 |  |  | 20 |  | 0.5 | 15 | A plywood village inside a log fort: fenced courts, a market green, close fights. |
+| range | Range | range | public | 1 | 1 | 1 |  |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |
