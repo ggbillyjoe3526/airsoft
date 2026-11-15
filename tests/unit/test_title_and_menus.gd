@@ -96,7 +96,7 @@ func test_the_current_tab_is_lit() -> void:
 	var dark := bar.tab_button(NavRail.Tab.MATCH).get_theme_stylebox("normal") as StyleBoxFlat
 	assert_eq(dark.bg_color.a, 0.0, "the others are bare words")
 	var rule := bar.tab_button(NavRail.Tab.ARMORY).get_child(0) as ColorRect
-	assert_eq(rule.color, GameTheme.ACCENT)
+	assert_eq(rule.color, GameTheme.accent)
 	assert_true(rule.visible, "with the teal rule")
 	assert_false((bar.tab_button(NavRail.Tab.MATCH).get_child(0) as ColorRect).visible)
 

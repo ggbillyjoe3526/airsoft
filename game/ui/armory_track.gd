@@ -105,7 +105,7 @@ func _card(r: ArmoryFacts.Row) -> Control:
 	panel.size_flags_stretch_ratio = 1.0
 	var face := GameTheme.panel_box(CARD_PAD.x, CARD_PAD.y)
 	if next:
-		face.border_color = GameTheme.ACCENT
+		face.border_color = GameTheme.accent
 		face.set_border_width_all(NEXT_EDGE)
 	panel.add_theme_stylebox_override("panel", face)
 	_faces[r.number] = face
@@ -158,7 +158,7 @@ func _head(r: ArmoryFacts.Row) -> Control:
 	match r.state:
 		ArmoryFacts.State.UNLOCKED:
 			words = tr("ARMORY_STATE_UNLOCKED")
-			colour = GameTheme.ACCENT
+			colour = GameTheme.accent
 		ArmoryFacts.State.NEXT:
 			words = tr("ARMORY_ROW_NEXT") % ArmoryFacts.grouped(r.total)
 			colour = GameTheme.TEXT

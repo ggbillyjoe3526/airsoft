@@ -1721,6 +1721,19 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 - [ ] **Attacking is worth it now.** Attack on the same fields and hold the site after the plant.
   Pass: holding the site feels like it wins rounds; the bomb goes off now and then, not every time.
 
+## The interface colour (UA1, UA2)
+
+- [ ] **Blue reads as the highlight, never as a team.** At 1080p and on your 4K screen go through Match, Loadout,
+  Customise, Armory, Settings and the pause menu, then play a round on Alpha and open the comms wheel (hold Z).
+  Pass: PLAY, RESUME, the picked field and mode, focus rings and the lit wheel button are a soft cornflower blue with
+  dark words that read easily; next to Alpha's score block and markers they are clearly a different, paler blue; with
+  Settings › Accessibility › High contrast on, the highlight still doesn't look like Alpha's sky blue.
+- [ ] **Every colour in Settings › Display › Interface › Colour.** Click each of the seven swatches (hover shows its
+  name), then Back, and look at Match, Loadout and Armory; also pick one from the pause menu's Settings in a match.
+  Pass: the menus change at once with the click and stay that colour after a restart; dark words read on every
+  colour; red, orange and blue never look like a team or a warning; from the pause menu, Resume and the settings
+  change at once and the HUD follows from the next match.
+
 ## The AEG Rifle's ring, handguard gaps and forward assist (AF1)
 
 - [ ] **The new shapes read in your hands.** Hold the AEG Rifle at the hip and aimed on Depot and Woodland, and

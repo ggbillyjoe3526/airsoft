@@ -1246,6 +1246,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   ARMORY, SETTINGS, the level and QUIT. Field pictures are photo-mode views from eye height, never overhead; replica
   pictures share one scale and fit inside their boxes; Customise keeps the replica fixed and can turn it in 3D; the HUD
   minimap is square and the equipped grenade's icon is the bigger one. Concepts: `/mnt/project-files/concepts/ui-redesign/`.
+- **The UI's highlight is blue, and the player can pick another (owner, 2026-11-15; UA1 and UA2, replaces Sunlit
+  Concrete's bone accent).** The accent (`GameTheme.accent`) lights the main buttons, the picked and focused items,
+  the rail marker and the comms wheel's lit button. Blue `#8fb0f0` by default; Settings › Display › Interface ›
+  Colour also offers beige, red, green, pink, orange and violet (`game/config/ui_colours.gd`). Each is a soft, light
+  shade with a dark ink, paler than the team colours so a highlight never reads as a team; team colours, signal
+  yellow and the off-white text don't change with it. A change restyles the menus at once (they are built again).
 - **There is no title screen (owner, 2026-11-02; UR1).** The game opens on the Match page. The version, the renderer,
   Report a Bug, Licences and Quit to desktop are in Settings › About (no title box there); QUIT is also at the rail's
   foot.

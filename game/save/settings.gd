@@ -23,7 +23,7 @@ const KNOWN_KEYS: Array[String] = [
 	"what_got_you", "hud", "custom_rules", "practice_challenge", "dev", "dev_enabled", "graphics_base",
 	"graphics_choice", "graphics_custom", "frame_limit", "monitor", "last_fullscreen", "renderer", "first_start_seen",
 	"team_colours", "gauge_patterns", "sound_cues", "sound_cue_size", "sound_cue_colour", "read_out", "reduced_motion",
-	"robots", "simulate_skips",
+	"robots", "simulate_skips", "ui_colour",
 ]
 ## Windowed leaves the window as it is (the project starts maximised); the other two are the DisplayServer's
 ## borderless and exclusive fullscreen. The first start is Exclusive (WINDOW_MODE_DEFAULT).
@@ -121,6 +121,8 @@ var renderer: Renderer = Renderer.AUTO
 var first_start_seen: bool = false
 ## Replica colours: every bold scheme shows as its plain family colour (LO3).
 var realistic_colours: bool = false
+## The interface's colour (Settings › Display, UA2): the accent of the main buttons and the selection.
+var ui_colour: UiColours.Pick = UiColours.DEFAULT
 ## The "What got you" card once you are hit: Auto shows it against Hard bots only.
 var what_got_you: WhatGotYou = WhatGotYou.AUTO
 ## Simulate skipped rounds (BP8, owner: off by default): a skip's cover offers SIMULATE, which decides the rest of the
@@ -262,7 +264,7 @@ func to_dict() -> Dictionary:
 		"wheel_pick": int(wheel_pick), "mouse_dpi": mouse_dpi,
 		"bindings": bindings.to_dict(), "volumes": vol, "window_mode": int(window_mode), "vsync": vsync,
 		"fov": fov, "show_fps": show_fps, "realistic_colours": realistic_colours, "what_got_you": int(what_got_you),
-		"simulate_skips": simulate_skips,
+		"simulate_skips": simulate_skips, "ui_colour": int(ui_colour),
 		"hud": hud.to_dict(), "custom_rules": custom_rules.to_dict(), "practice_challenge": practice_challenge,
 		"dev": dev.to_dict(), "graphics_base": String(graphics_base),
 		"graphics_custom": graphics_custom.duplicate(), "frame_limit": frame_limit, "monitor": monitor,
@@ -305,6 +307,8 @@ func from_dict(data: Dictionary) -> void:
 	vsync = _flag(data, "vsync", VSYNC_DEFAULT)
 	fov = _number(data, "fov", FOV_DEFAULT, FOV_MIN, FOV_MAX)
 	show_fps = _flag(data, "show_fps", false)
+	var colours := UiColours.Pick.size() - 1.0
+	ui_colour = roundi(_number(data, "ui_colour", UiColours.DEFAULT, 0.0, colours)) as UiColours.Pick
 	realistic_colours = _flag(data, "realistic_colours", false)
 	what_got_you = roundi(_number(data, "what_got_you", WhatGotYou.AUTO, 0.0, WhatGotYou.size() - 1.0)) as WhatGotYou
 	var saved_hud: Variant = data.get("hud")
