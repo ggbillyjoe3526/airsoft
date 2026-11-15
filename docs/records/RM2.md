@@ -1,15 +1,32 @@
 # RM2 · The Range's props rebuilt rounder, Woodland's woodpiles mixed
 
-**Review:** REVIEW_LINE
+**Review:** 14 attempts · critic 7/8, accepted by the owner (William, 2026-11-15: "Don't try again. This model
+is good so add it to the game.") · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-ATTEMPT_ROWS
+| 2026-11-15 | 1 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the models rule (its report was not kept in the shared runs) |
+| 2026-11-15 | 2 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the sandbags' proportions against photo 4 |
+| 2026-11-15 | 3 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the sandbags' proportions against photo 4 |
+| 2026-11-15 | 4 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the sandbag headers at a wall's end broke into hard planes |
+| 2026-11-15 | 5 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the bags' outlines still polygons end on |
+| 2026-11-15 | 6 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: split pieces stood on their points over the woodpile's top |
+| 2026-11-15 | 7 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the spike rule could not fire; spikes stayed |
+| 2026-11-15 | 8 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: a black slot ran up the woodpile's end corners |
+| 2026-11-15 | 9 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the end logs were hard-faceted grey prisms |
+| 2026-11-15 | 10 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the end logs' joints showed as flat tan flaps |
+| 2026-11-15 | 11 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the end read as hexagonal planks or bricks |
+| 2026-11-15 | 12 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: a straight line showed where two sections met |
+| 2026-11-15 | 13 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the end read as boards and pipes, not split firewood |
+| 2026-11-15 | 14 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the end read as stacked blocks; owner accepted it (below) |
 
 ## Decisions
 
+- **Shipped at the fourteenth woodpile pass, the owner's call.** The critic's attempt 14 was 7/8 (the end pieces still
+  too straight); William ruled "Don't try again. This model is good so add it to the game." (2026-11-15), so the v14
+  woodpiles ship as they are. A fifteenth pass begun before his word (pieces twisted and tapered) was dropped.
 - **Asked for by the owner.** His yes to the Range's sandbags, toilet ribs and tote bars rebuilt rounder (AUD1,
   2026-11-14; `docs/DECISIONS.md`); AUD1's rebuild failed the models rule and stayed out (KNOWN_ISSUES). On
   2026-11-15 he asked for "the props rebuilt as needed" and, on the pictures ("Looks good"), for better stacks of wood
