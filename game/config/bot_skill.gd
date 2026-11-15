@@ -23,6 +23,9 @@ extends Resource
 @export var aim_error_tracking: float = 0.11
 ## Share of the target's movement a bot leads by over the BB's flight.
 @export var lead_factor: float = 0.5
+## Extra aim error (degrees) the moment an enemy BB passes close (BotConfig.suppression_radius, AIM2), easing away over
+## BotConfig.flinch_time: a BB past the ear makes anyone flinch, so shooting back at a bot spoils its aim.
+@export var aim_error_under_fire_deg: float = 2.5
 ## Trigger held per burst, and the pause between bursts (s).
 @export var burst: Vector2 = Vector2(0.2, 0.45)
 @export var burst_pause: Vector2 = Vector2(0.3, 0.65)
