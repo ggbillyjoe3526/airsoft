@@ -69,6 +69,12 @@ the same end and role: 1 is the same ground every round.
 | Subway Plant The Bomb | 0.64 → 0.62 | 20.9 → 20.4 s | attackers 54.7 % ±3.7 (main with #357 54.9 %) | 40-65 % |
 | Stockade Plant The Bomb | 0.54 → 0.49 | 22.2 → 22.3 s | attackers 42.8 % ±3.8 (main with #357 40.3 %) | 40-65 % |
 
+- **After the stack rule (attempt 2's last change), 8 to 24 seeds:** Elimination end 0 Depot 52.3 % ±6.2, Woodland
+  43.5 % ±3.7 (24 seeds; outside within noise, main 47.6 % ±3.2 over 32 seeds in KNOWN_ISSUES), Subway 50.3 % ±3.6
+  (24 seeds), Stockade 49.2 % ±6.5; Attack / Defend attackers Depot 50.9 %, Woodland 56.7 %, Subway 56.9 %, Stockade
+  46.7 % (±6.5). Crossings a round fall a little (Elimination 3.7 to 5.7). Stockade was removed from the game on main
+  (SK2, #359) while this ran, and AIM1 (#360) changed the bots' aim after these figures; both are in the re-measure
+  after the map reworks.
 - **What it does for "fights start late":** Attack / Defend and Plant The Bomb meet 1 to 2 s sooner; Elimination
   doesn't move (about 15 s, the walk to the middle at a run plus a beat). The first version, with fewer crossings,
   had Elimination 0.6 to 1.3 s sooner; the cuts across lanes take that back. Coming out further on the player's side
@@ -81,5 +87,6 @@ the same end and role: 1 is the same ground every round.
 - A cross only checks that the point it makes for is no nearer home, not the route there: on Depot or Subway, with
   45 m of reach, a route round a wall could double back for a stretch (the critic's advisory; none seen in the runs).
 
-- Subway Elimination's end 0 (the street end) at 56.1 % ±3.7, outside within noise: re-measure on 32 seeds on the
-  reworked Subway (this thread re-measures every map once the reworks merge).
+- Woodland Elimination's west end at 43.5 % ±3.7 after the stack rule (24 seeds), outside within noise; Subway's
+  street end swung from 56.1 % to 50.3 % between two 24-seed runs, so these figures are noisy. Re-measured on 32
+  seeds on the reworked maps (this thread re-measures every map once the reworks merge).
