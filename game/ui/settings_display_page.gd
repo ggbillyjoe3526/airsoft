@@ -3,12 +3,15 @@ extends HBoxContainer
 ## The settings' Display tab (concept `settings-display.png`): the window (Window mode as Windowed, Borderless or
 ## Fullscreen, the F11 and Alt+Enter keys in its tooltip; Monitor, shown only with two screens or more, each as its
 ## number, size and rate) and the frame rate (V-Sync, and the frame-rate limit from 30 to 360 or Off) and the view (field
-## of view, Show FPS), in one column. The longer explanations are the rows' tooltips (UI1: help only where a player would
+## of view, Show FPS) and the interface's colour (UA2: a swatch per UiColours colour, its name in its tooltip), in one
+## column. The longer explanations are the rows' tooltips (UI1: help only where a player would
 ## be stuck). Each choice is applied at once through SettingsApply and `changed` asks the screen to save it. F11 pressed
 ## while the tab shows moves Window mode with it (`Settings.changed`).
 
 ## A choice landed: saved now (`immediate`, a click) or a moment after a slider stops.
 signal changed(immediate: bool)
+## The interface's colour changed (after `changed`): the screens built in the old one are built again.
+signal restyled
 
 ## The column's width and the labels' width (px).
 const LEFT_WIDTH := 1100.0
@@ -28,6 +31,7 @@ var _vsync: CheckButton = null
 var _limit: MenuChoice = null
 var _fov: HSlider = null
 var _fps: CheckButton = null
+var _ui_colour: MenuSwatches = null
 
 
 func _init() -> void:
@@ -45,6 +49,7 @@ func build(screen: SettingsScreen) -> void:
 	_build_window(left)
 	_build_frame_rate(left)
 	_build_view(left)
+	_build_interface(left)
 	_watch(is_inside_tree())
 
 
@@ -58,6 +63,7 @@ func refresh() -> void:
 	var at := Settings.FRAME_LIMITS.find(s.frame_limit)
 	_limit.put(at if at >= 0 else Settings.FRAME_LIMITS.size())
 	_screen.set_slider(_fov, s.fov)
+	_ui_colour.put(s.ui_colour)
 	_screen.set_check(_fps, s.show_fps)
 
 
@@ -89,6 +95,11 @@ func limit_choice() -> MenuChoice:
 
 func fov() -> HSlider:
 	return _fov
+
+
+## The interface colour's swatches (tests; Main.restyle puts the keyboard back on the picked one).
+func ui_colour() -> MenuSwatches:
+	return _ui_colour
 
 
 func show_fps() -> CheckButton:
@@ -191,6 +202,24 @@ func _build_view(column: VBoxContainer) -> void:
 	_fps.toggled.connect(func(on: bool) -> void:
 		_screen.settings.show_fps = on
 		changed.emit(true))
+
+
+## Interface: the colour of the main buttons and the selection (UiColours), applied at once.
+func _build_interface(column: VBoxContainer) -> void:
+	_screen.add_section(column, tr("SETTINGS_INTERFACE"))
+	var row := _screen.add_row(column, "SETTINGS_UI_COLOUR", LEFT_LABEL)
+	_ui_colour = MenuSwatches.new(UiColours.ACCENTS)
+	_ui_colour.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	for i in UiColours.NAME_KEYS.size():
+		_ui_colour.button(i).tooltip_text = tr(UiColours.NAME_KEYS[i])
+	_ui_colour.picked.connect(func(i: int) -> void:
+		_screen.settings.ui_colour = i as UiColours.Pick
+		var restyle := SettingsApply.apply_ui_colour(_screen.settings)
+		changed.emit(true)
+		if restyle:
+			restyled.emit())
+	row.add_child(_ui_colour)
+	_screen.explain(row, tr("SETTINGS_UI_COLOUR_HELP"))
 
 
 func _show_window() -> void:

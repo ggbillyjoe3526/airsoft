@@ -17,6 +17,9 @@ signal closed
 signal credits_requested
 signal report_requested
 signal quit_requested
+## Display › Interface colour changed (UA2): whoever opened the screen builds its screens again in the new colour, this
+## one too (Main.restyle; PauseMenu.restyle).
+signal restyled
 
 const SAVE_DELAY := 0.5
 ## The rows' one design (UI1): a name LABEL_WIDTH wide, ROW_SEPARATION, then the control, every row at least
@@ -167,7 +170,7 @@ func _ready() -> void:
 	_back = Button.new()
 	_back.name = "Back"
 	_back.text = tr("SETTINGS_BACK").to_upper()
-	GameTheme.small_button(_back, GameTheme.ACCENT)
+	GameTheme.small_button(_back, GameTheme.accent)
 	_back.pressed.connect(close)
 	ButtonWidth.group([_back])
 	foot.add_child(_back)
@@ -215,6 +218,13 @@ func _keyless_note(bindings: KeyBindings) -> String:
 func show_graphics() -> void:
 	# the page sits in its tab's scroll box
 	_tabs.current_tab = _graphics_page.get_parent().get_parent().get_index()
+
+
+## Shows the Display tab with the keyboard on the interface colour picked (a screen built again in a new colour).
+func show_display_colour() -> void:
+	_tabs.current_tab = _display_page.get_parent().get_parent().get_index()
+	var swatches := _display_page.ui_colour()
+	swatches.button(maxi(swatches.selected(), 0)).grab_focus()
 
 
 ## Shows the About tab.
@@ -426,6 +436,7 @@ func _build_display() -> void:
 	page.add_child(_display_page)
 	_display_page.build(self)
 	_display_page.changed.connect(_changed)
+	_display_page.restyled.connect(restyled.emit)
 
 
 # --- Graphics ---
@@ -808,7 +819,7 @@ func _spin_row(page: Control, label_key: String, lo: float, hi: float, step: flo
 	spin.get_line_edit().add_theme_font_size_override("font_size", GameTheme.LABEL_SIZE)
 	spin.get_line_edit().add_theme_stylebox_override("normal", GameTheme.box(GameTheme.CARD, GameTheme.LINE,
 			GameTheme.CONTROL_PAD_X, 0))
-	spin.get_line_edit().add_theme_stylebox_override("focus", GameTheme.box(GameTheme.CARD, GameTheme.ACCENT,
+	spin.get_line_edit().add_theme_stylebox_override("focus", GameTheme.box(GameTheme.CARD, GameTheme.accent,
 			GameTheme.CONTROL_PAD_X, 0))
 	row.add_child(spin)
 	return spin

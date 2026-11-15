@@ -237,12 +237,32 @@ func _open_settings() -> void:
 		_settings_screen.credits_requested.connect(_show_credits)
 		_settings_screen.report_requested.connect(_show_report)
 		_settings_screen.quit_requested.connect(ask_quit)
+		_settings_screen.restyled.connect(restyle)
 		# beside the rail, which stays on show, and under a graphics notice, the credits and the prompts
 		_menus.add_over_page(_settings_screen)
 	_menus.nav_rail().set_current(NavRail.Tab.SETTINGS)
 	# the settings show over the field's picture, so the page under them steps aside
 	_menus.set_page_hidden(true)
 	_settings_screen.open()
+
+
+## The interface colour changed in the settings (UA2): the menus are built again in it (each page keeps the colours it
+## was built with), the settings with them, back on Display's colours; deferred, so the click that sent it finishes.
+func restyle() -> void:
+	_rebuild_menus.call_deferred()
+
+
+func _rebuild_menus() -> void:
+	if _menus == null or _settings_screen == null:
+		return
+	_settings_screen.closed.disconnect(_settings_closed)
+	_settings_screen.close()
+	_settings_screen = null
+	_free_screens()
+	_build_screens()
+	_scale_menus()
+	_open_settings()
+	_settings_screen.show_display_colour()
 
 
 func _settings_closed() -> void:

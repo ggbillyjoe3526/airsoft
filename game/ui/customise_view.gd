@@ -458,7 +458,7 @@ func _build_crumb() -> Control:
 	# cut the last letter (UI1: "LOADOU")
 	GameTheme.dress(_back, GameTheme.box(GameTheme.CARD, GameTheme.LINE, BACK_PAD.x, BACK_PAD.y),
 			GameTheme.box(GameTheme.CARD_HI, GameTheme.LINE, BACK_PAD.x, BACK_PAD.y),
-			GameTheme.box(GameTheme.CARD_HI, GameTheme.ACCENT, BACK_PAD.x, BACK_PAD.y))
+			GameTheme.box(GameTheme.CARD_HI, GameTheme.accent, BACK_PAD.x, BACK_PAD.y))
 	_back.pressed.connect(func() -> void: back_requested.emit())
 	row.add_child(_back)
 	_crumb_sub = MenuParts.page_line("")
@@ -477,7 +477,7 @@ func _build_parts() -> Control:
 	for t: Tab in TAB_KEYS:
 		var card := MenuCard.new()
 		card.name = "Part_%s" % Tab.keys()[t].capitalize()
-		card.bar = GameTheme.ACCENT
+		card.bar = GameTheme.accent
 		card.bar_idle = 0.0
 		card.refresh()
 		var pad := MenuParts.padded(PART_PAD.x, PART_PAD.y, PART_PAD.x, PART_PAD.y)
