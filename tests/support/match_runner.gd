@@ -260,9 +260,9 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 
 ## The round tuning a match on `map_id` plays in the guards and the balance report: `base` (the loaded tuning by
 ## default) where the map offers its team size and has no round length of its own, else a copy at the map's standard
-## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game), its round length and its flag raise
-## time, as a Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00 and a 9 s raise. With
-## `picked` (a Custom size, TS1), that size where the map offers it, else its standard.
+## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game), its round length, its flag raise time and
+## its bomb fuse, as a Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00, a 9 s raise and its
+## own fuse. With `picked` (a Custom size, TS1), that size where the map offers it, else its standard.
 static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -> SimTuning:
 	var t := base if base != null else SimTuning.load_default()
 	var entry := MapCatalog.shared().find(map_id)
@@ -271,7 +271,9 @@ static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -
 	var length := MatchOptions.round_time(entry, null, t.rounds.round_time)
 	var size := entry.team_size_for(picked if picked > 0 else t.rounds.team_size)
 	var raise := MatchOptions.raise_time(entry, t.flag.raise_time)
-	if size == t.rounds.team_size and t.rounds.round_time == length and t.flag.raise_time == raise:
+	var fuse := MatchOptions.fuse_time(entry, t.plant.fuse_time)
+	if size == t.rounds.team_size and t.rounds.round_time == length and t.flag.raise_time == raise \
+			and t.plant.fuse_time == fuse:
 		return t
 	var sized := t.duplicate() as SimTuning
 	sized.rounds = t.rounds.duplicate() as RoundConfig
@@ -279,6 +281,8 @@ static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -
 	sized.rounds.round_time = length
 	sized.flag = t.flag.duplicate() as FlagConfig
 	sized.flag.raise_time = raise
+	sized.plant = t.plant.duplicate() as PlantConfig
+	sized.plant.fuse_time = fuse
 	return sized
 
 
