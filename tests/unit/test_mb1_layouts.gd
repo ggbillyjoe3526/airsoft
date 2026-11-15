@@ -11,6 +11,8 @@ const MAPS: Array[String] = ["depot", "woodland", "subway"]
 const DEPTH_SLACK := 3.5
 ## The farthest a lane's last two points (the defender posts) may stand from the nearest flag (m).
 const POST_REACH := 30.0
+## WB1: on Woodland every lane's last post stands by its pole (the forward one holds the stream side).
+const WOODLAND_HOME_REACH := 4.5
 ## Woodland's Long road from the west camp's gate to the Culvert (its centreline, tools/woodland/layout.py ROAD; the
 ## strip is walked 2 m either side of it), flag B's pole, the ring a body stands in to raise or hold it, its two
 ## defender posts, and the chest below the eye (m).
@@ -146,7 +148,8 @@ func test_defender_posts_stand_on_the_site_within_reach_of_a_pole() -> void:
 				var nearest := INF
 				for f in _flags(id):
 					nearest = minf(nearest, Vector2(q.x - f.x, q.z - f.z).length())
-				assert_lt(nearest, POST_REACH, "%s lane %d point %d is %.1f m from the nearest pole" % [id, l + 1, k + 1, nearest])
+				var reach := WOODLAND_HOME_REACH if id == "woodland" else POST_REACH
+				assert_lt(nearest, reach, "%s lane %d point %d is %.1f m from the nearest pole" % [id, l + 1, k + 1, nearest])
 		assert_gte(at_a_site, 2, "%s: at least two lanes defend a site" % id)
 
 

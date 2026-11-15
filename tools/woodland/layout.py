@@ -332,6 +332,9 @@ rect("log", 10.0, -48.5, 6.0, 0.7, 70)
 rect("crates", 31.0, -40.0, 2.4, 1.6, 15)
 rect("log", 36.0, -32.0, 6.0, 0.7, -40)
 rect("logpile", 27.0, -49.0, 4.0, 1.0, 0)
+# WB1: the pole's crouch cover moved with flag A (MB1 put it 2.4 m from the old pole, on the side the attackers came
+# in by; here that is the west, the stream side). A raise is still seen from the Fort's window and the north.
+rect("lowcrates", 39.8, -41.0, 1.0, 2.0, 0)
 
 # ------------------------------------------------------------------ A SITE: the Fort (plywood walls on the rise)
 FORT = [(46.0, -46.0), (64.0, -46.0), (64.0, -24.5)]
@@ -348,7 +351,6 @@ rect("tyrestack", 53.0, -43.0, 1.8, 1.8)
 rect("lowcrates", 58.0, -31.5, 2.0, 1.0, 0)
 rect("tyre", 49.0, -29.5, 1.7, 1.7)                          # MB1: the open corner's first cover for whoever comes in by it
 rect("windthrow", 41.5, -25.0, 6.0, 2.0, 0, top=2.2)         # MB1: 16 m out from the open corner: the last cover before it, and it ends the 45 m line up the Hollow way onto the pole
-rect("lowcrates", 52.6, -38.6, 1.0, 2.0, 0)                  # MB1: crouch cover at the pole on the gate's side: a raise is seen from the corner and the east gate
 
 # ------------------------------------------------------------------ MID LANE: Cabin > Woodpile > Birch stand > Clearing > Ford > Hut row
 hut(-52.0, 9.0, 6.0, 4.5, 0, [(0, 1.5, 3.0, "door"), (1, 1.4, 3.0, "door"), (2, 2.0, 4.0, "window"),
@@ -626,13 +628,14 @@ LANE_PATHS = {
     "ne": [(-76, -10), (-71, -30), (-62, -45), (-48, -50), (-34, -52), (-20, -52), (-7.9, -50.9), (0.5, -52.5),
            (16, -50), (19, -47), (42, -44)],
     # The north middle: between the two west thickets, along the Berm's north side, over the stream north of the
-    # Clearing, by the Hollow way's head to the south-west of flag A.
+    # Clearing, north of Hut row, then up the Hollow way to flag A's south-east side, before the Fort's west gate (WB1
+    # critic: every lane's post by a pole stands within 4.5 m of it, as the first three's do).
     "nm": [(-74, -4), (-60.5, -18.3), (-49.5, -24.7), (-38, -27), (-26, -31), (-14, -28), (-6, -22), (2, -16),
-           (12, -10), (24, -12), (40, -28)],
+           (12, -10), (24, -12), (43.4, -37.8)],
     # The south middle: south of the Cabin, the Clearing's south side, over the stream by the Knoll, up to the north of
-    # Log stacks and flag B.
+    # Log stacks and flag B; its post by the pole is the pocket's east mouth, between two of the stacks.
     "sm": [(-74, 10), (-62, 14), (-48, 12), (-37, 14), (-26, 14), (-15, 15), (-4.7, 15.3), (1, 15.5), (6, 15.5),
-           (17.3, 18.5), (34, 34)],
+           (17.3, 18.5), (43.0, 41.8)],
 }
 # The lanes in the map file's order: the first three keep their places (tests and records name them by number).
 LANE_ORDER = ("n", "m", "s", "ne", "nm", "sm")
