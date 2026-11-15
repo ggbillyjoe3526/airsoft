@@ -2605,7 +2605,7 @@ msgid "GRAPHICS_VOLUMETRIC_FOG"
 msgstr "VOLUMETRIC HAZE"
 
 msgid "GRAPHICS_VOLUMETRIC_FOG_NOTE"
-msgstr "A faint haze the light shines through. Higher levels draw its light shafts finer and smoother; the haze itself is the same."
+msgstr "A faint haze the light shines through. Higher levels reach farther into the distance and draw its light shafts finer and smoother."
 
 msgid "GRAPHICS_LAMP_LIGHTS"
 msgstr "LAMP LIGHT"

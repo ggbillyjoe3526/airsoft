@@ -27,12 +27,12 @@ never stops the game from starting.
   `gl_compatibility` (the simpler one, for older cards), or `all`. A row the renderer in use can't draw is greyed.
 - **Low, Medium, High, Ultra** are each preset's value: one of the row's choices, or a number in its range.
 - **The choices the game knows:** upscaler `bilinear, fsr1, fsr2`; edge smoothing `off, fxaa, smaa, msaa_2x, msaa_4x`;
-  temporal smoothing, sun shadows, baked light and occlusion culling `off, on`; shadow detail `1024, 2048, 4096, 8192` (the sun's shadow map, in
-  pixels); shadow softness `hard, soft, softer, softest`; ambient occlusion `off, half, full`; texture filtering
-  `off, 2x, 4x, 8x, 16x`; mesh detail `low, medium, high, ultra`; global illumination `off, screen, scene`;
-  reflections `off, probes, screen`; lamp light `off, near, far`; volumetric fog `off, low, medium, high`; glow, eye
-  adaptation and wear marks `off, on`. Render scale is
-  10–200 % at most, shadow range 10–500 m and wind dust 0–100 %.
+  temporal smoothing, sun shadows, baked light and occlusion culling `off, on`; shadow detail `1024, 2048, 4096, 8192`
+  (the sun's shadow map, in pixels); shadow softness `hard, soft, softer, softest`; ambient occlusion `off, half,
+  full`; texture filtering `off, 2x, 4x, 8x, 16x`; mesh detail `low, medium, high, ultra`; global illumination `off,
+  screen, scene`; reflections `off, probes, screen`; lamp light `off, near, far`; volumetric fog `off, low, medium,
+  high`; glow, eye adaptation and wear marks `off, on`. Render scale is 10–200 % at most, shadow range 10–500 m and
+  wind dust 0–100 %.
 
 ## Rows
 
@@ -108,11 +108,12 @@ never stops the game from starting.
   Loading bay, the Garage and the hall, and Woodland's pickup up its road. No boot prints (owner, 2026-11-10).
 - **Glow** blooms only what is brighter than white (lamp panels, a lit sky), softly.
 - **Volumetric haze** (the `volumetric_fog` row) is a faint haze lit by the sun, the lamps and the bounce light, so
-  light has shafts and the far end of a hall or a wood its depth. Its strength and reach are the same at every level
-  (LookConfig's Volumetric fog group); the level is how finely its light is worked out (VF1): Low on the engine's own
-  64 x 64 grid, unsmoothed (its shafts blockier, an eighth of High's work), Medium on 96 x 96, smoothed, and High on
-  128 x 128, smoothed: the haze as it was when it was one switch (Ultra). A saved Custom "on" reads as High. Low (the
-  preset) draws none, for its 60 FPS floor.
+  light has shafts and the far end of a hall or a wood its depth. The haze itself is the same at every level
+  (LookConfig's Volumetric fog group); each level reaches farther from the eye and works its light out more finely
+  (VF1): Low 30 m on the engine's own 64 x 64 grid, unsmoothed (an eighth of High's work), Medium 50 m on 96 x 96,
+  smoothed, and High 80 m on 128 x 128, smoothed: the haze as it was when it was one switch (Ultra). So a lower level
+  leaves the far end of a long view clearer. A saved Custom "on" reads as High. Low (the preset) draws none, for its
+  60 FPS floor.
 - **Temporal smoothing** is off on every preset: it smears the thin, fast BB streaks. It and FSR 2 are there for
   players who want them.
 - **Wind dust** is a share of the specks `game/config/effects_config.gd` sets (`dust_count`), lit by the sun so they

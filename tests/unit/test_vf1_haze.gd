@@ -72,20 +72,25 @@ func test_each_level_switches_the_haze_and_sends_its_grid_and_filter() -> void:
 	assert_eq(rs.fog_grid, sent, "Off sends no grid")
 
 
-func test_the_haze_looks_the_same_at_every_level() -> void:
+func test_each_level_hazes_farther_with_the_same_haze() -> void:
 	var lighting := FieldLighting.build(LightingConfig.new(), look)
 	add_child_autofree(lighting)
 	var env := lighting.environment
 	var values := table.preset(&"ultra")
 	var seen: Array = []
+	var reach := 0.0
 	for level: GraphicsQuality.VolumetricFog in [GraphicsQuality.VolumetricFog.LOW,
 			GraphicsQuality.VolumetricFog.MEDIUM, GraphicsQuality.VolumetricFog.HIGH]:
 		values.volumetric_fog = level
 		GraphicsApply.apply_field(values, lighting, null, GraphicsApply.Server.new())
-		seen.append([env.volumetric_fog_density, env.volumetric_fog_length, env.volumetric_fog_albedo,
-				env.volumetric_fog_anisotropy])
-	assert_eq(seen[0], seen[1])
-	assert_eq(seen[1], seen[2])
+		seen.append([env.volumetric_fog_density, env.volumetric_fog_albedo, env.volumetric_fog_anisotropy,
+				env.volumetric_fog_gi_inject])
+		assert_almost_eq(env.volumetric_fog_length, look.fog_reach(level), 0.001, "level %d's reach" % level)
+		assert_gt(env.volumetric_fog_length, reach, "level %d reaches farther than the one below" % level)
+		reach = env.volumetric_fog_length
+	assert_almost_eq(reach, look.fog_length, 0.001, "High reaches as far as the old switch did")
+	assert_eq(seen[0], seen[1], "the same haze at Low and Medium")
+	assert_eq(seen[1], seen[2], "the same haze at Medium and High")
 
 
 func test_a_custom_level_round_trips_by_name() -> void:

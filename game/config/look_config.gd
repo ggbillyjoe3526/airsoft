@@ -117,13 +117,17 @@ const GLOBAL_DUST := &"look_dust"
 
 @export_group("Volumetric fog")
 ## Graphics › Volumetric haze: a faint haze the sun and the bounce light up, so light has shafts and depth. Density (per
-## m), its colour, how forward it scatters, how far it reaches (m) and how much bounce light it takes in, the same at
-## every level, so each level is the same look drawn more or less finely (VF1).
+## m), its colour, how forward it scatters, how far it reaches at High (m) and how much bounce light it takes in. The
+## levels (VF1) share them all but the reach: each lower level hazes a shorter way out from the eye (the far end of a
+## hall or a wood clearer) and works its light out on a coarser grid.
 @export var fog_density: float = 0.006
 @export var fog_albedo: Color = Color8(0xf4, 0xec, 0xda)
 @export var fog_anisotropy: float = 0.45
 @export var fog_length: float = 80.0
 @export var fog_gi_inject: float = 1.0
+## How far Low's and Medium's haze reaches (m); High's is `fog_length`, the reach the haze had when it was one switch.
+@export var fog_length_low: float = 30.0
+@export var fog_length_medium: float = 50.0
 ## Each level's froxel grid (cells across the screen, and deep), Low, Medium and High: the haze's cost grows with the
 ## cells (Low's is the engine's own, an eighth of High's). High is the grid the haze had when it was one switch.
 @export var fog_grid_low: Vector2i = Vector2i(64, 64)
@@ -181,7 +185,6 @@ const GLOBAL_DUST := &"look_dust"
 @export var site_colours: Array[StringName] = [&"crimson", &"violet", &"yellow", &"teal", &"green", &"cream"]
 
 
-## The palette's colour `name`, or magenta with a warning for a name it doesn't have (a typo shows at once).
 ## The froxel grid the volumetric haze is drawn on at `level`, Vector2i.ZERO for Off.
 func fog_grid(level: GraphicsQuality.VolumetricFog) -> Vector2i:
 	match level:
@@ -194,11 +197,22 @@ func fog_grid(level: GraphicsQuality.VolumetricFog) -> Vector2i:
 	return Vector2i.ZERO
 
 
+## How far the volumetric haze reaches at `level` (m): `fog_length` at High and for Off (nothing drawn).
+func fog_reach(level: GraphicsQuality.VolumetricFog) -> float:
+	match level:
+		GraphicsQuality.VolumetricFog.LOW:
+			return fog_length_low
+		GraphicsQuality.VolumetricFog.MEDIUM:
+			return fog_length_medium
+	return fog_length
+
+
 ## True if the volumetric haze at `level` is smoothed across its cells (`fog_filter_from`).
 func fog_filtered(level: GraphicsQuality.VolumetricFog) -> bool:
 	return level != GraphicsQuality.VolumetricFog.OFF and level >= fog_filter_from
 
 
+## The palette's colour `name`, or magenta with a warning for a name it doesn't have (a typo shows at once).
 func colour(name: StringName) -> Color:
 	if palette.has(name):
 		return palette[name]

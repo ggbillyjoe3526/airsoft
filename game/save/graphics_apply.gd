@@ -355,6 +355,7 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		var fog := values.volumetric_fog != GraphicsQuality.VolumetricFog.OFF
 		if fog:
 			to.set_fog_quality(look.fog_grid(values.volumetric_fog), look.fog_filtered(values.volumetric_fog))
+			lighting.set_fog_reach(look.fog_reach(values.volumetric_fog))
 		lighting.set_effects(values.global_illumination, values.reflections, values.glow, fog,
 				sun_shadows(values, lighting) and values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
 		lighting.set_eye_adaptation(values.eye_adaptation)
