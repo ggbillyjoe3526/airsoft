@@ -149,3 +149,29 @@ func test_a_version_3_save_on_the_old_mix_moves_to_the_new_one_and_a_set_power_s
 	assert_eq(float(muted["Power"]), 0.0, "muted stays muted")
 	var current: Dictionary = Settings.migrate_defaults({"volumes": {"Power": 0.5}}, Settings.VERSION)["volumes"]
 	assert_eq(current["Power"], 0.5, "set in this build: never scaled again")
+
+
+func test_a_bot_s_stop_burst_ends_a_burst_under_way_and_a_player_s_burst_runs_its_course() -> void:
+	var bw := _bot(BURST)
+	var b: Bot = bw[0]
+	var w: BotWorld = bw[1]
+	var c := b.character
+	var events := SimEvents.new()
+	var pool := BBPool.new(16)
+	var shots := 0
+	for stop: bool in [false, true]:
+		c.armament.refill()
+		c.armament.cooldown = 0.0
+		c.armament.trigger_was_down = false
+		shots = 0
+		for i in 30:
+			var cmd := PlayerCommand.new()
+			cmd.fire = i == 0
+			# The tick after the first BB, the line of fire goes (a teammate in front): the bot lets off.
+			cmd.stop_burst = stop and i >= 1
+			events.clear()
+			Armament.step(c, cmd, EYE, 1.0, true, pool, Seeds.stream(1), events, w.tuning, DT)
+			shots += events.count_of(GameEvent.Kind.SHOT)
+		var burst := w.tuning.replica_rules.burst_shots
+		assert_eq(shots, 1 if stop else burst, "stopped after one" if stop else "a whole burst")
+	assert_false(PlayerCommand.new().stop_burst, "never set unless a bot sets it")
