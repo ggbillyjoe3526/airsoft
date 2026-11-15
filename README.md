@@ -14,7 +14,7 @@ every merge (`docs/wiki/README.md`).
 
 ## Status
 
-**[0.1 Dev 3](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.3) is out (2026-11-14), the last Dev
+**[0.1 Dev 3](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.3) is out (2026-11-15), the last Dev
 build; 0.1 Beta 1 is next.** The plan is `docs/ROADMAP.md`; what is happening now is `docs/HANDOFF.md`.
 
 **What's in 0.1 Dev 3:** Plant The Bomb, a new mode; the Pump Shotgun and the Compact SMG, with levels up to 15;
