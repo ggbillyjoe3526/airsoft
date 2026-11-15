@@ -680,6 +680,11 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
   arrive ready for you there a moment later. Get two or more ahead in Elimination: your bots stop holding and go hunting.
   The last bot of a team walks and checks corners. In an open fight they take a knee for each burst. Do they feel
   smarter, and still beatable on Normal?
+- [ ] **Routes vary round to round (RV1).** Play five or six rounds of Elimination on one map and of Attack / Defend
+  on another, and spectate once you're out. The enemy still follows a plan (spread out, a pair, or a stack on one
+  lane), but some rounds they rush and some they creep, each bot walks its lane a little to one side, and now and
+  then one switches lanes. Do fights start sooner, without you crossing half the map first? In Attack / Defend, now
+  and then one defender waits further out. Does it feel less predictable, and still fair?
 - [ ] **Anchors (BP5).** In Elimination with over a minute left, give an anchor teammate Follow me (F), then end it
   with F again: it goes hunting.
 

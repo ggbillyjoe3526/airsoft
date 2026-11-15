@@ -521,6 +521,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Bots and balance
 
+- **Bot teams vary how they carry out their plan (owner, 2026-11-15, RV1; Claude's defaults).** The plan (split, pair,
+  stack over the authored lanes) is drawn as before; each round adds a team tempo, shorter pauses in a bot's own half,
+  a per-bot lane shift and the odd lane crossing, and in Attack / Defend and Plant The Bomb sometimes a defender held
+  further up its lane. All on streams of their own, so the plan draws don't move. Values and figures:
+  `docs/records/RV1.md`; numbers in `game/config/bot_config.gd` › Lanes and holds.
 - **The audit's play questions (owner, 2026-11-14, AUD1).** Bots keep squeezing past Subway's works wagons on the
   track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a
   6 s defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots
