@@ -31,8 +31,8 @@ SCALE = 2                          # each cell is drawn at twice its size, then 
 WHITE = (0xF6, 0xF4, 0xEE)
 INK = (0x1E, 0x1E, 0x20)
 SAFE_GREEN = (0x16, 0x86, 0x3E)    # safe condition green (hue 141)
-FIRE = (0xC8, 0x30, 0x3C)          # the props' fire red (prop.PALETTE "fire"), 27 degrees off Beta's orange
-INDIGO = (0x2E, 0x2F, 0x7E)        # the photos' sign blue moved off Alpha's hue
+FIRE = (0xAC, 0x22, 0x64)          # the props' fire red (prop.PALETTE "fire"): its linear hue 24 degrees off Beta's
+INDIGO = (0x4A, 0x2F, 0x7E)        # the photos' sign blue moved to violet: 27 degrees off Alpha's hue
 YELLOW = ss.SIGN_YELLOW
 
 

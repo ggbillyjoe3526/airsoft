@@ -1,9 +1,11 @@
 """Pallet stacks of IBC totes and steel drums (DX1, Depot): one 2.7 m bay after the owner's 2026-11-15 photos
 (art/references/depot-props/pallet_stacks/), standing in for some of Depot's racking bays (pallet_racking.py). No
-racking: a tower of three IBCs stacked on their own black pallets (photos 1 and 2: white tanks in galvanised cages,
-each with its label plate, filler cap and bottom valve, the liquid showing through) beside drums stacked two a pallet,
-three pallets high (photos 4 to 6; their blue is Alpha's hue, so the drums are steel violet, black and grey). Two bays
-(BAYS) take turns along a row (PropDressConfig.variants), the tower and the drums swapped and their fills changed.
+racking: two IBCs at a real tote's size (1.2 x 1.0 x 1.16 m) stacked on their own black pallets on a yellow spill
+bund (photos 1 to 3: white tanks in galvanised cages, each with its label plate, filler cap and bottom valve, the
+liquid showing through; the bund's sump and fork slots) beside drums stacked two a pallet, three pallets high (photos
+4 to 6; their blue is Alpha's hue, so the drums are steel violet, black and grey). Three bays (BAYS) take turns along a
+row (PropDressConfig.variants), the tower and the drums swapped and their fills changed; the third two towers side by
+side (photo 2).
 
 Usage: python3 -I tools/blender/maps/drum_ibc_stack.py
 """
@@ -15,11 +17,12 @@ import bay_kit as bk  # noqa: E402
 import prop  # noqa: E402
 
 GALV = "concrete*0.86"
-IBC_H = 1.0              # a stacked tote: its pallet, tank and cage; three make the bay's 3 m
+IBC_H = 1.16             # a tote: its pallet, tank and cage (a 1,000 litre IBC is 1.2 x 1.0 x 1.16 m)
+BUND_H = 0.52            # the spill bund under the stack (photo 3), so two totes on it come to 2.84 m
 IBC_W = 1.2              # the long side faces out, as in photo 2's rows
 Y0 = bk.FRONT + 0.03
 DRUM_R = 0.285
-DRUM_H = 0.84
+DRUM_H = 0.855            # a 205 litre drum, 0.585 x 0.88 m, to the bay's 3 m in three pallets
 DECK = ["crate*1.0", "timber*1.1", "crate*0.93"]
 
 
@@ -75,6 +78,29 @@ def ibc(p: prop.Prop, cx: float, z: float, tank: str, fill: float, seed: int, to
                     facing=(out, 0.0, 0.0))
 
 
+def bund(p: prop.Prop, cx: float) -> float:
+    """The yellow spill bund the totes stand on (photo 3): its sump with a rolled lip, the ribs down its front, the
+    fork slots under it and its label; returns its top."""
+    x0, x1 = cx - IBC_W / 2 - 0.05, cx + IBC_W / 2 + 0.05
+    y0 = Y0 - 0.02
+    feet = 0.12
+    bk.chamfered(p, x0, x1, y0, bk.BACK, feet, BUND_H - 0.04, 0.04, "yellow*0.9", "yellow*0.95", "yellow*0.98")
+    # the lip round its top, proud of the sump, and the grating the pallet stands on inside it
+    p.box((x0 - 0.015, y0 - 0.015, BUND_H - 0.05), (x1 + 0.015, bk.BACK, BUND_H), "yellow*0.97")
+    # the moulded ribs down its front, between the fork slots
+    for i in range(5):
+        x = x0 + 0.1 + (x1 - x0 - 0.2) * i / 4
+        p.box((x - 0.04, y0 - 0.03, feet), (x + 0.04, y0, BUND_H - 0.06), "yellow*0.86")
+    # the feet and the fork slots between them, in shadow
+    for i in range(4):
+        fx = x0 + 0.06 + (x1 - x0 - 0.2) * i / 3
+        p.box((fx, y0 + 0.02, 0.0), (fx + 0.08, bk.BACK, feet), "yellow*0.8")
+    p.front_decal(x0 + 0.04, x1 - 0.04, 0.0, feet, y0 + 0.03, "ink*0.9")
+    # its maker's plate (no brand: a blank green band, as the photo's)
+    p.front_decal(x1 - 0.42, x1 - 0.12, BUND_H - 0.2, BUND_H - 0.12, y0 - 0.031, "green*0.85")
+    return BUND_H
+
+
 def drums(p: prop.Prop, cx: float, z: float, paints: tuple, k: int, top_most: bool) -> float:
     """A pallet of two drums standing side by side, their bungs up (their lids drawn on the stack's top pallet only);
     returns the drums' tops."""
@@ -89,32 +115,47 @@ def drums(p: prop.Prop, cx: float, z: float, paints: tuple, k: int, top_most: bo
     return deck + DRUM_H
 
 
-def build(order: tuple, tanks: list, drum_paints: list) -> prop.Prop:
-    """The bay: the IBC tower and the drum stack in `order` (left, right)."""
+def build(sides: tuple) -> prop.Prop:
+    """The bay: its two stacks, left then right, each ("ibc", its totes' (tank, fill) from the bottom) or ("drums",
+    its pallets' drum paints from the bottom)."""
     p = prop.Prop("drum_ibc_stack")
     # the yellow line painted on the floor along the stacks' front, the bay's whole width (photos 5 and 6)
     p.quad([(-bk.HW, bk.FRONT, 0.004), (bk.HW, bk.FRONT, 0.004), (bk.HW, bk.FRONT + 0.06, 0.004),
             (-bk.HW, bk.FRONT + 0.06, 0.004)], "yellow*0.92")
     xs = (-bk.HW + IBC_W / 2 + 0.07, bk.HW - IBC_W / 2 - 0.07)
-    for cx, what in zip(xs, order):
+    for side, (cx, (what, levels)) in enumerate(zip(xs, sides)):
         if what == "ibc":
-            for level, (tank, fill) in enumerate(tanks):
-                ibc(p, cx, level * IBC_H, tank, fill, level, level == len(tanks) - 1)
+            base = bund(p, cx)
+            capped = what == "ibc" and all(s[0] == "ibc" for s in sides)
+            for level, (tank, fill) in enumerate(levels):
+                ibc(p, cx, base + level * IBC_H, tank, fill, level + 2 * side, level == len(levels) - 1 and not capped)
+            if capped:
+                # two towers side by side (the third bay) come to the bay's 3 m with a card slip sheet and an empty
+                # pallet on each, as the photos' stacks are topped
+                top = base + len(levels) * IBC_H
+                p.box((cx - IBC_W / 2, Y0 + 0.02, top), (cx + IBC_W / 2, bk.BACK, bk.H - 0.144), "cream*0.88")
+                bk.euro_pallet(p, cx, bk.H - 0.144, IBC_W, DECK[side % len(DECK)], Y0 + 0.02)
         else:
             z = 0.0
-            for level, paints in enumerate(drum_paints):
-                z = drums(p, cx, z, paints, level, level == len(drum_paints) - 1)
+            for level, paints in enumerate(levels):
+                z = drums(p, cx, z, paints, level, level == len(levels) - 1)
     return p
 
 
-# Each bay: which side the tower stands, its totes' tanks (paint, fill) from the bottom, the drums' paints by level.
+# Each bay's two stacks, left then right: an IBC tower's totes (tank paint, fill) from the bottom, or a drum stack's
+# pallets of two drums (their paints) from the bottom.
 BAYS = {
-    "drum_ibc_stack.glb": (("ibc", "drums"), [("cream*0.93", 0.82), ("cream*0.95", 0.55), ("cream*0.93", 0.3)],
-                           [("violet*0.78", "violet*0.78"), ("violet*0.74", "violet*0.8"), ("grey*1.05", "violet*0.78")]),
-    "drum_ibc_stack_b.glb": (("drums", "ibc"), [("cream*0.93", 0.66), ("rubber*1.15", 0.9), ("cream*0.95", 0.74)],
-                             [("rubber*1.25", "rubber*1.25"), ("grey*1.05", "grey*1.0"), ("olive*0.8", "violet*0.78")]),
+    "drum_ibc_stack.glb": (("ibc", [("cream*0.93", 0.82), ("cream*0.95", 0.45)]),
+                           ("drums", [("violet*0.78", "violet*0.78"), ("violet*0.74", "violet*0.8"),
+                                      ("grey*1.05", "violet*0.78")])),
+    "drum_ibc_stack_b.glb": (("drums", [("rubber*1.25", "rubber*1.25"), ("grey*1.05", "grey*1.0"),
+                                        ("olive*0.8", "violet*0.78")]),
+                             ("ibc", [("cream*0.93", 0.66), ("rubber*1.15", 0.9)])),
+    # photo 2's two towers side by side, one of them black, the totes filled to different levels
+    "drum_ibc_stack_c.glb": (("ibc", [("cream*0.94", 0.3), ("cream*0.92", 0.9)]),
+                             ("ibc", [("rubber*1.15", 0.7), ("cream*0.95", 0.55)])),
 }
 
 if __name__ == "__main__":
-    for name, (order, tanks, drum_paints) in BAYS.items():
-        build(order, tanks, drum_paints).export(name, budget=1500)
+    for name, sides in BAYS.items():
+        build(sides).export(name, budget=1500)

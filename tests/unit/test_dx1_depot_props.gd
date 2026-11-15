@@ -1,15 +1,15 @@
 extends GutTest
 ## DX1 (Depot's new props from the owner's photos, 2026-11-15): some of Depot's rack blocks are drawn as wrapped
 ## racking, IBC and drum stacks or a parts cage instead of the shelving, each a 2.7 m bay of the shelf's size in its
-## budget, two bays a model taking turns, the blocks' boxes untouched (only their `dress`); the hall's walls and
-## pillars carry look-only extras (fire points, call points, cable reels, the pipework, the safety signs), every one a
-## model StationFixtures draws, in its budget, standing in no block, the fire points and reels clear of the shutters
+## budget, three bays a model taking turns, the blocks' boxes untouched (only their `dress`); the hall's walls and
+## pillars carry look-only extras (fire points, call points, the pipework, the safety signs), every one a
+## model StationFixtures draws, in its budget, standing in no block, the fire points clear of the shutters
 ## and each fire exit's "keep clear" sign beside its door (tools/depot/extras.py follows PropLayout's feature bays).
 
 const BAYS: Array[StringName] = [&"wrapped_racking", &"drum_ibc_stack", &"parts_cage"]
 const BAY_BUDGET := 1500
 const EXTRA_BUDGETS := {
-	&"fire_point": 700, &"call_point": 50, &"cable_reel": 380, &"pipe_run": 790, &"pipe_run_2": 500,
+	&"fire_point": 385, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500,
 	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
 	&"depot_sign_ppe": 52, &"depot_sign_pallet_storage": 52, &"depot_sign_fire_exit": 52,
 }
@@ -59,7 +59,7 @@ func test_each_new_bay_is_the_shelf_s_size_in_its_budget_and_takes_turns() -> vo
 	var shelf := cfg.mesh_of(&"shelf").get_aabb()
 	for base in BAYS:
 		var each := cfg.variants_of(base)
-		assert_eq(each.size(), 2, "%s has two bays taking turns" % base)
+		assert_eq(each.size(), 3, "%s has three bays taking turns" % base)
 		assert_eq(cfg.model_lays.get(base), PropDressConfig.Lay.TILE, "%s is laid as the racking is" % base)
 		for bay in each:
 			var mesh := cfg.mesh_of(bay)
@@ -107,7 +107,7 @@ func test_every_wall_extra_is_a_fixture_model_in_its_budget() -> void:
 		assert_not_null(mesh, "%s loads" % model)
 		if mesh != null:
 			assert_lte(_tris(mesh), int(EXTRA_BUDGETS[model]), "%s within its budget" % model)
-	for model: StringName in [&"fire_point", &"call_point", &"cable_reel", &"pipe_run", &"depot_sign_fire_exit"]:
+	for model: StringName in [&"fire_point", &"call_point", &"pipe_run", &"pipe_run_b", &"depot_sign_fire_exit"]:
 		assert_gt(used.get(model, 0), 0, "Depot has a %s" % model)
 	var placed := StationFixtures.placings_of(depot.fixtures, fixtures_cfg)
 	assert_eq(placed.size(), used.size(), "every extra is drawn")
@@ -131,7 +131,7 @@ func test_no_wall_extra_stands_in_a_block() -> void:
 					b.center])
 
 
-func test_fire_points_and_reels_keep_off_the_shutters_and_each_exit_has_its_sign() -> void:
+func test_fire_points_keep_off_the_shutters_and_each_exit_has_its_sign() -> void:
 	var all := PropLayout.layout(depot, cfg, _boxes())
 	var shutters: Array[Transform3D] = []
 	var exits: Array[Transform3D] = []
@@ -140,7 +140,7 @@ func test_fire_points_and_reels_keep_off_the_shutters_and_each_exit_has_its_sign
 	if all.has(&"hall_exit"):
 		exits = (all[&"hall_exit"] as PropLayout.Placed).transforms
 	for f in depot.fixtures:
-		if f.model != &"fire_point" and f.model != &"cable_reel":
+		if f.model != &"fire_point":
 			continue
 		for s in shutters:
 			var along := (f.position - s.origin).dot(s.basis.x.normalized())

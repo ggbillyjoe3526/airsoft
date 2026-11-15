@@ -143,3 +143,18 @@ def sheen(p: prop.Prop, x0: float, x1: float, z0: float, z1: float, y: float, se
         u = x0 + (x1 - x0) * (0.2 + 0.6 * ((k >> 6) % 5) / 4)
         p.quad([(u, y - 0.001, z0 + 0.05), (u + 0.01, y - 0.001, z0 + 0.05), (u + 0.03, y - 0.001, z1 - 0.04),
                 (u + 0.02, y - 0.001, z1 - 0.04)], lines)
+
+
+def glare(p: prop.Prop, x0: float, x1: float, z0: float, z1: float, y: float, seed: int,
+          paint: str = "cream*1.06") -> None:
+    """Where stretch film shows as film over a load: the pale glare down the front's two edges, where the film turns
+    the corner and catches the light, and a few slanting wrinkles where the wrapper stretched it unevenly (photos 2 to
+    4 and 7)."""
+    for a, b in ((x0 + 0.01, x0 + 0.045), (x1 - 0.045, x1 - 0.01)):
+        p.front_decal(a, b, z0 + 0.03, z1 - 0.03, y, paint)
+    k = seed * 104729
+    for j in range(3):
+        u = x0 + (x1 - x0) * (0.18 + 0.27 * j + 0.05 * ((k >> j) % 3))
+        zz = z0 + (z1 - z0) * (0.2 + 0.22 * ((k >> (j + 2)) % 3))
+        p.quad([(u, y - 0.0005, zz), (u + 0.16, y - 0.0005, zz + 0.05), (u + 0.16, y - 0.0005, zz + 0.062),
+                (u, y - 0.0005, zz + 0.012)], paint)

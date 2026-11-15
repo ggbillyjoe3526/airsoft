@@ -15,7 +15,7 @@ extends Resource
 	"line_map", "info_panel", "notice_smoking", "notice_handrail", "notice_cctv", "wall_sign_out", "wall_sign_platforms",
 	"departures_n", "departures_s",
 	# Depot's wall extras (DX1, tools/blender/maps/depot_extras.py)
-	"fire_point", "call_point", "cable_reel", "pipe_run", "pipe_run_2", "depot_sign_assembly", "depot_sign_fire_action",
+	"fire_point", "call_point", "pipe_run", "pipe_run_b", "pipe_run_2", "depot_sign_assembly", "depot_sign_fire_action",
 	"depot_sign_defib", "depot_sign_no_riding", "depot_sign_ppe", "depot_sign_pallet_storage", "depot_sign_fire_exit",
 ])
 ## Every printed face's picture (tools/blender/maps/station_signs.py: an invented station name, the way-out signs,
@@ -23,7 +23,7 @@ extends Resource
 @export_file("*.png") var sign_sheet: String = "res://assets/textures/station/signs.png"
 ## The models drawn in square chunks this many metres across (one MultiMesh a chunk) so the far ones cull: Depot's
 ## pipework, laid along every wall of the hall (DX1). Any other model is one MultiMesh.
-@export var chunks: Dictionary[StringName, float] = {&"pipe_run": 40.0, &"pipe_run_2": 40.0}
+@export var chunks: Dictionary[StringName, float] = {&"pipe_run": 40.0, &"pipe_run_b": 40.0, &"pipe_run_2": 40.0}
 ## The models printing from another sheet than `sign_sheet`: Depot's extras' (DX1, tools/blender/maps/depot_signs.py:
 ## its safety signs and the fire point's header).
 @export var sheets: Dictionary[StringName, String] = {

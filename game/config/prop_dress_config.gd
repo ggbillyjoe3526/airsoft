@@ -61,10 +61,13 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	# (its `dress`, tools/depot/build_map.py) and is laid as the racking is (TILE), on the same box.
 	&"wrapped_racking": "res://assets/models/props/wrapped_racking.glb",
 	&"wrapped_racking_b": "res://assets/models/props/wrapped_racking_b.glb",
+	&"wrapped_racking_c": "res://assets/models/props/wrapped_racking_c.glb",
 	&"drum_ibc_stack": "res://assets/models/props/drum_ibc_stack.glb",
 	&"drum_ibc_stack_b": "res://assets/models/props/drum_ibc_stack_b.glb",
+	&"drum_ibc_stack_c": "res://assets/models/props/drum_ibc_stack_c.glb",
 	&"parts_cage": "res://assets/models/props/parts_cage.glb",
 	&"parts_cage_b": "res://assets/models/props/parts_cage_b.glb",
+	&"parts_cage_c": "res://assets/models/props/parts_cage_c.glb",
 	# The game's own map models (DM1, tools/blender/maps): Depot's and Woodland's crates, Depot's plywood walls and
 	# containers.
 	&"crate": "res://assets/models/props/crate.glb",
@@ -229,9 +232,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## Their chunks are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
 @export var variants: Dictionary[StringName, PackedStringArray] = {
 	&"shelf": PackedStringArray(["shelf_b", "shelf_c"]),
-	&"wrapped_racking": PackedStringArray(["wrapped_racking_b"]),
-	&"drum_ibc_stack": PackedStringArray(["drum_ibc_stack_b"]),
-	&"parts_cage": PackedStringArray(["parts_cage_b"]),
+	&"wrapped_racking": PackedStringArray(["wrapped_racking_b", "wrapped_racking_c"]),
+	&"drum_ibc_stack": PackedStringArray(["drum_ibc_stack_b", "drum_ibc_stack_c"]),
+	&"parts_cage": PackedStringArray(["parts_cage_b", "parts_cage_c"]),
 	&"cordwood": PackedStringArray(["cordwood_b", "cordwood_c"]),
 }
 ## How a prop a block names (MapData.Block.dress, WR3) is laid in it; one not listed is fitted to the box (FIT, long
@@ -413,8 +416,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 @export_range(0.0, 1.0) var wear: float = 1.0
 @export var model_wear: Dictionary[StringName, float] = {
 	&"shelf": 0.35, &"shelf_b": 0.35, &"shelf_c": 0.35, &"earth_bank": 0.0,
-	&"wrapped_racking": 0.35, &"wrapped_racking_b": 0.35, &"drum_ibc_stack": 0.35, &"drum_ibc_stack_b": 0.35,
-	&"parts_cage": 0.35, &"parts_cage_b": 0.35,
+	&"wrapped_racking": 0.35, &"wrapped_racking_b": 0.35, &"wrapped_racking_c": 0.35,
+	&"drum_ibc_stack": 0.35, &"drum_ibc_stack_b": 0.35, &"drum_ibc_stack_c": 0.35,
+	&"parts_cage": 0.35, &"parts_cage_b": 0.35, &"parts_cage_c": 0.35,
 	&"pine_young_crown": 0.0, &"pine_grown_crown": 0.0, &"pine_old_crown": 0.0, &"oak_crown": 0.0, &"birch_crown": 0.0,
 	# a thicket's spruce is all boughs (FT1: worn, the dust on its upturned tiers drew its sunlit tops pale beige)
 	&"spruce": 0.0,

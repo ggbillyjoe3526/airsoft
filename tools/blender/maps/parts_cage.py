@@ -3,8 +3,9 @@
 Galvanised square posts at the bay's ends (half a post each, so two bays share one) and its middle, framed mesh
 panels with a rail across at 2 m (photos 2 to 4), and the store behind the mesh filling the bay as a shelf does, so it
 stops the eye as the racking does: steel shelving of bins and cartons, stacked cartons and a stepladder (photo 3);
-ladders, a hose and a cable drum (photo 5). The second bay (BAYS) has the store's padlocked door (photo 2). The two
-take turns along a row (PropDressConfig.variants).
+ladders, a hose and a cable drum (photo 5); a deck across the bay over flattened cartons and totes (photo 4). The
+second bay (BAYS) has the store's padlocked door (photo 2). The three take turns along a row
+(PropDressConfig.variants).
 
 Usage: python3 -I tools/blender/maps/parts_cage.py
 """
@@ -53,6 +54,29 @@ def panel(p: prop.Prop, x0: float, x1: float, z0: float, z1: float, y: float, fr
     for j in range(1, m):
         z = z0 + f + (z1 - z0 - 2 * f) * j / m
         bk.wire(p, (x0 + f, y - WIRE_R, z), (x1 - f, y - WIRE_R, z), WIRE_R, frame + "*1.03")
+
+
+def end_panels(p: prop.Prop) -> None:
+    """The cage's ends closed with mesh, each a hair inside the bay (two bays side by side never share a plane), from
+    the front back to the backing (y = 0: PropLayout draws the dark backing half a row in, so nothing behind it shows):
+    the frame's face and the wires, seen from outside the end."""
+    f = FRAME
+    y0, y1 = bk.FRONT + POST, 0.0
+    for x, out in ((-bk.HW + 0.004, -1.0), (bk.HW - 0.004, 1.0)):
+        face = (out, 0.0, 0.0)
+        for (a0, a1, b0, b1) in ((y0, y0 + f, 0.0, bk.H), (y1 - f, y1, 0.0, bk.H), (y0, y1, 0.0, f), (y0, y1, RAIL - f / 2,
+                                                                                                    RAIL + f / 2)):
+            pts = [(x, a0, b0), (x, a1, b0), (x, a1, b1), (x, a0, b1)]
+            p.quad(pts if out > 0 else pts[::-1], GALV)
+        n = max(1, round((y1 - y0 - 2 * f) / PITCH))
+        for i in range(1, n):
+            y = y0 + f + (y1 - y0 - 2 * f) * i / n
+            bk.wire(p, (x, y, f), (x, y, bk.H - 0.04), WIRE_R, GALV + "*0.97", sides=1, facing=face)
+        m = round((bk.H - 0.04 - f) / PITCH)
+        for j in range(1, m):
+            z = f + (bk.H - 0.04 - f) * j / m
+            bk.wire(p, (x + out * WIRE_R, y0 + f, z), (x + out * WIRE_R, y1 - f, z), WIRE_R, GALV + "*1.03", sides=1,
+                    facing=face)
 
 
 def panels(p: prop.Prop, door: bool) -> None:
@@ -114,7 +138,10 @@ def ladder(p: prop.Prop, x: float, z_top: float, width: float, paint: str, lean:
         t = (i + 0.6) / rungs
         z = z_top * t
         y = y_foot + lean * t - 0.02
-        p.box((x - width / 2 + 0.04, y - 0.015, z - 0.02), (x + width / 2 - 0.04, y + 0.015, z + 0.02), paint + "*0.82")
+        rx0, rx1 = x - width / 2 + 0.04, x + width / 2 - 0.04
+        p.front_decal(rx0, rx1, z - 0.02, z + 0.02, y - 0.015, paint + "*0.82")
+        p.quad([(rx0, y - 0.015, z + 0.02), (rx1, y - 0.015, z + 0.02), (rx1, y + 0.015, z + 0.02),
+                (rx0, y + 0.015, z + 0.02)], paint + "*0.9")
     # the feet's rubber shoes
     for sx in (x - width / 2, x + width / 2 - 0.04):
         p.box((sx - 0.005, y_foot - 0.03, 0.0), (sx + 0.045, y_foot + 0.03, 0.05), "rubber")
@@ -203,6 +230,9 @@ def store_a(p: prop.Prop) -> None:
 
 def store_b(p: prop.Prop) -> None:
     """Photo 5's store behind its door: ladders leaning on the back, a coiled hose, a cable drum and cartons."""
+    # plywood sheets stood on edge at the back, behind the ladders (no dark gap through the mesh)
+    p.box((-bk.HW + 0.03, Y_IN + 0.3, 0.0), (0.14, Y_IN + 0.36, 2.95), "plywood*0.92")
+    p.front_decal(-bk.HW + 0.03, 0.14, 2.6, 2.95, Y_IN + 0.299, "plywood*0.86")
     ladder(p, -1.05, 2.9, 0.44, "fire*0.95", 0.28, 9)
     ladder(p, -0.62, 2.7, 0.44, "fire*0.88", 0.26, 8)
     ladder(p, -0.25, 2.5, 0.4, "yellow*0.95", 0.24, 7)
@@ -217,12 +247,60 @@ def store_b(p: prop.Prop) -> None:
     carton(p, 0.14, bk.HW - 0.08, 1.3, 2.45, "crate*0.9", y0=Y_IN + 0.18, label=False)
 
 
-BAYS = {"parts_cage.glb": (store_a, False), "parts_cage_b.glb": (store_b, True)}
+def store_c(p: prop.Prop) -> None:
+    """Photo 4's store: a steel deck across the whole bay at 1.3 m, flattened cartons stood on edge against the mesh
+    and grey totes stacked on a dolly under it, stacked cartons and a white tub over it."""
+    deck = 1.3
+    p.box((-bk.HW + 0.03, Y_IN, deck - 0.04), (bk.HW - 0.03, bk.BACK, deck), SHELF + "*0.95")
+    p.front_decal(-bk.HW + 0.03, bk.HW - 0.03, deck - 0.04, deck - 0.005, Y_IN - 0.001, SHELF + "*1.12")
+    for x in (-bk.HW + 0.03, -0.0175, bk.HW - 0.065):
+        p.box((x, Y_IN, 0.0), (x + 0.035, Y_IN + 0.035, deck - 0.04), SHELF)
+    # under the deck, left: flattened cartons stood on edge, leaning into the mesh, the bay's stock behind them
+    carton(p, -bk.HW + 0.08, -0.06, 0.0, deck - 0.06, "crate*0.86", y0=Y_IN + 0.12, label=False)
+    sheets = [(-1.26, -0.62, 1.16, "crate*1.02"), (-1.18, -0.42, 1.04, "sand*1.0"), (-0.9, -0.1, 1.2, "crate*0.95"),
+              (-0.66, -0.08, 0.92, "crate*1.06"), (-1.3, -0.95, 0.86, "sand*0.94"), (-0.4, -0.08, 0.7, "crate*0.9")]
+    for k, (a, b, h, paint) in enumerate(sheets):
+        y = Y_IN + 0.012 * (3 - k)
+        p.box((a, y, 0.0), (b, y + 0.012, h), paint)
+        # the fold creases and a print mark on each sheet
+        p.front_decal((a + b) / 2 - 0.004, (a + b) / 2 + 0.004, 0.02, h - 0.02, y - 0.001, paint + "*0.86")
+        p.front_decal(a + 0.06, a + 0.2, h - 0.2, h - 0.1, y - 0.001, "rubber*1.1")
+    # under the deck, right: grey totes stacked on a dolly, a carton beside them
+    p.box((0.08, Y_IN + 0.02, 0.0), (0.82, bk.BACK, 0.1), "rubber*1.15")
+    z = 0.1
+    for k, h in enumerate((0.32, 0.32, 0.3)):
+        paint = "grey*1.08" if k != 1 else "grey*0.95"
+        bin_(p, 0.1, 0.8, z, h, paint)
+        # its lid's lip and the two hand holds
+        p.box((0.09, Y_IN + 0.005, z + h - 0.025), (0.81, Y_IN + 0.04, z + h), paint + "*1.06")
+        for hx in (0.16, 0.66):
+            p.front_decal(hx, hx + 0.08, z + h - 0.09, z + h - 0.05, Y_IN + 0.0085, "rubber*0.9")
+        z += h + 0.01
+    carton(p, 0.86, bk.HW - 0.08, 0.0, 0.58, "crate*1.0")
+    carton(p, 0.86, bk.HW - 0.08, 0.58, 1.1, "sand*0.98")
+    # over the deck: cartons stacked to the top rail, the white tub and a tool case
+    stack = [(-bk.HW + 0.08, -0.55, deck, deck + 0.55, "crate*1.0"), (-bk.HW + 0.08, -0.6, deck + 0.55, deck + 1.05,
+             "crate*0.93"), (-bk.HW + 0.1, -0.7, deck + 1.05, 2.92, "sand*1.02"), (0.42, bk.HW - 0.08, deck,
+             deck + 0.62, "crate*1.05"), (0.42, bk.HW - 0.1, deck + 0.62, deck + 1.2, "crate*0.97"),
+             (0.5, bk.HW - 0.12, deck + 1.2, 2.9, "cream*0.97")]
+    for a, b, z0, z1, paint in stack:
+        carton(p, a, b, z0, z1, paint, label=paint != "cream*0.97")
+    p.lathe([(deck, 0.27), (deck + 0.66, 0.3), (deck + 0.69, 0.31)], "cream*1.08", 8, (-0.15, Y_IN + 0.33, 0.0),
+            axis="z")
+    p.box((-0.5, Y_IN + 0.2, deck + 0.7), (0.38, bk.BACK, 2.92), "crate*0.82")
+    # a yellow extension lead coiled on a hook in front of it
+    hose(p, 0.26, 2.3, 0.13, 0.028, "yellow*0.88")
+    p.box((0.18, Y_IN + 0.04, deck), (0.41, Y_IN + 0.18, deck + 0.24), "rubber*1.2")
+    p.front_decal(0.2, 0.39, deck + 0.11, deck + 0.13, Y_IN + 0.039, "yellow*0.9")
+
+
+BAYS = {"parts_cage.glb": (store_a, False), "parts_cage_b.glb": (store_b, True), "parts_cage_c.glb": (store_c, False)}
 
 if __name__ == "__main__":
     for name, (store, door) in BAYS.items():
         p = prop.Prop("parts_cage")
         posts(p)
         panels(p, door)
+        end_panels(p)
         store(p)
         p.export(name, budget=1500)

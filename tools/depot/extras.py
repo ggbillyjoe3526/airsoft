@@ -6,7 +6,7 @@
   cage), so no area is all one kind.
 - `fixtures`: the look-only models on the hall's walls and pillars (StationFixtures draws them: no collider, no nav
   cell, no shadow): the pipework along every wall at PIPE_Y, safety signs over the racking, fire points and cable
-  reels on open walls by the columns, the "keep clear" sign beside each fire exit, and a call point and an
+  on open walls by the columns, the "keep clear" sign beside each fire exit, and a call point and an
   extinguisher on each pillar. Each spot is checked clear of every block in front of it, so a model never stands in
   a stack or behind a wall, wherever the layout puts them.
 
@@ -37,23 +37,25 @@ BLOCK_FACE = 0.20  # the blockwork dado's face, up to 2.4 m
 
 PIPE_Y = 5.6       # the services' foot: over the shutters' coil boxes (5.32 m), under the rooflights (6.3 m)
 PIPE_MODULES = [("pipe_run", 4.0), ("pipe_run_2", 2.0)]
+PIPE_FITTED = ("pipe_run_b", 3)  # every third 4 m length along a wall is the one with its valve, drop and box
+PIPE_BELOW = 0.3   # (m) the fitted length's conduit and sprinkler head reach this far under PIPE_Y
 PIPE_CORNER = 2.0  # (m) the end walls' pipework stops this far from a corner, under the long walls' runs
 PIPE_OUT = 0.7     # how far the pipework stands out from the wall (pipe_run is 0.66 m)
-SIGN_Y = 3.6       # the high signs' middle, over the 3 m racking
-HIGH_SIGNS = ["depot_sign_pallet_storage", "depot_sign_ppe", "depot_sign_no_riding"]
-SIGN_HALF = 0.3
-BESIDE = 0.9       # (m) a fire point's, a cable reel's or a high sign's middle from its column
+FIRE_POINT_Y = 0.3  # the fire point hangs this far off the floor (photo 3's wall-mounting board)
+BESIDE = 0.9       # (m) a fire point's or a sign's middle from its column
 FIRE_POINT_APART = 20.0
-CABLE_REELS = 3
-SPARE_APART = 6.0  # (m) a cable reel or an eye-height sign from another extra on its wall
-REEL_Y = 1.9       # the cable reel's bracket, on the blockwork
-EYE_SIGNS = ["depot_sign_defib", "depot_sign_fire_action", "depot_sign_assembly"]
+SPARE_APART = 6.0  # (m) an eye-height sign from another extra on its wall
+# every safety sign on the lower wall at eye height, in turn (the owner, 2026-11-15: "signs should be on the lower
+# part of the wall at roughly eye height")
+EYE_SIGNS = ["depot_sign_pallet_storage", "depot_sign_defib", "depot_sign_ppe", "depot_sign_fire_action",
+             "depot_sign_no_riding", "depot_sign_assembly"]
 EYE_Y = 1.6
+EYE_MOST = 14      # eye-height signs in all
 EXIT_SIGN = ("depot_sign_fire_exit", -1.1, 1.75)  # beside the exit door, over its extinguisher's recess
 PILLAR_R = 0.195   # the steel pillar's post is 0.2 m round (steel_pillar.py)
 CALL_Y = 1.35
 EXTINGUISHER_Y = 0.4
-FLOOR_CLEAR = (1.2, 2.3)  # (m) out and up in front of a fire point or a cable reel
+FLOOR_CLEAR = (1.2, 2.3)  # (m) out and up in front of a fire point or an eye-height sign
 
 
 def rack_dress(pieces: list[dict]) -> list[str]:
@@ -163,6 +165,7 @@ def _pipes(w: Wall, walls: list[Wall], others: list[tuple], corner: float) -> li
     """The pipework along wall w, a module a stretch between its columns, left out where anything stands in front."""
     out: list[dict] = []
     edges = w.cells()
+    long = 0
     for i in range(len(edges) - 1):
         a, b = edges[i], edges[i + 1]
         if i == 0:
@@ -172,8 +175,12 @@ def _pipes(w: Wall, walls: list[Wall], others: list[tuple], corner: float) -> li
         s = a
         while b - s >= PIPE_MODULES[-1][1] - 1e-6:
             model, length = next((m, n) for m, n in PIPE_MODULES if b - s >= n - 1e-6)
-            strip = w.strip(s, s + length, PIPE_Y - 0.1, PIPE_Y + PIPE_OUT, PIPE_OUT)
+            strip = w.strip(s, s + length, PIPE_Y - PIPE_BELOW, PIPE_Y + PIPE_OUT, PIPE_OUT)
             if not any(_hits(strip, o) for o in others):
+                if length == PIPE_MODULES[0][1]:
+                    long += 1
+                    if long % PIPE_FITTED[1] == 2:
+                        model = PIPE_FITTED[0]
                 # the model runs from its origin along its own +x
                 out.append(_on(w, model, s if w.sign > 0 else s + length, PIPE_Y, LINER))
             s += length
@@ -195,10 +202,8 @@ def fixtures(blocks: list[dict], middle: tuple) -> list[dict]:
     out: list[dict] = []
     for w in walls:
         out += _pipes(w, walls, others, 0.0 if w.along_x else PIPE_CORNER)
-    # the spots beside the columns, in wall order: open in front below 2.3 m (a fire point, a cable reel, a sign at
-    # eye height) or over the racking (a high sign)
+    # the spots beside the columns, in wall order, open in front below 2.3 m (a fire point, a sign at eye height)
     floor_spots: list[tuple] = []
-    high_spots: list[tuple] = []
     for wi, w in enumerate(walls):
         edges = w.cells()
         a_end, b_end = _end(w, walls, -1), _end(w, walls, 1)
@@ -215,37 +220,25 @@ def fixtures(blocks: list[dict], middle: tuple) -> list[dict]:
                 floor = w.strip(s - 0.4, s + 0.4, 0.05, FLOOR_CLEAR[1], FLOOR_CLEAR[0])
                 if not any(_hits(floor, o) for o in others):
                     floor_spots.append((wi, cell, s))
-                high = w.strip(s - SIGN_HALF, s + SIGN_HALF, SIGN_Y - 0.25, SIGN_Y + 0.25, 0.3)
-                if not any(_hits(high, o) for o in others):
-                    high_spots.append((wi, cell, s))
-    # fire points FIRE_POINT_APART apart along each wall; then cable reels and the eye-height signs on the spots left,
-    # never on a fire point's column
+    # fire points FIRE_POINT_APART apart along each wall; then the eye-height signs on the spots left, in turn, never
+    # on a fire point's column
     taken: list[tuple] = []
     for wi, cell, s in floor_spots:
         w = walls[wi]
         if all(t[0] != wi or abs(t[2] - s) >= FIRE_POINT_APART for t in taken):
             taken.append((wi, cell, s))
-            out.append(_on(w, "fire_point", s, 0.0, BLOCK_FACE + 0.01))
+            out.append(_on(w, "fire_point", s, FIRE_POINT_Y, BLOCK_FACE + 0.01))
     used = list(taken)
     spare = [p for p in floor_spots if all(p[0] != t[0] or abs(p[2] - t[2]) > 2 * BESIDE + 0.01 for t in taken)]
-    reels = 0
     eye = 0
     for wi, cell, s in spare:
-        w = walls[wi]
+        if eye >= EYE_MOST:
+            break
         if any(u[0] == wi and abs(u[2] - s) < SPARE_APART for u in used):
             continue
-        if reels < CABLE_REELS:
-            out.append(_on(w, "cable_reel", s, REEL_Y, BLOCK_FACE))
-            reels += 1
-        elif eye < len(EYE_SIGNS):
-            out.append(_on(w, EYE_SIGNS[eye], s, EYE_Y, BLOCK_FACE + 0.005))
-            eye += 1
-        else:
-            break
+        out.append(_on(walls[wi], EYE_SIGNS[eye % len(EYE_SIGNS)], s, EYE_Y, BLOCK_FACE + 0.005))
+        eye += 1
         used.append((wi, cell, s))
-    # a high sign over every other column's racking, in turn, clear of the spots in use below
-    for k, (wi, cell, s) in enumerate(high_spots[::3]):
-        out.append(_on(walls[wi], HIGH_SIGNS[k % len(HIGH_SIGNS)], s, SIGN_Y, RIB))
     # each fire exit's "keep clear" sign beside its door
     for (wi, cell), feature in sorted(features.items()):
         if feature != "hall_exit":

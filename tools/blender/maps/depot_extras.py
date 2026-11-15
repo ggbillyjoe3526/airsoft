@@ -1,16 +1,15 @@
 """Depot's wall extras (DX1): look-only models on the hall's walls and pillars after the owner's 2026-11-15 photos
-(art/references/depot-props/): fire points, call points, a cable reel, the pipework along the walls over the racking,
+(art/references/depot-props/): fire points, call points, the pipework along the walls over the racking,
 and the safety signs, so the walls aren't bare. They change nothing on the floor: no collider, no nav cell, no
 shadow (StationFixtures draws them, as it draws Subway's extras; their spots are written into data/maps/depot.json
 by tools/depot/build_map.py).
 
-- **fire_point**: photo 3's fire point board, wall hung: a white board with its grip slots and printed "Fire Point"
-  header, a call point and an alarm sounder on it, the fire action notice, a torch in its clip, and the red moulded
-  stand at its foot holding two extinguishers.
+- **fire_point**: photo 3's fire point in its wall-mounting version, hung 0.3 m off the floor so it stands on nothing:
+  a white moulded board with its carry handle's slots and printed "Fire Point" header, the alarm unit and the
+  sounder's housing, the fire action notice and the document tube, over the red moulded housing that hides the two
+  extinguishers.
 - **call_point**: photo 2's manual call point: the red box, its white frangible panel with the arrows and the dot,
   the house-and-flame mark over it, the test-key hole (on pillars, beside a fire extinguisher: station_extras.py's).
-- **cable_reel**: a wall-mounted cable reel (none in the photos; drawn as warehouses fit them): the bracket, a yellow
-  drum with black cable wound on, its crank, and the cable's end hanging down to the plug.
 - **pipe_run**: photos 3 to 6's services, a 4 m length laid end to end along every hall wall at 5.6 m (over the
   shutters' coil boxes, under the rooflights), between the wall's columns: a red sprinkler main on drop rods, two
   lagged pipes in aluminium cladding with their identification bands, a wire cable basket of cables (photo 3), all
@@ -35,9 +34,9 @@ import stationkit as sk  # noqa: E402
 
 sk.PAINTS.update({
     # the props' fire red (prop.PALETTE "fire") and its shade (the moulded stand's); aluminium cladding; the strut's
-    # galvanising; the safety yellow of the reel
+    # galvanising
     "fire": 0xAC2264, "fire_dark": 0x6E1640, "cladding": 0xC4C3C0, "cladding_lap": 0xA9A8A5, "galv": 0xB5B1AA,
-    "reel_yellow": 0xE4CA46, "board": 0xEDEBE6, "slot": 0x4A4A50,
+    "board": 0xEDEBE6, "slot": 0x4A4A50,
 })
 
 # The signs: (cell, half width, half height) in metres.
@@ -59,17 +58,6 @@ def sign(cell: str, w: float, h: float) -> sk.Mesh:
             x, y = sx * (w - 0.02), sy * (h - 0.02)
             m.box((x - 0.005, y - 0.005, d + t), (x + 0.005, y + 0.005, d + t + 0.002), "zinc", skip="b")
     return m
-
-
-def extinguisher(m: sk.Mesh, x: float, y: float, z: float, h: float, band: str) -> None:
-    """A stored-pressure extinguisher standing at (x, y, z): its red body and coloured band, the valve, the hose."""
-    r = 0.075
-    m.lathe([(r * 0.9, 0.0), (r, 0.02), (r, h * 0.62), (r, h * 0.72), (r, h * 0.86), (r * 0.6, h * 0.95),
-             (0.02, h)], 10, (x, y, z), ["fire_dark", "fire", band, "fire", "fire", "fire"])
-    m.box((x - 0.018, y + h, z - 0.018), (x + 0.018, y + h + 0.04, z + 0.018), "zinc")
-    m.box((x - 0.01, y + h + 0.04, z - 0.03), (x + 0.01, y + h + 0.05, z + 0.09), "black")
-    m.tube([(x - 0.018, y + h + 0.02, z), (x - r - 0.02, y + h - 0.04, z + 0.02), (x - r - 0.02, y + h * 0.45, z + 0.04)],
-           0.008, "black", sides=4)
 
 
 def call_point_on(m: sk.Mesh, x: float, y: float, z: float, s: float = 0.09) -> None:
@@ -109,73 +97,68 @@ def call_point() -> sk.Mesh:
 
 
 def fire_point() -> sk.Mesh:
-    """Photo 3's fire point board, 0.52 m wide, its board from 0.4 to 1.6 m on the wall over the red stand."""
+    """Photo 3's fire point, its wall-mounting version: a white moulded board 0.62 m wide and 1.55 m tall with its
+    carry handle's slots across the top, the printed "Fire Point" header, the alarm unit and the sounder's housing,
+    the fire action notice and the red document tube, over the red moulded housing that hides the two extinguishers,
+    its flared lip, its dark viewing slot, its ribs and its latch. Its foot at y = 0 (hung 0.3 m off the floor)."""
     m = sk.Mesh("fire_point")
-    w, b0, b1, d = 0.26, 0.4, 1.6, 0.02
-    # the board: rounded top corners by a chamfer, the three grip slots, the printed header
-    pts = [(-w, b0), (w, b0), (w, b1 - 0.05), (w - 0.05, b1), (-w + 0.05, b1), (-w, b1 - 0.05)]
+    w, b0, b1, d = 0.31, 0.42, 1.55, 0.03
+    # the board: its rounded corners by chamfers, its edge, its moulded grid, the handle's three slots
+    pts = [(-w, b0), (w, b0), (w, b1 - 0.07), (w - 0.07, b1), (-w + 0.07, b1), (-w, b1 - 0.07)]
     m.face([(x, y, d) for x, y in pts], "board")
     for (ax, ay), (bx, by) in zip(pts, pts[1:] + pts[:1]):
-        m.face_toward([(ax, ay, 0.0), (bx, by, 0.0), (bx, by, d), (ax, ay, d)],
-                      (by - ay, -(bx - ax), 0.0), "board")
+        m.face_toward([(ax, ay, 0.0), (bx, by, 0.0), (bx, by, d), (ax, ay, d)], (by - ay, -(bx - ax), 0.0), "board")
+    for i in range(1, 6):
+        x = -w + 2 * w * i / 6
+        m.face([(x - 0.002, b0 + 0.02, d + 0.0005), (x + 0.002, b0 + 0.02, d + 0.0005), (x + 0.002, b1 - 0.14,
+                d + 0.0005), (x - 0.002, b1 - 0.14, d + 0.0005)], "cladding")
+    for j in range(1, 9):
+        y = b0 + (b1 - 0.14 - b0) * j / 9
+        m.face([(-w + 0.03, y - 0.002, d + 0.0005), (w - 0.03, y - 0.002, d + 0.0005), (w - 0.03, y + 0.002,
+                d + 0.0005), (-w + 0.03, y + 0.002, d + 0.0005)], "cladding")
     for k in (-1, 0, 1):
-        m.face([(k * 0.12 - 0.04, b1 - 0.07, d + 0.001), (k * 0.12 + 0.04, b1 - 0.07, d + 0.001),
-                (k * 0.12 + 0.04, b1 - 0.04, d + 0.001), (k * 0.12 - 0.04, b1 - 0.04, d + 0.001)], "slot")
-    m.sign("fire_point", [(-0.22, b1 - 0.27, d + 0.002), (0.22, b1 - 0.27, d + 0.002), (0.22, b1 - 0.095, d + 0.002),
-                          (-0.22, b1 - 0.095, d + 0.002)], cells=depot_cells)
-    # the call point and the sounder on the board, the fire action notice, the torch in its clip
-    call_point_on(m, -0.12, b1 - 0.44, d)
-    m.lathe([(0.0, 0.0), (0.045, 0.0), (0.05, 0.03), (0.05, 0.16), (0.04, 0.17)], 10, (0.12, b1 - 0.46, d + 0.05),
-            "fire", axis="y")
-    m.box((0.1, b1 - 0.46, d), (0.14, b1 - 0.3, d + 0.004), "fire_dark", skip="b")
-    m.sign("fire_action", [(-0.2, b0 + 0.36, d + 0.002), (-0.04, b0 + 0.36, d + 0.002),
-                           (-0.04, b0 + 0.57, d + 0.002), (-0.2, b0 + 0.57, d + 0.002)], cells=depot_cells)
-    m.lathe([(0.022, 0.0), (0.022, 0.16), (0.03, 0.18), (0.03, 0.2)], 8, (0.13, b0 + 0.36, d + 0.035), "fire",
-            axis="y")
-    m.box((0.1, b0 + 0.42, d), (0.16, b0 + 0.45, d + 0.06), "sign_black", skip="b")
-    # the moulded stand at the foot: its tray, the front's opening and the two extinguishers standing in it
-    sw, sd = 0.3, 0.3
-    m.box((-sw, 0.0, 0.0), (sw, 0.06, sd), "fire_dark", skip="b")
-    m.box((-sw, 0.06, 0.0), (-sw + 0.04, 0.42, sd), "fire", skip="b")
-    m.box((sw - 0.04, 0.06, 0.0), (sw, 0.42, sd), "fire", skip="b")
-    m.box((-sw + 0.04, 0.06, sd - 0.04), (sw - 0.04, 0.3, sd), "fire", skip="")
-    m.face([(-sw + 0.08, 0.17, sd + 0.001), (sw - 0.08, 0.17, sd + 0.001), (sw - 0.08, 0.23, sd + 0.001),
-            (-sw + 0.08, 0.23, sd + 0.001)], "sign_black")
-    extinguisher(m, -0.12, 0.06, 0.13, 0.52, "sign_black")
-    extinguisher(m, 0.12, 0.06, 0.13, 0.52, "cream")
+        m.face([(k * 0.17 - 0.06, b1 - 0.06, d + 0.001), (k * 0.17 + 0.06, b1 - 0.06, d + 0.001),
+                (k * 0.17 + 0.06, b1 - 0.03, d + 0.001), (k * 0.17 - 0.06, b1 - 0.03, d + 0.001)], "slot")
+    m.sign("fire_point", [(-0.25, b1 - 0.28, d + 0.002), (0.25, b1 - 0.28, d + 0.002), (0.25, b1 - 0.1, d + 0.002),
+                          (-0.25, b1 - 0.1, d + 0.002)], cells=depot_cells)
+    # the alarm unit: a rounded red housing with its call point
+    ax, ay = -0.13, b1 - 0.58
+    m.prism_x([(ay, d), (ay + 0.2, d), (ay + 0.2, d + 0.05), (ay + 0.185, d + 0.065), (ay + 0.015, d + 0.065),
+               (ay, d + 0.05)][::-1], ax - 0.08, ax + 0.08, "fire")
+    call_point_on(m, ax, ay + 0.06, d + 0.065, 0.07)
+    # the sounder's housing: a half round red hood with its label
+    m.lathe([(0.0, 0.0), (0.065, 0.0), (0.07, 0.02), (0.07, 0.27), (0.06, 0.29), (0.0, 0.29)], 10,
+            (0.13, b1 - 0.64, d), "fire", axis="y")
+    m.face([(0.1, b1 - 0.6, d + 0.072), (0.16, b1 - 0.6, d + 0.072), (0.16, b1 - 0.55, d + 0.072),
+            (0.1, b1 - 0.55, d + 0.072)], "white")
+    # the fire action notice and the document tube with its black cap
+    m.sign("fire_action", [(-0.27, b0 + 0.2, d + 0.002), (-0.05, b0 + 0.2, d + 0.002),
+                           (-0.05, b0 + 0.48, d + 0.002), (-0.27, b0 + 0.48, d + 0.002)], cells=depot_cells)
+    m.lathe([(0.04, 0.0), (0.04, 0.2)], 10, (0.0, b0 + 0.3, d + 0.04), "fire", axis="x", cap_top=False,
+            cap_bottom=False)
+    m.lathe([(0.0, 0.2), (0.042, 0.2), (0.042, 0.26), (0.0, 0.26)], 10, (0.0, b0 + 0.3, d + 0.04), "black", axis="x")
+    m.face([(0.04, b0 + 0.3, d + 0.0805), (0.16, b0 + 0.3, d + 0.0805), (0.16, b0 + 0.33, d + 0.0805),
+            (0.04, b0 + 0.33, d + 0.0805)], "white")
+    # the moulded housing over the extinguishers: a sloped front under a flared lip, the dark viewing slot, two ribs,
+    # the latch at its foot
+    hw, hd, top = 0.34, 0.3, 0.56
+    m.prism_x([(0.0, 0.0), (0.0, hd - 0.05), (0.05, hd), (top - 0.1, hd), (top - 0.02, hd + 0.04), (top, hd + 0.02),
+               (top, 0.0)][::-1], -hw, hw, "fire", open_edges=(0, 6))
+    m.box((-hw - 0.01, top - 0.04, 0.0), (hw + 0.01, top, hd + 0.045), "fire", skip="b")
+    m.face([(-0.13, top - 0.24, hd + 0.001), (0.13, top - 0.24, hd + 0.001), (0.13, top - 0.15, hd + 0.001),
+            (-0.13, top - 0.15, hd + 0.001)], "black")
+    for x in (-0.24, 0.24):
+        m.box((x - 0.02, 0.06, hd - 0.004), (x + 0.02, top - 0.12, hd + 0.012), "fire_dark", skip="b")
+    m.box((-0.025, 0.02, hd), (0.025, 0.1, hd + 0.03), "black", skip="b")
     return m
 
 
-def cable_reel() -> sk.Mesh:
-    """A wall-mounted cable reel: its bracket plate and arm, a 0.36 m yellow drum turning on an axle out of the wall,
-    black cable wound on it, the crank, and the cable's end hanging down to its plug. Its middle is 0.3 m up."""
-    m = sk.Mesh("cable_reel")
-    cy = 0.3
-    m.box((-0.12, cy - 0.2, 0.0), (0.12, cy + 0.2, 0.01), "galv", skip="b")
-    for bx in (-0.09, 0.09):
-        for by in (cy - 0.17, cy + 0.17):
-            m.box((bx - 0.008, by - 0.008, 0.01), (bx + 0.008, by + 0.008, 0.016), "zinc", skip="b")
-    m.lathe([(0.02, 0.0), (0.02, 0.06)], 6, (0.0, cy, 0.01), "zinc", axis="z")
-    r, z0, z1 = 0.18, 0.07, 0.24
-    for a, b in ((z0, z0 + 0.012), (z1 - 0.012, z1)):
-        m.lathe([(r, a), (r, b)], 16, (0.0, cy, 0.0), "reel_yellow", axis="z", smooth=False)
-    m.lathe([(0.13, z0 + 0.012), (0.135, (z0 + z1) / 2), (0.13, z1 - 0.012)], 16, (0.0, cy, 0.0), "black",
-            axis="z", cap_top=False, cap_bottom=False)
-    # the hub, its crank and handle on the front flange
-    m.lathe([(0.04, z1), (0.04, z1 + 0.02)], 8, (0.0, cy, 0.0), "galv", axis="z")
-    m.box((-0.01, cy, z1 + 0.02), (0.01, cy + 0.14, z1 + 0.03), "galv")
-    m.lathe([(0.012, z1 + 0.03), (0.012, z1 + 0.09)], 6, (0.0, cy + 0.13, 0.0), "black", axis="z")
-    # the cable's end off the drum's foot, hanging to its yellow plug
-    m.tube([(0.1, cy - 0.09, 0.15), (0.13, cy - 0.2, 0.16), (0.12, cy - 0.5, 0.15), (0.1, cy - 0.62, 0.14)], 0.009,
-           "black", sides=5)
-    m.box((0.075, cy - 0.7, 0.115), (0.125, cy - 0.62, 0.165), "reel_yellow")
-    return m
-
-
-def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run") -> sk.Mesh:
+def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run", fittings: bool = False) -> sk.Mesh:
     """`L` m (4, or 2 to make up a wall's short end bay) of services along a hall wall from x 0 to L, out to 0.62 m from
     it, its foot at y = 0: the cable basket lowest, the two lagged pipes over it and the sprinkler main on top, on
-    strut brackets every 2 m from 1 m in."""
+    strut brackets every 2 m from 1 m in. With `fittings` (pipe_run_b, every third 4 m length) the runs carry their
+    fittings too: the main's gate valve with its handwheel and a drop to a pendant sprinkler head, a junction box on
+    the basket's cables and the lagged pipes' bands further along, so the runs don't repeat every 4 m."""
     m = sk.Mesh(name)
     brackets = int(L / 2.0)
     # the strut brackets: a channel down the wall and an arm out at each run, a 2 m pitch from 1 m in
@@ -201,7 +184,7 @@ def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run") -> sk.Mesh:
             x = 0.5 + 2.0 * k
             m.lathe([(r + 0.004, x), (r + 0.004, x + 0.05)], 10, (0.0, y, z), "cladding_lap", axis="x",
                     cap_top=False, cap_bottom=False)
-        for x in (1.5,):
+        for x in ((2.9,) if fittings else (1.5,)):
             m.lathe([(r + 0.002, x), (r + 0.002, x + 0.12)], 10, (0.0, y, z), band, axis="x", cap_top=False,
                     cap_bottom=False, smooth=False)
             m.face_toward([(x + 0.16, y - 0.025, z + r + 0.003), (x + 0.3, y - 0.025, z + r + 0.003),
@@ -221,15 +204,45 @@ def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run") -> sk.Mesh:
                 cap_top=False, cap_bottom=False, smooth=False)
         m.tube([(x, ym + rm, zm), (x, 0.66, zm)], 0.006, "galv", sides=4)
         m.box((x - 0.02, 0.62, 0.04), (x + 0.02, 0.66, 0.62), "galv")
+    if fittings:
+        _fittings(m, rm, ym, zm)
     return m
+
+
+def _fittings(m: sk.Mesh, rm: float, ym: float, zm: float) -> None:
+    """pipe_run_b's fittings (y up, z out from the wall): the sprinkler main's gate valve, its drop to a pendant head
+    under the services, and a junction box under the cable basket with its conduit into the wall."""
+    # the gate valve at 2 m: its flanged body, the bonnet out towards the hall and the red handwheel on its stem
+    vx = 2.0
+    for x0, x1 in ((vx - 0.11, vx - 0.08), (vx + 0.08, vx + 0.11)):
+        m.lathe([(rm + 0.03, x0), (rm + 0.03, x1)], 10, (0.0, ym, zm), "fire_dark", axis="x", smooth=False)
+    m.lathe([(rm + 0.015, vx - 0.08), (rm + 0.015, vx + 0.08)], 10, (0.0, ym, zm), "fire", axis="x",
+            cap_top=False, cap_bottom=False)
+    zb = zm + rm
+    m.box((vx - 0.04, ym - 0.04, zb), (vx + 0.04, ym + 0.04, zb + 0.09), "fire_dark")
+    m.tube([(vx, ym, zb + 0.09), (vx, ym, zb + 0.15)], 0.008, "galv", sides=4)
+    m.lathe([(0.085, zb + 0.13), (0.085, zb + 0.15)], 10, (vx, ym, 0.0), "fire", axis="z", smooth=False)
+    m.box((vx - 0.085, ym - 0.006, zb + 0.134), (vx + 0.085, ym + 0.006, zb + 0.146), "fire")
+    m.box((vx - 0.006, ym - 0.085, zb + 0.134), (vx + 0.006, ym + 0.085, zb + 0.146), "fire")
+    # a drop off the main's front at 3.4 m, out past the lagged pipe and down to a pendant sprinkler head
+    dx, dz = 3.4, 0.645
+    m.lathe([(rm + 0.008, dx - 0.04), (rm + 0.008, dx + 0.04)], 8, (0.0, ym, zm), "fire_dark", axis="x", smooth=False)
+    m.tube([(dx, ym, zb), (dx, ym, dz), (dx, -0.06, dz)], 0.016, "fire", sides=6)
+    m.lathe([(0.022, -0.06), (0.016, -0.085), (0.006, -0.095), (0.03, -0.1)], 6, (dx, 0.0, dz), "galv", axis="y",
+            smooth=False)
+    # the junction box hung under the basket's front edge at 0.6 m, its label, and its conduit into the wall
+    m.box((0.5, -0.16, 0.585), (0.7, 0.05, 0.63), "slot")
+    m.face_toward([(0.53, -0.04, 0.6305), (0.67, -0.04, 0.6305), (0.67, 0.0, 0.6305), (0.53, 0.0, 0.6305)],
+                  (0, 0, 1), "board")
+    m.tube([(0.6, -0.16, 0.607), (0.6, -0.24, 0.6), (0.6, -0.26, 0.5), (0.6, -0.26, 0.0)], 0.012, "charcoal", sides=4)
 
 
 def main() -> None:
     # budgets: look-only extras on every wall, kept lean; the pipework is laid along the whole hall
-    sk.export(fire_point(), "fire_point", 700)
+    sk.export(fire_point(), "fire_point", 385)
     sk.export(call_point(), "call_point", 50)
-    sk.export(cable_reel(), "cable_reel", 380)
     sk.export(pipe_run(), "pipe_run", 790)
+    sk.export(pipe_run(fittings=True, name="pipe_run_b"), "pipe_run_b", 1100)
     sk.export(pipe_run(2.0, "pipe_run_2"), "pipe_run_2", 500)
     for cell, w, h in SIGNS:
         sk.export(sign(cell, w, h), "depot_sign_" + cell, 52)

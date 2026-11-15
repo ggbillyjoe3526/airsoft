@@ -4,7 +4,7 @@ long rack wall isn't all one kind of shelf. Galvanised uprights (the photos' rac
 navy) and one level of yellow step beams (the photos' orange is Beta's hue), so each slot takes a whole wrapped load
 as tall as the photos' (1.1 to 1.25 m): kraft cartons with their labels under the film (photos 2 to 4), a silver
 load with two black straps (photo 1), cartons under a mesh hood (photo 5) and a mixed load with tube rolls on top
-(photo 6). Two bays (BAYS) take turns along a row (PropDressConfig.variants).
+(photo 6). Three bays (BAYS) take turns along a row (PropDressConfig.variants).
 
 Usage: python3 -I tools/blender/maps/wrapped_racking.py
 """
@@ -68,9 +68,38 @@ def kraft(p: prop.Prop, cx: float, z: float, w: float, h: float, cols: int, rows
             bk.side_decal(x, Y0 + 0.03, Y0 + 0.4, z + r * ch + 0.006, z + (r + 1) * ch - 0.006,
                           shades[(r + seed + 1) % len(shades)], p, out)
     bk.sheen(p, x0, x1, z + 0.04, z + h - 0.03, Y0 - 0.003, seed, "crate*1.08", "plywood*1.08")
+    bk.glare(p, x0, x1, z, z + h, Y0 - 0.004, seed)
     film_ends(p, x0, x1, z, z + h, Y0)
     ticket(p, x0 + 0.08 + 0.3 * (seed % 3), z + h * 0.5, Y0 - 0.005)
     tail(p, x1 if seed % 2 else x0, z, Y0 - 0.005, 1.0 if seed % 2 else -1.0)
+
+
+def capped(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> None:
+    """Photo 7's load: cartons bound with a printed tape band round the top row, a clear film cap pulled down over
+    the top with its folds at the corners, the large shipping sheets and a hazard label on the front."""
+    kraft(p, cx, z, w, h - 0.03, 3, 6, seed + 1)
+    x0, x1 = cx - w / 2, cx + w / 2
+    top = z + h - 0.03
+    # the tape band round the top row, its print marks
+    band = top - h / 6 + 0.02
+    p.front_decal(x0 + 0.02, x1 - 0.02, band, band + 0.045, Y0 - 0.006, "rubber*0.85")
+    for i in range(6):
+        u = x0 + 0.06 + i * (w - 0.12) / 6
+        p.front_decal(u, u + 0.05, band + 0.012, band + 0.033, Y0 - 0.007, "fire*0.9")
+    # the cap: the film over the top, its hem down the front, folded in at the corners
+    p.box((x0 - 0.01, Y0 - 0.008, top), (x1 + 0.01, Y1, top + 0.03), "cream*0.96")
+    p.front_decal(x0 + 0.01, x1 - 0.01, top - 0.2, top + 0.025, Y0 - 0.009, "plaster*1.04")
+    for side in (-1.0, 1.0):
+        ex = x1 if side > 0 else x0
+        tri = [(ex - side * 0.01, Y0 - 0.01, top + 0.02), (ex - side * 0.01, Y0 - 0.01, top - 0.26),
+               (ex - side * 0.15, Y0 - 0.01, top - 0.16)]
+        p.quad(tri if side < 0 else tri[::-1], "cream*1.08")
+    # the shipping sheets and the hazard label
+    p.front_decal(cx - 0.02, cx + 0.19, z + h * 0.42, z + h * 0.42 + 0.28, Y0 - 0.008, "cream*1.05")
+    for i in range(4):
+        p.front_decal(cx + 0.0, cx + 0.17 - 0.03 * (i % 2), z + h * 0.42 + 0.04 + 0.05 * i,
+                      z + h * 0.42 + 0.055 + 0.05 * i, Y0 - 0.009, "ink*1.2")
+    p.front_decal(x1 - 0.2, x1 - 0.1, top - 0.36, top - 0.26, Y0 - 0.008, "yellow*0.95")
 
 
 def silver(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> None:
@@ -82,6 +111,7 @@ def silver(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> 
         zz = z + h * (0.12 + 0.18 * j)
         p.front_decal(x0 + 0.04, x1 - 0.04, zz, zz + 0.05, Y0 - 0.001, "concrete*0.84" if j % 2 else "concrete*0.97")
     bk.sheen(p, x0 + 0.04, x1 - 0.04, z + 0.05, z + h - 0.05, Y0 - 0.003, seed, "concrete*0.96", "concrete*1.08")
+    bk.glare(p, x0 + 0.07, x1 - 0.07, z, z + h, Y0 - 0.004, seed, "concrete*1.14")
     # cardboard edge boards up the front corners, under the straps
     for ex, s in ((x0, 1.0), (x1, -1.0)):
         p.box((min(ex, ex + s * 0.07), Y0 - 0.008, z + 0.02), (max(ex, ex + s * 0.07), Y0 + 0.002, z + h - 0.01),
@@ -107,8 +137,8 @@ def hood(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> No
     bk.chamfered(p, hx0, hx1, Y0 - 0.012, Y1, z + low, z + h - 0.03, 0.02, "violet*0.66")
     p.front_decal(hx0 + 0.02, hx1 - 0.02, z + low, z + low + 0.035, Y0 - 0.013, "violet*0.52")
     # its weave: faint diagonal ribs
-    for i in range(12):
-        u = hx0 + 0.04 + i * (w - 0.12) / 12
+    for i in range(20):
+        u = hx0 + 0.04 + i * (w - 0.12) / 20
         p.quad([(u, Y0 - 0.0135, z + low + 0.05), (u + 0.012, Y0 - 0.0135, z + low + 0.05),
                 (u + 0.1, Y0 - 0.0135, z + h - 0.06), (u + 0.088, Y0 - 0.0135, z + h - 0.06)], "violet*0.74")
     # the carton cap over the hood, and the straps round it
@@ -116,6 +146,12 @@ def hood(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> No
     for sx in (cx - w * 0.3, cx + w * 0.3):
         p.box((sx - 0.018, Y0 - 0.022, z - 0.12), (sx + 0.018, Y0 - 0.014, z + h), STRAP)
     p.box((x0 - 0.014, Y0 - 0.02, z + h * 0.62), (x1 + 0.014, Y0 - 0.014, z + h * 0.62 + 0.036), STRAP)
+    # the straps' ratchet buckles, and the weave's courses across
+    for sx in (cx - w * 0.3, cx + w * 0.3):
+        p.box((sx - 0.03, Y0 - 0.045, z + h * 0.4), (sx + 0.03, Y0 - 0.022, z + h * 0.4 + 0.1), "concrete*0.8")
+    for j in range(1, 5):
+        zz = z + low + (h - low - 0.03) * j / 5
+        p.front_decal(hx0 + 0.02, hx1 - 0.02, zz, zz + 0.008, Y0 - 0.0137, "violet*0.6")
 
 
 def mixed(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> None:
@@ -138,7 +174,7 @@ def mixed(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> N
         bk.side_decal(x, Y0 + 0.02, Y0 + 0.4, lo + 0.006, tops - 0.006, "cream*0.95", p, out)
     # the tube rolls lying front to back on top, their end caps to the front (photo 6's red caps)
     r = 0.055
-    n = int((w * 0.5) / (2 * r))
+    n = int((w * 0.42) / (2 * r))
     for row in range(2):
         for i in range(n - row):
             x = x0 + 0.06 + r + row * r + i * 2 * r
@@ -162,6 +198,10 @@ def load(p: prop.Prop, what: str, cx: float, z: float, slot: float, h: float, k:
         kraft(p, cx, deck, w, h, 3, 4, k)
     elif what == "kraft_small":
         kraft(p, cx, deck, w, h, 4, 5, k)
+    elif what == "kraft_fine":
+        kraft(p, cx, deck, w, h, 4, 7, k)
+    elif what == "capped":
+        capped(p, cx, deck, w, h, k)
     elif what == "silver":
         silver(p, cx, deck, w, h, k)
     elif what == "hood":
@@ -173,7 +213,8 @@ def load(p: prop.Prop, what: str, cx: float, z: float, slot: float, h: float, k:
 # Each bay's loads, floor then beam level, left then right, with each load's height (m).
 BAYS = {
     "wrapped_racking.glb": [(("kraft", 1.2), ("silver", 1.24)), (("mixed", 1.16), ("kraft_small", 1.22))],
-    "wrapped_racking_b.glb": [(("hood", 1.22), ("kraft_small", 1.14)), (("silver", 1.2), ("kraft", 1.18))],
+    "wrapped_racking_b.glb": [(("hood", 1.22), ("kraft_fine", 1.14)), (("silver", 1.2), ("capped", 1.18))],
+    "wrapped_racking_c.glb": [(("capped", 1.2), ("silver", 1.18)), (("kraft_fine", 1.22), ("hood", 1.16))],
 }
 
 

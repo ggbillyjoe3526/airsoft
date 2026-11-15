@@ -14,12 +14,12 @@ const BUDGETS: Dictionary[StringName, int] = {
 	&"name_board": 40, &"line_map": 40, &"info_panel": 40, &"notice_smoking": 40, &"notice_handrail": 40,
 	&"notice_cctv": 40, &"wall_sign_out": 40, &"wall_sign_platforms": 40, &"departures_n": 90, &"departures_s": 90,
 	# Depot's wall extras (DX1, tests/unit/test_dx1_depot_props.gd checks where they stand)
-	&"fire_point": 700, &"call_point": 50, &"cable_reel": 380, &"pipe_run": 790, &"pipe_run_2": 500,
+	&"fire_point": 385, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500,
 	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
 	&"depot_sign_ppe": 52, &"depot_sign_pallet_storage": 52, &"depot_sign_fire_exit": 52,
 }
 ## The models only Depot's walls carry (DX1: MapData.fixtures), not Subway's station.
-const DEPOT: Array[StringName] = [&"fire_point", &"call_point", &"cable_reel", &"pipe_run", &"pipe_run_2",
+const DEPOT: Array[StringName] = [&"fire_point", &"call_point", &"pipe_run", &"pipe_run_b", &"pipe_run_2",
 		&"depot_sign_assembly", &"depot_sign_fire_action", &"depot_sign_defib", &"depot_sign_no_riding",
 		&"depot_sign_ppe", &"depot_sign_pallet_storage", &"depot_sign_fire_exit"]
 ## Depot's models printing from Depot's own sheet (StationFixturesConfig.sheets).
@@ -315,20 +315,26 @@ func test_no_colour_reads_as_a_team() -> void:
 					seen[c] = true
 					if FieldChecks.reads_as_team(c, teams):
 						near.append("%s %s" % [model, c.to_html(false)])
-	# the sign sheet: few of its pixels may read as a team (none of its paints do; only blends at their edges)
-	var sheet := (load(cfg.sign_sheet) as Texture2D).get_image()
-	if sheet.is_compressed():
-		sheet.decompress()
-	var hits := 0
-	var tried := 0
-	for y in range(0, sheet.get_height(), 8):
-		for x in range(0, sheet.get_width(), 8):
-			tried += 1
-			var c := sheet.get_pixel(x, y)
-			if FieldChecks.reads_as_team(c, teams) and not _stripe(c):
-				hits += 1
 	assert_eq(near, [] as Array[String], "no model paint within 20 degrees of a team's hue unless dull")
-	assert_lt(float(hits) / tried, 0.01, "the sign sheet keeps off the teams' hues (%d of %d)" % [hits, tried])
+	# each sign sheet (the station's and Depot's, DX1): few of its pixels may read as a team (none of its paints do;
+	# only blends at their edges)
+	var sheets: Array[String] = [cfg.sign_sheet]
+	for model: StringName in cfg.sheets:
+		if not sheets.has(cfg.sheets[model]):
+			sheets.append(cfg.sheets[model])
+	for path in sheets:
+		var sheet := (load(path) as Texture2D).get_image()
+		if sheet.is_compressed():
+			sheet.decompress()
+		var hits := 0
+		var tried := 0
+		for y in range(0, sheet.get_height(), 8):
+			for x in range(0, sheet.get_width(), 8):
+				tried += 1
+				var c := sheet.get_pixel(x, y)
+				if FieldChecks.reads_as_team(c, teams) and not _stripe(c):
+					hits += 1
+		assert_lt(float(hits) / tried, 0.01, "%s keeps off the teams' hues (%d of %d)" % [path, hits, tried])
 	assert_false(_stripe(Color("#fa8c29")), "Beta's orange is never let off")
 
 
