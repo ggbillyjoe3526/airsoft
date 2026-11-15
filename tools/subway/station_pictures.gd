@@ -3,10 +3,10 @@ extends SceneTree
 ## arms and players hidden, the camera at eye height at fixed spots (SHOTS), one picture each (`<n>-<name>.png`).
 ## At the graphics preset named (High unless one is given). For a before picture, run it in a checkout from before
 ## MT3. `fixtures` after the preset takes FIXTURE_SHOTS instead (SM5: the lamps and extras up close), `trains`
-## TRAIN_SHOTS (SM1: the trains' models). Needs a display
+## TRAIN_SHOTS (SM1: the trains' models), `extras` EXTRA_SHOTS (DX2: Depot's wall extras). Needs a display
 ## (the cloud's lavapipe Vulkan draws Forward+):
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver vulkan -s \
-##       res://tools/subway/station_pictures.gd -- <folder> [low|medium|high|ultra] [all|fixtures|trains] [names]
+##       res://tools/subway/station_pictures.gd -- <folder> [low|medium|high|ultra] [all|fixtures|trains|extras] [names]
 ## (`names`: only the shots named, comma-separated).
 ## Dev only: tools/ never ships.
 
@@ -50,7 +50,7 @@ const FIXTURE_SHOTS: Array[Array] = [
 	["way-out-sign", Vector3(-24.5, 10.4, -8.6), Vector3(-28.0, 11.8, -8.25)],
 	["cctv-camera", Vector3(-46.0, 2.2, -7.8), Vector3(-49.0, 3.5, -5.6)],
 	["north-tunnel-lamps", Vector3(51.0, 1.7, -10.4), Vector3(76.0, 2.2, -11.8)],
-	["ticket-hall-clock", Vector3(-53.0, 10.8, 6.0), Vector3(-51.0, 12.0, 9.5)],
+	["ticket-hall-clock", Vector3(-50.5, 10.8, 2.0), Vector3(-55.0, 12.0, 4.5)],
 	["strip-lamp-from-below", Vector3(-17.5, 1.7, -6.8), Vector3(-14.875, 3.85, -7.25)],
 	["tunnel-lamp-close", Vector3(60.4, 2.1, -10.4), Vector3(62.0, 2.55, -12.3)],
 	["trackside-posters-north", Vector3(43.0, 2.4, -8.6), Vector3(33.0, 2.4, -12.5)],
@@ -61,6 +61,24 @@ const FIXTURE_SHOTS: Array[Array] = [
 	["concourse-way-out", Vector3(-11.0, 10.6, 1.0), Vector3(-18.0, 12.2, 0.0)],
 	["hall-notices", Vector3(-51.5, 10.5, 6.0), Vector3(-51.5, 10.7, 9.5)],
 	["lower-hall-info", Vector3(16.5, 2.6, -1.0), Vector3(22.0, 2.5, 2.4)],
+]
+## DX2's: Depot's wall extras in the station (the pipework, fire points, call points and safety signs), with `extras`.
+const EXTRA_SHOTS: Array[Array] = [
+	["hall-pipework-fire-action", Vector3(-32.5, 10.6, -4.5), Vector3(-37.0, 11.0, -10.0)],
+	["hall-pipework-south", Vector3(-20.0, 10.6, 5.0), Vector3(-44.0, 12.0, 10.0)],
+	["hall-defib", Vector3(-44.0, 10.6, 7.0), Vector3(-45.2, 10.4, 10.0)],
+	["stair-top-fire-point", Vector3(25.5, 10.6, -4.0), Vector3(21.5, 10.4, -9.5)],
+	["stair-top-fire-action", Vector3(23.0, 10.6, -1.0), Vector3(27.0, 10.4, -3.0)],
+	["plant-room-fire-point-ppe", Vector3(5.8, 10.6, 3.5), Vector3(4.0, 9.9, -0.5)],
+	["platform-fire-action", Vector3(19.8, 2.6, -7.8), Vector3(22.0, 2.3, -5.5)],
+	["lift-landing-fire-point", Vector3(-42.0, 2.6, -2.5), Vector3(-38.0, 1.6, -3.6)],
+	["cross-passage-fire-exit", Vector3(70.6, 1.7, -10.0), Vector3(74.5, 1.4, -9.0)],
+	["lower-hall-defib", Vector3(15.0, 2.6, 0.0), Vector3(14.8, 2.4, 4.0)],
+	["hall-pipe-end-concourse", Vector3(-24.0, 10.6, -5.5), Vector3(-18.0, 12.3, -10.0)],
+	["stair-top-pipe-bulkhead", Vector3(24.5, 10.6, -6.0), Vector3(20.0, 12.2, -9.5)],
+	["hall-clock-street-wall", Vector3(-50.5, 10.8, 2.0), Vector3(-55.0, 12.0, 4.5)],
+	["pipe-end-from-concourse", Vector3(-15.5, 10.6, -7.0), Vector3(-18.5, 12.2, -9.7)],
+	["pipe-end-south-from-concourse", Vector3(-15.5, 10.6, 7.0), Vector3(-18.5, 12.2, 9.7)],
 ]
 ## The trains' pictures (SM1), with `trains` as the third argument instead of the station's.
 const TRAIN_SHOTS: Array[Array] = [
@@ -102,7 +120,8 @@ func _run() -> void:
 	var preset := StringName(args[1]) if args.size() > 1 else &"high"
 	var shots: Array[Array] = SHOTS
 	if args.size() > 2:
-		shots = FIXTURE_SHOTS if args[2] == "fixtures" else TRAIN_SHOTS if args[2] == "trains" else SHOTS
+		shots = FIXTURE_SHOTS if args[2] == "fixtures" else TRAIN_SHOTS if args[2] == "trains" \
+				else EXTRA_SHOTS if args[2] == "extras" else SHOTS
 	if args.size() > 3:
 		# Only the shots named (comma-separated), from whichever list.
 		var named := args[3].split(",")

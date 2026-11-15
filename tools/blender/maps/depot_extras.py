@@ -241,13 +241,16 @@ def fire_point() -> sk.Mesh:
 
 
 def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run", fittings: bool = False) -> sk.Mesh:
-    """`L` m (4, or 2 to make up a wall's short end bay) of services along a hall wall from x 0 to L, out to 0.62 m from
+    """`L` m (4, or 2 or 1 to make up a wall's short end bay; the 1 m length has no bracket of its own, held by the
+    next length and the wall it ends at) of services along a hall wall from x 0 to L, out to 0.62 m from
     it, its foot at y = 0: the cable basket lowest, the two lagged pipes over it and the sprinkler main on top, on
     strut brackets every 2 m from 1 m in. With `fittings` (pipe_run_b, every third 4 m length) the runs carry their
     fittings too: the main's gate valve with its handwheel and a drop to a pendant sprinkler head, a junction box on
     the basket's cables and the lagged pipes' bands further along, so the runs don't repeat every 4 m."""
     m = sk.Mesh(name)
     brackets = int(L / 2.0)
+    end = L < 1.5   # the 1 m length finishes a run: its pipes and cables capped at both ends (laid either way round),
+    #                 seen past a wall's return
     # the strut brackets: a channel down the wall and an arm out at each run, a 2 m pitch from 1 m in
     for k in range(brackets):
         x = 1.0 + 2.0 * k
@@ -262,16 +265,16 @@ def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run", fittings: bool = Fa
         m.wire([(x, 0.07, 0.26), (x, 0.0, 0.3), (x, 0.0, 0.54), (x, 0.07, 0.58)],
                [(0, -1, -1), (0, -1, 0), (0, -1, 0), (0, -1, 1)], 0.002, 0.002, "galv", flat=True)
     for z, paint, r in ((0.33, "fire", 0.022), (0.4, "violet", 0.026), (0.47, "charcoal", 0.03), (0.53, "grey", 0.02)):
-        m.lathe([(r, 0.0), (r, L)], 6, (0.0, r, z), paint, axis="x", cap_top=False, cap_bottom=False)
+        m.lathe([(r, 0.0), (r, L)], 6, (0.0, r, z), paint, axis="x", cap_top=end, cap_bottom=end)
     # the two lagged pipes in their aluminium cladding, a lapped joint every 2 m and the coloured bands with arrows
     for z, y, band in ((0.36, 0.3, "green"), (0.54, 0.3, "violet")):
         r = 0.07
-        m.lathe([(r, 0.0), (r, L)], 10, (0.0, y, z), "cladding", axis="x", cap_top=False, cap_bottom=False)
+        m.lathe([(r, 0.0), (r, L)], 10, (0.0, y, z), "cladding", axis="x", cap_top=end, cap_bottom=end)
         for k in range(brackets):
             x = 0.5 + 2.0 * k
             m.lathe([(r + 0.004, x), (r + 0.004, x + 0.05)], 10, (0.0, y, z), "cladding_lap", axis="x",
                     cap_top=False, cap_bottom=False)
-        for x in ((2.9,) if fittings else (1.5,)):
+        for x in ((2.9,) if fittings else (1.5,) if L > 1.8 else (0.3,)):
             m.lathe([(r + 0.002, x), (r + 0.002, x + 0.12)], 10, (0.0, y, z), band, axis="x", cap_top=False,
                     cap_bottom=False, smooth=False)
             m.face_toward([(x + 0.16, y - 0.025, z + r + 0.003), (x + 0.3, y - 0.025, z + r + 0.003),
@@ -283,7 +286,7 @@ def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run", fittings: bool = Fa
                     cap_top=False, cap_bottom=False, smooth=False)
     # the sprinkler main on top, its grooved couplings and the drop rods it hangs from to the arms
     rm, ym, zm = 0.055, 0.5, 0.42
-    m.lathe([(rm, 0.0), (rm, L)], 10, (0.0, ym, zm), "fire", axis="x", cap_top=False, cap_bottom=False)
+    m.lathe([(rm, 0.0), (rm, L)], 10, (0.0, ym, zm), "fire", axis="x", cap_top=end, cap_bottom=end)
     m.lathe([(rm + 0.012, 0.0), (rm + 0.012, 0.06)], 10, (0.0, ym, zm), "fire_dark", axis="x", smooth=False)
     for k in range(brackets):
         x = 1.0 + 2.0 * k
@@ -340,6 +343,7 @@ def main() -> None:
     sk.export(pipe_run(), "pipe_run", 790)
     sk.export(pipe_run(fittings=True, name="pipe_run_b"), "pipe_run_b", 1100)
     sk.export(pipe_run(2.0, "pipe_run_2"), "pipe_run_2", 500)
+    sk.export(pipe_run(1.0, "pipe_run_1"), "pipe_run_1", 360)
     for cell, w, h in SIGNS:
         sk.export(sign(cell, w, h), "depot_sign_" + cell, 52)
 

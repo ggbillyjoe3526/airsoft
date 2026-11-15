@@ -50,6 +50,18 @@ MODELS = {
     "wall_sign_platforms": ((-0.660, 0.660, -0.160, 0.160, 0.0, 0.029), "wall"),
     "departures_n": ((-0.800, 0.800, -0.745, 0.0, -0.050, 0.050), "hung"),
     "departures_s": ((-0.800, 0.800, -0.745, 0.0, -0.050, 0.050), "hung"),
+    # Depot's wall extras (DX1, tools/blender/maps/depot_extras.py) where a station has the like (DX2): fire points,
+    # call points, the safety signs that aren't a warehouse's, and the services' pipework, run along its own +x.
+    "fire_point": ((-0.325, 0.325, 0.0, 1.550, 0.0, 0.299), "wall"),
+    "call_point": ((-0.045, 0.045, 0.0, 0.090, 0.0, 0.061), "wall"),
+    "depot_sign_fire_action": ((-0.150, 0.150, -0.200, 0.200, 0.012, 0.017), "wall"),
+    "depot_sign_defib": ((-0.150, 0.150, -0.200, 0.200, 0.012, 0.017), "wall"),
+    "depot_sign_ppe": ((-0.225, 0.225, -0.150, 0.150, 0.012, 0.017), "wall"),
+    "depot_sign_fire_exit": ((-0.300, 0.300, -0.100, 0.100, 0.012, 0.017), "wall"),
+    "pipe_run": ((0.0, 4.0, -0.050, 0.660, 0.0, 0.620), "wall"),
+    "pipe_run_b": ((0.0, 4.0, -0.272, 0.660, 0.0, 0.685), "wall"),
+    "pipe_run_2": ((0.0, 2.0, -0.050, 0.660, 0.0, 0.620), "wall"),
+    "pipe_run_1": ((0.0, 1.0, -0.001, 0.567, 0.257, 0.613), "wall"),
 }
 POSTERS = ["poster_%s" % k for k in "abcdefghijklm"]  # the spots below take them in turn
 # How each wall faces into its room: the turn (degrees) of a model on it.
@@ -68,6 +80,10 @@ CCTV_Y = 2.75
 EXTINGUISHER_Y = 0.4
 LAMP_Y = 2.45      # a tunnel lamp over the track bed: clear of the wagons' tops, under the arch's springing (TB2)
 NOTICE_Y = 1.6
+FIRE_ACTION_Y = 1.6   # the Depot extras' signs at eye height (the owner, DX1)
+CALL_Y = 1.35
+FIRE_POINT_Y = 0.3    # a fire point's board hangs this far off the floor (DX1)
+EXIT_SIGN_Y = 1.75    # over the track bed, beside the cross passage's mouth
 SIGN_OVER = 0.35   # a wall sign's middle over an escalator's or a stair's mouth, from the mouth's ceiling
 # The escalator shafts' posters, Tube style: rows of small ones (ESC_SCALE of a poster: 0.6 x 0.9 m) on both side
 # walls, ESC_STEP apart, their middles this far over the stairs' pitch line, clear of the first and last 2 m.
@@ -81,7 +97,7 @@ ESC_ROWS = [("esc_low", -3.5, 6.5, 1.9)]
 WALL = [
     # The ticket hall, on the concourse's level since SW1 (its ceiling 4.5 m up).
     ("cctv_camera", "hall", "n", -47.0, 3.9), ("cctv_camera", "hall", "s", -36.0, 3.9),
-    ("platform_clock", "hall", "s", -51.0, 3.4),
+    ("platform_clock", "hall", "w", 4.5, 3.4),  # on the street-end wall, clear of the pipework (DX2)
     ("poster_b", "hall", "s", -41.0, POSTER_Y), ("poster_f", "hall", "s", -24.0, POSTER_Y),
     ("poster_a", "hall", "n", -33.0, POSTER_Y), ("poster_c", "hall", "n", -27.0, POSTER_Y),
     ("poster_d", "hall", "n", -21.0, POSTER_Y),
@@ -154,7 +170,38 @@ WALL = [
     ("tunnel_lamp", "run_s", "s", 66.0, LAMP_Y), ("tunnel_lamp", "run_s", "s", 74.0, LAMP_Y),
     ("tunnel_lamp", "run_s", "s", 81.0, LAMP_Y), ("tunnel_lamp", "run_s", "n", 70.0, LAMP_Y),
     ("tunnel_lamp", "run_s", "n", 79.0, LAMP_Y),
+    # DX2 (the owner, 2026-11-15: "Add the models in Subway where suitable"): Depot's wall extras where a station has
+    # the like. A fire action notice with a call point beside it by each way out of a hall and at each platform's
+    # doors to the lower hall; fire points in the staff spaces (the plant room, the stair top, the lift landing); a
+    # defibrillator in the ticket hall and the lower hall; PPE in the plant room; "Fire exit, keep clear" at each end of
+    # the cross passage, the running tunnels' way out. Every sign at eye height on the lower wall (the owner's Depot
+    # rule); the station's own extinguishers stand, so no second one.
+    ("depot_sign_fire_action", "hall", "n", -36.5, FIRE_ACTION_Y), ("call_point", "hall", "n", -36.05, CALL_Y),
+    ("depot_sign_defib", "hall", "s", -45.0, FIRE_ACTION_Y),
+    ("depot_sign_fire_action", "upper", "n", -14.6, FIRE_ACTION_Y), ("call_point", "upper", "n", -14.15, CALL_Y),
+    ("depot_sign_fire_action", "east", "e", -3.0, FIRE_ACTION_Y), ("call_point", "east", "e", -2.55, CALL_Y),
+    ("fire_point", "east", "n", 21.8, FIRE_POINT_Y),
+    ("fire_point", "plant", "w", 1.6, FIRE_POINT_Y), ("depot_sign_ppe", "plant", "w", -1.8, FIRE_ACTION_Y),
+    ("depot_sign_fire_action", "plat_n", "s", 21.65, FIRE_ACTION_Y), ("call_point", "plat_n", "s", 22.1, CALL_Y),
+    ("depot_sign_fire_action", "plat_s", "n", 23.05, FIRE_ACTION_Y), ("call_point", "plat_s", "n", 22.6, CALL_Y),
+    ("depot_sign_defib", "lowc", "s", 14.8, FIRE_ACTION_Y),
+    ("fire_point", "liftp", "e", -3.6, FIRE_POINT_Y),
+    ("depot_sign_fire_exit", "run_n", "s", 73.2, EXIT_SIGN_Y),
+    ("depot_sign_fire_exit", "run_s", "n", 77.8, EXIT_SIGN_Y),
 ]
+# The services' pipework (DX2: Depot's pipe_run, pipe_run_2 and every third 4 m length the fitted pipe_run_b) high on
+# the tall rooms' long walls, over the posters' band and the wall vents (StationDetail: 2.62 to 2.92 m) and under the
+# conduit (0.2 m under the ceiling): (room, wall, from, to along it, height of its foot over the floor, fitted). Laid
+# in 4 m lengths from `from`, 2 m and 1 m ones in the last gap, so each run ends at a wall: the ticket hall's from its
+# street-end corner to the concourse's wall, the stair top's from its corner over the stair to the passage's bulkhead.
+# A length that would meet another fixture (a camera, a clock) or stand over an opening is left out and named.
+PIPES = [
+    ("hall", "n", -55.0, -18.0, 3.05, True), ("hall", "s", -55.0, -18.0, 3.05, True),
+    ("east", "n", 27.0, 20.0, 3.0, False), ("east", "s", 27.0, 20.0, 3.0, False),
+]
+PIPE_MODULES = [("pipe_run", 4.0), ("pipe_run_2", 2.0), ("pipe_run_1", 1.0)]
+PIPE_FITTED = ("pipe_run_b", 3)  # every third 4 m length of a fitted run is the one with its valve, drop and box
+PIPE_APART = 0.02   # (m) a length's box from any other fixture's
 HUNG = [
     ("way_sign", "hall", -40.5, 6.0, 90.0), ("way_sign", "hall", -28.0, -6.0, 90.0),
     ("way_sign", "upper", -16.0, 0.0, 90.0), ("way_sign", "npass", 3.0, -8.0, 90.0),
@@ -174,6 +221,47 @@ BINS = [
 EDGES = [("plat_n", "n"), ("plat_s", "s")]
 
 
+def _pipe_spot(model: str, rm: dict, side: str, lo: float, hi: float, height: float, floor_at, world_box) -> tuple:
+    """Pipework `model` on room `rm`'s `side` wall covering lo..hi along it, its foot `height` over the floor: its
+    origin (x, y, z) and its world box. The model runs along its own +x from its origin, so it starts at whichever end
+    puts it on lo..hi."""
+    yaw = WALL_YAW[side]
+    for start in (lo, hi):
+        if side in "ns":
+            x, z = start, (rm["z0"] if side == "n" else rm["z1"])
+        else:
+            x, z = (rm["x0"] if side == "w" else rm["x1"]), start
+        y = floor_at(rm, x) + height
+        box = world_box(model, x, y, z, yaw)
+        if (box[0] if side in "ns" else box[4]) >= lo - 1e-6:
+            return (x, y, z, box)
+    return (x, y, z, box)
+
+
+def _pipe_ok(model: str, spot: tuple, side: str, lo: float, length: float, why: str, in_air, taken: list, clear,
+             quiet: bool = False) -> bool:
+    """Whether pipework `model` at `spot` (_pipe_spot) has solid wall behind it all along (every 0.25 m), meets no
+    other fixture (PIPE_APART) and stands in its room's air in no block. `quiet` names no failure (a fitted length
+    tried before its plain one)."""
+    x, y, z, box = spot
+    normal = {"n": (0.0, 1.0), "s": (0.0, -1.0), "w": (1.0, 0.0), "e": (-1.0, 0.0)}[side]
+    for i in range(int(length / 0.25) + 1):
+        a = lo + min(max(i * 0.25, 0.02), length - 0.02)
+        for v in (box[2] + 0.01, 0.5 * (box[2] + box[3]), box[3] - 0.01):
+            px = (a if side in "ns" else x) - normal[0] * LOOK
+            pz = (a if side in "we" else z) - normal[1] * LOOK
+            if in_air(px, v, pz):
+                if not quiet:
+                    print("fixtures: %s %s has an opening behind it; left out" % (model, why))
+                return False
+    if any(all(min(box[2 * k + 1], o[2 * k + 1] + PIPE_APART) - max(box[2 * k], o[2 * k] - PIPE_APART) > 0
+               for k in range(3)) for o in taken):
+        if not quiet:
+            print("fixtures: %s %s meets another fixture; left out" % (model, why))
+        return False
+    return clear(model, box, why, not quiet)
+
+
 def place(L, floor_at, ceil_at, air_boxes, lift: float, holes: list) -> list[dict]:
     """The fixtures, each checked against the rooms' air, `L.blocks` and `holes` (boxes nothing stands in: the lift
     shafts); a spot that fails is printed and left out."""
@@ -182,6 +270,7 @@ def place(L, floor_at, ceil_at, air_boxes, lift: float, holes: list) -> list[dic
     solid = [[b["x0"], b["x1"], b["y"], b["y"] + b["h"], b["z0"], b["z1"]] for b in L.blocks if b["y"] is not None]
     solid += holes
     out: list[dict] = []
+    taken: list[list[float]] = []   # every placed fixture's box but the pipework's, for the pipework to keep clear of
 
     def in_air(x: float, y: float, z: float) -> bool:
         return any(a[0] <= x <= a[1] and a[2] <= y <= a[3] and a[4] <= z <= a[5] for a in air)
@@ -196,23 +285,27 @@ def place(L, floor_at, ceil_at, air_boxes, lift: float, holes: list) -> list[dic
                 zs.append(z - px * s + pz * c)
         return [min(xs), max(xs), y + b[2], y + b[3], min(zs), max(zs)]
 
-    def clear(model: str, box: list[float], why: str) -> bool:
+    def clear(model: str, box: list[float], why: str, say: bool = True) -> bool:
         # every corner of the model in a room's air (pulled in a hair, so a face on the wall counts), none in a block
         e = [min(0.01, 0.25 * (box[2 * k + 1] - box[2 * k])) for k in range(3)]
         for cx in (box[0] + e[0], box[1] - e[0]):
             for cy in (box[2] + e[1], box[3] - e[1]):
                 for cz in (box[4] + e[2], box[5] - e[2]):
                     if not in_air(cx, cy, cz):
-                        print("fixtures: %s %s leaves its room's air at (%.2f, %.2f, %.2f); left out" % (
-                            model, why, cx, cy, cz))
+                        if say:
+                            print("fixtures: %s %s leaves its room's air at (%.2f, %.2f, %.2f); left out" % (
+                                model, why, cx, cy, cz))
                         return False
         for s in solid:
             if all(min(box[2 * k + 1], s[2 * k + 1]) - max(box[2 * k], s[2 * k]) > e[k] for k in range(3)):
-                print("fixtures: %s %s stands in a block %s; left out" % (model, why, s))
+                if say:
+                    print("fixtures: %s %s stands in a block %s; left out" % (model, why, s))
                 return False
         return True
 
     def add(model: str, x: float, y: float, z: float, yaw: float, scale: float = 1.0) -> None:
+        if not model.startswith("pipe_run"):
+            taken.append(world_box(model, x, y, z, yaw, scale))
         out.append({"model": model, "x": round(x, 3), "y": round(y + lift, 3), "z": round(z, 3),
                     "yaw": round(((yaw + 180.0) % 360.0) - 180.0, 1)})
         if scale != 1.0:
@@ -255,6 +348,25 @@ def place(L, floor_at, ceil_at, air_boxes, lift: float, holes: list) -> list[dic
                 break
         if ok and clear(model, box, why):
             add(model, x, y, z, yaw, scale)
+    for name, side, a, b, height, fitted in PIPES:
+        rm = rooms[name]
+        step = 1.0 if b > a else -1.0
+        s, long = a, 0
+        while (b - s) * step >= PIPE_MODULES[-1][1] - 1e-6:
+            model, length = next((m, n) for m, n in PIPE_MODULES if (b - s) * step >= n - 1e-6)
+            lo, hi = sorted((s, s + step * length))
+            if length == PIPE_MODULES[0][1]:
+                long += 1
+                if fitted and long % PIPE_FITTED[1] == 2:
+                    model = PIPE_FITTED[0]
+            s += step * length
+            why = "on %s's %s wall from %.1f to %.1f" % (name, side, lo, hi)
+            # a fitted length whose drop would meet something below it (a block's top) is laid plain
+            for pick in [model] + ([PIPE_MODULES[0][0]] if model == PIPE_FITTED[0] else []):
+                spot = _pipe_spot(pick, rm, side, lo, hi, height, floor_at, world_box)
+                if _pipe_ok(pick, spot, side, lo, length, why, in_air, taken, clear, quiet=pick == PIPE_FITTED[0]):
+                    add(pick, *spot[:3], WALL_YAW[side])
+                    break
     for model, name, x, z, yaw in HUNG:
         rm = rooms[name]
         # under a vault (TB1), hung on drop rods from the arc a little under its springing, clear of its colliders
