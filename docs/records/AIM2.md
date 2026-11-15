@@ -1,6 +1,6 @@
 # AIM2 · Bots notice you like a person would, and flinch when you shoot back
 
-**Review:** 2 attempts · critic pending · qa Pass (attempt 1, cee0f90) · performance Pass (attempt 1, e76d160)
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass (attempt 1, cee0f90) · performance Pass (attempt 1, e76d160)
 
 The owner's 2026-11-15 ask, after AIM1: "Go over all the bot ai and logic so their reaction, aim, accuracy, etc, are
 realistic and fair. Scale up and down for difficulty levels."
@@ -10,7 +10,7 @@ realistic and fair. Scale up and down for difficulty levels."
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | The flinch's effect on aim() had no test |
-| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ | – | – |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## What was found
 
