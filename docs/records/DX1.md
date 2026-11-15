@@ -18,7 +18,8 @@ on the lower part of the wall at roughly eye height."
 | 2026-11-15 | 2 | Opus 5.5 (build thread) | passed | Retry 6/8 | fire point's cabinet proportions; film still a frame; IBC side bars past the posts; parts cage goods past its ends; no pipework close-up; stale comments |
 | 2026-11-15 | 3 | Opus 5.5 (build thread) | passed | Retry 7/8 | kraft film still read as carton shades; fire point's foot and hood; a faceted handwheel |
 | 2026-11-15 | 4 | Opus 5.5 (build thread) | passed | Retry 7/8 | the fire point's window a letterbox; its cabinet a box on a box |
-| 2026-11-15 | 5 | Opus 5.5 (build thread) | pending | pending | – (the owner's ruling: past the attempt cap, keep fixing until the critic passes) |
+| 2026-11-15 | 5 | Opus 5.5 (build thread) | passed | Retry 7/8 | the fire point's body too tall, window high, a visor not in the photo, no latch panel (past the attempt cap: the owner's ruling, keep fixing until the critic passes) |
+| 2026-11-15 | 6 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## What changed
 
@@ -38,8 +39,9 @@ on the lower part of the wall at roughly eye height."
   they were: no rebake.
 - **Wall extras** (`depot_extras.py`, the signs' sheet by `depot_signs.py` with cells in `depot_cells.py`): photo 3's
   wall-mounted fire point board (its moulded cabinet as wide as the board at its ears and 32 % of its height,
-  tapering down curved haunches to a foot 0.8 of its width, with a smooth bulging front, the lid sunk behind a rim
-  between raised ears, and a rounded 0.30 x 0.09 m viewing window in a shallow recess under a moulded visor), a call point, 4 m and 2 m lengths of pipework (every third 4 m length, `pipe_run_b`,
+  tapering down curved haunches to a foot 0.8 of its width, with a smooth bulging front, a rounded 0.30 x 0.09 m
+  viewing window sunk 8 mm into the middle of its face, the lid's lip curving up into the raised ears, and the latch
+  running from its recessed panel onto the foot), a call point, 4 m and 2 m lengths of pipework (every third 4 m length, `pipe_run_b`,
   with a gate valve and its 12-sided handwheel, a drop to a pendant sprinkler head and a junction box with its conduit), and seven safety signs. They are
   `MapData.fixtures` (`dressing.fixtures`, read by `StationDressing.read_fixtures`), drawn by StationFixtures as
   Subway's extras are: one MultiMesh a model, no collider, no shadow; a model may print from its own sheet

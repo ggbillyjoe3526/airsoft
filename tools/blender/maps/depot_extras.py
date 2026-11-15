@@ -36,7 +36,7 @@ sk.PAINTS.update({
     # the props' fire red (prop.PALETTE "fire") and its shade (the moulded stand's); aluminium cladding; the strut's
     # galvanising
     "fire": 0xAC2264, "fire_dark": 0x6E1640, "cladding": 0xC4C3C0, "cladding_lap": 0xA9A8A5, "galv": 0xB5B1AA,
-    "board": 0xEDEBE6, "slot": 0x4A4A50,
+    "board": 0xEDEBE6, "slot": 0x4A4A50, "void": 0x0E0E10,
 })
 
 # The signs: (cell, half width, half height) in metres.
@@ -108,12 +108,12 @@ def fire_point() -> sk.Mesh:
     m.face([(x, y, d) for x, y in pts], "board")
     for (ax, ay), (bx, by) in zip(pts, pts[1:] + pts[:1]):
         m.face_toward([(ax, ay, 0.0), (bx, by, 0.0), (bx, by, d), (ax, ay, d)], (by - ay, -(bx - ax), 0.0), "board")
-    for i in range(1, 6):
-        x = -w + 2 * w * i / 6
+    for i in range(1, 4):
+        x = -w + 2 * w * i / 4
         m.face([(x - 0.002, b0 + 0.02, d + 0.0005), (x + 0.002, b0 + 0.02, d + 0.0005), (x + 0.002, b1 - 0.14,
                 d + 0.0005), (x - 0.002, b1 - 0.14, d + 0.0005)], "cladding")
-    for j in range(1, 9):
-        y = b0 + (b1 - 0.14 - b0) * j / 9
+    for j in range(1, 7):
+        y = b0 + (b1 - 0.14 - b0) * j / 7
         m.face([(-w + 0.03, y - 0.002, d + 0.0005), (w - 0.03, y - 0.002, d + 0.0005), (w - 0.03, y + 0.002,
                 d + 0.0005), (-w + 0.03, y + 0.002, d + 0.0005)], "cladding")
     for k in (-1, 0, 1):
@@ -127,7 +127,7 @@ def fire_point() -> sk.Mesh:
                (ay, d + 0.05)][::-1], ax - 0.08, ax + 0.08, "fire")
     call_point_on(m, ax, ay + 0.06, d + 0.065, 0.07)
     # the sounder's housing: a half round red hood with its label
-    m.lathe([(0.0, 0.0), (0.065, 0.0), (0.07, 0.02), (0.07, 0.27), (0.06, 0.29), (0.0, 0.29)], 10,
+    m.lathe([(0.0, 0.0), (0.065, 0.0), (0.07, 0.02), (0.07, 0.27), (0.06, 0.29), (0.0, 0.29)], 8,
             (0.13, b1 - 0.64, d), "fire", axis="y")
     m.face([(0.1, b1 - 0.6, d + 0.072), (0.16, b1 - 0.6, d + 0.072), (0.16, b1 - 0.55, d + 0.072),
             (0.1, b1 - 0.55, d + 0.072)], "white")
@@ -136,46 +136,63 @@ def fire_point() -> sk.Mesh:
                            (-0.05, b0 + 0.48, d + 0.002), (-0.27, b0 + 0.48, d + 0.002)], cells=depot_cells)
     m.lathe([(0.0, -0.04), (0.045, -0.04), (0.045, 0.22)], 8, (0.0, b0 + 0.3, d + 0.045), "fire", axis="x",
             cap_top=False)
-    m.lathe([(0.0, 0.22), (0.047, 0.22), (0.047, 0.28), (0.0, 0.28)], 8, (0.0, b0 + 0.3, d + 0.045), "black", axis="x")
+    m.lathe([(0.0, 0.22), (0.047, 0.22), (0.047, 0.28), (0.0, 0.28)], 6, (0.0, b0 + 0.3, d + 0.045), "black", axis="x")
     m.face([(0.02, b0 + 0.3, d + 0.0905), (0.17, b0 + 0.3, d + 0.0905), (0.17, b0 + 0.33, d + 0.0905),
             (0.02, b0 + 0.33, d + 0.0905)], "white")
     # the moulded housing over the extinguishers (photo 3), as wide as the board at its ears: its sides tapering in
-    # down curved haunches to a narrower foot, its front bulging out a little (smooth), the lid sloping back up to the
-    # board, sunk behind a rim between two raised ears, the rounded viewing window in its shallow recess under a
-    # moulded visor, and the latch on the foot
-    hw, hd, top, foot = w, 0.28, 0.46, 0.25
+    # down curved haunches to a narrower foot, its front bulging out a little (smooth), the rounded viewing window set
+    # into the middle of its face, the lid's lip above it curving up into the two raised ears, and the latch running
+    # from its recessed panel down onto the foot
+    hw, hd, top, foot = w, 0.28, 0.42, 0.25
     m.prism_x([(0.0, 0.0), (0.0, hd - 0.08), (0.03, hd - 0.05), (0.13, hd - 0.05), (0.13, 0.0)][::-1], -foot, foot,
               "fire", open_edges=(4,))
-    prof = [(0.11, 0.0), (0.11, hd - 0.03), (0.15, hd), (0.26, hd + 0.018), (0.37, hd + 0.01), (0.4, hd - 0.02),
+    wy0, wy1 = 0.22, 0.34  # the window's facet
+    prof = [(0.11, 0.0), (0.11, hd - 0.03), (0.15, hd), (wy0, hd + 0.018), (wy1, hd + 0.01), (0.37, hd - 0.02),
             (top, 0.13), (top, 0.0)]
     half = [0.262, 0.275, 0.3, hw, hw, hw, hw, hw]  # the haunches: narrower towards the foot
+
+    def on_window(x: float, y: float, out: float = 0.0) -> tuple:
+        """A point on the window's facet, `out` in front of it (behind, when negative)."""
+        return (x, y, hd + 0.018 - (y - wy0) * 0.008 / (wy1 - wy0) + out)
+
     for i in range(len(prof) - 1):
         (ya, za), (yb, zb) = prof[i], prof[i + 1]
         ha, hb = half[i], half[i + 1]
-        m.face_toward([(-ha, ya, za), (ha, ya, za), (hb, yb, zb), (-hb, yb, zb)], (0.0, -(zb - za), yb - ya), "fire",
-                      smooth=2 <= i <= 4)
-        for sd in (-1.0, 1.0):
+        if i != 3:
+            m.face_toward([(-ha, ya, za), (ha, ya, za), (hb, yb, zb), (-hb, yb, zb)], (0.0, -(zb - za), yb - ya),
+                          "fire", smooth=2 <= i <= 4)
+        for sd in (-1.0, 1.0) if ya != yb else ():
             m.face_toward([(sd * ha, ya, za), (sd * hb, yb, zb), (sd * hb, yb, 0.0), (sd * ha, ya, 0.0)], (sd, 0.0, 0.0),
                           "fire")
+    # the window: 0.30 x 0.09 m, its corners rounded, sunk 8 mm into the face with its walls, the face round it
+    win = [(-0.128, 0.235), (0.128, 0.235), (0.15, 0.257), (0.15, 0.303), (0.128, 0.325), (-0.128, 0.325),
+           (-0.15, 0.303), (-0.15, 0.257)]
+    out = (0.0, -0.008, 1.0)
+    c0, c1, c2, c3 = (-hw, wy0), (hw, wy0), (hw, wy1), (-hw, wy1)
+    for ring in ([c0, c1, win[1], win[0]], [c1, c2, win[4], win[3], win[2], win[1]], [c2, c3, win[5], win[4]],
+                 [c3, c0, win[0], win[7], win[6], win[5]]):
+        m.face_toward([on_window(x, y) for x, y in ring], out, "fire", smooth=True)
+    for i in range(len(win)):
+        (xa, ya), (xb, yb) = win[i], win[(i + 1) % len(win)]
+        mx, my = (xa + xb) / 2, (ya + yb) / 2
+        m.face_toward([on_window(xa, ya), on_window(xb, yb), on_window(xb, yb, -0.008), on_window(xa, ya, -0.008)],
+                      (-mx, 0.28 - my, 0.0), "fire_dark")
+    m.face_toward([on_window(x, y, -0.008) for x, y in win], out, "void")
+    # the lid's lip: an edge 5 cm over the window, curving up at each end into the ears
+    lip = [(-(hw - 0.06), 0.44, 0.13), (-(hw - 0.1), 0.39, 0.235), (-(hw - 0.13), 0.375, 0.262),
+           (hw - 0.13, 0.375, 0.262), (hw - 0.1, 0.39, 0.235), (hw - 0.06, 0.44, 0.13)]
+    m.tube(lip, 0.01, "fire", sides=3, up=(0.0, 0.0, 1.0))
     for sd in (-1.0, 1.0):
         e0, e1 = sorted((sd * (hw - 0.06), sd * (hw + 0.005)))
         m.prism_x([(top - 0.1, 0.0), (top - 0.1, 0.17), (top + 0.04, 0.12), (top + 0.04, 0.0)][::-1], e0, e1, "fire",
                   open_edges=(3,))
-    m.box((-hw + 0.06, 0.395, hd - 0.05), (hw - 0.06, 0.425, hd - 0.012), "fire", skip="b")
-
-    def on_window(x: float, y: float, out: float) -> tuple:
-        """A point on the window's facet (y 0.26 to 0.37), `out` proud of it."""
-        return (x, y, hd + 0.018 - (y - 0.26) * 0.008 / 0.11 + out)
-
-    def rounded(x: float, y0: float, y1: float, c: float) -> list:
-        return [(-x + c, y0), (x - c, y0), (x, y0 + c), (x, y1 - c), (x - c, y1), (-x + c, y1), (-x, y1 - c),
-                (-x, y0 + c)]
-
-    m.face([on_window(x, y, 0.001) for x, y in rounded(0.165, 0.262, 0.368, 0.025)], "fire_dark")
-    m.face([on_window(x, y, 0.002) for x, y in rounded(0.15, 0.27, 0.36, 0.022)], "black")
-    m.prism_x([(0.365, hd + 0.005), (0.365, hd + 0.05), (0.38, hd + 0.05), (0.4, hd - 0.02)][::-1], -0.18, 0.18,
-              "fire")
-    m.box((-0.022, 0.025, hd - 0.062), (0.022, 0.11, hd - 0.03), "black", skip="b")
+    # the latch's recessed panel at the body's foot, and the latch running from it down onto the foot
+    pz = lambda y: hd + (y - 0.15) * 0.018 / (wy0 - 0.15) + 0.001  # noqa: E731
+    panel = [(-0.045, 0.155), (0.045, 0.155), (0.06, 0.17), (0.06, 0.2), (0.045, 0.212), (-0.045, 0.212),
+             (-0.06, 0.2), (-0.06, 0.17)]
+    m.face_toward([(x, y, pz(y)) for x, y in panel], out, "fire_dark")
+    m.box((-0.018, 0.03, hd - 0.058), (0.018, 0.115, hd - 0.035), "black", skip="b")
+    m.box((-0.014, 0.115, hd - 0.03), (0.014, 0.195, hd + 0.012), "black", skip="b")
     return m
 
 
