@@ -5,8 +5,9 @@ extends GutTest
 ## weights (tools/blender/figures/body_weights.py; owner 2026-11-07: he preferred 33fa48b's shoulder to the easing).
 
 const REPLICAS := ["aeg", "sniper", "cyber", "smg", "shotgun"]
-## The GBB Pistol keeps 7 (docs/KNOWN_ISSUES.md): its unpainted pair, the grip's tiling stipple and the BB, can't share.
-const OVER := {"pistol": 7}
+## The GBB Pistol keeps 8 (docs/KNOWN_ISSUES.md): its unpainted three, the grip's tiling stipple, the BB and the back
+## recess's near-black floor (GB1), can't share.
+const OVER := {"pistol": 8}
 const REPLICA_MOST := 6
 const FIGURE_MOST := 8
 ## A glove plate: a piece of the Body joined by its faces, of at most PLATE_MOST points, all led by a hand bone
