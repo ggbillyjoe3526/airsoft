@@ -807,8 +807,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the blocks' corner, `MapStyle`), which bots by night (WL6) share. Grass and leaves are `RayHit.Surface` 6 and 7: BBs
   on them puff and sound as earth and never ricochet. A point on sloping ground is checked against the ground under it
   (field.onFloor), not its nav cell's middle.
-- **Depot is an indoor hall, built from concept 3 (owner, 2026-10-31, DR1).** 108 x 72 m under a roof (no sky), three
-  bent lanes round dead space (plywood rooms and racking 3 m tall), nine links (two tight alleys, two unlit tunnels:
+- **Depot is an indoor hall, built from concept 3 (owner, 2026-10-31, DR1).** 108 x 72 m under a roof (no sky; 98 x 72
+  m since DC1, below), three bent lanes round dead space (plywood rooms and racking 3 m tall), nine links (two tight
+  alleys, two unlit tunnels:
   dark, never pitch black), not mirrored but timed even: both ends reach the Chrono hall within 1.5 s, and each owns a
   side lane by 1 to 4 s. 5v5 or 6v6 only; bots see 55 m there (`botSight`); no catwalks; the Range stays its own map.
   The layout lives in `tools/depot/layout.py` and `build_map.py` writes `data/maps/depot.json`: change the script,
@@ -936,11 +937,23 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   RP1's replicas; Woodland's west 40 to 44 % sent over the North bridge, 50 % stopped at its head). No
   lane takes a way a bot is slow on (Subway's spiral stair, about 40 s against a lift's 10), and none goes through a
   gap a squad can't pass abreast.
-- **Each of Depot's flags stands between two crate stacks (2026-11-12, MB1).** One hides the pole from the site's
+- **Each of Depot's flags stood between two crate stacks (2026-11-12, MB1; the poles moved 8 m in at DC1, below, the
+  stacks stayed).** One hid the pole from the site's
   doors, the other from the A stairs or the B ramp; the two corner stacks behind the poles are gone. The defenders'
   posts are behind them and the Garage's behind its dog-leg stacks, so Attack / Defend is fought on the sites (the
   knock-outs there went from 70 to 203 against the attackers to 148 to 208, at 10 m, not 16, and a flag goes up in
   45 % of rounds, not 27 %).
+- **Depot is the compact hall (owner, 2026-11-15, DC1: "Go with the recommended options", the map redesign's
+  concept B).** The west 10 m is closed (98 x 72 m, x -44 to 54); the west spawn room, its stairs and its two-screen
+  chicanes are the concept's moved 10 m east onto the old Mid exit, opening straight onto Upper mid behind a crate
+  rack. The mock-up closed 13 m with the spawn line in the open Mid exit, seen from Upper mid; a room with chicanes
+  needs the 10 m. Flags and bomb sites stand 8 m in from the sites' far ends (A 36.5, -26.5; B 37, 27.5), so the
+  defenders have ground in front of them. The chrono hut and its overtime flag moved 4.5 m east onto the new middle
+  (both ends walk about as far to it). Bots take five lanes: each side's corridor, each side's rooms and the middle,
+  and Depot's defender posts stand forward of the poles (the Offices door, Lower mid and the end of the Containers,
+  the last two behind low crates), not on the site: MB1's posts-on-the-site rule gives way here. The rule that both
+  ends reach the Chrono hall together and each owns a side room by 1 to 4 s still holds, timed from the new middle
+  (test_depot_hall). The quiet east strip behind the new sites (A stairs, B ramp) was left as it is.
 - **Woodland's lanes are broken by pieces on the high ground and by leaves (2026-11-12, MB1).** A hazel hedge on the
   Ridge's brow, a fallen tree and a log stack at the North bridge's heads, a west wall with a window and a doorway on
   the Fort, a fallen tree in the Clearing where the west's sweep ends, two spruce thickets on the Ford's east bank with
