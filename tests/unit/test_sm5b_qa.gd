@@ -105,9 +105,9 @@ func _escalator_posters() -> Array[StationDressing.Fixture]:
 	return out
 
 
-func test_there_are_28_small_posters_all_of_the_poster_models_at_0_6() -> void:
+func test_there_are_12_small_posters_all_of_the_poster_models_at_0_6() -> void:
 	var ps := _escalator_posters()
-	assert_eq(ps.size(), 28)
+	assert_eq(ps.size(), 12, "the lower escalators' shaft's rows (the upper shaft's 16 went with it, SW1)")
 	for f in ps:
 		assert_almost_eq(f.scale, ESC_SCALE, 0.0001)
 		assert_true(String(f.model).begins_with("poster_") and not String(f.model).begins_with("poster_wide"), String(f.model))
@@ -117,7 +117,6 @@ func test_every_escalator_poster_stands_on_its_shaft_wall_centred_clear_of_the_d
 	var m := _subway()
 	# shaft: x range, wall z, room height over the stair
 	var shafts := [
-		{"x0": -38.0, "x1": -18.0, "z": 3.5, "h": 3.2},
 		{"x0": -6.0, "x1": 10.0, "z": 3.0, "h": 2.8},
 	]
 	var bad: Array[String] = []
@@ -153,7 +152,7 @@ func test_every_escalator_poster_stands_on_its_shaft_wall_centred_clear_of_the_d
 		if f.position.x < shaft.x0 + 2.0 - 0.001 or f.position.x > shaft.x1 - 2.0 + 0.001:
 			bad.append("%s: within 2 m of the shaft's end" % tag)
 	assert_eq(bad, [] as Array[String])
-	assert_eq(sides.size(), 4, "both walls of both shafts carry a row")
+	assert_eq(sides.size(), 2, "both walls of the shaft carry a row")
 
 
 # ---- the new cells ----

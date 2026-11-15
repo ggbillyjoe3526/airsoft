@@ -87,11 +87,13 @@ PART_ATTR = "wear_part"
 SUFFIX = ".worn"
 
 
-def apply(seed: int = 1, heavier: dict = None, size: int = SIZE, only: tuple = None) -> None:
+def apply(seed: int = 1, heavier: dict = None, size: int = SIZE, only: tuple = None, clean: tuple = ()) -> None:
     """Bakes the scene's wear mask (the image `wear`, packed: the export embeds it and Godot's import writes it beside
     the glb as `<model>_wear.png`) and hangs it on the painted materials. `heavier` maps a mesh's name to how many
     times the scratches it gets (the magazine is handled most). `only` (name prefixes) wears just those meshes, on their
-    own copies of the painted materials (a parts file; `unsuffix` after the export)."""
+    own copies of the painted materials (a parts file; `unsuffix` after the export). `clean` lists boxes ((x, y, z) low,
+    (x, y, z) high, metres, the model at rest) left with no wear at all: a deep pocket a hand never reaches whose inside
+    corners would otherwise gather grime that reads as marks (GB1, the pistol's back)."""
     targets = _targets(only)
     if not targets:
         raise RuntimeError("wear: no mesh carries a painted material")
@@ -116,7 +118,7 @@ def apply(seed: int = 1, heavier: dict = None, size: int = SIZE, only: tuple = N
     ids = _bake(targets, size, "ids", _ids, 1)
     for ob in targets:
         ob.data.attributes.remove(ob.data.attributes[PART_ATTR])
-    mask = _compose(targets, pos, nrm, geo, ids, lo, hi, seed, heavier, size)
+    mask = _compose(targets, pos, nrm, geo, ids, lo, hi, seed, heavier, size, clean)
     image = bpy.data.images.new("wear", size, size, alpha=False)
     image.colorspace_settings.name = "Non-Color"
     image.pixels.foreach_set(mask.ravel())
@@ -468,7 +470,7 @@ def _fbm(p: np.ndarray, seed: int, octaves: int = 3) -> np.ndarray:
     return total / norm
 
 
-def _compose(targets, pos, nrm, geo, ids, lo, hi, seed, heavier, size) -> np.ndarray:
+def _compose(targets, pos, nrm, geo, ids, lo, hi, seed, heavier, size, clean=()) -> np.ndarray:
     rng = np.random.default_rng(seed)
     covered = (pos[..., 0] > 0.02) & (pos[..., 1] > 0.02) & (pos[..., 2] > 0.02)
     idx = np.flatnonzero(covered.ravel())
@@ -509,6 +511,12 @@ def _compose(targets, pos, nrm, geo, ids, lo, hi, seed, heavier, size) -> np.nda
     # Scratches and patches start where a hand or a bag reaches: not deep inside (the barrel in its handguard).
     reach = _smoothstep(0.55, 0.85, G[:, 2])
     scratch = _scratches(rng, P, N, obj, targets, area, texel, heavier, lo, hi, reach)
+
+    for box_lo, box_hi in clean:
+        inside = np.all((P >= np.array(box_lo)) & (P <= np.array(box_hi)), axis=1)
+        grime[inside] = 0.0
+        edge[inside] = 0.0
+        scratch[inside] = 0.0
 
     if covered[0, 0]:
         raise RuntimeError("wear: a UV island covers the origin, where the figures' copies read the mask")

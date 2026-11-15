@@ -21,10 +21,10 @@ import sys
 
 # Each area's style (StationLook.style_floors, style_walls, style_ceilings). An area not listed is a passage.
 STYLES = {
-    "Ticket hall": "hall", "Booking hall": "hall", "Concourse": "hall", "Stair top": "hall", "Lower hall": "hall",
-    "Spiral stair": "passage", "West passage": "passage", "North passage": "passage", "South passage": "passage",
+    "Ticket hall": "hall", "Concourse": "hall", "Stair top": "hall", "Lower hall": "hall",
+    "Spiral stair": "passage", "North passage": "passage", "South passage": "passage",
     "Stair": "passage", "Stair landing": "passage", "Mid passage": "passage", "East passage": "passage",
-    "Lift landing": "passage", "Escalators": "escalator", "Low escalators": "escalator", "Plant room": "plant",
+    "Lift landing": "passage", "Low escalators": "escalator", "Plant room": "plant",
     "North platform": "platform", "South platform": "platform", "North track": "track", "South track": "track",
     "North train": "train", "South train": "train", "North tunnel": "tunnel", "South tunnel": "tunnel",
     "Cross passage": "service",
@@ -42,7 +42,7 @@ WORDS_HEIGHT = 0.24
 WORDS_EVERY = 12.0
 # The stairs' and escalators' heads and feet (SD2): a tactile strip across the floor just off each end, this deep and
 # this far from the end (m).
-HEADS = ["esc_up", "esc_low", "stair1", "stair2"]
+HEADS = ["esc_low", "stair1", "stair2"]
 HEAD_DEPTH = 0.4
 HEAD_GAP = 0.2
 # The tracks' centre lines (z) and the areas whose rooms on the track bed carry them.

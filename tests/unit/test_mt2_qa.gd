@@ -86,16 +86,16 @@ func test_two_cars_called_at_once_ride_on_their_own() -> void:
 	var sim: Simulation = m[0]
 	var state: GameState = m[1]
 	var q := level.query()
-	_put(state.characters[0], q.lifts[0].car_point(q.lifts[0].stops[2]))
+	_put(state.characters[0], q.lifts[0].car_point(q.lifts[0].stops[1]))
 	_put(state.characters[1], q.lifts[1].car_point(q.lifts[1].stops[0]))
-	_run(sim, state, 1, [Vector2i(0, 0), Vector2i(1, 2)])
+	_run(sim, state, 1, [Vector2i(0, 0), Vector2i(1, 1)])
 	assert_eq(state.lifts.calls[0], 1)
-	assert_eq(state.lifts.calls[1], 4)
-	_run(sim, state, _ticks(cfg.door_time + cfg.floor_time * 2.0 + cfg.door_time + 1.0))
+	assert_eq(state.lifts.calls[1], 2)
+	_run(sim, state, _ticks(cfg.door_time + cfg.floor_time + cfg.door_time + 1.0))
 	assert_true(state.lifts.open_at(0, 0))
-	assert_true(state.lifts.open_at(1, 2))
+	assert_true(state.lifts.open_at(1, 1))
 	assert_almost_eq(state.characters[0].position.y, q.lifts[0].stops[0] + tuning.body.rest_gap, 0.05)
-	assert_almost_eq(state.characters[1].position.y, q.lifts[1].stops[2] + tuning.body.rest_gap, 0.05)
+	assert_almost_eq(state.characters[1].position.y, q.lifts[1].stops[1] + tuning.body.rest_gap, 0.05)
 
 
 func test_a_hit_player_s_press_calls_nothing() -> void:
@@ -105,9 +105,9 @@ func test_a_hit_player_s_press_calls_nothing() -> void:
 	var spec := level.query().lifts[1]
 	var me := state.characters[0]
 	Elimination.eliminate(me, 1, state.characters, sim.ends)
-	_put(me, spec.landing_point(2, cfg))
+	_put(me, spec.landing_point(1, cfg))
 	_put(state.characters[1], Vector3(75.5, 0.0, 7.5))
-	_run(sim, state, 5, [Vector2i(1, 2)])
+	_run(sim, state, 5, [Vector2i(1, 1)])
 	assert_eq(state.lifts.calls[1], 0, "a player who is out of play presses no button")
 	assert_eq(state.lifts.caller[1], -1)
 
@@ -119,7 +119,7 @@ func test_a_new_match_mid_ride_puts_every_car_back_with_nothing_left_over() -> v
 	var q := level.query()
 	var spec := q.lifts[1]
 	_put(state.characters[0], spec.car_point(spec.stops[0]))
-	_run(sim, state, 1, [Vector2i(1, 2)])
+	_run(sim, state, 1, [Vector2i(1, 1)])
 	_run(sim, state, _ticks(cfg.door_time + cfg.floor_time * 0.7))
 	assert_eq(state.lifts.phase[1], LiftState.Phase.MOVING)
 	sim.start_match(state)
@@ -148,7 +148,7 @@ func test_the_drawn_car_is_between_last_tick_and_this() -> void:
 	var state: GameState = m[1]
 	var spec := level.query().lifts[1]
 	_put(state.characters[0], spec.car_point(spec.stops[0]))
-	_run(sim, state, 1, [Vector2i(1, 2)])
+	_run(sim, state, 1, [Vector2i(1, 1)])
 	_run(sim, state, _ticks(cfg.door_time) + 10)
 	assert_eq(state.lifts.phase[1], LiftState.Phase.MOVING)
 	for t in 30:
@@ -226,10 +226,10 @@ func test_a_bot_gives_up_on_a_car_that_never_comes() -> void:
 	var me := bot.character
 	_put(me, spec.landing_point(0, cfg))
 	# A body holds the hall doorway: the car waiting there can never shut and come.
-	var door := spec.door_center(2)
-	_put(state.characters[1], Vector3(door.x, spec.stops[2], door.z))
+	var door := spec.door_center(1)
+	_put(state.characters[1], Vector3(door.x, spec.stops[1], door.z))
 	_put(state.characters[2], Vector3(75.5, 0.0, 7.5))
-	var goal := spec.landing_point(2, cfg) + Vector3(-2.0, 0.0, -3.0)
+	var goal := spec.landing_point(1, cfg) + Vector3(-2.0, 0.0, -3.0)
 	assert_true(nav.find_route(me.position, goal, bot.route, true))
 	bot.route_from = me.position
 	bot.route_leg = 0

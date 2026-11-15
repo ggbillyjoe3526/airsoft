@@ -936,8 +936,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   (`RoundPlanner._points_to_middle`), and the end sent deeper loses (Depot's west won 44 % of Elimination's rounds
   walking 6 m deeper down the Chrono hall, 55 % dead even, 50 % with the middle lane's pair 0.8 m east of even, before
   RP1's replicas; Woodland's west 40 to 44 % sent over the North bridge, 50 % stopped at its head). No
-  lane takes a way a bot is slow on (Subway's spiral stair, about 40 s against a lift's 10), and none goes through a
-  gap a squad can't pass abreast.
+  lane takes a way a bot is slow on (Subway's spiral stair was, about 40 s against a lift's 10, until SW1 made it a
+  6 s walk and gave it a lane), and none goes through a gap a squad can't pass abreast.
 - **Each of Depot's flags stands between two crate stacks (2026-11-12, MB1).** One hides the pole from the site's
   doors, the other from the A stairs or the B ramp; the two corner stacks behind the poles are gone. The defenders'
   posts are behind them and the Garage's behind its dog-leg stacks, so Attack / Defend is fought on the sites (the
@@ -1012,6 +1012,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the
   north lane has one stop 4.45 m either side of the field's middle. No block moved.
+- **Subway is a station on two levels (owner, 2026-11-15, SW1: "Ticket hall and concourse should be one single level
+  now").** The ticket hall stands on the concourse's level (game 8.9 m), over the old booking hall and west passage, and
+  the street level is gone, with the upper escalators (`escalator_upper.glb` in `_archive/`); the lifts stop twice
+  (Ticket hall, Platforms) and keep 4 s a stop, now for 8 m; the spiral stair (eight flights) runs from beside the gates
+  to the south platform's west half, and its top landing meets the hall floor flush, so bots walk it (its 15 cm slot
+  read as a drop and no bot ever used it). Five lockers went (two from each passage, one from the old booking hall), so
+  the upper level's longest line is 57 m, the hall's west end to a passage's mouth (it was 28 m); a short pier at each
+  mouth keeps the hall's spawn from seeing down the passages. Its lanes are five: concept A's (MR1) north passage lane
+  and a spiral stair lane join the three. Bot matches (6v6 Normal): see `docs/records/SW1.md`.
 - **Stockade is out of the game (owner, 2026-11-15: "Completely remove stockades map from game").** The dev-only
   Plant The Bomb field (SK1, #344) is gone with its data, tools, pictures and tests; its build is in git before this
   change and its record stays in `docs/records/SK1.md`. Plant The Bomb plays on Depot, Woodland and Subway.

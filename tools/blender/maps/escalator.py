@@ -6,14 +6,16 @@ the top and the bottom, and the old bronze uplighters standing on the middle dec
 the concept's lamps).
 
 Each bank is one model laid over its blocks (PropDressConfig Lay.SET, unturned): the ramp room's floor wedges
-(`esc_up` and `esc_low` in tools/subway/layout.py) and its three decks (its `barrier` blocks: one from each wall and a
+(`esc_low` in tools/subway/layout.py; the upper bank, `esc_up`, went with the street level in SW1) and its three
+decks (its `barrier` blocks: one from each wall and a
 wide one between the escalators, each escalator 1.2 m wide between them, two abreast: the owner, 2026-11-12), so it
 fills their box exactly and the ramp stays the collider: the steps' treads sit level, each one's middle on the ramp's
 slope (half a riser above it at the nosing, half under it at the back), so feet never sink more than 10 cm. The decks
 are a metre tall over the slope; the handrails' tops are their top, along each deck's edge over an escalator. The uplighters stand on the middle deck over it (thin bronze stems: sight and BBs pass
 them, as the ceiling's lamps), never over the bank's box.
 
-Writes assets/models/props/escalator_upper.glb (20 m, 10 m down) and escalator_lower.glb (16 m, 8 m down).
+Writes assets/models/props/escalator_lower.glb (16 m, 8 m down). The upper bank's model (20 m, 10 m down) is in
+_archive/ since SW1 (2026-11-15), its room gone.
 Budget 8,000 triangles a bank (the owner's: aim for about 95% of it).
 
 Usage: python3 -I tools/blender/maps/escalator.py
@@ -371,5 +373,4 @@ def build(room: str, name: str) -> None:
 
 
 if __name__ == "__main__":
-    build("esc_up", "escalator_upper")
     build("esc_low", "escalator_lower")
