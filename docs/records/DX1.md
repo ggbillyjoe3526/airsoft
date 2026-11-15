@@ -21,7 +21,7 @@ on the lower part of the wall at roughly eye height."
 | 2026-11-15 | 5 | Opus 5.5 (build thread) | passed | Retry 7/8 | the fire point's body too tall, window high, a visor not in the photo, no latch panel (past the attempt cap: the owner's ruling, keep fixing until the critic passes) |
 | 2026-11-15 | 6 | Opus 5.5 (build thread) | passed | Retry 7/8 | the fire point's lip a floating rail, its latch panel small and not sunk, the haunches banded, no door seams, the window not tapered |
 | 2026-11-15 | 7 | Opus 5.5 (build thread) | passed | Retry 7/8 | the fire point's window tapered too much, its door seams following the haunches, its ears square posts |
-| 2026-11-15 | 8 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-15 | 8 | Opus 5.5 (build thread) | passed | Accept 8/8 | – |
 
 ## What changed
 
