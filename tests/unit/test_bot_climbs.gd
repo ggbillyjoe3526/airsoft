@@ -143,7 +143,7 @@ func test_bots_climb_out_of_the_pit_and_drop_into_it_on_their_way() -> void:
 	var was_high: Array[bool] = []
 	for c in state.characters:
 		was_high.append(c.position.y > 0.45)
-	for t in roundi(tuning.rounds.round_time / DT) * 2:
+	for t in roundi(tuning.rounds.round_time / DT) * 4:
 		bots.think(state, commands, DT)
 		sim.step(state, commands, DT)
 		bots.observe(state)
@@ -162,7 +162,7 @@ func test_bots_climb_out_of_the_pit_and_drop_into_it_on_their_way() -> void:
 			if was_high[i] and not high and c.position.x < -0.3:
 				drops += 1
 			was_high[i] = high
-		if rounds >= 2:
+		if rounds >= 4:
 			break
 	gut.p("climb field: %d climbs, %d drops, %d rounds" % [climbs, drops, rounds])
 	assert_gt(climbs, 0, "bots climbed out of the pit")

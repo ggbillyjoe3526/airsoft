@@ -4,12 +4,18 @@ class_name RoundPlanner
 ## walks, bots on a shared lane setting off a moment apart; in Attack / Defend the attackers walk theirs to the middle
 ## (then make for the pole) and the defenders only to their first or second point, where they hold. Between plans it
 ## answers where a bot stands (ahead of its team?) and picks hunt spots from the team's memory. Its own seeded stream,
-## apart from each bot's.
+## apart from each bot's. Route variety (RV1) on a second stream of its own: each team's tempo, each bot's lane shift,
+## and the rolls for crossing lanes mid-round.
 
 enum Plan { SPLIT, PAIR, STACK }
+## A team's pace this round (RV1): quick, steady or slow pauses at lane points.
+enum Tempo { QUICK, STEADY, SLOW }
 
 ## Per team: this round's plan, the middle of its spawns, the way its enemy is (yaw), and the unit way there (x, z).
 var plans: Array[Plan] = [Plan.SPLIT, Plan.SPLIT]
+## Per team: this round's tempo and the scale it puts on its bots' pauses.
+var tempos: Array[Tempo] = [Tempo.STEADY, Tempo.STEADY]
+var paces: PackedFloat64Array = PackedFloat64Array([1.0, 1.0])
 var spawn_centre: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
 var enemy_yaw: PackedFloat64Array = PackedFloat64Array([0.0, 0.0])
 var attack_dir: Array[Vector2] = [Vector2.RIGHT, Vector2.LEFT]
@@ -22,6 +28,8 @@ var bounds_hi: Vector2 = Vector2.ZERO
 var top_y: float = 0.0
 
 var _rng: RandomNumberGenerator = null
+## Route variety's stream (Seeds.variety_seed): tempos, lane shifts, crossings.
+var _variety: RandomNumberGenerator = null
 ## Scratch for dealing lanes (reused each round).
 var _order: PackedInt32Array = PackedInt32Array()
 var _members: Array[Bot] = []
@@ -30,11 +38,12 @@ var _dealt: PackedInt32Array = PackedInt32Array()
 
 func _init(match_seed: int) -> void:
 	_rng = Seeds.stream(Seeds.plan_seed(match_seed))
+	_variety = Seeds.stream(Seeds.variety_seed(match_seed))
 
 
-## A fresh round for every bot: per team a plan, the lanes dealt in a random order, bots sharing a lane setting off
-## lane_follow_delay apart; on a map with two poles, the one the attackers go for. Call after the round's respawn
-## (spawns and ends are this round's).
+## A fresh round for every bot: per team a plan and a tempo, the lanes dealt in a random order, bots sharing a lane
+## setting off lane_follow_delay apart (scaled by the tempo), each bot that walks its lane on a shift of its own; on a
+## map with two poles, the one the attackers go for. Call after the round's respawn (spawns and ends are this round's).
 func plan(w: BotWorld) -> void:
 	_measure_ends(w.characters)
 	var cfg := w.cfg
@@ -56,6 +65,8 @@ func plan(w: BotWorld) -> void:
 		if p == Plan.PAIR and _members.size() < 3:
 			p = Plan.SPLIT
 		plans[team] = p
+		tempos[team] = _pick_tempo(cfg)
+		paces[team] = _tempo_pace(tempos[team], cfg)
 		_shuffle_lanes(lane_count)
 		_dealt.resize(_members.size())
 		for i in _members.size():
@@ -67,6 +78,10 @@ func plan(w: BotWorld) -> void:
 		# Not on defence: defenders hold the points they were dealt.
 		if not defending:
 			_take_own_lanes(w.lanes)
+		# Drawn for both teams every round, so one team's role never moves the other's draws.
+		var pusher := _variety.randi_range(0, maxi(0, _members.size() - 1))
+		if _variety.randf() >= cfg.defend_push_chance or not defending:
+			pusher = -1
 		for i in _members.size():
 			var b := _members[i]
 			var lane := _dealt[i]
@@ -77,6 +92,7 @@ func plan(w: BotWorld) -> void:
 			var hold := 0.0
 			for k in ahead:
 				hold += b.pick(cfg.lane_follow_delay)
+			hold *= paces[team]
 			var points := w.lanes[lane].size() if lane >= 0 else 0
 			if points > 0 and defending:
 				# The first on a lane, or anyone sharing one with team play, holds its second point (a defender alone on
@@ -84,13 +100,44 @@ func plan(w: BotWorld) -> void:
 				var shared := _dealt.count(lane) > 1
 				var forward := ahead == 0 and (shared or _rng.randf() < cfg.defend_forward_chance)
 				points = mini(points, 2 if forward or (shared and b.skill.team_play) else 1)
-			elif points > 0 and attacking:
-				points = _points_to_middle(w.lanes[lane], team, b.character.end)
-			elif points > 0 and b.style.holds and w.mode == RoundState.Mode.ELIMINATION:
-				# An anchor (bots.md › Holds until) walks its lane only to the last point short of the middle, and holds
-				# there (BotPersonality.anchor_holding).
-				points = maxi(1, _points_to_middle(w.lanes[lane], team, b.character.end) - 1)
+				if i == pusher:
+					points = _pushed_post(w.lanes[lane], team, b.character.end, points, cfg)
+			elif points > 0:
+				points = walk_points(b, lane, w)
+			# Drawn for every bot, defender or not, so one team's roles never move the other's draws.
+			var shift := _variety.randf_range(-1.0, 1.0) * cfg.lane_shift
 			b.reset(lane, points, hold, cfg)
+			b.pace = paces[team]
+			if not defending:
+				b.lane_shift = shift
+
+
+## How many points of `lane` bot `b` walks from its end before it is done with it (not a defender, who holds a post):
+## in Attack / Defend an attacker walks to the first past the middle (then makes for the pole), in Elimination an anchor
+## (bots.md › Holds until) only to the last short of the middle, where it holds (BotPersonality.anchor_holding); anyone
+## else all of them. 0 with no such lane.
+func walk_points(b: Bot, lane: int, w: BotWorld) -> int:
+	if lane < 0 or lane >= w.lanes.size():
+		return 0
+	var points := w.lanes[lane]
+	var team := b.character.team
+	if RoundState.has_sides(w.mode) and w.attackers >= 0 and team == w.attackers:
+		return _points_to_middle(points, team, b.character.end)
+	if b.style.holds and w.mode == RoundState.Mode.ELIMINATION:
+		return maxi(1, _points_to_middle(points, team, b.character.end) - 1)
+	return points.size()
+
+
+## The points a pushed defender (RV1, defend_push_chance) walks: defend_push_share of the way from `post` (the points it
+## would walk) to the last point short of the middle, never fewer than `post`.
+func _pushed_post(points: PackedVector3Array, team: int, end: int, post: int, cfg: BotConfig) -> int:
+	var short := _points_to_middle(points, team, end) - 1
+	return maxi(post, post + roundi((short - post) * cfg.defend_push_share))
+
+
+## A roll in [0, 1) on route variety's stream, for a bot choosing whether to cross lanes (BotMovement).
+func variety_roll() -> float:
+	return _variety.randf()
 
 
 ## True if `b` is more than team_spread ahead (towards the enemy) of its rearmost bot teammate in play.
@@ -192,6 +239,27 @@ func _pick_plan(cfg: BotConfig) -> Plan:
 	if r < cfg.plan_split_weight + cfg.plan_pair_weight:
 		return Plan.PAIR
 	return Plan.STACK
+
+
+func _pick_tempo(cfg: BotConfig) -> Tempo:
+	var total := cfg.tempo_quick_weight + cfg.tempo_steady_weight + cfg.tempo_slow_weight
+	if total <= 0.0:
+		return Tempo.STEADY
+	var r := _variety.randf() * total
+	if r < cfg.tempo_quick_weight:
+		return Tempo.QUICK
+	if r < cfg.tempo_quick_weight + cfg.tempo_steady_weight:
+		return Tempo.STEADY
+	return Tempo.SLOW
+
+
+static func _tempo_pace(t: Tempo, cfg: BotConfig) -> float:
+	match t:
+		Tempo.QUICK:
+			return cfg.tempo_quick_pace
+		Tempo.SLOW:
+			return cfg.tempo_slow_pace
+	return 1.0
 
 
 ## A bot that keeps a lane of its own (bots.md › Own lane) and was dealt one a teammate shares in _dealt takes the free

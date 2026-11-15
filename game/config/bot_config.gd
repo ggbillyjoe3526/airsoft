@@ -163,6 +163,27 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Lane points move up to this far at random (m, onto walkable ground on their floor), in this many tries.
 @export var lane_jitter: float = 1.2
 @export var lane_jitter_tries: int = 6
+## Route variety (RV1): each round a team draws a tempo (quick, steady or slow, by these weights) that scales its bots'
+## pauses at lane points and their stagger setting off; the steady scale is 1.
+@export var tempo_quick_weight: float = 0.3
+@export var tempo_steady_weight: float = 0.45
+@export var tempo_slow_weight: float = 0.25
+@export var tempo_quick_pace: float = 0.45
+@export var tempo_slow_pace: float = 1.4
+## A pause at a lane point in its own half is this share of one in the enemy's half: bots move up quickly through
+## ground their team holds, and slow down where the fight will be.
+@export var own_half_pace: float = 0.55
+## Each round a bot that walks its lane (not a defender) moves every lane point up to this far (m) across the way to the
+## enemy, one side or the other, the same for the whole lane (half as far, or not at all, where that isn't walkable on
+## the point's floor in a straight line from it): the other side of a row of crates, the far edge of a clearing.
+@export var lane_shift: float = 2.5
+## Setting off for its next lane point, a bot that walks its lane may (this chance) cross to another lane instead: the
+## point of it within lane_cross_reach (m) on about the same floor, no nearer its own end than where it is, that the
+## fewest teammates walk; at most lane_cross_max times a round. Never a defender, the bomb carrier or a bot under an
+## order.
+@export var lane_cross_chance: float = 0.15
+@export var lane_cross_reach: float = 10.0
+@export var lane_cross_max: int = 1
 ## Bots sharing a lane: a lane point with a teammate holding there (or heading there to hold) within lane_hold_spacing
 ## (m) moves lane_hold_offset (m) to one side, across the way to the enemy, so the two hold side by side.
 @export var lane_hold_spacing: float = 1.5
@@ -356,6 +377,11 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Defending, a bot holds the first point of its lane (nearest home), or with this chance the second; the first of
 ## two on a shared lane always holds the second.
 @export var defend_forward_chance: float = 0.3
+## Route variety (RV1): each round, with this chance, one defending bot (drawn at random) holds well up its lane
+## instead: defend_push_share of the way from its post to the last point short of the middle, for an early pick on the
+## attackers' way in.
+@export var defend_push_chance: float = 0.5
+@export var defend_push_share: float = 0.5
 ## A defender goes after someone seen or heard within this far of the pole (m, and on the pole's floor:
 ## anchor_search_rise); further off, it watches that way from its post.
 @export var defend_search_radius: float = 12.0

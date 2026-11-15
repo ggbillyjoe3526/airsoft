@@ -24,6 +24,9 @@ const CALLOUT_XOR := 0x5ca11
 ## A bot's bombs' stream (BotBombs, SF2) is its own stream's seed with these bits flipped: whether it throws never moves
 ## another of its rolls.
 const BOMB_XOR := 0xb0b5
+## The bots' route-variety stream (RoundPlanner: tempos, lane shifts, lane crossings, RV1) is the plan stream's seed with
+## these bits flipped: varying the routes never moves a plan roll.
+const VARIETY_XOR := 0x7a51e
 const SIMULATE_MULTIPLIER := 1597334677
 const SIMULATE_PER_ROUND := 2654435769
 ## Rounds a match can have before two rounds' simulate seeds could meet (simulate_seed): far more than any match plays.
@@ -94,3 +97,9 @@ static func stream(seed_value: int) -> RandomNumberGenerator:
 ## none of its other rolls.
 static func bomb_seed(bot_seed_value: int) -> int:
 	return (bot_seed_value & MASK_32) ^ BOMB_XOR
+
+
+## The bots' route-variety stream's seed (RoundPlanner, RV1) for a match seeded with `seed_value`: the plan stream's seed
+## with VARIETY_XOR's bits flipped, so no plan roll moves.
+static func variety_seed(seed_value: int) -> int:
+	return plan_seed(seed_value) ^ VARIETY_XOR
