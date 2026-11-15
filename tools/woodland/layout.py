@@ -272,12 +272,12 @@ SPAWNS_E = [(79.5, -9.25 + 2.0 * i) for i in range(8)]    # Alpha / defenders
 DEAD_W = (-85.0, 26.0)
 DEAD_E = (84.5, -24.0)
 # WB1 (the owner, 2026-11-15, Concept B of the map action redesign): both flags 14 m nearer the stream, so the
-# defenders have ground in front of them to hold and the fights come mid-map. A stands in Fern hollow under the oak, west
-# of the Fort; B at Log stacks, in the pocket between three cordwood stacks on the road's south verge, 6 m off the
+# defenders have ground in front of them to hold and the fights come mid-map. A stands in Fern hollow beside the oak,
+# west of the Fort; B at Log stacks, in the pocket between three cordwood stacks on the road's south verge, 6 m off the
 # road's centre line. The concept's (36, 40) was on the gravel's edge (the road stays clear), and anywhere else on that
 # verge the road's S, 40 m west, saw the pole down the Culvert's straight (test_mb1_layouts: MB2 shut that line, and
 # the road's strip is where it runs, so no piece can). The Fort and the Sawmill stay, the defenders' ground behind.
-FLAG_A = (41.0, -42.0)
+FLAG_A = (42.2, -41.4)  # the concept's (41, -42), 1.4 m off the oak so its trunk is out of the pole's ring
 FLAG_B = (40.0, 42.0)
 OT_FLAG = (-3.0, 1.0)
 FLAGS = [FLAG_A, FLAG_B]

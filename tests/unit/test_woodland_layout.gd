@@ -384,7 +384,7 @@ func test_a_crouched_body_walks_through_each_tunnel_and_a_standing_one_can_t() -
 # WR2: the huts' doors, the two flags and the 3:00 round (concept 3: doors on the Cabin, the Hut row and the Box, the
 # door facing the enemy shut). WB1 (the owner, 2026-11-15, Concept B): A in Fern hollow, B between the woodpiles at Log
 # stacks, each nearer the stream than the Fort and the Sawmill.
-const FLAG_A := Vector2(41.0, -42.0)
+const FLAG_A := Vector2(42.2, -41.4)
 const FLAG_B := Vector2(40.0, 42.0)
 const HUT_DOORS := 8
 const SHUT_DOORS := 4
