@@ -18,9 +18,10 @@ const ROAD_WEST: Array[Vector2] = [Vector2(-66, 27), Vector2(-48, 33), Vector2(-
 		Vector2(-20.5, 52.3), Vector2(-16, 55.6), Vector2(-13, 55.6), Vector2(-10.3, 52), Vector2(-8.3, 46),
 		Vector2(-6.3, 42.4), Vector2(-3.5, 42.4), Vector2(-0.8, 45), Vector2(3, 48.3), Vector2(8, 48.3)]
 const ROAD_SIDE := 2.0
-const POLE_B := Vector2(49.0, 38.5)
+const POLE_B := Vector2(40.0, 42.0)
 const POLE_RING := 1.5
-const POSTS_B: Array[Vector2] = [Vector2(44.6, 29.8), Vector2(49.0, 37.0)]
+## WB1: the south lane's post by flag B (its forward post holds the Culvert's east head, on the road by design).
+const POSTS_B: Array[Vector2] = [Vector2(39.0, 40.3)]
 const CHEST_BELOW_EYE := 0.3
 
 var tuning: SimTuning = SimTuning.load_default()
@@ -130,12 +131,18 @@ func test_defender_posts_stand_on_the_site_within_reach_of_a_pole() -> void:
 		var at_a_site := 0
 		for l in maps[id].lanes.size():
 			var lane := maps[id].lanes[l]
-			# Woodland's middle lane ends in the east camp's Back yard, at no pole: it defends nothing.
+			# Woodland's middle lane ends at Hut row (WB1; the Back yard before), at no pole: it holds the middle.
 			if id == "woodland" and l == 1:
 				continue
 			at_a_site += 1
 			for k: int in [lane.size() - 2, lane.size() - 1]:
 				var q := lane[k]
+				# WB1: Woodland's forward posts hold the stream side, on the defenders' half of the field, out ahead of
+				# their pole (Concept B); the post by the pole is within reach of it, as everywhere.
+				if id == "woodland" and k == lane.size() - 2:
+					assert_lt(_past_middle(id, q, 1), 0.0,
+							"%s lane %d forward post %s is on the defenders' half" % [id, l + 1, q])
+					continue
 				var nearest := INF
 				for f in _flags(id):
 					nearest = minf(nearest, Vector2(q.x - f.x, q.z - f.z).length())
@@ -143,13 +150,14 @@ func test_defender_posts_stand_on_the_site_within_reach_of_a_pole() -> void:
 		assert_gte(at_a_site, 2, "%s: at least two lanes defend a site" % id)
 
 
-func test_woodland_flag_b_forward_post_is_behind_the_crates() -> void:
+## WB1: the south lane's defenders hold the Culvert's east head, then the verge beside flag B.
+func test_woodland_flag_b_posts_are_the_culvert_head_and_the_verge_by_the_pole() -> void:
 	var lane := maps["woodland"].lanes[2]
 	var post := lane[lane.size() - 2]
-	assert_almost_eq(post.x, 44.6, 0.01, "flag B's forward defender post")
-	assert_almost_eq(post.z, 29.8, 0.01, "flag B's forward defender post")
+	assert_almost_eq(Vector2(post.x, post.z), Vector2(14.0, 48.3), Vector2(0.01, 0.01), "the Culvert's east head")
+	var home := lane[lane.size() - 1]
 	var flag := maps["woodland"].poles[1]
-	assert_lt(Vector2(post.x - flag.x, post.z - flag.z).length(), 12.0, "within reach of the pole")
+	assert_lt(Vector2(home.x - flag.x, home.z - flag.z).length(), 3.0, "beside the pole")
 
 
 func test_subway_flag_b_stands_on_the_north_platform_floor_clear_of_every_block() -> void:
