@@ -199,16 +199,18 @@ def fire_point() -> sk.Mesh:
                           (-(xa + xb) / 2, mx0 - (ya + yb) / 2, 0.0), wall)
         m.face_toward([at(x, y, -depth) for x, y in hole], out, floor)
 
-    # the latch's panel: 0.22 x 0.065 m, its corners rounded, sunk 4.5 mm; the window: 0.30 m across its top, 0.26 m
-    # at its foot with the larger lower corners, 0.09 m tall, sunk 8 mm
+    # the latch's panel: 0.22 x 0.065 m, its corners rounded, sunk 4.5 mm; the window: 0.30 m across near its top,
+    # tapering softly to 0.24 m at its foot past the larger lower corners, 0.09 m tall, sunk 8 mm
     recess([(-0.3, ly0), (0.3, ly0), (hw, ly1), (-hw, ly1)],
            [(-0.095, 0.152), (0.095, 0.152), (0.11, 0.167), (0.11, 0.2), (0.095, 0.215), (-0.095, 0.215),
             (-0.11, 0.2), (-0.11, 0.167)], 0.0045, "fire_dark", "fire")
     recess([(-hw, wy0), (hw, wy0), (hw, wy1), (-hw, wy1)],
-           [(-0.105, 0.235), (0.105, 0.235), (0.13, 0.26), (0.15, 0.312), (0.137, 0.325), (-0.137, 0.325),
-            (-0.15, 0.312), (-0.13, 0.26)], 0.008, "fire_dark", "void")
-    # the door's seams: a dark line 3 mm wide, 0.5 mm proud, from each ear's inner foot down the side to the foot
-    seam = [(0.25, 0.115), (0.275, ly0), (0.295, ly1), (0.295, wy1), (0.285, 0.37), (hw - 0.06, lid)]
+           [(-0.12, 0.235), (0.12, 0.235), (0.135, 0.25), (0.15, 0.312), (0.137, 0.325), (-0.137, 0.325),
+            (-0.15, 0.312), (-0.135, 0.25)], 0.008, "fire_dark", "void")
+    # the door's seams: a dark line 3 mm wide, 0.5 mm proud, from each ear's inner foot straight down, then sweeping
+    # in to meet the foot 0.19 m off the middle (the door 0.38 m wide there); a point at each facet's edge
+    seam = [(0.19, 0.115), (0.21, 0.14), (0.2175, ly0), (0.24, 0.18), (0.26, ly1), (0.27, 0.24), (0.27, wy1),
+            (0.27, 0.37), (0.265, lid)]
     for sd in (-1.0, 1.0):
         for (xa, ya), (xb, yb) in zip(seam, seam[1:]):
             m.face_toward([(sd * xa - 0.0015, ya, front_z(ya) + 5e-4), (sd * xa + 0.0015, ya, front_z(ya) + 5e-4),
@@ -219,11 +221,19 @@ def fire_point() -> sk.Mesh:
            (0.44, 0.06), (0.44, 0.0)][::-1]
     m.prism_x(lip, -(hw - 0.06), hw - 0.06, "fire", open_edges=(2, 3, 4, 5, 6))
     m.prism_x(lip, -(hw - 0.06), hw - 0.06, "fire", caps="", open_edges=(0, 1, 5, 6), smooth=True)
-    # the ears: raised over the lid at the board's corners, their fronts running on up from the door's
+    # the ears: raised over the lid at the board's corners, their fronts running on up from the door's, each inner
+    # top corner cut 3 cm across by 4 cm down into the lid (a moulded shoulder, not a post)
+    def ear_z(y: float) -> float:
+        return hd - 0.004 - (y - lid) * 0.026 / 0.06
+
     for sd in (-1.0, 1.0):
-        e0, e1 = sorted((sd * (hw - 0.06), sd * (hw + 0.005)))
-        m.prism_x([(0.38, 0.0), (lid, hd - 0.004), (0.46, hd - 0.03), (0.46, 0.0)][::-1], e0, e1, "fire",
-                  open_edges=(2, 3))
+        ear = [(sd * x, y) for x, y in ((hw - 0.06, lid), (hw + 0.005, lid), (hw + 0.005, 0.46), (hw - 0.03, 0.46),
+                                         (hw - 0.06, 0.42))]
+        m.face_toward([(x, y, ear_z(y)) for x, y in ear], (0.0, 0.026, 0.06), "fire")
+        cx = sd * (hw - 0.025)
+        for (xa, ya), (xb, yb) in zip(ear, ear[1:] + ear[:1]):
+            m.face_toward([(xa, ya, 0.0), (xb, yb, 0.0), (xb, yb, ear_z(yb)), (xa, ya, ear_z(ya))],
+                          ((xa + xb) / 2 - cx, (ya + yb) / 2 - 0.43, 0.0), "fire")
     # the latch: from the foot up into its panel
     m.box((-0.018, 0.03, hd - 0.058), (0.018, 0.115, hd - 0.035), "black", skip="b")
     m.box((-0.014, 0.115, hd - 0.03), (0.014, 0.195, hd + 0.012), "black", skip="b")
