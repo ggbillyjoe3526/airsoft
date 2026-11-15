@@ -89,20 +89,25 @@ ATTEMPT_ROWS
   checks (a third of the pieces have one or more, was 30 %); to pay for them the bark arcs step 28°, not 24°, and a
   section draws as many hearts as its 3,200 triangles leave room for (built once with all, then again with that share;
   the hearts draw from a stream of their own, so the pieces stay put). Fifth pass: hearts reach 0.45 of the way to the bark
-  (were 0.3); a piece cut at the section's end stands flush. Sixth pass: the stack's top the top course's logs
-  lying front to back, two of the core's columns each, each its own bark, rounded across (5 points) and rising 2 to
-  3 cm between the faces (at the faces they meet the core's sides, so no slit), a crease between them, the two at
-  the ends flat (was a near-black lid, then flat tilted strips that read as roofing); the core's top read from the
-  highest of three points about each column and, at the ends, every piece out to the end, so it lies close under
-  the tallest pieces; a piece still standing over it has a bark back and its upper sides; the end logs never stand
-  past the core's face, run past the middle and widen to meet the next, from the ground up, so no dark panel shows
-  between them, and none is pale split (read as planks). Paid for: bark arcs in 34 degree steps (were 28), end logs
-  5 facets round (were 6), fewer drying checks (a quarter of the pieces, was a third), no rim of bark on a piece
-  under 7 cm (a hairline). 3,192 / 3,151 / 3,043 triangles: Woodland draws no more.
+  (were 0.3); a piece cut at the section's end stands flush. Sixth and seventh passes (the critic's attempts 5
+  and 6): the stack's top the top course's logs lying front to back, each its own width (0.5 to 1.5 of 13 cm), a
+  few askew, each its own bark, full-shouldered across and rising up to 0.22 of its width between the faces to a
+  crown off its middle here and there (at the faces they meet the core's sides, so no slit), a crease between them
+  (was a near-black lid, then strips that read as roofing); the core's top read at the face pieces' tops (was 2 cm
+  under) from three points about each column and, at the ends, every piece out to the end; a face piece standing
+  more than 4 cm over it (a wedge on its point) is taken off and the top read again; one still over it has a bark
+  back and its upper sides. The end logs are round (one bark each, drawn smooth under 45 degrees, was 34), each
+  closed by its sawn end at the face and the stack's dark inside, never past the core's face, 0.44 to 0.5 of the
+  depth long so no edge runs further, their inner ends up to 2.5 cm higher or lower so the joints slant, widened to
+  meet the next from the ground up, a thin one taken into the one under it, the top one up to the crest (no
+  notch); none pale split (read as planks). Paid for: bark arcs in 34 degree steps (were 28), end logs 5 facets
+  round (were 6), fewer drying checks (a quarter of the pieces, was a third), no rim of bark on a piece under
+  8.5 cm (a hairline) and, in section A, a dark heart on about two thirds of the wedges. 3,189 / 3,037 / 3,164
+  triangles: Woodland draws no more.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
-  fourth, v5 the fifth, v6 the sixth).
+  fourth, v5 the fifth, v6 the sixth, v7 the seventh: the woodpiles).
 
 ## Known issues left
 
