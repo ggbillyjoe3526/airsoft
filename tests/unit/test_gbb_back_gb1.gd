@@ -74,3 +74,61 @@ func test_the_slides_back_has_an_open_recess_under_the_cover_plate() -> void:
 	assert_false(flush.is_empty())
 	if not flush.is_empty():
 		assert_almost_eq((flush["position"] as Vector3).z / MM, bf.x, 0.0003, "the walls beside it reach the back")
+
+
+## The slide's surface that carries the recess's floor material ("Cavity"), its drawn material and the mesh node.
+func _cavity() -> Array:
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			var own := mi.mesh.surface_get_material(i)
+			if own != null and own.resource_name == "Cavity":
+				return [mi, i]
+	return []
+
+
+func _drawn_albedo(mi: MeshInstance3D, i: int) -> Color:
+	var m := mi.get_active_material(i)
+	if m is ShaderMaterial:
+		return (m as ShaderMaterial).get_shader_parameter("albedo") as Color
+	return (m as BaseMaterial3D).albedo_color
+
+
+func test_the_recess_floor_has_its_own_dark_material_in_the_file() -> void:
+	var found := _cavity()
+	assert_false(found.is_empty(), "the slide carries a Cavity surface")
+	if not found.is_empty():
+		var own := (found[0] as MeshInstance3D).mesh.surface_get_material(found[1] as int) as BaseMaterial3D
+		assert_lt(own.albedo_color.get_luminance(), 0.08, "near black")
+
+
+func test_the_recess_floor_keeps_its_material_in_every_paint() -> void:
+	for paint: StringName in [&"ghost", &"onyx", &"coral"]:
+		for realistic: bool in [false, true]:
+			var fresh := (load(MODEL) as PackedScene).instantiate() as Node3D
+			add_child_autofree(fresh)
+			for surfaced: bool in [true, false]:
+				ReplicaPaint.apply(fresh, paint, realistic, surfaced)
+				var hit := false
+				for node: Node in fresh.find_children("*", "MeshInstance3D", true, false):
+					var mi := node as MeshInstance3D
+					if mi.mesh == null:
+						continue
+					for i in mi.mesh.get_surface_count():
+						var own := mi.mesh.surface_get_material(i)
+						if own != null and own.resource_name == "Cavity":
+							hit = true
+							assert_null(mi.get_surface_override_material(i), "%s/%s/%s: not repainted" % [paint, realistic, surfaced])
+							assert_lt((mi.get_active_material(i) as BaseMaterial3D).albedo_color.get_luminance(), 0.08)
+				assert_true(hit, "Cavity found")
+
+
+func test_the_figure_copy_of_the_pistol_has_no_cavity_surface() -> void:
+	# The bots' copy (the model's `Figure` mesh, tools/blender/replicas/figure_copy.py) drops the recess floor.
+	var figure := model.find_child("Figure", true, false) as MeshInstance3D
+	assert_not_null(figure, "the pistol carries a Figure mesh")
+	if figure != null:
+		for i in figure.mesh.get_surface_count():
+			assert_ne(figure.mesh.surface_get_material(i).resource_name, "Cavity")
