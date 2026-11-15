@@ -138,3 +138,86 @@ func test_only_forward_plus_draws_the_haze_at_any_level() -> void:
 		assert_false(table.can_draw(FOG, level, "gl_compatibility"), "level %d" % level)
 		assert_false(table.can_draw(FOG, level, "mobile"), "level %d" % level)
 		assert_true(table.can_draw(FOG, level, "forward_plus"), "level %d" % level)
+
+
+# --- QA: the Graphics tab's row of four, and what an old or odd save leaves ---
+
+func _page_on(settings: Settings, method: String = "forward_plus") -> SettingsGraphicsPage:
+	var screen := SettingsScreen.new()
+	screen.settings = settings
+	screen.save_path = ROOT.path_join("settings.save")
+	add_child_autofree(screen)
+	screen.open()
+	var page := screen._graphics_page
+	page.probe = GraphicsPick.Probe.new()
+	page.probe.preset = &"high"
+	page.probe.rendering_method = method
+	page.probe.driver = "vulkan"
+	page.build(screen)
+	page.refresh()
+	return page
+
+
+func test_the_haze_row_shows_four_choices_and_each_pick_is_custom_at_that_level() -> void:
+	var drawn_before := GraphicsApply.server().drawn
+	var s := Settings.new(PlayTuning.new())
+	var page := _page_on(s)
+	var line := page.line(FOG)
+	assert_not_null(line.choice, "a row of choices, not a switch")
+	assert_eq(line.levels.size(), 4)
+	for name: String in ["low", "medium", "high", "off"]:
+		var level: int = GraphicsQuality.CHOICES[FOG].find(name)
+		line.choice.button(line.levels.find(level)).pressed.emit()
+		assert_eq(GraphicsQuality.resolve(s.graphics_choice, s.graphics_base, s.graphics_custom, table).volumetric_fog,
+				level, name)
+		assert_eq(line.choice.selected(), line.levels.find(level), "%s is the one lit" % name)
+	GraphicsApply.server().drawn = drawn_before
+
+
+func test_a_haze_pick_marks_custom_and_reset_to_the_cards_pick_clears_it() -> void:
+	var drawn_before := GraphicsApply.server().drawn
+	var s := Settings.new(PlayTuning.new())
+	var page := _page_on(s)
+	var base := GraphicsQuality.resolve(s.graphics_choice, s.graphics_base, s.graphics_custom, table).volumetric_fog
+	var other: int = (base + 1) % 4
+	var line := page.line(FOG)
+	line.choice.button(line.levels.find(other)).pressed.emit()
+	assert_true(line.marked(), "a changed row is marked")
+	page.reset_button().pressed.emit()
+	assert_false(line.marked())
+	assert_true(s.graphics_custom.is_empty(), "back to the card's pick")
+	GraphicsApply.server().drawn = drawn_before
+
+
+func test_the_simpler_renderer_greys_every_haze_choice() -> void:
+	var page := _page_on(Settings.new(PlayTuning.new()), "gl_compatibility")
+	var line := page.line(FOG)
+	assert_true(line.shut)
+	for i in 4:
+		assert_true(line.choice.button(i).disabled, "choice %d" % i)
+
+
+func test_a_corrupt_saved_haze_value_falls_back_to_the_presets_level() -> void:
+	for bad: Variant in ["extreme", "", 2, true, null, ["high"], "ON"]:
+		var q := GraphicsQuality.resolve(GraphicsQuality.CUSTOM, &"medium", {"volumetric_fog": bad}, table)
+		assert_eq(q.volumetric_fog, table.preset(&"medium").volumetric_fog, "%s" % [bad])
+
+
+func test_a_version_three_store_in_a_save_bundle_restores_its_on_as_high() -> void:
+	var s := Settings.new(PlayTuning.new())
+	var d := {"graphics_choice": "custom", "graphics_base": "low", "graphics_custom": {"volumetric_fog": "on"}}
+	var moved := Settings.migrate_defaults(d, 3)
+	s.from_dict(moved)
+	var q := GraphicsQuality.resolve(s.graphics_choice, s.graphics_base, s.graphics_custom, table)
+	assert_eq(q.volumetric_fog, GraphicsQuality.VolumetricFog.HIGH)
+	assert_eq((d["graphics_custom"] as Dictionary)["volumetric_fog"], "on", "the input is not changed")
+
+
+func test_the_servers_first_filter_is_the_projects_so_a_first_high_level_sends_nothing_extra() -> void:
+	var rs := GraphicsApply.Server.new()
+	var project: bool = (ProjectSettings.get_setting(GraphicsApply.FOG_FILTER) as int) != 0
+	assert_eq(rs.fog_filter, project)
+	assert_eq(rs.fog_grid, Vector2i.ZERO)
+	rs.set_fog_quality(look.fog_grid(GraphicsQuality.VolumetricFog.LOW), false)
+	assert_false(rs.fog_filter, "Low turns the filter off even from the project's on")
+	assert_eq(rs.fog_grid, look.fog_grid(GraphicsQuality.VolumetricFog.LOW))
