@@ -1723,13 +1723,33 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 
 ## Plant The Bomb's fuse on each field (PB4)
 
-- [ ] **A short fuse is fair to the defenders.** Defend on Depot (16 s fuse), Woodland (23 s) and Subway (22 s) at
+- [ ] **A short fuse is fair to the defenders.** Defend on Depot (16 s fuse), Woodland (27 s) and Subway (22 s) at
   Normal and Hard; let the attackers arm the bomb on the site nearest you and on the one farthest away, then go for
   it. The Match page says the field's fuse under the rules.
   Pass: from the near site you always have time to defuse it yourself; from the far site it is a race you can win if
   you go at once; your bots still leave the defuse to you while you are close.
 - [ ] **Attacking is worth it now.** Attack on the same fields and hold the site after the plant.
   Pass: holding the site feels like it wins rounds; the bomb goes off now and then, not every time.
+
+## Woodland's nearer flags and six routes (WB1)
+
+- [ ] **The fight comes to the middle.** Attack on Woodland at Normal, by day: walk any route east without hurrying.
+  Pass: you meet defenders around the stream (the Tower, the Hollow way's head, Hut row, the Culvert) more often than
+  at the flags, and the first shot of a round comes about 20 s in, not half a minute.
+- [ ] **Flag A in Fern hollow.** Raise it from the west, then defend it from the Fort's window and from the
+  windthrow and the crouch crate beside it. Pass: it is readable where the pole stands (the oak beside it, not in the ring), the Fort's
+  window and gate are worth holding, and neither side gets a spot that wins every duel.
+- [ ] **Flag B between the woodpiles.** Raise it coming along the road, then from the north (the Knoll side). Defend
+  it from inside the pocket and from the road side. Pass: the road's double bend never sees the pole; whoever is in
+  the pocket can be flushed with a smoke or a flash; a raise there is a fair fight, not a free one either way.
+- [ ] **Bots use the whole wood.** Spectate a few Elimination and Attack / Defend rounds. Pass: bots walk the north
+  edge, the Berm and the Clearing's south side as well as the old three routes, nobody gets stuck on the new routes
+  (the stream's north end, the Knoll's slope), and none walk on top of each other.
+- [ ] **Plant The Bomb.** Attack and defend both sites with the 27 s fuse. Pass: from either site a defender has time
+  to come over; the pocket at B is hard but not hopeless to retake.
+- [ ] **At night** both flags have a lantern by them and the fights at them are lit, and the Box and the Sawmill,
+  without theirs now, aren't too dark to fight in.
+- [ ] **The map card** on the match page still reads right with flag A out of the Fort.
 
 ## The interface colour (UA1, UA2)
 

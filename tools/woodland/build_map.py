@@ -548,7 +548,7 @@ def dead_zones() -> list[list[dict]]:
 
 
 def lanes() -> list[list[dict]]:
-    return [[spot(x, z) for (x, z) in L.LANE_PATHS[k]] for k in ("n", "m", "s")]
+    return [[spot(x, z) for (x, z) in L.LANE_PATHS[k]] for k in L.LANE_ORDER]
 
 
 def areas() -> list[dict]:
