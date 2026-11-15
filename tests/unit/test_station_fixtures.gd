@@ -3,7 +3,7 @@ extends GutTest
 ## map names them (dressing.station.fixtures) and each stands in its room's air, a wall model's back on a wall, a
 ## hanging sign's top at its ceiling and well over the floor, a bin and an edge warning on the floor, none inside a
 ## block; StationFixtures draws one MultiMesh a model with no shadow, glowing lenses and the printed sheet, and nothing
-## on the other maps but Depot's wall extras (DX1); the ceilings' strip lamps are the model, turned along rooms running along z; no colour reads as
+## on the other maps but Depot's wall extras (DX1), some of which Subway carries too (DX2); the ceilings' strip lamps are the model, turned along rooms running along z; no colour reads as
 ## a team; a malformed or unknown fixture is warned about and left out.
 
 const BUDGETS: Dictionary[StringName, int] = {
@@ -18,10 +18,11 @@ const BUDGETS: Dictionary[StringName, int] = {
 	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
 	&"depot_sign_ppe": 52, &"depot_sign_pallet_storage": 52, &"depot_sign_fire_exit": 52,
 }
-## The models only Depot's walls carry (DX1: MapData.fixtures), not Subway's station.
-const DEPOT: Array[StringName] = [&"fire_point", &"call_point", &"pipe_run", &"pipe_run_b", &"pipe_run_2",
-		&"depot_sign_assembly", &"depot_sign_fire_action", &"depot_sign_defib", &"depot_sign_no_riding",
-		&"depot_sign_ppe", &"depot_sign_pallet_storage", &"depot_sign_fire_exit"]
+## The models only Depot's walls carry (DX1: MapData.fixtures), not Subway's station: a warehouse's signs.
+const DEPOT: Array[StringName] = [&"depot_sign_assembly", &"depot_sign_no_riding", &"depot_sign_pallet_storage"]
+## Depot's wall extras Subway's station carries too that print Depot's sheet (DX2).
+const SHARED_PRINTED: Array[StringName] = [&"fire_point", &"depot_sign_fire_action", &"depot_sign_defib",
+		&"depot_sign_ppe", &"depot_sign_fire_exit"]
 ## Depot's models printing from Depot's own sheet (StationFixturesConfig.sheets).
 const DEPOT_PRINTED: Array[StringName] = [&"fire_point", &"depot_sign_assembly", &"depot_sign_fire_action",
 		&"depot_sign_defib", &"depot_sign_no_riding", &"depot_sign_ppe", &"depot_sign_pallet_storage",
@@ -37,7 +38,8 @@ const WALL: Array[StringName] = [&"tunnel_lamp", &"cctv_camera", &"fire_extingui
 		&"poster_b", &"poster_c", &"poster_d", &"poster_e", &"poster_f", &"poster_g", &"poster_h", &"poster_i", &"poster_j",
 		&"poster_k", &"poster_l", &"poster_m", &"poster_wide_a", &"poster_wide_b", &"poster_wide_c", &"name_board",
 		&"line_map", &"info_panel", &"notice_smoking", &"notice_handrail", &"notice_cctv", &"wall_sign_out",
-		&"wall_sign_platforms"]
+		&"wall_sign_platforms", &"fire_point", &"call_point", &"pipe_run", &"pipe_run_b", &"pipe_run_2",
+		&"depot_sign_fire_action", &"depot_sign_defib", &"depot_sign_ppe", &"depot_sign_fire_exit"]
 const FLOOR: Array[StringName] = [&"litter_bin", &"edge_sign"]
 ## How far (m) a model may sink into the wall or ceiling it is fixed to.
 const TOUCH := 0.012
@@ -206,11 +208,16 @@ func test_the_view_draws_one_multimesh_a_model_glowing_and_printed_with_no_shado
 				assert_not_null((mat as ShaderMaterial).get_shader_parameter(&"sheet"), "the sheet is printed")
 			elif mat is ShaderMaterial and (mat as ShaderMaterial).get_shader_parameter(&"glow") != null:
 				glow += 1
-	assert_eq(view.views().size(), cfg.models.size() - DEPOT.size(), "one MultiMesh a model")
+	var views := 0
+	for model: StringName in view.placed():
+		var chunk: float = cfg.chunks.get(model, 0.0)
+		views += StationFixtures.chunked(view.placed()[model], chunk).size() if chunk > 0.0 else 1
+	assert_eq(view.placed().size(), cfg.models.size() - DEPOT.size(), "every model but a warehouse's sign")
+	assert_eq(view.views().size(), views, "one MultiMesh a model (the pipework's a chunk, DX2)")
 	assert_eq(total, m.station.fixtures.size(), "every fixture drawn")
 	assert_eq(glow, 1, "the tunnel lamp's glass glows")
-	assert_eq(printed, PRINTED.size(), "every printed model prints the sheet")
-	assert_eq(view.materials().size(), 3)
+	assert_eq(printed, PRINTED.size() + SHARED_PRINTED.size(), "every printed model prints its sheet")
+	assert_eq(view.materials().size(), 4, "the props', the glass's, the station's sheet's and Depot's (DX2)")
 
 
 func test_each_tunnel_lamp_lights_its_running_tunnel_s_arch_from_its_glass() -> void:
