@@ -77,6 +77,14 @@ var _sector_rows: int = 1
 var _visited: Array[PackedFloat64Array] = []
 
 
+## The character with `id` on the field, or null.
+func character(id: int) -> Character:
+	for c in characters:
+		if c.id == id:
+			return c
+	return null
+
+
 ## Sets up the hunt memory over the field from `lo` to `hi` (x, z), every sector unchecked.
 func setup_sectors(lo: Vector2, hi: Vector2) -> void:
 	var size := cfg.hunt_sector_size

@@ -109,9 +109,9 @@ static func build(map: MapData, style: MapStyle, swing_time: float) -> DoorView:
 	view._mesh = MultiMeshInstance3D.new()
 	view._mesh.name = "Leaves"
 	view._mesh.multimesh = mm
-	view._mesh.material_override = view._material
 	# The leaf model's foot (its y), where its grime starts.
-	view._mesh.set_instance_shader_parameter(&"wear_floor", mm.mesh.get_aabb().position.y)
+	LookMaterials.draw_worn(view._mesh, view._material, mm.mesh.get_aabb().position.y,
+			LookMaterials.floors_by_material(), {})
 	view.add_child(view._mesh)
 	view._add_frames(map, style)
 	for i in map.doors.size():

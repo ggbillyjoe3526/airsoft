@@ -84,7 +84,7 @@ func clear() -> void:
 ## contact; otherwise it marks the floor in front of what the view met. One placed on the full-screen map (FM1: value
 ## 2) marks the floor there (map_spot), never an enemy: the map shows only what your side heard.
 func place(e: GameEvent, now: float, w: BotWorld) -> Ping:
-	var leader := _character(w, e.actor)
+	var leader := w.character(e.actor)
 	var p := of(e.actor)
 	if leader == null or p == null or not Elimination.is_in_play(leader) or now - p.at < _cfg.min_gap:
 		return null
@@ -252,10 +252,3 @@ func _enemy_under_view(leader: Character, eye: Vector3, dir: Vector3, reach: flo
 		best = c
 		best_off = off
 	return best
-
-
-static func _character(w: BotWorld, id: int) -> Character:
-	for c in w.characters:
-		if c.id == id:
-			return c
-	return null

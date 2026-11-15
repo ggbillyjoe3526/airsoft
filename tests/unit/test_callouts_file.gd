@@ -100,11 +100,13 @@ func test_the_shipped_file_keeps_the_urgent_calls_first() -> void:
 	assert_lt(r[E.DOWN].priority, r[E.CONTACT].priority)
 	assert_lt(r[E.CONTACTS].priority, r[E.CONTACT].priority)
 	assert_lt(r[E.CONTACT].priority, r[E.CHECKING].priority)
-	# The answers to your ping after every hit's call, before every other.
+	# Flash out before all (its bang is a moment off, BC1); the answers to your ping after every hit's call, before
+	# every other.
+	assert_eq(r[E.FLASH_OUT].priority, 0)
 	var hits := maxi(r[E.LAST_ONE].priority, maxi(r[E.DOWN].priority, r[E.TAGGED].priority))
 	assert_lt(hits, r[E.PING_GOING].priority)
 	assert_lt(r[E.PING_GOING].priority, r[E.PING_WATCHING].priority)
-	var first: Array[int] = [E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING]
+	var first: Array[int] = [E.FLASH_OUT, E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING]
 	for e in E.size():
 		if not first.has(e):
 			assert_lt(r[E.PING_WATCHING].priority, r[e].priority, CalloutsFile.EVENT_NAMES[e])
