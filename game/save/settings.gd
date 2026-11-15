@@ -12,9 +12,14 @@ signal changed
 
 const PATH := "user://settings.save"
 const KIND := "settings"
-## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1); an older file is brought over once by
-## `migrate_defaults`.
-const VERSION := 3
+## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1), 4 made Volumetric haze four levels (VF1); an older
+## file is brought over once by `migrate_defaults`.
+const VERSION := 4
+## A Custom Volumetric haze row saved by a version 3 file or older, when it was one switch, and the level its "on"
+## drew: the finest grid, which High still draws (VF1). Its "off" is still Off.
+const FOG_ROW_V3 := "volumetric_fog"
+const FOG_ON_V3 := "on"
+const FOG_ON_NOW := "high"
 ## The keys this build reads (with two it reads once and no longer writes: "dev_enabled", FB3, and "robots", FI6); any
 ## other key in the file is kept as it was.
 const KNOWN_KEYS: Array[String] = [
@@ -199,12 +204,19 @@ func load_file(path: String = PATH) -> void:
 
 
 ## `data` as a version `version` file's, with every value still at the old default moved to the new one (a value the
-## player changed is kept): the volumes (from version 1 or 2), Windowed and V-Sync (from version 1). The current
-## version or later is returned as it is. A new dictionary; `data` is not changed.
+## player changed is kept): the volumes (from version 1 or 2), Windowed and V-Sync (from version 1); and a Custom
+## Volumetric haze row of "on" (version 3 or older) as the level it drew, High. The current version or later is
+## returned as it is. A new dictionary; `data` is not changed.
 static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	if version >= VERSION:
 		return data
 	var moved := data.duplicate(true)
+	var custom: Variant = moved.get("graphics_custom")
+	if custom is Dictionary and (custom as Dictionary).get(FOG_ROW_V3) is String \
+			and (custom as Dictionary)[FOG_ROW_V3] == FOG_ON_V3:
+		(custom as Dictionary)[FOG_ROW_V3] = FOG_ON_NOW
+	if version >= 3:
+		return moved
 	var old_volumes := VOLUME_DEFAULTS_V1 if version < 2 else VOLUME_DEFAULTS_V2
 	var saved_vol: Variant = moved.get("volumes")
 	if saved_vol is Dictionary:

@@ -382,7 +382,7 @@ func test_a_file_from_before_the_graphics_fields_loads_unchanged() -> void:
 		"show_fps": true, "volumes": {"Master": 0.7},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 3, "3 since AU1 moved the ambience's default; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 4, "4 since VF1 made Volumetric haze four levels; adding fields does not bump it")
 	assert_eq(t.load_message, "", "an older file is not a damaged one")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_eq(t.window_mode, Settings.WindowMode.BORDERLESS)
@@ -554,7 +554,7 @@ func test_a_file_from_before_the_accessibility_fields_loads_unchanged() -> void:
 		"sensitivity": 1.5, "fov": 95.0, "realistic_colours": true, "hud": {"colour": 2},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 3, "3 since AU1 moved the ambience's default; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 4, "4 since VF1 made Volumetric haze four levels; adding fields does not bump it")
 	assert_eq(t.load_message, "")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_almost_eq(t.fov, 95.0, 1e-6)
