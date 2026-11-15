@@ -248,12 +248,13 @@ func test_the_summary_row_keeps_its_size_at_100_and_fits_at_150() -> void:
 			hud.get_parent().queue_free()
 
 
-func test_the_order_wheel_fits_the_shortest_canvas_at_150() -> void:
-	var outer := HudConfig.new().wheel_outer
-	var shortest := canvas_of(WINDOWS[1]).y
+func test_the_order_wheel_fits_the_smallest_canvas_at_150() -> void:
+	var half := OrderWheelLayout.new(ControlsConfig.new()).half_extent()
+	var smallest := canvas_of(WINDOWS[1])
 	for window in WINDOWS:
-		shortest = minf(shortest, canvas_of(window).y)
-	assert_lt(outer * 2.0 * SIZES[1], shortest, "the wheel's ring across, at 150 %, inside the canvas's height")
+		smallest = smallest.min(canvas_of(window))
+	assert_lt(half.y * 2.0 * SIZES[1], smallest.y, "the wheel's columns, at 150 %, inside the canvas's height")
+	assert_lt(half.x * 2.0 * SIZES[1], smallest.x, "and both columns inside its width")
 
 
 # --- the HUD tab ---

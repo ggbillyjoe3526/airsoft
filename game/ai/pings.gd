@@ -84,7 +84,7 @@ func clear() -> void:
 ## contact; otherwise it marks the floor in front of what the view met. One placed on the full-screen map (FM1: value
 ## 2) marks the floor there (map_spot), never an enemy: the map shows only what your side heard.
 func place(e: GameEvent, now: float, w: BotWorld) -> Ping:
-	var leader := _character(w, e.actor)
+	var leader := w.character(e.actor)
 	var p := of(e.actor)
 	if leader == null or p == null or not Elimination.is_in_play(leader) or now - p.at < _cfg.min_gap:
 		return null
@@ -101,7 +101,7 @@ func place(e: GameEvent, now: float, w: BotWorld) -> Ping:
 	var met := e.value == 1
 	var eye := e.position
 	var dir := e.direction
-	var enemy := _enemy_under_view(leader, eye, dir, e.reach if met else _cfg.reach, w)
+	var enemy := enemy_under_view(leader, eye, dir, e.reach if met else _cfg.reach, _cfg.enemy_cone_deg, w)
 	if enemy != null:
 		p.kind = Kind.CONTACT
 		p.enemy_id = enemy.id
@@ -181,6 +181,7 @@ static func take(b: Bot, p: Ping, w: BotWorld) -> bool:
 	if not Elimination.is_in_play(b.character) or b.target_visible or b.mode == Bot.Mode.FIGHT \
 			or b.mode == Bot.Mode.COVER:
 		return false
+	b.ping_joined = false
 	b.last_known = p.spot
 	b.ping_spot = p.spot
 	b.has_last_known = true
@@ -192,6 +193,26 @@ static func take(b: Bot, p: Ping, w: BotWorld) -> bool:
 	if b.mode == Bot.Mode.SEARCH:
 		b.route_state = Bot.RouteState.NONE
 		BotMovement.start_search(b, w)
+	return true
+
+
+## Bot `b` hears its player `giver`'s ping of a spot `p` (CW1, owner 2026-11-15): "I'm heading there, come with me",
+## not an order (Go There is the order). Under a squad order it keeps the order and only watches the spot (take). Else
+## one within BotConfig.ping_follow_reach of the giver comes along on a roll of ping_follow_chance (its own stream):
+## it takes the spot and goes there, from a post it holds too (Bot.joins_ping); the rest carry on with their own play.
+## Returns whether it came along.
+static func follow(b: Bot, p: Ping, giver: Character, w: BotWorld) -> bool:
+	if b.order != SquadOrder.Kind.NONE:
+		take(b, p, w)
+		return false
+	if giver == null or not Elimination.is_in_play(b.character):
+		return false
+	var d := Vector2(giver.position.x - b.character.position.x, giver.position.z - b.character.position.z)
+	if d.length_squared() > w.cfg.ping_follow_reach * w.cfg.ping_follow_reach:
+		return false
+	if b.rng.randf() >= w.cfg.ping_follow_chance or not take(b, p, w):
+		return false
+	b.ping_joined = true
 	return true
 
 
@@ -226,10 +247,11 @@ func _floor_spot(point: Vector3, dir: Vector3, hit: float, w: BotWorld) -> Vecto
 
 
 ## The enemy of `leader` in play nearest the line of its view (`dir` from `eye`) within `reach` m: one whose chest or
-## head the line passes within enemy_cone_deg of (or enemy_reach m, up close) and whom the bots' sight rules let the
-## leader see. Null if none.
-func _enemy_under_view(leader: Character, eye: Vector3, dir: Vector3, reach: float, w: BotWorld) -> Character:
-	var cone := tan(deg_to_rad(_cfg.enemy_cone_deg))
+## head the line passes within `cone_deg` of (or enemy_reach m, up close) and whom the bots' sight rules let the
+## leader see. Null if none. A ping's enemy (enemy_cone_deg) and Spotted's (Spots, spot_cone_deg).
+func enemy_under_view(leader: Character, eye: Vector3, dir: Vector3, reach: float, cone_deg: float,
+		w: BotWorld) -> Character:
+	var cone := tan(deg_to_rad(cone_deg))
 	var hits := w.tuning.hits
 	var best: Character = null
 	var best_off := INF
@@ -252,10 +274,3 @@ func _enemy_under_view(leader: Character, eye: Vector3, dir: Vector3, reach: flo
 		best = c
 		best_off = off
 	return best
-
-
-static func _character(w: BotWorld, id: int) -> Character:
-	for c in w.characters:
-		if c.id == id:
-			return c
-	return null

@@ -114,7 +114,7 @@ static func waiting(b: Bot, w: BotWorld) -> bool:
 		return true
 	if me.mag.asked < 0:
 		return false
-	var giver := _character(w, me.mag.asked)
+	var giver := w.character(me.mag.asked)
 	if giver == null:
 		return false
 	var gb := bot_of(giver, w)
@@ -127,7 +127,7 @@ static func fighting_giver(b: Bot, w: BotWorld) -> Bot:
 	var me := b.character
 	if me.mag.coming > 0 or me.mag.asked < 0:
 		return null
-	var giver := _character(w, me.mag.asked)
+	var giver := w.character(me.mag.asked)
 	var gb := bot_of(giver, w) if giver != null else null
 	if gb == null or not gb.has_last_known or (gb.mode != Bot.Mode.FIGHT and gb.mode != Bot.Mode.COVER):
 		return null
@@ -159,7 +159,7 @@ static func move(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 			return false
 		b.mag_rush = _flat(to.position, me.position) > cfg.mag_hurry_distance
 		return _walk_to(b, w, to.position, _up_to(me, to, w), dt)
-	var giver := _character(w, me.mag.asked) if me.mag.coming == 0 else null
+	var giver := w.character(me.mag.asked) if me.mag.coming == 0 else null
 	if giver == null or bot_of(giver, w) != null:
 		_stand(b)
 		return false
@@ -251,13 +251,6 @@ static func _walk_to(b: Bot, w: BotWorld, goal: Vector3, arrive: float, dt: floa
 static func _stand(b: Bot) -> void:
 	if b.route_state != Bot.RouteState.WANTED:
 		b.route_state = Bot.RouteState.NONE
-
-
-static func _character(w: BotWorld, id: int) -> Character:
-	for c in w.characters:
-		if c.id == id:
-			return c
-	return null
 
 
 static func _flat(a: Vector3, b: Vector3) -> float:

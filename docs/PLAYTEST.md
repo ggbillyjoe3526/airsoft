@@ -38,7 +38,8 @@ replays the same match.
 What to play in the build in your hands: your checklist of open checks is
 `/mnt/project-files/playtest/0.1-beta1-checklist.md` in the project's shared files (0.1 Dev 3's is
 `0.1-dev3-checklist.md`, 0.1 Dev 2's `0.1-dev2-checklist.md`, 0.1 Dev 1's `0.1-dev1-checklist.md`), and each pull
-request names its sections here. For the core slice:
+request names its sections here. On 2026-11-15 the Beta 1 list's 120 checks were cleared without play where they
+could be and the list rewritten to the 22 that need the owner; `docs/records/BC1.md` gives each old check's outcome. For the core slice:
 [Movement](#movement), [Shooting and reloads](#shooting-and-reloads), [BBs](#bbs), [Players and replicas](#players-and-replicas), [Rounds and matches](#rounds-and-matches),
 [Depot](#depot), [Bots](#bots) and [Builds and the desktop](#builds-and-the-desktop).
 
@@ -1706,6 +1707,16 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 - [ ] **At 10 to 40 m** a face still reads as eyes and brows in the opening, with no shimmer or ragged dark ring
   round the eyes as the bot moves,
   and none along the opening's lower hem on the cap (look at 1 m too).
+
+## Plant The Bomb's fuse on each field (PB4)
+
+- [ ] **A short fuse is fair to the defenders.** Defend on Depot (16 s fuse), Woodland (23 s) and Subway (22 s) at
+  Normal and Hard; let the attackers arm the bomb on the site nearest you and on the one farthest away, then go for
+  it. The Match page says the field's fuse under the rules.
+  Pass: from the near site you always have time to defuse it yourself; from the far site it is a race you can win if
+  you go at once; your bots still leave the defuse to you while you are close.
+- [ ] **Attacking is worth it now.** Attack on the same fields and hold the site after the plant.
+  Pass: holding the site feels like it wins rounds; the bomb goes off now and then, not every time.
 
 ## Reporting what you find
 

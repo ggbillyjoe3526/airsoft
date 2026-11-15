@@ -40,6 +40,8 @@ var callouts: Callouts = null
 ## The ping book (PN1): each character's ping, a press resolved into a spot or a contact, or a teammate's mark from a
 ## Contact call; cleared each round. The presentation reads it.
 var pings: Pings = null
+## The enemies spotted (CW1): who is marked for which team, until when; cleared each round. The presentation reads it.
+var spots: Spots = null
 ## When the round under way started (s of match time), and whether Dev settings › Bots run low on BBs has put this
 ## round's bots low yet.
 var _round_started_at: float = 0.0
@@ -100,6 +102,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	w.setup_sectors(w.planner.bounds_lo, w.planner.bounds_hi)
 	orders = SquadOrderBook.new(w)
 	pings = Pings.new(state.characters, tuning.pings)
+	spots = Spots.new(state.characters, tuning.pings)
 	if options.talk:
 		callouts = Callouts.new(CalloutsFile.shared(), config.callouts, map.areas, state.match_seed)
 		callouts.bomb_heard = config.plant_heard
@@ -138,6 +141,8 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	BotMagShare.update(w, sharing)
 	# What the bots saw a moment ago, told to their teammates (BQ3).
 	BotRadio.step(w)
+	# Where the enemies spotted are now, told to the spotters' teammates near them (CW1).
+	spots.step(w)
 	if w.mode == RoundState.Mode.ATTACK_DEFEND:
 		BotFlag.pick_retakers(w)
 		BotFlag.pick_raiser(w)
@@ -279,7 +284,8 @@ func _record_hit(state: GameState, shooter_id: int, bounced: bool) -> void:
 ## A PING event `e` in `state`'s tick (PN1): the pinger's ping in the book (Pings.place) and, if it marks anything, taken by
 ## each of their bot teammates (Pings.take: a bot fighting, in cover or with a target in view doesn't). A Go there ping
 ## (FM1) is an order instead: its floor spot (Pings.move_spot) goes to SquadOrderBook.give_move, and its marker is
-## Hold here's; so is a Watching here (BP8: SquadOrderBook.give_watch), marked by Hold here's marker as Watching.
+## Hold here's; so is a Watching here (BP8: SquadOrderBook.give_watch), marked by Hold here's marker as Watching. A
+## Spotted (CW1) marks the enemy under the view instead (Spots.place).
 func _ping(e: GameEvent, state: GameState) -> void:
 	if e.value2 == 1:
 		orders.give_move(state.character(e.actor), pings.move_spot(e, world))
@@ -290,11 +296,21 @@ func _ping(e: GameEvent, state: GameState) -> void:
 	if e.value2 == GameEvent.PING_WATCH:
 		orders.give_watch(state.character(e.actor), pings.move_spot(e, world))
 		return
+	if e.value2 == GameEvent.PING_SPOT:
+		spots.place(e, state.time, world, pings)
+		return
 	var p := pings.place(e, state.time, world)
 	if p == null:
 		return
+	# A spot is where its pinger is heading (CW1): who comes along is each bot's call (Pings.follow); a contact is an
+	# enemy there for all of them.
+	var giver := state.character(p.owner)
 	for b in world.bots:
-		if b.character.team == p.team and b.character.id != p.owner:
+		if b.character.team != p.team or b.character.id == p.owner:
+			continue
+		if p.kind == Pings.Kind.SPOT:
+			Pings.follow(b, p, giver, world)
+		else:
 			Pings.take(b, p, world)
 
 
@@ -311,6 +327,7 @@ func _new_round(state: GameState) -> void:
 	_ran_low = false
 	orders.clear()
 	pings.clear()
+	spots.clear()
 	world.time = state.time
 	_sync_round(state)
 	world.clear_sectors()

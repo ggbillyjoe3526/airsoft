@@ -1,6 +1,6 @@
 extends GutTest
 ## The magazine hand-off on H, the order wheel and the screen (MH3; concepts `step27/wheel-need-a-mag.png` and
-## `step27/mag-hand-off.png`): Need a Mag's key and the wheel's fifth item (each pressing mag_hand_off once, dead on the
+## `step27/mag-hand-off.png`): Need a Mag's key and the wheel's Need a Mag (each pressing mag_hand_off once, dead on the
 ## range and while you are out), Toss a Mag in reach, a refusal in the wheel's middle or on the line, the line's words
 ## (who needs one and how far, underlined in reach; whose is coming; what you caught; why not, for 2.5 s), hidden under
 ## the open wheel and with Settings › HUD › Mag hand-off off, the glyph by the chevron, the screen reader's messages, the
@@ -13,9 +13,9 @@ const NAMES := ["", "Rook", "Brick", "Fox"]
 const YOU := 0
 const ROOK := 1
 const BRICK := 2
-## The order wheel's pointer on its last item, Need a Mag, upper left (288 degrees clockwise from the top; its slice
-## centred on 309 of the seven).
-const UPPER_LEFT := Vector2(-80.0, -26.0)
+## The order wheel's pointer on Need a Mag, the right column's fourth button (CW1).
+const ON_MAG := Vector2(200.0, 87.0)
+const MAG_BUTTON := 3
 
 var tuning := SimTuning.new()
 var loadout: Array[ReplicaConfig] = []
@@ -37,7 +37,7 @@ func before_all() -> void:
 
 func before_each() -> void:
 	controls = ControlsConfig.new()
-	wheel = OrderWheelPointer.new(controls.wheel_reach, controls.wheel_dead_zone, controls.wheel_orders.size())
+	wheel = OrderWheelPointer.new(OrderWheelLayout.new(controls))
 	outcome = SquadOrders.Outcome.new()
 	input = null
 
@@ -182,16 +182,15 @@ func test_h_is_dead_on_the_range_and_while_you_are_out() -> void:
 	assert_false(cmd.mag_hand_off, "a press made just before going out is dropped")
 
 
-func test_the_wheels_fifth_item_upper_left_does_what_h_does() -> void:
-	assert_eq(controls.wheel_orders.size(), 7, "Go There (FM1) and Watching Here (BP8) made it seven")
-	assert_eq(controls.wheel_orders[6], SquadOrder.Kind.MAG)
-	assert_eq(controls.wheel_keys[6], &"mag_hand_off")
-	assert_eq(OrderWheelPointer.slice(UPPER_LEFT, 7, controls.wheel_dead_zone), 6, "upper left")
+func test_the_wheels_need_a_mag_does_what_h_does() -> void:
+	assert_eq(controls.wheel_orders[MAG_BUTTON], SquadOrder.Kind.MAG)
+	assert_eq(controls.wheel_keys[MAG_BUTTON], &"mag_hand_off")
+	assert_eq(OrderWheelLayout.new(controls).pick(ON_MAG), MAG_BUTTON, "the right column's fourth")
 	for pick: ControlsConfig.WheelPick in [ControlsConfig.WheelPick.HOVER, ControlsConfig.WheelPick.CLICK]:
 		controls.wheel_pick = pick
 		_make_input()
 		_event(&"order_wheel", true)
-		_move(UPPER_LEFT)
+		_move(ON_MAG)
 		if pick == ControlsConfig.WheelPick.CLICK:
 			_event(&"fire", true)
 			_event(&"fire", false)
@@ -228,23 +227,21 @@ func test_a_bot_playing_you_keeps_its_own_press() -> void:
 	_event(&"mag_hand_off", false)
 
 
-func test_the_wheel_draws_need_a_mag_upper_left_with_h_and_toss_a_mag_in_reach() -> void:
+func test_the_wheel_draws_need_a_mag_and_toss_a_mag_in_reach() -> void:
 	_match()
 	wheel.start()
-	wheel.at = UPPER_LEFT
+	wheel.at = ON_MAG
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, DT)
 	var w := hud.order_wheel()
-	assert_eq(w.slice_name(6), "NEED A MAG")
-	assert_eq(w.slice_key(6), "H")
-	assert_eq(w.lit_slice(), 6)
-	assert_true(w._label_at[6].x < 0.0 and w._label_at[6].y < 0.0, "upper left")
+	assert_eq(w.slice_name(MAG_BUTTON), "NEED A MAG")
+	assert_eq(w.lit_slice(), MAG_BUTTON)
 	_last_mag(state.characters[ROOK])
 	_tick([ROOK])
 	assert_true(_line().toss_ready(), "Rook asked you and is 4 m off")
-	assert_eq(w.slice_name(6), "TOSS A MAG")
+	assert_eq(w.slice_name(MAG_BUTTON), "TOSS A MAG")
 	state.characters[ROOK].position.x = 12.0
 	_tick()
-	assert_eq(w.slice_name(6), "NEED A MAG", "out of reach: asking again")
+	assert_eq(w.slice_name(MAG_BUTTON), "NEED A MAG", "out of reach: asking again")
 
 
 # --- criterion 2: a refusal, and the radio click ---
@@ -256,7 +253,7 @@ func test_a_refusal_from_the_wheel_shows_in_its_middle_and_from_h_on_the_line() 
 	assert_eq(hud.order_wheel().notice_text(), "")
 	_ticks(160)
 	wheel.start()
-	wheel.at = UPPER_LEFT
+	wheel.at = ON_MAG
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, DT)
 	wheel.close()
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, DT)

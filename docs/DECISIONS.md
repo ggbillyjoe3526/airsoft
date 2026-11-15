@@ -522,11 +522,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 ## Bots and balance
 
 - **The audit's play questions (owner, 2026-11-14, AUD1).** Bots keep squeezing past Subway's works wagons on the
-  track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a
-  6 s defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots
-  only. A holstered bot's arms swing as it steps, a switch between two replicas of one class plays its own put-away
-  and draw, and a slow-sprung Sniper Rifle's bolt is home with the recording's last knock: looks only, the timing of
-  a shot or a switch is unchanged.
+  track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a 6 s
+  defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots only.
+  (The fuse is replaced by each field's own on 2026-11-15, PB4, below.) A holstered bot's arms swing as it steps, a
+  switch between two replicas of one class plays its own put-away and draw, and a slow-sprung Sniper Rifle's bolt is
+  home with the recording's last knock: looks only, the timing of a shot or a switch is unchanged.
+- **Plant The Bomb's fuse is each field's own (owner's ask, 2026-11-15, PB4; the values are Claude's).** He asked for
+  the attackers' win rate to be made fairer. The fuse is the lever (data/maps.md `Fuse (s)`, the game's 30 s where a
+  field has none), set from bot matches to near half the rounds for the attackers: Depot 16 s, Subway 22 s, Woodland 23
+  s. The defuse stays 6 s and the plant 3.5 s, the lengths of his recordings. A field whose layout
+  changes has its fuse measured again (32 seeds at Normal, `docs/records/PB4.md`), and every fuse leaves a defending
+  player within 15 m of the bomb time to reach it before a bot takes the defuse over.
 - **Bots throw their bombs as a player would (2026-10-30, SF2; Claude's defaults).** A smoke when pinned in cover
   (an enemy BB close in the last 2 s) by someone 8 to 35 m off with no cloud between them yet, half way to them; a flash
   round a corner it is searching toward, 4 to 16 m off, landing before its bang and never where a teammate close by
@@ -605,6 +611,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   defaults).** An enemy counts only if the bots' own sight rules let you see them, and the mark stays over where they
   were seen, never following them, on screen and on the minimap (step 27 plan). One teammate answers each ping.
   Numbers: `legacy/browser/docs/records/PG1.md`.
+- **The comms wheel, Spotted, the ping as intention and Cover me (owner, 2026-11-15, CW1).** The order wheel is Spotted in a
+  circle in the middle with four same-size buttons a side, names only: right Watching Here, Follow Me, Cover Me, Need
+  a Mag; left Team Plan, Go There, Hold Here, Regroup. A tap of its key spots the enemy under the view: a yellow arrow
+  over them for 10 s, seen through cover, and bot teammates near them go after them or watch them. A ping of a spot
+  says you are heading there: teammates near you may come along, never must; Go There is the strict order. Claude's
+  defaults (`docs/records/CW1.md`): a 60 % roll within 40 m, shared within 30 m, Cover me as one helper beside you
+  until you are 30 m off.
 - **Bots ask the nearest teammate within 30 m for a magazine, and bring one when asked (2026-10-15, MG1).** Fights and
   cover come first. Dev settings › Bots run low on BBs (a cheat, off) shows the bot side.
 - **Routes are searched one a tick, bots and walk-offs sharing the turn (2026-10-18, BE1).** The search is Godot's
@@ -978,6 +991,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   should be less bright. I don't like the wooden sniper rifle so remove that and keep polymer." So black metal is
   the darkest, black polymer a shade lighter, white polymer an off-white, and the sniper's stock stays polymer; no
   replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
+- **Metal and polymer are a close shade (owner, 2026-11-15, MQ4; replaces the MQ1 shades above).** "Materials on guns
+  clash too much. Metal is too shiny and the polymer is relatively very dark. Materials should generally be a close or
+  similar shade but appear slightly more metallic (metals) or matte (polymer)." Steel and aluminium are now a satin
+  coat (about half metallic, a broad highlight, near black when painted black) and polymer draws its paint nearly
+  as it is; white polymer stays a touch off-white and no replica is wood. He answered "Perfect" to the pictures; the
+  values are not re-tuned without him (docs/records/MQ4.md).
 - **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
   handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
   sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip

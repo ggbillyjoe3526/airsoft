@@ -69,8 +69,9 @@ sides swap at half time. Every field has both sites.
   replica comes back. Bots crouch beside it, no weapon in hand. While you carry the bomb it shows as a row in your
   weapon rail ([HUD](HUD-and-Minimap#the-weapon-rail)), lit while you set it. A code beeps as it is keyed in, and anyone within about <!-- wiki:config sound_config.plant_work_reach -->
   m hears it.
-- **Armed**, **BOMB ARMED** shows under the score bar for everyone, and the bomb goes off after **<!-- wiki:config plant_config.fuse_time --> seconds**, beeping faster as its
-  time runs down. The round's clock stops mattering: only the fuse counts now.
+- **Armed**, **BOMB ARMED** shows under the score bar for everyone, and the bomb goes off after its fuse runs out, beeping faster as its
+  time runs down. Each field has its own fuse, shorter where the defenders' way back to a site is short: the
+  [Maps](Maps) table lists each field's, and the Match page says it under the rules when you pick Plant The Bomb. The round's clock stops mattering: only the fuse counts now.
 - **Defusing:** a defender within reach of the armed bomb holds <!-- wiki:key use_door --> for
   **<!-- wiki:config plant_config.defuse_time --> seconds**, replica put away as for planting. Past half way the work is kept: let go after that and
   the next try starts from half.

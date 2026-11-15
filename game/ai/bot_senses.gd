@@ -143,7 +143,7 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 			best_part = part
 			best_d = d
 	if best != null and best.id != b.target_id and b.target_id >= 0:
-		var cur := _character(w, b.target_id)
+		var cur := w.character(b.target_id)
 		if cur != null and Elimination.is_in_play(cur) and _flat(me.position, cur.position) - best_d < cfg.target_switch_margin:
 			var part := visible_part(me, cur, w, sight_reach(b, cur, w))
 			if part > 0.0:
@@ -198,7 +198,7 @@ static func current_target(b: Bot, w: BotWorld) -> Character:
 	if w.time - b.last_seen_at() > w.cfg.memory_time:
 		b.forget_target()
 		return null
-	var c := _character(w, b.target_id)
+	var c := w.character(b.target_id)
 	if c != null and Elimination.is_in_play(c):
 		return c
 	b.forget_target()
@@ -274,13 +274,6 @@ static func _contact_for(b: Bot, id: int) -> Bot.Contact:
 		c = Bot.Contact.new()
 		b.contacts[id] = c
 	return c
-
-
-static func _character(w: BotWorld, id: int) -> Character:
-	for c in w.characters:
-		if c.id == id:
-			return c
-	return null
 
 
 static func _flat(a: Vector3, b: Vector3) -> float:
