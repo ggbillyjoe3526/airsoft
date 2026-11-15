@@ -30,7 +30,7 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
   some burn dimmer and warmer, a few flicker now and then, and a couple are dead, the same ones every match.
 - **It sounds like a big empty hall:** a quiet hum of the building, with the odd creak from the roof.
 - **No full auto indoors:** as at a real indoor site, every replica that can fire full auto starts each round on
-  single shots here, bots' too. Press **B** to switch to auto during the round if you want it. Bots switch only now
+  3-round bursts here (single shots if it has no burst), bots' too. Press **B** to switch to auto during the round if you want it. Bots switch only now
   and then, at someone out in the open down one of Depot's long sight lines.
 - **Long sight lines** down the Chrono hall and the yards: bots on Depot see 55 metres, further than on other fields.
 - **The Box** sits in the Box yard: a roofed container you can fight inside, and container rows with ports guard

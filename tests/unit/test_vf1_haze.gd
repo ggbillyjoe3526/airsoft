@@ -132,10 +132,11 @@ func test_a_corrupt_old_custom_row_is_left_for_the_reader_to_drop() -> void:
 	assert_eq(Settings.migrate_defaults({}, 3), {})
 
 
-func test_a_version_three_files_volumes_are_not_moved_again() -> void:
-	var data := {"volumes": Settings.VOLUME_DEFAULTS_V2.duplicate()}
+func test_a_version_three_files_own_volumes_are_not_moved_by_the_haze_step() -> void:
+	# Volumes the player set (none on an old default, no Power source, which FV1 rescales) come through as they were.
+	var data := {"volumes": {"Master": 0.6, "Effects": 0.5, "Ambience": 0.3, "Interface": 0.1}}
 	var moved := Settings.migrate_defaults(data, 3)
-	assert_eq(moved["volumes"], data["volumes"], "version 3 already has the current volume defaults")
+	assert_eq(moved["volumes"], data["volumes"], "only the haze row and FV1's old defaults move")
 
 
 func test_only_forward_plus_draws_the_haze_at_any_level() -> void:

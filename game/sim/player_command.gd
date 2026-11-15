@@ -23,6 +23,10 @@ var jump: bool = false
 var aim: bool = false
 ## Trigger held. Semi fires on the press only.
 var fire: bool = false
+## Ends a burst under way, and drops a press kept for later (FV1): a bot sets it when its line of fire is no longer
+## clear (a teammate stepped in, its aim left the target), as it lets off on full auto. The player's input never sets
+## it: a player's burst runs its course.
+var stop_burst: bool = false
 var reload: bool = false
 ## The controller's reload setting, not a press: on, an empty magazine stays in until a reload is asked (the player's
 ## Settings › Controls › Reload: Manual, RL2), and the trigger only clicks dry; off (bots, the pilots), the dry click
@@ -106,6 +110,7 @@ func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
 	jump = false
 	aim = false
 	fire = false
+	stop_burst = false
 	reload = false
 	manual_reload = false
 	switch_to = -1
@@ -148,6 +153,7 @@ func copy_from(other: PlayerCommand) -> void:
 	jump = other.jump
 	aim = other.aim
 	fire = other.fire
+	stop_burst = other.stop_burst
 	reload = other.reload
 	manual_reload = other.manual_reload
 	switch_to = other.switch_to

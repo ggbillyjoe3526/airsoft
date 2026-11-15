@@ -233,7 +233,7 @@ own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a 
 - [ ] **Lasers, the Dev Easter egg** (LZ1). With Settings › Dev › Lasers off (it starts off), BBs fly, arc and hit
   exactly as before. Turn it on: every replica, yours and the bots', fires a solid beam in its team colour that hits at
   once (no flight, no drop). Semi and the Sniper Rifle flash once a shot, burst flashes three times, and full auto keeps
-  the beam on while the trigger is held (try the AEG outdoors: indoor maps start on semi). The beam starts at the
+  the beam on while the trigger is held (try the AEG outdoors: indoor maps start on burst). The beam starts at the
   muzzle, ends on what it hit, and plays the laser sound instead of the shot. Bots hit more often (nothing to dodge);
   is it fun? Turn it off mid-match: the next shot is a BB again.
 - [ ] **Hit flinch.** Hit a bot side-on, then one from behind (with Dev › Robots on, try a robot too): its upper body
@@ -440,9 +440,10 @@ An asymmetric warehouse yard. Attackers start in the west yard, defenders in the
 flagpole stands in the walled loading bay. Three lanes lead there: **Dock Road** (north, along a raised loading dock),
 **Container Alley** (the middle, through the Main Gate) and the **Office** (south, close quarters).
 
-- [ ] **No full auto indoors** (NA1). Start a Depot match with the AEG: the selector (the replica and the HUD chip)
-  shows single shots. Press **B** twice: auto, and it fires full auto. Next round it is back on single shots. Bots on
-  Depot fire single shots (a quick tap-tap); only now and then, at you out in the open down a long line (the Chrono
+- [ ] **No full auto indoors** (NA1; burst since FV1). Start a Depot match with the AEG: the selector (the replica and
+  the HUD chip) shows burst. Press **B**: auto, and it fires full auto. Next round it is back on burst. With the
+  Compact SMG it starts on single shots. Bots on Depot fire 3-round bursts (a quick brrt, a short gap, again); only
+  now and then, at you out in the open down a long line (the Chrono
   hall), does one switch to a full-auto buzz, never at you in a cramped room or round a short corner. On Woodland
   the AEG starts on auto and keeps the mode you pick from round to round.
 - [ ] **Walk all three lanes from the west yard to the pole.** None has a dead end and you can tell which you're in.
@@ -1053,7 +1054,7 @@ file, Dev).
   bind; Reset All asks first. By keyboard only: Tab to a box, Enter, press a key.
 - [ ] **Your keyboard layout** (AZERTY or QWERTZ). Move forward shows as Z (AZERTY) and the order
   wheel as W or Y; the reload hint uses the same letters.
-- [ ] **Display.** Field of view starts at 90° (120° shows more at the sides, 80° less). Fullscreen (or F10) goes
+- [ ] **Display.** Field of view starts at 87° (FV1; a save still on the old 90° moves to it; 110° shows more at the sides, 80° less). Fullscreen (or F10) goes
   fullscreen and back with play carrying on ([Builds and the desktop](#builds-and-the-desktop)). No Tone mapping row
   here or in Graphics.
 - [ ] **Dev group.** Debug info, BB paths, Game speed (25 % to 200 %), Bottomless magazines and Ghost (BBs pass
@@ -1088,8 +1089,9 @@ Headphones help: direction (in front, behind, above) comes through best on them.
   stays clear. Pausing mid-burst and resuming makes no click.
 - [ ] **Settings › Audio.** Master, Effects, Power source volume (each replica's motor, gas and spring, yours and the
   bots'), Ambience and Interface (hit tick, marker, whistle), each at once and kept.
-- [ ] **Audio defaults (FB2).** A new save, and a delete-save, start Master 100 %, Effects 70 %, Power source 100 %,
-  Ambience 30 %, Interface 40 %. A save from before moves only the volumes you never touched; ones you set stay.
+- [ ] **Audio defaults (FV1).** A new save, and a delete-save, start Master 90 %, Effects 80 %, Power source 80 %,
+  Ambience 30 %, Interface 40 %. A save from before moves only the volumes you never touched; ones you set stay, and a
+  Power source you set is moved down so it sounds the same (Power source 80 % is the old 100 %; 100 % is louder).
 - [ ] **Output devices.** F3 shows the audio latency (about 10 to 40 ms). Anything that sounds like a firearm, harsh, or
   too loud? Say which.
 
