@@ -624,8 +624,8 @@ Settings › Dev › Dev content.
 - [ ] **The tracks and trains (MT1, CL1).** Drop off a platform's edge into the track: no steps lead back up; you
   climb out over the edge (Jump). Walk through the north train's open doors, and the south train from its
   platform doors to its east cab door and down the steps into the south tunnel.
-- [ ] **Close quarters above, long lines below (MT1, SW1).** Above the platforms no line runs past about 57 m (the
-  hall to the passages, with fewer lockers since SW1); the platforms open to about 58 m. Does each level play as
+- [ ] **Close quarters above, long lines below (MT1, SW1).** Above the platforms no line runs past about 67 m (the
+  hall's west end into the north passage, with fewer lockers since SW1); the platforms open to about 58 m. Does each level play as
   meant, and do the bots hold and push through both?
 - [ ] **The flags (MT1).** Attack / Defend: flag A stands inside the south train's first car, B on the stair's half
   landing, both on short poles that fit under the roof; Elimination's overtime flag rises in the lower hall.

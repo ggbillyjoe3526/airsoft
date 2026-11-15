@@ -13,7 +13,7 @@ recommended Subway concept A (two more lanes, the north passage's and the west p
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (lint, wiki, smoke, the touched unit files; the rest in CI) | CRITIC_ROW | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (lint, wiki, smoke, 9 touched unit files 127/127; the rest in CI) | CRITIC_ROW | – |
 
 ## What changed
 
@@ -23,8 +23,8 @@ recommended Subway concept A (two more lanes, the north passage's and the west p
   side; the ticket office, kiosk, machines, booking counter and cable drums stand in the hall.
 - **Lifts of two stops** (Platforms, Ticket hall), 4 s a stop as before, now for 8 m (was 4 s for each of 4.5 m and
   8 m stops).
-- **The spiral stair works.** Eight flights from beside the gates down to the south platform's west half (x -29) (it ran ten,
-  street level to the booking hall). Its top landing now runs to the well's walls and meets the floor round the hole
+- **The spiral stair works.** Eight flights from beside the gates down to the south platform's west half (x -29; it
+  ran ten, street level to the booking hall). Its top landing now runs to the well's walls and meets the floor round the hole
   flush: before, a 15 cm slot between landing and floor read as a drop on the bots' grid, so no bot route ever took
   the stair (players could). A body walks it down in about 7.8 s (sprinting 5.8 s); the bots' route through it is
   24.6 m, about 5.5 s.
@@ -48,7 +48,11 @@ Bot matches, 6v6, Normal (`tools/balance.sh`'s runner, seeds 1 to 32, the field'
 | Plant The Bomb: armed / gone off | 82 % / 8 of 239 rounds (PB4, before BC1) | 70 % / 4 of 165 armed | – |
 | Rounds that run out the clock | 0 | 0 in every mode | ≤ 10 % |
 
-HARD_ROWS
+At Hard (16 seeds; band 40 to 60 %): Elimination's west end 58.8 % ±4.5 (70 of 119; 50.0 % ±4.6 at AUD1) and Alpha
+47.1 % ±4.6, the attackers 58.8 % ±4.5 of Attack / Defend (58.4 % at AUD1) and 57.1 % ±4.5 of Plant The Bomb (58.3 %
+at PB4); no clock-outs. All three are in the band near its top edge: Attack / Defend and Plant The Bomb where they
+were, the west end up about 9 points, under two standard errors of the difference (6.4), so within the noise. It is
+the one to watch.
 
 No figure left its band, so nothing was tuned: the fuse stays 22 s (the attackers' share moved by less than
 the noise, though the bomb is armed in fewer rounds).
@@ -64,7 +68,7 @@ The map heat tool (`tools/map_heat.gd`, 8 seeds a mode, the MR1 report's measure
 | Attack / Defend: hits outside the defenders' third | – | 44 % |
 | Plant The Bomb: attackers' share | 52 % (30 s fuse) | 45 % (25 of 56, 22 s fuse) |
 | Spawn to spawn walk | 147 m | 135 m |
-| Upper level's longest sight line | 28 m | 57 m |
+| Upper level's longest sight line (the field checks') | 28 m | 66.8 m |
 
 ## Decisions
 
@@ -77,8 +81,9 @@ The map heat tool (`tools/map_heat.gd`, 8 seeds a mode, the MR1 report's measure
   hall's foot can't go now that the hall is on the concourse's floor: the owner asked for it "to get down to the
   platform".
 - **Which lockers went:** the ones that cut the passages' long axis (13 m and the mouths); the wall-side chicane
-  lockers stay so each passage still has cover, and the longest upper line (57 m, the spawn area to the passages)
-  stays under the platforms' 58 m.
+  lockers stay so each passage still has cover, and the longest upper line, 66.8 m from the hall's west end into
+  the north passage, becomes the field's longest: `FieldStandard`'s Subway exception rises from 60 to 68 m with the
+  owner's words as its reason (he asked for longer lines; bots still see 50 m).
 - **Two lanes added, the spiral's and the north passage's (MR1 concept A).** DECISIONS' lane rule (no lane on a way a
   bot is slow on) now lets the spiral stair have one: it is a 6 s walk.
 - **The cable drums and booking counter stay** in the new hall: SM4's and SM3's models and tests need them, and they
@@ -88,4 +93,4 @@ The map heat tool (`tools/map_heat.gd`, 8 seeds a mode, the MR1 report's measure
 ## Known issues left
 
 - The balance row in `docs/KNOWN_ISSUES.md` (Maps, Subway) carries the new figures; Easy was not re-measured, and the
-  upper level's 57 m line joins the platform's under the field checks' Subway exception (`FieldStandard`).
+  upper level's 67 m line joins the platform's 58 m under the field checks' Subway exception (`FieldStandard`).
