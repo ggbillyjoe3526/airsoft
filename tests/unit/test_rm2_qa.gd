@@ -338,3 +338,30 @@ func test_short_lines_with_variants_keep_their_ends_and_use_no_variant() -> void
 			assert_eq(names[-1], &"sandbags_end")
 		if cells == 3:
 			assert_true(SANDBAG_SECTIONS.has(names[1]), "the middle cell is a main section")
+
+
+func _line_cfg(cfg: PropDressConfig, size: Vector3, boxes: Dictionary[StringName, AABB]) -> Dictionary[StringName, PropLayout.Placed]:
+	var out: Dictionary[StringName, PropLayout.Placed] = {}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	var picks: Array[StringName] = [&"sandbags"]
+	PropLayout._grid(out, picks, boxes, Vector3.ZERO, size, Vector3(1.2, 0.9, 0.6), cfg, rng, &"sandbags")
+	return out
+
+
+func test_a_two_name_grid_ends_entry_still_closes_a_one_cell_line_with_the_start_model() -> void:
+	var cfg := play.site_look.props.duplicate() as PropDressConfig
+	cfg.grid_ends = {&"sandbags": PackedStringArray(["sandbags_start", "sandbags_end"])}
+	var out := _line_cfg(cfg, Vector3(1.2, 0.9, 0.6), _boxes())
+	assert_eq(out.keys(), [&"sandbags_start"] as Array)
+	var many := _line_cfg(cfg, Vector3(3.6, 0.9, 0.6), _boxes())
+	assert_true(many.has(&"sandbags_end") and not many.has(&"sandbags_single"))
+
+
+func test_a_one_cell_line_along_z_and_a_multi_row_one_cell_line_take_the_single_model() -> void:
+	var cfg := play.site_look.props
+	var z_line := _line_cfg(cfg, Vector3(0.6, 0.9, 1.2), _boxes())
+	assert_eq(z_line.keys(), [&"sandbags_single"] as Array)
+	var rows := _line_cfg(cfg, Vector3(1.2, 0.9, 1.8), _boxes())
+	for name: StringName in rows:
+		assert_eq(name, &"sandbags_single", "every row of a one-cell line is closed at both ends")
