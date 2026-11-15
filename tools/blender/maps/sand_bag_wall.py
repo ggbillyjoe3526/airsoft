@@ -72,7 +72,10 @@ HEADED = 0  # the parity of the courses a wall's end lays a header across, its e
 # Points round a bag, (across, up) from its widest line: 13 on its sides and crown, 0 and 180 degrees its widest (the
 # ears' corners); its foot, flat where it sits, is the chord between the first and the last.
 ARC = [math.radians(a) for a in (-55, -25, 0, 25, 50, 70, 90, 110, 130, 155, 180, 205, 235)]
-FOOT = (0, len(ARC) - 1)  # the points that stay down on the course below
+ROUND_PTS = 20
+# A bag seen end on (a header, or one closing the wall's end: `Bag.end_on`) shows its round as its outline, so it
+# has 20 points over its crown, from one ear to the other (sixth pass: 9 drew corners against the sky at 1 m).
+ARC_ROUND = [math.radians(a) for a in [-40.0] + [180.0 * k / (ROUND_PTS - 1) for k in range(ROUND_PTS)] + [220.0]]
 SIDE_ROUND = 2.3  # the belly's squareness (2 an ellipse): full shoulders, a soft crown
 FOOT_ROUND = 4.0  # flatter underneath: it spreads where it sits
 CENTRE = (0.36, 0.43)  # its widest line, a share of its height up: lower where the fill has slumped
@@ -84,7 +87,15 @@ END = ((0.0, 1.04, 0.32, 0.0, 0.026), (0.02, 1.01, 0.5, 0.15, 0.012), (0.06, 0.9
 # An end pressed full against a header's side, so no light shows between them.
 PRESSED = ((0.0, 0.94, 0.8, 0.2, 0.0), (0.015, 0.975, 0.9, 0.45, 0.0), (0.05, 0.995, 0.96, 0.7, 0.0),
            (0.14, 1.0, 0.985, 0.9, 0.0))
-DOME = 0.012  # m an end seen end on bulges past its seam
+# A bag seen end on pays for its 20-point crown with fewer stations along it: its ends' four in three, and no belly
+# station on a bag too short to need one.
+END_ROUND = (END[0], (0.04, 1.0, 0.62, 0.3, 0.004), END[3])
+PRESSED_ROUND = (PRESSED[0], (0.03, 0.985, 0.93, 0.58, 0.0), PRESSED[3])
+# The end seen end on: a pillow's end, its rings each inside the next towards the belly, so its outline is the
+# belly's round and no corner shows where a flat seam's ring would stand out past it.
+ON_END = ((0.0, 0.93, 0.6, 0.2, 0.008), (0.04, 0.985, 0.84, 0.5, 0.0), (0.14, 1.0, 0.96, 0.85, 0.0))
+BELLY_ROUND = 0.62  # m: such a bag shorter than this has no belly station (a header, most closing bags)
+DOME = 0.04  # m an end seen end on bulges past its seam, at its middle
 INTO_HEADER = 0.035  # m such an end runs into the header
 LUMP = 0.008  # the sacking's lumps, m in or out
 CREASE = 0.006  # its creases fanning in from the ears, m at the seam
@@ -98,19 +109,19 @@ def _pow(v: float, e: float) -> float:
     return math.copysign(abs(v) ** e, v)
 
 
-def _ring(w: float, h: float, kw: float, kh: float, sag: float, centre: float) -> list:
+def _ring(w: float, h: float, kw: float, kh: float, sag: float, centre: float, arc: list = ARC) -> list:
     """A bag's cross-section as (across, up) points from its foot: a loaf w either side and h tall, its widest line
     `centre` of it up, scaled kw across and kh up about that line (the lower half shrinks less, so a bag's ends stay
     down on the course below), its crown dipped `sag` m."""
     pts = []
     c = centre * h
     up, down = (h - c) * kh, c * min(1.0, kh + 0.5)
-    for j, a in enumerate(ARC):
+    for j, a in enumerate(arc):
         cs, sn = math.cos(a), math.sin(a)
         y = w * kw * _pow(cs, 2.0 / SIDE_ROUND)
         if sn >= 0.0:
             z = c + up * _pow(sn, 2.0 / SIDE_ROUND) - sag * sn ** 4
-        elif j in FOOT:
+        elif j in (0, len(arc) - 1):
             z = c - down  # the foot's corners, down where it sits
         else:
             z = c + down * _pow(sn, 2.0 / FOOT_ROUND)
@@ -148,6 +159,7 @@ class Bag:
         self.bed = rng.uniform(*BED)
         # its ends seen end on: a header's both, a bag's at the wall's end (drawn domed, `_dome`)
         self.end_on = tuple(header or abs(abs(e) - HL) < 1e-6 for e in (a0, a1))
+        self.arc = ARC_ROUND if any(self.end_on) else ARC
         self.tie_rng = random.Random(seed + 1)
 
     def middle(self) -> float:
@@ -167,9 +179,11 @@ class Bag:
         """(along from a0, across scale, up scale, sag scale, seam drawn in, its end: -1 a0, 1 a1, 0 the belly); a
         cut bag has one more, where it is cut, the same in both parts."""
         n = abs(self.a1 - self.a0)
-        ends = [PRESSED if p else END for p in self.pressed]
-        st = [s + (-1,) for s in ends[0]] + [(n * 0.5, 1.0, 1.0, 1.0, 0.0, 0)] + \
-             [(n - s[0],) + s[1:5] + (1,) for s in reversed(ends[1])]
+        lean = any(self.end_on)
+        ends = [ON_END if on else (PRESSED_ROUND if lean else PRESSED) if p else (END_ROUND if lean else END)
+                for p, on in zip(self.pressed, self.end_on)]
+        belly = [(n * 0.5, 1.0, 1.0, 1.0, 0.0, 0)] if not lean or n > BELLY_ROUND else []
+        st = [s + (-1,) for s in ends[0]] + belly + [(n - s[0],) + s[1:5] + (1,) for s in reversed(ends[1])]
         if self.cut:
             t = HL - self.a0
             st = [s for s in st if abs(s[0] - t) > 0.004]
@@ -188,7 +202,7 @@ class Bag:
         zc = self.centre * self.h
         out, cut_i = [], None
         for i, (t, kw, kh, ks, recess, end) in enumerate(self.stations()):
-            ring = _ring(self.w, self.h, kw, kh, self.h * self.sag_k * ks, self.centre)
+            ring = _ring(self.w, self.h, kw, kh, self.h * self.sag_k * ks, self.centre, self.arc)
             u = t / n
             # the lumps fade out at the seams and, on a cut bag, at its cut (where both parts must meet alike)
             fade = min(1.0, t / 0.06, (n - t) / 0.06)
@@ -199,8 +213,8 @@ class Bag:
             crease = CREASE * max(0.0, 1.0 - min(t, n - t) / 0.14)
             pts = []
             for j, (y, z) in enumerate(ring):
-                a = ARC[j]
-                if j not in FOOT:
+                a = self.arc[j]
+                if j not in (0, len(ring) - 1):
                     f = 0.6 * math.sin(math.tau * (1.5 * u + p1) + 2.0 * a) + \
                         0.4 * math.sin(math.tau * (2.5 * u + p2) - 3.0 * a)
                     d = LUMP * fade * f + crease * math.sin(3.0 * a + math.tau * p3 + (0.0 if end < 0 else 1.7))
@@ -230,7 +244,7 @@ def _tie(kit: rk.Kit, bag: Bag, ring: list, end: int) -> None:
     5). `ring` is the bag's end ring as built, `end` -1 its a0 end, 1 its a1."""
     from mathutils import Vector
     rng = bag.tie_rng
-    ear = Vector(ring[ARC.index(0.0) if bag.face > 0 else ARC.index(math.pi)])
+    ear = Vector(ring[min(range(len(bag.arc)), key=lambda j: abs(bag.arc[j] - (0.0 if bag.face > 0 else math.pi)))])
     sense = 1.0 if bag.a1 >= bag.a0 else -1.0
     along = Vector((0.0, sense * end, 0.0) if bag.header else (sense * end, 0.0, 0.0))
     side = Vector((bag.face, 0.0, 0.0) if bag.header else (0.0, bag.face, 0.0))
@@ -303,14 +317,11 @@ def _part(kit: rk.Kit, bag: Bag, rings: list, end: int, shift: float) -> None:
 
 
 def _dome(kit: rk.Kit, bag: Bag, ring: list, facing: tuple) -> None:
-    """An end seen end on (a header's, or a bag's at the wall's end): its seam closed by a soft dome, a ring 0.6 of
-    the way in and DOME out, then to its middle, so it reads round, never a flat star."""
+    """An end seen end on (a header's, or a bag's at the wall's end): its seam closed by a low dome to its middle,
+    DOME out, drawn smooth, so it reads round, never a flat star."""
     from mathutils import Vector
     f = Vector(facing).normalized()
-    m = sum((Vector(p) for p in ring), Vector()) / len(ring)
-    inner = [tuple(m + (Vector(p) - m) * 0.6 + f * DOME) for p in ring]
-    _outward(kit, kit.loft([ring, inner], bag.paint, cap0=False, cap1=False), [ring, inner])
-    kit.fan(inner, tuple(f), bag.paint, apex=tuple(f * DOME * 0.5))
+    kit.fan(ring, tuple(f), bag.paint, apex=tuple(f * DOME))
 
 
 _JOINTS = {}
