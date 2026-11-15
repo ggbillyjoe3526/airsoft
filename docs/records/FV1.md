@@ -24,8 +24,8 @@ Bot matches on Depot, 6v6, Normal, seeds 1 to 32 (`tools/balance.sh depot`, LEVE
 | Elimination: either end's share | – | 50.2 % / 49.8 % | 45–55 % |
 | Elimination: rounds that run out the clock | – | 0 % | ≤ 10 % |
 
-All 7 banded figures are in band, none near an edge. The attackers' share moved 4.6 points, inside two standard
-errors of the difference (about 4.5 to 6.4 points), so Depot's 16 s fuse stays. Subway (a Dev map, being reworked
+All 7 banded figures are in band, none near an edge. The attackers' share moved 4.6 points, about one standard
+error of the difference (4.5 points; two would be 9), so Depot's 16 s fuse stays. Subway (a Dev map, being reworked
 in its own thread) was not re-run: its fuse is re-measured on the new layout, as PB4 asks.
 
 ## Decisions
