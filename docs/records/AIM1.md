@@ -60,10 +60,19 @@ Normal bot's first hit takes a median 1.15 s at 10 m, 1.6 s at 20 m and 1.9 s at
   one he feels.
 - **Hard punishes a re-peek of the same corner more than Normal (28 % against 4 % at 10 m).** It watches where you
   ducked (`peek_watch_time`) by design, "careful, not twitchier".
+- **Turning back to an enemy it was not fighting is a re-pick-up too.** A bot refreshes only its chosen target's
+  sighting, so after fighting a nearer enemy for over 0.25 s it pays a re-pick-up (not a full reaction) on the first
+  one, though that one stood in view. It has to find them again; before AIM1 the same switch past the 1.2 s grace was
+  already a full fresh reaction. Refreshing every enemy in sight would cost a sight ray each per check (QA's advisory).
 - **0.25 s for `reacquire_after`:** sight checks run ten a second, so a single missed check (a pole crossing the line)
   is not a new pick-up.
 
 ## Verified
+
+- Bot matches, `SEEDS=16 LEVELS=normal tools/balance.sh depot` (6v6): Elimination Alpha 49.6 % ±4.5 and the west end
+  49.6 % (band 45 to 55), no round to the clock, median round 47.7 s, first hit 14.7 s at 14.5 m; Attack / Defend
+  attackers 49.2 % ±4.4 (38 to 67), median round 42.6 s; Plant The Bomb attackers 37.7 % ±4.4, as before AIM1 (37.9 %,
+  AUD1; its balance is another thread's). Both teams play the same rule, so the shares hold.
 
 - `test_aim1_reacquire` (new): a second peek reacts again within `reacquire_time` with the aim kept at
   `reacquire_settled`, the first sighting unchanged; a 0.2 s flicker changes nothing; past the grace a fresh contact;
