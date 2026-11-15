@@ -1,6 +1,6 @@
 # RV1 · Bots vary their routes and timing each round
 
-**Review:** 1 attempt · critic pending · qa Pass · performance Pass
+**Review:** 2 attempts · critic pending · qa Pass · performance Pass
 
 The owner, 2026-11-15: bots are "too predictive and follow the same routes each time. It should feel more random
 while teams still follow a general strategy/plan", and "bots don't come out far enough and I find myself running
@@ -10,7 +10,8 @@ across the map before anything happens".
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | 6: the route change too small to feel (crossings rare, none on Woodland) |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ | pending | – |
 
 ## Decisions
 
@@ -22,57 +23,58 @@ across the map before anything happens".
   - **Own half first:** a pause at a lane point in the bot's own half is ×0.55. Reason: real players move up fast
     through ground their side holds and slow where the fight will be; it is the lever for "bots don't come out far
     enough".
-  - **Lane shift:** each bot that walks its lane (not a defender) walks every point up to 2.5 m to one side, square to
-    the way to the enemy, the same side all round; half as far, or not at all, where the spot isn't on the point's
-    floor in a straight walkable line from it (`BotMovement._shifted`). Defenders keep their authored posts.
-  - **Lane crossing:** setting off for its next point, a bot may (0.15 a point, at most once a round) cross to the
-    nearest point within 10 m of another lane, on the same floor, no nearer home, among the points it would walk there
-    (`RoundPlanner.walk_points`), preferring the lane fewest teammates walk. Never a defender, the bomb carrier or a
-    bot under a squad order.
+  - **Lane shift:** each bot that walks its lane (not a defender, nor an Elimination anchor: both hold authored
+    posts) walks every point up to 2.5 m to one side, square to the way to the enemy, the same side all round; less
+    far (`lane_shift_tries`, `lane_shift_fallback`), or not at all, where the spot isn't on the point's floor in a
+    straight walkable line from it (`BotMovement._shifted`).
+  - **Lane crossing:** setting off for its next point, a bot may (0.1 a point, at most once a round) cut across to
+    another lane: the nearest point within 45 m and 1.5 m of height (the same storey; a slope's rise is fine), no
+    nearer home, among the points it would walk there (`RoundPlanner.walk_points`), each teammate on that lane
+    counting 8 m further off. Never a defender, the bomb carrier or a bot under a squad order. Reason: the critic's
+    first review (7/8) found the route change too small to feel; at the first 10 m reach Woodland, whose lanes run
+    about 40 m apart, never crossed at all. Now every map crosses (bots a round: Elimination 4.3 to 6.9 of 12,
+    Attack / Defend 2.3 to 3.5, Plant The Bomb 1.8 to 2.9).
   - **Pushed defender** (Attack / Defend, Plant The Bomb): in 35 % of rounds one defender holds 35 % of the way from
     its post to the last point short of the middle. At 50 % / 50 % Woodland's attackers went to 66.5 % (24 seeds,
-    band to 65 %); at 35 % / 35 % 55.9 %.
-- **Lanes stay the authored three a map.** More routes through the unused rooms is a map change, proposed by the map
-  redesign thread; its figures should be re-measured on top of this.
-- **Two tests changed for the new variety, not their intent.** `test_bot_crossfire` pins exact lane points, so it also
-  zeroes `lane_shift` (as it zeroes `lane_jitter`). `test_bot_climbs`' pit test plays up to four rounds, not two: with
-  the new timing, seed 21's first two rounds ended in fights before anyone climbed.
+    band to 65 %); at 35 % / 35 % 53 to 56 %.
+- **Lanes stay the authored three a map.** More routes through the unused rooms is a map change (the map rework
+  threads); this is re-measured on top of them (owner, 2026-11-15: rebalance after the map reworks).
+- **Tests changed for the new variety, not their intent.** `test_bot_crossfire` pins exact lane points, so it also
+  zeroes `lane_shift` (as it zeroes `lane_jitter`); `test_bots`' crouched-teammate case (HV1) was found on the
+  authored lanes, so it zeroes the bots' shift. `test_bot_climbs`' pit test and `test_bot_vaults`' low-wall test play
+  up to four rounds, not two: with the new timing their seed's first two rounds could end in fights before anyone
+  reached the ledge. `test_fg2_qa` allows the one pushed defender past point 2.
 
 ## Verified
 
-Headless bot matches (`tools/map_heat.gd`), Normal 6v6, against today's main at the same seeds. The route sameness
-figure is the mean overlap (Jaccard) of the 4 m cells a team stood in during the first 30 s, between rounds of the
-same end and role (1 = the same ground every round).
+Headless bot matches (`tools/map_heat.gd`, a scratch copy counting crossings), Normal 6v6. Main: seeds 1 to 8 (24
+for Woodland Attack / Defend); RV1: seeds 1 to 24, on main with the per-field Plant The Bomb fuses (#357). Route
+sameness is the mean overlap (Jaccard) of the 4 m cells a team stood in during a round's first 30 s, between rounds of
+the same end and role: 1 is the same ground every round.
 
-| Map, mode | First hit, main → RV1 (median) | Route sameness, main → RV1 (seeds 1-8) |
-|---|---|---|
-| Depot Elimination | 14.8 → 13.5 s | 0.49 → 0.46 |
-| Woodland Elimination | 18.9 → 18.3 s | 0.49 → 0.43 |
-| Subway Elimination | 16.2 → 15.3 s | 0.59 → 0.55 |
-| Stockade Elimination | 15.3 → 14.5 s | 0.48 → 0.44 |
-| Depot Attack / Defend | 22.4 → 20.4 s | 0.57 → 0.51 |
-| Woodland Attack / Defend | 27.6 → 23.8 s | 0.56 → 0.48 |
-| Subway Attack / Defend | 19.4 → 17.7 s | 0.63 → 0.61 |
-| Stockade Attack / Defend | 21.5 → 19.8 s | 0.57 → 0.53 |
+| Map, mode | Route sameness, main → RV1 | First hit (median), main → RV1 | Win rate on RV1 (± 1 SE) | Band |
+|---|---|---|---|---|
+| Depot Elimination | 0.49 → 0.42 | 14.8 → 14.6 s | end 0 53.2 % ±3.7 (main 50.0 %) | 45-55 % |
+| Woodland Elimination | 0.49 → 0.39 | 18.9 → 18.8 s | end 0 51.9 % ±3.7 (main 48.1 %) | 45-55 % |
+| Subway Elimination | 0.59 → 0.56 | 16.2 → 15.3 s | end 0 56.1 % ±3.7 (main 52.4 %), outside within noise | 45-55 % |
+| Stockade Elimination | 0.48 → 0.41 | 15.3 → 15.1 s | end 0 50.0 % ±3.7 (main 47.4 %) | 45-55 % |
+| Depot Attack / Defend | 0.57 → 0.49 | 22.4 → 20.5 s | attackers 56.0 % ±3.7 (main 46.7 %) | 38-67 % |
+| Woodland Attack / Defend | 0.56 → 0.48 | 26.5 → 25.9 s | attackers 53.0 % ±3.7 (main 54.7 %) | 40-65 % |
+| Subway Attack / Defend | 0.63 → 0.60 | 19.4 → 17.9 s | attackers 61.2 % ±3.7 (main 63.9 %) | 40-65 % |
+| Stockade Attack / Defend | 0.57 → 0.50 | 21.5 → 20.8 s | attackers 50.6 % ±3.7 (main 56.2 %) | 40-65 % |
+| Depot Plant The Bomb | 0.56 → 0.50 | 22.3 → 20.3 s | attackers 59.8 % ±3.6 (main with #357 51.6 %) | 40-65 % |
+| Woodland Plant The Bomb | 0.57 → 0.48 | 26.7 → 26.0 s | attackers 50.8 % ±3.7 (main with #357 54.8 %) | 40-65 % |
+| Subway Plant The Bomb | 0.64 → 0.62 | 20.9 → 20.4 s | attackers 54.7 % ±3.7 (main with #357 54.9 %) | 40-65 % |
+| Stockade Plant The Bomb | 0.54 → 0.49 | 22.2 → 22.3 s | attackers 42.8 % ±3.8 (main with #357 40.3 %) | 40-65 % |
 
-Win rates on RV1 (Normal, ± one standard error):
-
-| Map | Elimination, end 0 (24 seeds; band 45-55 %) | Attack / Defend, attackers (16 seeds; band 40-65 %, Depot 38-67 %) |
-|---|---|---|
-| Depot | 54.9 % ±3.7 (near an edge) | 60.5 % ±4.3 |
-| Woodland | 54.4 % ±3.7 (near an edge) | 55.9 % ±4.6 |
-| Subway | 52.8 % ±3.7 | 57.4 % ±4.5 |
-| Stockade | 50.8 % ±3.7 | 54.5 % ±4.5 |
-
-Plant The Bomb on the old 30 s fuse, 24 seeds, attackers: Depot 27 → 36 %, Woodland 36 → 40 %, Stockade 36 → 39 %,
-Subway 52 → 44 % (±3.7). The per-field fuses (#357) land beside this; see Known issues left.
-
-- GUT: `test_rv1_route_variety` (8), `test_rv1_qa` (11, QA), and the bot files QA ran (`test_bot_crossfire`,
-  `test_bot_climbs`, `test_bot_personality`, `test_bn1_qa`, `test_bp6_bots`, `test_bot_team_play`, `test_bot_flag`,
-  `test_bots_plant`, `test_pb1_qa`, `test_two_flags`, `test_mb4_qa`) pass; the full suite in CI.
+- **What it does for "fights start late":** Attack / Defend and Plant The Bomb meet 1 to 2 s sooner; Elimination
+  doesn't move (about 15 s, the walk to the middle at a run plus a beat). The first version, with fewer crossings,
+  had Elimination 0.6 to 1.3 s sooner; the cuts across lanes take that back. Coming out further on the player's side
+  is the map reworks' lever (smaller fields, more routes).
+- GUT: `test_rv1_route_variety` (9), `test_rv1_qa` (11, QA), the bot files QA ran and the four adjusted ones pass;
+  CI's seven unit parts, smoke test and every match guard are green on 63d942b.
 
 ## Known issues left
 
-- Plant The Bomb on RV1 plus the per-field fuses (#357) is re-measured once #357 is on main.
-- Depot's and Woodland's Elimination end shares sit near the band's top edge (54.9 %, 54.4 %): re-measure on 32
-  seeds in the next balance report.
+- Subway Elimination's end 0 (the street end) at 56.1 % ±3.7, outside within noise: re-measure on 32 seeds on the
+  reworked Subway (this thread re-measures every map once the reworks merge).
