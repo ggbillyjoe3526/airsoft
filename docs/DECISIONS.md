@@ -605,6 +605,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   defaults).** An enemy counts only if the bots' own sight rules let you see them, and the mark stays over where they
   were seen, never following them, on screen and on the minimap (step 27 plan). One teammate answers each ping.
   Numbers: `legacy/browser/docs/records/PG1.md`.
+- **The comms wheel, Spotted, the ping as intention and Cover me (owner, 2026-11-15, CW1).** The order wheel is Spotted in a
+  circle in the middle with four same-size buttons a side, names only: right Watching Here, Follow Me, Cover Me, Need
+  a Mag; left Team Plan, Go There, Hold Here, Regroup. A tap of its key spots the enemy under the view: a yellow arrow
+  over them for 10 s, seen through cover, and bot teammates near them go after them or watch them. A ping of a spot
+  says you are heading there: teammates near you may come along, never must; Go There is the strict order. Claude's
+  defaults (`docs/records/CW1.md`): a 60 % roll within 40 m, shared within 30 m, Cover me as one helper beside you
+  until you are 30 m off.
 - **Bots ask the nearest teammate within 30 m for a magazine, and bring one when asked (2026-10-15, MG1).** Fights and
   cover come first. Dev settings › Bots run low on BBs (a cheat, off) shows the bot side.
 - **Routes are searched one a tick, bots and walk-offs sharing the turn (2026-10-18, BE1).** The search is Godot's

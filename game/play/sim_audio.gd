@@ -165,6 +165,8 @@ var _order_serial: int = 0
 ## Your ping heard (on_ping): the ping book's serial read up to, and when your last ping that piped was placed.
 var _ping_serial: int = 0
 var _ping_at: float = -INF
+## Your Spotted heard (on_spot): the spots book's serial read up to.
+var _spot_serial: int = 0
 ## A teammate's callout click (on_calls): its voices, unattenuated and panned at SoundConfig.radio_pan, the next one to
 ## use, and the call log read and the serial read up to.
 var _radio: Array[AudioStreamPlayer3D] = []
@@ -470,6 +472,15 @@ func on_ping(book: Pings, player_id: int) -> void:
 		return
 	_ping_at = p.at
 	_play(&"ping_pip", Vector3.ZERO, true, _cfg.ping_pip_gain, Kind.INTERFACE, BUS_INTERFACE)
+
+
+## The same pip when `player_id` spotted an enemy in `spots` (CW1) since the last call; a tap on nobody plays nothing.
+func on_spot(spots: Spots, player_id: int) -> void:
+	if spots == null or spots.placed == _spot_serial:
+		return
+	_spot_serial = spots.placed
+	if spots.last_spotter == player_id:
+		_play(&"ping_pip", Vector3.ZERO, true, _cfg.ping_pip_gain, Kind.INTERFACE, BUS_INTERFACE)
 
 
 ## A part's sound as you inspect the replica in hand (IN1, ReplicaView.inspect_sound), in your ear as your own

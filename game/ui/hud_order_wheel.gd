@@ -1,95 +1,78 @@
 class_name HudOrderWheel
 extends Control
-## The order wheel (the approved concepts `wheel-open.png`, `wheel-notice.png`) round the crosshair while the wheel's key
-## is held: a ring of slices clockwise from the top, one for each of ControlsConfig.wheel_orders, each with its name and
-## its key, the one the pointer is on lit yellow, the order in force banded in your team's colour and tagged ACTIVE, the
-## pointer a white dot. A notice (nobody to order, back on the team plan) shows in the middle, dimming the rest, for
-## HudConfig.order_notice_time; there is no order text anywhere else. Built on its first opening and drawn only while
-## open: closed, it does nothing and a frame costs a comparison. The pointer's move is OrderWheelPointer's (px of mouse
-## from the middle); this maps it onto the drawing (pointer_at). Need a Mag (MH3) reads Toss a Mag while a toss is in
-## reach (set_mag_toss), and a refusal of the hand-off picked on the wheel shows in the middle as an order's notice does
+## The order wheel (CW1, owner 2026-11-15, after Battlefield's commo rose) round the crosshair while the wheel's key is
+## held: Spotted in a circle in the middle and two columns of equal buttons beside it (OrderWheelLayout, from
+## ControlsConfig), each with its name alone, the one the pointer is on lit, the order in force banded in your team's
+## colour on its outer edge, the pointer a white dot. A button kept free is drawn empty and faint, and never lit. Drawn only once
+## the key is held past a tap or the pointer leaves the circle (OrderWheelPointer.held), so a tap that spots never
+## flashes it up. A notice (nobody to order, back on the team plan) shows in the circle, dimming the rest, for
+## HudConfig.order_notice_time; there is no order text anywhere else. Built on its first showing and drawn only while
+## up: shut, it does nothing and a frame costs a comparison. Need a Mag (MH3) reads Toss a Mag while a toss is in reach
+## (set_mag_toss), and a refusal of the hand-off picked on the wheel shows in the circle as an order's notice does
 ## (tell).
 
-## Each slice's edge, in segments of its arc, and the strokes (px) of an ordinary and of the lit slice's.
-const ARC_STEPS := 28
+## Nothing worked out yet (the lit button and the banded one, before the first frame open).
+const UNSET := -3
+## The buttons' strokes (px) plain and lit, the lit edge, the fill's alpha, the corner radius, and a free button's
+## fill alpha.
 const STROKE := 2.0
 const LIT_STROKE := 3.0
 const LIT_EDGE := Color("ffe28a")
-const SLICE_ALPHA := 0.86
-## The hub in the middle: the gap between it and the ring (px), its fill's alpha open and with a notice up, the notice's
-## yellow rule (px), the band on the order in force (px, along the ring's outer edge).
-const HUB_GAP := 8.0
-const HUB_ALPHA := 0.22
+const BUTTON_ALPHA := 0.86
+const RADIUS := 4
+const FREE_ALPHA := 0.35
+## The band on the order in force (px, along the button's outer edge).
+const BAND := 7.0
+## The circle: its fill's alpha open and with a notice up, and the notice's yellow rule (px).
+const HUB_ALPHA := 0.6
 const NOTICE_ALPHA := 0.96
 const NOTICE_RULE := 3.0
-const BAND := 9.0
+const CIRCLE_STEPS := 64
 ## What lies behind the wheel: a dark that fades out to the radius `SCRIM_RADII` ends at, its darkest share and the
 ## texture (px) it is baked into.
 const SCRIM := GameTheme.BG
-const SCRIM_RADII := Vector3(360.0, 470.0, 540.0)
-const SCRIM_ALPHAS := Vector2(0.3, 0.1)
+const SCRIM_RADII := Vector3(300.0, 400.0, 470.0)
+const SCRIM_ALPHAS := Vector2(0.32, 0.12)
 const SCRIM_BAKE := 128
-## The words: a slice's name, its key's chip and the ACTIVE tag (type sizes, letter spacing in em, padding in px), the
-## room a slice's words are given, how far the words dim under a notice, and the notice's type size and side padding.
-const NAME_SIZE := 24
+## The words: a button's name (type size, letter spacing in em) and the room it keeps from the button's ends (px),
+## Spotted's name in the circle, how far the words dim under a notice, and the notice's type size and side padding.
+const NAME_SIZE := 22
 const NAME_SPACING := 0.05
-## The gap (px) between a long name's two lines.
-const NAME_LEADING := 2.0
-const KEY_SIZE := 17
-const KEY_PAD := Vector2(10.0, 3.0)
-## Room (px) a key chip keeps for its border, added to its padding.
-const KEY_EDGE := 3.0
-const KEY_MIN := 34.0
-const KEY_RADIUS := 4
-const TAG_SIZE := 12
-const TAG_SPACING := 0.1
-const TAG_PAD := Vector4(9.0, 2.0, 9.0, 3.0)
-const TAG_RADIUS := 3
-const TAG_LOWER := 6.0
-const SLICE_BOX := Vector2(190.0, 96.0)
-const WORDS_GAP := 8.0
-const NO_KEY_HEIGHT := 28.0
+const NAME_PAD := 14.0
+const SPOT_SIZE := 18
 const DIM := 0.55
-const NOTICE_SIZE := 23
-const NOTICE_PAD := 22.0
+const NOTICE_SIZE := 16
+const NOTICE_PAD := 14.0
 ## The pointer: its dot, the dark ring round it and the pale halo round that (px).
-const POINTER_DOT := 7.0
-const POINTER_RING := 10.0
-const POINTER_HALO := 12.0
+const POINTER_DOT := 6.0
+const POINTER_RING := 9.0
+const POINTER_HALO := 11.0
 const POINTER_HALO_ALPHA := 0.6
 
 var _cfg: HudConfig = null
 var _controls: ControlsConfig = null
+var _layout: OrderWheelLayout = null
 var _colour := Color.WHITE
 var _built: bool = false
-var _slices: Array[PackedVector2Array] = []
-var _outlines: Array[PackedVector2Array] = []
-var _bands: Array[PackedVector2Array] = []
-var _label_at := PackedVector2Array()
 var _names := PackedStringArray()
-var _keys := PackedStringArray()
-var _hub: float = 0.0
+var _spot_name: String = ""
 var _scrim: GradientTexture2D = null
 var _name_font: Font = null
-var _key_font: Font = null
-var _tag_font: Font = null
-var _tag_text: String = ""
-var _chip := StyleBoxFlat.new()
-var _tag := StyleBoxFlat.new()
+var _button := StyleBoxFlat.new()
 var _pointer: Pointer = null
 var _notice: Label = null
-var _lit: int = -2
-var _force: int = -2
+var _lit: int = UNSET
+var _force: int = UNSET
 var _showing_notice: bool = false
 var _notice_left: float = 0.0
 var _serial: int = 0
-## The wheel was open last frame, and pointed at a slice then; how long (s) a pick that shut it still waits for its
-## answer; and the wheel is up with only a notice (an order picked on it, which shut it as it was picked).
+## The wheel was up last frame, and on a button then; how long (s) a pick that shut it still waits for its answer; and
+## the wheel is up with only a notice (an order picked on it, which shut it as it was picked).
 var _was_open: bool = false
 var _on_slice: bool = false
 var _wait_left: float = 0.0
 var _notice_only: bool = false
-## The slice of Need a Mag (-1: the wheel has none), its two names as drawn (asking, tossing), whether it reads the
+## The button of Need a Mag (-1: the wheel has none), its two names as drawn (asking, tossing), whether it reads the
 ## second, and a notice told (tell) and not shown yet.
 var _mag_slice: int = -1
 var _mag_names := PackedStringArray(["", ""])
@@ -97,7 +80,7 @@ var _mag_toss: bool = false
 var _told: String = ""
 
 
-## A wheel for `controls`' orders in `colour` (your team's), sized by `cfg`. Builds nothing until it first opens.
+## A wheel for `controls`' orders in `colour` (your team's), timed by `cfg`. Builds nothing until it first shows.
 func setup(cfg: HudConfig, controls: ControlsConfig, colour: Color) -> void:
 	_cfg = cfg
 	_controls = controls
@@ -111,9 +94,10 @@ func setup(cfg: HudConfig, controls: ControlsConfig, colour: Color) -> void:
 
 
 ## Each frame: `wheel` (the pointer PlayerInput moves), `in_force` (the order your teammates carry out, NONE for the team
-## plan), `outcome` (the last order given, for its notice) and `you` (your character's id), `delta` seconds on.
+## plan), `outcome` (the last order given, for its notice) and `you` (your character's id), `delta` seconds on;
+## `now_ms` (Time.get_ticks_msec, by default now) tells a tap from a hold.
 func update(wheel: OrderWheelPointer, in_force: SquadOrder.Kind, outcome: SquadOrders.Outcome, you: int,
-		delta: float) -> void:
+		delta: float, now_ms: int = -1) -> void:
 	var told := outcome.serial != _serial and outcome.giver == you and outcome.notice != SquadOrders.Notice.NONE
 	_serial = outcome.serial
 	var words := ""
@@ -123,11 +107,14 @@ func update(wheel: OrderWheelPointer, in_force: SquadOrder.Kind, outcome: SquadO
 		words = _told
 		_told = ""
 		told = true
-	if not wheel.open:
+	# A notice for you while it is open (an order key pressed with it held) shows it at once, tap or not.
+	var shown := wheel.held(Time.get_ticks_msec() if now_ms < 0 else now_ms, _controls.wheel_tap) or (told and wheel.open)
+	if not shown and not (_was_open and wheel.open):
 		_closed(told, words, delta)
 		return
 	_was_open = true
-	_on_slice = wheel.pick() != OrderWheelPointer.NONE
+	var pick := wheel.pick()
+	_on_slice = pick >= 0
 	if not visible or _notice_only:
 		_open()
 	if told:
@@ -136,24 +123,24 @@ func update(wheel: OrderWheelPointer, in_force: SquadOrder.Kind, outcome: SquadO
 		_notice_left -= delta
 		if _notice_left <= 0.0:
 			_clear_notice()
-	var lit := OrderWheelPointer.NONE if _showing_notice else wheel.pick()
+	var lit := OrderWheelPointer.NONE if _showing_notice or not _pickable(pick) else pick
 	var force := -1 if _showing_notice else _index_of(in_force)
 	if lit != _lit or force != _force:
 		_lit = lit
 		_force = force
 		queue_redraw()
-	_pointer.visible = not _showing_notice
-	_pointer.position = pointer_at(wheel.at, _controls.wheel_dead_zone, _controls.wheel_reach, _hub,
-			_cfg.wheel_pointer_reach) - Vector2.ONE * POINTER_HALO
+	# In Spotted's circle the lit circle is the pointer: the dot would sit on its name.
+	_pointer.visible = not _showing_notice and pick != OrderWheelPointer.SPOT
+	_pointer.position = wheel.at - Vector2.ONE * POINTER_HALO
 
 
-## A notice of the hand-off's (a refusal of Need a Mag picked on the wheel; HudMagLine.refusal_text) for the middle,
+## A notice of the hand-off's (a refusal of Need a Mag picked on the wheel; HudMagLine.refusal_text) for the circle,
 ## shown on the next update as an order's notice is.
 func tell(words: String) -> void:
 	_told = words
 
 
-## Need a Mag reads Toss a Mag (`on`) or Need a Mag; redrawn only when it changes while open.
+## Need a Mag reads Toss a Mag (`on`) or Need a Mag; redrawn only when it changes while up.
 func set_mag_toss(on: bool) -> void:
 	if on == _mag_toss:
 		return
@@ -180,9 +167,9 @@ func _process(_delta: float) -> void:
 		dismiss()
 
 
-## A frame with the wheel shut. Just shut on a slice, it waits order_notice_wait for the notice of the order it was
-## shut by: one that comes shows alone in the hub for order_notice_time, then goes; none, or shut on nothing, and it goes
-## at once.
+## A frame with the wheel shut (or held no longer than a tap). Just shut on a button, it waits order_notice_wait for
+## the notice of the order it was shut by: one that comes shows alone in the circle for order_notice_time, then goes;
+## none, or shut on nothing, and it goes at once.
 func _closed(told: bool, words: String, delta: float) -> void:
 	if _was_open:
 		var on_slice := _on_slice
@@ -204,16 +191,6 @@ func _closed(told: bool, words: String, delta: float) -> void:
 			dismiss()
 
 
-## Where the pointer is drawn (px from the middle) for the mouse's `at` (px from the middle): in step with the hub while
-## inside the dead zone `dead`, then out to `far` as it goes from there to `reach`, in the same direction.
-static func pointer_at(at: Vector2, dead: float, reach: float, hub: float, far: float) -> Vector2:
-	var d := at.length()
-	if d <= 0.0:
-		return Vector2.ZERO
-	var r := d / maxf(dead, 0.001) * hub if d < dead else hub + (d - dead) / maxf(reach - dead, 0.001) * (far - hub)
-	return at / d * minf(r, far)
-
-
 ## The notice's words for `notice` (a translation key), or "" for none.
 static func notice_key(notice: SquadOrders.Notice) -> String:
 	match notice:
@@ -232,23 +209,32 @@ static func notice_key(notice: SquadOrders.Notice) -> String:
 	return ""
 
 
-## The slice lit now (an index into the wheel's orders, -1 none), for tests.
+## The button lit now (an index into the wheel's orders; OrderWheelPointer.SPOT for Spotted; -1 none), for tests.
 func lit_slice() -> int:
-	return _lit if visible else -1
+	return _lit if visible and _lit != UNSET else -1
 
 
-## The slice banded as the order in force (-1 none), for tests.
+## The button banded as the order in force (-1 none), for tests.
 func banded_slice() -> int:
-	return _force if visible else -1
+	return _force if visible and _force != UNSET else -1
 
 
-## The slice's name as drawn and its key's ("" for none), for tests.
+## The button's name as drawn ("" for a free one), for tests.
 func slice_name(i: int) -> String:
-	return _names[i] if _built and i < _names.size() else ""
+	return _names[i] if _built and i >= 0 and i < _names.size() else ""
 
 
-func slice_key(i: int) -> String:
-	return _keys[i] if _built and i < _keys.size() else ""
+## Spotted's name as drawn in the circle, for tests.
+func spot_name() -> String:
+	return _spot_name
+
+
+## Whether button `i`'s name fits inside it at full size (NAME_PAD clear of each end), for tests.
+func name_fits(i: int) -> bool:
+	if not _built or i < 0 or i >= _names.size():
+		return false
+	var wide := _name_font.get_string_size(_names[i], HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE).x
+	return wide <= _layout.box(i).size.x - NAME_PAD * 2.0
 
 
 ## The notice's words while one shows, else "", for tests.
@@ -261,8 +247,7 @@ func built() -> bool:
 	return _built
 
 
-## The wheel itself (the dark behind it and its slices) is drawn: not while only a notice shows in its hub, so the
-## crosshair stays clear while you have control again.
+## Whether the buttons are drawn (the wheel up, not only a notice), for tests.
 func draws_wheel() -> bool:
 	return _built and visible and not _notice_only
 
@@ -275,92 +260,74 @@ func _draw() -> void:
 		return
 	var far := SCRIM_RADII.z
 	draw_texture_rect(_scrim, Rect2(-far, -far, far * 2.0, far * 2.0), false)
-	var back := HudStyle.backing_on(self, SLICE_ALPHA)
-	for i in _slices.size():
-		var lit := i == _lit
-		draw_colored_polygon(_slices[i], GameTheme.ACCENT if lit else back)
-		draw_polyline(_outlines[i], LIT_EDGE if lit else GameTheme.LINE, LIT_STROKE if lit else STROKE, true)
-	if _force >= 0:
-		draw_colored_polygon(_bands[_force], _colour)
+	var back := HudStyle.backing_on(self, BUTTON_ALPHA)
+	for i in _names.size():
+		_draw_button(i, back)
 	_draw_hub()
-	for i in _slices.size():
-		_draw_words(i)
 
 
-## The hub and its ring, ruled while it tells a notice; see-through when the wheel is shut and it only tells you.
-func _draw_hub() -> void:
-	var alpha := NOTICE_ALPHA if _showing_notice and not _notice_only else HUB_ALPHA
-	draw_circle(Vector2.ZERO, _hub, HudStyle.backing_on(self, alpha))
-	draw_arc(Vector2.ZERO, _hub, 0.0, TAU, 64, GameTheme.LINE, STROKE, true)
-	if _showing_notice:
-		draw_arc(Vector2.ZERO, _hub - NOTICE_RULE * 0.5, 0.0, TAU, 64, GameTheme.ACCENT, NOTICE_RULE, true)
-
-
-## Slice `i`'s name and key, and the ACTIVE tag when it is the order in force.
-func _draw_words(i: int) -> void:
-	var lit := i == _lit
+## Button `i`: its box, lit or plain (or only a faint outline when free), the band of the order in force, its name.
+func _draw_button(i: int, back: Color) -> void:
+	var box := _layout.box(i)
 	var fade := DIM if _showing_notice else 1.0
+	if _names[i].is_empty():
+		_button.bg_color = HudStyle.backing_on(self, FREE_ALPHA)
+		_button.border_color = GameTheme.LINE
+		_button.set_border_width_all(roundi(STROKE))
+		draw_style_box(_button, box)
+		return
+	var lit := i == _lit
+	_button.bg_color = GameTheme.ACCENT if lit else back
+	_button.border_color = LIT_EDGE if lit else GameTheme.LINE
+	_button.set_border_width_all(roundi(LIT_STROKE if lit else STROKE))
+	draw_style_box(_button, box)
+	if i == _force:
+		var outer := box.end.x - BAND if box.position.x > 0.0 else box.position.x
+		draw_rect(Rect2(outer, box.position.y, BAND, box.size.y), _colour)
 	var ink := Color(GameTheme.ACCENT_INK if lit else GameTheme.TEXT, fade)
-	var key_ink := Color(GameTheme.ACCENT_INK if lit else GameTheme.MUTED, fade)
-	var has_key := not _keys[i].is_empty()
-	var key_h := _key_font.get_height(KEY_SIZE) + KEY_PAD.y * 2.0 + KEY_EDGE
-	var column := float(NAME_SIZE) + WORDS_GAP + (key_h if has_key else NO_KEY_HEIGHT)
-	var box := _label_at[i] - SLICE_BOX * 0.5
-	var top := box.y + (SLICE_BOX.y - column) * 0.5
-	var mid := _label_at[i].x
-	var base := top + (NAME_SIZE - _name_font.get_height(NAME_SIZE)) * 0.5 + _name_font.get_ascent(NAME_SIZE)
-	# A name wider than its slice (Watching Here, BP8) goes onto two lines where no key is under it, else a size smaller.
-	var name := _names[i]
 	var size := NAME_SIZE
-	var wide := _name_font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE).x
-	if wide > SLICE_BOX.x:
-		var cut := name.rfind(" ")
-		if not has_key and cut > 0:
-			draw_string(_name_font, Vector2(box.x, base + NAME_SIZE + NAME_LEADING), name.substr(cut + 1),
-					HORIZONTAL_ALIGNMENT_CENTER, SLICE_BOX.x, NAME_SIZE, ink)
-			name = name.substr(0, cut)
-		else:
-			size = floori(NAME_SIZE * SLICE_BOX.x / wide)
-	draw_string(_name_font, Vector2(box.x, base), name, HORIZONTAL_ALIGNMENT_CENTER, SLICE_BOX.x, size, ink)
-	if has_key:
-		var text_w := _key_font.get_string_size(_keys[i], HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_SIZE).x
-		var w := maxf(KEY_MIN, text_w + KEY_PAD.x * 2.0 + KEY_EDGE)
-		var chip := Rect2(mid - w * 0.5, top + NAME_SIZE + WORDS_GAP, w, key_h)
-		_chip.bg_color = Color(GameTheme.ACCENT_INK, 0.1 * fade) if lit else Color(0.0, 0.0, 0.0, 0.0)
-		_chip.border_color = key_ink
-		draw_style_box(_chip, chip)
-		var key_base := chip.position.y + (key_h - _key_font.get_height(KEY_SIZE)) * 0.5 + _key_font.get_ascent(KEY_SIZE)
-		draw_string(_key_font, Vector2(chip.position.x, key_base), _keys[i], HORIZONTAL_ALIGNMENT_CENTER, w, KEY_SIZE,
-				key_ink)
-	if i == _force and not _showing_notice:
-		var tag_w := _tag_font.get_string_size(_tag_text, HORIZONTAL_ALIGNMENT_LEFT, -1, TAG_SIZE).x + TAG_PAD.x \
-				+ TAG_PAD.z
-		var tag_h := _tag_font.get_height(TAG_SIZE) + TAG_PAD.y + TAG_PAD.w
-		var tag := Rect2(mid - tag_w * 0.5, box.y + SLICE_BOX.y + TAG_LOWER - tag_h, tag_w, tag_h)
-		draw_style_box(_tag, tag)
-		var tag_base := tag.position.y + TAG_PAD.y + _tag_font.get_ascent(TAG_SIZE)
-		draw_string(_tag_font, Vector2(tag.position.x, tag_base), _tag_text, HORIZONTAL_ALIGNMENT_CENTER, tag_w,
-				TAG_SIZE, Color.WHITE)
+	var room := box.size.x - NAME_PAD * 2.0
+	var wide := _name_font.get_string_size(_names[i], HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE).x
+	if wide > room:
+		size = floori(NAME_SIZE * room / wide)
+	var base := box.position.y + (box.size.y - _name_font.get_height(size)) * 0.5 + _name_font.get_ascent(size)
+	draw_string(_name_font, Vector2(box.position.x + NAME_PAD, base), _names[i], HORIZONTAL_ALIGNMENT_CENTER, room,
+			size, ink)
 
 
-## Opens: builds the parts the first time, and reads the names and the keys as they are now (a key may have been
-## rebound since).
+## Spotted's circle, lit while the pointer is in it; ruled while it tells a notice (and its name hidden); see-through
+## when the wheel is shut and it only tells you.
+func _draw_hub() -> void:
+	var r := _layout.centre
+	var lit := _lit == OrderWheelPointer.SPOT and not _showing_notice
+	var alpha := NOTICE_ALPHA if _showing_notice and not _notice_only else HUB_ALPHA
+	draw_circle(Vector2.ZERO, r, GameTheme.ACCENT if lit else HudStyle.backing_on(self, alpha))
+	draw_arc(Vector2.ZERO, r, 0.0, TAU, CIRCLE_STEPS, LIT_EDGE if lit else GameTheme.LINE,
+			LIT_STROKE if lit else STROKE, true)
+	if _showing_notice:
+		draw_arc(Vector2.ZERO, r - NOTICE_RULE * 0.5, 0.0, TAU, CIRCLE_STEPS, GameTheme.ACCENT, NOTICE_RULE, true)
+		return
+	if not draws_wheel():
+		return
+	var ink := GameTheme.ACCENT_INK if lit else GameTheme.TEXT
+	var base := (_name_font.get_ascent(SPOT_SIZE) - _name_font.get_descent(SPOT_SIZE)) * 0.5
+	draw_string(_name_font, Vector2(-r, base), _spot_name, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, SPOT_SIZE, ink)
+
+
+## Opens: builds the parts the first time, and reads the names as they are now.
 func _open() -> void:
 	if not _built:
 		_build()
 	for i in _names.size():
-		_names[i] = tr(_controls.wheel_labels[i]).to_upper() if i < _controls.wheel_labels.size() else ""
+		var key := _controls.wheel_labels[i] if i < _controls.wheel_labels.size() else ""
+		_names[i] = tr(key).to_upper() if not key.is_empty() else ""
+	_spot_name = tr(_controls.wheel_spot_label).to_upper()
 	if _mag_slice >= 0:
 		_mag_names[0] = _names[_mag_slice]
 		_mag_names[1] = tr(_controls.wheel_mag_toss).to_upper()
 		_names[_mag_slice] = _mag_names[1 if _mag_toss else 0]
-	for i in _names.size():
-		var action := _controls.wheel_keys[i] if i < _controls.wheel_keys.size() else &""
-		var key := KeyNames.of_action(action) if action != &"" else ""
-		_keys[i] = "" if key == KeyNames.NO_KEY else key
-	_tag_text = tr("HUD_ORDER_ACTIVE").to_upper()
-	_lit = -2
-	_force = -2
+	_lit = UNSET
+	_force = UNSET
 	_clear_notice()
 	_notice_only = false
 	visible = true
@@ -370,18 +337,11 @@ func _open() -> void:
 
 func _build() -> void:
 	_built = true
-	var n := _controls.wheel_orders.size()
+	_layout = OrderWheelLayout.new(_controls)
+	_names.resize(mini(_controls.wheel_orders.size(), _layout.count))
 	_mag_slice = _controls.wheel_orders.find(SquadOrder.Kind.MAG)
-	_hub = _cfg.wheel_inner - HUB_GAP
-	_names.resize(n)
-	_keys.resize(n)
-	_label_at.resize(n)
-	for i in n:
-		var a := TAU * i / maxi(n, 1)
-		_label_at[i] = _at(_cfg.wheel_label_radius, a)
-		_slices.append(_sector(i, n, _cfg.wheel_inner, _cfg.wheel_outer, false))
-		_outlines.append(_sector(i, n, _cfg.wheel_inner, _cfg.wheel_outer, true))
-		_bands.append(_sector(i, n, _cfg.wheel_outer - BAND, _cfg.wheel_outer, false))
+	if _mag_slice >= _names.size():
+		_mag_slice = -1
 	var gradient := Gradient.new()
 	gradient.offsets = PackedFloat32Array([0.0, SCRIM_RADII.x / SCRIM_RADII.z, SCRIM_RADII.y / SCRIM_RADII.z, 1.0])
 	gradient.colors = PackedColorArray([Color(SCRIM, SCRIM_ALPHAS.x), Color(SCRIM, SCRIM_ALPHAS.x),
@@ -394,20 +354,24 @@ func _build() -> void:
 	_scrim.width = SCRIM_BAKE
 	_scrim.height = SCRIM_BAKE
 	_name_font = GameTheme.spaced_font(800, NAME_SPACING, NAME_SIZE)
-	_key_font = GameTheme.font(800)
-	_tag_font = GameTheme.spaced_font(800, TAG_SPACING, TAG_SIZE)
-	_chip.set_border_width_all(roundi(STROKE))
-	_chip.set_corner_radius_all(KEY_RADIUS)
-	_tag.bg_color = _colour
-	_tag.set_corner_radius_all(TAG_RADIUS)
+	_button.set_corner_radius_all(RADIUS)
+	_button.anti_aliasing = true
+	var r := _layout.centre
 	_notice = HudStyle.label(self, NOTICE_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
 	_notice.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_notice.position = Vector2(-_hub + NOTICE_PAD, -_hub)
-	_notice.size = Vector2(_hub * 2.0 - NOTICE_PAD * 2.0, _hub * 2.0)
+	_notice.position = Vector2(-r + NOTICE_PAD, -r)
+	_notice.size = Vector2(r * 2.0 - NOTICE_PAD * 2.0, r * 2.0)
 	_notice.visible = false
 	_pointer = Pointer.new()
 	add_child(_pointer)
+
+
+## Whether `pick` is something to light: Spotted, or a button with an order on it.
+func _pickable(pick: int) -> bool:
+	if pick == OrderWheelPointer.SPOT:
+		return true
+	return pick >= 0 and pick < _names.size() and not _names[pick].is_empty()
 
 
 func _show_notice(words: String) -> void:
@@ -428,35 +392,12 @@ func _clear_notice() -> void:
 		queue_redraw()
 
 
-## Which of the wheel's orders is `kind` (-1 for none, or one the wheel doesn't have).
+## Which of the wheel's buttons is `kind` (-1 for none, or one the wheel doesn't have).
 func _index_of(kind: SquadOrder.Kind) -> int:
 	if kind == SquadOrder.Kind.NONE:
 		return -1
-	return _controls.wheel_orders.find(kind)
-
-
-## The point `r` px from the middle at `angle` (0 up, clockwise).
-static func _at(r: float, angle: float) -> Vector2:
-	return Vector2(sin(angle), -cos(angle)) * r
-
-
-## Slice `i` of `n` between radii `r0` and `r1` with the gap between slices kept: its corners and edges, closed with its
-## first point again for an outline (`line`).
-func _sector(i: int, n: int, r0: float, r1: float, line: bool) -> PackedVector2Array:
-	var centre := TAU * i / n
-	var half := TAU / n * 0.5
-	var out := PackedVector2Array()
-	var outer_from := centre - half + _cfg.wheel_gap / r1
-	var outer_to := centre + half - _cfg.wheel_gap / r1
-	var inner_from := centre - half + _cfg.wheel_gap / r0
-	var inner_to := centre + half - _cfg.wheel_gap / r0
-	for s in ARC_STEPS + 1:
-		out.append(_at(r1, lerpf(outer_from, outer_to, float(s) / ARC_STEPS)))
-	for s in ARC_STEPS + 1:
-		out.append(_at(r0, lerpf(inner_to, inner_from, float(s) / ARC_STEPS)))
-	if line:
-		out.append(out[0])
-	return out
+	var i := _controls.wheel_orders.find(kind)
+	return i if i < _names.size() else -1
 
 
 ## The pointer: a white dot in a dark ring in a pale halo.

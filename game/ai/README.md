@@ -63,7 +63,8 @@ faster or slower to close on it and sprinting when far behind, covering the give
 them to the spot the giver looks at, side by side across their view, looking their way. Go there held once all are
 there lapses after `SquadConfig.go_there_quiet` with nothing happening round them, back to the plan (BQ1). Regroup sprints them back, each
 turning to Follow me once close. The order in force given again cancels it (from the order wheel it stays), Team plan
-ends it, and it ends when its giver is out and at each round start. Back on the plan, in Elimination the bot hunts from
+ends it. Cover me (CW1) sends only the nearest teammate free of a fight to a post beside the giver, looking their way,
+until the giver is `SquadConfig.cover_leave` from it. An order ends when its giver is out and at each round start. Back on the plan, in Elimination the bot hunts from
 where it stands; in Attack / Defend it takes up its post.
 
 Bots share magazines (MH2, `BotMagShare`; the rules are the simulation's `MagShare`): a bot low on BBs for its primary
@@ -104,7 +105,8 @@ at its level, never how well (`BotPersonality`).
 | `squad_orders.gd`, `squad_order_book.gd` | Squad orders: carrying each out (Follow me's spots and pace, Hold here's spot and each holder's place, Regroup); the orders in force, handed out and ended |
 | `bot_mag_share.gd` | `BotMagShare`: the magazine hand-off's bot side (MH2): when a low bot presses to ask, which ask a bot takes, the walk over and the press to toss, a bot that asked waiting or walking up to you |
 | `bot_roster.gd`, `bot_personality.gd` | Each bot's name and personality for a match; a personality laid over the level's skill, and its habits |
-| `pings.gd` | `Pings`: the ping book (PN1), one ping per character, a press resolved into a spot (the floor in front of what the view met) or a contact (an enemy under the view the bots' sight rules let you see), kept 8 s and cleared each round, and a Contact call's mark; `Pings.take`, how a bot teammate takes one (a noise heard there, kept `ping_memory`) |
+| `spots.gd` | `Spots`: Spotted (CW1), the enemies marked for each team for `PingConfig.spot_time` and told to the spotter's bot teammates near them (`spot_share_radius`) |
+| `pings.gd` | `Pings`: the ping book (PN1), one ping per character, a press resolved into a spot (the floor in front of what the view met) or a contact (an enemy under the view the bots' sight rules let you see), kept 8 s and cleared each round, and a Contact call's mark; `Pings.take`, how a bot teammate takes one (a noise heard there, kept `ping_memory`); `Pings.follow`, a spot pinged as your intention, which each teammate within `ping_follow_reach` joins on a roll of `ping_follow_chance` (CW1) |
 | `callouts.gd`, `callout_log.gd` | `Callouts`: what the bots call to their team (`data/callouts.md`), read off what they do after each step on a seeded stream of its own, never writing a bot or the state; `CalloutLog`: the calls said, a fixed ring the presentation reads |
 
 Nothing allocates per tick once warm. Route searches (`NavGrid.find_route`) are queued round-robin and kept to

@@ -69,3 +69,8 @@ extends Resource
 @export var watch_radius: float = 8.0
 @export var watch_join_range: float = 45.0
 @export var watch_leave: float = 6.0
+## Cover me (CW1): the teammate covering its giver stands at Watching here's post beside where they gave it, looking
+## where they looked (cover_look m on along their view when it meets nothing nearer), and holds there until the giver
+## is cover_leave (m) from it, when it is back on the team plan.
+@export var cover_look: float = 12.0
+@export var cover_leave: float = 30.0

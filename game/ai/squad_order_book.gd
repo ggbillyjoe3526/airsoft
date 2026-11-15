@@ -74,6 +74,8 @@ func give_order(giver: Character, kind: SquadOrder.Kind, from_wheel: bool = fals
 		order_outcome.record(giver.id, SquadOrder.Kind.NONE,
 				SquadOrders.Notice.CANCELLED if before != SquadOrder.Kind.NONE else SquadOrders.Notice.ON_PLAN)
 		return SquadOrder.Kind.NONE
+	if kind == SquadOrder.Kind.COVER:
+		return give_cover(giver)
 	var now := _hand_out(giver, kind, not from_wheel)
 	var notice := SquadOrders.Notice.NONE
 	if now == SquadOrder.Kind.NONE:
@@ -240,6 +242,50 @@ func give_watch(giver: Character, spot: Vector3) -> SquadOrder.Kind:
 	return SquadOrder.Kind.WATCH
 
 
+## Cover me (CW1, owner 2026-11-15) from `giver` (in play), written into order_outcome: one teammate covers the way
+## they look while they move on. Any order in force ends, the rest back on the team plan. The nearest teammate in play
+## that is neither fighting nor in cover (the nearest in play if none is free) goes to Watching here's post beside
+## where the giver stands (SquadOrders.watch_post) and holds there, looking where they looked (the spot their view
+## meets, or SquadConfig.cover_look m on along it), until the order ends or the giver is cover_leave from it. Given
+## again it starts afresh from where they stand now. Returns COVER, or NONE with no teammate in play.
+func give_cover(giver: Character) -> SquadOrder.Kind:
+	var w := _world
+	var before := order_of(giver.id)
+	var helper: Bot = null
+	var nearest: Bot = null
+	var help := INF
+	var near := INF
+	for b in w.bots:
+		if b.character == giver or b.character.team != giver.team or not Elimination.is_in_play(b.character):
+			continue
+		var d := _flat(b.character.position, giver.position)
+		if d < near:
+			near = d
+			nearest = b
+		if d < help and not b.target_visible and b.mode != Bot.Mode.FIGHT and b.mode != Bot.Mode.COVER:
+			help = d
+			helper = b
+	_drop_order(giver)
+	if nearest == null:
+		order_outcome.record(giver.id, SquadOrder.Kind.NONE,
+				SquadOrders.Notice.CANCELLED if before != SquadOrder.Kind.NONE else SquadOrders.Notice.NOBODY)
+		return SquadOrder.Kind.NONE
+	if helper == null:
+		helper = nearest
+	var spot := SquadOrders.hold_point(giver, w)
+	if not SquadOrders.is_spot(spot):
+		var view := giver.view_direction()
+		var flat := Vector2(view.x, view.z)
+		flat = flat.normalized() if flat.length() > 1e-3 else Vector2(-sin(giver.yaw), -cos(giver.yaw))
+		spot = giver.position + Vector3(flat.x, 0.0, flat.y) * w.cfg.squad.cover_look
+	SquadOrders.start(helper, giver, SquadOrder.Kind.COVER, 0)
+	helper.order_goal = SquadOrders.watch_post(giver, helper.character.position, spot, w)
+	helper.order_yaw = SquadOrders.yaw_towards(helper.order_goal, spot, giver.yaw)
+	_given[giver.id] = SquadOrder.Kind.COVER
+	order_outcome.record(giver.id, SquadOrder.Kind.COVER, SquadOrders.Notice.NONE)
+	return SquadOrder.Kind.COVER
+
+
 ## Hands `kind` out to `giver`'s bot teammates in play; `toggle`: the order in force given again cancels it (see
 ## give_order); `at`: Hold here's spot picked on the map (give_hold_at), else NO_SPOT and it is the one looked at.
 ## Returns the order in force afterwards.
@@ -366,6 +412,11 @@ func update() -> void:
 		for b in _world.bots:
 			if b.order_giver == giver:
 				carried = true
+				# Cover me (CW1) lasts while its giver is near enough to be covered.
+				if b.order == SquadOrder.Kind.COVER \
+						and _flat(giver.position, b.order_goal) > _world.cfg.squad.cover_leave:
+					_drop_order(giver)
+					order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED)
 				break
 		if not carried:
 			_given[id] = SquadOrder.Kind.NONE
