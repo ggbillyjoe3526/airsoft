@@ -1,12 +1,12 @@
 # CW1 · Comms wheel redesign, Spotted, ping as intention and Cover me
 
-**Review:** pending
+**Review:** 1 attempt · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Owner's asks (William, 2026-11-15)
 
@@ -44,9 +44,15 @@
 
 ## Verified
 
-- To fill in: checks, agents.
+- Touched test files pass (test_cw1_spotted 21 tests, QA's test_cw1_qa 11 and test_cw1_qa_orders 6, and the wheel,
+  HUD, ping and squad order files they touch). Full `tools/check.sh`: see the pull request.
+- Wheel pictures rendered in a Depot match (Spotted, Cover Me and Go There lit) and shown to the owner.
+- Advisories left to play (`playtest/0.1-beta1-checklist.md` N2 to N5): a flick straight out from the circle lands on
+  the line between the middle two rows, so the lit button may flicker there (a sticky edge would fix it); a held wheel
+  let go in the middle spots on Hover; a tap is timed on the wall clock, so a hitch over 0.2 s makes it a hold; bots
+  that win the ping roll leave posts they hold, which in Attack / Defend may pull a defender off the flag.
 - Pictures: `art/comms-wheel/cw1-wheel-v2-in-game.png` and `cw1-wheel-v2-close-ups.png` in the shared files.
 
 ## Known issues left
 
-- To fill in.
+- None found; the advisories above wait on play.
