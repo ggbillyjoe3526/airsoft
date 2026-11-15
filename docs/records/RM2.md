@@ -102,12 +102,24 @@ ATTEMPT_ROWS
   meet the next from the ground up, a thin one taken into the one under it, the top one up to the crest (no
   notch); none pale split (read as planks). Paid for: bark arcs in 34 degree steps (were 28), end logs 5 facets
   round (were 6), fewer drying checks (a quarter of the pieces, was a third), no rim of bark on a piece under
-  8.5 cm (a hairline) and, in section A, a dark heart on about two thirds of the wedges. 3,189 / 3,037 / 3,164
-  triangles: Woodland draws no more.
+  8.5 cm (a hairline) and, in section A, a dark heart on about two thirds of the wedges. Eighth pass (the critic's
+  attempt 7): the top line near level (at most 10 cm under the cell's top, 5 cm from one of nine points to the next;
+  was up to 45 cm); the face's crown read every 2 cm and opened over 10 cm each way, and a piece standing more than
+  4 cm over that cut level there (a point broken off, its end plain) or taken off when less than 0.45 of it is left,
+  so nothing stands up out of the top and no hole opens; a notch narrower than 16 cm bridged by the top's pieces. The
+  face's pieces stop 12 cm short of each end (none cut there, so no card shows edge on); the end a column of half logs
+  lying front to back, their bark round and creased along one line, never fuller than 1.25 times their half height,
+  their sawn ends (a bark rim round a sawn face, the flat side split) with the face's pieces' ends, filling the face to
+  the section's end and drawn in to the last piece, so each corner shows a column of log ends and no dark seam; where
+  the front and back logs meet, a dark panel both ways, so nothing is seen through a log's open inner end; the core's
+  sides stop at the end (no flap). The top two rows of pieces meeting along a wandering line about the middle, each
+  row's joints its own, 0.5 to 1.5 of 16 cm wide, rising up to 0.4 of their width, dark barks never the same as the
+  one beside, three in ten stopping 10 to 20 cm short of their face over a paler piece's back. 3,195 / 3,191 / 2,872
+  triangles (hearts on 79 / 92 / 100 % of the wedges): Woodland draws no more.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
-  fourth, v5 the fifth, v6 the sixth, v7 the seventh: the woodpiles).
+  fourth, v5 the fifth, v6 the sixth, v7 the seventh and v8 the eighth: the woodpiles).
 
 ## Known issues left
 

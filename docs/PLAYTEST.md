@@ -1720,10 +1720,12 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 - [ ] **The water tote's** valve sits back in a recess in the tank's foot, behind the cage, with no bar running
   through it or its yellow lever; the cage's top corners are bent round; the water's line shows through the tank from
   10 m.
-- [ ] **The woodpiles** look stacked by hand: pieces of every shape and size, no neat rows, no square blocks, no dark
-  line up the stack where two 2 m sections meet; the wood is a warm brown at eye height, not pale cream; the stack's
-  ends show the uneven bark sides of the end logs, some further in than others, not a flat column of pipes or slabs,
-  and nothing hangs off them; from a raised spot the stack's top shows the logs' bark, not a black lid.
+- [ ] **The woodpiles** look stacked by hand: pieces of every shape and size, no neat rows, no square blocks; the top
+  line near level with no pale shard standing up out of it and no deep V; the wood is a warm brown at eye height, not
+  pale cream; each corner shows a column of half-round log ends with a bark rim, no thin pale card or black flap; the
+  stack's ends show round, creased bark logs, not flat slabs, and where two 2 m sections meet the log ends read as
+  round logs, not a dark seam; from a raised spot the top shows pieces in dark bark in broken lengths, not a black
+  lid or a corrugated sheet.
 
 ## Reporting what you find
 
