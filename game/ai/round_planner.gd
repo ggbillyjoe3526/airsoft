@@ -111,7 +111,8 @@ func plan(w: BotWorld) -> void:
 			var shift := _variety.randf_range(-1.0, 1.0) * cfg.lane_shift
 			b.reset(lane, points, hold, cfg)
 			b.pace = paces[team]
-			if not defending:
+			# Defenders and anchors hold authored posts: they walk their lanes as drawn.
+			if not defending and not (b.style.holds and w.mode == RoundState.Mode.ELIMINATION):
 				b.lane_shift = shift
 
 

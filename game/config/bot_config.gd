@@ -173,16 +173,22 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## A pause at a lane point in its own half is this share of one in the enemy's half: bots move up quickly through
 ## ground their team holds, and slow down where the fight will be.
 @export var own_half_pace: float = 0.55
-## Each round a bot that walks its lane (not a defender) moves every lane point up to this far (m) across the way to the
-## enemy, one side or the other, the same for the whole lane (half as far, or not at all, where that isn't walkable on
-## the point's floor in a straight line from it): the other side of a row of crates, the far edge of a clearing.
+## Each round a bot that walks its lane (not a defender, nor an anchor holding its post) moves every lane point up to
+## this far (m) across the way to the enemy, one side or the other, the same for the whole lane (less far, or not at
+## all, where that isn't walkable on the point's floor in a straight line from it): the other side of a row of crates,
+## the far edge of a clearing.
 @export var lane_shift: float = 2.5
+## Where a shifted point isn't walkable, it tries again this many times, each this share of the last shift, before it
+## keeps the point itself.
+@export var lane_shift_tries: int = 2
+@export var lane_shift_fallback: float = 0.5
 ## Setting off for its next lane point, a bot that walks its lane may (this chance) cross to another lane instead: the
-## point of it within lane_cross_reach (m) on about the same floor, no nearer its own end than where it is, that the
-## fewest teammates walk; at most lane_cross_max times a round. Never a defender, the bomb carrier or a bot under an
-## order.
-@export var lane_cross_chance: float = 0.15
-@export var lane_cross_reach: float = 10.0
+## point of it within lane_cross_reach (m), no more than lane_cross_rise (m) above or below (the same storey; a slope's
+## rise is fine), no nearer its own end than where it is, that the fewest teammates walk; at most lane_cross_max times
+## a round. Never a defender, the bomb carrier or a bot under an order. Most maps' lanes run 10 to 20 m apart.
+@export var lane_cross_chance: float = 0.12
+@export var lane_cross_reach: float = 20.0
+@export var lane_cross_rise: float = 1.5
 @export var lane_cross_max: int = 1
 ## Bots sharing a lane: a lane point with a teammate holding there (or heading there to hold) within lane_hold_spacing
 ## (m) moves lane_hold_offset (m) to one side, across the way to the enemy, so the two hold side by side.

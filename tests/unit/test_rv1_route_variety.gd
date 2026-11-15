@@ -263,3 +263,18 @@ func test_a_match_with_variety_plays_on_without_errors() -> void:
 		walked = maxf(walked, state.characters[i].position.distance_to(start[i]))
 	assert_gt(walked, 10.0, "bots walked their lanes")
 	assert_not_null(w)
+
+
+func test_in_elimination_an_anchor_keeps_its_authored_points_and_the_others_shift() -> void:
+	var cfg := _quiet(config)
+	cfg.lane_shift = 2.0
+	var shifted := 0
+	for seed_value: int in [1, 2, 3]:
+		var w := _start(cfg, seed_value)
+		for b in w.bots:
+			if b.style.holds:
+				assert_eq(b.lane_shift, 0.0, "an anchor holds its authored post")
+			elif not is_zero_approx(b.lane_shift):
+				shifted += 1
+				assert_lte(absf(b.lane_shift), cfg.lane_shift)
+	assert_gt(shifted, 0, "the others walk shifted")

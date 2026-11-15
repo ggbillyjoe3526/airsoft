@@ -588,28 +588,29 @@ static func _jitter(b: Bot, w: BotWorld, point: Vector3, radius: float) -> Vecto
 
 
 ## Lane point `point` moved b.lane_shift across the way to the enemy (RV1): there if that spot is on the point's floor
-## and walkable in a straight line from it, else half as far, else the point itself.
+## and walkable in a straight line from it, else lane_shift_fallback as far (up to lane_shift_tries in all), else the
+## point itself.
 static func _shifted(b: Bot, w: BotWorld, point: Vector3) -> Vector3:
 	if is_zero_approx(b.lane_shift):
 		return point
 	var way := w.planner.attack_dir[b.character.team]
 	var shift := b.lane_shift
-	for i in 2:
+	for i in w.cfg.lane_shift_tries:
 		var x := point.x - way.y * shift
 		var z := point.z + way.x * shift
 		if _on_same_floor(w, point, x, z):
 			var to := Vector3(x, w.nav.floor_at(Vector3(x, point.y, z)), z)
 			if w.nav.clear_line(point, to):
 				return to
-		shift *= 0.5
+		shift *= w.cfg.lane_shift_fallback
 	return point
 
 
 ## Setting off for lane point `next`, maybe (lane_cross_chance, RV1) cross to another lane instead: to the point of it
-## within lane_cross_reach of `next` on about its floor, no nearer the bot's own end than `next`, among those it would
-## still walk on that lane, on the lane the fewest teammates walk (the nearer point on a tie). On a cross, b.lane,
-## b.lane_index (the point to make for) and b.lane_points are the new lane's; true. Never a defender, the bomb carrier,
-## a bot under a squad order, or one that crossed lane_cross_max times this round.
+## within lane_cross_reach of `next` and lane_cross_rise of its height, no nearer the bot's own end than `next`, among
+## those it would still walk on that lane, on the lane the fewest teammates walk (the nearer point on a tie). On a
+## cross, b.lane, b.lane_index (the point to make for) and b.lane_points are the new lane's; true. Never a defender,
+## the bomb carrier, a bot under a squad order, or one that crossed lane_cross_max times this round.
 static func _cross_lane(b: Bot, w: BotWorld, next: int) -> bool:
 	var cfg := w.cfg
 	if b.lanes_crossed >= cfg.lane_cross_max or b.raiser or b.order != SquadOrder.Kind.NONE \
@@ -639,7 +640,7 @@ static func _cross_lane(b: Bot, w: BotWorld, next: int) -> bool:
 		for k in points.size():
 			var q := points[k]
 			var walked := k if b.lane_dir > 0 else points.size() - 1 - k
-			if walked >= walks or absf(q.y - from.y) > w.tuning.body.max_step:
+			if walked >= walks or absf(q.y - from.y) > cfg.lane_cross_rise:
 				continue
 			var d := Vector2(q.x - from.x, q.z - from.z).length()
 			if d > cfg.lane_cross_reach or Vector2(q.x - home.x, q.z - home.z).dot(way) < from_progress:
