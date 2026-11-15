@@ -22,6 +22,21 @@ const MADE_OF := [
 	["cyber", "Body", "CyberSlab", &"coated"],
 	["cyber", "Body", "CyberFrame", &"polymer"],
 ]
+## Metal and polymer in one paint are a close shade (owner, 2026-11-15, MQ4: "Metal is too shiny and the polymer is
+## relatively very dark. Materials should generally be a close or similar shade but appear slightly more metallic
+## (metals) or matte (polymer)"): the most their colours' gains differ, the least and most metallic a coated metal
+## is, the darkest metal's floor (linear) and the least polymer's gain.
+const CLOSE_GAIN := 0.15
+const LEAST_METAL := 0.35
+const MOST_METAL := 0.6
+const MOST_FLOOR := 0.05
+const LEAST_POLYMER_GAIN := 0.85
+## The black paint's body colour (ReplicaSchemes "black", the Body part), the reflectance of a dielectric at specular 1
+## (Godot: 0.16 x specular squared), and the most a black metal face may send back against black polymer (MQ1 drew
+## steel at about 4.8 times it).
+const BLACK_PAINT := Color("26292e")
+const DIELECTRIC_REFLECTANCE := 0.16
+const MOST_SHADE_RATIO := 1.5
 ## The AEG Rifle's Body material is two things: forged aluminium receivers and a polymer pistol grip.
 const MIXED := ["aeg", "Body", "Body", [&"aluminium", &"polymer"]]
 
@@ -99,8 +114,8 @@ func test_every_kind_has_a_look() -> void:
 			assert_true(look.has(field), "%s says its %s" % [kind, field])
 		assert_gt(float(look["tile"]), 0.0, "%s: a grain that repeats" % kind)
 		assert_gte(float(look["stretch"]), 1.0, "%s: stretched along the bore or not at all" % kind)
-	assert_gt(float(ReplicaSurfaces.LOOKS[&"steel"]["metallic"]), 0.5, "steel is metal")
-	assert_gt(float(ReplicaSurfaces.LOOKS[&"aluminium"]["metallic"]), 0.5, "aluminium is metal")
+	assert_gte(float(ReplicaSurfaces.LOOKS[&"steel"]["metallic"]), LEAST_METAL, "steel is metal, a satin coat (MQ4)")
+	assert_gte(float(ReplicaSurfaces.LOOKS[&"aluminium"]["metallic"]), LEAST_METAL, "aluminium is metal")
 	assert_eq(float(ReplicaSurfaces.LOOKS[&"polymer"]["metallic"]), 0.0, "polymer is not")
 	assert_eq(float(ReplicaSurfaces.LOOKS[&"wood"]["metallic"]), 0.0, "nor wood")
 	assert_gt(float(ReplicaSurfaces.LOOKS[&"wood"]["figure"]), 0.0, "wood shows its figure")
@@ -116,14 +131,17 @@ func test_metal_keeps_a_light_paints_colour_and_only_bare_metal_is_brushed() -> 
 		var look: Dictionary = ReplicaSurfaces.LOOKS[kind]
 		assert_lt(float(look["light_keeps"]), 1.0, "%s: a white paint stays white, not silver" % kind)
 		assert_gt(float(look["floor"]), 0.0, "%s: a black paint still has something to reflect with" % kind)
-		assert_lt(float(look["gain"]), float(ReplicaSurfaces.LOOKS[&"polymer"]["gain"]),
-				"%s reads a shade deeper than the polymer beside it" % kind)
+		assert_almost_eq(float(look["gain"]), float(ReplicaSurfaces.LOOKS[&"polymer"]["gain"]), CLOSE_GAIN,
+				"%s is close to the shade of the polymer beside it (owner, MQ4)" % kind)
 		assert_lt(float(look["roughness"]), float(ReplicaSurfaces.LOOKS[&"polymer"]["roughness"]),
 				"%s is the smoother of the two" % kind)
+		assert_lte(float(look["metallic"]), MOST_METAL, "%s: only a little more metallic, not a mirror (MQ4)" % kind)
+		assert_lte(float(look["floor"]), MOST_FLOOR, "%s: black metal stays near black, not grey (MQ4)" % kind)
 		assert_eq(float(look["stretch"]), 1.0, "%s: a coated part is not brushed (the pistol's serrations)" % kind)
 	assert_gt(float(ReplicaSurfaces.LOOKS[&"bare"]["stretch"]), 1.0, "a bare bolt is")
 	var polymer: Dictionary = ReplicaSurfaces.LOOKS[&"polymer"]
-	assert_lt(float(polymer["gain"]), 1.0, "black polymer is darker and white polymer less bright (owner)")
+	assert_lt(float(polymer["gain"]), 1.0, "white polymer is less bright (owner)")
+	assert_gte(float(polymer["gain"]), LEAST_POLYMER_GAIN, "but black polymer is not much darker than its paint (MQ4)")
 	assert_gt(float(polymer["bold_keeps"]), 0.0, "and a bold paint stays bold on it")
 	var dressed := ShaderMaterial.new()
 	dressed.shader = ReplicaPaint.SURFACE_SHADER
@@ -134,6 +152,28 @@ func test_metal_keeps_a_light_paints_colour_and_only_bare_metal_is_brushed() -> 
 		assert_eq(len(shine), ReplicaSurfaces.SLOTS, "a row per slot")
 	assert_eq(dressed.get_shader_parameter(&"wood_stain_share"), ReplicaSurfaces.WOOD_STAIN_SHARE,
 			"wood is stained, the paint only tints it")
+
+
+## How much light a face in kind `kind` sends back under even light (the light it scatters plus what it reflects at
+## normal incidence) in the black paint's body colour, as replica_surface.gdshaderinc and Godot's lighting work it out:
+## the kind's gain on the paint, metal lifted to its floor by its metallic, a dielectric's reflectance 0.16 x
+## specular squared.
+func _black_shade(kind: StringName) -> float:
+	var look: Dictionary = ReplicaSurfaces.LOOKS[kind]
+	var paint := BLACK_PAINT.srgb_to_linear().get_luminance() * float(look["gain"])
+	var metal := float(look["metallic"])
+	var albedo := lerpf(paint, maxf(paint, float(look["floor"])), metal)
+	var dielectric := DIELECTRIC_REFLECTANCE * pow(float(look["specular"]), 2.0)
+	return albedo * (1.0 - metal) + lerpf(dielectric, albedo, metal)
+
+
+func test_black_metal_and_black_polymer_are_a_close_shade() -> void:
+	var polymer := _black_shade(&"polymer")
+	for kind: StringName in [&"steel", &"aluminium"]:
+		var ratio := _black_shade(kind) / polymer
+		gut.p("%s against polymer in black: %.2f" % [kind, ratio])
+		assert_between(ratio, 1.0, MOST_SHADE_RATIO,
+				"%s is a touch brighter than the polymer beside it (it shines), never a silver band (MQ4)" % kind)
 
 
 func test_an_unknown_kind_and_part_fall_back() -> void:

@@ -163,7 +163,8 @@ the next match.
 In your hands a replica is made of what the real thing would be, under whatever colours it wears: the GBB Pistol's
 slide is coated steel with a satin sheen, the AEG Rifle's receiver and rail are anodised aluminium, the
 barrels and the Sniper Rifle's action are dark steel, and the grips, stocks and the pistol's frame are matte polymer with a
-moulded grain. The metal catches the light; the polymer does not.
+moulded grain. Metal and polymer in the same colours are a close shade: the metal has a soft satin sheen, the polymer
+is matte.
 The parts you fit are made of something too: scopes, the red dot, the silencer and the torch are anodised aluminium,
 grips are polymer, their pads and caps rubber, the Hi-Cap Magazine a steel shell and the Low-Cap polymer.
 

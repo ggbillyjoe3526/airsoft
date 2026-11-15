@@ -39,28 +39,32 @@ const GRAIN := preload("res://assets/textures/replica/replica_grain.png")
 ## the share of the metallic a light paint keeps (a dark finish is an oxide or an anodise, metal to look at; a light
 ## one a baked coat in the paint's own colour) and `floor` the least a metal face reflects (linear: gunmetal).
 ## `bold_keeps` is how far a bold paint escapes `gain` (1: only greys, black and white take it; owner, 2026-11-12:
-## black polymer darker, but lighter than black metal, and white polymer less bright).
+## white polymer less bright).
+## Metal and polymer in one paint are a close shade (owner, 2026-11-15, MQ4: "Metal is too shiny and the polymer is
+## relatively very dark ... a close or similar shade but appear slightly more metallic (metals) or matte (polymer)";
+## "Perfect" on the pictures): the metals are a satin coat, under half metallic with a broad highlight and a low
+## floor, so black steel stays near black, and polymer draws its paint nearly as it is, matte with a dull highlight.
 const LOOKS: Dictionary[StringName, Dictionary] = {
 	# A moulding: matte, a pebbled grain, a dull highlight.
 	&"polymer": {
-		"metallic": 0.0, "roughness": 0.66, "sheen": 0.05, "bares": 0.0,
+		"metallic": 0.0, "roughness": 0.6, "sheen": 0.05, "bares": 0.0,
 		"tile": 0.02, "stretch": 1.0, "relief": 0.3, "figure": 0.0,
-		"cloud": 0.13, "dark": 1.0, "light": 1.0, "gain": 0.72,
-		"specular": 0.25, "light_keeps": 1.0, "floor": 0.0, "bold_keeps": 1.0,
+		"cloud": 0.13, "dark": 1.0, "light": 1.0, "gain": 0.9,
+		"specular": 0.4, "light_keeps": 1.0, "floor": 0.0, "bold_keeps": 1.0,
 	},
-	# Coated steel (nitride, parkerising, a baked coat): smooth and satin, a tight highlight, gunmetal when dark.
+	# Coated steel (nitride, parkerising, a baked coat): satin, a broad soft highlight, near black when painted black.
 	&"steel": {
-		"metallic": 0.8, "roughness": 0.36, "sheen": 0.08, "bares": 0.45,
+		"metallic": 0.4, "roughness": 0.48, "sheen": 0.08, "bares": 0.45,
 		"tile": 0.012, "stretch": 1.0, "relief": 0.05, "figure": 0.0,
-		"cloud": 0.11, "dark": 1.0, "light": 1.0, "gain": 0.64,
-		"specular": 1.0, "light_keeps": 0.3, "floor": 0.1, "bold_keeps": 0.0,
+		"cloud": 0.11, "dark": 1.0, "light": 1.0, "gain": 1.0,
+		"specular": 0.5, "light_keeps": 0.3, "floor": 0.035, "bold_keeps": 0.0,
 	},
-	# Anodised aluminium: the colour is in the metal, a finer blasted grain, a brighter sheen than steel's.
+	# Anodised aluminium: the colour is in the metal, a finer blasted grain, a touch more sheen than steel's.
 	&"aluminium": {
-		"metallic": 0.85, "roughness": 0.3, "sheen": 0.06, "bares": 0.5,
+		"metallic": 0.45, "roughness": 0.45, "sheen": 0.06, "bares": 0.5,
 		"tile": 0.014, "stretch": 1.0, "relief": 0.1, "figure": 0.0,
-		"cloud": 0.15, "dark": 1.0, "light": 1.0, "gain": 0.68,
-		"specular": 1.0, "light_keeps": 0.6, "floor": 0.12, "bold_keeps": 0.0,
+		"cloud": 0.15, "dark": 1.0, "light": 1.0, "gain": 1.0,
+		"specular": 0.5, "light_keeps": 0.6, "floor": 0.04, "bold_keeps": 0.0,
 	},
 	&"wood": {
 		"metallic": 0.0, "roughness": 0.46, "sheen": 0.07, "bares": 0.0,
