@@ -1,6 +1,6 @@
 # AIM1 · Bots find you again when you step back out
 
-**Review:** 2 attempts · critic pending · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass (on attempt 1, 05ba07d) · performance Pass (on attempt 1)
 
 The owner's 2026-11-15 playtest note: on Normal "I could move out of cover for a split second and I get hit".
 
@@ -9,7 +9,7 @@ The owner's 2026-11-15 playtest note: on Normal "I could move out of cover for a
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Accept | Ricochet hits past the owner's 0.25 cap (G12) |
-| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## What was wrong
 
@@ -87,6 +87,12 @@ Normal bot's first hit takes a median 1.15 s at 10 m, 1.6 s at 20 m and 1.9 s at
 - `test_aim1_reacquire` (new): a second peek reacts again within `reacquire_time` with the aim kept at
   `reacquire_settled`, the first sighting unchanged; a 0.2 s flicker changes nothing; past the grace a fresh contact;
   a reaction under way is never cut short; each level up re-reacts no slower and keeps no less settled.
+
+- `test_bot_climbs` and `test_bot_vaults` played two rounds of one seed and needed a bot over the step or the low
+  wall in them; with AIM1 the first crossing falls in a later round, so each now plays up to 6 rounds and stops once it
+  has seen what it looks for (the same assertions). `test_tl1_qa` leaves the two new skill fields out of its pinned
+  snapshot, as it does every field added after the levels moved.
+- 87 bot test files (898 tests) pass on attempt 2.
 
 ## Known issues left
 
