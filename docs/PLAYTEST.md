@@ -1728,8 +1728,9 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
   behind the ejection port and your right hand clears it.
 - [ ] **Parts and bots.** Fit the Red Dot, the 2x Scope and the Variable Scope, a grip and a torch; look at a bot
   carrying the AEG up close.
-  Pass: every optic sits on the receiver's rail as before; the bot's rifle shows the ring all round and a clean,
-  solid handguard (its copy has no gaps: too small to read at a bot's distance) with no torn faces on its rails.
+  Pass: every optic sits on the receiver's rail as before; the bot's rifle shows the ring all round and a solid
+  handguard (its copy has no gaps: too small to read at a bot's distance) with clean side rails. Its top rail still
+  has one collapsed tooth, as before this change (KNOWN_ISSUES): say if it shows.
 
 ## Reporting what you find
 

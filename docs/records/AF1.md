@@ -1,13 +1,13 @@
 # AF1 · AEG ring all round, gaps between the handguard's rails, larger angled forward assist
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (AEG ring and rails thread) | ✓ | 6/8 Retry (QA Pass, performance Pass) | Measured, check 1: the photo's lower corners have shorter oval slots, not round holes (the round dots are the side rail's own holes); judgment: the bots' copy tore the side rail's teeth; check 8: PLAYTEST said the bots' rifle shows the same handguard |
-| 2026-11-15 | 2 | Opus 5.5 (AEG ring and rails thread) | pending | pending | – |
+| 2026-11-15 | 2 | Opus 5.5 (AEG ring and rails thread) | ✓ | 7/8 Accept (QA Pass, performance Pass) | Check 8: PLAYTEST promised no torn faces on the bots' rails; one top-rail tooth still collapses (as on main): line reworded, KNOWN_ISSUES row added |
 
 ## What changed
 
@@ -53,3 +53,9 @@ Pictures: /mnt/project-files/art/replica-views/aeg-ring-gaps-fa/ (before/after c
 - Forward assist angle 18 degrees: enough to stand clear in the top view without reaching the stock or the hand.
 - The bots' copy keeps a solid handguard: 28 slots in a 2,400-triangle copy fray, and at a bot's distance they don't
   read.
+
+## Known issues left
+
+- The bots' copy's handguard top rail: one collapsed tooth and the first two holed, close up only (KNOWN_ISSUES, can
+  wait); main's copy had the same.
+- The side rail's small round mounting holes on the photo are left out (budget: 636 triangles left in the hands).
