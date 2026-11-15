@@ -31,8 +31,7 @@ recommended Subway concept A (two more lanes, the north passage's and the west p
   it is 24.6 m, about 5.5 s. A rail closes the top landing's west edge over the well (the owner's picture, 11:07).
 - **Five lockers out:** two in each passage (the 13 m pair and the mouth pair at -4 m) and the one screening the old
   booking hall's spiral foot; each passage keeps its wall-side and inner chicane lockers. A short pier (0.6 by 0.8 m,
-  3 m high) stands on each mouth's inner side, and the concourse's two piers run out to the passages' line, so the
-  hall's spawn doesn't see down a passage.
+  3 m high) stands on each mouth's inner side, so the hall's spawn doesn't see down a passage.
 - **Five lanes:** north, middle and south as before (from the new hall), plus concept A's north passage lane and a
   spiral stair lane that comes up the south platform and crosses to the north at the lower hall.
 - Fixtures, dress and pictures follow the new rooms (`fixtures.py`, `station_dress.py`, `station_pictures.gd`).
@@ -83,12 +82,13 @@ The map heat tool (`tools/map_heat.gd`, 8 seeds a mode, the MR1 report's measure
 - **The spiral stair lands on the south platform**, in its west half, where the old booking
   hall's foot can't go now that the hall is on the concourse's floor: the owner asked for it "to get down to the
   platform".
-- **Which lockers went:** the ones that cut the passages' long axis (13 m and the mouths); the wall-side chicane
-  lockers stay so each passage still has cover. With the mouth lockers gone the field checks found a 66.8 m line
-  from the hall's west end (the Street team's spawn) slipping past a mouth's corner into the north passage (critic,
-  attempt 1). A short pier on each mouth's inner side (0.6 by 0.8 m, the mouth 2.2 m wide) and the concourse's piers
-  run out to the passages' line close it: the longest upper line is 57 m, the hall's west end to a passage's mouth,
-  and from the spawn spots 3 of about 1,100 passage points are seen, all at a mouth. The Subway exception stays 60 m.
+- **Which lockers went:** the ones that cut the passages' long axis (13 m and the mouths); the wall-side chicane lockers
+  stay so each passage still has cover. With the mouth lockers gone the field checks found a 66.8 m line from the hall's
+  west end (the Street team's spawn) slipping past a mouth's corner into the north passage (critic, attempt 1). A short
+  pier on each mouth's inner side (0.6 by 0.8 m, the mouth 2.2 m wide) closes it (running the concourse's piers out to
+  the passages' line as well changed no line and was taken back): the longest upper line is 57 m, the hall's west end to
+  a passage's mouth, and from the spawn spots 3 of about 1,100 passage points are seen, all at a mouth. The Subway
+  exception stays 60 m.
 - **Two lanes added, the spiral's and the north passage's (MR1 concept A).** DECISIONS' lane rule (no lane on a way a
   bot is slow on) now lets the spiral stair have one: it is a 6 s walk.
 - **The cable drums and booking counter stay** in the new hall: SM4's and SM3's models and tests need them, and they

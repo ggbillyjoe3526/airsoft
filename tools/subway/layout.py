@@ -68,7 +68,7 @@ block("container", C, -49, -46, 7.4, 10, 2.5, 0x8a8478, dress="kiosk")  # shutte
 block("cabinet", C, -55.0, -54.4, 2.5, 8.0, 2.0, dress="ticket_machine")
 block("furniture", C, -48.5, -42.5, -10, -9.1, 1.1, dress="booking_counter")  # the old ticket counter, waist high
 # Cable drums left from the works where the west passage was: cover along the hall's north wall (the concourse's
-# north pier closes the line down it into the north passage).
+# pier and the north passage's mouth pier keep the line down it out of the passage).
 block("crate", C, -31, -29, -10, -8.6, 1.8, dress="cable_drum")
 block("crate", C, -25, -23, -8.4, -7.0, 1.8, dress="cable_drum")
 # Ticket gates (the owner: lanes one person wide, paddle doors each side): a slim pedestal 0.49 m wide and 1.4 m along
