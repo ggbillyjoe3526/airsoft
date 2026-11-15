@@ -106,3 +106,19 @@ func test_the_pipework_lengths_on_a_wall_meet_end_to_end_and_every_third_fitted_
 		assert_almost_eq(row[i].position.x - row[i - 1].position.x, 4.0, 0.001, "end to end")
 	var fitted := row.filter(func(f: StationDressing.Fixture) -> bool: return f.model == &"pipe_run_b")
 	assert_eq(fitted.size(), 2, "every third length fitted, the one over the ticket office laid plain")
+
+
+func test_no_extra_overlaps_another_fixture_and_none_is_laid_twice() -> void:
+	var fixtures := _subway().station.fixtures
+	var boxes: Array[AABB] = []
+	for f in fixtures:
+		boxes.append(_box(f).grow(-0.002))  # signs are 5 mm thick
+	var bad: Array[String] = []
+	for i in fixtures.size():
+		if not SHARED.has(fixtures[i].model):
+			continue
+		for j in fixtures.size():
+			if i != j and (j < i or not SHARED.has(fixtures[j].model)) and boxes[i].intersects(boxes[j]):
+				bad.append("%s at %s meets %s at %s" % [fixtures[i].model, fixtures[i].position,
+						fixtures[j].model, fixtures[j].position])
+	assert_eq(bad, [] as Array[String], "the station's extras keep clear of every other fixture")
