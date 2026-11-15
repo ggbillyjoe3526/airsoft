@@ -67,8 +67,8 @@ block("wall", C, -55, -49, -10, -6.5, 3.0, dress="ticket_office")  # closed tick
 block("container", C, -49, -46, 7.4, 10, 2.5, 0x8a8478, dress="kiosk")  # shuttered kiosk
 block("cabinet", C, -55.0, -54.4, 2.5, 8.0, 2.0, dress="ticket_machine")
 block("furniture", C, -48.5, -42.5, -10, -9.1, 1.1, dress="booking_counter")  # the old ticket counter, waist high
-# Cable drums left from the works where the west passage was: cover along the hall's north wall, and no line down it
-# into the north passage.
+# Cable drums left from the works where the west passage was: cover along the hall's north wall (the concourse's
+# north pier closes the line down it into the north passage).
 block("crate", C, -31, -29, -10, -8.6, 1.8, dress="cable_drum")
 block("crate", C, -25, -23, -8.4, -7.0, 1.8, dress="cable_drum")
 # Ticket gates (the owner: lanes one person wide, paddle doors each side): a slim pedestal 0.49 m wide and 1.4 m along
@@ -108,8 +108,8 @@ block("barrier", C, -14.0, -13.4, 3.6, 5.6, 1.1, dress="crowd_barrier")
 block("cabinet", C, -9.0, -7.6, -8.4, -7.0, 2.2, dress="help_point")  # help points / map boards
 block("cabinet", C, -9.0, -7.6, 7.0, 8.4, 2.2, dress="help_point")
 block("furniture", C, -17.4, -16.8, 5.5, 8.5, 0.8, dress="station_bench_long", facing="+x")  # bench
-block("wall", C, -12.6, -11.4, -9.5, -6.9, 4.0)            # piers: break the passage-to-passage line
-block("wall", C, -12.6, -11.4, 6.9, 9.5, 4.0)
+block("wall", C, -12.6, -11.4, -9.5, -6.5, 4.0)  # piers: break the passage-to-passage line and the hall's down the
+block("wall", C, -12.6, -11.4, 6.5, 9.5, 4.0)    # north wall (SW1: out to the passages' line, no seam beside them)
 block("container", C, -12.4, -10.4, -2.6, 2.6, 2.8, 0x8a8478, dress="kiosk_long")  # shut newsagent's kiosk between the
 #                                                                escalator banks:
 #                                                                no line from the lower hall up both flights
@@ -119,6 +119,10 @@ for z0, z1 in ((-3.0, -ESC_MID - ESC_LANE), (-ESC_MID, ESC_MID), (ESC_MID + ESC_
     block("barrier", None, -6, 10, z0, z1, 1.0, dress="escalator_lower")
 room("npass", "North passage", -6, 20, -9.5, -6.5, C, h=3.0)
 room("spass", "South passage", -6, 20, 6.5, 9.5, C, h=3.0)
+# A pier at each passage's mouth on its inner side (SW1): with the mouths' lockers gone, it keeps the hall's west end
+# from seeing down the passage past the mouth's corner; the mouth stays 2.2 m wide.
+block("wall", C, -6.0, -5.4, -7.3, -6.5, 3.0)
+block("wall", C, -6.0, -5.4, 6.5, 7.3, 3.0)
 for zs in (-1, 1):
     a, b = sorted((zs * 9.5, zs * 7.7))
     c, d = sorted((zs * 8.3, zs * 6.5))
