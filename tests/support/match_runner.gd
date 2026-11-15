@@ -667,10 +667,12 @@ static func chasing(c: Character, leader: Character, catch_up: float, sprint_spe
 
 ## Standing still on purpose, not held up: an anchor settled at its post (bots.md › Holds until), a bot watching where
 ## someone ducked out of sight (Watch where you ducked), or one pausing at a lane point or waiting there for its team
-## (holding this tick, on its lane), or at its spot by the pole (Attack / Defend: its route there done).
+## (holding this tick, on its lane), or at its spot by the pole (Attack / Defend: its route there done), or one on a
+## landing waiting for the lift on its route (BotLifts: it gives up after BotConfig.lift_patience; RV1, Subway seed 11:
+## a car parked at the far landing takes about 10 s to come down 18 m and open).
 static func holding_on_purpose(b: Bot, time: float) -> bool:
 	return b.at_post or time < b.watch_until or (b.mode == Bot.Mode.ADVANCE and b.holding) \
-			or (b.mode == Bot.Mode.FLAG and b.route_state == Bot.RouteState.NONE)
+			or (b.mode == Bot.Mode.FLAG and b.route_state == Bot.RouteState.NONE) or b.lift_wait > 0.0
 
 
 static func _bot_of(bots: BotController, id: int) -> Bot:

@@ -45,7 +45,9 @@ across the map before anything happens".
   zeroes `lane_shift` (as it zeroes `lane_jitter`); `test_bots`' crouched-teammate case (HV1) was found on the
   authored lanes, so it zeroes the bots' shift. `test_bot_climbs`' pit test and `test_bot_vaults`' low-wall test play
   up to four rounds, not two: with the new timing their seed's first two rounds could end in fights before anyone
-  reached the ledge. `test_fg2_qa` allows the one pushed defender past point 2.
+  reached the ledge. `test_fg2_qa` allows the one pushed defender past point 2. The match runner's held-up guard counts a bot waiting
+  on a landing for its route's lift as waiting on purpose (it gives up after `lift_patience`): Subway seed 11 had one
+  wait about 10 s for a car parked at the far landing, which read as held up.
 
 ## Verified
 
