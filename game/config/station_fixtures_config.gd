@@ -21,6 +21,9 @@ extends Resource
 ## Every printed face's picture (tools/blender/maps/station_signs.py: an invented station name, the way-out signs,
 ## the posters, the clock face, the edge warning).
 @export_file("*.png") var sign_sheet: String = "res://assets/textures/station/signs.png"
+## The models drawn in square chunks this many metres across (one MultiMesh a chunk) so the far ones cull: Depot's
+## pipework, laid along every wall of the hall (DX1). Any other model is one MultiMesh.
+@export var chunks: Dictionary[StringName, float] = {&"pipe_run": 40.0, &"pipe_run_2": 40.0}
 ## The models printing from another sheet than `sign_sheet`: Depot's extras' (DX1, tools/blender/maps/depot_signs.py:
 ## its safety signs and the fire point's header).
 @export var sheets: Dictionary[StringName, String] = {

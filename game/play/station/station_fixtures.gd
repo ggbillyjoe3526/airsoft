@@ -59,7 +59,14 @@ static func build(map: MapData, cfg: StationFixturesConfig) -> StationFixtures:
 			printed[sheet_path] = _printed(sheet_path, cfg, prop)
 			if printed[sheet_path] != prop:
 				view._materials.append(printed[sheet_path])
-		view._add(model, _surfaces(src, prop, glow, printed[sheet_path]), placed[model])
+		var mesh := _surfaces(src, prop, glow, printed[sheet_path])
+		var chunk: float = cfg.chunks.get(model, 0.0)
+		if chunk > 0.0:
+			var groups := chunked(placed[model], chunk)
+			for i in groups.size():
+				view._add(model, mesh, groups[i], i)
+		else:
+			view._add(model, mesh, placed[model])
 		if cfg.lit_models.has(String(model)):
 			for t: Transform3D in placed[model]:
 				view._add_lamp(t * Vector3(0.0, 0.0, cfg.lamp_out), cfg)
@@ -112,7 +119,21 @@ static func _surfaces(src: Mesh, prop: Material, glow: Material, printed: Materi
 	return mesh
 
 
-func _add(model: StringName, mesh: ArrayMesh, transforms: Array) -> void:
+## `transforms` split by the `size` m square of the world their origins stand in, in order of first use. Pure.
+static func chunked(transforms: Array, size: float) -> Array[Array]:
+	var cells: Dictionary[Vector2i, int] = {}
+	var out: Array[Array] = []
+	for t: Transform3D in transforms:
+		var cell := Vector2i(floori(t.origin.x / size), floori(t.origin.z / size))
+		if not cells.has(cell):
+			cells[cell] = out.size()
+			out.append([])
+		out[cells[cell]].append(t)
+	return out
+
+
+## One MultiMesh of `model` at `transforms`, named for its model (and its chunk, `part`, when it is one of several).
+func _add(model: StringName, mesh: ArrayMesh, transforms: Array, part: int = -1) -> void:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = mesh
@@ -120,7 +141,7 @@ func _add(model: StringName, mesh: ArrayMesh, transforms: Array) -> void:
 	for i in transforms.size():
 		mm.set_instance_transform(i, transforms[i])
 	var inst := MultiMeshInstance3D.new()
-	inst.name = String(model).to_pascal_case()
+	inst.name = String(model).to_pascal_case() + ("" if part < 0 else "Chunk%d" % part)
 	inst.multimesh = mm
 	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	inst.gi_mode = GeometryInstance3D.GI_MODE_DISABLED

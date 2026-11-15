@@ -158,3 +158,20 @@ func test_fire_points_and_reels_keep_off_the_shutters_and_each_exit_has_its_sign
 			if Vector2(f.position.x - e.origin.x, f.position.z - e.origin.z).length() < 1.6:
 				near += 1
 		assert_eq(near, 1, "the exit at %s has its sign beside its door" % e.origin)
+
+
+func test_the_pipework_is_drawn_in_chunks_that_cull_and_every_fixture_once() -> void:
+	var view := StationFixtures.build(depot, fixtures_cfg)
+	assert_not_null(view, "Depot's extras drawn")
+	if view == null:
+		return
+	add_child_autofree(view)
+	var pipes := 0
+	var total := 0
+	for v in view.views():
+		total += v.multimesh.instance_count
+		if v.multimesh.mesh != null and v.name.begins_with("PipeRun") and v.multimesh.instance_count > 0:
+			pipes += 1
+			assert_lte(v.multimesh.get_aabb().size.x, fixtures_cfg.chunks[&"pipe_run"] + 4.5, "a chunk, not the hall")
+	assert_eq(total, depot.fixtures.size(), "every extra drawn once")
+	assert_gt(pipes, 4, "the pipework in chunks round the hall")

@@ -49,6 +49,8 @@ floor.
   like Subway's extinguisher red, so no prop reads as Beta in High contrast.
 - **The exit bays keep their own extinguisher and call point**, so fire points stay out of them; fire points and
   reels stand 0.9 m from a column, clear of a shutter's opening and posts (2.53 m from its bay's middle).
+- **The pipework is drawn in 40 m chunks** (`StationFixturesConfig.chunks`, performance's advice): 92 lengths
+  round the hall, about 66k triangles, in one hall-wide MultiMesh would never cull.
 - **Pillar signs left out:** a flat sign on the 0.4 m round post would stand off it at its edges; the call point and
   extinguisher are small enough to sit on it.
 
