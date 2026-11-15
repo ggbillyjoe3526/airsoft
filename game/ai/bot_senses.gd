@@ -156,7 +156,8 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 	if w.time - c.seen_at > cfg.contact_grace:
 		# Someone stepping out where the bot already aims (a held angle) is answered sooner and with a steadier aim.
 		var pre_aimed := _aimed_at(b, w, best, best_part)
-		c.react_at = w.time + b.pick(b.skill.pre_aim_reaction_time if pre_aimed else b.skill.reaction_time)
+		c.react_at = w.time + b.pick(b.skill.pre_aim_reaction_time if pre_aimed else b.skill.reaction_time) \
+				+ notice_time(me, best, best_d, cfg)
 		c.acquired_at = w.time - (b.skill.pre_aim_settled * b.skill.aim_settle_time if pre_aimed else 0.0)
 		c.first_seen_at = w.time
 		c.reaction_from = w.time
@@ -188,6 +189,20 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 	b.last_threat_at = w.time
 	b.last_known = best.position
 	b.has_last_known = true
+
+
+## How much later than its reaction `viewer` answers a fresh sighting of `target`, `dist` m away level (s; AIM2): more
+## off the middle of its view and further away, less for someone on the move, none within close_awareness.
+static func notice_time(viewer: Character, target: Character, dist: float, cfg: BotConfig) -> float:
+	if dist <= cfg.close_awareness:
+		return 0.0
+	var dx := target.position.x - viewer.position.x
+	var dz := target.position.z - viewer.position.z
+	var facing := clampf((-sin(viewer.yaw) * dx - cos(viewer.yaw) * dz) / maxf(dist, 1e-3), -1.0, 1.0)
+	var off := clampf(acos(facing) / maxf(deg_to_rad(cfg.fov_deg) * 0.5, 1e-3), 0.0, 1.0)
+	var t := cfg.notice_edge_time * off * off + cfg.notice_far_time * clampf(dist / cfg.view_distance, 0.0, 1.0)
+	var speed := Vector2(target.velocity.x, target.velocity.z).length()
+	return t * (cfg.notice_moving_share if speed >= cfg.notice_moving_speed else 1.0)
 
 
 ## The target `b` has in mind if it is still in play and not forgotten; a target that is out or forgotten is dropped (an

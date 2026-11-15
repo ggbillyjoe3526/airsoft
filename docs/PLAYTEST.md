@@ -208,11 +208,11 @@ own air: 20 °C in Depot and on the Range, cooler on Woodland and Subway, and a 
   grip's back; the SMG sits as the rifles do. A pistol is held tight in both hands, no left
   fingers showing, the right thumb resting on the left hand, the Cyber Pistol held as the GBB is; over the sights no
   gap shows between the left hand and the grip. Raise the sight: a
-  rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and only the top of the
-  hands shows under a pistol's slide. Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
+  rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and a pistol's hands stay
+  whole under its slide, never faded (HA2). Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
   should hold up close on Inspect (Y); the right index finger and the skin between wrist and thumb look natural.
-  The pistols sit 25 cm from the eye (the owner's pick): judge their size at the hip, through a reload and on
-  Inspect. Skin-only arms on a pistol: the bare hands should read as hands (knuckle folds, the thumb's tendon, veins
+  The pistols sit low on the right as the rifles do, turned a little in (HA2): judge their size and angle beside a
+  rifle at the hip, through a reload and on Inspect. Skin-only arms on a pistol: the bare hands should read as hands (knuckle folds, the thumb's tendon, veins
   at the wrist, nails, a tapered thumb), not plastic. Close to a bot holding an AEG with no grip: its left fingers
   lie open under the handguard.
 - [ ] **The replica moves with you** (HA1). Walk, sprint, strafe, jump and land, crouch, stand, fire, switch: a
@@ -666,6 +666,9 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
 - [ ] **Peek, duck, peek again (AIM1).** On Normal, step out past a corner a bot watches for under half a second, duck
   back, and step out again half a second later: it should rarely hit you on either peek (its first BBs go wide again),
   but stand out for a second and a half and it should. On Hard, re-peeking the same corner is riskier.
+- [ ] **Noticed, and shooting back (AIM2).** On Normal, step into a bot's view from its side 30 m off: it should take a
+  moment longer to answer than when you step out right in front of it close by. Then trade shots with one: a BB past
+  its head should make its next shots go wider for a moment.
 - [ ] **The bots' kits (BG1).** Opponents carry kits from `bot-kits.md`: Easy the plainest, each level up more scoped,
   silenced or red-dot, Hard never plain. Spectate a few: the optic shows on their rifle and a silenced bot is heard
   nearer. Does gear make Normal unfair or Hard too easy?
@@ -1719,6 +1722,16 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
   you go at once; your bots still leave the defuse to you while you are close.
 - [ ] **Attacking is worth it now.** Attack on the same fields and hold the site after the plant.
   Pass: holding the site feels like it wins rounds; the bomb goes off now and then, not every time.
+
+## Pistols at the rifles' place, arms on Inspect (HA2)
+
+- [ ] **A pistol takes about a rifle's share of the screen.** Switch between the AEG and the GBB Pistol, then the
+  Cyber Pistol, standing still, walking and after a shot.
+  Pass: the pistol sits low on the right at about the rifle's angle, both hands on it and no forearm showing; it
+  comes up to the sight smoothly and squares up as it does, the hands whole and never fading.
+- [ ] **No arm ends on Inspect.** Press Y with each replica, at your field of view and at 110, on a wide screen if you
+  have one. Pass: both sleeves run off the edge of the screen all through the turn; no green end or blob comes up in
+  front of you; both hands stay on the replica.
 
 ## Reporting what you find
 
