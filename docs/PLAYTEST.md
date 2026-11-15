@@ -1742,6 +1742,19 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
   colour; red, orange and blue never look like a team or a warning; from the pause menu, Resume and the settings
   change at once and the HUD follows from the next match.
 
+## The AEG Rifle's ring, handguard gaps and forward assist (AF1)
+
+- [ ] **The new shapes read in your hands.** Hold the AEG Rifle at the hip and aimed on Depot and Woodland, and
+  inspect it (**Y**).
+  Pass: the ribbed ring shows all the way round between the receiver and the handguard; the oval gaps between the
+  rails (a row in each corner, the lower ones shorter) show the barrel and gas tube with no flicker or seam of
+  daylight; the forward assist stands out at an angle behind the ejection port and your right hand clears it.
+- [ ] **Parts and bots.** Fit the Red Dot, the 2x Scope and the Variable Scope, a grip and a torch; look at a bot
+  carrying the AEG up close.
+  Pass: every optic sits on the receiver's rail as before; the bot's rifle shows the ring all round and a solid
+  handguard (its copy has no gaps: too small to read at a bot's distance) with clean side rails. Its top rail still
+  has one collapsed tooth, as before this change (KNOWN_ISSUES): say if it shows.
+
 ## Pistols at the rifles' place, arms on Inspect (HA2)
 
 - [ ] **A pistol takes about a rifle's share of the screen.** Switch between the AEG and the GBB Pistol, then the
