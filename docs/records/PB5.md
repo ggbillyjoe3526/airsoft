@@ -1,6 +1,6 @@
 # PB5 · Plant The Bomb's fuses measured again on the reworked fields
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 1 attempt · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner's ask (2026-11-15 09:53): the Plant The Bomb balance thread rebalances once the map reworks are in. PB4
 (#357) set a fuse for each field on the old layouts. Since then Depot's compact hall (DC1, #368), Woodland's new routes
@@ -12,7 +12,7 @@ of the others were in.
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (wiki, changelog, touched tests; the rest in CI) | 8/8 Accept | – |
 
 ## What the bots showed
 
