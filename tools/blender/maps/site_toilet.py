@@ -20,40 +20,52 @@ import range_kit as rk  # noqa: E402
 from range_kit import hs  # noqa: E402
 
 OUT = os.path.join(rk.PROPS, "site_toilet.glb")
-BUDGET = 2500
+BUDGET = 5000  # docs/CC0_ASSETS.md › Size limits: a prop (RM2: the ribs moulded round)
 HW = 0.6
 HIGH = 2.4
 WALL = 0.565  # the walls' half width (the roof and skids reach the box)
 FRONT = 0.54  # the front wall's distance from the middle: the door's handle and hinges stand proud of it to the box
 EAVE = 2.12
 SKID = 0.1
+RIB_ALONG, RIB_ACROSS = 18, 8  # a rib's points along it and across its round swell (RM2)
+RIB_END = 0.12  # the share of a rib's length at each end where it runs out into the wall
 
 rk.check_colours(["loo_door", "loo_wall", "loo_frame", "loo_roof", "loo_vent", "stand_black", "zinc"], shade=0.05)
 
 
 def _wave(k: rk.Kit, axis: str, at: float, out: float, u0: float, u1: float, z0: float, amp: float, mat: str,
           width: float = 0.05) -> None:
-    """A moulded rib `width` tall sweeping from u0 to u1 on a wall facing along `axis` (x or y) at `at`, swelling
-    `out` proud with sloped flanks (moulded into the wall, not a strip on it), rising `amp` along it in an S."""
+    """A moulded rib `width` tall sweeping from u0 to u1 on a wall facing along `axis` (x or y) at `at`, rising `amp`
+    along it in an S. It is moulded into the wall, not a strip laid on it (RM2): its section a smooth round swell
+    `out` proud at its crest that runs out into the wall at both edges, and its ends taper into the wall too."""
     import bmesh
     from mathutils import Vector
-    n = 10
     rings = []
-    for i in range(n + 1):
-        t = i / n
+    for i in range(RIB_ALONG + 1):
+        t = i / RIB_ALONG
         u = u0 + (u1 - u0) * t
         z = z0 + amp * (0.5 - 0.5 * math.cos(math.pi * t))
+        env = _ease(min(t, 1.0 - t) / RIB_END)  # the ends run out into the wall by the corner posts
         ring = []
-        for d, dz in ((0.0, 0.0), (out, width * 0.3), (out, width * 0.7), (0.0, width)):
+        for j in range(RIB_ACROSS + 1):
+            v = j / RIB_ACROSS
+            # A swoosh: a short steep rise from its lower edge to its crest, then a long easy slope back to the wall.
+            d = out * env * math.sin(math.pi * v ** 0.6) ** 1.3
+            dz = width * v
             ring.append((at + d, u, z + dz) if axis == "x" else (u, at + d, z + dz))
         rings.append(ring)
-    faces = k.loft(rings, mat, closed=False)
+    faces = k.loft(rings, mat, cap0=False, cap1=False, closed=False)
     # Its faces look out of the wall, whichever way the loft wound them.
     facing = Vector((1.0, 0.0, 0.0) if axis == "x" else (0.0, 1.0, 0.0)) * math.copysign(1.0, out)
     mid = faces[len(faces) // 2]
     mid.normal_update()
     if mid.normal.dot(facing) < 0.0:
         bmesh.ops.reverse_faces(k.bm, faces=faces)
+
+
+def _ease(x: float) -> float:
+    x = min(max(x, 0.0), 1.0)
+    return x * x * (3.0 - 2.0 * x)
 
 
 def _arch(x: float) -> float:
@@ -69,26 +81,24 @@ def build() -> object:
         for sy in (-1.0, 1.0):
             k.blk((sx * 0.52 - 0.08, sy * 0.5 - 0.09, 0.0), (sx * 0.52 + 0.08, sy * 0.5 + 0.09, SKID * 0.8),
                   "loo_frame")
-    k.prism(hs.rounded_rect(0.585, 0.585, 0.06, 2), "z", SKID * 0.6, SKID + 0.08, "loo_frame")
+    k.prism(hs.rounded_rect(0.585, 0.585, 0.06, 4), "z", SKID * 0.6, SKID + 0.08, "loo_frame")
     # The cabin's shell: grey walls with rounded corners.
     mid = (WALL - FRONT) * 0.5
-    k.prism([(x, y + mid) for x, y in hs.rounded_rect(WALL, (WALL + FRONT) * 0.5, 0.07, 3)], "z", SKID + 0.08, EAVE,
+    k.prism([(x, y + mid) for x, y in hs.rounded_rect(WALL, (WALL + FRONT) * 0.5, 0.07, 6)], "z", SKID + 0.08, EAVE,
             "loo_wall")
     # Corner posts standing proud the full height (darker), as the moulded uprights in the photos.
     for sx in (-1.0, 1.0):
         for sy in (-1.0, 1.0):
             c = (sx * (WALL - 0.035), sy * (WALL - 0.035) if sy > 0 else -FRONT + 0.035)
-            k.prism([(c[0] + x, c[1] + y) for x, y in hs.rounded_rect(0.045, 0.045, 0.02, 2)], "z", SKID + 0.08,
+            k.prism([(c[0] + x, c[1] + y) for x, y in hs.rounded_rect(0.045, 0.045, 0.02, 4)], "z", SKID + 0.08,
                     EAVE, "loo_frame")
     # The sides' sweeping ribs (photos 1 and 2), three a side, and two on the back.
     for sx in (-1.0, 1.0):
         at = sx * WALL
-        for i, z0 in enumerate((0.45, 1.05, 1.6)):
-            _wave(k, "x", at, sx * 0.02, -0.42 * sx, 0.42 * sx, z0, 0.2, "loo_wall", 0.1)
-        # A round moulded boss low on each side (photo 2's circles).
-        k.cyl((at if sx > 0 else at - 0.012, 0.2, 0.62), 0.16, 0.012, "loo_wall", seg=20, axis="x")
+        for i, z0 in enumerate((0.38, 0.98, 1.55)):
+            _wave(k, "x", at, sx * 0.035, -0.485 * sx, 0.485 * sx, z0, 0.2, "loo_wall", 0.2)
     for z0 in (0.7, 1.45):
-        _wave(k, "y", WALL, 0.02, -0.42, 0.42, z0, 0.16, "loo_wall", 0.1)
+        _wave(k, "y", WALL, 0.035, -0.485, 0.485, z0, 0.16, "loo_wall", 0.2)
     # The front: the door frame (posts up to the header, never overlapping it, and the header, proud of the wall),
     # the door a little back in it, its two moulded swoops, three hinges on the left, the latch with its round
     # indicator and a pull handle on the right.
@@ -108,13 +118,13 @@ def build() -> object:
     px = [-0.36 + 0.72 * i / 12 for i in range(13)]
     door = [(-0.36, SKID + 0.14), (0.36, SKID + 0.14)] + [(x, hz - 0.06 + _arch(x) * 0.9) for x in reversed(px)]
     k.prism(door, "y", fy - 0.022, fy - 0.012, "loo_door")
-    _wave(k, "y", fy - 0.022, -0.01, -0.3, 0.3, 0.55, 0.12, "loo_frame", 0.035)
-    _wave(k, "y", fy - 0.022, -0.01, 0.3, -0.3, 1.6, 0.1, "loo_frame", 0.035)
+    _wave(k, "y", fy - 0.022, -0.016, -0.3, 0.3, 0.55, 0.12, "loo_door", 0.06)
+    _wave(k, "y", fy - 0.022, -0.016, 0.3, -0.3, 1.6, 0.1, "loo_door", 0.06)
     for z in (0.35, 1.1, 1.8):
         k.blk((-0.41, fy - 0.045, z - 0.06), (-0.355, fy - 0.022, z + 0.06), "stand_black")
         k.cyl((-0.383, fy - 0.045, z - 0.075), 0.009, 0.15, "stand_black", seg=6)
-    k.cyl((0.3, fy - 0.037, 1.12), 0.035, 0.015, "stand_black", seg=10, axis="y")
-    k.cyl((0.3, fy - 0.043, 1.12), 0.022, 0.006, "loo_vent", seg=10, axis="y")
+    k.cyl((0.3, fy - 0.037, 1.12), 0.035, 0.015, "stand_black", seg=16, axis="y")
+    k.cyl((0.3, fy - 0.043, 1.12), 0.022, 0.006, "loo_vent", seg=16, axis="y")
     k.blk((0.27, fy - 0.06, 0.88), (0.33, fy - 0.022, 0.92), "stand_black")
     k.blk((0.31, fy - 0.06, 0.88), (0.33, fy - 0.022, 1.02), "stand_black")
     # Vents high on the sides.
@@ -124,15 +134,19 @@ def build() -> object:
     # The roof: a white dome over the eaves (it overhangs to the box), and the vent pipe at the back right (its cap
     # the top of the box).
     rings = []
-    for z, s, r in ((EAVE - 0.04, HW, 0.08), (EAVE + 0.04, HW, 0.08), (EAVE + 0.12, 0.56, 0.12),
-                    (EAVE + 0.18, 0.47, 0.16), (EAVE + 0.21, 0.32, 0.18)):
-        rings.append([(x, y, z) for x, y in hs.rounded_rect(s, s, r, 3)])
+    # (RM2: a smooth dome, its rim rolled under, each corner rounded in 7 steps.)
+    for z, s, r in ((EAVE - 0.04, HW - 0.012, 0.08), (EAVE - 0.03, HW, 0.08), (EAVE + 0.03, HW, 0.08),
+                    (EAVE + 0.05, HW - 0.008, 0.09), (EAVE + 0.1, 0.57, 0.11), (EAVE + 0.145, 0.535, 0.13),
+                    (EAVE + 0.18, 0.48, 0.15), (EAVE + 0.2, 0.41, 0.17), (EAVE + 0.212, 0.32, 0.18)):
+        rings.append([(x, y, z) for x, y in hs.rounded_rect(s, s, r, 6)])
     k.loft(rings, "loo_roof")
-    k.cyl((0.32, 0.32, EAVE + 0.1), 0.035, HIGH - 0.02 - EAVE - 0.1, "loo_vent", seg=10)
-    k.cyl((0.32, 0.32, HIGH - 0.02), 0.05, 0.02, "loo_vent", seg=10)
+    k.cyl((0.32, 0.32, EAVE + 0.1), 0.035, HIGH - 0.02 - EAVE - 0.1, "loo_vent", seg=16)
+    k.lathe([(0.0, 0.0), (0.0, 0.05), (0.012, 0.05), (0.02, 0.04), (0.02, 0.0)], "loo_vent", segments=16,
+            centre=(0.32, 0.32, HIGH - 0.02), axis="z")
     ob = k.build()
     rk.finish(ob, angle=math.radians(45.0))
     rk.bake(ob, jitter={}, seed=3)
+    rk.occlude(ob, strength=0.5, distance=0.12)
     rk.fit_box(ob, (-HW, -HW, 0.0), (HW, HW, HIGH))
     return ob
 
@@ -155,7 +169,7 @@ def main() -> None:
             ("Roof and vent", (-1.4, -1.8, 3.4), (0.0, 0.0, 2.2), 35),
             ("From 10 m", (-3.0, -9.5, 1.6), (0.0, 0.0, 1.2), 40),
         ], sys.argv[sys.argv.index("--render") + 1],
-            "RM1 site toilet (map prop): from William's portable toilet photos")
+            "Site toilet (Range map prop, RM2 rebuild): moulded ribs, rounder roof and corners")
 
 
 if __name__ == "__main__":

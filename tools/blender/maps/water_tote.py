@@ -19,13 +19,15 @@ import range_kit as rk  # noqa: E402
 from range_kit import hs  # noqa: E402
 
 OUT = os.path.join(rk.PROPS, "water_tote.glb")
-BUDGET = 2000
+BUDGET = 5000  # docs/CC0_ASSETS.md › Size limits: a prop (RM2: round tubes, a rounder tank)
 HW = 0.6
 HIGH = 1.2
 PALLET = 0.15
 CAGE = 0.585  # the cage's tubes' outer faces
 TUBE = 0.011
 TANK = 0.55
+HOOP_OUT = 0.006  # the cage's rows stand this far outside its verticals
+TUBE_SEG, FRAME_SEG = 10, 12  # the cage's tubes round (RM2: 5 and 6 sides read square)
 
 rk.check_colours(["tank", "tank_shade", "cage", "pallet_black", "cap", "valve", "lever", "label"], shade=0.05)
 
@@ -43,9 +45,12 @@ def build() -> object:
     # base holds it.
     top = HIGH - 0.06
     rings = []
-    for z, s, r in ((PALLET, TANK - 0.03, 0.07), (PALLET + 0.04, TANK, 0.09), (top - 0.05, TANK, 0.09),
-                    (top, TANK - 0.04, 0.07)):
-        rings.append([(x, y, z) for x, y in hs.rounded_rect(s, s, r, 2)])
+    # (RM2: its corners rounded in 6 steps, its shoulders rolled over in three rings, its walls bellied 6 mm by
+    # the water between the cage's bars.)
+    for z, s, r in ((PALLET, TANK - 0.03, 0.07), (PALLET + 0.015, TANK - 0.01, 0.08), (PALLET + 0.04, TANK, 0.09),
+                    ((PALLET + top) * 0.5, TANK + 0.006, 0.095), (top - 0.05, TANK, 0.09),
+                    (top - 0.02, TANK - 0.012, 0.085), (top, TANK - 0.04, 0.07)):
+        rings.append([(x, y, z) for x, y in hs.rounded_rect(s, s, r, 6)])
     k.loft(rings, "tank")
     def span(sv: float) -> tuple:
         return (TANK - 0.12, TANK + 0.004) if sv > 0 else (-TANK - 0.004, -TANK + 0.12)
@@ -54,19 +59,20 @@ def build() -> object:
             (x0, x1), (y0, y1) = span(sx), span(sy)
             k.blk((x0, y0, PALLET), (x1, y1, PALLET + 0.12), "pallet_black")
     # The screw cap on the lid, and the ball valve at the front foot with its yellow lever.
-    k.cyl((0.0, 0.05, top), 0.075, 0.035, "cap", seg=12)
-    k.cyl((0.0, 0.05, top + 0.035), 0.06, 0.012, "cap", seg=12)
+    k.cyl((0.0, 0.05, top), 0.075, 0.035, "cap", seg=24)
+    k.lathe([(0.0, 0.0), (0.0, 0.062), (0.008, 0.06), (0.012, 0.052), (0.012, 0.0)], "cap", segments=24,
+            centre=(0.0, 0.05, top + 0.035), axis="z")
     # The ball valve: a stub out of the tank's foot, the valve's round body across it, its outlet with a screw cap
     # to the front, and the yellow lever on top.
     # The valve's middle: in the clear bay between the cage's two middle verticals (x +-0.082) and under its lowest
     # horizontal (z 0.259), inside the cage's front (y -0.6 .. -0.55).
     vx, vz, vy = 0.0, PALLET + 0.06, -0.578
-    k.cyl((vx, vy, vz), 0.036, -TANK - vy, "valve", seg=12, axis="y")  # the stub into the tank
-    k.cyl((vx - 0.06, vy, vz), 0.026, 0.12, "valve", seg=12, axis="x")  # the valve's body, 0.12 m across
+    k.cyl((vx, vy, vz), 0.036, -TANK - vy, "valve", seg=20, axis="y")  # the stub into the tank
+    k.cyl((vx - 0.06, vy, vz), 0.026, 0.12, "valve", seg=20, axis="x")  # the valve's body, 0.12 m across
     for x in (vx - 0.062, vx + 0.042):  # its union nuts
         k.cyl((x, vy, vz), 0.032, 0.02, "valve", seg=6, axis="x")
-    k.cyl((vx, -HW + 0.004, vz), 0.03, vy + HW - 0.004, "valve", seg=12, axis="y")  # the outlet
-    k.cyl((vx, -HW, vz), 0.036, 0.008, "cap", seg=12, axis="y")  # its cap
+    k.cyl((vx, -HW + 0.004, vz), 0.03, vy + HW - 0.004, "valve", seg=20, axis="y")  # the outlet
+    k.cyl((vx, -HW, vz), 0.036, 0.008, "cap", seg=20, axis="y")  # its cap
     k.blk((vx - 0.012, vy - 0.007, vz + 0.03), (vx + 0.07, vy + 0.007, vz + 0.044), "lever")  # inside the bay
     # The cage: a frame at the top, posts at the corners, verticals between, five rows of horizontals (the photos'
     # grid), two bars over the top.
@@ -79,15 +85,17 @@ def build() -> object:
             w = c - inset
             return [(u, -w, z), (w, u, z), (-u, w, z), (-w, -u, z)][side]
         for u in xs[1:-1]:
-            k.bar(at(u, z0), at(u, z1), TUBE, "cage", seg=5, cap=False)
-        k.bar(at(-c, z0), at(-c, z1), TUBE * 1.3, "cage", seg=6)
+            k.bar(at(u, z0), at(u, z1), TUBE, "cage", seg=TUBE_SEG, cap=False)
+        k.bar(at(-c, z0), at(-c, z1), TUBE * 1.3, "cage", seg=FRAME_SEG)
         for row in range(5):
             z = z0 + 0.12 + row * (z1 - z0 - 0.12) / 4.5
-            k.bar(at(-c, z), at(c, z), TUBE, "cage", seg=5, cap=False)
-        k.bar(at(-c, z1), at(c, z1), TUBE * 1.3, "cage", seg=6)
-        k.bar(at(-c, z0 + 0.01), at(c, z0 + 0.01), TUBE * 1.3, "cage", seg=6)
+            # The rows sit on the outside of the verticals, welded where they cross (never one tube through the
+            # other's middle, where the two round faces meet in a point).
+            k.bar(at(-c, z, -HOOP_OUT), at(c, z, -HOOP_OUT), TUBE, "cage", seg=TUBE_SEG, cap=False)
+        k.bar(at(-c, z1), at(c, z1), TUBE * 1.3, "cage", seg=FRAME_SEG)
+        k.bar(at(-c, z0 + 0.01), at(c, z0 + 0.01), TUBE * 1.3, "cage", seg=FRAME_SEG)
     for y in (-0.22, 0.32):
-        k.bar((-c, y, z1), (c, y, z1), TUBE, "cage", seg=5)
+        k.bar((-c, y, z1), (c, y, z1), TUBE, "cage", seg=TUBE_SEG)
     # A blank dark label plate on the front (the photos' notice plate, no writing).
     # Fixed on the cage over its bars, with a clip at each corner.
     k.blk((-0.42, -CAGE - 0.008, 0.42), (-0.02, -CAGE - 0.002, 0.82), "label")
@@ -95,9 +103,10 @@ def build() -> object:
         for z in (0.44, 0.8):
             k.blk((x - 0.012, -CAGE - 0.011, z - 0.012), (x + 0.012, -CAGE - 0.008, z + 0.012), "cage")
     ob = k.build()
-    rk.finish(ob, angle=math.radians(50.0))
+    rk.finish(ob, bevel=0.004, angle=math.radians(50.0))  # the pallet and plate edges rounded (RM2)
     rk.clamp_to(ob, (-HW, -HW, 0.0), (HW, HW, HIGH))
     rk.bake(ob, seed=5)
+    rk.occlude(ob, strength=0.45, distance=0.1)
     rk.fit_box(ob, (-HW, -HW, 0.0), (HW, HW, HIGH))
     return ob
 
@@ -119,7 +128,8 @@ def main() -> None:
             ("Top: cap and cage bars", (-1.0, -1.4, 2.6), (0.0, 0.0, 1.1), 35),
             ("Side", (3.0, 0.0, 0.9), (0.0, 0.0, 0.6), 35),
             ("From 10 m", (-3.0, -9.5, 1.6), (0.0, 0.0, 0.6), 40),
-        ], sys.argv[sys.argv.index("--render") + 1], "RM1 water tote / IBC (map prop): from William's IBC photos")
+        ], sys.argv[sys.argv.index("--render") + 1],
+            "Water tote / IBC (Range map prop, RM2 rebuild): round cage tubes, rounder tank")
 
 
 if __name__ == "__main__":

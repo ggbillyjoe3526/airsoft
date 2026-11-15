@@ -56,7 +56,7 @@ PAINT = {
     # Sandbags: hessian sand, and the darker cord binding each bag's neck.
     "hessian": 0xc4b28a,
     "hessian_dark": 0xb0a078,
-    "tie": 0x8a7a5a,
+    "tie": 0x807868,  # weathered jute cord, dull (RM2: the knots shaded dark stay off the teams' hues)
     # The site toilet: a dark green door and posts, mid-grey walls, a white roof (photos 1, 2 and 4; no blue: it is
     # Alpha's hue).
     "loo_door": 0x7c8e80,
@@ -173,11 +173,12 @@ class Kit(hs.Builder):
     def blk(self, lo: tuple, hi: tuple, mat: str) -> list:
         return self.box(lo, hi, mat)
 
-    def fan(self, ring: list, facing: tuple, mat: str) -> list:
+    def fan(self, ring: list, facing: tuple, mat: str, apex: tuple = (0.0, 0.0, 0.0)) -> list:
         """A ring of points closed by triangles to its middle, facing `facing`: an end cap that stays sound however
-        the ring curls (an n-gon cap of a concave ring can triangulate across itself)."""
+        the ring curls (an n-gon cap of a concave ring can triangulate across itself). The middle moves by `apex`
+        (a domed or pointed end)."""
         bm = self.bm
-        mid = Vector(tuple(sum(p[i] for p in ring) / len(ring) for i in range(3)))
+        mid = Vector(tuple(sum(p[i] for p in ring) / len(ring) + apex[i] for i in range(3)))
         vs = [bm.verts.new(Vector(p)) for p in ring]
         c = bm.verts.new(mid)
         normal = (vs[1].co - vs[0].co).cross(c.co - vs[0].co)
@@ -227,6 +228,48 @@ def bake(ob: bpy.types.Object, jitter: dict = None, seed: int = 1, islands: bool
     me.materials.clear()
     plain = bpy.data.materials.get("Prop") or bpy.data.materials.new("Prop")
     me.materials.append(plain)
+
+
+def occlude(ob: bpy.types.Object, strength: float = 0.5, distance: float = 0.15, samples: int = 64,
+            ground: bool = True) -> None:
+    """Darkens `ob`'s corner colours where the model shades itself (Cycles' ambient occlusion baked to its corners,
+    `distance` m reach, over a ground plane at z 0 when `ground`): the creases between bags, the wall behind a rib or
+    a cage bar, a foot on the ground. A corner fully shut in keeps 1 - `strength` of its colour (RM2)."""
+    sc = bpy.context.scene
+    sc.render.engine = "CYCLES"
+    sc.cycles.device = "CPU"
+    sc.cycles.samples = samples
+    world = sc.world or bpy.data.worlds.new("World")
+    sc.world = world
+    world.light_settings.distance = distance
+    floor = None
+    if ground:
+        lo = [min((ob.matrix_world @ v.co)[i] for v in ob.data.vertices) for i in range(3)]
+        hi = [max((ob.matrix_world @ v.co)[i] for v in ob.data.vertices) for i in range(3)]
+        me = bpy.data.meshes.new("AoFloor")
+        pad = 2.0
+        me.from_pydata([(lo[0] - pad, lo[1] - pad, 0.0), (hi[0] + pad, lo[1] - pad, 0.0),
+                        (hi[0] + pad, hi[1] + pad, 0.0), (lo[0] - pad, hi[1] + pad, 0.0)], [], [(0, 1, 2, 3)])
+        floor = bpy.data.objects.new("AoFloor", me)
+        sc.collection.objects.link(floor)
+    me = ob.data
+    base = me.color_attributes["Color"]
+    ao = me.color_attributes.new("AO", "FLOAT_COLOR", "CORNER")
+    me.color_attributes.active_color = ao
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.bake(type="AO", target="VERTEX_COLORS")
+    ao = me.color_attributes["AO"]
+    base = me.color_attributes["Color"]
+    for i in range(len(me.loops)):
+        k = 1.0 - strength * (1.0 - ao.data[i].color[0])
+        c = base.data[i].color
+        base.data[i].color = (c[0] * k, c[1] * k, c[2] * k, 1.0)
+    me.color_attributes.remove(me.color_attributes["AO"])
+    me.color_attributes.active_color = me.color_attributes["Color"]
+    if floor is not None:
+        bpy.data.objects.remove(floor)
 
 
 def finish(ob: bpy.types.Object, bevel: float = 0.0, angle: float = math.radians(40.0)) -> bpy.types.Object:

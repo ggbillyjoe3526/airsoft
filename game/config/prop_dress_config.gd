@@ -392,6 +392,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"birch_crown": 0.95,
 	# Subway's escalators' brushed stainless (SM2): a soft sheen.
 	&"escalator_upper": 0.4, &"escalator_lower": 0.4,
+	# The Range's sandbags' sacking (RM2): matt, as the site's own bags (SiteLook's fabric), never a pillow's sheen.
+	&"sandbags": 0.97,
 }
 ## How worn the props are drawn (SL2, look_vertex.gdshader's `wear`; LookConfig.wear scales it): grime up their feet,
 ## streaks, stains and dust on top. Models worn otherwise (each its own material): the trees' crowns are clean, as

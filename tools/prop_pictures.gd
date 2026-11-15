@@ -44,7 +44,8 @@ func _run() -> void:
 			continue
 		var inst := MeshInstance3D.new()
 		inst.mesh = mesh
-		var mat := LookMaterials.vertex_colour(0.7, 0.0)
+		# its roughness as the game draws it (PropDressConfig.model_roughness, else the props' shared one)
+		var mat := LookMaterials.vertex_colour(props.model_roughness.get(StringName(model), props.roughness), 0.0)
 		# The props' own perforations and ribs, as PropDress draws them.
 		mat.set_shader_parameter(&"perforations", true)
 		inst.material_override = mat
