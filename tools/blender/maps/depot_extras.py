@@ -139,24 +139,42 @@ def fire_point() -> sk.Mesh:
     m.lathe([(0.0, 0.22), (0.047, 0.22), (0.047, 0.28), (0.0, 0.28)], 8, (0.0, b0 + 0.3, d + 0.045), "black", axis="x")
     m.face([(0.02, b0 + 0.3, d + 0.0905), (0.17, b0 + 0.3, d + 0.0905), (0.17, b0 + 0.33, d + 0.0905),
             (0.02, b0 + 0.33, d + 0.0905)], "white")
-    # the moulded housing over the extinguishers (photo 3), as wide as the board: a narrower foot under it, its front
-    # bulging out a little (smooth), the side panels stepped out, the lid sloping back up to the board between two
-    # raised ears, the wide dark viewing slot under its moulded hood, and the latch on the foot
+    # the moulded housing over the extinguishers (photo 3), as wide as the board at its ears: its sides tapering in
+    # down curved haunches to a narrower foot, its front bulging out a little (smooth), the lid sloping back up to the
+    # board, sunk behind a rim between two raised ears, the rounded viewing window in its shallow recess under a
+    # moulded visor, and the latch on the foot
     hw, hd, top, foot = w, 0.28, 0.46, 0.25
     m.prism_x([(0.0, 0.0), (0.0, hd - 0.08), (0.03, hd - 0.05), (0.13, hd - 0.05), (0.13, 0.0)][::-1], -foot, foot,
               "fire", open_edges=(4,))
-    m.prism_x([(0.11, 0.0), (0.11, hd - 0.03), (0.15, hd), (0.27, hd + 0.018), (0.36, hd + 0.01), (0.4, hd - 0.02),
-               (top, 0.13), (top, 0.0)][::-1], -hw, hw, "fire", open_edges=(7,), smooth=True)
-    for side in (-1.0, 1.0):
-        x0, x1 = sorted((side * hw, side * (hw + 0.012)))
-        m.box((x0, 0.15, 0.02), (x1, 0.37, hd - 0.05), "fire", skip="b")
-        e0, e1 = sorted((side * (hw - 0.06), side * (hw + 0.005)))
+    prof = [(0.11, 0.0), (0.11, hd - 0.03), (0.15, hd), (0.26, hd + 0.018), (0.37, hd + 0.01), (0.4, hd - 0.02),
+            (top, 0.13), (top, 0.0)]
+    half = [0.262, 0.275, 0.3, hw, hw, hw, hw, hw]  # the haunches: narrower towards the foot
+    for i in range(len(prof) - 1):
+        (ya, za), (yb, zb) = prof[i], prof[i + 1]
+        ha, hb = half[i], half[i + 1]
+        m.face_toward([(-ha, ya, za), (ha, ya, za), (hb, yb, zb), (-hb, yb, zb)], (0.0, -(zb - za), yb - ya), "fire",
+                      smooth=2 <= i <= 4)
+        for sd in (-1.0, 1.0):
+            m.face_toward([(sd * ha, ya, za), (sd * hb, yb, zb), (sd * hb, yb, 0.0), (sd * ha, ya, 0.0)], (sd, 0.0, 0.0),
+                          "fire")
+    for sd in (-1.0, 1.0):
+        e0, e1 = sorted((sd * (hw - 0.06), sd * (hw + 0.005)))
         m.prism_x([(top - 0.1, 0.0), (top - 0.1, 0.17), (top + 0.04, 0.12), (top + 0.04, 0.0)][::-1], e0, e1, "fire",
                   open_edges=(3,))
-    slot = [(-0.15, 0.27), (0.15, 0.27), (0.17, 0.29), (0.17, 0.32), (0.15, 0.34), (-0.15, 0.34), (-0.17, 0.32),
-            (-0.17, 0.29)]
-    m.face([(x, y, hd + 0.0185) for x, y in slot], "black")
-    m.box((-0.2, 0.345, hd), (0.2, 0.37, hd + 0.05), "fire", skip="b")
+    m.box((-hw + 0.06, 0.395, hd - 0.05), (hw - 0.06, 0.425, hd - 0.012), "fire", skip="b")
+
+    def on_window(x: float, y: float, out: float) -> tuple:
+        """A point on the window's facet (y 0.26 to 0.37), `out` proud of it."""
+        return (x, y, hd + 0.018 - (y - 0.26) * 0.008 / 0.11 + out)
+
+    def rounded(x: float, y0: float, y1: float, c: float) -> list:
+        return [(-x + c, y0), (x - c, y0), (x, y0 + c), (x, y1 - c), (x - c, y1), (-x + c, y1), (-x, y1 - c),
+                (-x, y0 + c)]
+
+    m.face([on_window(x, y, 0.001) for x, y in rounded(0.165, 0.262, 0.368, 0.025)], "fire_dark")
+    m.face([on_window(x, y, 0.002) for x, y in rounded(0.15, 0.27, 0.36, 0.022)], "black")
+    m.prism_x([(0.365, hd + 0.005), (0.365, hd + 0.05), (0.38, hd + 0.05), (0.4, hd - 0.02)][::-1], -0.18, 0.18,
+              "fire")
     m.box((-0.022, 0.025, hd - 0.062), (0.022, 0.11, hd - 0.03), "black", skip="b")
     return m
 
