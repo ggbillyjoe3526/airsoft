@@ -81,11 +81,11 @@ const EXCEPTIONS: Dictionary[String, Dictionary] = {
 				+ "kept the hall's open middle and this line over breaking it up (2026-10-31, DR1); bots there see 55 m",
 	},
 	"subway": {
-		"sightline": 68.0,
+		"sightline": 60.0,
 		"sightline_reason": "down the south platform and its track, about 58 m: the owner's metro concept v2 "
 				+ "(2026-11-10, 'mostly CQB until the platform level where longer sightlines open up'); above the "
-				+ "platforms the ticket hall and concourse, one level since SW1, see up to 67 m, from the hall's west end into the north "
-				+ "passage (the owner, 2026-11-15: 'remove some of the metal lockers to give longer sight lines'); "
+				+ "platforms the ticket hall and concourse, one level since SW1, see up to 57 m, from the hall's west end to a passage's "
+				+ "mouth (the owner, 2026-11-15: 'remove some of the metal lockers to give longer sight lines'); "
 				+ "bots see 50 m",
 	},
 	"woodland": {

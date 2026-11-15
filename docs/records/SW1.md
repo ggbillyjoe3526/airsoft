@@ -1,6 +1,6 @@
 # SW1 · Subway on two levels
 
-**Review:** 1 attempt · critic CRITIC_SCORE · qa Pass · performance Pass
+**Review:** 2 attempts · critic CRITIC_SCORE · qa Pass · performance Pass
 
 The owner's ask (2026-11-15, after the map redesign proposals, MR1): "make Subway map more compact. Ticket hall and
 concourse should be one single level now. That means removing the escalator between the levels and also adjust the
@@ -13,7 +13,8 @@ recommended Subway concept A (two more lanes, the north passage's and the west p
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (lint, wiki, smoke, 9 touched unit files 127/127; the rest in CI) | CRITIC_ROW | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ (lint, wiki, smoke, 9 touched unit files 127/127; the rest in CI) | 7/8 Retry | check 6: a 66.8 m line from the Street spawn into the north passage, the exception raised to fit it |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ (lint, wiki, smoke, 11 touched unit files 142/142; the rest in CI) | CRITIC_ROW | – |
 
 ## What changed
 
@@ -24,12 +25,14 @@ recommended Subway concept A (two more lanes, the north passage's and the west p
 - **Lifts of two stops** (Platforms, Ticket hall), 4 s a stop as before, now for 8 m (was 4 s for each of 4.5 m and
   8 m stops).
 - **The spiral stair works.** Eight flights from beside the gates down to the south platform's west half (x -29; it
-  ran ten, street level to the booking hall). Its top landing now runs to the well's walls and meets the floor round the hole
-  flush: before, a 15 cm slot between landing and floor read as a drop on the bots' grid, so no bot route ever took
-  the stair (players could). A body walks it down in about 7.8 s (sprinting 5.8 s); the bots' route through it is
-  24.6 m, about 5.5 s.
+  ran ten, street level to the booking hall). Its top landing now runs to the well's walls and meets the floor round
+  the hole flush: before, a 15 cm slot between landing and floor read as a drop on the bots' grid, so no bot route
+  ever took the stair (players could). A body walks it down in about 7.8 s (sprinting 5.8 s); the bots' route through
+  it is 24.6 m, about 5.5 s. A rail closes the top landing's west edge over the well (the owner's picture, 11:07).
 - **Five lockers out:** two in each passage (the 13 m pair and the mouth pair at -4 m) and the one screening the old
-  booking hall's spiral foot; each passage keeps its wall-side and inner chicane lockers.
+  booking hall's spiral foot; each passage keeps its wall-side and inner chicane lockers. A short pier (0.6 by 0.8 m,
+  3 m high) stands on each mouth's inner side, and the concourse's two piers run out to the passages' line, so the
+  hall's spawn doesn't see down a passage.
 - **Five lanes:** north, middle and south as before (from the new hall), plus concept A's north passage lane and a
   spiral stair lane that comes up the south platform and crosses to the north at the lower hall.
 - Fixtures, dress and pictures follow the new rooms (`fixtures.py`, `station_dress.py`, `station_pictures.gd`).
@@ -68,7 +71,7 @@ The map heat tool (`tools/map_heat.gd`, 8 seeds a mode, the MR1 report's measure
 | Attack / Defend: hits outside the defenders' third | – | 44 % |
 | Plant The Bomb: attackers' share | 52 % (30 s fuse) | 45 % (25 of 56, 22 s fuse) |
 | Spawn to spawn walk | 147 m | 135 m |
-| Upper level's longest sight line (the field checks') | 28 m | 66.8 m |
+| Upper level's longest sight line (the field checks') | 28 m | 57 m (66.8 m before the mouth piers) |
 
 ## Decisions
 
@@ -81,9 +84,11 @@ The map heat tool (`tools/map_heat.gd`, 8 seeds a mode, the MR1 report's measure
   hall's foot can't go now that the hall is on the concourse's floor: the owner asked for it "to get down to the
   platform".
 - **Which lockers went:** the ones that cut the passages' long axis (13 m and the mouths); the wall-side chicane
-  lockers stay so each passage still has cover, and the longest upper line, 66.8 m from the hall's west end into
-  the north passage, becomes the field's longest: `FieldStandard`'s Subway exception rises from 60 to 68 m with the
-  owner's words as its reason (he asked for longer lines; bots still see 50 m).
+  lockers stay so each passage still has cover. With the mouth lockers gone the field checks found a 66.8 m line
+  from the hall's west end (the Street team's spawn) slipping past a mouth's corner into the north passage (critic,
+  attempt 1). A short pier on each mouth's inner side (0.6 by 0.8 m, the mouth 2.2 m wide) and the concourse's piers
+  run out to the passages' line close it: the longest upper line is 57 m, the hall's west end to a passage's mouth,
+  and from the spawn spots 3 of about 1,100 passage points are seen, all at a mouth. The Subway exception stays 60 m.
 - **Two lanes added, the spiral's and the north passage's (MR1 concept A).** DECISIONS' lane rule (no lane on a way a
   bot is slow on) now lets the spiral stair have one: it is a 6 s walk.
 - **The cable drums and booking counter stay** in the new hall: SM4's and SM3's models and tests need them, and they
@@ -93,4 +98,4 @@ The map heat tool (`tools/map_heat.gd`, 8 seeds a mode, the MR1 report's measure
 ## Known issues left
 
 - The balance row in `docs/KNOWN_ISSUES.md` (Maps, Subway) carries the new figures; Easy was not re-measured, and the
-  upper level's 67 m line joins the platform's 58 m under the field checks' Subway exception (`FieldStandard`).
+  upper level's 57 m line joins the platform's 58 m under the field checks' Subway exception (`FieldStandard`, 60 m).

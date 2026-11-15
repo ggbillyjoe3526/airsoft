@@ -978,9 +978,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   (Ticket hall, Platforms) and keep 4 s a stop, now for 8 m; the spiral stair (eight flights) runs from beside the gates
   to the south platform's west half, and its top landing meets the hall floor flush, so bots walk it (its 15 cm slot
   read as a drop and no bot ever used it). Five lockers went (two from each passage, one from the old booking hall), so
-  the upper level's longest line is 67 m, the hall's west end into the north passage (it was 28 m; the field checks'
-  Subway exception rises from 60 to 68 m). Its lanes are five: concept A's (MR1) north passage lane and a spiral stair
-  lane join the three. Bot matches (6v6 Normal): see `docs/records/SW1.md`.
+  the upper level's longest line is 57 m, the hall's west end to a passage's mouth (it was 28 m); a short pier at each
+  mouth keeps the hall's spawn from seeing down the passages. Its lanes are five: concept A's (MR1) north passage lane
+  and a spiral stair lane join the three. Bot matches (6v6 Normal): see `docs/records/SW1.md`.
 - **Stockade has no Bell tower (owner, 2026-11-13, SK1).** Concept 1's tower, built from Woodland's watch tower, put a
   standing eye 5 m up that saw over every 2.6 m wall (3,839 lines over 34 m, the longest 65 m to the attackers' gate).
   Asked whether to keep it, he chose "Leave the tower out": a Bell house stands across Main Street's east end in its
