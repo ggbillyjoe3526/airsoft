@@ -323,10 +323,13 @@ arms, figures and replicas use (steps 23 and 28).
 ## Menus and HUD
 
 - **Sunlit Concrete (SL4):** `GameTheme`'s palette is charcoal panels (`BG` `#131311`), off-white words (`TEXT`
-  `#f2eee6`) and one cornflower blue accent (`ACCENT` `#8fb0f0`, blue-charcoal ink `#141a24` on it; owner,
-  2026-11-15, UA1, in place of SL4's bone `#d8ccb2`) for the main button and the selection, paler and greyer than
-  Alpha's `#3b87f5` and bluer than High contrast's `#8ccfff`, so the team colours stay the strongest on screen. The
-  comms wheel's lit button and Spotted circle are edged a paler blue (`HudOrderWheel.LIT_EDGE` `#d6e2ff`). Signal yellow (`WARN`), better and worse (`GOOD`, `BAD`) are a
+  `#f2eee6`) and one accent for the main button and the selection, with a dark ink of its own colour on it
+  (`GameTheme.accent`, `accent_ink`). The player picks it in Settings › Display › Interface (owner, 2026-11-15, UA2;
+  `game/config/ui_colours.gd`): blue `#8fb0f0` by default (UA1, in place of SL4's bone), beige `#d8ccb2` (the old
+  bone), red `#ec7a74`, green `#86d39a`, pink `#f4a6cb`, orange `#f5b97f` or violet `#b8a2f2`. All are soft, light
+  shades, so blue stays paler than Alpha's `#3b87f5` and orange paler than Beta's `#fa8c29`, and the team colours stay
+  the strongest on screen. The comms wheel's lit button and Spotted circle are edged in the accent made paler
+  (`HudOrderWheel.lit_edge`). Signal yellow (`WARN`), better and worse (`GOOD`, `BAD`) are a
   little quieter. Every dark ink derives from the palette: `BG` (markers' ink, the map's backdrop), `DEEP` `#0c0c0b`
   (the rail, the shades over a match or page) and `PLATE` `#1f1e1b` (notices, report boxes, the Armory's picked card).
 

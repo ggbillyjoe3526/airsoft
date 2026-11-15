@@ -120,7 +120,7 @@ func _init() -> void:
 	_frame.draw_center = false
 	_frame.set_corner_radius_all(RADIUS)
 	_frame.set_border_width_all(roundi(FRAME_WIDTH))
-	_frame.border_color = Color(GameTheme.ACCENT, FRAME_ALPHA)
+	_frame.border_color = Color(GameTheme.accent, FRAME_ALPHA)
 	_frame.anti_aliasing = true
 	_tag_box = StyleBoxFlat.new()
 	_tag_box.bg_color = HIT_RED

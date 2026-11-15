@@ -91,7 +91,7 @@ func setup(teams: TeamConfig, wins_needed: int, first: int = 0) -> void:
 	clock_row.position = Vector2(_clock_x, 4.0)
 	clock_row.size = Vector2(HudStyle.CLOCK_WIDTH, 46.0)
 	add_child(clock_row)
-	_ot_label = HudStyle.label(clock_row, HudStyle.OT_SIZE, 800, GameTheme.ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	_ot_label = HudStyle.label(clock_row, HudStyle.OT_SIZE, 800, GameTheme.accent, HORIZONTAL_ALIGNMENT_CENTER)
 	_ot_label.text = HudStyle.caps("HUD_OT")
 	_ot_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_ot_label.size_flags_vertical = Control.SIZE_FILL
@@ -179,7 +179,7 @@ func set_clock(seconds: int, overtime: bool = false, fuse: bool = false) -> void
 	_overtime = overtime
 	if fuse != _fuse:
 		_fuse = fuse
-		_clock_label.add_theme_color_override("font_color", GameTheme.ACCENT if fuse else GameTheme.TEXT)
+		_clock_label.add_theme_color_override("font_color", GameTheme.accent if fuse else GameTheme.TEXT)
 	_ot_label.visible = overtime
 	_clock_label.text = HudStyle.clock_text(seconds)
 
@@ -194,7 +194,7 @@ func set_sides(attackers: int) -> void:
 		tag.visible = attackers >= 0
 		var attacking := side == attackers
 		tag.text = HudStyle.caps("HUD_ATK" if attacking else "HUD_DEF")
-		tag.add_theme_color_override("font_color", GameTheme.ACCENT_INK if attacking else GameTheme.TEXT)
+		tag.add_theme_color_override("font_color", GameTheme.accent_ink if attacking else GameTheme.TEXT)
 	queue_redraw()
 
 
@@ -230,7 +230,7 @@ func _draw() -> void:
 	if _attackers >= 0:
 		for side in 2:
 			var tag := _tags[side]
-			var fill := GameTheme.ACCENT if side == _attackers else HudStyle.backing_on(self, HudStyle.BACKING_CLOCK)
+			var fill := GameTheme.accent if side == _attackers else HudStyle.backing_on(self, HudStyle.BACKING_CLOCK)
 			_tag_box.bg_color = fill
 			draw_style_box(_tag_box, Rect2(tag.position, tag.size))
 	var empty := Color(GameTheme.TEXT, HudStyle.PIP_EMPTY_ALPHA)

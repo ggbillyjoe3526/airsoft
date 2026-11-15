@@ -402,10 +402,30 @@ func open_settings() -> void:
 		_screen.esc_closes = true
 		_screen.end_round = end_round
 		_screen.closed.connect(_settings_closed)
+		_screen.restyled.connect(restyle)
 		add_child(_screen)
 	# The menu's buttons sit under the settings: out of the focus ring, so Tab can't reach Resume or Quit unseen (BP3).
 	_buttons_focusable(false)
 	_screen.open()
+
+
+## The interface colour changed from these settings (UA2): Resume is dressed again and the settings built again on the
+## colour picked, deferred so the screen that sent it finishes its click. The rest of the match's HUD keeps the colour
+## it was built with until the next match (docs/KNOWN_ISSUES.md).
+func restyle() -> void:
+	_dress_main(_resume)
+	_rebuild_settings.call_deferred()
+
+
+func _rebuild_settings() -> void:
+	if _screen == null:
+		return
+	_screen.closed.disconnect(_settings_closed)
+	_screen.close()
+	_screen.queue_free()
+	_screen = null
+	open_settings()
+	_screen.show_display_colour()
 
 
 func _settings_closed() -> void:
@@ -559,7 +579,7 @@ func _toggle_challenge() -> void:
 	challenge_toggled.emit(_challenge_on)
 
 
-## A menu button, its words centred in capitals; `main` is the yellow one.
+## A menu button, its words centred in capitals; `main` is the accent one (Resume).
 func _button(parent: Control, text: String, main: bool) -> Button:
 	var b := Button.new()
 	b.text = text.to_upper()
@@ -567,18 +587,22 @@ func _button(parent: Control, text: String, main: bool) -> Button:
 	b.add_theme_font_override("font", GameTheme.spaced_font(800, GameTheme.SPACING_MAIN, BUTTON_SIZE))
 	b.add_theme_font_size_override("font_size", BUTTON_SIZE)
 	if main:
-		var ink := GameTheme.ACCENT_INK
-		var solid := GameTheme.box(GameTheme.ACCENT, GameTheme.ACCENT, BUTTON_PAD_X, BUTTON_PAD_Y)
-		GameTheme.dress(b, solid, GameTheme.box(GameTheme.ACCENT.lightened(0.15), GameTheme.ACCENT, BUTTON_PAD_X,
-				BUTTON_PAD_Y), solid)
-		for colour: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-			b.add_theme_color_override(colour, ink)
-		b.add_theme_stylebox_override("focus", GameTheme.focus_box())
+		_dress_main(b)
 	else:
 		var plain := GameTheme.box(GameTheme.CARD, GameTheme.LINE, BUTTON_PAD_X, BUTTON_PAD_Y)
 		GameTheme.dress(b, plain, GameTheme.box(GameTheme.CARD_HI, GameTheme.LINE, BUTTON_PAD_X, BUTTON_PAD_Y), plain)
 	parent.add_child(b)
 	return b
+
+
+## The main button's accent plate, lighter under the pointer, and its ink (again on a new interface colour).
+func _dress_main(b: Button) -> void:
+	var solid := GameTheme.box(GameTheme.accent, GameTheme.accent, BUTTON_PAD_X, BUTTON_PAD_Y)
+	GameTheme.dress(b, solid, GameTheme.box(GameTheme.accent.lightened(GameTheme.MAIN_HOVER_LIGHTEN), GameTheme.accent,
+			BUTTON_PAD_X, BUTTON_PAD_Y), solid)
+	for colour: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		b.add_theme_color_override(colour, GameTheme.accent_ink)
+	b.add_theme_stylebox_override("focus", GameTheme.focus_box())
 
 
 func _gap(height: int) -> Control:

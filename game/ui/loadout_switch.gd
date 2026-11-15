@@ -78,7 +78,7 @@ func _init(pictures: ReplicaPictures, facts: LoadoutFacts) -> void:
 	frame.add_theme_constant_override("separation", 0)
 	centre.add_child(frame)
 	var rule := ColorRect.new()
-	rule.color = GameTheme.ACCENT
+	rule.color = GameTheme.accent
 	rule.custom_minimum_size.y = RULE
 	frame.add_child(rule)
 	var panel := PanelContainer.new()
@@ -286,7 +286,7 @@ func _card(item: Pool.Item, later: bool, lock_level: int) -> MenuCard:
 		sub.add_child(MenuTag.dev())
 	_subs[item.id] = sub
 	_tagged[item.id] = sub.get_child_count() > 0
-	var slot_tag := MenuParts.text("", SUB_SIZE, 700, GameTheme.ACCENT)
+	var slot_tag := MenuParts.text("", SUB_SIZE, 700, GameTheme.accent)
 	# the class and fire rate: the card's tooltip, not a line cut short
 	var rest := MenuParts.text("", SUB_SIZE, 500, GameTheme.MUTED)
 	rest.visible = false

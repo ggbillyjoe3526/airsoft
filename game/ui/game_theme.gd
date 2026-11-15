@@ -4,8 +4,9 @@ class_name GameTheme
 ## headings, tabs, rail and main buttons in words (assets/fonts/; never a number: the owner finds Barlow's figures hard
 ## to read, 2026-10-07). The layout is UI concept B's (owner, 2026-11-02; docs/records/UR1.md): glass panels over the
 ## blurred field (MenuBackdrop). The colours are Sunlit Concrete's (owner, 2026-11-09; docs/records/SL4.md): charcoal
-## panels, off-white words and one soft blue accent for the main button and the selection (owner, 2026-11-15, UA1: blue
-## in place of SL4's bone), paler and greyer than Alpha's team blue so the team colours stay the strongest on screen.
+## panels, off-white words and one accent for the main button and the selection, the player's pick of UiColours (owner,
+## 2026-11-15, UA2; blue unless picked, UA1, in place of SL4's bone), every one soft enough that the team colours stay
+## the strongest on screen.
 
 const FONT_DIR := "res://assets/fonts/"
 ## Sizes (px at 1080p; the window scales canvas items).
@@ -20,7 +21,7 @@ const HEADING_SIZE := 18
 const MAIN_BUTTON_SIZE := 32
 
 ## The palette (Sunlit Concrete, SL4): the charcoal under everything, the panel, a card and a lit card on it, the
-## hairline, and off-white words at three strengths; the blue accent and the blue-charcoal ink on it.
+## hairline, and off-white words at three strengths (the accent and its ink are `accent` and `accent_ink` below).
 const BG := Color("131311")
 const PANEL := Color(0.078, 0.076, 0.071, 0.82)
 const CARD := Color(0.95, 0.93, 0.89, 0.06)
@@ -33,10 +34,6 @@ const DIM := Color(0.95, 0.93, 0.9, 0.36)
 const DEEP := Color("0c0c0b")
 ## A raised dark plate drawn whole (a notice, a report box, the Armory's picked card): a step lighter than BG.
 const PLATE := Color("1f1e1b")
-## Cornflower (UA1): lighter and greyer than Alpha's #3b87f5 and bluer than High contrast's sky #8ccfff, so a lit
-## button never reads as a team's.
-const ACCENT := Color("8fb0f0")
-const ACCENT_INK := Color("141a24")
 ## Signal yellow, for warnings and the flags only (a low magazine, THEIR FLAG IS GOING UP!, a flag's marker), never as a
 ## theme colour (UR1); a little quieter in Sunlit Concrete.
 const WARN := Color("ecc246")
@@ -104,6 +101,10 @@ static var _spaced: Dictionary[int, FontVariation] = {}
 static var _heads: Dictionary[int, Font] = {}
 static var _spaced_heads: Dictionary[int, FontVariation] = {}
 static var _knob: Texture2D = null
+## The accent and the ink on it now (UiColours; `use_colour` changes them). Every page reads them as it builds, so a
+## page built before a change keeps the old colour until it is built again (the menus are, at once: Main.restyle).
+static var accent: Color = UiColours.ACCENTS[UiColours.DEFAULT]
+static var accent_ink: Color = UiColours.INKS[UiColours.DEFAULT]
 
 
 ## Inter at `weight` (500, 600, 700 or 800), with its marks face as the fallback.
@@ -194,7 +195,7 @@ static func dress(b: Button, plain: StyleBox, hover: StyleBox, lit: StyleBox) ->
 ## line colour, or yellow for the one to press), lit yellow when pressed.
 static func small_button(b: Button, edge: Color = LINE) -> void:
 	var plain := box(CARD, edge, CONTROL_PAD_X, 0)
-	dress(b, plain, box(CARD_HI, edge, CONTROL_PAD_X, 0), box(CARD_HI, ACCENT, CONTROL_PAD_X, 0))
+	dress(b, plain, box(CARD_HI, edge, CONTROL_PAD_X, 0), box(CARD_HI, accent, CONTROL_PAD_X, 0))
 	b.add_theme_font_override("font", spaced_font(800, SPACING_TAB, CONTROL_SIZE))
 	b.add_theme_font_size_override("font_size", CONTROL_SIZE)
 	b.custom_minimum_size.y = CONTROL_HEIGHT
@@ -225,7 +226,7 @@ static func knob() -> Texture2D:
 	for y in SLIDER_GRABBER:
 		for x in SLIDER_GRABBER:
 			var reach := (Vector2(x + 0.5, y + 0.5) - centre).length()
-			image.set_pixel(x, y, Color(ACCENT, clampf(SLIDER_GRABBER / 2.0 - reach + 0.5, 0.0, 1.0)))
+			image.set_pixel(x, y, Color(accent, clampf(SLIDER_GRABBER / 2.0 - reach + 0.5, 0.0, 1.0)))
 	_knob = ImageTexture.create_from_image(image)
 	return _knob
 
@@ -233,6 +234,22 @@ static func knob() -> Texture2D:
 ## A tab's pill: `fill`, rounded, its words padded (TAB_PAD).
 static func pill_box(fill: Color) -> StyleBoxFlat:
 	return box(fill, Color(0.0, 0.0, 0.0, 0.0), TAB_PAD.x, TAB_PAD.y)
+
+
+## Lights the interface in `pick`'s colour (Settings › Display, UA2): the accent and its ink, and the shared Theme's
+## boxes and colours redone in place, so whatever uses the Theme redraws in it at once. Whether it changed.
+static func use_colour(pick: UiColours.Pick) -> bool:
+	var at := clampi(pick, 0, UiColours.ACCENTS.size() - 1)
+	if accent == UiColours.ACCENTS[at] and accent_ink == UiColours.INKS[at]:
+		return false
+	accent = UiColours.ACCENTS[at]
+	accent_ink = UiColours.INKS[at]
+	_knob = null
+	if _theme != null:
+		_add_buttons(_theme)
+		_add_panels(_theme)
+		_add_inputs(_theme)
+	return true
 
 
 ## The shared Theme.
@@ -269,7 +286,7 @@ static func _add_buttons(t: Theme) -> void:
 	t.set_constant("align_to_largest_stylebox", "Button", 1)
 	for type: StringName in [&"Button", &"OptionButton", &"CheckButton", &"CheckBox"]:
 		for state: String in states:
-			var edge := ACCENT if state == "pressed" or state == "hover_pressed" else LINE
+			var edge := accent if state == "pressed" or state == "hover_pressed" else LINE
 			t.set_stylebox(state, type, box(states[state], edge))
 		t.set_stylebox("focus", type, focus_box())
 		t.set_color("font_color", type, TEXT)
@@ -282,9 +299,9 @@ static func _add_buttons(t: Theme) -> void:
 	# The main button: a rounded accent plate, lighter under the pointer; the focus a white ring round it.
 	t.set_type_variation(MAIN_BUTTON, "Button")
 	for state: String in ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]:
-		var fill := ACCENT
+		var fill := accent
 		if state == "hover" or state == "pressed" or state == "hover_pressed":
-			fill = ACCENT.lightened(MAIN_HOVER_LIGHTEN)
+			fill = accent.lightened(MAIN_HOVER_LIGHTEN)
 		if state == "disabled":
 			fill = DIM
 		var plate := box(fill, Color(0.0, 0.0, 0.0, 0.0), MAIN_MARGIN_X, MAIN_MARGIN_Y)
@@ -297,7 +314,7 @@ static func _add_buttons(t: Theme) -> void:
 		t.set_stylebox(state, MAIN_BUTTON, plate)
 	for colour: String in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color",
 			"font_focus_color"]:
-		t.set_color(colour, MAIN_BUTTON, ACCENT_INK)
+		t.set_color(colour, MAIN_BUTTON, accent_ink)
 	t.set_font("font", MAIN_BUTTON, heading_font(700, SPACING_MAIN, MAIN_BUTTON_SIZE))
 	t.set_font_size("font_size", MAIN_BUTTON, MAIN_BUTTON_SIZE)
 	# The quiet text button.
@@ -335,7 +352,7 @@ static func focus_box() -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.draw_center = false
 	s.set_border_width_all(FOCUS_BORDER)
-	s.border_color = ACCENT
+	s.border_color = accent
 	s.set_corner_radius_all(RADIUS)
 	s.anti_aliasing = true
 	return s
@@ -381,24 +398,24 @@ static func _add_panels(t: Theme) -> void:
 		t.set_stylebox("scroll", type, box(PANEL, Color(0.0, 0.0, 0.0, 0.0), SCROLL_WIDTH / 2, 0))
 		t.set_stylebox("grabber", type, box(LINE, Color(0.0, 0.0, 0.0, 0.0), SCROLL_WIDTH / 2, 0))
 		t.set_stylebox("grabber_highlight", type, box(MUTED, Color(0.0, 0.0, 0.0, 0.0), SCROLL_WIDTH / 2, 0))
-		t.set_stylebox("grabber_pressed", type, box(ACCENT, Color(0.0, 0.0, 0.0, 0.0), SCROLL_WIDTH / 2, 0))
+		t.set_stylebox("grabber_pressed", type, box(accent, Color(0.0, 0.0, 0.0, 0.0), SCROLL_WIDTH / 2, 0))
 
 
 static func _add_inputs(t: Theme) -> void:
 	for type: StringName in [&"LineEdit", &"TextEdit"]:
 		t.set_stylebox("normal", type, box(CARD, LINE))
-		t.set_stylebox("focus", type, box(CARD, ACCENT))
+		t.set_stylebox("focus", type, box(CARD, accent))
 		t.set_stylebox("read_only", type, box(CARD, LINE))
 		t.set_color("font_color", type, TEXT)
 		t.set_color("font_readonly_color", type, TEXT)
-		t.set_color("caret_color", type, ACCENT)
+		t.set_color("caret_color", type, accent)
 		t.set_color("selection_color", type, CARD_HI)
 	var rail := StyleBoxFlat.new()
 	rail.bg_color = LINE
 	rail.content_margin_top = SLIDER_HEIGHT
 	rail.content_margin_bottom = SLIDER_HEIGHT
 	var filled := StyleBoxFlat.new()
-	filled.bg_color = ACCENT
+	filled.bg_color = accent
 	filled.content_margin_top = SLIDER_HEIGHT
 	filled.content_margin_bottom = SLIDER_HEIGHT
 	t.set_stylebox("slider", "HSlider", rail)

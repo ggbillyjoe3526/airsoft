@@ -26,22 +26,22 @@ func _distance(a: Color, b: Color) -> float:
 
 
 func test_accent_is_blue() -> void:
-	assert_between(GameTheme.ACCENT.h, BLUE_HUE.x, BLUE_HUE.y, "the accent's hue is in the blue range")
-	assert_gt(GameTheme.ACCENT.b, GameTheme.ACCENT.r, "more blue than red")
-	assert_gt(GameTheme.ACCENT.b, GameTheme.ACCENT.g, "more blue than green")
+	assert_between(GameTheme.accent.h, BLUE_HUE.x, BLUE_HUE.y, "the accent's hue is in the blue range")
+	assert_gt(GameTheme.accent.b, GameTheme.accent.r, "more blue than red")
+	assert_gt(GameTheme.accent.b, GameTheme.accent.g, "more blue than green")
 
 
 func test_ink_on_accent_is_readable() -> void:
-	assert_gte(_contrast(GameTheme.ACCENT_INK, GameTheme.ACCENT), MIN_CONTRAST, "ink on the accent meets WCAG AAA")
+	assert_gte(_contrast(GameTheme.accent_ink, GameTheme.accent), MIN_CONTRAST, "ink on the accent meets WCAG AAA")
 
 
 func test_accent_stays_apart_from_the_standard_team_colours() -> void:
 	var hud := TeamColours.resolve(TeamColours.Set.STANDARD, false).hud
 	for team in hud.colours.size():
-		assert_gte(_distance(GameTheme.ACCENT, hud.colours[team]), MIN_TEAM_DISTANCE, "accent vs team %d" % team)
+		assert_gte(_distance(GameTheme.accent, hud.colours[team]), MIN_TEAM_DISTANCE, "accent vs team %d" % team)
 
 
 func test_order_wheel_lit_edge_is_bluish_not_yellow() -> void:
-	var edge := HudOrderWheel.LIT_EDGE
+	var edge := HudOrderWheel.lit_edge()
 	assert_gt(edge.b, edge.r, "the lit edge leans blue")
 	assert_gt(edge.b, edge.g, "the lit edge is not yellow")
