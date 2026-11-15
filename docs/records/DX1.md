@@ -7,35 +7,41 @@ Depot has too many shelves; build pallet racking with shrink-wrapped loads, pall
 caged mesh parts store and wall extras (cable reels, fire points, signs, pipework) from the photos, and use the first
 three in place of some shelves, each on the same footprint, height and solidity, so sight lines, cover and balance
 don't change (the Chrono hall's 65 m line stays open); the extras go on walls and pillars and change nothing on the
-floor.
+floor. After the first pictures, the owner: "Make variations of each model to give more variety. Also signs should be
+on the lower part of the wall at roughly eye height."
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | passed | Retry | the film didn't read as film; fire point and pipework not after the photos; a cable reel with no photo |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## What changed
 
-- **Three new rack bays, two of each** (`tools/blender/maps/wrapped_racking.py`, `drum_ibc_stack.py`,
+- **Three new rack bays, three of each** (`tools/blender/maps/wrapped_racking.py`, `drum_ibc_stack.py`,
   `parts_cage.py`, shared parts in `bay_kit.py`): 2.7 x 3.0 x 0.9 m like `pallet_racking.py`'s, front to -y, so
-  PropLayout lays them as it lays the racking (`Lay.TILE`, dark backing half a row in, the two bays taking turns,
-  never the same side by side, 40 m chunks, no shadow). 1,108 to 1,500 triangles of the bay's 1,500.
+  PropLayout lays them as it lays the racking (`Lay.TILE`, dark backing half a row in, the three bays taking turns,
+  40 m chunks, no shadow). The third bays (the owner's ask for variety): racking with photo 7's capped load and finer
+  cartons, two IBC towers side by side topped with empty pallets (photo 2), and photo 4's store with a deck across
+  the bay over flattened cartons and totes. The wrapped loads show their film as glare down the edges and slanting
+  wrinkles. 1,306 to 1,438 triangles of the bay's 1,500.
 - **Which blocks:** `tools/depot/extras.py` `rack_dress` gives each `dead` piece a `dress` in turn (racking, wrapped
   racking, drums and IBCs, racking, parts cage), the two 108 m strips along the long walls staying racking: 24 of
   Depot's 48 rack blocks. The blocks' boxes are untouched (the map's blocks match the old file's but for `dress`), so
   collision, nav, cover, sight lines and the baked light (its hash covers kind, place and size, not dress) are as
   they were: no rebake.
-- **Wall extras** (`depot_extras.py`, the signs' sheet by `depot_signs.py` with cells in `depot_cells.py`): a fire
-  point board, a call point, a cable reel, 4 m and 2 m lengths of pipework, and seven safety signs. They are
+- **Wall extras** (`depot_extras.py`, the signs' sheet by `depot_signs.py` with cells in `depot_cells.py`): photo 3's
+  wall-mounted fire point board, a call point, 4 m and 2 m lengths of pipework (every third 4 m length, `pipe_run_b`,
+  with a gate valve, a sprinkler drop and a junction box), and seven safety signs. They are
   `MapData.fixtures` (`dressing.fixtures`, read by `StationDressing.read_fixtures`), drawn by StationFixtures as
   Subway's extras are: one MultiMesh a model, no collider, no shadow; a model may print from its own sheet
   (`StationFixturesConfig.sheets`).
 - **Where the extras go** (`extras.py` `fixtures`, written by `build_map.py`): pipework along every hall wall at
   5.6 m (over the shutters' coil boxes, under the rooflights), a length between columns, the end walls' stopping 2 m
-  short of the corners under the long walls' runs; high signs over the racking every third spot beside a column;
-  fire points 0.9 m beside a column on an open wall, 20 m apart along it, then cable reels and the eye-height signs
-  on the spots left, 6 m from any other; a "Fire exit, keep clear" sign beside each fire exit's door; a call point
+  short of the corners under the long walls' runs; fire points hung 0.3 m up, 0.9 m beside a column on an open wall,
+  20 m apart along it, then every safety sign at eye height (1.6 m) on the lower wall on the spots left, 6 m from any
+  other, in turn (the owner: no high signs over the racking); a "Fire exit, keep clear" sign beside each fire exit's door; a call point
   and an extinguisher on each pillar's post facing the hall's middle. Every spot is checked clear of the blocks in
   front of it, so the extras follow any layout. The feature bays (shutters, exits) are found by the same rule as
   `PropLayout._bays`; the test checks the two agree.
@@ -51,6 +57,10 @@ floor.
   reels stand 0.9 m from a column, clear of a shutter's opening and posts (2.53 m from its bay's middle).
 - **The pipework is drawn in 40 m chunks** (`StationFixturesConfig.chunks`, performance's advice): 92 lengths
   round the hall, about 66k triangles, in one hall-wide MultiMesh would never cull.
+- **No cable reel:** none of the photos shows one, and the critic held models to the photos; the fire points and signs
+  fill the open wall.
+- **Signs only where the wall is open in front:** a sign behind racking at eye height would be hidden, so seven signs
+  stand on the open stretches, and the racking walls keep the pipework over them.
 - **Pillar signs left out:** a flat sign on the 0.4 m round post would stand off it at its edges; the call point and
   extinguisher are small enough to sit on it.
 

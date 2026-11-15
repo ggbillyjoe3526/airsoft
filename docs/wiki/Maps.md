@@ -27,8 +27,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
   tunnels are unlit and bend twice: dark, but never pitch black.
 - **The building:** blockwork walls under cladding, with galvanised steel columns, roller shutters and fire exits;
   steel pillars with hazard bands; scaffold walls hung with camouflage netting; a polished concrete floor. Pipework
-  and cable baskets run along the walls high up, with safety signs over the racking, fire points on the open
-  walls, and a call point and extinguisher on each pillar.
+  and cable baskets run along the walls high up, with valves and sprinkler drops; fire points and safety signs at
+  eye height on the open walls, and a call point and extinguisher on each pillar.
 - **The storage:** the racking you can't enter holds shrink-wrapped pallets, stacks of chemical tanks and drums, or
   a mesh parts cage stacked with shelves and boxes. Every stack is as solid as the next: you can't shoot through the
   gaps.
