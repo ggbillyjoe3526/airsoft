@@ -645,13 +645,6 @@ Settings › Dev › Dev content.
   the ceilings (none over a lamp), drains along the halls' walls, a service door in each plant room, and a yellow
   tactile strip at each escalator's and stair's head. Nothing covers a poster or sign, floats, flickers into a wall
   or stops a BB or a body (look only).
-- [ ] **Depot's wall extras in the station (DX2, checklist N21).** On High walk the ticket hall, the stair top, the
-  plant room, both platforms by the lower hall's doors, the lift landing and the north running tunnel to the cross
-  passage: pipework high on the hall's and stair top's walls (over the posters and vents, under the conduit, clear of
-  the cameras and clock), a fire action notice with a call point beside it, fire points, defibrillator, PPE and "Fire
-  exit, keep clear" signs at eye height. They read as a station's, nothing floats or clips a fixture, the open pipe
-  ends (1 m short of the concourse and of the passage's bulkhead) don't look unfinished, and nothing stops a BB or a
-  body (look only: you walk through a fire point's board).
 
 ## Bots
 

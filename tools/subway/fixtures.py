@@ -61,6 +61,7 @@ MODELS = {
     "pipe_run": ((0.0, 4.0, -0.050, 0.660, 0.0, 0.620), "wall"),
     "pipe_run_b": ((0.0, 4.0, -0.272, 0.660, 0.0, 0.685), "wall"),
     "pipe_run_2": ((0.0, 2.0, -0.050, 0.660, 0.0, 0.620), "wall"),
+    "pipe_run_1": ((0.0, 1.0, -0.001, 0.567, 0.257, 0.613), "wall"),
 }
 POSTERS = ["poster_%s" % k for k in "abcdefghijklm"]  # the spots below take them in turn
 # How each wall faces into its room: the turn (degrees) of a model on it.
@@ -96,7 +97,7 @@ ESC_ROWS = [("esc_low", -3.5, 6.5, 1.9)]
 WALL = [
     # The ticket hall, on the concourse's level since SW1 (its ceiling 4.5 m up).
     ("cctv_camera", "hall", "n", -47.0, 3.9), ("cctv_camera", "hall", "s", -36.0, 3.9),
-    ("platform_clock", "hall", "s", -51.0, 3.4),
+    ("platform_clock", "hall", "w", 4.5, 3.4),  # on the street-end wall, clear of the pipework (DX2)
     ("poster_b", "hall", "s", -41.0, POSTER_Y), ("poster_f", "hall", "s", -24.0, POSTER_Y),
     ("poster_a", "hall", "n", -33.0, POSTER_Y), ("poster_c", "hall", "n", -27.0, POSTER_Y),
     ("poster_d", "hall", "n", -21.0, POSTER_Y),
@@ -191,14 +192,14 @@ WALL = [
 # The services' pipework (DX2: Depot's pipe_run, pipe_run_2 and every third 4 m length the fitted pipe_run_b) high on
 # the tall rooms' long walls, over the posters' band and the wall vents (StationDetail: 2.62 to 2.92 m) and under the
 # conduit (0.2 m under the ceiling): (room, wall, from, to along it, height of its foot over the floor, fitted). Laid
-# in 4 m lengths from `from`, a 2 m one in the last gap; a length that would meet another fixture (a camera, a clock)
-# or stand over an opening is left out and named. The ticket hall's from its street-end corner, the stair top's from
-# its corner over the stair.
+# in 4 m lengths from `from`, 2 m and 1 m ones in the last gap, so each run ends at a wall: the ticket hall's from its
+# street-end corner to the concourse's wall, the stair top's from its corner over the stair to the passage's bulkhead.
+# A length that would meet another fixture (a camera, a clock) or stand over an opening is left out and named.
 PIPES = [
-    ("hall", "n", -55.0, -18.0, 3.05, True), ("hall", "s", -50.0, -18.0, 3.05, True),
-    ("east", "n", 27.0, 21.0, 3.0, False), ("east", "s", 27.0, 21.0, 3.0, False),
+    ("hall", "n", -55.0, -18.0, 3.05, True), ("hall", "s", -55.0, -18.0, 3.05, True),
+    ("east", "n", 27.0, 20.0, 3.0, False), ("east", "s", 27.0, 20.0, 3.0, False),
 ]
-PIPE_MODULES = [("pipe_run", 4.0), ("pipe_run_2", 2.0)]
+PIPE_MODULES = [("pipe_run", 4.0), ("pipe_run_2", 2.0), ("pipe_run_1", 1.0)]
 PIPE_FITTED = ("pipe_run_b", 3)  # every third 4 m length of a fitted run is the one with its valve, drop and box
 PIPE_APART = 0.02   # (m) a length's box from any other fixture's
 HUNG = [

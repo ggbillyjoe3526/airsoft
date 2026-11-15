@@ -9,7 +9,8 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | passed | Accept 7/8 | – (check 8: the open pipe ends had no KNOWN_ISSUES row or PLAYTEST line; added) |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | passed | Accept 7/8 | check 8: two pipe runs ended in the open, 1 m short of a wall |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | passed | pending | – |
 
 ## What changed
 
@@ -20,13 +21,18 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
   keep clear" beside the cross passage's mouth in each running tunnel. Signs at eye height (1.6 m, the owner's Depot
   rule), call points at 1.35 m, as on Depot. Every spot passes the station's checks (solid wall behind, in its room's
   air, in no block).
-- **Pipework** (`PIPES`): pipe_run lengths with a 2 m one in the last gap, every third 4 m length the fitted
-  pipe_run_b, along the ticket hall's long walls (from its street-end corner, its foot 3.05 m up) and the stair top's
-  side walls (3.0 m, ending at the corner over the stair): over the posters' band and StationDetail's wall vents
+- **Pipework** (`PIPES`): pipe_run lengths with 2 m and 1 m ones in the last gap, every third 4 m length the fitted
+  pipe_run_b, along the ticket hall's long walls (from its street-end corner to the concourse's wall, its foot 3.05 m
+  up) and the stair top's side walls (3.0 m, from the corner over the stair to the passage's bulkhead), so every run
+  ends at a wall: over the posters' band and StationDetail's wall vents
   (top 2.92 m), under its conduit (0.2 m under the ceiling). 21 lengths, about 17k triangles, in StationFixtures' 40 m
   chunks. A length is checked for solid wall every 0.25 m behind it and kept 2 cm clear of every other fixture (the
   hall's cameras and clock); a fitted length whose drop would meet something under it (the ticket office's roof) is
   laid plain.
+- **pipe_run_1** (`depot_extras.py`, 260 triangles): a 1 m length to finish a run at a wall, with no bracket of its
+  own (the next length's and the wall hold it). Depot doesn't lay it.
+- **The ticket hall's clock** (SM5's) moves from the south wall at -51 to the street-end wall, 3.4 m up as before, so
+  the south run reaches the corner.
 - **Pictures:** `tools/subway/station_pictures.gd` `extras` (EXTRA_SHOTS); the owner's sheets in
   `art/subway-extras-sx1/` (project files).
 - **Tests:** `tests/unit/test_dx2_subway_extras.gd` (the models carried, their heights, the pipework's height, clearance
@@ -44,8 +50,10 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
   the passages and plant room; the 3.0 to 3.5 m rooms have no height over their vents and under their conduit for a
   0.7 m run; the running tunnels' 0.8 m walkway beside the wagons is too narrow for a 0.62 m deep run.
 
+- **Depot's end-wall runs keep their 2 m gap at the corners:** the long walls' runs pass over them at the same
+  height, so running them on would cross; finishing them needs an elbow piece, not a length.
+
 ## Known issues left
 
-- A pipe run ends in the open where a wall's length isn't a whole number of lengths (the hall's north run 1 m short
-  of the concourse, the stair top's 1 m short of the passage's bulkhead), as Depot's end-wall runs do. How it looks in
-  play is play check N21 (`docs/PLAYTEST.md` › Subway); a row in `docs/KNOWN_ISSUES.md`.
+- At the concourse's end the hall's runs meet a 0.5 m return, so the 1 m length's front 11 cm (the red main's and the
+  basket's edge) stands past the return's corner, seen from the concourse.

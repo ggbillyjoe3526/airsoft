@@ -50,7 +50,7 @@ const FIXTURE_SHOTS: Array[Array] = [
 	["way-out-sign", Vector3(-24.5, 10.4, -8.6), Vector3(-28.0, 11.8, -8.25)],
 	["cctv-camera", Vector3(-46.0, 2.2, -7.8), Vector3(-49.0, 3.5, -5.6)],
 	["north-tunnel-lamps", Vector3(51.0, 1.7, -10.4), Vector3(76.0, 2.2, -11.8)],
-	["ticket-hall-clock", Vector3(-53.0, 10.8, 6.0), Vector3(-51.0, 12.0, 9.5)],
+	["ticket-hall-clock", Vector3(-50.5, 10.8, 2.0), Vector3(-55.0, 12.0, 4.5)],
 	["strip-lamp-from-below", Vector3(-17.5, 1.7, -6.8), Vector3(-14.875, 3.85, -7.25)],
 	["tunnel-lamp-close", Vector3(60.4, 2.1, -10.4), Vector3(62.0, 2.55, -12.3)],
 	["trackside-posters-north", Vector3(43.0, 2.4, -8.6), Vector3(33.0, 2.4, -12.5)],
@@ -74,6 +74,9 @@ const EXTRA_SHOTS: Array[Array] = [
 	["lift-landing-fire-point", Vector3(-42.0, 2.6, -2.5), Vector3(-38.0, 1.6, -3.6)],
 	["cross-passage-fire-exit", Vector3(70.6, 1.7, -10.0), Vector3(74.5, 1.4, -9.0)],
 	["lower-hall-defib", Vector3(15.0, 2.6, 0.0), Vector3(14.8, 2.4, 4.0)],
+	["hall-pipe-end-concourse", Vector3(-24.0, 10.6, -5.5), Vector3(-18.0, 12.3, -10.0)],
+	["stair-top-pipe-bulkhead", Vector3(24.5, 10.6, -6.0), Vector3(20.0, 12.2, -9.5)],
+	["hall-clock-street-wall", Vector3(-50.5, 10.8, 2.0), Vector3(-55.0, 12.0, 4.5)],
 ]
 ## The trains' pictures (SM1), with `trains` as the third argument instead of the station's.
 const TRAIN_SHOTS: Array[Array] = [

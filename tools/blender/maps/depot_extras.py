@@ -241,7 +241,8 @@ def fire_point() -> sk.Mesh:
 
 
 def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run", fittings: bool = False) -> sk.Mesh:
-    """`L` m (4, or 2 to make up a wall's short end bay) of services along a hall wall from x 0 to L, out to 0.62 m from
+    """`L` m (4, or 2 or 1 to make up a wall's short end bay; the 1 m length has no bracket of its own, held by the
+    next length and the wall it ends at) of services along a hall wall from x 0 to L, out to 0.62 m from
     it, its foot at y = 0: the cable basket lowest, the two lagged pipes over it and the sprinkler main on top, on
     strut brackets every 2 m from 1 m in. With `fittings` (pipe_run_b, every third 4 m length) the runs carry their
     fittings too: the main's gate valve with its handwheel and a drop to a pendant sprinkler head, a junction box on
@@ -271,7 +272,7 @@ def pipe_run(L: float = PIPE_LENGTH, name: str = "pipe_run", fittings: bool = Fa
             x = 0.5 + 2.0 * k
             m.lathe([(r + 0.004, x), (r + 0.004, x + 0.05)], 10, (0.0, y, z), "cladding_lap", axis="x",
                     cap_top=False, cap_bottom=False)
-        for x in ((2.9,) if fittings else (1.5,)):
+        for x in ((2.9,) if fittings else (1.5,) if L > 1.8 else (0.3,)):
             m.lathe([(r + 0.002, x), (r + 0.002, x + 0.12)], 10, (0.0, y, z), band, axis="x", cap_top=False,
                     cap_bottom=False, smooth=False)
             m.face_toward([(x + 0.16, y - 0.025, z + r + 0.003), (x + 0.3, y - 0.025, z + r + 0.003),
@@ -340,6 +341,7 @@ def main() -> None:
     sk.export(pipe_run(), "pipe_run", 790)
     sk.export(pipe_run(fittings=True, name="pipe_run_b"), "pipe_run_b", 1100)
     sk.export(pipe_run(2.0, "pipe_run_2"), "pipe_run_2", 500)
+    sk.export(pipe_run(1.0, "pipe_run_1"), "pipe_run_1", 275)
     for cell, w, h in SIGNS:
         sk.export(sign(cell, w, h), "depot_sign_" + cell, 52)
 

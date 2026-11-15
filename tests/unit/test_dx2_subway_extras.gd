@@ -5,9 +5,9 @@ extends GutTest
 
 ## Depot's wall extras Subway carries, and the warehouse signs it never does.
 const SHARED: Array[StringName] = [&"fire_point", &"call_point", &"pipe_run", &"pipe_run_b", &"pipe_run_2",
-		&"depot_sign_fire_action", &"depot_sign_defib", &"depot_sign_ppe", &"depot_sign_fire_exit"]
+		&"pipe_run_1", &"depot_sign_fire_action", &"depot_sign_defib", &"depot_sign_ppe", &"depot_sign_fire_exit"]
 const WAREHOUSE: Array[StringName] = [&"depot_sign_assembly", &"depot_sign_no_riding", &"depot_sign_pallet_storage"]
-const PIPES: Array[StringName] = [&"pipe_run", &"pipe_run_b", &"pipe_run_2"]
+const PIPES: Array[StringName] = [&"pipe_run", &"pipe_run_b", &"pipe_run_2", &"pipe_run_1"]
 ## Heights over the floor (m) of the models' spots (fixtures.py: FIRE_ACTION_Y, CALL_Y, FIRE_POINT_Y), and the
 ## platform level's track bed for the cross passage's signs (EXIT_SIGN_Y).
 const HEIGHTS: Dictionary[StringName, float] = {

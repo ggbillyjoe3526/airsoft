@@ -14,7 +14,7 @@ const BUDGETS: Dictionary[StringName, int] = {
 	&"name_board": 40, &"line_map": 40, &"info_panel": 40, &"notice_smoking": 40, &"notice_handrail": 40,
 	&"notice_cctv": 40, &"wall_sign_out": 40, &"wall_sign_platforms": 40, &"departures_n": 90, &"departures_s": 90,
 	# Depot's wall extras (DX1, tests/unit/test_dx1_depot_props.gd checks where they stand)
-	&"fire_point": 425, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500,
+	&"fire_point": 425, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500, &"pipe_run_1": 275,
 	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
 	&"depot_sign_ppe": 52, &"depot_sign_pallet_storage": 52, &"depot_sign_fire_exit": 52,
 }
@@ -39,7 +39,7 @@ const WALL: Array[StringName] = [&"tunnel_lamp", &"cctv_camera", &"fire_extingui
 		&"poster_k", &"poster_l", &"poster_m", &"poster_wide_a", &"poster_wide_b", &"poster_wide_c", &"name_board",
 		&"line_map", &"info_panel", &"notice_smoking", &"notice_handrail", &"notice_cctv", &"wall_sign_out",
 		&"wall_sign_platforms", &"fire_point", &"call_point", &"pipe_run", &"pipe_run_b", &"pipe_run_2",
-		&"depot_sign_fire_action", &"depot_sign_defib", &"depot_sign_ppe", &"depot_sign_fire_exit"]
+		&"pipe_run_1", &"depot_sign_fire_action", &"depot_sign_defib", &"depot_sign_ppe", &"depot_sign_fire_exit"]
 const FLOOR: Array[StringName] = [&"litter_bin", &"edge_sign"]
 ## How far (m) a model may sink into the wall or ceiling it is fixed to.
 const TOUCH := 0.012
