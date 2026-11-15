@@ -174,6 +174,7 @@ func test_a_shifted_lane_moves_across_the_way_to_the_enemy_unless_a_wall_is_in_t
 func test_setting_off_a_bot_may_cross_once_onto_the_other_lane_never_back_towards_home() -> void:
 	var cfg := _quiet(config)
 	cfg.lane_cross_chance = 1.0
+	cfg.plan_stack_weight = 0.0
 	cfg.lane_cross_reach = 10.0
 	var w := _start(cfg)
 	var b := _bot(0)
@@ -202,6 +203,7 @@ func test_setting_off_a_bot_may_cross_once_onto_the_other_lane_never_back_toward
 func test_a_defender_or_a_bot_under_an_order_never_crosses() -> void:
 	var cfg := _quiet(config)
 	cfg.lane_cross_chance = 1.0
+	cfg.plan_stack_weight = 0.0
 	var w := _start(cfg, 5, RoundState.Mode.ATTACK_DEFEND)
 	for b in w.bots:
 		b.lane = 0
@@ -278,3 +280,55 @@ func test_in_elimination_an_anchor_keeps_its_authored_points_and_the_others_shif
 				shifted += 1
 				assert_lte(absf(b.lane_shift), cfg.lane_shift)
 	assert_gt(shifted, 0, "the others walk shifted")
+
+
+## Bot 0 on lane 0, setting off for its fourth point from its end, with a cross due (chance 1).
+func _due_to_cross(w: BotWorld) -> Bot:
+	var b := _bot(0)
+	b.lane = 0
+	b.lane_dir = 1 if b.character.end == 0 else -1
+	b.lane_points = map.lanes[0].size()
+	b.lane_index = 2 if b.lane_dir > 0 else map.lanes[0].size() - 3
+	b.hunting = false
+	b.lanes_crossed = 0
+	b.order = SquadOrder.Kind.NONE
+	w.planner.plans[b.character.team] = RoundPlanner.Plan.SPLIT
+	return b
+
+
+func test_a_cross_keeps_to_its_storey_prefers_the_emptier_lane_and_never_breaks_a_stack() -> void:
+	var cfg := _quiet(config)
+	cfg.lane_cross_chance = 1.0
+	cfg.lane_cross_reach = 10.0
+	cfg.lane_cross_rise = 1.5
+	cfg.lane_cross_crowd = 8.0
+	var w := _start(cfg)
+	var north := w.lanes[1]
+	# Lane 1 a storey up (2 m): no cross.
+	var raised := PackedVector3Array()
+	for q in north:
+		raised.append(q + Vector3(0.0, 2.0, 0.0))
+	w.lanes[1] = raised
+	var b := _due_to_cross(w)
+	assert_false(BotMovement._cross_lane(b, w, b.lane_index + b.lane_dir), "never onto another storey")
+	w.lanes[1] = north
+	# A third lane as near on the other side, lane 1 walked by two teammates: it takes the empty one.
+	var south := PackedVector3Array()
+	for q in w.lanes[0]:
+		south.append(q + Vector3(0.0, 0.0, -8.0))
+	w.lanes.append(south)
+	b = _due_to_cross(w)
+	var mates := 0
+	for o in w.bots:
+		if o != b and o.character.team == b.character.team and mates < 2:
+			o.lane = 1
+			o.hunting = false
+			mates += 1
+	assert_true(BotMovement._cross_lane(b, w, b.lane_index + b.lane_dir))
+	assert_eq(b.lane, 2, "the lane nobody walks, at the same distance")
+	# The team stacks this round: nobody leaves the stack.
+	b = _due_to_cross(w)
+	w.planner.plans[b.character.team] = RoundPlanner.Plan.STACK
+	assert_false(BotMovement._cross_lane(b, w, b.lane_index + b.lane_dir), "a stack stays a stack")
+	w.lanes.pop_back()
+	assert_eq(map.lanes.size(), 2, "the field's own lanes untouched")

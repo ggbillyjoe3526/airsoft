@@ -1,6 +1,6 @@
 # RV1 · Bots vary their routes and timing each round
 
-**Review:** 2 attempts · critic pending · qa Pass · performance Pass
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 The owner, 2026-11-15: bots are "too predictive and follow the same routes each time. It should feel more random
 while teams still follow a general strategy/plan", and "bots don't come out far enough and I find myself running
@@ -11,7 +11,7 @@ across the map before anything happens".
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | 6: the route change too small to feel (crossings rare, none on Woodland) |
-| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
@@ -30,7 +30,9 @@ across the map before anything happens".
   - **Lane crossing:** setting off for its next point, a bot may (0.1 a point, at most once a round) cut across to
     another lane: the nearest point within 45 m and 1.5 m of height (the same storey; a slope's rise is fine), no
     nearer home, among the points it would walk there (`RoundPlanner.walk_points`), each teammate on that lane
-    counting 8 m further off. Never a defender, the bomb carrier or a bot under a squad order. Reason: the critic's
+    counting 8 m further off. Never a defender, the bomb carrier, a bot under a squad order, or a team that stacks
+    this round (the critic's second review: crossings scattered a stack over every lane, so the plan no longer read as
+    one; split and paired teams still cross). Reason: the critic's
     first review (7/8) found the route change too small to feel; at the first 10 m reach Woodland, whose lanes run
     about 40 m apart, never crossed at all. Now every map crosses (bots a round: Elimination 4.3 to 6.9 of 12,
     Attack / Defend 2.3 to 3.5, Plant The Bomb 1.8 to 2.9).
@@ -75,6 +77,9 @@ the same end and role: 1 is the same ground every round.
   CI's seven unit parts, smoke test and every match guard are green on 63d942b.
 
 ## Known issues left
+
+- A cross only checks that the point it makes for is no nearer home, not the route there: on Depot or Subway, with
+  45 m of reach, a route round a wall could double back for a stretch (the critic's advisory; none seen in the runs).
 
 - Subway Elimination's end 0 (the street end) at 56.1 % ±3.7, outside within noise: re-measure on 32 seeds on the
   reworked Subway (this thread re-measures every map once the reworks merge).

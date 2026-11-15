@@ -190,9 +190,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Setting off for its next lane point, a bot that walks its lane may (this chance) cross to another lane instead: the
 ## nearest point of it within lane_cross_reach (m), no more than lane_cross_rise (m) above or below (the same storey; a
 ## slope's rise is fine), no nearer its own end than where it is, each teammate walking that lane counting
-## lane_cross_crowd (m) further off; at most lane_cross_max times a round. Never a defender, the bomb carrier or a bot
-## under an order. Depot's and Subway's lanes run 2 to 20 m apart, Woodland's about 40 m: a cross there is a flank
-## through the trees.
+## lane_cross_crowd (m) further off; at most lane_cross_max times a round. Never a defender, the bomb carrier, a bot
+## under an order or a team stacked on one lane. Depot's and Subway's lanes run 2 to 20 m apart, Woodland's about
+## 40 m: a cross there is a flank through the trees.
 @export var lane_cross_chance: float = 0.1
 @export var lane_cross_reach: float = 45.0
 @export var lane_cross_rise: float = 1.5

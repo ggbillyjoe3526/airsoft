@@ -98,6 +98,7 @@ func _lane_state_ok(b: Bot, w: BotWorld) -> bool:
 func test_a_match_with_every_bot_always_crossing_keeps_every_lane_state_valid() -> void:
 	var cfg: BotConfig = config.duplicate()
 	cfg.lane_cross_chance = 1.0
+	cfg.plan_stack_weight = 0.0
 	cfg.lane_cross_reach = 30.0
 	cfg.lane_cross_max = 5
 	for seed_value: int in [1, 2, 3]:
@@ -113,6 +114,7 @@ func test_a_match_with_every_bot_always_crossing_keeps_every_lane_state_valid() 
 func test_after_a_cross_resuming_from_a_fight_stays_on_the_new_lane_and_its_points() -> void:
 	var cfg: BotConfig = config.duplicate()
 	cfg.lane_cross_chance = 1.0
+	cfg.plan_stack_weight = 0.0
 	cfg.lane_cross_reach = 30.0
 	cfg.lane_shift = 0.0
 	var w := _start(cfg)
@@ -138,6 +140,7 @@ func test_after_a_cross_resuming_from_a_fight_stays_on_the_new_lane_and_its_poin
 func test_a_bot_never_crosses_when_there_is_only_one_lane_or_no_point_in_reach() -> void:
 	var cfg: BotConfig = config.duplicate()
 	cfg.lane_cross_chance = 1.0
+	cfg.plan_stack_weight = 0.0
 	cfg.lane_cross_reach = 0.5
 	var w := _start(cfg)
 	var b := w.bots[0]
@@ -158,6 +161,7 @@ func test_a_bot_never_crosses_when_there_is_only_one_lane_or_no_point_in_reach()
 func test_a_cross_never_lands_on_a_point_the_bot_would_not_walk_on_that_lane() -> void:
 	var cfg: BotConfig = config.duplicate()
 	cfg.lane_cross_chance = 1.0
+	cfg.plan_stack_weight = 0.0
 	cfg.lane_cross_reach = 40.0
 	var w := _start(cfg, 5, RoundState.Mode.ATTACK_DEFEND)
 	for b in w.bots:
@@ -179,6 +183,7 @@ func test_a_cross_never_lands_on_a_point_the_bot_would_not_walk_on_that_lane() -
 func test_a_bomb_carrier_never_crosses_even_with_certain_chance() -> void:
 	var cfg: BotConfig = config.duplicate()
 	cfg.lane_cross_chance = 1.0
+	cfg.plan_stack_weight = 0.0
 	cfg.lane_cross_reach = 40.0
 	var w := _start(cfg)
 	var b := w.bots[0]
@@ -248,6 +253,7 @@ func test_a_planner_with_no_lanes_still_plans_with_variety_on() -> void:
 func test_the_same_seed_plays_the_same_match_with_variety_on() -> void:
 	var cfg: BotConfig = config.duplicate()
 	cfg.lane_cross_chance = 0.5
+	cfg.plan_stack_weight = 0.0
 	var end: Array[Array] = []
 	for run in 2:
 		_start(cfg, 9)
@@ -266,7 +272,32 @@ func test_attackers_that_crossed_still_finish_their_lane_in_attack_and_defend() 
 	cfg.lane_cross_chance = 1.0
 	cfg.lane_cross_reach = 30.0
 	var w := _start(cfg, 4, RoundState.Mode.ATTACK_DEFEND)
-	_step(60 * 60)
-	for b in w.bots:
-		if BotFlag.role(b, w) == BotFlag.Role.ATTACK and Elimination.is_in_play(b.character):
-			assert_true(b.lane_done or b.hunting or b.mode != Bot.Mode.ADVANCE, "attacker %d is not stuck on a lane" % b.character.id)
+	# Crossing is off for a stacked team (RV1); here every team may cross.
+	w.planner.plans[0] = RoundPlanner.Plan.SPLIT
+	w.planner.plans[1] = RoundPlanner.Plan.SPLIT
+	var commands: Array[PlayerCommand] = []
+	for c in state.characters:
+		commands.append(PlayerCommand.new())
+	# Through the first round only (the next one starts every lane afresh): an attacker that crossed walks on to its
+	# lane's end (lane_done), hunts, or leaves its advance for a fight (or is hit), never stopping on the new lane for
+	# good.
+	var crossed := 0
+	var finished := 0
+	var seen: Dictionary[int, bool] = {}
+	for t in 60 * 60:
+		bots.think(state, commands, DT)
+		sim.step(state, commands, DT)
+		bots.observe(state)
+		if state.events.count_of(GameEvent.Kind.ROUND_OVER) > 0:
+			break
+		for b in w.bots:
+			if BotFlag.role(b, w) != BotFlag.Role.ATTACK or b.lanes_crossed == 0 or seen.has(b.character.id):
+				continue
+			if not seen.has(-1 - b.character.id):
+				seen[-1 - b.character.id] = true
+				crossed += 1
+			if b.lane_done or b.hunting or b.mode != Bot.Mode.ADVANCE or not Elimination.is_in_play(b.character):
+				seen[b.character.id] = true
+				finished += 1
+	assert_gt(crossed, 0, "attackers crossed lanes")
+	assert_eq(finished, crossed, "every attacker that crossed went on past its new lane")

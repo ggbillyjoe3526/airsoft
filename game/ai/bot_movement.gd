@@ -613,8 +613,10 @@ static func _shifted(b: Bot, w: BotWorld, point: Vector3) -> Vector3:
 ## the bomb carrier, a bot under a squad order, or one that crossed lane_cross_max times this round.
 static func _cross_lane(b: Bot, w: BotWorld, next: int) -> bool:
 	var cfg := w.cfg
+	# A team stacked on one lane this round keeps its stack: that is its plan.
 	if b.lanes_crossed >= cfg.lane_cross_max or b.raiser or b.order != SquadOrder.Kind.NONE \
-			or BotFlag.role(b, w) == BotFlag.Role.DEFEND or w.lanes.size() < 2:
+			or BotFlag.role(b, w) == BotFlag.Role.DEFEND or w.lanes.size() < 2 \
+			or w.planner.plans[b.character.team] == RoundPlanner.Plan.STACK:
 		return false
 	if w.planner.variety_roll() >= cfg.lane_cross_chance:
 		return false
