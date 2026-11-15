@@ -159,9 +159,18 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 		c.react_at = w.time + b.pick(b.skill.pre_aim_reaction_time if pre_aimed else b.skill.reaction_time)
 		c.acquired_at = w.time - (b.skill.pre_aim_settled * b.skill.aim_settle_time if pre_aimed else 0.0)
 		c.first_seen_at = w.time
+		c.reaction_from = w.time
 		c.held = b.skill.holds_angles and b.holding and pre_aimed
 		BotAim.fresh_error(b, cfg, true)
 		BotRadio.saw(b, w, best)
+	elif w.time - c.seen_at > cfg.reacquire_after:
+		# Seen again after a moment out of sight (AIM1): the same contact, but it has to find them again. A reaction
+		# still under way runs on; its aim keeps no more than reacquire_settled of its settling, off to one side again.
+		var kept := clampf(BotAim.settling(w.time, c, cfg), 0.0, b.skill.reacquire_settled * b.skill.aim_settle_time)
+		c.react_at = maxf(c.react_at, w.time + b.pick(b.skill.reacquire_time))
+		c.reaction_from = w.time
+		c.acquired_at = w.time - kept
+		BotAim.fresh_error(b, cfg, true)
 	elif c != b.contact:
 		# Back on someone seen moments ago: no new reaction, but this target's aim error, not the last one's.
 		BotAim.fresh_error(b, cfg, false)

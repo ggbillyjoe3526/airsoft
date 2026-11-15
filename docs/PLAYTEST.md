@@ -660,7 +660,10 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
 - [ ] **Every level hunts (M87).** Once their lane is swept, bots hunt the map's middle without walking into corners
   they already saw empty; a round shouldn't drag to the clock. On Woodland they now check inside the hut too (KI1).
 - [ ] **Up close, a fair moment.** Walk into a Normal bot at 5 to 10 m: its first BBs go wide and walk in (its first
-  hit takes about 1.5 s).
+  hit takes about 1 s; an Easy bot's about 1.7 s).
+- [ ] **Peek, duck, peek again (AIM1).** On Normal, step out past a corner a bot watches for under half a second, duck
+  back, and step out again half a second later: it should rarely hit you on either peek (its first BBs go wide again),
+  but stand out for a second and a half and it should. On Hard, re-peeking the same corner is riskier.
 - [ ] **The bots' kits (BG1).** Opponents carry kits from `bot-kits.md`: Easy the plainest, each level up more scoped,
   silenced or red-dot, Hard never plain. Spectate a few: the optic shows on their rifle and a silenced bot is heard
   nearer. Does gear make Normal unfair or Hard too easy?
