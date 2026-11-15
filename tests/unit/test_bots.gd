@@ -118,11 +118,11 @@ func test_whole_bot_matches_play_out_fairly_over_seeds() -> void:
 
 ## Ricochets counting (the browser game's depotMatch.ricochet tests, half its seeds): matches still play out, no bot
 ## shoots a teammate directly, a stray bounce only rarely catches a teammate or its own shooter, and bounced BBs decide
-## some hits but not most (G12: under a quarter). Measured: 45 of 251 hits off a bounce, 4 on a teammate, 4 on the shooter. HV1
+## some hits but under a quarter (G12). Measured: 45 of 251 hits off a bounce, 4 on a teammate, 4 on the shooter. HV1
 ## (bots treat a crouched teammate as standing): 47 of 224, 3 and 10 here, and 17 on the shooter of 485 hits over the
 ## browser's 16 seeds (3.5 %), so the shooter's bar is 5 % for these eight. AIM1 (a bot picks someone up again after a
-## moment out of sight, its first aim off to one side again): 64 of 242 off a bounce (35 of 219 before), so the bar for
-## bounced hits is three in ten.
+## moment out of sight): 46 of 226 off a bounce (35 of 219 before; 64 of 242 while its unsettled aim went to one side,
+## so a re-pick-up's error now wanders any way off the target).
 func test_bot_matches_with_ricochets_counting_stay_playable() -> void:
 	tuning.hits.ricochets_count = true
 	var hits := 0
@@ -162,10 +162,8 @@ func test_bot_matches_with_ricochets_counting_stay_playable() -> void:
 	# hit volumes (3 of 224 hits before GA1 re-made the legs, 7 of 242 after; the cap was 6).
 	assert_lt(float(friendly_bounces) / maxi(1, hits), 0.035, "a bounce catches a teammate only rarely")
 	assert_lt(float(self_hits) / maxi(1, hits), 0.05, "a bounce catches its own shooter only rarely")
-	# AIM1 raised it from 35 of 219 hits to 64 of 242: a bot seeing someone again after a moment out of sight aims off to
-	# one side again, so more first BBs meet the wall by a corner and bounce on.
 	var share := float(bounced) / maxi(1, hits)
-	assert_between(share, 0.05, 0.3, "bounced BBs decide some hits, under three in ten")
+	assert_between(share, 0.05, 0.25, "bounced BBs decide some hits, under a quarter")
 
 
 func test_a_bot_does_not_see_an_enemy_behind_a_wall() -> void:

@@ -82,7 +82,9 @@ func test_seen_again_after_ducking_back_reacts_again_with_its_aim_unsettled() ->
 	var at_fire := BotAim.settling(c.react_at, c, config)
 	assert_almost_eq(at_fire, _b.skill.reacquire_settled * _b.skill.aim_settle_time, 1e-4,
 			"its aim keeps only reacquire_settled of its settling when it may fire")
-	assert_gt(BotAim.first_error_size(at_fire, 20.0, _b.skill), 0.0, "its first aim is off to one side again")
+	assert_eq(Vector2(_b.first_yaw, _b.first_pitch), Vector2.ZERO, "no first aim to one side: the error wanders")
+	assert_gt(BotAim.error_size(at_fire, false, 20.0, 0.0, _b.skill), deg_to_rad(_b.skill.aim_error_settled_deg) + 1e-4,
+			"its aim error is wider than a settled one when it may fire")
 	assert_eq(c.first_seen_at, first, "still the same contact: its first sighting stays")
 
 

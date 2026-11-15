@@ -36,7 +36,9 @@ static func aim(b: Bot, w: BotWorld, target: Character, eye: Vector3, walking: b
 		var across := Vector2(point.x - eye.x, point.z - eye.z)
 		var sideways := (v.x * across.y - v.z * across.x) / maxf(across.length(), 1e-3)
 		var since := BotAim.settling(w.time, b.contact, cfg)
-		var first := BotAim.first_error_size(since, dist, b.skill)
+		# A re-pick-up (AIM1) has no first aim to one side: its whole error wanders, any way off the target.
+		var sided := b.first_yaw != 0.0 or b.first_pitch != 0.0
+		var first := BotAim.first_error_size(since, dist, b.skill) if sided else 0.0
 		var error := BotAim.error_size(since, walking or cmd.right != 0.0, dist, sideways, b.skill)
 		if scoped(b, cfg):
 			# Through a sniper's scope the hand's wander is finer (SN3): one shot a cycle has to count.

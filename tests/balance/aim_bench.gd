@@ -36,6 +36,7 @@ const FIELD_CENTRE_Z := -20.0
 var tuning: SimTuning = SimTuning.load_default()
 var config: BotConfig = BotConfig.load_default()
 var _fields: Dictionary[float, Array] = {}
+var _filter: String = ""
 
 
 class Tally:
@@ -58,6 +59,7 @@ func _run() -> void:
 	var trials := args[1].to_int() if args.size() > 1 and args[1].is_valid_int() else 200
 	if args.size() > 2 and args[2] == "old":
 		config.reacquire_after = INF
+	_filter = args[3] if args.size() > 3 else ""
 	var lines := PackedStringArray(["# Bot aim bench (AIM1)", "",
 			"One bot (AEG Rifle, from the hip, held still in the open, looking down the field) against you behind a"
 			+ " wall corner, %d seeds a case. Hit: share of trials the bot hit you. Fire and hit: median seconds from"
@@ -93,6 +95,8 @@ func _run() -> void:
 ## `length` how long a trial runs, `count_from` the second from which a hit counts (the re-peek's second exposure).
 func _row(lines: PackedStringArray, label: String, dist: float, trials: int, x_at: Callable, length: float,
 		count_from: float = 0.0) -> void:
+	if _filter != "" and not label.containsn(_filter):
+		return
 	var cells := PackedStringArray()
 	for level in LEVELS:
 		var t := Tally.new()
