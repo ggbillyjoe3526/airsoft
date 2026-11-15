@@ -122,3 +122,51 @@ func test_no_extra_overlaps_another_fixture_and_none_is_laid_twice() -> void:
 				bad.append("%s at %s meets %s at %s" % [fixtures[i].model, fixtures[i].position,
 						fixtures[j].model, fixtures[j].position])
 	assert_eq(bad, [] as Array[String], "the station's extras keep clear of every other fixture")
+
+
+func test_every_pipe_run_ends_at_a_wall_both_ways() -> void:
+	# along each wall the lengths meet end to end, and past each run's first and last length (2 cm on, at the pipes'
+	# middle) stands a wall: the street end's, the concourse's return, the stair top's corner, the passage's bulkhead
+	var m := _subway()
+	var runs: Dictionary[String, Array] = {}
+	for f in m.station.fixtures:
+		if PIPES.has(f.model):
+			var key := "wall z %.2f" % f.position.z   # every run lies along x, on a north or south wall
+			if not runs.has(key):
+				runs[key] = []
+			runs[key].append(_box(f))
+	assert_eq(runs.size(), 4, "the ticket hall's two long walls and the stair top's two")
+	var open_ends: Array[String] = []
+	for key: String in runs:
+		var boxes: Array = runs[key]
+		var lo: AABB = boxes[0]
+		var hi: AABB = boxes[0]
+		for b: AABB in boxes:
+			if b.position.x < lo.position.x:
+				lo = b
+			if b.end.x > hi.end.x:
+				hi = b
+		var span := hi.end.x - lo.position.x
+		var laid := 0.0
+		for b: AABB in boxes:
+			laid += b.size.x
+		assert_almost_eq(laid, span, 0.01, "%s: end to end, no gap" % key)
+		var y := lo.get_center().y
+		for p: Vector3 in [Vector3(lo.position.x - 0.02, y, _inner(lo)), Vector3(hi.end.x + 0.02, y, _inner(hi))]:
+			if not _solid(m, p):
+				open_ends.append("%s at %s" % [key, p])
+	assert_eq(open_ends, [] as Array[String], "every run ends at a wall")
+
+
+## A z 0.15 m in from the wall side of `box` (a length of pipework on a wall running along x, the walls at z of either
+## sign): inside a wall's return or a bulkhead where the run ends.
+func _inner(box: AABB) -> float:
+	var wall_z := box.position.z if absf(box.position.z) > absf(box.end.z) else box.end.z
+	return wall_z - signf(wall_z) * 0.15
+
+
+func _solid(m: MapData, p: Vector3) -> bool:
+	for b in m.blocks:
+		if AABB(b.center - b.size * 0.5, b.size).has_point(p):
+			return true
+	return false

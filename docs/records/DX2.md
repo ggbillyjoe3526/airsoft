@@ -10,7 +10,8 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (build thread) | passed | Accept 7/8 | check 8: two pipe runs ended in the open, 1 m short of a wall |
-| 2026-11-15 | 2 | Opus 5.5 (build thread) | passed | pending | – |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | passed | Accept 7/8 | check 8: the 1 m end length's front 11 cm stood past the concourse's 0.5 m return, its pipes open-ended |
+| 2026-11-15 | 3 | Opus 5.5 (build thread) | passed | pending | – |
 
 ## What changed
 
@@ -29,8 +30,10 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
   chunks. A length is checked for solid wall every 0.25 m behind it and kept 2 cm clear of every other fixture (the
   hall's cameras and clock); a fitted length whose drop would meet something under it (the ticket office's roof) is
   laid plain.
-- **pipe_run_1** (`depot_extras.py`, 260 triangles): a 1 m length to finish a run at a wall, with no bracket of its
-  own (the next length's and the wall hold it). Depot doesn't lay it.
+- **pipe_run_1** (`depot_extras.py`, 300 triangles): a 1 m length to finish a run at a wall, with no bracket of its
+  own (the next length's and the wall hold it), its pipes and cables capped at its far end: where the hall's runs
+  meet the concourse's 0.5 m return, the main's and the basket's front 11 cm stand past the return's corner and show
+  closed ends. Depot doesn't lay it. A test checks every run is laid end to end with a wall past both its ends.
 - **The ticket hall's clock** (SM5's) moves from the south wall at -51 to the street-end wall, 3.4 m up as before, so
   the south run reaches the corner.
 - **Pictures:** `tools/subway/station_pictures.gd` `extras` (EXTRA_SHOTS); the owner's sheets in
@@ -55,5 +58,4 @@ models in Subway where suitable." Look only: the station's cover, sight lines an
 
 ## Known issues left
 
-- At the concourse's end the hall's runs meet a 0.5 m return, so the 1 m length's front 11 cm (the red main's and the
-  basket's edge) stands past the return's corner, seen from the concourse.
+- None known.
