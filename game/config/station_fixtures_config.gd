@@ -2,8 +2,9 @@ class_name StationFixturesConfig
 extends Resource
 ## How a station's lamps and extras are drawn (SM5, Subway: MapData.station's fixtures, written by
 ## tools/subway/fixtures.py; the models by tools/blender/maps/station_lamps.py and station_extras.py from the owner's
-## photos). Each model's `Prop` faces are its vertex colours in the shared light, worn a little; its `Lens` faces (a
-## tunnel lamp's glass) glow; its `Sign` faces print the sign sheet. Look only: no collider, no shadow.
+## photos), and a hall's wall extras (DX1, Depot: MapData.fixtures, written by tools/depot/build_map.py; the models by
+## depot_extras.py). Each model's `Prop` faces are its vertex colours in the shared light, worn a little; its `Lens`
+## faces (a tunnel lamp's glass) glow; its `Sign` faces print its sign sheet. Look only: no collider, no shadow.
 
 ## Where the models are, and the ones a map may name (any other is left out with a warning).
 @export_dir var folder: String = "res://assets/models/props"
@@ -13,10 +14,25 @@ extends Resource
 	"poster_j", "poster_k", "poster_l", "poster_m", "poster_wide_a", "poster_wide_b", "poster_wide_c", "name_board",
 	"line_map", "info_panel", "notice_smoking", "notice_handrail", "notice_cctv", "wall_sign_out", "wall_sign_platforms",
 	"departures_n", "departures_s",
+	# Depot's wall extras (DX1, tools/blender/maps/depot_extras.py)
+	"fire_point", "call_point", "cable_reel", "pipe_run", "depot_sign_assembly", "depot_sign_fire_action",
+	"depot_sign_defib", "depot_sign_no_riding", "depot_sign_ppe", "depot_sign_pallet_storage", "depot_sign_fire_exit",
 ])
 ## Every printed face's picture (tools/blender/maps/station_signs.py: an invented station name, the way-out signs,
 ## the posters, the clock face, the edge warning).
 @export_file("*.png") var sign_sheet: String = "res://assets/textures/station/signs.png"
+## The models printing from another sheet than `sign_sheet`: Depot's extras' (DX1, tools/blender/maps/depot_signs.py:
+## its safety signs and the fire point's header).
+@export var sheets: Dictionary[StringName, String] = {
+	&"fire_point": "res://assets/textures/depot/signs.png",
+	&"depot_sign_assembly": "res://assets/textures/depot/signs.png",
+	&"depot_sign_fire_action": "res://assets/textures/depot/signs.png",
+	&"depot_sign_defib": "res://assets/textures/depot/signs.png",
+	&"depot_sign_no_riding": "res://assets/textures/depot/signs.png",
+	&"depot_sign_ppe": "res://assets/textures/depot/signs.png",
+	&"depot_sign_pallet_storage": "res://assets/textures/depot/signs.png",
+	&"depot_sign_fire_exit": "res://assets/textures/depot/signs.png",
+}
 @export_range(0.0, 1.0) var roughness: float = 0.7
 @export_range(0.0, 1.0) var metallic: float = 0.0
 @export_range(0.0, 1.0) var sign_roughness: float = 0.6
@@ -38,3 +54,8 @@ extends Resource
 ## The model `model`'s file.
 func path_of(model: StringName) -> String:
 	return folder.path_join(String(model) + ".glb")
+
+
+## The sign sheet model `model`'s printed faces show: its own (`sheets`), else `sign_sheet`.
+func sheet_of(model: StringName) -> String:
+	return sheets.get(model, sign_sheet)

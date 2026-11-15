@@ -2,9 +2,10 @@ class_name StationFixtures
 extends Node3D
 ## A station's lamps and extras (SM5, Subway: MapData.station's fixtures): the running tunnels' bulkhead lamps, the
 ## station's name boards, way-out signs, posters, clocks, CCTV cameras, fire extinguishers, litter bins and the
-## platform edges' warnings, one MultiMesh a model (StationFixturesConfig). A lamp's glass glows (no real light: the
-## ceilings' strip lamps light the station, RoofView), a printed face shows the sign sheet. Look only: no collider,
-## no shadow, nothing the simulation reads. Built once; nothing runs a frame.
+## platform edges' warnings; and a hall's wall extras (DX1, Depot: MapData.fixtures, its fire points, call points,
+## cable reels, pipework and safety signs). One MultiMesh a model (StationFixturesConfig). A lamp's glass glows (no
+## real light: the ceilings' strip lamps light the station, RoofView), a printed face shows its sign sheet. Look only:
+## no collider, no shadow, nothing the simulation reads. Built once; nothing runs a frame.
 
 const PROP_SURFACE := &"Prop"
 const LENS_SURFACE := &"Lens"
@@ -24,11 +25,18 @@ var _placed: Dictionary[StringName, Array] = {}
 var _lamps: Array[OmniLight3D] = []
 
 
-## The fixtures of `map`'s station drawn under `cfg`, or null on a map with none.
+## The fixtures of `map`'s station and its own wall extras (MapData.fixtures, DX1: Depot's) drawn under `cfg`, or null
+## on a map with none.
 static func build(map: MapData, cfg: StationFixturesConfig) -> StationFixtures:
-	if map == null or cfg == null or map.station == null or map.station.fixtures.is_empty():
+	if map == null or cfg == null:
 		return null
-	var placed := placings(map.station, cfg)
+	var fixtures: Array[StationDressing.Fixture] = []
+	if map.station != null:
+		fixtures.append_array(map.station.fixtures)
+	fixtures.append_array(map.fixtures)
+	if fixtures.is_empty():
+		return null
+	var placed := placings_of(fixtures, cfg)
 	if placed.is_empty():
 		return null
 	var view := StationFixtures.new()
@@ -38,28 +46,46 @@ static func build(map: MapData, cfg: StationFixturesConfig) -> StationFixtures:
 	var glow := ShaderMaterial.new()
 	glow.shader = CodeShaders.of(GLOW_SHADER)
 	glow.set_shader_parameter(&"glow", cfg.lens_colour * cfg.lens_energy)
-	var sheet := load(cfg.sign_sheet) as Texture2D if ResourceLoader.exists(cfg.sign_sheet) else null
-	var printed: Material = LookMaterials.printed(sheet, cfg.sign_roughness, cfg.wear) if sheet != null else prop
-	if sheet == null:
-		push_warning("StationFixtures: the sign sheet \"%s\" won't load; signs drawn blank" % cfg.sign_sheet)
-	view._materials.append_array([prop, glow, printed])
+	view._materials.append_array([prop, glow])
+	# each sign sheet's printed material, made the first time a model printing from it is drawn
+	var printed: Dictionary[String, Material] = {}
 	for model: StringName in placed:
 		var src := PropDressConfig.load_mesh(cfg.path_of(model))
 		if src == null:
 			push_warning("StationFixtures: \"%s\" won't load; its fixtures are left out" % cfg.path_of(model))
 			continue
-		view._add(model, _surfaces(src, prop, glow, printed), placed[model])
+		var sheet_path := cfg.sheet_of(model)
+		if not printed.has(sheet_path):
+			printed[sheet_path] = _printed(sheet_path, cfg, prop)
+			if printed[sheet_path] != prop:
+				view._materials.append(printed[sheet_path])
+		view._add(model, _surfaces(src, prop, glow, printed[sheet_path]), placed[model])
 		if cfg.lit_models.has(String(model)):
 			for t: Transform3D in placed[model]:
 				view._add_lamp(t * Vector3(0.0, 0.0, cfg.lamp_out), cfg)
 	return view
 
 
+## The printed material for the sign sheet at `path`, or `prop` (the signs drawn blank) when it won't load.
+static func _printed(path: String, cfg: StationFixturesConfig, prop: Material) -> Material:
+	var sheet := load(path) as Texture2D if ResourceLoader.exists(path) else null
+	if sheet == null:
+		push_warning("StationFixtures: the sign sheet \"%s\" won't load; signs drawn blank" % path)
+		return prop
+	return LookMaterials.printed(sheet, cfg.sign_roughness, cfg.wear)
+
+
 ## Each model's transforms, by its name, in the file's order; a fixture naming a model `cfg` doesn't list is left out
 ## (warned). Pure.
 static func placings(station: StationDressing, cfg: StationFixturesConfig) -> Dictionary[StringName, Array]:
+	return placings_of(station.fixtures, cfg)
+
+
+## `fixtures`' transforms by model, as `placings`. Pure.
+static func placings_of(fixtures: Array[StationDressing.Fixture], cfg: StationFixturesConfig) \
+		-> Dictionary[StringName, Array]:
 	var out: Dictionary[StringName, Array] = {}
-	for f: StationDressing.Fixture in station.fixtures:
+	for f: StationDressing.Fixture in fixtures:
 		if not cfg.models.has(String(f.model)):
 			push_warning("StationFixtures: no model \"%s\"; left out" % f.model)
 			continue

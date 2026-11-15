@@ -56,6 +56,15 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"desk": "res://assets/models/props/office_desk.glb",
 	&"locker": "res://assets/models/props/steel_locker.glb",
 	&"kit_rack": "res://assets/models/props/kit_rack.glb",
+	# Depot's other rack bays (DX1, the owner's photos, 2026-11-15), each two bays taking turns along a row: racking
+	# of shrink-wrapped pallets, stacks of IBC totes and drums, and a mesh-caged parts store. A rack block names one
+	# (its `dress`, tools/depot/build_map.py) and is laid as the racking is (TILE), on the same box.
+	&"wrapped_racking": "res://assets/models/props/wrapped_racking.glb",
+	&"wrapped_racking_b": "res://assets/models/props/wrapped_racking_b.glb",
+	&"drum_ibc_stack": "res://assets/models/props/drum_ibc_stack.glb",
+	&"drum_ibc_stack_b": "res://assets/models/props/drum_ibc_stack_b.glb",
+	&"parts_cage": "res://assets/models/props/parts_cage.glb",
+	&"parts_cage_b": "res://assets/models/props/parts_cage_b.glb",
 	# The game's own map models (DM1, tools/blender/maps): Depot's and Woodland's crates, Depot's plywood walls and
 	# containers.
 	&"crate": "res://assets/models/props/crate.glb",
@@ -220,6 +229,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## Their chunks are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
 @export var variants: Dictionary[StringName, PackedStringArray] = {
 	&"shelf": PackedStringArray(["shelf_b", "shelf_c"]),
+	&"wrapped_racking": PackedStringArray(["wrapped_racking_b"]),
+	&"drum_ibc_stack": PackedStringArray(["drum_ibc_stack_b"]),
+	&"parts_cage": PackedStringArray(["parts_cage_b"]),
 	&"cordwood": PackedStringArray(["cordwood_b", "cordwood_c"]),
 }
 ## How a prop a block names (MapData.Block.dress, WR3) is laid in it; one not listed is fitted to the box (FIT, long
@@ -234,6 +246,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"root_plate": Lay.GROUND, &"sawbench": Lay.GROUND, &"boards": Lay.GROUND,
 	&"log_tunnel_side": Lay.SIDE, &"log_tunnel_roof": Lay.LINED,
 	&"range_wall": Lay.GRID, &"range_backstop": Lay.GRID, &"sandbags": Lay.GRID,
+	&"wrapped_racking": Lay.TILE, &"drum_ibc_stack": Lay.TILE, &"parts_cage": Lay.TILE,
 }
 ## How far (m) a SET model stands over the top of its box: thin parts drawn for the look only, which stop no one and
 ## no BB (SM2: the platform stair's handrails, over its ramps, as the ceiling's lamps hang under the roof). The model is
@@ -400,6 +413,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 @export_range(0.0, 1.0) var wear: float = 1.0
 @export var model_wear: Dictionary[StringName, float] = {
 	&"shelf": 0.35, &"shelf_b": 0.35, &"shelf_c": 0.35, &"earth_bank": 0.0,
+	&"wrapped_racking": 0.35, &"wrapped_racking_b": 0.35, &"drum_ibc_stack": 0.35, &"drum_ibc_stack_b": 0.35,
+	&"parts_cage": 0.35, &"parts_cage_b": 0.35,
 	&"pine_young_crown": 0.0, &"pine_grown_crown": 0.0, &"pine_old_crown": 0.0, &"oak_crown": 0.0, &"birch_crown": 0.0,
 	# a thicket's spruce is all boughs (FT1: worn, the dust on its upturned tiers drew its sunlit tops pale beige)
 	&"spruce": 0.0,

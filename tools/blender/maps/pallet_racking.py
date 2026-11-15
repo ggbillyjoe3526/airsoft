@@ -39,35 +39,37 @@ BRACE = "ink*1.45"
 DECK = ["crate*1.0", "crate*0.93", "plywood*0.95", "crate*0.97", "timber*1.1"]
 
 
-def uprights(p: prop.Prop) -> None:
+def uprights(p: prop.Prop, upright: str = UPRIGHT, slots: str = SLOTS, brace: str = BRACE, foot: str = FOOT) -> None:
+    """The bay's two half uprights with their slots, foot plates and side bracing, in the given paints (the
+    wrapped racking's galvanised ones, wrapped_racking.py)."""
     for side in (-1.0, 1.0):
         x_out = side * HW
         x_in = side * (HW - COL_W)
         lo, hi = min(x_out, x_in), max(x_out, x_in)
-        p.box((lo, FRONT, 0.0), (hi, FRONT + COL_D, H), UPRIGHT)
+        p.box((lo, FRONT, 0.0), (hi, FRONT + COL_D, H), upright)
         # the slots punched up the column's face: one column of them on each bay's half, so where two bays meet the
         # whole upright shows its two columns (the photos' pairs), pale on the ink so they read down an aisle
         xc = side * (HW - COL_W * 0.45)
         for i in range(SLOT_N):
             zs = 0.16 + i * SLOT_PITCH
-            p.front_decal(xc - 0.007, xc + 0.007, zs, zs + 0.05, FRONT - 0.001, SLOTS)
+            p.front_decal(xc - 0.007, xc + 0.007, zs, zs + 0.05, FRONT - 0.001, slots)
         # the foot plate, bolted down in front of the column
-        p.box((lo, FRONT - 0.045, 0.0), (hi, FRONT + COL_D + 0.02, 0.016), FOOT)
+        p.box((lo, FRONT - 0.045, 0.0), (hi, FRONT + COL_D + 0.02, 0.016), foot)
         # the side frame's bracing towards the back, half of it in each bay
         bx = (-HW, -HW + 0.032) if side < 0 else (HW - 0.032, HW)
         for z in (0.14, H - 0.2):
-            p.box((bx[0], FRONT + COL_D, z), (bx[1], 0.0, z + 0.05), BRACE)
+            p.box((bx[0], FRONT + COL_D, z), (bx[1], 0.0, z + 0.05), brace)
         for z0, z1 in ((0.18, 1.0), (1.0, 1.9), (1.9, H - 0.24)):
             faces = p.box((bx[0], -0.022, 0.0), (bx[1], 0.022, math.hypot(z1 - z0, 0.0 - FRONT - COL_D) - 0.022),
-                          BRACE)
+                          brace)
             ang = math.atan2(-(FRONT + COL_D), z1 - z0)
             p.transform(faces, prop.Matrix.Translation((0.0, FRONT + COL_D + 0.02, z0)) @
                         prop.Matrix.Rotation(-ang, 4, "X"))
 
 
-def beams(p: prop.Prop) -> None:
+def beams(p: prop.Prop, tops: tuple = BEAM_TOPS) -> None:
     x0, x1 = -HW + COL_W, HW - COL_W
-    for top in BEAM_TOPS:
+    for top in tops:
         p.box((x0, FRONT, top - BEAM_H), (x1, FRONT + BEAM_D, top), BEAM)
         # the step along the beam's top that the pallets sit in, and the end connectors on the columns
         p.box((x0, FRONT + BEAM_D, top - 0.035), (x1, FRONT + BEAM_D + 0.03, top - 0.004), BEAM + "*0.8")

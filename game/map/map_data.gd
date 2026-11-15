@@ -161,6 +161,9 @@ var site: SiteDressing = null
 ## Its station dress (MT3, `dressing.station`: StationDressing), drawn by StationLook and StationSurface instead of the
 ## greybox; null on a map without one.
 var station: StationDressing = null
+## Its wall extras (DX1, `dressing.fixtures`: Depot's fire points, call points, cable reels, pipework and signs),
+## look-only models drawn by StationFixtures as a station's are; none on a map naming none.
+var fixtures: Array[StationDressing.Fixture] = []
 ## Its trains (SM1, `dressing.trains`: TrainDressing), drawn by TrainView in a station's train models; none on a map
 ## naming none.
 var trains: Array[TrainDressing] = []
@@ -290,6 +293,10 @@ static func parse(text: String, style: MapStyle, team_size: int) -> MapData:
 	m.site = SiteDressing.read(d.get("dressing"), m.warnings)
 	m.marks = WearMark.read(d.get("dressing"), m.warnings)
 	m.station = StationDressing.read(d.get("dressing"), m.warnings)
+	var dressing: Variant = d.get("dressing")
+	if dressing is Dictionary:
+		m.fixtures = StationDressing.read_fixtures((dressing as Dictionary).get("fixtures", []), "dressing.fixtures",
+				m.warnings)
 	m.trains = TrainDressing.read(d.get("dressing"), m.warnings)
 	m._read_woods(d.get("dressing"), style)
 	m._read_poles(d.get("flags"), d.get("flag"))
