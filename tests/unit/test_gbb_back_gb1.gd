@@ -121,7 +121,7 @@ func test_the_recess_floor_keeps_its_material_in_every_paint() -> void:
 						if own != null and own.resource_name == "Cavity":
 							hit = true
 							assert_null(mi.get_surface_override_material(i), "%s/%s/%s: not repainted" % [paint, realistic, surfaced])
-							assert_lt((mi.get_active_material(i) as BaseMaterial3D).albedo_color.get_luminance(), 0.08)
+							assert_lt(_drawn_albedo(mi, i).get_luminance(), 0.08, "%s: drawn near black" % paint)
 				assert_true(hit, "Cavity found")
 
 
