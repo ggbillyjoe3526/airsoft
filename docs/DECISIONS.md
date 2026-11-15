@@ -999,9 +999,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   against an M4 quad-rail photo: the ring "should go around the full body" (the rail covered its top), the handguard
   "should have gaps in between the rails (not the rails themselves)" and the forward assist was "too small and
   recessed. It should be slightly larger and stick out at more of an angle." So the upper's top rail stops at the
-  ring and the handguard's starts in front of it; the handguard is hollow with oval slots in its top corners and small
-  round holes in its lower ones, the barrel and a gas tube seen through them; the left rail cover is a rail's height;
-  the forward assist's axis turns 18 degrees out toward the back (docs/records/AF1.md).
+  ring and the handguard's starts in front of it; the handguard is hollow with a row of oval slots in each corner
+  between two rails (the lower ones a little shorter, as on the photo), the barrel and a gas tube seen through them;
+  the left rail cover is a rail's height; the forward assist's axis turns 18 degrees out toward the back. The bots'
+  copy keeps a solid handguard: at its 3,000 triangles the slots frayed (docs/records/AF1.md).
 - **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
   handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
   sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip

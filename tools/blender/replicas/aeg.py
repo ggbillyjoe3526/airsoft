@@ -188,23 +188,31 @@ GUARD_HW = 0.0165
 GUARD_Z = (0.031, RAIL_BASE)
 # The handguard's corners (owner, 2026-11-15, the M4 quad-rail photo: open gaps between the rails, not the rails):
 # each 45-degree corner face is CHAMFER in from the square (each flat face just wider than a rail's foot), and a row
-# of GAP_COUNT holes through its wall shows the barrel inside: long oval slots in the top corners, small round holes
-# in the bottom ones, as in the photo. The wall's thickness, each slot's length and height (across the corner face), a
-# round hole's radius, and the solid ends before the first and after the last slot.
+# of GAP_COUNT oval slots through its wall shows the barrel inside, the lower corners' a little shorter and narrower,
+# as in the photo. The wall's thickness, a top slot's length and height (across the corner face), a lower slot's, and
+# the solid ends before the first and after the last slot.
 GUARD_CHAMFER = 0.0078
 GUARD_WALL = 0.0018
 GAP_COUNT = 7
-GAP_LEN = 0.0160
+GAP_LEN = 0.0150
 GAP_H = 0.0084
-GAP_HOLE_R = 0.0026
+GAP_LOW_LEN = 0.0128
+GAP_LOW_H = 0.0072
 GAP_END = 0.0105
 # The left rail's ribbed cover, as tall as the rail's top (half height), so the corner gaps show either side of it.
 COVER_HH = 0.0112
 # The hollow handguard's pieces, joined into the body only after the figures' copy is made: a figure's copy, cut down
-# to a few thousand triangles, frayed the slots into spikes, so it is made from a solid stand-in (GuardStandIn) the
-# handguard's outside shape instead, as it was before the gaps (AF1).
+# to a few thousand triangles, frayed the slots into spikes, so it is made from a solid stand-in (GuardStandIn) of
+# the handguard's outside shape instead, as it was before the gaps (AF1).
 GUARD_HOLLOW = ("Handguard", "GasTube")
 STAND_IN_CHAMFER = 0.0045
+# The upper and forward assist are swapped the same way for a coarser copy (UpperStandIn, ForwardAssistStandIn): cut
+# down from the angled forward assist's full detail, the copy spent its triangles there and tore the side rail's
+# teeth (critic, AF1 attempt 1).
+UPPER_SWAPPED = ("Upper", "ForwardAssist")
+FA_STAND_IN_SEGMENTS = 12
+# Where the handguard's rails start: 0.2 mm in front of the delta ring's front face.
+GUARD_RAILS_Y = GUARD_Y[0] + DELTA_LEN - DELTA_BACK + 0.0002
 # The gas tube inside the handguard, over the barrel (seen through the top gaps): its radius and its axis's height.
 GAS_R = 0.0021
 GAS_Z = 0.0578
@@ -313,12 +321,9 @@ def octagon(hw: float, hh: float, ch: float, zc: float) -> list:
 
 
 def stadium(w: float, length: float, seg: int = 4) -> list:
-    """An oval slot's outline (x across, y along), `w` wide and `length` long, its ends half circles of `seg` steps
-    (a round hole when the two are equal)."""
+    """An oval slot's outline (x across, y along), `w` wide and `length` long, its ends half circles of `seg` steps."""
     r = 0.5 * w
     c = 0.5 * length - r
-    if c <= 0.0:
-        return [(r * math.cos(math.pi * i / seg), r * math.sin(math.pi * i / seg)) for i in range(2 * seg)]
     pts = [(r * math.cos(math.pi * i / seg), c + r * math.sin(math.pi * i / seg)) for i in range(seg + 1)]
     return pts + [(-x, -y) for x, y in pts]
 
@@ -334,9 +339,11 @@ def ch_channel() -> object:
     return c.build()
 
 
-def upper() -> list:
+def upper(stand_in: bool = False) -> list:
+    """The upper receiver, its forward assist and rail; with `stand_in`, only the receiver and forward assist, named
+    for the figures' copy, the forward assist's rings coarser and its plunger plain (FA_STAND_IN_SEGMENTS)."""
     out = []
-    b = hs.Builder("Upper", ["Body"])
+    b = hs.Builder("UpperStandIn" if stand_in else "Upper", ["Body"])
     sec = [(-UPPER_HW, SEAM), (UPPER_HW, SEAM), (UPPER_HW, 0.055), (0.0115, 0.0590), (0.0098, RAIL_BASE),
            (-0.0098, RAIL_BASE), (-0.0115, 0.0590), (-UPPER_HW, 0.055)]
     b.prism(sec, "y", UPPER_Y[0], UPPER_Y[1], "Body")
@@ -346,9 +353,10 @@ def upper() -> list:
     # Forward-assist housing: a round boss on the right at the back, its axis angled out toward the back (FA_ANGLE) so
     # its front sinks into the side in a teardrop and its back stands out of it (owner, 2026-11-15, the M4 photo).
     rings = []
+    segs = FA_STAND_IN_SEGMENTS if stand_in else 24
     for s_, r in FA_HOUSING:
         rings.append([fa_frame() @ Vector((r * math.cos(t), s_, r * math.sin(t)))
-                      for t in (2.0 * math.pi * i / 24 for i in range(24))])
+                      for t in (2.0 * math.pi * i / segs for i in range(segs))])
     b.loft(rings, "Body")
     ob = b.build()
     cutters = []
@@ -366,6 +374,15 @@ def upper() -> list:
     hs.cut(ob, cutters)
     hs.finish(ob, 0.0008)
     out.append(ob)
+
+    if stand_in:
+        b = hs.Builder("ForwardAssistStandIn", ["Detail"])
+        fa = b.lathe([(0.004, 0.0), (0.004, FA_NECK_R), (-0.0025, FA_NECK_R), (-0.0029, FA_HEAD_R),
+                      (-FA_OUT + 0.0006, FA_HEAD_R), (-FA_OUT, FA_HEAD_R - 0.0028), (-FA_OUT - 0.0002, 0.0)], "Detail",
+                     FA_STAND_IN_SEGMENTS)
+        b.transform(fa, fa_frame())
+        out.append(hs.finish(b.build(), 0.0003, 1))
+        return out
 
     # Inside the port: the bolt face the hop dial shows through.
     b = hs.Builder("PortFloor", ["Detail"])
@@ -854,6 +871,18 @@ def stock() -> list:
     return out
 
 
+def guard_rails(name: str, bevel: float) -> object:
+    """The handguard's top, bottom and right rails, from the delta ring's front: the top one level with the upper's."""
+    z0, z1 = GUARD_Z
+    zc = 0.5 * (z0 + z1)
+    b = hs.Builder(name, ["Furniture"])
+    y0, y1 = GUARD_RAILS_Y, GUARD_Y[1] - 0.001
+    picatinny(b, y0, y1, "Furniture", rail_on("top", 0, 0, 0.0, RAIL_BASE))
+    picatinny(b, y0, y1, "Furniture", rail_on("bottom", 0, 0, 0.0, z0 + 0.0006))
+    picatinny(b, y0, y1, "Furniture", rail_on("right", 0, 0, GUARD_HW - 0.0006, zc))
+    return hs.finish(b.build(), bevel, 1)
+
+
 def guard_stand_in() -> object:
     """The handguard's outside shape, solid and without its gaps: what the figures' copy is cut down from. Its corners
     are cut STAND_IN_CHAMFER in, as before the gaps, so the rails' feet stay inside its flat faces (on the wider
@@ -895,7 +924,7 @@ def handguard() -> list:
         for sx in (-1, 1):
             for sz in (-1, 1):
                 c = hs.Builder("c_gap", ["Furniture"])
-                outline = stadium(GAP_H, GAP_LEN, 5) if sz > 0 else stadium(2.0 * GAP_HOLE_R, 2.0 * GAP_HOLE_R, 5)
+                outline = stadium(GAP_H, GAP_LEN, 5) if sz > 0 else stadium(GAP_LOW_H, GAP_LOW_LEN, 5)
                 faces = c.prism(outline, "z", -0.006, 0.006, "Furniture")
                 # Its long side along the rifle, its short one across the corner face, cut along the face's normal.
                 d = 0.5 * GUARD_CHAMFER
@@ -928,12 +957,8 @@ def handguard() -> list:
 
     # Rails: the top one level with the upper's, from the ring's front (owner, 2026-11-15: the ring shows all round);
     # the bottom and right ones bare, each over a flat face between two rows of gaps.
-    b = hs.Builder("GuardRails", ["Furniture"])
-    y0 = ring_front + 0.0002
-    picatinny(b, y0, GUARD_Y[1] - 0.001, "Furniture", rail_on("top", 0, 0, 0.0, RAIL_BASE))
-    picatinny(b, y0, GUARD_Y[1] - 0.001, "Furniture", rail_on("bottom", 0, 0, 0.0, z0 + 0.0006))
-    picatinny(b, y0, GUARD_Y[1] - 0.001, "Furniture", rail_on("right", 0, 0, hw - 0.0006, zc))
-    out.append(hs.finish(b.build(), 0.0003, 1))
+    out.append(guard_rails("GuardRails", 0.0003))
+    y0 = GUARD_RAILS_Y
 
     # The left rail under a ladder cover with raised ribs across it, as in the owner's photo, as tall as a rail so the
     # corner gaps show above and below it (owner, 2026-11-15); the right one stays bare for the torch.
@@ -1287,11 +1312,12 @@ def build() -> None:
     body_parts += handguard()
     for ob in body_parts:
         print("  part %-14s %6d" % (ob.name, hs.tris(ob)))
-    # The hollow handguard stays out of the body until the figures' copy is made from a solid stand-in (AF1).
-    hollow = [ob for ob in body_parts if ob.name in GUARD_HOLLOW]
-    stand_in = guard_stand_in()
-    surface.tag_named(body_parts + [stand_in], PART_SURFACES)
-    body = hs.join("Body", [ob for ob in body_parts if ob not in hollow])
+    # The hollow handguard, the upper and its forward assist stay out of the body until the figures' copy is made from
+    # their stand-ins (AF1).
+    swapped = [ob for ob in body_parts if ob.name in GUARD_HOLLOW + UPPER_SWAPPED]
+    stand_ins = [guard_stand_in()] + upper(stand_in=True)
+    surface.tag_named(body_parts + stand_ins, PART_SURFACES)
+    body = hs.join("Body", [ob for ob in body_parts if ob not in swapped])
     body.parent = arm
     fh = flash_hider()
     fh.parent = arm
@@ -1308,9 +1334,10 @@ def build() -> None:
     fh.location = BARREL_END
     clips(arm)
     surface.resolve(SURFACES)
-    fig = figure_copy.make(FIGURE_TRIS, skip=GUARD_HOLLOW)
-    bpy.data.objects.remove(stand_in, do_unlink=True)
-    body = hs.join("Body", [body] + hollow)
+    fig = figure_copy.make(FIGURE_TRIS, skip=GUARD_HOLLOW + UPPER_SWAPPED)
+    for ob in stand_ins:
+        bpy.data.objects.remove(ob, do_unlink=True)
+    body = hs.join("Body", [body] + swapped)
     surface.strip()
     total = 0
     for ob in bpy.data.objects:

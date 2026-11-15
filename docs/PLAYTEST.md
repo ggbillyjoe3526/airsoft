@@ -1723,11 +1723,13 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 - [ ] **The new shapes read in your hands.** Hold the AEG Rifle at the hip and aimed on Depot and Woodland, and
   inspect it (**Y**).
   Pass: the ribbed ring shows all the way round between the receiver and the handguard; the oval gaps between the
-  rails show the barrel and gas tube with no flicker or seam of daylight; the forward assist stands out at an angle
+  rails (a row in each corner, the lower ones shorter) show the barrel and gas tube with no flicker or seam of
+  daylight; the forward assist stands out at an angle
   behind the ejection port and your right hand clears it.
 - [ ] **Parts and bots.** Fit the Red Dot, the 2x Scope and the Variable Scope, a grip and a torch; look at a bot
   carrying the AEG up close.
-  Pass: every optic sits on the receiver's rail as before; the bot's rifle shows the same ring and handguard.
+  Pass: every optic sits on the receiver's rail as before; the bot's rifle shows the ring all round and a clean,
+  solid handguard (its copy has no gaps: too small to read at a bot's distance) with no torn faces on its rails.
 
 ## Reporting what you find
 
