@@ -27,6 +27,9 @@ const BOMB_XOR := 0xb0b5
 ## The bots' route-variety stream (RoundPlanner: tempos, lane shifts, lane crossings, RV1) is the plan stream's seed with
 ## these bits flipped: varying the routes never moves a plan roll.
 const VARIETY_XOR := 0x7a51e
+## Its lane crossings' rolls, made mid-round, are the variety stream's seed with these bits flipped: how a round played
+## never moves the next round's tempos and shifts.
+const CROSSING_XOR := 0xc2055
 const SIMULATE_MULTIPLIER := 1597334677
 const SIMULATE_PER_ROUND := 2654435769
 ## Rounds a match can have before two rounds' simulate seeds could meet (simulate_seed): far more than any match plays.
@@ -103,3 +106,8 @@ static func bomb_seed(bot_seed_value: int) -> int:
 ## with VARIETY_XOR's bits flipped, so no plan roll moves.
 static func variety_seed(seed_value: int) -> int:
 	return plan_seed(seed_value) ^ VARIETY_XOR
+
+
+## The bots' lane-crossing rolls' seed (RoundPlanner.variety_roll, RV1) for a match seeded with `seed_value`.
+static func crossing_seed(seed_value: int) -> int:
+	return variety_seed(seed_value) ^ CROSSING_XOR

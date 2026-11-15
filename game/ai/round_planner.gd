@@ -4,7 +4,7 @@ class_name RoundPlanner
 ## walks, bots on a shared lane setting off a moment apart; in Attack / Defend the attackers walk theirs to the middle
 ## (then make for the pole) and the defenders only to their first or second point, where they hold. Between plans it
 ## answers where a bot stands (ahead of its team?) and picks hunt spots from the team's memory. Its own seeded stream,
-## apart from each bot's. Route variety (RV1) on a second stream of its own: each team's tempo, each bot's lane shift,
+## apart from each bot's. Route variety (RV1) on two streams of their own: each team's tempo, each bot's lane shift,
 ## and the rolls for crossing lanes mid-round.
 
 enum Plan { SPLIT, PAIR, STACK }
@@ -28,8 +28,10 @@ var bounds_hi: Vector2 = Vector2.ZERO
 var top_y: float = 0.0
 
 var _rng: RandomNumberGenerator = null
-## Route variety's stream (Seeds.variety_seed): tempos, lane shifts, crossings.
+## Route variety's streams (Seeds.variety_seed, Seeds.crossing_seed): each round's tempos, lane shifts and pushed
+## defender; and the rolls for crossing lanes mid-round, apart so that how a round played never moves the next one's.
 var _variety: RandomNumberGenerator = null
+var _crossing: RandomNumberGenerator = null
 ## Scratch for dealing lanes (reused each round).
 var _order: PackedInt32Array = PackedInt32Array()
 var _members: Array[Bot] = []
@@ -39,6 +41,7 @@ var _dealt: PackedInt32Array = PackedInt32Array()
 func _init(match_seed: int) -> void:
 	_rng = Seeds.stream(Seeds.plan_seed(match_seed))
 	_variety = Seeds.stream(Seeds.variety_seed(match_seed))
+	_crossing = Seeds.stream(Seeds.crossing_seed(match_seed))
 
 
 ## A fresh round for every bot: per team a plan and a tempo, the lanes dealt in a random order, bots sharing a lane
@@ -129,15 +132,15 @@ func walk_points(b: Bot, lane: int, w: BotWorld) -> int:
 
 
 ## The points a pushed defender (RV1, defend_push_chance) walks: defend_push_share of the way from `post` (the points it
-## would walk) to the last point short of the middle, never fewer than `post`.
+## would walk) to the last point short of the middle (a share outside 0 to 1 is held to it), never fewer than `post`.
 func _pushed_post(points: PackedVector3Array, team: int, end: int, post: int, cfg: BotConfig) -> int:
 	var short := _points_to_middle(points, team, end) - 1
-	return maxi(post, post + roundi((short - post) * cfg.defend_push_share))
+	return maxi(post, post + roundi((short - post) * clampf(cfg.defend_push_share, 0.0, 1.0)))
 
 
-## A roll in [0, 1) on route variety's stream, for a bot choosing whether to cross lanes (BotMovement).
+## A roll in [0, 1) on the crossings' stream, for a bot choosing whether to cross lanes (BotMovement).
 func variety_roll() -> float:
-	return _variety.randf()
+	return _crossing.randf()
 
 
 ## True if `b` is more than team_spread ahead (towards the enemy) of its rearmost bot teammate in play.
