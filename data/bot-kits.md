@@ -35,7 +35,7 @@ The kits are the bots' own: what you have unlocked never changes them.
   Smoke or Flash, the same twice if you like ("Flash, Flash"). Empty, or not two: the default pick, one smoke and one
   flash. The column may be left out.
 - **Fields** keeps a kit to one kind of field: `indoor` (a field the breeze doesn't reach, Wind 0 in maps.md: Depot,
-  Subway) or `outdoor` (any other: Woodland, Stockade). Empty: every field. The Clearer is indoor only: its Pump
+  Subway) or `outdoor` (any other: Woodland). Empty: every field. The Clearer is indoor only: its Pump
   Shotgun is out-ranged in the open (on Woodland its carriers took about three hits for each one they gave). The column
   may be left out. A word here that is neither (a typo) drops the whole kit with a warning, as any cell of a kit that
   can't be read does: the kit is not left to play on every field.

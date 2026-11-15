@@ -12,8 +12,8 @@ in `docs/PROCESS.md`.
 - **Last tag:** `0.1-dev.3`, [0.1 Dev 3](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.3)
   (2026-11-15), the last Dev build. The owner creates tags.
 - **Next: 0.1 Beta 1.** Fixing, balance, performance, stability, UX and polish (`docs/PROCESS.md` › Placing work), from
-  the owner's playtests and `docs/KNOWN_ISSUES.md`. Subway and Stockade stay dev content until the owner makes them
-  public.
+  the owner's playtests and `docs/KNOWN_ISSUES.md`. Subway stays dev content until the owner makes it public.
+  Stockade, the dev-only Plant The Bomb field, was removed (owner, 2026-11-15).
 - **0.1 Dev 2** (owner, 2026-10-30; tagged 2026-11-09): basic smoke and flash bombs, thrown by bots too (done: SF1,
   SF2), a full-screen map and a Go there ping (owner, 2026-10-31; done: FM1), then Depot and Woodland redesigned larger
   and dressed (step 28). Depot is the owner's concept 3, an indoor hall (2026-10-31): the map (done: DR1), doors (done:

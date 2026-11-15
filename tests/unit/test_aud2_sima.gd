@@ -46,7 +46,6 @@ func test_indoor_fields_are_the_still_air_ones() -> void:
 	assert_eq(BotKits.field_kind(catalog.find("depot")), BotKits.INDOOR)
 	assert_eq(BotKits.field_kind(catalog.find("subway")), BotKits.INDOOR)
 	assert_eq(BotKits.field_kind(catalog.find("woodland")), BotKits.OUTDOOR)
-	assert_eq(BotKits.field_kind(catalog.find("stockade")), BotKits.OUTDOOR)
 	assert_eq(BotKits.field_kind(null), &"", "a field the catalogue doesn't list: any kit")
 
 
@@ -59,7 +58,7 @@ func test_the_clearer_is_carried_indoors_only() -> void:
 	for i in 400:
 		var personality: StringName = [&"rusher", &"flanker"][i % 2]
 		var outdoor := k.pick(&"hard", rules, Seeds.kit_seed(i, 3), personality, 3.0, BotKits.OUTDOOR)
-		assert_ne(outdoor.kit_name, "Clearer", "seed %d: never on Woodland or Stockade" % i)
+		assert_ne(outdoor.kit_name, "Clearer", "seed %d: never on Woodland" % i)
 		var indoor := k.pick(&"hard", rules, Seeds.kit_seed(i, 3), personality, 3.0, BotKits.INDOOR)
 		if indoor.kit_name == "Clearer":
 			indoors += 1
