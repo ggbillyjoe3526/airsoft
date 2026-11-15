@@ -225,11 +225,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   pistol take up less space on screen. it should roughly be same scale/angle as rifle" (replacing his 25 cm pick
   above) and "when inspecting rifles the player can see the end of the arm models". Both pistols sit low on the right
   as the rifles do, 35 cm from the eye, turned 0.15 rad in so their side shows (`ViewModelConfig.hip`, `hip_turn`,
-  gone as the sight comes up); the reload move and the inspect's shift and turn follow, so a reload and an inspect
-  cross the same part of the screen as before. Inspected, the arms no longer turn rigidly with the replica: each
+  gone as the sight comes up); the reload move follows, so a reload crosses the same share of the screen as before,
+  and an inspect turns from the new place. Inspected, the arms no longer turn rigidly with the replica: each
   shoulder stays where your body has it (coming only as near as the hand needs to keep hold) and the elbow's way with
   it (`ArmsTuck`, both sides), so a sleeve's cut-off end never turns into view, checked at the widest field of view on
-  a 21:9 screen. Defaults taken: 35 cm and 0.15 rad from pictures beside the AEG and the Compact SMG at the hip.
+  a 21:9 screen. Defaults taken: 35 cm and 0.15 rad from pictures beside the AEG and the Compact SMG at the hip; he
+  called the pictures "perfect" (11:50) and added "the pistol ADS shows the hand fading, it shouldn't do this", so
+  aimed a pistol's hands are drawn whole (`aim_hands_hint` empty; it replaces his HA1 pick of the tops only).
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands
   copy the first-person holds he approved (`assets/models/arms/arms.glb`), so a change to a first-person hold changes
   the bots' too: the right hand high on the grip, index on the trigger, thumb along the grip's left side ("the thumb

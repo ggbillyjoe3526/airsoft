@@ -10,8 +10,8 @@ left hand under the handguard just ahead of the magazine, its thumb along the ne
 up beside the rifle, and your right hand stays below the screen. A pistol
 is held tight in both hands, the left wrapped round the right, low on the right of the screen as a rifle is, turned a
 little so you see its side. Raise the
-sight and your hands leave the view: a rifle hides them behind itself, and only the top of them shows under a
-pistol's slide. With a grip fitted your left hand closes round the grip, high under the handguard.
+sight and a rifle hides your hands behind itself; a pistol comes up to the middle in both hands, held whole under
+its slide. With a grip fitted your left hand closes round the grip, high under the handguard.
 
 The replica moves with you: it bobs with your steps, rises and falls a little as you breathe, leans into a strafe,
 dips when you land and flicks lightly with each shot. With the sight raised it holds almost still, and **Reduced

@@ -49,11 +49,12 @@ extends Resource
 @export var aim_slide: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.0, -0.07, 0.22),
 		&"sniper": Vector3(0.02, -0.09, 0.22), &"smg": Vector3(0.0, -0.07, 0.22),
 		&"shotgun": Vector3(0.0, -0.07, 0.22)}
-## A replica in aim_hands_hint (the pistols) keeps the tops of its hands under the slide (the owner's pick of three
-## pictures): as the sight's raise (as drawn, 0..1) passes from aim_hint_span's x to its y, what lies below the sight
-## line fades out, whole down to aim_hint_below's x (m under it) and gone by its y.
+## A replica in aim_hands_hint keeps the tops of its hands under the sight: as the sight's raise (as drawn, 0..1) passes
+## from aim_hint_span's x to its y, what lies below the sight line fades out, whole down to aim_hint_below's x (m under
+## it) and gone by its y. None does: the pistols did (HA1, the owner's pick of three pictures) until he saw it in play,
+## "the pistol ADS shows the hand fading, it shouldn't do this" (HA2), so aimed their hands are drawn whole.
 @export var aim_hint_span: Vector2 = Vector2(0.3, 0.8)
-@export var aim_hands_hint: Array[StringName] = [&"pistol", &"cyber"]
+@export var aim_hands_hint: Array[StringName] = []
 @export var aim_hint_below: Vector2 = Vector2(0.08, 0.12)
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits
@@ -257,15 +258,15 @@ extends Resource
 	&"aeg": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), RIFLE_TURN, RIFLE_SHIFT,
 			PackedFloat32Array([0.06, 0.13, 0.27, 0.36, 0.65, 0.83]),
 			[&"selector", &"torchClick", &"selector", &"selector", &"dryFire", &"torchClick"]),
-	# Side on, the muzzle to the left, the top a little to the eye (turned 0.15 less than before HA2: the hip turn adds
-	# it); nothing moves, the slide only ever back firing or locked empty (GS2).
+	# Side on, the muzzle to the left, the top a little to the eye (the hip turn adds 0.15 more since HA2); nothing
+	# moves, the slide only ever back firing or locked empty (GS2).
 	&"pistol": InspectPose.make(2.0, PackedFloat32Array([0.0, 0.22, 0.72, 1.0]),
-			[Vector3.ZERO, Vector3(0.05, 0.8, -0.1), Vector3(0.08, 0.85, -0.2), Vector3.ZERO],
+			[Vector3.ZERO, Vector3(0.05, 0.95, -0.1), Vector3(0.08, 1.0, -0.2), Vector3.ZERO],
 			PISTOL_SHIFT, PackedFloat32Array(), []),
 	# Side on, the muzzle to the left, the butt of the grip to the eye (the hip turn adds 0.15 as the gas pistol's): the
 	# battery eased out of the grip and pushed home.
 	&"cyber": InspectPose.make(2.0, PackedFloat32Array([0.0, 0.22, 0.72, 1.0]),
-			[Vector3.ZERO, Vector3(-0.15, 0.8, -0.1), Vector3(-0.35, 0.85, -0.15), Vector3.ZERO],
+			[Vector3.ZERO, Vector3(-0.15, 0.95, -0.1), Vector3(-0.35, 1.0, -0.15), Vector3.ZERO],
 			PISTOL_SHIFT, PackedFloat32Array([0.17, 0.75]), [&"torchClick", &"magIn"]),
 	# Side on as the AEG, turned a little less and held close, so both forearms run off the screen's foot (BP8, the
 	# owner): the bolt lifted, drawn back, held and closed.
@@ -295,9 +296,9 @@ const LONG_TURN: Array[Vector3] = [Vector3.ZERO, Vector3(0.07, 0.9, -0.1), Vecto
 		Vector3(0.05, 0.88, -0.08), Vector3.ZERO]
 const LONG_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.15, 0.03, -0.2), Vector3(-0.16, 0.035, -0.2),
 		Vector3(-0.14, 0.03, -0.19), Vector3.ZERO]
-## The pistols' inspect shifts: in from their hip low on the right (HA2) to near the middle of the view, where the
-## browser game's pistol and Cyber poses held them, a little nearer than their hip.
-const PISTOL_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.11, 0.035, 0.03), Vector3(-0.115, 0.04, 0.03),
+## The pistols' inspect shifts (the browser game's pistol and Cyber poses), in from their hip low on the right (HA2):
+## the owner saw these with it on pictures and called them "perfect".
+const PISTOL_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.06, 0.0, -0.04), Vector3(-0.065, 0.005, -0.04),
 		Vector3.ZERO]
 
 

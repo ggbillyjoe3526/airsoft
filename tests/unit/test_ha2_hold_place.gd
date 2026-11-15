@@ -1,7 +1,8 @@
 extends GutTest
 ## HA2 (the owner, 2026-11-15): the pistols sit low on the right at about the rifles' share of the screen and angle,
 ## turned a little in at the hip; and turned over in an inspect, your shoulders stay where your body has them, so an
-## arm's cut-off end never turns into view, while both hands keep their hold on the replica.
+## arm's cut-off end never turns into view, while both hands keep their hold on the replica. Aimed, a pistol's hands
+## are drawn whole, never faded ("the pistol ADS shows the hand fading, it shouldn't do this").
 
 const DT := 1.0 / 60.0
 const PISTOLS: Array[StringName] = [&"pistol", &"cyber"]
@@ -10,9 +11,9 @@ const SIDES: Array[String] = ["_L", "_R"]
 ## The pistols' hip before HA1 (34 cm from the eye) and their reload move there.
 const OLD_HIP := Vector3(0.05, -0.07, -0.34)
 const OLD_MOVE := Vector3(0.1, 0.06, 0.0)
-## The left shoulder held still moves less than this (m: within reach of the hand on the handguard it doesn't move;
-## the Sniper Rifle's turn takes the hand a few mm past the arm's reach); a hand on its hold, less than this.
-const STILL := 0.01
+## The left shoulder moves no further than its hand goes past the arm's reach, give or take this (m); a hand on its
+## hold moves less than this.
+const STILL := 0.002
 const HOLD := 0.001
 ## The widest screen drawn (21:9), and how far outside the view's edge an arm's cut-off end stays (1: on the edge).
 const WIDEST := 21.0 / 9.0
@@ -84,6 +85,22 @@ func test_the_hip_turn_holds_at_the_hip_and_is_gone_aimed() -> void:
 		assert_almost_eq(root.rotation, Vector3.ZERO, Vector3.ONE * 1e-3, "%s: square to the eye aimed" % id)
 
 
+func test_aimed_a_pistols_hands_are_whole_never_faded() -> void:
+	assert_true(cfg.aim_hands_hint.is_empty(), "no replica fades its hands aimed")
+	for id: StringName in PISTOLS:
+		var vc := _view(id)
+		var view: ReplicaView = vc[0]
+		var c: Character = vc[1]
+		_frames(view, c, 90, 1.0)
+		assert_eq(view._arms.hinted(), 0.0, "%s aimed: nothing faded" % id)
+		for mesh: MeshInstance3D in view._arms._meshes:
+			if not mesh.visible:
+				continue
+			for i in mesh.mesh.get_surface_count():
+				assert_true(mesh.get_surface_override_material(i) is BaseMaterial3D,
+						"%s aimed: %s in its own material" % [id, mesh.name])
+
+
 func test_through_an_inspect_the_arms_cut_off_ends_stay_out_of_view_and_the_hands_keep_hold() -> void:
 	# The widest view the game draws: the settings' widest field of view on a 21:9 screen.
 	var view_cfg := ViewConfig.new()
@@ -100,6 +117,9 @@ func test_through_an_inspect_the_arms_cut_off_ends_stay_out_of_view_and_the_hand
 		for side: String in SIDES:
 			shoulders.append(_in_view(view, ArmsTuck.UPPER + side))
 			hands.append(_in_replica(view, ArmsTuck.HAND + side))
+		var reach := (_in_view(view, ArmsTuck.FORE + SIDES[0]).distance_to(shoulders[0])
+				+ _in_view(view, ArmsTuck.HAND + SIDES[0]).distance_to(_in_view(view, ArmsTuck.FORE + SIDES[0]))) \
+				* ArmsTuck.REACH_MOST
 		view.inspect()
 		_frames(view, c, 1)
 		var frames := ceili(view._inspect_length / DT)
@@ -114,10 +134,12 @@ func test_through_an_inspect_the_arms_cut_off_ends_stay_out_of_view_and_the_hand
 				if end.z < 0.0:
 					nearest = minf(nearest, maxf(absf(end.x) / -end.z / across, absf(end.y) / -end.z / up))
 				worst_hand = maxf(worst_hand, _in_replica(view, ArmsTuck.HAND + SIDES[i]).distance_to(hands[i]))
-			left_moved = maxf(left_moved, _in_view(view, ArmsTuck.UPPER + SIDES[0]).distance_to(shoulders[0]))
+			# The left shoulder moves only as far as the hand is past the arm's reach from where it rests.
+			var past := maxf(_in_view(view, ArmsTuck.HAND + SIDES[0]).distance_to(shoulders[0]) - reach, 0.0)
+			left_moved = maxf(left_moved, _in_view(view, ArmsTuck.UPPER + SIDES[0]).distance_to(shoulders[0]) - past)
 		assert_gt(nearest, OUT_OF_VIEW, "%s: neither arm's cut-off end turns into view" % id)
 		assert_lt(worst_hand, HOLD, "%s: both hands keep their hold" % id)
-		assert_lt(left_moved, STILL, "%s: the left shoulder stays where your body has it" % id)
+		assert_lt(left_moved, STILL, "%s: the left shoulder stays where your body has it, but for what the hand needs" % id)
 		_frames(view, c, 10)
 		assert_false(view.inspecting(), "%s: over" % id)
 		assert_false(view._arms._tucked, "%s: the arms back on their clip alone" % id)

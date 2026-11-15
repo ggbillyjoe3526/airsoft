@@ -21,7 +21,7 @@ extends Node3D
 ## HA1 (the owner): aimed, a rifle's hands are out of view, never faded: the replica hides them, and as the sight comes
 ## up (`aim`) the left arm is drawn in under it and its hand slides back behind the receiver (ArmsTuck,
 ## ViewModelConfig.aim_tuck and aim_slide), so forearm and hand lie behind it too.
-## A replica in ViewModelConfig.aim_hands_hint (a pistol) keeps the tops of its hands: what lies further under the
+## A replica in ViewModelConfig.aim_hands_hint (none since HA2) keeps the tops of its hands: what lies further under the
 ## sight line fades (ArmsFade's copies of the materials, worn only while the sight is raised at all).
 
 const MODEL := "res://assets/models/arms/arms.glb"
