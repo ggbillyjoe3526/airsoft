@@ -27,6 +27,7 @@ boards (/mnt/project-files/art/woodland-model-list.md). Plain vertex colours, no
 
 import math
 import os
+import random
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -47,11 +48,12 @@ SAG = 0.45              # how far under the cell's top the stack's top dips at m
 PROUD = (0.003, 0.05)   # how far a piece's end stands out of the core: the face's relief (WS1: solid ends, near flush)
 PROUD_MODE = 0.015     # most stand out about this far, a few flush or 5 cm out, as a stack built by hand
 TILT = 0.14             # an end face sawn off square: up to this much further out per metre across or up it
+ARC_STEP = 28.0         # degrees of bark arc a segment (RM2: 24, then 28 to make room for the hearts)
 ARC = 5                 # the bark arc's segments on a split piece (a pie slice of its log), the widest 6
 ARC_SPAN = (55.0, 125.0)  # a split piece's angle at the log's heart (degrees): 1.2 to 1.5 times as wide as deep
 RIM = 0.07              # a ring of bark on a sawn end: this share of the way in from its edge (about 4 % across)
 BARK_RIM = 0.1          # a split piece's rim of bark inside its arc: this share of its radius
-CHECKS = (70, 18, 8, 4)  # how often a split piece shows no, one, two or three drying cracks from its heart
+CHECKS = (66, 20, 9, 5)  # how often a split piece shows no, one, two or three drying cracks from its heart
 GAP = 0.005             # m between neighbouring ends along a row: a hairline, as the photo's stack packed tight
 EDGE = 0.03             # the share of its row's height kept clear above and below each piece
 SHOWS = 0.035           # an end standing out less than this (m) shows no side
@@ -75,11 +77,12 @@ CROWN_SINK = 0.02       # m the core's top lies under the highest piece's top
 EDGE_CUT = 0.35         # how much of a piece's width may run past the section's end, cut off there (RM2)
 HALF = 0.1              # the share of split pieces that are half logs (RM2: the photos' mix)
 HALF_SPAN = (150.0, 175.0)
-END_SET = 0.08          # m the stack's end stands inside the section's end; its logs' sides bulge out of it up to this
+END_SET = 0.06          # m the stack's end stands inside the section's end; its logs' sides bulge out of it up to this
 END_NEAR = 0.1          # m from the end a piece's sawn end may stand back and still show its side there
-END_ARC = 5             # a log's side's segments round (32 degrees each: drawn smooth, under SMOOTH)
+END_ARC = 6             # a log's side's segments round (27 degrees each: round, drawn smooth under SMOOTH)
+END_PROUD = 0.012       # m past the core an end log's side starts, out with the face's sawn ends
 END_SPLIT = 0.15        # the share of the end's pieces showing a pale split side, not bark
-LOOSE = 6               # split pieces lying across the top
+LOOSE = 0               # split pieces lying across the top (RM2: none; they read as planks along the top edge)
 LOOSE_IN = 0.2          # m they keep in from the section's ends, never over the stack's end
 SMOOTH = 34.0           # degrees: faces meeting at less than this are drawn smooth
 # the sawn ends' colours, each piece its own, from fresh pale to warm tan to weathered grey (as in the photo)
@@ -87,8 +90,11 @@ SMOOTH = 34.0           # degrees: faces meeting at less than this are drawn smo
 # (RM2: deeper, more of the deep tans and a brown, as the owner's photo's warm brown at eye height; their hue can go
 # no nearer orange, so they are darker, not more orange)
 END_PAINTS = {"EndPale": 0xC4AF7F, "EndLight": 0xBDA56B, "EndWarm": 0xB69D5B, "EndDeep": 0xAC924D, "EndTan": 0xA28843,
-              "EndBrown": 0x927B3C, "EndOld": 0xAF9D75, "Rim": 0x5F543C}
-END_MATS = tuple(k for k in END_PAINTS if k != "Rim")  # Rim: a split piece's bark, a warm brown
+              "EndBrown": 0x927B3C, "EndOld": 0xAF9D75, "Rim": 0x5F543C,
+              "EndHeart": 0x7C6838}
+END_MATS = tuple(k for k in END_PAINTS if k not in ("Rim", "EndHeart"))  # Rim: a split piece's bark, a warm brown;
+# EndHeart: its heart, darker (RM2, the photo's pieces)
+HEART_SHARE = 0.3       # how far out from a wedge's point its dark heart reaches
 END_WEIGHTS = (1, 2, 3, 3, 3, 2, 1)
 # the boards (m)
 BOARDS_LEN, BOARDS_DEPTH, BOARDS_TOP = 6.4, 1.0, 2.0
@@ -100,7 +106,8 @@ STICKERS = 6
 BEARER = 0.1
 
 
-def cordwood(seed: int) -> object:
+def cordwood(seed: int, hearts: float = 1.0) -> object:
+    """One section; `hearts` the share of wedges drawn with a dark heart (as many as its budget leaves room for)."""
     hs.reset()
     wk.paint_all()
     mk.paints({"Gap": 0x2A2621})  # near black, dull: the deep shade between the pieces, as in the photo
@@ -109,6 +116,7 @@ def cordwood(seed: int) -> object:
         assert wk.off_team(colour), "%s #%06x reads as a team" % (name, colour)
     mk.paints(END_PAINTS)
     r = wk.rng(seed)
+    dark = random.Random(seed * 7 + 1)  # which wedges show a dark heart: a stream of its own
     b = hs.Builder("Cordwood", [])
     half_x, half_y = SECTION * 0.5, DEPTH * 0.5
     core = half_y - PROUD[1]
@@ -163,7 +171,8 @@ def cordwood(seed: int) -> object:
             outline = [(px, side * core, pz) for px, pz in poly]
             end_mat = r.choices(END_MATS, END_WEIGHTS)[0]
             piece_end(b, outline, r.triangular(PROUD[0], PROUD[1], PROUD_MODE), out, end_mat, kind,
-                      (r.uniform(-TILT, TILT), r.uniform(-TILT, TILT)), r.choices((0, 1, 2, 3), CHECKS)[0], r)
+                      (r.uniform(-TILT, TILT), r.uniform(-TILT, TILT)), r.choices((0, 1, 2, 3), CHECKS)[0], r,
+                      heart=dark.random() < hearts)
     # split pieces lying across the top here and there, on the pieces' top
     for k in range(LOOSE):
         x = -half_x + LOOSE_IN + (SECTION - 2.0 * LOOSE_IN) * (k + r.uniform(0.2, 0.8)) / LOOSE
@@ -205,7 +214,7 @@ def end_log(b: hs.Builder, r: object, base: float, s: float, y0: float, y1: floa
     sink = r.uniform(0.0, 0.035) * (1.0 if bulge > 0.03 else 0.3)  # set further into the stack than its neighbours
     # its two ends: some a little inside the face, and short of the middle or past it, among the far side's logs
     face = y0
-    y0 = y0 - math.copysign(r.uniform(0.0, 0.04), y0)
+    y0 = y0 + math.copysign(END_PROUD - r.uniform(0.0, 0.03), y0)  # out with the sawn ends on the face, or a little in
     y1 = y1 + math.copysign(r.uniform(-0.1, 0.12), y1 - face)
     zc, rz = (z0 + z1) * 0.5, (z1 - z0) * 0.49
     turn = r.uniform(-35.0, 35.0)  # where its round stands out furthest, up or down: twisting a little along it
@@ -222,7 +231,9 @@ def end_log(b: hs.Builder, r: object, base: float, s: float, y0: float, y1: floa
                 out *= r.uniform(0.8, 1.15)  # an uneven, knotty round
             ring.append((base + s * max(0.003, out), y, zc + rz * math.sin(a)))
         rings.append(ring)
-    bark = ("Bark", "BarkDark", "BarkGrey", "Bark", "BarkLight", "BarkDark")
+    # one bark a log, a darker streak on a facet here and there
+    own = r.choice(("Bark", "Bark", "BarkDark", "BarkGrey"))
+    bark = (own, own, own, "BarkDark", "BarkFurrow")
     for i in range(END_ARC):
         q = wk.verts(b, [rings[0][i], rings[1][i], rings[1][i + 1], rings[0][i + 1]])
         a = math.radians(-80.0 + 160.0 * (i + 0.5) / END_ARC)
@@ -398,8 +409,8 @@ def piece_outline(r: object, h: float, arc_n: int = ARC, split_only: bool = Fals
     for turn in ways:
         # the arc's middle points away from the heart: down (point up), up (point down) or to either side
         mid = turn - 0.5 * math.pi + math.radians(r.uniform(-LEAN, LEAN))
-        # (RM2: the arc in about 24 degree steps, so a wide piece's bark rounds as a narrow one's does)
-        n = max(3, min(arc_n + 1, round(math.degrees(span) / 24.0)))
+        # (RM2: the arc in about ARC_STEP degree steps, so a wide piece's bark rounds as a narrow one's does)
+        n = max(3, min(arc_n + 1, round(math.degrees(span) / ARC_STEP)))
         arc = [(rad * math.cos(mid - span / 2 + span * i / n), rad * math.sin(mid - span / 2 + span * i / n))
                for i in range(n + 1)]
         out.append(("wedge", _from_zero([(0.0, 0.0)] + arc)))
@@ -427,7 +438,7 @@ def overlaps(a: list, c: list, margin: float = 0.0) -> bool:
 
 
 def piece_end(b: hs.Builder, outline: list, depth: float, out: Vector, end_mat: str, kind: str, tilt: tuple,
-              checks: int = 0, r: object = None) -> None:
+              checks: int = 0, r: object = None, heart: bool = False) -> None:
     """A piece's end standing `depth` proud of the stack's dark core (outline: points on the core's face), as a solid
     log end (WS1, the owner: the stacks read flat): its sides run back to the core where it stands out enough to show
     them (SHOWS), and its end face is sawn a little off square (`tilt`: how much further out it stands per metre across
@@ -472,6 +483,12 @@ def piece_end(b: hs.Builder, outline: list, depth: float, out: Vector, end_mat: 
     # the sawn face inside its bark: the arc drawn in toward the heart by BARK_RIM of its radius
     inner = [p if i == 0 else front[0].lerp(p, 1.0 - BARK_RIM) for i, p in enumerate(front)]
     wk.face(b, wk.verts(b, [p + out * 0.004 for p in inner]), end_mat, out)
+    if heart:
+        # the heart, darker, at the wedge's point
+        tip = inner[0]
+        HEARTS[0] += 1
+        wk.face(b, wk.verts(b, [tip + out * 0.005, tip.lerp(inner[1], HEART_SHARE) + out * 0.005,
+                                tip.lerp(inner[-1], HEART_SHARE) + out * 0.005]), "EndHeart", out)
     for _ in range(checks):
         # a drying crack from near the heart toward the bark, thin and dark, each its own length and way
         tip = inner[0]
@@ -556,9 +573,22 @@ def board(b: hs.Builder, x0: float, x1: float, y0: float, y1: float, z0: float, 
         wk.face(b, wk.verts(b, [(x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)]), mat, Vector((0, 0, 1)))
 
 
+HEARTS = [0]  # the dark hearts drawn in the section being built
+
+
+def _tris(ob: object) -> int:
+    return sum(len(p.vertices) - 2 for p in ob.data.polygons)
+
+
 def main() -> None:
     for name, seed in SECTIONS:
+        # built once with every heart, then again with as many as its budget leaves room for (the hearts draw from
+        # a stream of their own, so the pieces stay where they were)
+        HEARTS[0] = 0
         ob = cordwood(seed)
+        over = _tris(ob) - int(CORD_BUDGET * 0.995)
+        if over > 0:
+            ob = cordwood(seed, max(0.0, 1.0 - over / max(1, HEARTS[0])))
         mk.report(ob, name, CORD_BUDGET)
         print("  wrote", mk.export_prop(ob, name))
     ob = boards()

@@ -18,20 +18,25 @@ ATTEMPT_ROWS
   The sandbag wall keeps four courses: his real wall's close-up (photo 4) and the two stacks (photos 3 and 5) give a
   bag 2.6 to 3 times as long as it stands on the face; at 0.225 m a course a 0.6 m bag is 2.67 times. (His first
   photo's long wall, about 5 times, would need six courses and 24 bags, past a prop's 5,000 triangles.)
-- **The sandbags, bag by bag** (third pass, after the critic's attempt 2): each a filled sack laid flat, a pillow
+- **The sandbags, bag by bag** (third and fourth passes, after the critic's attempts 2 and 3): each a filled sack laid flat, a pillow
   full in its belly and thinning to its ends, each end a flat seam 0.6 of the belly high whose corners stand out as
   ears, the seam's middle drawn in 2.6 cm; two bags end to end run 3 cm into each other and meet about 0.68 of their
   bellies high, a V between them (photo 4); the sacking lumped and creased in from the ears; 13 points round, the
-  foot a flat chord; a tied corner on 60 % of a section's own bags' ends. Each bag's crown stands 2.8 cm under to
-  2.2 cm over its course's line, it falls up to 5 cm a metre along its length and leans up to 5 cm a metre, its
+  foot a flat chord; a tied corner on 60 % of a section's own bags' ends, its tail drooping along the face (a tail
+  run out of the face was pressed flat against the model's box and drew black). Each bag's crown stands 4.5 cm under
+  to 4 cm over its course's line, it falls up to 8 cm a metre along its length and leans up to 5 cm a metre, its
   widest line 0.36 to 0.43 of it up (slumped); it sits 2 to 4 cm into the lowest crown under it, so it never stands
-  off one. The bed joints wander -11 to +13 % of a course.
+  off one. The bed joints wander -17 to +24 % of a course; the bags run 0.49 to 0.74 m (2.2 to 3.3 times a course).
+  Drawn smooth up to 100 degrees, so a seam's flat end and a header's end shade round, and the corners where a
+  shared bag is cut take the whole bag's normals there (built whole once), so no line shows where it is cut.
 - **The bond runs through every section's ends** (third pass): every course's two joints lie inside the section, so
   each course's bag over the +x end runs on into the next section, which carries the rest of it at its -x end (cut
   flush there, closed inside, one random stream a bag seeded by its place, so both parts are one bag; the cut ring
   is the bag's own profile there). Joints sit half a bag over the course under them and the two rows a quarter of a
-  bag apart (each wandering 3.5 cm), so no light finds a way through: a ray test square on and 15 degrees up or down
-  finds no hole; at 20 degrees along, 12 rays of 4 mm in a 7.2 m wall. Nothing ends flat at a section's end any more.
+  bag apart, each wandering up to 10 cm, drawn together until no two come nearer than 8 cm (two rows in a course),
+  12 cm (a row over and under) or 6 cm (the other row over and under), and 4 cm from a section's end: a ray test
+  square on, 15 degrees up or down and 20 degrees along finds no hole. Nothing ends flat at a section's end. The
+  shared bags' bellies stand 3 mm past the wall's face, pressed flat there, so every model fills its box's depth.
 - **Three main sections take turns** (`sandbags`, `sandbags_b`, `sandbags_c`, `PropDressConfig.variants`): they
   share the bags over their ends and differ in their own bags (height, tilt, lean, shade, tied corners: only a
   section's own bags are tied, so the knots never repeat every 1.2 m). A bag shared over an end sits on the lowest
@@ -66,16 +71,22 @@ ATTEMPT_ROWS
   up a stack where two sections meet; each bark arc in about 24° steps (3 to 6); the sawn ends weighted to the deep
   tans with a brown added, and (third pass) every end colour 14 % darker, as the photo's warm brown at eye height
   (their hue is already at the team-hue limit, 37° linear, so warmer means deeper, not more orange; each nudged back
-  to 37 to 38°). The stack's ends (third pass): the end pieces' own bark sides, each its own: set up to 3.5 cm further
-  in, bulging 45 to 100 % of 8 cm out of the dark end (a pale split side 15 % of the time, flatter), a wedge's edge or
-  a flatter face, uneven, twisting up to 15° and narrowing or swelling along it, starting up to 4 cm inside the face
-  and stopping short of the middle or running up to 12 cm past it, so the front and back halves stagger; its bark in
-  streaks (five barks a facet), 5 facets round, drawn smooth. The core's top stops at the end (no slab over it); the
-  loose pieces on top keep 0.2 m in from the ends, lower and never dark; a piece cut at the section's end shows bark
-  on its cut side, not a pale strip. The same 3,200 triangles a section (3,177 / 3,056 / 3,043): Woodland draws no more.
+  to 37 to 38°). The stack's ends (third and fourth passes): the end pieces' own round bark sides, each its own:
+  set up to 3.5 cm further in, bulging 45 to 100 % of 6 cm out of the dark end (a pale split side 15 % of the time,
+  flatter), a wedge's edge or a flatter face, uneven, twisting up to 15° and narrowing or swelling along it, starting
+  out with the face's sawn ends (1.2 cm past the core) or up to 1.8 cm in, and stopping short of the middle or running
+  up to 12 cm past it, so the front and back halves stagger; one bark a log with a darker streak here and there, 6
+  facets round, drawn smooth. The core's top stops at the end (no slab over it); no loose pieces on top (they read as
+  planks along the top edge); a piece cut at the section's end shows bark on its cut side, not a pale strip. The sawn
+  ends (fourth pass): a darker heart at each wedge's point (`EndHeart`, 0.3 of the way to its bark) and more drying
+  checks (a third of the pieces have one or more, was 30 %); to pay for them the bark arcs step 28°, not 24°, and a
+  section draws as many hearts as its 3,200 triangles leave room for (built once with all, then again with that share;
+  the hearts draw from a stream of their own, so the pieces stay put). 3,185 / 3,128 / 3,075 triangles: Woodland
+  draws no more.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
-  Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second).
+  Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
+  fourth).
 
 ## Known issues left
 

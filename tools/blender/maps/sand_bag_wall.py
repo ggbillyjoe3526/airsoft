@@ -50,8 +50,8 @@ HL = LONG * 0.5
 COURSES = 4  # 0.225 m a course: a 0.6 m bag 2.67 times as long as it stands (photo 4: 2.7 to 3.1, photo 5: 3.0)
 PITCH = HIGH / COURSES
 BED = (0.02, 0.04)  # m each bag sits down into the crowns of the bags under it
-CROWN = (-0.028, 0.022)  # m a bag's crown stands under or over its course's line, so the bed joints wander
-TILT = 0.05  # how far a bag's line may fall along it, m a metre: one end down, one up (photo 4)
+CROWN = (-0.045, 0.04)  # m a bag's crown stands under or over its course's line, so the bed joints wander
+TILT = 0.08  # how far a bag's line may fall along it, m a metre: one end down, one up (photo 4)
 ROLL = 0.05  # how far it may lean, m across a metre up: its crown towards one face
 ROW = 0.137  # the two rows' middles, m either side of the wall's middle
 HALF_W = 0.145  # a stretcher's half width: the rows' bellies pressed together, their faces 0.282 out (its ears,
@@ -62,7 +62,11 @@ OVERLAP = 0.03  # m bags end to end in a course run into each other, their eared
 # over both of the section's ends, so no joint lies at a section's end; a row's joints half a bag over the course
 # under them, and the two rows' a quarter of a bag apart, so no light finds a way through the wall.
 JOINTS = {(0, 0): (-0.375, 0.225), (1, 0): (-0.075, 0.525), (0, 1): (-0.225, 0.375), (1, 1): (-0.525, 0.075)}
-JOINT = 0.035  # m each joint wanders either way
+JOINT = 0.1  # m each joint may wander either way: this bond's bags run 0.49 to 0.74 m (photo 4: stubby to long)
+# how far apart (m) joints must stay: two rows' in a course, a row's in the courses over and under it, the other
+# row's there, and any joint from a section's end
+APART = {"rows": 0.08, "courses": 0.12, "across": 0.06, "end": 0.04}
+SMOOTH = 100.0  # degrees: faces meeting at less than this are drawn smooth, a seam's flat end too
 MIN_BAG = 0.2  # m: a closing bag shorter than this joins the bag beside it instead
 HEADED = 0  # the parity of the courses a wall's end lays a header across, its ends on the wall's faces
 # Points round a bag, (across, up) from its widest line: 13 on its sides and crown, 0 and 180 degrees its widest (the
@@ -228,9 +232,9 @@ def _tie(kit: rk.Kit, bag: Bag, ring: list, end: int) -> None:
     along = Vector((0.0, sense * end, 0.0) if bag.header else (sense * end, 0.0, 0.0))
     side = Vector((bag.face, 0.0, 0.0) if bag.header else (0.0, bag.face, 0.0))
     turn = bag.tie_turn[0 if end < 0 else 1]
-    # out of the face and a little along it, drooping; a header's tail points out of the face, along the bag
-    d = along * 0.85 + side * 0.25 if bag.header else along * (0.35 + turn * 0.3) + side * 0.8
-    d = (d + Vector((0.0, 0.0, -0.35))).normalized()
+    # along the face, a little out of it, drooping (kept in the box: see below); a header's along the bag
+    d = along * 0.85 + side * 0.12 if bag.header else along * (0.8 + turn * 0.3) + side * 0.25
+    d = (d + Vector((0.0, 0.0, -0.4))).normalized()
     u = d.cross(Vector((0.0, 0.0, 1.0))).normalized()
     v = u.cross(d).normalized()
     rings = []
@@ -243,10 +247,35 @@ def _tie(kit: rk.Kit, bag: Bag, ring: list, end: int) -> None:
             rr = r * (1.0 - fray * (i % 2)) * rng.uniform(0.92, 1.08)
             pts.append(tuple(c + (u * math.cos(ang) + v * math.sin(ang)) * rr))
         rings.append(pts)
-    kit.loft(rings[:2], bag.paint, cap0=False, cap1=False)
-    kit.loft(rings[1:3], "tie", cap0=False, cap1=False)
-    kit.loft(rings[2:], "hessian_dark", cap0=False, cap1=False)
+    # kept inside the model's box (a tail past it would be pressed flat against it there, and shade black): moved
+    # back off the face, and off the wall's end, by what runs past
+    for axis, half in ((1, DEEP * 0.5), (0, HL)):
+        over = max(abs(p[axis]) for r in rings for p in r) - (half - 0.003)
+        if over > 0.0:
+            k = max((p for r in rings for p in r), key=lambda p: abs(p[axis]))
+            shift = -math.copysign(over, k[axis])
+            rings = [[tuple(q + (shift if i == axis else 0.0) for i, q in enumerate(p)) for p in r] for r in rings]
+    _outward(kit, kit.loft(rings[:2], bag.paint, cap0=False, cap1=False), rings[:2])
+    _outward(kit, kit.loft(rings[1:3], "tie", cap0=False, cap1=False), rings[1:3])
+    _outward(kit, kit.loft(rings[2:], "hessian_dark", cap0=False, cap1=False), rings[2:])
     kit.fan(rings[-1], tuple(d), "hessian_dark", apex=tuple(d * 0.012 + Vector((0.0, 0.0, -0.006))))
+
+
+def _outward(kit: rk.Kit, faces: list, rings: list) -> None:
+    """Turns a tube's faces (an open loft, whose own normals can come out either way) to face out of it: each away
+    from the middle of the rings it runs between."""
+    import bmesh
+    from mathutils import Vector
+    mids = [sum((Vector(p) for p in r), Vector()) / len(r) for r in rings]
+    n = len(rings[0])
+    flip = []
+    for k, f in enumerate(faces):
+        seg = min(k // n, len(mids) - 2)
+        f.normal_update()
+        if f.normal.dot(f.calc_center_median() - (mids[seg] + mids[seg + 1]) * 0.5) < 0.0:
+            flip.append(f)
+    if flip:
+        bmesh.ops.reverse_faces(kit.bm, faces=flip)
 
 
 def _facing(first: list, second: list) -> tuple:
@@ -260,18 +289,42 @@ def _part(kit: rk.Kit, bag: Bag, rings: list, end: int, shift: float) -> None:
     end, the first ring; 1 the a1 end, the last; 0 both, a whole bag) the bag's own, its other end the cut, closed flat
     there too (inside the next section's part of the bag, never seen, but no section is open)."""
     rs = [[(p[0] + shift, p[1], p[2]) for p in r] for r in rings]
-    kit.loft(rs, bag.paint, cap0=False, cap1=False)
+    _outward(kit, kit.loft(rs, bag.paint, cap0=False, cap1=False), rs)
     for e, i, j in ((-1, 0, 1), (1, -1, -2)):
         kit.fan(rs[i], _facing(rs[i], rs[j]), bag.paint)
         if end in (0, e) and bag.ties[0 if e < 0 else 1]:
             _tie(kit, bag, rs[i], e)
 
 
+_JOINTS = {}
+
+
+def _apart(a: float, b: float) -> float:
+    d = abs(a - b) % LONG
+    return min(d, LONG - d)
+
+
 def _joints(c: int, ri: int) -> tuple:
-    """Course `c`'s two joints in row `ri` of every section, each a little off its place in the bond."""
-    rng = random.Random(3000 + c * 10 + ri)
-    j1, j2 = JOINTS[(c % 2, ri)]
-    return j1 + rng.uniform(-JOINT, JOINT), j2 + rng.uniform(-JOINT, JOINT)
+    """Course `c`'s two joints in row `ri` of every section, each up to JOINT off its place in the bond, drawn
+    together (one stream) until no two joints come nearer than APART says, so no light finds a way through."""
+    if not _JOINTS:
+        rng = random.Random(3000)
+        for _ in range(20000):
+            js = {k: tuple(j + rng.uniform(-JOINT, JOINT) for j in JOINTS[(k[0] % 2, k[1])])
+                  for k in ((cc, rr) for cc in range(COURSES) for rr in (0, 1))}
+            ok = all(_apart(j, HL) >= APART["end"] for v in js.values() for j in v)
+            for (cc, rr), v in js.items():
+                for (c2, r2), w in js.items():
+                    if (c2, r2) <= (cc, rr) or abs(c2 - cc) > 1:
+                        continue
+                    need = APART["rows"] if c2 == cc else APART["courses"] if r2 == rr else APART["across"]
+                    ok = ok and all(_apart(a, b) >= need for a in v for b in w)
+            if ok:
+                _JOINTS.update(js)
+                break
+        else:
+            raise SystemExit("no bond found")
+    return _JOINTS[(c, ri)]
 
 
 def _spans(c: int, ri: int, closes: int) -> list:
@@ -325,7 +378,7 @@ def _crown(bag: Bag, c: int, shared: bool) -> float:
     if c == COURSES - 1:
         if shared and not bag.header:
             return HIGH + 0.012
-        return HIGH - bag.rng.uniform(0.0, 0.035) - abs(bag.tilt) * 0.35
+        return HIGH - bag.rng.uniform(0.0, 0.05) - abs(bag.tilt) * 0.35
     return (c + 1) * PITCH + bag.rng.uniform(*CROWN)
 
 
@@ -342,7 +395,9 @@ def plan() -> dict:
             j1, j2 = _joints(c, ri)
             ov = OVERLAP * 0.5
             seed = 1000 + c * 100 + ri * 10
-            shared = Bag(seed, j2 - ov, j1 + LONG + ov, row, HALF_W * random.Random(seed + 5).uniform(0.97, 1.03),
+            # (its belly a few millimetres past the wall's face, pressed flat there: every model has these bags, so
+            # every model fills its box's depth exactly)
+            shared = Bag(seed, j2 - ov, j1 + LONG + ov, row, DEEP * 0.5 - ROW + 0.003,
                          cut=True, face=-1.0 if row < 0 else 1.0, tilt=c > 0 and not last)
             _rest(shared, [below[name] for name, _ in MODELS], (ri,), _crown(shared, c, True))
             for name, closes in MODELS:
@@ -421,6 +476,48 @@ def section(name: str) -> object:
     return ob
 
 
+_SEAM_N = {}
+
+
+def _whole_normals() -> dict:
+    """The normals round each shared bag's cut, from the bag built whole and smoothed as the models are, keyed by
+    (y, z): so the two parts two sections carry shade as one bag, no line where it is cut."""
+    import bpy
+    if not _SEAM_N:
+        k = rk.Kit("whole")
+        seen = set()
+        for name, _ in MODELS:
+            for _c, b, _p in _PLAN[name]:
+                if b.cut and id(b) not in seen:
+                    seen.add(id(b))
+                    _part(k, b, b.rings()[0], 0, 0.0)
+        ob = k.build()
+        rk.finish(ob, angle=math.radians(SMOOTH))
+        rk.clamp_to(ob, (-10.0, -DEEP * 0.5, 0.0), (10.0, DEEP * 0.5, HIGH))
+        for v in ob.data.vertices:
+            if abs(v.co.x - HL) < 1e-5:
+                _SEAM_N[(round(v.co.y, 4), round(v.co.z, 4))] = v.normal.copy()
+        bpy.data.objects.remove(ob)
+    return _SEAM_N
+
+
+def _seam_normals(ob: object) -> None:
+    """Gives the corners of each shared bag's cut, at the section's two ends, the whole bag's normals there."""
+    me = ob.data
+    whole = _whole_normals()
+    normals = [c.vector.copy() for c in me.corner_normals]
+    for p in me.polygons:
+        if abs(p.normal.x) > 0.9:
+            continue  # the cut's own flat end, inside the next section's part
+        for li in p.loop_indices:
+            co = me.vertices[me.loops[li].vertex_index].co
+            if abs(abs(co.x) - HL) < 1e-5:
+                n = whole.get((round(co.y, 4), round(co.z, 4)))
+                if n is not None:
+                    normals[li] = n
+    me.normals_split_custom_set(normals)
+
+
 def _soil_and_sun(ob: object) -> None:
     """The lowest course's sacking a little darker towards the ground, where rain splashes it (SOIL m up), and the
     bags' tops a little paler, where the sun bleaches them."""
@@ -475,8 +572,9 @@ def build_all() -> dict:
     lo, hi = (-HL, -DEEP * 0.5, 0.0), (HL, DEEP * 0.5, HIGH)
     for name, _ in MODELS:
         ob = obs[name]
-        rk.finish(ob, angle=math.radians(70.0))
+        rk.finish(ob, angle=math.radians(SMOOTH))
         rk.clamp_to(ob, lo, hi)
+        _seam_normals(ob)
         rk.bake(ob, jitter={}, seed=7, islands=False)
         _soil_and_sun(ob)
     main = obs["sandbags"]
