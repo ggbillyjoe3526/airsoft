@@ -380,8 +380,8 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Route variety (RV1): each round, with this chance, one defending bot (drawn at random) holds well up its lane
 ## instead: defend_push_share of the way from its post to the last point short of the middle, for an early pick on the
 ## attackers' way in.
-@export var defend_push_chance: float = 0.5
-@export var defend_push_share: float = 0.5
+@export var defend_push_chance: float = 0.35
+@export var defend_push_share: float = 0.35
 ## A defender goes after someone seen or heard within this far of the pole (m, and on the pole's floor:
 ## anchor_search_rise); further off, it watches that way from its post.
 @export var defend_search_radius: float = 12.0
