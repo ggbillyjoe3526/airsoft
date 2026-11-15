@@ -29,12 +29,13 @@ const TEAM_EVENTS: Array[int] = [
 	CalloutsFile.Event.WATCH_REST, CalloutsFile.Event.BOMB, CalloutsFile.Event.BOMB_ARMED,
 	CalloutsFile.Event.BOMB_DOWN, CalloutsFile.Event.FLASH_OUT,
 ]
-## The answers to a player's ping and the asks and answers for a magazine: a personality's Talks (×) never makes them
-## less likely.
+## The answers to a player's ping, the asks and answers for a magazine, and Flash out (every flash warns the team): a
+## personality's Talks (×) never makes them less likely.
 const ANSWERS: Array[int] = [
 	CalloutsFile.Event.PING_GOING, CalloutsFile.Event.PING_WATCHING, CalloutsFile.Event.NEED_MAG,
 	CalloutsFile.Event.MAG_COMING, CalloutsFile.Event.NEED_HELP, CalloutsFile.Event.GO_ROUND,
 	CalloutsFile.Event.COVER_ME, CalloutsFile.Event.WATCH_JOIN, CalloutsFile.Event.WATCH_REST,
+	CalloutsFile.Event.FLASH_OUT,
 ]
 ## The asks (BQ2), and what each one's ping asks (Pings.Ask), in the same order.
 const ASK_EVENTS: Array[int] = [

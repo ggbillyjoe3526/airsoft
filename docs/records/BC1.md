@@ -186,7 +186,8 @@ later change replaced.
 
 - **The flash is called in words (critic, attempt 1):** a new callout event, Flash out, said by the thrower as it lets
   go, past the bot's and the team's gaps (the bang is 1.5 s off). Bots' look-away stays on the throw, as callouts.md
-  says: what a bot says never changes how anyone plays.
+  says: what a bot says never changes how anyone plays. It is the most urgent row, and Talks (×) never makes a quiet
+  personality skip it (critic, attempt 2).
 - **MQ4's check came in during the pass** (its thread added it to the old list at 06:46); it stands as N1 under New
   checks, in the same words, as it needs the owner's eye in play.
 - **Feel questions on a default already taken are dropped** where nothing hangs on them (the Lasers egg, the skip's

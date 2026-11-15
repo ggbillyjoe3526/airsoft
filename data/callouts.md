@@ -25,7 +25,7 @@ plays: the calls are what it already does, put into words.
   within its gap, and the same enemy is not called twice within its gap. A call the team gap holds back waits at most
   the last row's seconds, then is dropped.
 - **Personalities.** Talks (×) multiplies every chance: 1 changes nothing, above 1 is chattier. It never makes the
-  answers to your ping, or the asks and answers for a magazine, less likely. Every personality in [bots.md](bots.md) needs a row.
+  answers to your ping, the asks and answers for a magazine, or Flash out, less likely. Every personality in [bots.md](bots.md) needs a row.
 - **Marks.** A teammate calling Contact or Contacts that still sees the enemy may also mark them for you, a ping over
   where they are: the chance is how likely, and the team marks at most once in its seconds. Marks only show; they
   never change how anyone plays.
@@ -95,12 +95,12 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 
 | Event | Chance | Team gap (s) |
 |---|---|---|
+| Flash out | 1 | 0 |
 | Last one | 1 | 0 |
 | Down | 0.9 | 0 |
 | Tagged | 0.6 | 3 |
 | Going to your ping | 1 | 0 |
 | Watching your ping | 1 | 0 |
-| Flash out | 1 | 0 |
 | Watching with you | 1 | 0 |
 | Leaving it to you | 1 | 0 |
 | Need a mag | 1 | 3 |

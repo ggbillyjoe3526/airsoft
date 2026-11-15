@@ -15,7 +15,7 @@ const LINES: PackedStringArray = [
 ]
 ## The shipped order of urgency.
 const ORDER: Array[int] = [
-	E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING, E.FLASH_OUT, E.WATCH_JOIN, E.WATCH_REST, E.NEED_MAG, E.MAG_COMING,
+	E.FLASH_OUT, E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING, E.WATCH_JOIN, E.WATCH_REST, E.NEED_MAG, E.MAG_COMING,
 	E.NEED_HELP, E.COVER_ME,
 	E.GO_ROUND, E.OVERTIME, E.FLAG,
 	E.RAISING, E.BOMB, E.BOMB_DOWN, E.PLANTING, E.DEFUSING, E.BOMB_ARMED, E.CONTACTS, E.CONTACT, E.RELOADING, E.MAG_THANKS, E.HEARD, E.PUSHING, E.FLANKING, E.CHECKING,
@@ -310,6 +310,14 @@ func test_a_bot_s_flash_is_called_by_its_thrower_even_inside_its_own_gap() -> vo
 	assert_eq(r.tick([smoke]), _said([]))
 	var yours := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 99, "position": YARD}
 	assert_eq(r.tick([yours]), _said([]))
+
+
+func test_a_quiet_personality_still_calls_every_flash_it_throws() -> void:
+	var r := _rig({}, {}, [4, 1.5, 10, 1.5], [0.5, 0.5]) # both talk half as much as the file's chances
+	var flash := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 0, "position": YARD}
+	for n in 20:
+		assert_eq(r.tick([flash]), _said(["0: Flash out!"]), "throw %d" % n)
+		r.run(5.0)
 
 
 func test_plant_the_bomb_armed_defusing_and_dropped_are_called_by_the_side_they_matter_to() -> void:
