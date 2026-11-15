@@ -38,26 +38,24 @@ recommended Subway concept A (two more lanes, the north passage's and the west p
 
 ## What the bots showed
 
-Bot matches, 6v6, Normal (`tools/balance.sh`'s runner, seeds 1 to 32, the field's 22 s fuse in Plant The Bomb):
+Bot matches, 6v6 (`tools/balance.sh`'s runner, the field's 22 s fuse in Plant The Bomb), on the final layout with
+main's bots merged in (AIM1, AIM2, RV1; head 44fd9fe): Normal on seeds 1 to 32 (band 45 to 55 % for Elimination's
+ends, 40 to 65 % for the attackers), Hard on 16 (band 40 to 60 %).
 
-| Figure | Before (AUD1, 16 seeds) | SW1 (32 seeds) | Band |
+| Figure | Before (AUD1 16 seeds; PB4 32) | SW1 Normal | SW1 Hard |
 |---|---|---|---|
-| Elimination: the west end's share | 50.8 % ±4.5 | 49.8 % ±3.3 (113 of 227) | 45 to 55 % |
-| Elimination: Alpha's share | 49.2 % | 47.1 % ±3.3 (near the edge) | 45 to 55 % |
-| Elimination: first hit, median | – | 16.0 s at 9.3 m | – |
-| Attack / Defend: the attackers' share | 57.8 % ±4.4 | 58.1 % ±3.2 (136 of 234) | 40 to 65 % |
-| Plant The Bomb: the attackers' share | 54.9 % ±3.1 (PB4 on main, 32 seeds) | 56.6 % ±3.2 (133 of 235) | 40 to 65 % |
-| Plant The Bomb: armed / gone off | 82 % / 8 of 239 rounds (PB4, before BC1) | 70 % / 4 of 165 armed | – |
-| Rounds that run out the clock | 0 | 0 in every mode | ≤ 10 % |
+| Elimination: the west end's share | 50.8 % ±4.5 | 48.5 % ±3.2 (115 of 237) | 54.5 % ±4.5 (66 of 121) |
+| Elimination: Alpha's share | 49.2 % | 51.1 % ±3.2 | 52.9 % ±4.5 |
+| Elimination: first hit, median | – | 14.8 s at 9.3 m | 16.9 s at 10.0 m |
+| Attack / Defend: the attackers' share | 57.8 % ±4.4 | 57.3 % ±3.2 (137 of 239) | 53.0 % ±4.6 (62 of 117) |
+| Plant The Bomb: the attackers' share | 54.9 % ±3.1 (PB4, 22 s) | 49.3 % ±3.3 (111 of 225) | 52.1 % ±4.5 (63 of 121) |
+| Plant The Bomb: armed / armed gone off | 82 % / 8 of 239 rounds (PB4) | 72 % / 10 of 161 | 66 % / 0 of 80 |
+| Rounds that run out the clock | 0 | 0 in every mode | 0 in every mode |
 
-At Hard (16 seeds; band 40 to 60 %): Elimination's west end 58.8 % ±4.5 (70 of 119; 50.0 % ±4.6 at AUD1) and Alpha
-47.1 % ±4.6, the attackers 58.8 % ±4.5 of Attack / Defend (58.4 % at AUD1) and 57.1 % ±4.5 of Plant The Bomb (58.3 %
-at PB4); no clock-outs. All three are in the band near its top edge: Attack / Defend and Plant The Bomb where they
-were, the west end up about 9 points, under two standard errors of the difference (6.4), so within the noise. It is
-the one to watch.
-
-No figure left its band, so nothing was tuned: the fuse stays 22 s (the attackers' share moved by less than
-the noise, though the bomb is armed in fewer rounds).
+Every figure is in its band and none near an edge, so nothing was tuned: the fuse stays 22 s. On the way, on the
+pre-merge bots: the first layout read Normal 49.8 / 58.1 / 56.6 % (west end, A/D, PTB) and Hard's west end 58.8 %;
+with the mouth piers and the concourse piers run out, Normal's west end 55.9 % (outside, within noise); with the
+concourse piers taken back, 49.4 %.
 
 The map heat tool (`tools/map_heat.gd`, 8 seeds a mode, the MR1 report's measure) before and after:
 
