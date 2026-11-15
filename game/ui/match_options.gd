@@ -106,8 +106,8 @@ static func team_size(map: MapCatalog.Entry, custom: CustomRules) -> int:
 
 ## The round tuning a match on `map` plays: `base` with the Custom switches in force (`custom`, null under Skirmish), the
 ## team size the map gives (team_size), under Skirmish the map's round length (data/maps.md Round, WR2) and, under
-## either, the map's flag raise time (data/maps.md Raise, MB3). A copy wherever it differs from `base`, which is never
-## written (the loaded tuning is shared).
+## either, the map's flag raise time (data/maps.md Raise, MB3) and bomb fuse (data/maps.md Fuse, PB4). A copy wherever
+## it differs from `base`, which is never written (the loaded tuning is shared).
 static func match_tuning(base: SimTuning, map: MapCatalog.Entry, custom: CustomRules) -> SimTuning:
 	var t := base if custom == null else custom.applied_to(base)
 	var size := team_size(map, custom)
@@ -126,6 +126,13 @@ static func match_tuning(base: SimTuning, map: MapCatalog.Entry, custom: CustomR
 		if t.flag == base.flag:
 			t.flag = base.flag.duplicate() as FlagConfig
 		t.flag.raise_time = raise
+	var fuse := fuse_time(map, t.plant.fuse_time)
+	if t.plant.fuse_time != fuse:
+		if t == base:
+			t = base.duplicate() as SimTuning
+		if t.plant == base.plant:
+			t.plant = base.plant.duplicate() as PlantConfig
+		t.plant.fuse_time = fuse
 	return t
 
 
@@ -142,6 +149,22 @@ static func raise_time(map: MapCatalog.Entry, played: float) -> float:
 	if map == null or map.raise_time <= 0.0:
 		return played
 	return map.raise_time
+
+
+## The seconds from the bomb armed to it going off on `map`: the map's own (data/maps.md Fuse), else `played`, the bomb
+## tuning's.
+static func fuse_time(map: MapCatalog.Entry, played: float) -> float:
+	if map == null or map.fuse_time <= 0.0:
+		return played
+	return map.fuse_time
+
+
+## The bomb's fuse on `map` in `mode` (s): what the Match page says before a Plant The Bomb match (the clock counts it
+## down once the bomb is armed), the field's own or else the game's `base`. 0 in a mode with no bomb or with no map.
+static func field_fuse(mode: String, map: MapCatalog.Entry, base: float) -> float:
+	if mode != MODE_PLANT_THE_BOMB or map == null:
+		return 0.0
+	return fuse_time(map, base)
 
 
 ## The seconds a flag takes to raise on `map` in `mode` where that is not the game's `base` (a field's own, data/maps.md
