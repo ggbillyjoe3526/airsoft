@@ -152,11 +152,22 @@ ATTEMPT_ROWS
   height (`END_WEDGE`); every split face has a crease; a chip under 7.5 cm near a closed end is dropped; the end's
   top piece no longer stands over the crest. The top's pieces lie apart (1.5 to 3 cm) about a third of the time and
   a fifth ride half on a neighbour; the crossing pieces stay inside the end courses. 2,915 / 2,844 / 2,585 triangles
-  the middle sections, 2,791 / 2,924 / 2,974 the end ones, all hearts drawn.
+  the middle sections, 2,791 / 2,924 / 2,974 the end ones, all hearts drawn. Thirteenth pass (the critic's attempt
+  12): the joins share their pieces. One column of face pieces stands across every join (`join_column`, seeded by
+  `JOIN_SEED` alone, so it is the same in every section, each piece 30 to 70 % of its width either side, drawn the
+  same way in both: paint, depth, tilt, heart); each section draws its part of each (`piece_end`'s clip) and lays its
+  own pieces round them, so the two halves meet as one whole piece and the join runs piece by piece; one top piece
+  lies across each join the same way, and the core's top meets at the join column's crown. No slice, no rim along a
+  cut. A face piece's split sides are a shaded tan (`SplitSide`), so none shows as a pale sliver edge on. The end
+  courses are 10 to 20 cm high; their long pieces (one in five) are round logs pushed 10 to 15 cm out (their run
+  back dark, a round sawn end with a bark rim on it), the top course round logs; a round log's sides have 5
+  segments (were 4), a log split down one side two bark steps a side, half the wedges one bark side, every split face
+  creased 2.5 cm. The top: no two neighbouring columns lie point up. 3,137 / 3,068 / 2,885 the middle sections, 3,041 /
+  3,193 / 3,181 the end ones (hearts thinned to fit).
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
-  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth, v9 the ninth, v10 the tenth, v11 the eleventh and v12 the twelfth: the woodpiles).
+  fourth, v5 the fifth, v6 the sixth, v7 the seventh, v8 the eighth, v9 the ninth, v10 the tenth, v11 the eleventh, v12 the twelfth and v13 the thirteenth: the woodpiles).
 
 ## Known issues left
 
