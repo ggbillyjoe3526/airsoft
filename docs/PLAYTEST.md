@@ -1715,6 +1715,14 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 - [ ] **Attacking is worth it now.** Attack on the same fields and hold the site after the plant.
   Pass: holding the site feels like it wins rounds; the bomb goes off now and then, not every time.
 
+## The blue highlight (UA1)
+
+- [ ] **Blue reads as the highlight, never as a team.** At 1080p and on your 4K screen go through Match, Loadout,
+  Customise, Armory, Settings and the pause menu, then play a round on Alpha and open the comms wheel (hold Z).
+  Pass: PLAY, RESUME, the picked field and mode, focus rings and the lit wheel button are a soft cornflower blue with
+  dark words that read easily; next to Alpha's score block and markers they are clearly a different, paler blue; with
+  Settings › Accessibility › High contrast on, the highlight still doesn't look like Alpha's sky blue.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

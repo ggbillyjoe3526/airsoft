@@ -17,13 +17,13 @@ const UNSET := -3
 ## fill alpha.
 const STROKE := 2.0
 const LIT_STROKE := 3.0
-const LIT_EDGE := Color("ffe28a")
+const LIT_EDGE := Color("d6e2ff")
 const BUTTON_ALPHA := 0.86
 const RADIUS := 4
 const FREE_ALPHA := 0.35
 ## The band on the order in force (px, along the button's outer edge).
 const BAND := 7.0
-## The circle: its fill's alpha open and with a notice up, and the notice's yellow rule (px).
+## The circle: its fill's alpha open and with a notice up, and the notice's accent rule (px).
 const HUB_ALPHA := 0.6
 const NOTICE_ALPHA := 0.96
 const NOTICE_RULE := 3.0

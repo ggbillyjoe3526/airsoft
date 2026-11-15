@@ -4,8 +4,8 @@ class_name GameTheme
 ## headings, tabs, rail and main buttons in words (assets/fonts/; never a number: the owner finds Barlow's figures hard
 ## to read, 2026-10-07). The layout is UI concept B's (owner, 2026-11-02; docs/records/UR1.md): glass panels over the
 ## blurred field (MenuBackdrop). The colours are Sunlit Concrete's (owner, 2026-11-09; docs/records/SL4.md): charcoal
-## panels, off-white words and one bone accent for the main button and the selection, so the team colours are the only
-## strong colours on screen (the HUD's own).
+## panels, off-white words and one soft blue accent for the main button and the selection (owner, 2026-11-15, UA1: blue
+## in place of SL4's bone), paler and greyer than Alpha's team blue so the team colours stay the strongest on screen.
 
 const FONT_DIR := "res://assets/fonts/"
 ## Sizes (px at 1080p; the window scales canvas items).
@@ -20,7 +20,7 @@ const HEADING_SIZE := 18
 const MAIN_BUTTON_SIZE := 32
 
 ## The palette (Sunlit Concrete, SL4): the charcoal under everything, the panel, a card and a lit card on it, the
-## hairline, and off-white words at three strengths; the bone accent and the charcoal ink on it.
+## hairline, and off-white words at three strengths; the blue accent and the blue-charcoal ink on it.
 const BG := Color("131311")
 const PANEL := Color(0.078, 0.076, 0.071, 0.82)
 const CARD := Color(0.95, 0.93, 0.89, 0.06)
@@ -33,8 +33,10 @@ const DIM := Color(0.95, 0.93, 0.9, 0.36)
 const DEEP := Color("0c0c0b")
 ## A raised dark plate drawn whole (a notice, a report box, the Armory's picked card): a step lighter than BG.
 const PLATE := Color("1f1e1b")
-const ACCENT := Color("d8ccb2")
-const ACCENT_INK := Color("1b1a17")
+## Cornflower (UA1): lighter and greyer than Alpha's #3b87f5 and bluer than High contrast's sky #8ccfff, so a lit
+## button never reads as a team's.
+const ACCENT := Color("8fb0f0")
+const ACCENT_INK := Color("141a24")
 ## Signal yellow, for warnings and the flags only (a low magazine, THEIR FLAG IS GOING UP!, a flag's marker), never as a
 ## theme colour (UR1); a little quieter in Sunlit Concrete.
 const WARN := Color("ecc246")
