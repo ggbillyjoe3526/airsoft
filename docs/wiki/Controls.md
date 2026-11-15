@@ -20,10 +20,12 @@ so W A S D stays W A S D on any keyboard layout.
   "Space to climb" shows under the crosshair (it names your own Jump key).
 - **Loadout (practice)** opens the Loadout from the [Practice Range](Practice-Range); in a match it does nothing.
 - **Hop-up less** and **Hop-up more** turn the hop-up dial on the replica in your hands ([How to Play](How-to-Play#hop-up)).
-- **Squad: ping a spot** (the middle mouse button) marks where you look for your bot teammates
-  ([Squad Orders](Squad-Orders#pings)).
+- **Squad: ping a spot** (the middle mouse button) tells your bot teammates you are heading where you look, and they
+  may come along ([Squad Orders](Squad-Orders#pings)).
+- **Order wheel** (Z) held opens the order wheel; a quick tap spots the opponent under your crosshair
+  ([Squad Orders](Squad-Orders#spotted)).
 - **Squad: need a mag** (H) tosses a magazine to a teammate who asked you, or asks for one when you are low
-  ([Squad Orders](Squad-Orders#need-a-mag)); it is also the order wheel's last item, at its upper left.
+  ([Squad Orders](Squad-Orders#need-a-mag)); it is also on the order wheel (right, at the bottom).
 - **Throw smoke** (4) and **Throw flash** (5) take a smoke bomb or a flash bomb in hand; a click throws it, or hold the
   button and it goes when you let go ([Grenades](Grenades)).
 - **Next / previous replica** (the mouse wheel) steps through your two replicas and then your bombs left, smoke then

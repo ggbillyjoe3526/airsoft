@@ -79,6 +79,8 @@ var no_shot_for: float = 0.0
 ## last-known spot until real news writes another, kept in mind BotConfig.ping_memory (ping_in_mind).
 var ping_at: float = -INF
 var ping_spot: Vector3 = Vector3.ZERO
+## It took that ping to come along with its player (CW1, Pings.follow): it goes there even from a post it holds.
+var ping_joined: bool = false
 
 ## Its route: waypoints, the one it walks to, where the leg began, the goal and the route's state.
 var route: PackedVector3Array = PackedVector3Array()
@@ -317,6 +319,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	share_at = INF
 	share_id = -1
 	ping_at = -INF
+	ping_joined = false
 	bomb_kind = Grenade.Kind.NONE
 	bomb_aim_until = -INF
 	bomb_roll_at = -INF
@@ -414,6 +417,11 @@ func threat_in_mind(time: float, cfg: BotConfig) -> bool:
 ## (real news since, a sighting, a noise or a teammate's, writes another; a search that got there and looked forgets it).
 func ping_in_mind(time: float, cfg: BotConfig) -> bool:
 	return time - ping_at < cfg.ping_memory and on_ping_spot()
+
+
+## Whether it is coming along to the spot its player pinged (CW1): it joined, and the ping is still in mind.
+func joins_ping(time: float, cfg: BotConfig) -> bool:
+	return ping_joined and ping_in_mind(time, cfg)
 
 
 ## Whether its last-known spot is still the one a teammate's ping gave it, however long ago.

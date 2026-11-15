@@ -1,21 +1,25 @@
 extends GutTest
-## The order wheel and Hold here's marker on screen (SO4): the wheel's items from the data (names, keys), the slice
-## pointed at lit, the order in force marked, nothing built or drawn while it is closed, the notice in its middle and
-## where it may show; the marker over the held spots' middle with its distance, held inside the screen's edge clear of
-## the flag marker, gone with the order; the pointer's mapping; the Settings row; and nothing left behind.
+## The order wheel and Hold here's marker on screen (SO4; CW1's shape): the wheel's buttons from the data (names only,
+## every name fitting its button), the button pointed at lit (Spotted in the middle), the order in force marked,
+## nothing built or drawn while it is closed or only tapped, the notice in its middle and where it may show; the
+## marker over the held spots' middle with its distance, held inside the screen's edge clear of the flag marker, gone
+## with the order; the pointer drawn where it points; the Settings row; and nothing left behind.
 
 const SAVE := "user://so4-test.save"
 
 var hud: Hud = null
 var controls := ControlsConfig.new()
-var wheel := OrderWheelPointer.new(controls.wheel_reach, controls.wheel_dead_zone, controls.wheel_orders.size())
+var wheel := OrderWheelPointer.new(OrderWheelLayout.new(controls))
+## Over Follow Me (the right column's second button), and over Hold Here (the left's third).
+const ON_FOLLOW := Vector2(200.0, -29.0)
+const ON_HOLD := Vector2(-200.0, 29.0)
 var outcome := SquadOrders.Outcome.new()
 var you: Character = null
 
 
 func before_each() -> void:
 	controls = ControlsConfig.new()
-	wheel = OrderWheelPointer.new(controls.wheel_reach, controls.wheel_dead_zone, controls.wheel_orders.size())
+	wheel = OrderWheelPointer.new(OrderWheelLayout.new(controls))
 	outcome = SquadOrders.Outcome.new()
 	you = Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
 	var frame := Control.new()
@@ -53,78 +57,92 @@ func test_the_wheel_builds_nothing_while_closed() -> void:
 	assert_eq(w.lit_slice(), -1)
 
 
-func test_it_draws_the_wheels_items_each_with_its_key() -> void:
+func test_it_draws_the_wheels_buttons_by_name_alone_and_spotted_in_the_middle() -> void:
 	_open(Vector2.ZERO)
 	var w := hud.order_wheel()
 	assert_true(w.visible)
-	assert_eq(w.slice_name(0), "FOLLOW ME")
-	assert_eq(w.slice_name(1), "HOLD HERE")
-	assert_eq(w.slice_name(2), "GO THERE", "the third, lower right (FM1)")
-	assert_eq(w.slice_name(3), "WATCHING HERE", "the fourth, below Go There (BP8)")
-	assert_eq(w.slice_name(4), "REGROUP")
-	assert_eq(w.slice_name(5), "TEAM PLAN")
-	assert_eq(w.slice_name(6), "NEED A MAG", "the last, upper left (MH3)")
-	assert_eq([w.slice_key(0), w.slice_key(1), w.slice_key(2), w.slice_key(3), w.slice_key(4), w.slice_key(5),
-			w.slice_key(6)], ["F", "X", "Mouse 4", "", "V", "", "H"], "Team Plan and Watching Here have no key")
-	assert_eq(w.slice_name(7), "", "only the wheel's own items")
+	var names: Array[String] = []
+	for i in 8:
+		names.append(w.slice_name(i))
+	assert_eq(names, ["WATCHING HERE", "FOLLOW ME", "COVER ME", "NEED A MAG", "TEAM PLAN", "GO THERE", "HOLD HERE",
+			"REGROUP"], "the right column, then the left, top to bottom (the owner's order, 2026-11-15)")
+	assert_eq(w.spot_name(), "SPOTTED")
+	assert_eq(w.slice_name(8), "", "only the wheel's own buttons")
+	assert_eq(w.lit_slice(), OrderWheelPointer.SPOT, "opened in the middle: Spotted lit")
+
+
+func test_every_name_fits_its_button_at_full_size() -> void:
+	_open(Vector2.ZERO)
+	var w := hud.order_wheel()
+	for i in 8:
+		assert_true(w.name_fits(i), "%s fits" % w.slice_name(i))
+	hud.order_wheel().set_mag_toss(true)
+	assert_eq(w.slice_name(3), "TOSS A MAG")
+	assert_true(w.name_fits(3), "Toss a Mag fits too")
+
+
+func test_a_tap_never_draws_the_wheel() -> void:
+	var w := hud.order_wheel()
+	wheel.start(5000)
+	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 5050)
+	assert_false(w.visible, "50 ms in the middle: not drawn")
+	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 5250)
+	assert_true(w.visible, "held past a tap: drawn")
+	wheel.close()
+	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 5300)
+	assert_false(w.visible)
+	wheel.start(9000)
+	wheel.at = ON_FOLLOW
+	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 9010)
+	assert_true(w.visible, "out of the middle at once: drawn at once")
 
 
 func test_a_different_wheel_is_drawn_from_its_data() -> void:
+	controls.wheel_rows = 1
 	controls.wheel_orders = [SquadOrder.Kind.REGROUP, SquadOrder.Kind.TEAM_PLAN]
 	controls.wheel_keys = [&"order_regroup", &""]
 	controls.wheel_labels = PackedStringArray(["ORDER_REGROUP", "ORDER_TEAM_PLAN"])
-	var two := OrderWheelPointer.new(controls.wheel_reach, controls.wheel_dead_zone, 2)
+	var two := OrderWheelPointer.new(OrderWheelLayout.new(controls))
 	var fresh := Hud.new()
 	hud.get_parent().add_child(fresh)
 	fresh.setup(HudConfig.new(), TeamConfig.new(), ViewConfig.new(), SimTuning.new(), you)
 	fresh.setup_orders(controls)
 	two.start()
-	two.at = Vector2(0.0, 60.0)
+	two.at = Vector2(-200.0, 10.0)
 	fresh.update_orders(two, SquadOrder.Kind.NONE, outcome, 0.0)
 	var w := fresh.order_wheel()
 	assert_eq([w.slice_name(0), w.slice_name(1), w.slice_name(2)], ["REGROUP", "TEAM PLAN", ""])
-	assert_eq(w.lit_slice(), 1, "pointed down, the second of two")
+	assert_eq(w.lit_slice(), 1, "one a column: the left is the second")
 
 
-func test_it_lights_the_slice_pointed_at_and_marks_the_order_in_force() -> void:
+func test_it_lights_the_button_pointed_at_and_marks_the_order_in_force() -> void:
 	var w := hud.order_wheel()
-	_open(Vector2(60.0, -22.0), SquadOrder.Kind.FOLLOW)
-	assert_eq(w.lit_slice(), 1, "up and right of the middle: Hold Here")
-	assert_eq(w.banded_slice(), 0, "Follow Me is in force")
-	_open(Vector2(0.0, -60.0), SquadOrder.Kind.HOLD)
-	assert_eq(w.lit_slice(), 0)
-	assert_eq(w.banded_slice(), 1)
-	_open(Vector2(5.0, 5.0), SquadOrder.Kind.NONE)
-	assert_eq(w.lit_slice(), -1, "in the middle: none")
+	_open(ON_HOLD, SquadOrder.Kind.FOLLOW)
+	assert_eq(w.lit_slice(), 6, "Hold Here")
+	assert_eq(w.banded_slice(), 1, "Follow Me is in force")
+	_open(ON_FOLLOW, SquadOrder.Kind.HOLD)
+	assert_eq(w.lit_slice(), 1)
+	assert_eq(w.banded_slice(), 6)
+	_open(Vector2(5.0, -100.0), SquadOrder.Kind.NONE)
+	assert_eq(w.lit_slice(), -1, "between the columns: none")
 	assert_eq(w.banded_slice(), -1, "the team plan: no order to mark")
+	_open(Vector2(-200.0, 87.0), SquadOrder.Kind.COVER)
+	assert_eq(w.lit_slice(), 7, "Regroup, bottom left")
+	assert_eq(w.banded_slice(), 2, "Cover Me in force")
 
 
 func test_it_closes_with_the_key() -> void:
-	_open(Vector2(60.0, 0.0))
+	_open(ON_FOLLOW)
 	wheel.close()
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.0)
 	assert_false(hud.order_wheel().visible)
-
-
-func test_the_pointer_is_drawn_in_step_with_the_mouses() -> void:
-	var dead := 24.0
-	var reach := 90.0
-	assert_eq(HudOrderWheel.pointer_at(Vector2.ZERO, dead, reach, 112.0, 300.0), Vector2.ZERO)
-	var inside := HudOrderWheel.pointer_at(Vector2(12.0, 0.0), dead, reach, 112.0, 300.0)
-	assert_almost_eq(inside.x, 56.0, 0.01, "half the dead zone: half the hub")
-	var edge := HudOrderWheel.pointer_at(Vector2(0.0, -dead), dead, reach, 112.0, 300.0)
-	assert_almost_eq(edge.length(), 112.0, 0.01, "the dead zone's edge is the hub's")
-	var far := HudOrderWheel.pointer_at(Vector2(-reach, 0.0), dead, reach, 112.0, 300.0)
-	assert_almost_eq(far.x, -300.0, 0.01, "full reach: the far mark, same way")
-	assert_almost_eq(HudOrderWheel.pointer_at(Vector2(500.0, 0.0), dead, reach, 112.0, 300.0).x, 300.0, 0.01,
-			"never past it")
 
 
 # --- notices ---
 
 func test_a_notice_shows_in_the_middle_while_the_wheel_is_open_and_times_out() -> void:
 	var w := hud.order_wheel()
-	_open(Vector2(52.0, -30.0))
+	_open(ON_FOLLOW)
 	assert_eq(w.notice_text(), "")
 	outcome.record(you.id, SquadOrder.Kind.NONE, SquadOrders.Notice.NOBODY)
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
@@ -150,7 +168,7 @@ func test_no_notice_outside_the_wheel_or_for_someone_elses_order() -> void:
 	var w := hud.order_wheel()
 	outcome.record(you.id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED)
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
-	_open(Vector2(60.0, 0.0))
+	_open(ON_FOLLOW)
 	assert_eq(w.notice_text(), "", "given with the wheel shut: nothing on screen, then or later")
 	outcome.record(7, SquadOrder.Kind.NONE, SquadOrders.Notice.NOBODY)
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
@@ -162,20 +180,20 @@ func test_no_notice_outside_the_wheel_or_for_someone_elses_order() -> void:
 
 func test_a_notice_ends_with_the_wheel() -> void:
 	var w := hud.order_wheel()
-	_open(Vector2(60.0, 0.0))
+	_open(ON_FOLLOW)
 	outcome.record(you.id, SquadOrder.Kind.NONE, SquadOrders.Notice.ON_PLAN)
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
 	assert_ne(w.notice_text(), "")
 	wheel.close()
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
-	_open(Vector2(60.0, 0.0))
+	_open(ON_FOLLOW)
 	assert_eq(w.notice_text(), "", "reopened: a clean wheel")
 
 
 func test_an_order_picked_on_the_wheel_is_told_its_notice_with_the_wheel_up_alone() -> void:
 	var w := hud.order_wheel()
 	var cfg := HudConfig.new()
-	_open(Vector2(60.0, 0.0))
+	_open(ON_FOLLOW)
 	wheel.close() # the pick shut it
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)
 	assert_false(w.visible, "shut without an answer yet: not drawn")
@@ -190,7 +208,7 @@ func test_an_order_picked_on_the_wheel_is_told_its_notice_with_the_wheel_up_alon
 
 func test_the_notice_after_a_pick_shows_in_the_hub_alone_with_no_dark_or_slices() -> void:
 	var w := hud.order_wheel()
-	_open(Vector2(60.0, 0.0))
+	_open(ON_FOLLOW)
 	assert_true(w.draws_wheel(), "open: the wheel is drawn")
 	wheel.close()
 	outcome.record(you.id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED)
@@ -212,7 +230,7 @@ func test_a_wheel_shut_on_nothing_waits_for_no_notice() -> void:
 func test_a_pick_with_no_notice_or_a_late_answer_shows_nothing() -> void:
 	var w := hud.order_wheel()
 	var cfg := HudConfig.new()
-	_open(Vector2(60.0, 0.0))
+	_open(ON_FOLLOW)
 	wheel.close()
 	outcome.record(you.id, SquadOrder.Kind.HOLD, SquadOrders.Notice.NONE)
 	hud.update_orders(wheel, SquadOrder.Kind.HOLD, outcome, 0.016)
@@ -224,7 +242,7 @@ func test_a_pick_with_no_notice_or_a_late_answer_shows_nothing() -> void:
 
 
 func test_dismissing_puts_the_wheel_away() -> void:
-	_open(Vector2(60.0, 0.0))
+	_open(ON_FOLLOW)
 	hud.close_order_wheel()
 	assert_false(hud.order_wheel().visible)
 
@@ -317,7 +335,7 @@ func test_a_frame_with_neither_shown_allocates_nothing() -> void:
 
 
 func test_wheel_and_marker_go_with_the_hud() -> void:
-	_open(Vector2(60.0, 0.0))
+	_open(ON_FOLLOW)
 	var wheel_node := hud.order_wheel()
 	var marker := hud.hold_marker()
 	hud.free()
