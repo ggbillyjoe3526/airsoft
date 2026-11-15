@@ -96,8 +96,34 @@ SERRATION_PITCH = 0.0050
 SERRATION_DEPTH = 0.0007
 FRONT_SERRATION_AT = 0.0138
 REAR_SERRATION_AT = 0.0094
-# The fine lines across the rear cover plate's upper half.
-PLATE_LINES = 5
+# The back of the slide, from the owner's Gen5 photos (2026-11-15: the back face square on, 0.0468 mm a pixel at x3,
+# the slide's foot at z 0): the cover plate, a tombstone COVER_HW a side from COVER_FOOT up to COVER_TOP, its top
+# corners rounded COVER_ROUND, set COVER_DEPTH into the face in an opening COVER_GAP wider all round, its face a hair
+# under the slide's; COVER_LINES grooves right across it (COVER_LINE_Z the top one's centre, COVER_LINE_PITCH apart,
+# COVER_LINE_H tall, COVER_LINE_DEPTH deep); under it the open recess (RECESS_HW a side, RECESS_DEPTH deep, from the
+# slide's foot up to COVER_FOOT), the plate's tongue down its middle (TONGUE_HW a side, to RECESS_TONGUE_FOOT) and the
+# two blocks inside it (x from, to; top), their faces BLOCK_INSET under the back face.
+COVER_HW = 0.0084
+COVER_TOP = 0.0176
+COVER_FOOT = 0.0079
+COVER_ROUND = 0.0040
+COVER_GAP = 0.00015
+COVER_DEPTH = 0.0010
+COVER_LINES = 5
+COVER_LINE_Z = 0.0133
+COVER_LINE_PITCH = 0.00097
+COVER_LINE_H = 0.0003
+COVER_LINE_DEPTH = 0.0003
+RECESS_HW = 0.0078
+RECESS_DEPTH = 0.0035
+TONGUE_HW = 0.0027
+RECESS_TONGUE_FOOT = 0.0040
+BLOCKS = (((-0.0068, -0.0031), 0.0072), ((0.0030, 0.0058), 0.0061))
+BLOCK_FOOT = 0.0034
+BLOCK_INSET = 0.0012
+# The frame's walls under the rear serrations stay this far inside the grooves' floor (owner 2026-11-15: they showed
+# through as grey squares at the grooves' feet).
+SERRATION_CLEAR = 0.0003
 PORT_Y = (-0.0095, 0.0225)
 PORT_DEPTH = 0.0088
 # The port's left edge (x) on the top; the barrel hood's clearance to the port's walls and its right face's inset from
@@ -232,6 +258,14 @@ def pts(trace: list) -> list:
 
 # ------------------------------------------------------------------------------------------------------------ slide
 
+def plate_outline(grow: float, foot: float) -> list:
+    """The cover plate's tombstone outline (x, z) on the slide's back, grown `grow` all round, its foot at `foot`:
+    square at the foot, its top corners rounded COVER_ROUND; it starts at the foot's left corner, then its right."""
+    hw, top = COVER_HW + grow, COVER_TOP + grow
+    return hs.fillet([(-hw, foot, 0.0), (hw, foot, 0.0), (hw, top, COVER_ROUND + grow),
+                      (-hw, top, COVER_ROUND + grow)], 6)
+
+
 def slide() -> object:
     """The slide: a square block with bevelled top edges and the narrower nose under its front, rear serrations, the
     ejection port (the barrel's hood fills it: barrel()), the extractor, the rear cover plate and the sights."""
@@ -311,18 +345,13 @@ def slide() -> object:
     c.prism(hs.fillet([(PORT_Y[0] - 0.0175, ez0, 0.0016), (PORT_Y[0] + 0.002, ez0, 0.0), (PORT_Y[0] + 0.002, ez1, 0.0),
                        (PORT_Y[0] - 0.0175, ez1, 0.0016)], 4), "x", SLIDE_HW - 0.0008, 0.02, "Body")
     cutters.append(c.build())
-    # The rear cover plate's outline, a fine groove in the back face.
+    # The back: the cover plate's opening (its gap all round the plate) and the recess under it, open at the foot.
     c = hs.Builder("c_plate", ["Body"])
-    plate = hs.fillet([(-0.0090, SLIDE_FOOT + 0.0012, 0.0015), (0.0090, SLIDE_FOOT + 0.0012, 0.0015),
-                       (0.0090, foot + 0.0110, 0.002), (-0.0090, foot + 0.0110, 0.002)], 3)
-    inner = hs.fillet([(-0.0085, SLIDE_FOOT + 0.0017, 0.0011), (0.0085, SLIDE_FOOT + 0.0017, 0.0011),
-                       (0.0085, foot + 0.0105, 0.0016), (-0.0085, foot + 0.0105, 0.0016)], 3)
-    c.prism(plate, "y", y0 - 0.001, y0 + 0.0005, "Body")
-    cut_plate = c.build()
-    c = hs.Builder("c_plate_in", ["Body"])
-    c.prism(inner, "y", y0 - 0.002, y0 + 0.002, "Body")
-    hs.cut(cut_plate, [c.build()])
-    cutters.append(cut_plate)
+    c.prism(plate_outline(COVER_GAP, COVER_FOOT), "y", y0 - 0.001, y0 + COVER_DEPTH, "Body")
+    cutters.append(c.build())
+    c = hs.Builder("c_recess", ["Body"])
+    c.box((-RECESS_HW, y0 - 0.001, SLIDE_FOOT - 0.001), (RECESS_HW, y0 + RECESS_DEPTH, COVER_FOOT), "Body")
+    cutters.append(c.build())
     # The muzzle's bore through the face, and the spring guide's hole under it.
     c = hs.Builder("c_bore", ["Body"])
     c.lathe([(y1 - 0.030, BARREL_R + 0.0004), (y1 + 0.01, BARREL_R + 0.0004)], "Body", 32,
@@ -333,18 +362,27 @@ def slide() -> object:
     cutters.append(c.build())
     hs.cut(ob, cutters)
     hs.finish(ob, 0.0008, 1)
-    # The cover plate itself, a touch inside the face, with fine lines across its upper half as the photos'.
+    # The cover plate itself, its face a hair under the slide's, its tongue down the recess's middle, the lines right
+    # across it as the photos'; and the two blocks in the recess either side of the tongue.
     b = hs.Builder("CoverPlate", ["Body"])
-    b.prism(inner, "y", y0 - 0.0002, y0 + 0.001, "Body")
+    outline = plate_outline(0.0, COVER_FOOT)
+    outline[1:1] = [(-TONGUE_HW, COVER_FOOT), (-TONGUE_HW, RECESS_TONGUE_FOOT), (TONGUE_HW, RECESS_TONGUE_FOOT),
+                    (TONGUE_HW, COVER_FOOT)]
+    b.prism(outline, "y", y0 + 0.0001, y0 + COVER_DEPTH + 0.0002, "Body")
     plate_ob = b.build()
     lines = []
-    for k in range(PLATE_LINES):
-        z = foot + 0.0042 + k * 0.0013
+    for k in range(COVER_LINES):
+        z = COVER_LINE_Z - k * COVER_LINE_PITCH
         c = hs.Builder("c_line", ["Body"])
-        c.box((-0.0072, y0 - 0.001, z), (0.0072, y0 + 0.0001, z + 0.0005), "Body")
+        c.box((-COVER_HW - 0.001, y0 - 0.001, z - 0.5 * COVER_LINE_H),
+              (COVER_HW + 0.001, y0 + 0.0001 + COVER_LINE_DEPTH, z + 0.5 * COVER_LINE_H), "Body")
         lines.append(c.build())
     hs.cut(plate_ob, lines)
-    parts = [ob, hs.finish(plate_ob, 0.0002, 1)]
+    b = hs.Builder("RecessBlocks", ["Body"])
+    for (xa, xb), zt in BLOCKS:
+        b.box((xa, y0 + BLOCK_INSET, BLOCK_FOOT), (xb, y0 + RECESS_DEPTH + 0.0002, zt), "Body")
+    blocks = hs.finish(b.build(), 0.0002, 1)
+    parts = [ob, hs.finish(plate_ob, 0.0002, 1), blocks]
     # The extractor and the sights.
     b = hs.Builder("Bits", ["Detail", "Metal", "Accent"])
     # Extractor: a slim bar in its slot, a little below the flank, its rear end rounded.
@@ -637,6 +675,15 @@ def frame_upper() -> object:
         c = hs.Builder("c_rail", ["Furniture"])
         xa, xb = sorted((sx * (FRAME_HW - RAIL_SLOT_DEPTH), sx * 0.02))
         c.box((xa, Y(166.0), Z(141.5)), (xb, Y(10.0), Z(131.0)), "Furniture")
+        cutters.append(c.build())
+    # Under the rear serrations the walls stand inside the grooves' floor, so the grooves run down to the slide's
+    # foot as the front ones do (the walls rose 2.7 mm into the slide there and filled the grooves' feet).
+    rear = SLIDE_Y[0] + REAR_SERRATION_AT
+    for sx in (-1, 1):
+        c = hs.Builder("c_serration_clear", ["Furniture"])
+        xa, xb = sorted((sx * (SLIDE_HW - SERRATION_DEPTH - SERRATION_CLEAR), sx * 0.02))
+        c.box((xa, rear - 0.001, SLIDE_SIDE_FOOT + 0.00002),
+              (xb, rear + (SERRATIONS - 1) * SERRATION_PITCH + SERRATION_W + 0.001, Z(90.0)), "Furniture")
         cutters.append(c.build())
     # The channel the lip runs back in as the slide cycles, the lip's own section with a hair's clearance: its
     # floor's corners rounded as the lip's, not box-edged (BP6).
