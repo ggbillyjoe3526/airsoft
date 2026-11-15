@@ -49,7 +49,6 @@ func before_each() -> void:
 	_w.time = 10.0
 
 
-
 func _look(at: Vector3, seconds: float) -> void:
 	_w.time += seconds
 	_you.position = at
@@ -122,9 +121,36 @@ func test_notice_time_is_the_same_at_every_level() -> void:
 		assert_eq(BotSenses.notice_time(b.character, p[1], d, config), t0)
 
 
-func test_a_scope_scales_the_flinch_with_the_rest_of_the_error() -> void:
-	# Documents the intent: the flinch is part of the error the scope scales (aim() multiplies the sum).
-	_b.suppressed_at = _w.time
-	var f := BotCombat.flinch(_b, _w)
-	assert_gt(f * _w.cfg.scoped_error_scale, 0.0)
-	assert_lt(_w.cfg.scoped_error_scale, 1.0)
+## How far (rad) `level`'s aim settles off you, seen and reacted to at OUT, with the wander held at one edge of its
+## disc and the clock still, with a near miss just now or none.
+func _held_off(level: StringName, near_miss: bool) -> float:
+	_b.skill = config.skill_for(level)
+	_look(OUT, 0.0)
+	assert_true(_b.target_visible, "seen in the open")
+	_b.suppressed_at = _w.time if near_miss else -INF
+	_b.first_yaw = 0.0
+	_b.first_pitch = 0.0
+	_b.err_yaw = 1.0
+	_b.goal_err_yaw = 1.0
+	_b.err_pitch = 0.0
+	_b.goal_err_pitch = 0.0
+	var eye := BotSenses.eye_of(_b.character, tuning)
+	var cmd := PlayerCommand.new()
+	for i in 120:
+		_b.wander_left = 1e6
+		BotCombat.aim(_b, _w, _you, eye, false, cmd, DT)
+	var point := BotSenses.body_point(_you, tuning.hits, _b.target_part)
+	return absf(wrapf(_b.aim_yaw - BotAim.look_yaw(eye, point), -PI, PI))
+
+
+func test_a_near_miss_throws_the_aim_off_by_the_levels_flinch_and_hard_least() -> void:
+	var last := INF
+	for level: StringName in [&"easy", &"normal", &"hard"]:
+		before_each()
+		var calm := _held_off(level, false)
+		before_each()
+		var shaken := _held_off(level, true)
+		assert_almost_eq(shaken - calm, deg_to_rad(config.skill_for(level).aim_error_under_fire_deg), 1e-4,
+				"%s: aim() lands the flinch's whole extra error off" % level)
+		assert_lt(shaken - calm, last, "%s flinches less than the level below" % level)
+		last = shaken - calm

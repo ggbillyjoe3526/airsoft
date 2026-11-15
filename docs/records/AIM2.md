@@ -1,6 +1,6 @@
 # AIM2 · Bots notice you like a person would, and flinch when you shoot back
 
-**Review:** 1 attempt · critic pending · qa pending · performance Pass (attempt 1, e76d160)
+**Review:** 2 attempts · critic pending · qa Pass (attempt 1, cee0f90) · performance Pass (attempt 1, e76d160)
 
 The owner's 2026-11-15 ask, after AIM1: "Go over all the bot ai and logic so their reaction, aim, accuracy, etc, are
 realistic and fair. Scale up and down for difficulty levels."
@@ -9,7 +9,8 @@ realistic and fair. Scale up and down for difficulty levels."
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | – | – |
+| 2026-11-15 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | The flinch's effect on aim() had no test |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | ✓ | – | – |
 
 ## What was found
 
@@ -67,18 +68,23 @@ shoot back there); in matches both teams play it.
   ask; the lead stays as it was (`lead_factor` per level).
 - **A pre-aimed Hard sighting notices as anyone does too** (QA's note): noticing comes before every reaction, the
   pre-aimed one included; Hard's pre-aim still answers 0.07 to 0.27 s sooner than a surprised one.
+- **Steady fire keeps a bot flinching:** every near miss starts the 0.6 s again, so a bot sprayed at from 20 m stays
+  about 0.7 m off. That is the point of shooting back; whether it makes bots too easy to pin is a play check (N15).
 - **The flinch rides on the near miss already there** (`suppressed_at`, `suppression_radius`), so a teammate's BBs
   never make a bot flinch, and a round's reset clears it with the rest.
 
 ## Verified
 
-- Bot matches, `SEEDS=16 LEVELS=normal tools/balance.sh depot` (6v6): Elimination Alpha 56.2 % ±4.5 (band 45 to 55,
+- Bot matches, `SEEDS=16 LEVELS=normal tools/balance.sh depot` (6v6), measured on 621588b with the AIM2 game code
+  uncommitted (the same as e76d160's; only a divide-by-zero guard came after): Elimination Alpha 56.2 % ±4.5 (band 45 to 55,
   outside within noise; the west end 51.2 %), no round to the clock, median round 49.2 s (47.7 s on AIM1), first hit
   15.3 s at 12.9 m (14.7 s at 14.5 m); Attack / Defend attackers 50.0 % ±4.6; Plant The Bomb attackers 42.6 % ±4.5
   (band 40 to 65). Both teams play the same rule.
 - `test_aim2_notice` (new): straight ahead close by is noticed almost at once, the view's edge and the far end are
   slower by their configured times, a runner is noticed in half the time, within `close_awareness` there is nothing to
-  notice, and the flinch eases off and is smallest on Hard.
+  notice, and the flinch eases off and is smallest on Hard. QA's `test_aim2_qa`: no flinch on a new or reset bot, no
+  NaN at the edges, a fresh contact waits the notice time and a re-pick-up doesn't, noticing is level-blind, and
+  (attempt 2) `BotCombat.aim()` itself settles the level's whole flinch further off after a near miss, least on Hard.
 - `test_bot_angles` measures the level's reaction past the noticing; `test_tl1_qa` skips the new skill field.
 - 100 bot test files (1,223 tests) pass.
 
