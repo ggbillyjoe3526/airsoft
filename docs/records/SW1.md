@@ -52,7 +52,9 @@ ends, 40 to 65 % for the attackers), Hard on 16 (band 40 to 60 %).
 | Plant The Bomb: armed / armed gone off | 82 % / 8 of 239 rounds (PB4) | 72 % / 10 of 161 | 66 % / 0 of 80 |
 | Rounds that run out the clock | 0 | 0 in every mode | 0 in every mode |
 
-Every figure is in its band and none near an edge, so nothing was tuned: the fuse stays 22 s. On the way, on the
+Every figure is in its band and none near an edge, so nothing was tuned: the fuse stays 22 s. FV1 (#366: indoor
+fields start on burst, bots fire bursts there) merged after these runs; the follow-up fuse re-tune on the new layouts
+(PB4's thread) measures on top of it. On the way, on the
 pre-merge bots: the first layout read Normal 49.8 / 58.1 / 56.6 % (west end, A/D, PTB) and Hard's west end 58.8 %;
 with the mouth piers and the concourse piers run out, Normal's west end 55.9 % (outside, within noise); with the
 concourse piers taken back, 49.4 %.

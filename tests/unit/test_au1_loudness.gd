@@ -180,9 +180,9 @@ func test_the_ambience_plays_at_its_share_of_its_level() -> void:
 		assert_almost_eq(audio._beds[1].volume_db, want, 1e-3)
 
 
-func test_the_ambience_volume_starts_at_20_percent() -> void:
-	assert_eq(Settings.VOLUME_DEFAULTS[&"Ambience"], 0.2)
-	assert_eq(Settings.new().volumes[&"Ambience"], 0.2)
+func test_the_ambience_volume_starts_at_30_percent() -> void:
+	assert_eq(Settings.VOLUME_DEFAULTS[&"Ambience"], 0.3, "owner, 2026-11-15 (FV1; 20 % from AU1 before)")
+	assert_eq(Settings.new().volumes[&"Ambience"], 0.3)
 
 
 func test_master_has_a_limiter() -> void:

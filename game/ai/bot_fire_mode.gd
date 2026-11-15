@@ -1,16 +1,17 @@
 class_name BotFireMode
 extends RefCounted
-## A bot's fire selector on a field with a start mode ("no full auto indoors", owner 2026-11-02, NA1): it keeps the
-## replica on the field's start mode (Armament.start_mode) and may go to full auto only for a target across open
-## ground down a long sight line (owner: "if the bot is aiming down that sight line and the target is in an open space
-## then the bots can go full auto. It's an option; it doesn't mean they have to"). The map's data says both: the sight
-## line is the level's own geometry along the aim (a ray, BotConfig.auto_line_min long), the open ground the nav grid's
-## open field (NavGrid.open, the clear space round the target's cell, BotConfig.auto_open_min). As a burst begins with
-## both true it decides once per target (BotConfig.auto_chance); it goes back to the start mode once the shot isn't
-## open any more or the target is gone. On semi it taps at a player's pace (pull). On a field without a start mode it
-## never touches the selector and pulls as it always has (bot kits come on full auto there, BotKits.kit_of). The owner's
-## exception (2026-11-14): a bot holding the Compact SMG (BotConfig.close_auto_replicas) goes full auto at a target in
-## sight within close_auto_range, open ground or not (close_auto).
+## A bot's fire selector on a field with a start mode ("no full auto indoors", owner 2026-11-02, NA1; burst, not semi,
+## since FV1, owner 2026-11-15): it keeps the replica on the field's start mode (Armament.start_mode) and may go to
+## full auto only for a target across open ground down a long sight line (owner: "if the bot is aiming down that sight
+## line and the target is in an open space then the bots can go full auto. It's an option; it doesn't mean they have
+## to"). The map's data says both: the sight line is the level's own geometry along the aim (a ray,
+## BotConfig.auto_line_min long), the open ground the nav grid's open field (NavGrid.open, the clear space round the
+## target's cell, BotConfig.auto_open_min). As a burst begins with both true it decides once per target
+## (BotConfig.auto_chance); it goes back to the start mode once the shot isn't open any more or the target is gone. On
+## semi or burst it taps at a player's pace (pull). On a field without a start mode it never touches the selector and
+## pulls as it always has (bot kits come on full auto there, BotKits.kit_of). The owner's exception (2026-11-14): a bot
+## holding the Compact SMG (BotConfig.close_auto_replicas) goes full auto at a target in sight within
+## close_auto_range, open ground or not (close_auto).
 ## Allocation-free.
 
 ## The sight line's check (one at a time: the bots think in turn).
@@ -19,11 +20,17 @@ static var _hit: RayHit = RayHit.new()
 
 ## The trigger this tick, given whether the bot `wants` it down (on semi, a fresh pull). On a field with a start mode a
 ## bot on semi pulls no faster than a player taps (BotConfig.semi_tap_gap), so semi indoors is slower than full auto
-## (a replica cycles a pull as fast as its full-auto rate, fire_rate); elsewhere, and in burst or auto, as wanted.
+## (a replica cycles a pull as fast as its full-auto rate, fire_rate). On burst there (the indoor start since FV1) each
+## pull is a fresh one too, the next a tap's gap after the burst before it ends: a held trigger gives one burst, and a
+## pull during a burst is lost (Armament). Elsewhere, and on full auto, as wanted.
 static func pull(b: Bot, w: BotWorld, wants: bool) -> bool:
 	var a := b.character.armament
-	if w.start_mode == ReplicaConfig.FireMode.AUTO or a.fire_mode() != ReplicaConfig.FireMode.SEMI:
+	var mode := a.fire_mode()
+	if w.start_mode == ReplicaConfig.FireMode.AUTO or mode == ReplicaConfig.FireMode.AUTO:
 		return wants
+	if mode == ReplicaConfig.FireMode.BURST and a.burst_shots_left > 0:
+		b.next_tap = w.time + w.cfg.semi_tap_gap
+		return false
 	if not wants or w.time < b.next_tap:
 		return false
 	b.next_tap = w.time + w.cfg.semi_tap_gap

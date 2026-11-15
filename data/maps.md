@@ -31,7 +31,9 @@ warning; a map with no row is not listed.
   comes on full auto to its highest mode no higher (SEMI, then BURST, then AUTO), any replica now or added later, the
   bots' too; you can still switch to auto in the round. Blank or `auto` starts every replica as it comes, and a
   selector stays as set for the match. Anything else starts them as they come, with a warning. "No full auto indoors"
-  (owner, 2026-11-02): Depot, the one fully indoor field, starts on `semi`.
+  (owner, 2026-11-02): the indoor fields, Depot and Subway, start on `burst` (owner, 2026-11-15; it was `semi`), so
+  the AEG starts on burst there, and a replica without burst (the Compact SMG) on semi. A replica that comes on semi
+  anywhere (the Cyber) starts on semi there too.
 - **Wind (×)** is the share of the match's breeze that reaches the field (PH1): 0 indoors, where the air stands still
   and BBs fly straight; 1 in the open, where each match draws a breeze of 0.3 to 1.8 m/s that drifts BBs (about 30 cm
   at 30 m for a rifle at its strongest; `game/config/wind_config.gd`). 0 to 2; blank is 1.
@@ -45,7 +47,7 @@ warning; a map with no row is not listed.
 
 | Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Fuse (s) | Start mode | Wind (×) | Air (°C) | Blurb |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| depot | Depot | field | public | 5 | 6 | 8 |  |  | 16 | semi | 0 | 20 | An indoor airsoft hall: three lanes, two dark tunnels. |
+| depot | Depot | field | public | 5 | 6 | 8 |  |  | 16 | burst | 0 | 20 | An indoor airsoft hall: three lanes, two dark tunnels. |
 | woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 23 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
-| subway | Subway | field | dev | 5 | 6 | 8 |  |  | 22 | semi | 0 | 14 | A closed metro station on two levels, from the ticket hall and concourse down to the trains. |
+| subway | Subway | field | dev | 5 | 6 | 8 |  |  | 22 | burst | 0 | 14 | A closed metro station on two levels, from the ticket hall and concourse down to the trains. |
 | range | Range | range | public | 1 | 1 | 1 |  |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |
