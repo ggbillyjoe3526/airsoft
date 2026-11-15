@@ -178,7 +178,7 @@ func test_carry_records_the_cars_rise_for_a_rider_and_zero_off_the_car() -> void
 	lifts.carry(rider, state)
 	assert_almost_eq(rider.lift_rise, rider.position.y - before, 1e-6, "what the car carried it")
 	assert_gt(rider.lift_rise, 0.0)
-	rider.position = spec.landing_point(2, tuning.lifts)
+	rider.position = spec.landing_point(spec.stops.size() - 1, tuning.lifts)
 	lifts.carry(rider, state)
 	assert_eq(rider.lift_rise, 0.0, "off the car the last tick's rise is forgotten")
 	state.rise[0] = 0.0

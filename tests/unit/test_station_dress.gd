@@ -64,7 +64,8 @@ func test_subway_names_its_station_and_the_other_maps_none() -> void:
 	var m := _map("subway")
 	assert_not_null(m.station, "Subway is station-dressed")
 	assert_gt(m.station.zones.size(), 60, "its rooms' air")
-	assert_eq(m.station.strips.size(), 12, "two strips on each platform's edge, one off each end of four flights (SD2)")
+	assert_eq(m.station.strips.size(), 10,
+			"two strips on each platform's edge, one off each end of three flights (SD2; the upper escalators went, SW1)")
 	assert_eq(m.station.tracks.size(), 4, "both lines, either side of the trains")
 	assert_eq(m.warnings.filter(func(w: String) -> bool: return w.contains("station")), [], "no warnings")
 	for id: String in ["depot", "woodland", "range"]:
@@ -94,9 +95,9 @@ func test_every_style_the_map_names_is_one_the_look_knows() -> void:
 
 func test_each_face_takes_its_room_s_finish() -> void:
 	var m := _map("subway")
-	assert_eq(_finish_at(m, Vector3(-45.0, 18.9, 5.0), Vector3.UP), &"hall_floor", "the ticket hall's floor, plain")
-	assert_eq(_finish_at(m, Vector3(-62.0, 20.0, 0.0), Vector3.RIGHT), &"wall_tile", "the ticket hall's west wall")
-	assert_eq(_finish_at(m, Vector3(-50.0, 24.9, 0.0), Vector3.DOWN), &"plaster", "the ticket hall's ceiling")
+	assert_eq(_finish_at(m, Vector3(-45.0, 8.9, 5.0), Vector3.UP), &"hall_floor", "the ticket hall's floor, plain")
+	assert_eq(_finish_at(m, Vector3(-55.0, 10.0, 0.0), Vector3.RIGHT), &"wall_tile", "the ticket hall's west wall")
+	assert_eq(_finish_at(m, Vector3(-50.0, 13.4, 0.0), Vector3.DOWN), &"plaster", "the ticket hall's ceiling")
 	assert_eq(_finish_at(m, Vector3(0.0, 0.9, -7.0), Vector3.UP), &"platform_floor", "the north platform")
 	assert_eq(_finish_at(m, Vector3(-30.0, 0.0, 11.5), Vector3.UP), &"ballast", "the south track bed")
 	assert_eq(_finish_at(m, Vector3(70.0, 1.5, 12.6), Vector3.FORWARD), &"lining", "the south running tunnel's wall")
@@ -107,10 +108,10 @@ func test_each_face_takes_its_room_s_finish() -> void:
 
 func test_a_lift_shaft_wears_each_storey_s_walls_and_paint_inside() -> void:
 	var m := _map("subway")
-	assert_eq(_finish_at(m, Vector3(-43.55, 20.0, -1.2), Vector3.FORWARD), &"wall_tile",
-			"the shaft's front in the ticket hall")
 	assert_eq(_finish_at(m, Vector3(-43.55, 10.0, -1.2), Vector3.FORWARD), &"wall_tile",
-			"the shaft's front on the concourse")
+			"the shaft's front in the ticket hall")
+	assert_eq(_finish_at(m, Vector3(-43.55, 2.0, -1.2), Vector3.FORWARD), &"wall_tile",
+			"the shaft's front on the lift landing")
 	assert_eq(_finish_at(m, Vector3(-43.55, 3.0, -0.9), Vector3.BACK), &"painted", "the shaft's wall inside its well")
 
 
@@ -118,15 +119,15 @@ func test_the_escalators_are_tread_and_the_cover_its_kind_s() -> void:
 	var m := _map("subway")
 	var treads := 0
 	for b in m.blocks:
-		if b.kind == &"ramp" and b.center.x > -37.0 and b.center.x < -19.0 and absf(b.center.z) > 0.5:
+		if b.kind == &"ramp" and b.center.x > -5.0 and b.center.x < 9.0 and absf(b.center.z) > 0.5:
 			for f in GreyboxFaces.faces_of(b):
 				if GreyboxFaces.face_normal(f).y > 0.5:
-					assert_eq(StationSurface.finish_of_face(m, look, b, f), &"tread", "the upper escalators' steps")
+					assert_eq(StationSurface.finish_of_face(m, look, b, f), &"tread", "the escalators' steps")
 					treads += 1
 		if look.kind_finishes.has(b.kind) and m.station.owner_of(b) == &"":
 			var f0 := GreyboxFaces.faces_of(b)[0]
 			assert_eq(StationSurface.finish_of_face(m, look, b, f0), look.kind_finishes[b.kind], "a %s" % b.kind)
-	assert_gt(treads, 10, "the upper escalators' ramp")
+	assert_gt(treads, 10, "the escalators' ramp")
 
 
 func test_almost_every_floor_faces_the_room_it_carries() -> void:

@@ -410,14 +410,15 @@ func test_a_stop_called_on_the_way_is_stopped_at() -> void:
 	assert_eq(state.lifts.stop[0], 2, "then on up")
 
 
-func test_subway_lists_two_lifts_of_three_stops() -> void:
+func test_subway_lists_two_lifts_of_two_stops() -> void:
 	var m := MapData.load_map("subway", MapStyle.new(), 6)
 	assert_not_null(m)
 	assert_eq(m.lifts.size(), 2)
 	for spec in m.lifts:
-		assert_eq(spec.stop_count(), 3)
-		assert_eq(spec.stop_names[2], "Ticket hall")
-	assert_eq(m.lifts[0].start, 2, "one car waits at the hall")
+		assert_eq(spec.stop_count(), 2, "the platforms and the ticket hall, one level since SW1")
+		assert_eq(spec.stop_names[0], "Platforms")
+		assert_eq(spec.stop_names[1], "Ticket hall")
+	assert_eq(m.lifts[0].start, 1, "one car waits at the hall")
 	assert_eq(m.lifts[1].start, 0, "the other at the platforms")
 
 
@@ -453,15 +454,15 @@ func test_jolt_moves_subway_s_car_and_switches_its_doorways_at_once() -> void:
 	var mid := spec.car_point(spec.stops[1])
 	var hit := RayHit.new()
 	q.set_lift_car(0, spec.stops[1])
-	assert_true(q.ray(mid + Vector3(0, 1.0, 0), mid - Vector3(0, 1.0, 0), hit), "the car's floor at the concourse")
+	assert_true(q.ray(mid + Vector3(0, 1.0, 0), mid - Vector3(0, 1.0, 0), hit), "the car's floor at the hall")
 	assert_almost_eq(hit.position.y, spec.stops[1], 1e-3)
 	assert_eq(hit.surface, RayHit.Surface.METAL)
-	q.set_lift_car(0, spec.stops[2])
-	assert_false(q.ray(mid + Vector3(0, 1.0, 0), mid - Vector3(0, 1.0, 0), hit), "moved up, at once")
+	q.set_lift_car(0, spec.stops[0])
+	assert_false(q.ray(mid + Vector3(0, 1.0, 0), mid - Vector3(0, 1.0, 0), hit), "moved down, at once")
 	var door := spec.door_center(1)
 	var across := Vector3(0.0, 0.0, 1.0)
 	q.set_lift_door(0, 1, true)
-	assert_true(q.ray(door - across, door + across, hit), "the concourse's doorway shut")
+	assert_true(q.ray(door - across, door + across, hit), "the hall's doorway shut")
 	q.set_lift_door(0, 1, false)
 	q.set_lift_car(0, spec.stops[0])
 	assert_false(q.ray(door - across + Vector3(0, -0.5, 0), door + across * 0.6, hit), "open, a clear doorway")
@@ -491,16 +492,16 @@ func test_a_ride_on_subway_takes_a_body_from_the_platforms_to_the_hall() -> void
 	cmd.reset(PI, 0.0)
 	cmd.use_door = true
 	cmd.lift_to_use = 1
-	cmd.lift_stop = 2
+	cmd.lift_stop = 1
 	sim.step(state, cmds, DT)
-	for t in _ticks(cfg.door_time + cfg.floor_time * 2.0 + cfg.door_time):
+	for t in _ticks(cfg.door_time + cfg.floor_time + cfg.door_time):
 		cmd.reset(PI, 0.0)
 		sim.step(state, cmds, DT)
-	assert_true(state.lifts.open_at(1, 2), "open at the hall")
-	assert_almost_eq(me.position.y, spec.stops[2] + tuning.body.rest_gap, 0.05, "rode up with it")
+	assert_true(state.lifts.open_at(1, 1), "open at the hall")
+	assert_almost_eq(me.position.y, spec.stops[1] + tuning.body.rest_gap, 0.05, "rode up with it")
 	for t in 120:
 		cmd.reset(0.0, 0.0)
 		cmd.forward = 1.0
 		sim.step(state, cmds, DT)
-	assert_lt(me.position.z, spec.landing_point(2, cfg).z + 0.3, "walked out into the ticket hall")
-	assert_almost_eq(me.position.y, spec.stops[2] + tuning.body.rest_gap, 0.05)
+	assert_lt(me.position.z, spec.landing_point(1, cfg).z + 0.3, "walked out into the ticket hall")
+	assert_almost_eq(me.position.y, spec.stops[1] + tuning.body.rest_gap, 0.05)
