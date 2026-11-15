@@ -13,19 +13,19 @@ from mathutils import Vector
 from PIL import Image, ImageDraw, ImageFont
 
 
-def _prop_material() -> None:
+def _prop_material(roughness: float) -> None:
     m = bpy.data.materials.get("Prop")
     if m is None:
         return
     m.use_nodes = True
     nt = m.node_tree
     bsdf = nt.nodes.get("Principled BSDF")
+    bsdf.inputs["Roughness"].default_value = roughness
     if any(n.type == "ATTRIBUTE" for n in nt.nodes):
         return
     at = nt.nodes.new("ShaderNodeAttribute")
     at.attribute_name = "Color"
     nt.links.new(at.outputs["Color"], bsdf.inputs["Base Color"])
-    bsdf.inputs["Roughness"].default_value = 0.7
 
 
 def _stage(floor: bool) -> None:
@@ -59,8 +59,9 @@ def _stage(floor: bool) -> None:
 
 
 def render_sheet(views: list, out: str, title: str, size: tuple = (640, 480), floor: bool = True,
-                 cols: int = 3) -> None:
-    _prop_material()
+                 cols: int = 3, roughness: float = 0.7) -> None:
+    """`roughness` is the model's as the game draws it (PropDressConfig.roughness or its model_roughness)."""
+    _prop_material(roughness)
     _stage(floor)
     sc = bpy.context.scene
     sc.render.resolution_x, sc.render.resolution_y = size

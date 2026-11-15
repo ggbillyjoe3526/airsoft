@@ -9,7 +9,8 @@ extends GutTest
 
 const BUDGETS := {
 	&"fallen_log_5": 1500, &"fallen_log_6": 1500, &"fallen_log_8": 1500, &"root_plate": 4000, &"cordwood": 3200,
-	&"cordwood_b": 3200, &"cordwood_c": 3200, &"boards": 1500, &"sawbench": 2000, &"earth_bank": 340,
+	&"cordwood_b": 3200, &"cordwood_c": 3200, &"cordwood_start": 3200, &"cordwood_end": 3200, &"cordwood_single": 3200,
+	&"boards": 1500, &"sawbench": 2000, &"earth_bank": 340,
 }
 const FOLIAGE_BUDGETS := {"fern_model": 400, "bush_model": 1500}
 const GROUNDED: Array[StringName] = [
@@ -113,8 +114,15 @@ func test_an_earth_bank_stands_only_under_a_grounded_prop_and_under_the_ground_a
 func test_every_woodpile_is_one_section_high_inside_its_box_its_sections_mixed() -> void:
 	var sections := cfg.variants_of(&"cordwood")
 	assert_eq(sections.size(), 3, "three cordwood sections")
-	for model in sections:
-		assert_true(placed.has(model), "Woodland's woodpiles lay %s" % model)
+	# and each stack's first and last sections are its end models (RM2), held to the same box and shade
+	var models: Array[StringName] = sections.duplicate()
+	for end: String in cfg.grid_ends.get(&"cordwood", PackedStringArray()):
+		models.append(StringName(end))
+	assert_eq(models.size(), 6, "three middle sections and three end models")
+	for model in models:
+		# every stack is two sections long or more, so the one-section model need not be laid
+		if model != &"cordwood_single":
+			assert_true(placed.has(model), "Woodland's woodpiles lay %s" % model)
 		if not placed.has(model):
 			continue
 		var box := dress.mesh_of(model).get_aabb()
