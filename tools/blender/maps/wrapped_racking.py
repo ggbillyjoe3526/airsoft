@@ -20,17 +20,18 @@ BEAM_TOP = 1.58
 GALV = "concrete*0.88"
 GALV_SLOTS = "ink*1.25"
 GALV_BRACE = "concrete*0.78"
-FILM = "cream*0.93"
+FILM = "sand*1.08"
 STRAP = "rubber*0.9"
 Y0 = pr.FRONT + 0.075           # a load's front, set back from the beam's face
 Y1 = bk.BACK
 DECK = ["crate*1.0", "timber*1.12", "crate*0.92", "plywood*0.95"]
 
 
-def film_ends(p: prop.Prop, x0: float, x1: float, z_deck: float, z_top: float, y: float) -> None:
-    """The film where it leaves the load: gathered over the pallet's top board below and rolled over the top edge."""
+def film_ends(p: prop.Prop, x0: float, x1: float, z_deck: float, z_top: float, y: float, roll: str = "sand*1.1") -> None:
+    """The film where it leaves the load: gathered over the pallet's top board below and rolled softly over the top
+    edge."""
     p.front_decal(x0 + 0.01, x1 - 0.01, z_deck - 0.03, z_deck + 0.035, y - 0.004, FILM)
-    p.front_decal(x0 + 0.02, x1 - 0.02, z_top - 0.035, z_top - 0.004, y - 0.004, "cream*0.97")
+    bk.film_roll(p, x0 + 0.02, x1 - 0.02, y, z_top, roll)
 
 
 def ticket(p: prop.Prop, x: float, z: float, y: float) -> None:
@@ -51,7 +52,7 @@ def tail(p: prop.Prop, x: float, z: float, y: float, side: float) -> None:
 def kraft(p: prop.Prop, cx: float, z: float, w: float, h: float, cols: int, rows: int, seed: int) -> None:
     """Kraft cartons stacked in bonded rows, each labelled, wrapped in film (photos 2 to 4)."""
     x0, x1 = cx - w / 2, cx + w / 2
-    bk.chamfered(p, x0, x1, Y0, Y1, z, z + h, 0.025, "crate*0.62", "crate*0.97", "plywood*1.1")
+    bk.chamfered(p, x0, x1, Y0, Y1, z, z + h, 0.025, "crate*0.62", "crate*0.97", "crate*1.1")
     shades = ["crate*0.98", "crate*1.06", "crate*0.94", "crate*1.01", "sand*1.04"]
     ch = h / rows
     for r in range(rows):
@@ -61,6 +62,8 @@ def kraft(p: prop.Prop, cx: float, z: float, w: float, h: float, cols: int, rows
             [x1 - 0.025]
         for i in range(len(edges) - 1):
             carton = shades[(r * 3 + i + seed) % len(shades)]
+            if bk.in_sheen((edges[i] + edges[i + 1]) / 2, z + (r + 0.5) * ch, x0, x1, z, z + h, seed):
+                carton += "*1.09"  # the film's sheen over it
             bk.carton_face(p, edges[i], edges[i + 1], z + r * ch, z + (r + 1) * ch, Y0, carton,
                            label=(r + i + seed) % 2 == 0 and edges[i + 1] - edges[i] > 0.25)
         # the cartons down the load's sides, seen at a rack's end
@@ -111,7 +114,7 @@ def silver(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> 
         zz = z + h * (0.12 + 0.18 * j)
         p.front_decal(x0 + 0.04, x1 - 0.04, zz, zz + 0.05, Y0 - 0.001, "concrete*0.84" if j % 2 else "concrete*0.97")
     bk.sheen(p, x0 + 0.04, x1 - 0.04, z + 0.05, z + h - 0.05, Y0 - 0.003, seed, "concrete*0.96", "concrete*1.08")
-    bk.glare(p, x0 + 0.07, x1 - 0.07, z, z + h, Y0 - 0.004, seed, "concrete*1.14")
+    bk.glare(p, x0 + 0.07, x1 - 0.07, z, z + h, Y0 - 0.004, seed, "concrete*1.04", "concrete*1.1")
     # cardboard edge boards up the front corners, under the straps
     for ex, s in ((x0, 1.0), (x1, -1.0)):
         p.box((min(ex, ex + s * 0.07), Y0 - 0.008, z + 0.02), (max(ex, ex + s * 0.07), Y0 + 0.002, z + h - 0.01),
@@ -121,7 +124,7 @@ def silver(p: prop.Prop, cx: float, z: float, w: float, h: float, seed: int) -> 
     for sx in (cx - w * 0.22, cx + w * 0.22):
         p.box((sx - 0.016, Y0 - 0.006, z - 0.12), (sx + 0.016, Y0, z + h), STRAP)
         p.box((sx - 0.016, Y0, z + h), (sx + 0.016, 0.0, z + h + 0.005), STRAP)
-    film_ends(p, x0, x1, z, z + h, Y0)
+    film_ends(p, x0, x1, z, z + h, Y0, "concrete*1.05")
     ticket(p, cx - 0.075, z + h * 0.45, Y0 - 0.007)
 
 

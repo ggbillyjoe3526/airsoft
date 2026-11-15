@@ -100,7 +100,7 @@ def fire_point() -> sk.Mesh:
     """Photo 3's fire point, its wall-mounting version: a white moulded board 0.62 m wide and 1.55 m tall with its
     carry handle's slots across the top, the printed "Fire Point" header, the alarm unit and the sounder's housing,
     the fire action notice and the red document tube, over the red moulded housing that hides the two extinguishers,
-    its flared lip, its dark viewing slot, its ribs and its latch. Its foot at y = 0 (hung 0.3 m off the floor)."""
+    its raised ears, its dark viewing slot and its latch. Its foot at y = 0 (hung 0.3 m off the floor)."""
     m = sk.Mesh("fire_point")
     w, b0, b1, d = 0.31, 0.42, 1.55, 0.03
     # the board: its rounded corners by chamfers, its edge, its moulded grid, the handle's three slots
@@ -134,22 +134,24 @@ def fire_point() -> sk.Mesh:
     # the fire action notice and the document tube with its black cap
     m.sign("fire_action", [(-0.27, b0 + 0.2, d + 0.002), (-0.05, b0 + 0.2, d + 0.002),
                            (-0.05, b0 + 0.48, d + 0.002), (-0.27, b0 + 0.48, d + 0.002)], cells=depot_cells)
-    m.lathe([(0.04, 0.0), (0.04, 0.2)], 10, (0.0, b0 + 0.3, d + 0.04), "fire", axis="x", cap_top=False,
-            cap_bottom=False)
-    m.lathe([(0.0, 0.2), (0.042, 0.2), (0.042, 0.26), (0.0, 0.26)], 10, (0.0, b0 + 0.3, d + 0.04), "black", axis="x")
-    m.face([(0.04, b0 + 0.3, d + 0.0805), (0.16, b0 + 0.3, d + 0.0805), (0.16, b0 + 0.33, d + 0.0805),
-            (0.04, b0 + 0.33, d + 0.0805)], "white")
-    # the moulded housing over the extinguishers: a sloped front under a flared lip, the dark viewing slot, two ribs,
-    # the latch at its foot
-    hw, hd, top = 0.34, 0.3, 0.56
-    m.prism_x([(0.0, 0.0), (0.0, hd - 0.05), (0.05, hd), (top - 0.1, hd), (top - 0.02, hd + 0.04), (top, hd + 0.02),
-               (top, 0.0)][::-1], -hw, hw, "fire", open_edges=(0, 6))
-    m.box((-hw - 0.01, top - 0.04, 0.0), (hw + 0.01, top, hd + 0.045), "fire", skip="b")
-    m.face([(-0.13, top - 0.24, hd + 0.001), (0.13, top - 0.24, hd + 0.001), (0.13, top - 0.15, hd + 0.001),
-            (-0.13, top - 0.15, hd + 0.001)], "black")
-    for x in (-0.24, 0.24):
-        m.box((x - 0.02, 0.06, hd - 0.004), (x + 0.02, top - 0.12, hd + 0.012), "fire_dark", skip="b")
-    m.box((-0.025, 0.02, hd), (0.025, 0.1, hd + 0.03), "black", skip="b")
+    m.lathe([(0.0, -0.04), (0.045, -0.04), (0.045, 0.22)], 8, (0.0, b0 + 0.3, d + 0.045), "fire", axis="x",
+            cap_top=False)
+    m.lathe([(0.0, 0.22), (0.047, 0.22), (0.047, 0.28), (0.0, 0.28)], 8, (0.0, b0 + 0.3, d + 0.045), "black", axis="x")
+    m.face([(0.02, b0 + 0.3, d + 0.0905), (0.17, b0 + 0.3, d + 0.0905), (0.17, b0 + 0.33, d + 0.0905),
+            (0.02, b0 + 0.33, d + 0.0905)], "white")
+    # the moulded housing over the extinguishers (photo 3): an inset foot, a front that bulges out a little, the lid
+    # sloping back up to the board between two raised ears, the wide dark viewing slot and the latch at its foot
+    hw, hd, top = 0.33, 0.28, 0.47
+    m.prism_x([(0.0, 0.0), (0.0, hd - 0.06), (0.09, hd - 0.06), (0.13, hd), (0.24, hd + 0.018), (0.33, hd + 0.01),
+               (0.39, hd - 0.02), (top, 0.13), (top, 0.0)][::-1], -hw, hw, "fire", open_edges=(8,))
+    for x0, x1 in ((-hw - 0.005, -hw + 0.06), (hw - 0.06, hw + 0.005)):
+        m.prism_x([(top - 0.1, 0.0), (top - 0.1, 0.17), (top + 0.04, 0.12), (top + 0.04, 0.0)][::-1], x0, x1, "fire",
+                  open_edges=(3,))
+    slot = [(-0.15, 0.27), (0.15, 0.27), (0.17, 0.29), (0.17, 0.32), (0.15, 0.34), (-0.15, 0.34), (-0.17, 0.32),
+            (-0.17, 0.29)]
+    m.face([(x, y, hd + 0.0185) for x, y in slot], "black")
+    m.box((-0.022, 0.025, hd - 0.062), (0.022, 0.11, hd - 0.03), "black", skip="b")
+    m.box((-0.012, 0.11, hd - 0.004), (0.012, 0.14, hd + 0.01), "black", skip="b")
     return m
 
 
@@ -214,27 +216,37 @@ def _fittings(m: sk.Mesh, rm: float, ym: float, zm: float) -> None:
     under the services, and a junction box under the cable basket with its conduit into the wall."""
     # the gate valve at 2 m: its flanged body, the bonnet out towards the hall and the red handwheel on its stem
     vx = 2.0
-    for x0, x1 in ((vx - 0.11, vx - 0.08), (vx + 0.08, vx + 0.11)):
-        m.lathe([(rm + 0.03, x0), (rm + 0.03, x1)], 10, (0.0, ym, zm), "fire_dark", axis="x", smooth=False)
-    m.lathe([(rm + 0.015, vx - 0.08), (rm + 0.015, vx + 0.08)], 10, (0.0, ym, zm), "fire", axis="x",
+    # the two flanges, each capped on its outer face (the inner ones meet the body)
+    for x0, x1, low in ((vx - 0.11, vx - 0.08, True), (vx + 0.08, vx + 0.11, False)):
+        m.lathe([(rm + 0.03, x0), (rm + 0.03, x1)], 8, (0.0, ym, zm), "fire_dark", axis="x", smooth=False,
+                cap_bottom=low, cap_top=not low)
+    m.lathe([(rm + 0.015, vx - 0.08), (rm + 0.015, vx + 0.08)], 6, (0.0, ym, zm), "fire", axis="x",
             cap_top=False, cap_bottom=False)
     zb = zm + rm
     m.box((vx - 0.04, ym - 0.04, zb), (vx + 0.04, ym + 0.04, zb + 0.09), "fire_dark")
     m.tube([(vx, ym, zb + 0.09), (vx, ym, zb + 0.15)], 0.008, "galv", sides=4)
-    m.lathe([(0.085, zb + 0.13), (0.085, zb + 0.15)], 10, (vx, ym, 0.0), "fire", axis="z", smooth=False)
-    m.box((vx - 0.085, ym - 0.006, zb + 0.134), (vx + 0.085, ym + 0.006, zb + 0.146), "fire")
-    m.box((vx - 0.006, ym - 0.085, zb + 0.134), (vx + 0.006, ym + 0.085, zb + 0.146), "fire")
+    # the handwheel: a ring on its two spokes, open between them
+    m.lathe([(0.072, zb + 0.13), (0.085, zb + 0.13), (0.085, zb + 0.15), (0.072, zb + 0.15)], 8, (vx, ym, 0.0),
+            "fire", axis="z", cap_top=False, cap_bottom=False, smooth=False)
+    m.box((vx - 0.075, ym - 0.006, zb + 0.134), (vx + 0.075, ym + 0.006, zb + 0.146), "fire_dark")
+    m.box((vx - 0.006, ym - 0.075, zb + 0.134), (vx + 0.006, ym + 0.075, zb + 0.146), "fire_dark")
     # a drop off the main's front at 3.4 m, out past the lagged pipe and down to a pendant sprinkler head
     dx, dz = 3.4, 0.645
-    m.lathe([(rm + 0.008, dx - 0.04), (rm + 0.008, dx + 0.04)], 8, (0.0, ym, zm), "fire_dark", axis="x", smooth=False)
+    m.lathe([(rm + 0.008, dx - 0.04), (rm + 0.008, dx + 0.04)], 8, (0.0, ym, zm), "fire_dark", axis="x", smooth=False,
+            cap_top=False, cap_bottom=False)
     m.tube([(dx, ym, zb), (dx, ym, dz), (dx, -0.06, dz)], 0.016, "fire", sides=6)
-    m.lathe([(0.022, -0.06), (0.016, -0.085), (0.006, -0.095), (0.03, -0.1)], 6, (dx, 0.0, dz), "galv", axis="y",
+    # the pendant head: its brass boss, the frame's two arms down to the deflector disc
+    m.lathe([(0.024, -0.05), (0.024, -0.075), (0.012, -0.085)], 6, (dx, 0.0, dz), "galv", axis="y", smooth=False)
+    for side in (-1.0, 1.0):
+        m.box((dx + side * 0.016 - 0.004, -0.13, dz - 0.004), (dx + side * 0.016 + 0.004, -0.075, dz + 0.004), "galv")
+    m.lathe([(0.0, -0.135), (0.04, -0.135), (0.04, -0.128), (0.0, -0.128)], 8, (dx, 0.0, dz), "galv", axis="y",
             smooth=False)
     # the junction box hung under the basket's front edge at 0.6 m, its label, and its conduit into the wall
     m.box((0.5, -0.16, 0.585), (0.7, 0.05, 0.63), "slot")
     m.face_toward([(0.53, -0.04, 0.6305), (0.67, -0.04, 0.6305), (0.67, 0.0, 0.6305), (0.53, 0.0, 0.6305)],
                   (0, 0, 1), "board")
     m.tube([(0.6, -0.16, 0.607), (0.6, -0.24, 0.6), (0.6, -0.26, 0.5), (0.6, -0.26, 0.0)], 0.012, "charcoal", sides=4)
+    m.box((0.57, -0.28, 0.0), (0.63, -0.24, 0.03), "galv", skip="b")
 
 
 def main() -> None:

@@ -5,10 +5,10 @@
   pallet racking; the others take turns through RACK_TURNS (racking, wrapped racking, drum and IBC stacks, a parts
   cage), so no area is all one kind.
 - `fixtures`: the look-only models on the hall's walls and pillars (StationFixtures draws them: no collider, no nav
-  cell, no shadow): the pipework along every wall at PIPE_Y, safety signs over the racking, fire points and cable
-  on open walls by the columns, the "keep clear" sign beside each fire exit, and a call point and an
-  extinguisher on each pillar. Each spot is checked clear of every block in front of it, so a model never stands in
-  a stack or behind a wall, wherever the layout puts them.
+  cell, no shadow): the pipework along every wall at PIPE_Y (every third 4 m length the fitted one), fire points
+  and the safety signs at eye height on the open walls by the columns, the "keep clear" sign beside each fire exit,
+  and a call point and an extinguisher on each pillar. Each spot is checked clear of every block in front of it, so
+  a model never stands in a stack or behind a wall, wherever the layout puts them.
 
 The hall's walls are laid by PropLayout._bays as bays of the hall wall model (hall_wall.py) on an 8 m grid, with a
 column at each bay's ends and up to two feature bays a wall (a shutter or a fire exit, taken in turn) where the wall

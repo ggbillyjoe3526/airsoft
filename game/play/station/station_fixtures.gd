@@ -3,7 +3,7 @@ extends Node3D
 ## A station's lamps and extras (SM5, Subway: MapData.station's fixtures): the running tunnels' bulkhead lamps, the
 ## station's name boards, way-out signs, posters, clocks, CCTV cameras, fire extinguishers, litter bins and the
 ## platform edges' warnings; and a hall's wall extras (DX1, Depot: MapData.fixtures, its fire points, call points,
-## cable reels, pipework and safety signs). One MultiMesh a model (StationFixturesConfig). A lamp's glass glows (no
+## pipework and safety signs). One MultiMesh a model (StationFixturesConfig). A lamp's glass glows (no
 ## real light: the ceilings' strip lamps light the station, RoofView), a printed face shows its sign sheet. Look only:
 ## no collider, no shadow, nothing the simulation reads. Built once; nothing runs a frame.
 

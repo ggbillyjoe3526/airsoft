@@ -145,16 +145,37 @@ def sheen(p: prop.Prop, x0: float, x1: float, z0: float, z1: float, y: float, se
                 (u + 0.02, y - 0.001, z1 - 0.04)], lines)
 
 
+def sheen_band(x0: float, x1: float, z0: float, z1: float, seed: int) -> tuple:
+    """The broad band of sheen the light lays across a wrapped load's face, rising left to right: its lower edge's
+    height at x0 and at x1, and its height."""
+    t = (z1 - z0) * 0.32
+    za, zb = z0 + 0.06, z1 - 0.06 - (z1 - z0) * (0.12 + 0.1 * (seed % 3))
+    return za, zb - t, t
+
+
+def in_sheen(x: float, z: float, x0: float, x1: float, z0: float, z1: float, seed: int) -> bool:
+    """Whether (x, z) on a load's face lies in its sheen_band."""
+    za, zb, t = sheen_band(x0, x1, z0, z1, seed)
+    low = za + (zb - za) * (x - x0) / max(x1 - x0, 1e-6)
+    return low <= z <= low + t
+
+
 def glare(p: prop.Prop, x0: float, x1: float, z0: float, z1: float, y: float, seed: int,
-          paint: str = "cream*1.06") -> None:
-    """Where stretch film shows as film over a load: the pale glare down the front's two edges, where the film turns
-    the corner and catches the light, and a few slanting wrinkles where the wrapper stretched it unevenly (photos 2 to
-    4 and 7)."""
-    for a, b in ((x0 + 0.01, x0 + 0.045), (x1 - 0.045, x1 - 0.01)):
-        p.front_decal(a, b, z0 + 0.03, z1 - 0.03, y, paint)
+          paint: str = "", wrinkle: str = "crate*1.16") -> None:
+    """Where stretch film shows as film over a load (photos 2 to 4 and 7): the broad sheen the light lays across the
+    face (`paint`, an opaque film's; a see-through film's lightens the cartons under it instead, by in_sheen), and a few
+    slanting wrinkles where the wrapper stretched it unevenly; all a shade lighter than the load, never a white frame."""
     k = seed * 104729
+    if paint:
+        za, zb, t = sheen_band(x0, x1, z0, z1, seed)
+        p.quad([(x0 + 0.03, y, za), (x1 - 0.03, y, zb), (x1 - 0.03, y, zb + t), (x0 + 0.03, y, za + t)], paint)
     for j in range(3):
         u = x0 + (x1 - x0) * (0.18 + 0.27 * j + 0.05 * ((k >> j) % 3))
         zz = z0 + (z1 - z0) * (0.2 + 0.22 * ((k >> (j + 2)) % 3))
         p.quad([(u, y - 0.0005, zz), (u + 0.16, y - 0.0005, zz + 0.05), (u + 0.16, y - 0.0005, zz + 0.062),
-                (u, y - 0.0005, zz + 0.012)], paint)
+                (u, y - 0.0005, zz + 0.012)], wrinkle)
+
+
+def film_roll(p: prop.Prop, x0: float, x1: float, y: float, z: float, paint: str, r: float = 0.03) -> None:
+    """The film's soft roll over a load's top front edge (y, z), where the last turns are pulled over the top."""
+    p.lathe([(x0, r), (x1, r)], paint, 8, (0.0, y + r * 0.6, z - r * 0.6), axis="x", cap=False)

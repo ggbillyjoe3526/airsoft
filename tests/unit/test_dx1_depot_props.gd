@@ -14,7 +14,7 @@ const EXTRA_BUDGETS := {
 	&"depot_sign_ppe": 52, &"depot_sign_pallet_storage": 52, &"depot_sign_fire_exit": 52,
 }
 ## How far (m) a shutter's opening, its guides and their hazard posts reach from its bay's middle (hall_wall.py), and
-## a fire point's or a reel's half width.
+## a fire point's half width.
 const SHUTTER_REACH := 2.53
 const EXTRA_HALF := 0.3
 

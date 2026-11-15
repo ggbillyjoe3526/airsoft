@@ -56,7 +56,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"desk": "res://assets/models/props/office_desk.glb",
 	&"locker": "res://assets/models/props/steel_locker.glb",
 	&"kit_rack": "res://assets/models/props/kit_rack.glb",
-	# Depot's other rack bays (DX1, the owner's photos, 2026-11-15), each two bays taking turns along a row: racking
+	# Depot's other rack bays (DX1, the owner's photos, 2026-11-15), each three bays taking turns along a row: racking
 	# of shrink-wrapped pallets, stacks of IBC totes and drums, and a mesh-caged parts store. A rack block names one
 	# (its `dress`, tools/depot/build_map.py) and is laid as the racking is (TILE), on the same box.
 	&"wrapped_racking": "res://assets/models/props/wrapped_racking.glb",

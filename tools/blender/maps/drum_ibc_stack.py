@@ -67,15 +67,15 @@ def ibc(p: prop.Prop, cx: float, z: float, tank: str, fill: float, seed: int, to
     for j in range(1, 4):
         zz = cz0 + (cz1 - cz0) * j / 4
         bk.wire(p, (x0 + 0.03, yb - 0.01, zz), (x1 - 0.03, yb - 0.01, zz), 0.009, GALV + "*0.95")
-    for sx, out in ((x0 - 0.004, -1.0), (x1 + 0.004, 1.0)):
+    # the sides' frame and bars stay inside the corner posts' outer faces (x0, x1), so nothing pokes past a post
+    for sx, out in ((x0, -1.0), (x1, 1.0)):
         p.box((min(sx, sx - out * 0.03), Y0 + 0.024, cz1 - 0.03), (max(sx, sx - out * 0.03), 0.0, cz1), GALV)
-        for i in (1,):
-            y = Y0 + (0.0 - Y0) * i / 2
-            bk.wire(p, (sx, y, cz0), (sx, y, cz1 - 0.03), 0.009, GALV, facing=(out, 0.0, 0.0))
+        bar = sx - out * 0.01
+        y = Y0 / 2
+        bk.wire(p, (bar, y, cz0), (bar, y, cz1 - 0.03), 0.009, GALV, facing=(out, 0.0, 0.0))
         for j in (1, 3):
             zz = cz0 + (cz1 - cz0) * j / 4
-            bk.wire(p, (sx + out * 0.01, Y0 + 0.02, zz), (sx + out * 0.01, 0.0, zz), 0.009, GALV + "*0.95",
-                    facing=(out, 0.0, 0.0))
+            bk.wire(p, (bar, Y0 + 0.024, zz), (bar, 0.0, zz), 0.009, GALV + "*0.95", facing=(out, 0.0, 0.0))
 
 
 def bund(p: prop.Prop, cx: float) -> float:

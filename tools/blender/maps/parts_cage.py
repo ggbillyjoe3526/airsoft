@@ -58,10 +58,10 @@ def panel(p: prop.Prop, x0: float, x1: float, z0: float, z1: float, y: float, fr
 
 def end_panels(p: prop.Prop) -> None:
     """The cage's ends closed with mesh, each a hair inside the bay (two bays side by side never share a plane), from
-    the front back to the backing (y = 0: PropLayout draws the dark backing half a row in, so nothing behind it shows):
-    the frame's face and the wires, seen from outside the end."""
+    the front to the bay's back, so the store's goods stay inside the mesh from every side: the frame's face and the
+    wires, seen from outside the end."""
     f = FRAME
-    y0, y1 = bk.FRONT + POST, 0.0
+    y0, y1 = bk.FRONT + POST, bk.BACK
     for x, out in ((-bk.HW + 0.004, -1.0), (bk.HW - 0.004, 1.0)):
         face = (out, 0.0, 0.0)
         for (a0, a1, b0, b1) in ((y0, y0 + f, 0.0, bk.H), (y1 - f, y1, 0.0, bk.H), (y0, y1, 0.0, f), (y0, y1, RAIL - f / 2,
@@ -287,9 +287,13 @@ def store_c(p: prop.Prop) -> None:
         carton(p, a, b, z0, z1, paint, label=paint != "cream*0.97")
     p.lathe([(deck, 0.27), (deck + 0.66, 0.3), (deck + 0.69, 0.31)], "cream*1.08", 8, (-0.15, Y_IN + 0.33, 0.0),
             axis="z")
-    p.box((-0.5, Y_IN + 0.2, deck + 0.7), (0.38, bk.BACK, 2.92), "crate*0.82")
-    # a yellow extension lead coiled on a hook in front of it
+    # the stock behind: cartons standing on the tub's lid, and on the deck behind the tool case
+    p.box((-0.46, Y_IN + 0.2, deck + 0.69), (0.16, bk.BACK, 2.92), "crate*0.82")
+    p.box((0.16, Y_IN + 0.2, deck), (0.4, bk.BACK, 2.92), "crate*0.86")
+    # a yellow extension lead coiled on a hook screwed to the stock behind it
     hose(p, 0.26, 2.3, 0.13, 0.028, "yellow*0.88")
+    p.box((0.245, Y_IN + 0.12, 2.42), (0.275, Y_IN + 0.2, 2.45), GALV)
+    p.box((0.245, Y_IN + 0.1, 2.4), (0.275, Y_IN + 0.13, 2.47), GALV)
     p.box((0.18, Y_IN + 0.04, deck), (0.41, Y_IN + 0.18, deck + 0.24), "rubber*1.2")
     p.front_decal(0.2, 0.39, deck + 0.11, deck + 0.13, Y_IN + 0.039, "yellow*0.9")
 

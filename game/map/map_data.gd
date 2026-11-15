@@ -161,7 +161,7 @@ var site: SiteDressing = null
 ## Its station dress (MT3, `dressing.station`: StationDressing), drawn by StationLook and StationSurface instead of the
 ## greybox; null on a map without one.
 var station: StationDressing = null
-## Its wall extras (DX1, `dressing.fixtures`: Depot's fire points, call points, cable reels, pipework and signs),
+## Its wall extras (DX1, `dressing.fixtures`: Depot's fire points, call points, pipework and signs),
 ## look-only models drawn by StationFixtures as a station's are; none on a map naming none.
 var fixtures: Array[StationDressing.Fixture] = []
 ## Its trains (SM1, `dressing.trains`: TrainDressing), drawn by TrainView in a station's train models; none on a map

@@ -15,7 +15,8 @@ on the lower part of the wall at roughly eye height."
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-15 | 1 | Opus 5.5 (build thread) | passed | Retry | the film didn't read as film; fire point and pipework not after the photos; a cable reel with no photo |
-| 2026-11-15 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-15 | 2 | Opus 5.5 (build thread) | passed | Retry 6/8 | fire point's cabinet proportions; film still a frame; IBC side bars past the posts; parts cage goods past its ends; no pipework close-up; stale comments |
+| 2026-11-15 | 3 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## What changed
 
@@ -24,16 +25,17 @@ on the lower part of the wall at roughly eye height."
   PropLayout lays them as it lays the racking (`Lay.TILE`, dark backing half a row in, the three bays taking turns,
   40 m chunks, no shadow). The third bays (the owner's ask for variety): racking with photo 7's capped load and finer
   cartons, two IBC towers side by side topped with empty pallets (photo 2), and photo 4's store with a deck across
-  the bay over flattened cartons and totes. The wrapped loads show their film as glare down the edges and slanting
-  wrinkles. 1,306 to 1,438 triangles of the bay's 1,500.
+  the bay over flattened cartons and totes. The wrapped loads show their film as a broad sheen rising across the face
+  (the cartons under it a shade lighter, so their joints still show through), slanting wrinkles and a soft roll over
+  the top edge. 1,338 to 1,480 triangles of the bay's 1,500.
 - **Which blocks:** `tools/depot/extras.py` `rack_dress` gives each `dead` piece a `dress` in turn (racking, wrapped
   racking, drums and IBCs, racking, parts cage), the two 108 m strips along the long walls staying racking: 24 of
   Depot's 48 rack blocks. The blocks' boxes are untouched (the map's blocks match the old file's but for `dress`), so
   collision, nav, cover, sight lines and the baked light (its hash covers kind, place and size, not dress) are as
   they were: no rebake.
 - **Wall extras** (`depot_extras.py`, the signs' sheet by `depot_signs.py` with cells in `depot_cells.py`): photo 3's
-  wall-mounted fire point board, a call point, 4 m and 2 m lengths of pipework (every third 4 m length, `pipe_run_b`,
-  with a gate valve, a sprinkler drop and a junction box), and seven safety signs. They are
+  wall-mounted fire point board (its moulded cabinet 30 % of its height, with raised ears and a wide viewing slot), a call point, 4 m and 2 m lengths of pipework (every third 4 m length, `pipe_run_b`,
+  with a gate valve and its handwheel, a drop to a pendant sprinkler head and a junction box with its conduit), and seven safety signs. They are
   `MapData.fixtures` (`dressing.fixtures`, read by `StationDressing.read_fixtures`), drawn by StationFixtures as
   Subway's extras are: one MultiMesh a model, no collider, no shadow; a model may print from its own sheet
   (`StationFixturesConfig.sheets`).
