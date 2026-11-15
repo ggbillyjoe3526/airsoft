@@ -185,7 +185,7 @@ func _set_card(colour_set: TeamColours.Set, teams: TeamConfig) -> MenuCard:
 			GameTheme.SPACING_TAB)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
-	var tag := MenuTag.make(tr("SETTINGS_IN_USE"), GameTheme.ACCENT_INK, GameTheme.ACCENT, GameTheme.ACCENT)
+	var tag := MenuTag.make(tr("SETTINGS_IN_USE"), GameTheme.accent_ink, GameTheme.accent, GameTheme.accent)
 	head.add_child(tag)
 	rows.add_child(head)
 	var swatches := HBoxContainer.new()

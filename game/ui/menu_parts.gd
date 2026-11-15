@@ -194,7 +194,7 @@ static func arrow_button(glyph: String, tip: String, node_name: String) -> Butto
 	b.add_theme_font_size_override("font_size", ARROW_SIZE)
 	GameTheme.dress(b, GameTheme.box(GameTheme.CARD, GameTheme.LINE, ARROW_PAD.x, ARROW_PAD.y),
 			GameTheme.box(GameTheme.CARD_HI, GameTheme.LINE, ARROW_PAD.x, ARROW_PAD.y),
-			GameTheme.box(GameTheme.CARD_HI, GameTheme.ACCENT, ARROW_PAD.x, ARROW_PAD.y))
+			GameTheme.box(GameTheme.CARD_HI, GameTheme.accent, ARROW_PAD.x, ARROW_PAD.y))
 	b.add_theme_stylebox_override("disabled", GameTheme.box(Color(0.0, 0.0, 0.0, 0.0), GameTheme.LINE, ARROW_PAD.x,
 			ARROW_PAD.y))
 	return b

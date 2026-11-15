@@ -13,17 +13,17 @@ extends Control
 
 ## Nothing worked out yet (the lit button and the banded one, before the first frame open).
 const UNSET := -3
-## The buttons' strokes (px) plain and lit, the lit edge, the fill's alpha, the corner radius, and a free button's
-## fill alpha.
+## The buttons' strokes (px) plain and lit, how much paler than the accent the lit edge is, the fill's alpha, the corner
+## radius, and a free button's fill alpha.
 const STROKE := 2.0
 const LIT_STROKE := 3.0
-const LIT_EDGE := Color("ffe28a")
+const LIT_EDGE_LIGHTEN := 0.6
 const BUTTON_ALPHA := 0.86
 const RADIUS := 4
 const FREE_ALPHA := 0.35
 ## The band on the order in force (px, along the button's outer edge).
 const BAND := 7.0
-## The circle: its fill's alpha open and with a notice up, and the notice's yellow rule (px).
+## The circle: its fill's alpha open and with a notice up, and the notice's accent rule (px).
 const HUB_ALPHA := 0.6
 const NOTICE_ALPHA := 0.96
 const NOTICE_RULE := 3.0
@@ -209,6 +209,11 @@ static func notice_key(notice: SquadOrders.Notice) -> String:
 	return ""
 
 
+## The lit button's and circle's edge: the accent, paler (UA2: it follows the interface colour).
+static func lit_edge() -> Color:
+	return GameTheme.accent.lightened(LIT_EDGE_LIGHTEN)
+
+
 ## The button lit now (an index into the wheel's orders; OrderWheelPointer.SPOT for Spotted; -1 none), for tests.
 func lit_slice() -> int:
 	return _lit if visible and _lit != UNSET else -1
@@ -277,14 +282,14 @@ func _draw_button(i: int, back: Color) -> void:
 		draw_style_box(_button, box)
 		return
 	var lit := i == _lit
-	_button.bg_color = GameTheme.ACCENT if lit else back
-	_button.border_color = LIT_EDGE if lit else GameTheme.LINE
+	_button.bg_color = GameTheme.accent if lit else back
+	_button.border_color = lit_edge() if lit else GameTheme.LINE
 	_button.set_border_width_all(roundi(LIT_STROKE if lit else STROKE))
 	draw_style_box(_button, box)
 	if i == _force:
 		var outer := box.end.x - BAND if box.position.x > 0.0 else box.position.x
 		draw_rect(Rect2(outer, box.position.y, BAND, box.size.y), _colour)
-	var ink := Color(GameTheme.ACCENT_INK if lit else GameTheme.TEXT, fade)
+	var ink := Color(GameTheme.accent_ink if lit else GameTheme.TEXT, fade)
 	var size := NAME_SIZE
 	var room := box.size.x - NAME_PAD * 2.0
 	var wide := _name_font.get_string_size(_names[i], HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE).x
@@ -301,15 +306,15 @@ func _draw_hub() -> void:
 	var r := _layout.centre
 	var lit := _lit == OrderWheelPointer.SPOT and not _showing_notice
 	var alpha := NOTICE_ALPHA if _showing_notice and not _notice_only else HUB_ALPHA
-	draw_circle(Vector2.ZERO, r, GameTheme.ACCENT if lit else HudStyle.backing_on(self, alpha))
-	draw_arc(Vector2.ZERO, r, 0.0, TAU, CIRCLE_STEPS, LIT_EDGE if lit else GameTheme.LINE,
+	draw_circle(Vector2.ZERO, r, GameTheme.accent if lit else HudStyle.backing_on(self, alpha))
+	draw_arc(Vector2.ZERO, r, 0.0, TAU, CIRCLE_STEPS, lit_edge() if lit else GameTheme.LINE,
 			LIT_STROKE if lit else STROKE, true)
 	if _showing_notice:
-		draw_arc(Vector2.ZERO, r - NOTICE_RULE * 0.5, 0.0, TAU, CIRCLE_STEPS, GameTheme.ACCENT, NOTICE_RULE, true)
+		draw_arc(Vector2.ZERO, r - NOTICE_RULE * 0.5, 0.0, TAU, CIRCLE_STEPS, GameTheme.accent, NOTICE_RULE, true)
 		return
 	if not draws_wheel():
 		return
-	var ink := GameTheme.ACCENT_INK if lit else GameTheme.TEXT
+	var ink := GameTheme.accent_ink if lit else GameTheme.TEXT
 	var base := (_name_font.get_ascent(SPOT_SIZE) - _name_font.get_descent(SPOT_SIZE)) * 0.5
 	draw_string(_name_font, Vector2(-r, base), _spot_name, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, SPOT_SIZE, ink)
 
