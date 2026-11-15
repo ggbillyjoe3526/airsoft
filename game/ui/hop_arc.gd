@@ -81,7 +81,7 @@ func _draw() -> void:
 		for i in _heights.size():
 			var h := clampf(_heights[i], -FALL, RISE)
 			points.append(Vector2(left + width * float(i) * STEP / _range, aim_y - h * scale_y))
-		draw_polyline(points, GameTheme.ACCENT, PATH_WIDTH, true)
+		draw_polyline(points, GameTheme.accent, PATH_WIDTH, true)
 	var mark_x := left + width * clampf(_on_target / _range, 0.0, 1.0)
 	# The words beside the marker, kept inside the box; a second line (the field's air, AUD2) sits in the box's lower
 	# left corner, under the flight's level part, clear of the aim line the first one stands over. A marker that would

@@ -211,8 +211,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   far as its magazine lets the palm stay on the replica; the forearm lower in the view). "Keep that version"
   (06:34, of the vertical grip's fourth-look hold). The pistols' size at the hip (08:38, on a picture of three
   distances beside his reference shots, the reviewer having found them small): he chose "25 cm, clearly larger" over
-  keeping 34 cm and over 29 cm, so both pistols sit 25 cm from the eye, on the same line from it as his place of
-  2026-11-06 (`ViewModelConfig.hip`). The bare hands (14:01, on the repainted skin in game): "Remove the white
+  keeping 34 cm and over 29 cm, so both pistols sat 25 cm from the eye, on the same line from it as his place of
+  2026-11-06 (`ViewModelConfig.hip`; replaced by HA2 below). The bare hands (14:01, on the repainted skin in game): "Remove the white
   finger nail tips, make the tendons more subtle", and of the skin's texture "Keep the texture as is": the nails have
   no white free edge and a faint moon, the tendons a little under half their shade and height
   (`skin.NAIL_TONE`, `MOON`, `TENDON_FORM`, `TENDON`); of that picture, "Perfect" (14:17). The AEG's far side (21:21, on a card: its
@@ -221,6 +221,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   about 1 cm past the handguard's end. Default taken: the bots stay one-handed on pistols (HG1 below; they copy
   `<id>_Hold`).
   His reference pictures are other games' and set hand placement and framing only; the art is our own.
+- **Pistols at the rifles' place; your shoulders stay put through an inspect (owner, 2026-11-15, HA2).** "make the
+  pistol take up less space on screen. it should roughly be same scale/angle as rifle" (replacing his 25 cm pick
+  above) and "when inspecting rifles the player can see the end of the arm models". Both pistols sit low on the right
+  as the rifles do, 35 cm from the eye, turned 0.15 rad in so their side shows (`ViewModelConfig.hip`, `hip_turn`,
+  gone as the sight comes up); the reload move follows, so a reload crosses the same share of the screen as before,
+  and an inspect turns from the new place. Inspected, the arms no longer turn rigidly with the replica: each
+  shoulder stays where your body has it (coming only as near as the hand needs to keep hold) and the elbow's way with
+  it (`ArmsTuck`, both sides), so a sleeve's cut-off end never turns into view, checked at the widest field of view on
+  a 21:9 screen. Defaults taken: 35 cm and 0.15 rad from pictures beside the AEG and the Compact SMG at the hip; he
+  called the pictures "perfect" (11:50) and added "the pistol ADS shows the hand fading, it shouldn't do this", so
+  aimed a pistol's hands are drawn whole (`aim_hands_hint` empty; it replaces his HA1 pick of the tops only).
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands
   copy the first-person holds he approved (`assets/models/arms/arms.glb`), so a change to a first-person hold changes
   the bots' too: the right hand high on the grip, index on the trigger, thumb along the grip's left side ("the thumb
@@ -521,6 +532,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Bots and balance
 
+- **Bot teams vary how they carry out their plan (owner, 2026-11-15, RV1; Claude's defaults).** The plan (split, pair,
+  stack over the authored lanes) is drawn as before; each round adds a team tempo, shorter pauses in a bot's own half,
+  a per-bot lane shift and the odd lane crossing, and in Attack / Defend and Plant The Bomb sometimes a defender held
+  further up its lane. All on streams of their own, so the plan draws don't move. Values and figures:
+  `docs/records/RV1.md`; numbers in `game/config/bot_config.gd` › Lanes and holds.
 - **The audit's play questions (owner, 2026-11-14, AUD1).** Bots keep squeezing past Subway's works wagons on the
   track, as a player can (they climbed to the platform before). Plant The Bomb's timings stay at a 30 s fuse and a 6 s
   defuse: on the audit's final code the attackers took 38 %, 47 % and 48 % on Depot, Woodland and Subway, bots only.
@@ -1249,6 +1265,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   ARMORY, SETTINGS, the level and QUIT. Field pictures are photo-mode views from eye height, never overhead; replica
   pictures share one scale and fit inside their boxes; Customise keeps the replica fixed and can turn it in 3D; the HUD
   minimap is square and the equipped grenade's icon is the bigger one. Concepts: `/mnt/project-files/concepts/ui-redesign/`.
+- **The UI's highlight is blue, and the player can pick another (owner, 2026-11-15; UA1 and UA2, replaces Sunlit
+  Concrete's bone accent).** The accent (`GameTheme.accent`) lights the main buttons, the picked and focused items,
+  the rail marker and the comms wheel's lit button. Blue `#8fb0f0` by default; Settings › Display › Interface ›
+  Colour also offers beige, red, green, pink, orange and violet (`game/config/ui_colours.gd`). Each is a soft, light
+  shade with a dark ink, paler than the team colours so a highlight never reads as a team; team colours, signal
+  yellow and the off-white text don't change with it. A change restyles the menus at once (they are built again).
 - **There is no title screen (owner, 2026-11-02; UR1).** The game opens on the Match page. The version, the renderer,
   Report a Bug, Licences and Quit to desktop are in Settings › About (no title box there); QUIT is also at the rail's
   foot.

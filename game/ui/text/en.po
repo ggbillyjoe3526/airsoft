@@ -2604,6 +2604,9 @@ msgstr "Oil stains and tyre tracks on the floors."
 msgid "GRAPHICS_VOLUMETRIC_FOG"
 msgstr "VOLUMETRIC HAZE"
 
+msgid "GRAPHICS_VOLUMETRIC_FOG_NOTE"
+msgstr "A faint haze the light shines through. Higher levels reach farther into the distance and draw its light shafts finer and smoother."
+
 msgid "GRAPHICS_LAMP_LIGHTS"
 msgstr "LAMP LIGHT"
 
@@ -3134,6 +3137,36 @@ msgstr "The most frames a second the game draws: a laptop runs cooler and quiete
 
 msgid "SETTINGS_SHOW_FPS_HELP"
 msgstr "Frames a second, bottom right."
+
+msgid "SETTINGS_INTERFACE"
+msgstr "INTERFACE"
+
+msgid "SETTINGS_UI_COLOUR"
+msgstr "COLOUR"
+
+msgid "SETTINGS_UI_COLOUR_HELP"
+msgstr "The colour of the main buttons, what you have picked and the comms wheel. Team colours stay as they are."
+
+msgid "SETTINGS_UI_COLOUR_BLUE"
+msgstr "Blue"
+
+msgid "SETTINGS_UI_COLOUR_BEIGE"
+msgstr "Beige"
+
+msgid "SETTINGS_UI_COLOUR_RED"
+msgstr "Red"
+
+msgid "SETTINGS_UI_COLOUR_GREEN"
+msgstr "Green"
+
+msgid "SETTINGS_UI_COLOUR_PINK"
+msgstr "Pink"
+
+msgid "SETTINGS_UI_COLOUR_ORANGE"
+msgstr "Orange"
+
+msgid "SETTINGS_UI_COLOUR_VIOLET"
+msgstr "Violet"
 
 msgid "SETTINGS_MONITOR_HELP"
 msgstr "Only with two screens or more."

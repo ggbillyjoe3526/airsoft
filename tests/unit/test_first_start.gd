@@ -71,7 +71,7 @@ func test_the_notice_names_the_pick_the_card_and_the_screen() -> void:
 			"Picked for your graphics card. If the game stutters in a match it steps down a preset between rounds by"
 			+ " itself, until you pick one.", "Graphics card", "Test Card 3000 · dedicated", "Screen",
 			"2560 × 1440 · 144 Hz · borderless fullscreen", "OK", "GRAPHICS SETTINGS"]))
-	assert_eq(n.edge_colour(), GameTheme.ACCENT)
+	assert_eq(n.edge_colour(), GameTheme.accent)
 
 
 func test_the_screen_in_words() -> void:

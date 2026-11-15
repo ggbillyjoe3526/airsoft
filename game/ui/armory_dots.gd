@@ -186,11 +186,11 @@ func _draw() -> void:
 		var reach := dot_position(mini(_level, last_shown()))
 		if _level < last_shown():
 			reach = reach.lerp(dot_position(_level + 1), _fraction)
-		draw_line(first, reach, GameTheme.ACCENT, LINE)
+		draw_line(first, reach, GameTheme.accent, LINE)
 	for i in range(first_shown(), last_shown() + 1):
 		var c := dot_position(i)
 		if i <= _level:
-			draw_circle(c, DOT, GameTheme.ACCENT)
+			draw_circle(c, DOT, GameTheme.accent)
 		elif i == _level + 1:
 			draw_circle(c, NEXT_DOT, GameTheme.TEXT)
 		else:
@@ -200,10 +200,10 @@ func _draw() -> void:
 		if picked:
 			var r := (NEXT_DOT if i == _level + 1 else DOT) + PICKED_GAP
 			draw_arc(c, r, 0.0, TAU, 32, GameTheme.TEXT, PICKED_RING, true)
-		var colour := GameTheme.ACCENT if picked else GameTheme.TEXT if i <= _level + 1 else GameTheme.DIM
+		var colour := GameTheme.accent if picked else GameTheme.TEXT if i <= _level + 1 else GameTheme.DIM
 		var width := _font.get_string_size(_words[i], HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x
 		var base := c.y + NEXT_DOT + LABEL_GAP + LABEL_SIZE
 		draw_string(_font, Vector2(c.x - width * 0.5, base), _words[i], HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE,
 				colour)
 		if picked:
-			draw_rect(Rect2(c.x - PICKED_BAR.x * 0.5, base + PICKED_BAR_GAP, PICKED_BAR.x, PICKED_BAR.y), GameTheme.ACCENT)
+			draw_rect(Rect2(c.x - PICKED_BAR.x * 0.5, base + PICKED_BAR_GAP, PICKED_BAR.x, PICKED_BAR.y), GameTheme.accent)

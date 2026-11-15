@@ -298,6 +298,13 @@ func _exit_tree() -> void:
 		_end_refresh()
 
 
+## How far the volumetric haze reaches from the eye (m; Graphics › Volumetric haze's level, LookConfig.fog_reach). Only
+## set when it changes; never per frame.
+func set_fog_reach(reach: float) -> void:
+	if not is_equal_approx(environment.volumetric_fog_length, reach):
+		environment.volumetric_fog_length = reach
+
+
 ## The eyes adapting (Graphics › Eye adaptation, UG3): the field's world meters what its camera sees and brightens a
 ## dark view or settles a bright one within the preset's limits; off, the preset's own exposure alone. Every camera in
 ## the field's world adapts but a scope's glass (OpticGlass: the main view tonemaps its picture). Only set when it

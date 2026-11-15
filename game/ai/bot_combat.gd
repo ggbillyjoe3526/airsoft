@@ -39,7 +39,8 @@ static func aim(b: Bot, w: BotWorld, target: Character, eye: Vector3, walking: b
 		# A re-pick-up (AIM1) has no first aim to one side: its whole error wanders, any way off the target.
 		var sided := b.first_yaw != 0.0 or b.first_pitch != 0.0
 		var first := BotAim.first_error_size(since, dist, b.skill) if sided else 0.0
-		var error := BotAim.error_size(since, walking or cmd.right != 0.0, dist, sideways, b.skill)
+		var error := BotAim.error_size(since, walking or cmd.right != 0.0, dist, sideways, b.skill) \
+				+ flinch(b, w)
 		if scoped(b, cfg):
 			# Through a sniper's scope the hand's wander is finer (SN3): one shot a cycle has to count.
 			error *= cfg.scoped_error_scale
@@ -90,6 +91,15 @@ static func aim(b: Bot, w: BotWorld, target: Character, eye: Vector3, walking: b
 			_look_yaw += sin(TAU * b.team_wait / cfg.hold_sweep_period) * deg_to_rad(cfg.hold_sweep_deg)
 	BotAim.step(b, _look_yaw, _look_pitch, 0.0, 0.0, cfg, dt)
 	return INF
+
+
+## The extra aim error (rad) of a near miss (AIM2): the skill's aim_error_under_fire_deg as the BB passes, easing to
+## none over BotConfig.flinch_time.
+static func flinch(b: Bot, w: BotWorld) -> float:
+	var since := w.time - b.suppressed_at
+	if since >= w.cfg.flinch_time:
+		return 0.0
+	return deg_to_rad(b.skill.aim_error_under_fire_deg) * (1.0 - since / w.cfg.flinch_time)
 
 
 ## Slicing: leans out past `a`, the corner aimed at, once within slice_lean_distance of it (towards its open side).

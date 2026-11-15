@@ -432,8 +432,11 @@ static func _next_goal(b: Bot, w: BotWorld) -> bool:
 		var next := (0 if b.lane_dir > 0 else lane.size() - 1) if b.lane_index < 0 else b.lane_index + b.lane_dir
 		var walked := next if b.lane_dir > 0 else lane.size() - 1 - next
 		if next >= 0 and next < lane.size() and walked < b.lane_points:
+			if b.lane_index >= 0 and _cross_lane(b, w, next):
+				lane = w.lanes[b.lane]
+				next = b.lane_index
 			b.lane_index = next
-			b.lane_goal = _jitter(b, w, lane[next], w.cfg.lane_jitter)
+			b.lane_goal = _jitter(b, w, _shifted(b, w, lane[next]), w.cfg.lane_jitter)
 			_stagger_hold(b, w)
 			# At night it holds out of the light pools (BotWorld.out_of_light).
 			b.lane_goal = w.out_of_light(b.lane_goal)
@@ -584,6 +587,79 @@ static func _jitter(b: Bot, w: BotWorld, point: Vector3, radius: float) -> Vecto
 	return point
 
 
+## Lane point `point` moved b.lane_shift across the way to the enemy (RV1): there if that spot is on the point's floor
+## and walkable in a straight line from it, else lane_shift_fallback as far (up to lane_shift_tries in all), else the
+## point itself.
+static func _shifted(b: Bot, w: BotWorld, point: Vector3) -> Vector3:
+	if is_zero_approx(b.lane_shift):
+		return point
+	var way := w.planner.attack_dir[b.character.team]
+	var shift := b.lane_shift
+	for i in w.cfg.lane_shift_tries:
+		var x := point.x - way.y * shift
+		var z := point.z + way.x * shift
+		if _on_same_floor(w, point, x, z):
+			var to := Vector3(x, w.nav.floor_at(Vector3(x, point.y, z)), z)
+			if w.nav.clear_line(point, to):
+				return to
+		shift *= w.cfg.lane_shift_fallback
+	return point
+
+
+## Setting off for lane point `next`, maybe (lane_cross_chance, RV1) cross to another lane instead: to the point of it
+## within lane_cross_reach of `next` and lane_cross_rise of its height, no nearer the bot's own end than `next`, among
+## those it would still walk on that lane: the nearest, each teammate walking that lane counting lane_cross_crowd
+## metres further. On a cross, b.lane, b.lane_index (the point to make for) and b.lane_points are the new lane's; true. Never a defender,
+## the bomb carrier, a bot under a squad order, or one that crossed lane_cross_max times this round.
+static func _cross_lane(b: Bot, w: BotWorld, next: int) -> bool:
+	var cfg := w.cfg
+	# A team stacked on one lane this round keeps its stack: that is its plan.
+	if b.lanes_crossed >= cfg.lane_cross_max or b.raiser or b.order != SquadOrder.Kind.NONE \
+			or BotFlag.role(b, w) == BotFlag.Role.DEFEND or w.lanes.size() < 2 \
+			or w.planner.plans[b.character.team] == RoundPlanner.Plan.STACK:
+		return false
+	if w.planner.variety_roll() >= cfg.lane_cross_chance:
+		return false
+	var from := w.lanes[b.lane][next]
+	var team := b.character.team
+	var way := w.planner.attack_dir[team]
+	var home := w.planner.spawn_centre[team]
+	var from_progress := Vector2(from.x - home.x, from.z - home.z).dot(way)
+	var best_lane := -1
+	var best_index := -1
+	var best_score := INF
+	for other in w.lanes.size():
+		if other == b.lane:
+			continue
+		var points := w.lanes[other]
+		var walks := w.planner.walk_points(b, other, w)
+		var mates := 0
+		for o in w.bots:
+			if o != b and o.character.team == team and o.lane == other and not o.hunting \
+					and Elimination.is_in_play(o.character):
+				mates += 1
+		for k in points.size():
+			var q := points[k]
+			var walked := k if b.lane_dir > 0 else points.size() - 1 - k
+			if walked >= walks or absf(q.y - from.y) > cfg.lane_cross_rise:
+				continue
+			var d := Vector2(q.x - from.x, q.z - from.z).length()
+			if d > cfg.lane_cross_reach or Vector2(q.x - home.x, q.z - home.z).dot(way) < from_progress:
+				continue
+			var score := d + mates * cfg.lane_cross_crowd
+			if score < best_score:
+				best_lane = other
+				best_index = k
+				best_score = score
+	if best_lane < 0:
+		return false
+	b.lane = best_lane
+	b.lane_index = best_index
+	b.lane_points = w.planner.walk_points(b, best_lane, w)
+	b.lanes_crossed += 1
+	return true
+
+
 ## True if (x, z) is walkable and on the floor `point` stands on (within a step of its height).
 static func _on_same_floor(w: BotWorld, point: Vector3, x: float, z: float) -> bool:
 	var at := Vector3(x, point.y, z)
@@ -608,9 +684,13 @@ static func _hold_post(b: Bot, w: BotWorld, dt: float, arrived: bool, at_post: b
 	b.team_wait += dt
 
 
-## The pause at the lane point just reached: how long, whether to wait for the team, whether to crouch.
+## The pause at the lane point just reached: how long (scaled by its team's tempo, and shorter in its own half, RV1),
+## whether to wait for the team, whether to crouch.
 static func _start_hold(b: Bot, w: BotWorld) -> void:
-	b.hold_left = b.pick(b.skill.hold_time)
+	var pace := b.pace
+	if not w.planner.in_enemy_half(b):
+		pace *= w.cfg.own_half_pace
+	b.hold_left = b.pick(b.skill.hold_time) * pace
 	b.team_wait = 0.0
 	b.wait_for_team = true
 	b.hold_crouch = _crouched_view_clear(b, w, b.character.position)

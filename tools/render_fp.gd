@@ -3,14 +3,15 @@ extends SceneTree
 ## the game's eye camera) on the Depot on High, one picture a shot. Each shot is `<name>:<replica id>` followed by any
 ## of `:aim=<0..1>` (the sight's raise), `:skin` (skin-only arms), `:reload=<0..1>` (that share through a reload),
 ## `:fire=<seconds>` (that long after a shot), `:sprint`, `:walk=<seconds>` (that long into a walk), `:grip=<key>`,
-## `:paint=<paint>` (a ReplicaSchemes paint, the replica's default otherwise),
-## `:optic=<key>` and `:out=<x>,<y>,<z>,<far>` (seen from outside: the camera that way from your right hand along the
-## eye's axes, that far off). An argument `set:<property>[.<key>]=<value>` changes a ViewModelConfig value for every
-## shot (a number, or three for a Vector3), for trying a pose before it goes in the config; `size:<w>x<h>` draws the
-## pictures that large (1280x720 otherwise: a texture's fine detail wants 2560x1440); `preset:<id>` draws on that
+## `:inspect=<0..1>` (that share through an inspect: IN1), `:paint=<paint>` (a ReplicaSchemes paint, the replica's
+## default otherwise), `:optic=<key>` and `:out=<x>,<y>,<z>,<far>` (seen from outside: the camera that way from your
+## right hand along the eye's axes, that far off). An argument `set:<property>[.<key>]=<value>` changes a
+## ViewModelConfig value for every shot after it (a number, or three for a Vector3), for trying a pose before it goes in
+## the config; `size:<w>x<h>` draws the pictures that large (1280x720 otherwise: a texture's fine detail wants
+## 2560x1440); `fov:<deg>` sets the 16:9 horizontal field of view (ViewConfig's otherwise); `preset:<id>` draws on that
 ## graphics preset (High otherwise), `map:<id>` on that map (the Depot otherwise) and `spot:<x>,<z>,<yaw>,<pitch>`
-## stands you there (MQ4: the outdoor sun on a replica's metal). Needs a display; Forward+
-## under xvfb with lavapipe (mesa-vulkan-drivers):
+## stands you there (MQ4: the outdoor sun on a replica's metal). Needs a display; Forward+ under xvfb with lavapipe
+## (mesa-vulkan-drivers):
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . -s res://tools/render_fp.gd -- <folder> [set:...] <shot> ...
 ## Dev only: tools/ never ships.
 
@@ -63,12 +64,14 @@ func _run() -> void:
 	var shots: Array[String] = []
 	for i in range(1, args.size()):
 		if args[i].begins_with("set:"):
-			_change(args[i].trim_prefix("set:"))
+			shots.append(args[i])
 		elif args[i].begins_with("size:"):
 			var sides := args[i].trim_prefix("size:").split("x")
 			_size = Vector2i(int(sides[0]), int(sides[1]))
 		elif args[i].begins_with("preset:"):
 			_preset = StringName(args[i].trim_prefix("preset:"))
+		elif args[i].begins_with("fov:"):
+			_play.view.horizontal_fov_16x9 = args[i].trim_prefix("fov:").to_float()
 		elif args[i].begins_with("map:"):
 			_map = args[i].trim_prefix("map:")
 		elif args[i].begins_with("spot:"):
@@ -85,7 +88,10 @@ func _run() -> void:
 		return
 	var failed := 0
 	for shot in shots:
-		failed += await _shoot(shot, folder)
+		if shot.begins_with("set:"):
+			_change(shot.trim_prefix("set:"))
+		else:
+			failed += await _shoot(shot, folder)
 	quit(1 if failed > 0 else 0)
 	# Godot may not leave after quit() under xvfb.
 	OS.kill(OS.get_process_id())
@@ -219,6 +225,14 @@ func _shoot(shot: String, folder: String) -> int:
 		var ticks := maxi(roundi(share * length / DT), 1)
 		for i in ticks:
 			c.armament.reload_left = maxf(length * (1.0 - float(i + 1) / ticks * share), 0.0001)
+			hands.update(c, _yaw, _pitch, _eye, _look, DT, aim)
+	if opts.has("inspect"):
+		hands.inspect()
+		hands.update(c, _yaw, _pitch, _eye, _look, DT, aim)
+		# The inspect's length is its model's Inspect clip's (ReplicaView), known once it has started.
+		for i in maxi(roundi(float(opts["inspect"]) * hands._inspect_length / DT) - 1, 0):
+			for player: Node in hands.find_children("*", "AnimationPlayer", true, false):
+				(player as AnimationPlayer).advance(DT)
 			hands.update(c, _yaw, _pitch, _eye, _look, DT, aim)
 	if opts.has("fire"):
 		hands.on_shot()
