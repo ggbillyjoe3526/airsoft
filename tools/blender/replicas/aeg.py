@@ -86,6 +86,23 @@ def fsb_rear(z: float) -> float:
 
 
 FA_Z = 0.046
+# The forward assist (owner, 2026-11-15: "slightly larger and stick out at more of an angle", per the M4 photo): its
+# housing's back face's centre (out from the upper's side, along the rifle), its axis turned this far out from the
+# rifle's toward the back (degrees), the housing's (distance forward of its back face along the axis, radius) rings,
+# the plunger's neck and head radius and how far the head stands out of the housing.
+FA_BACK = (0.0060, -0.0640)
+FA_ANGLE = 18.0
+FA_HOUSING = ((0.0, 0.0094), (0.0060, 0.0096), (0.0130, 0.0090), (0.0210, 0.0074), (0.0290, 0.0052),
+              (0.0350, 0.0030))
+FA_NECK_R = 0.0064
+FA_HEAD_R = 0.0080
+FA_OUT = 0.0135
+
+
+def fa_frame() -> Matrix:
+    """The forward assist's axis: its local +y forward along it, its origin the housing's back face's centre."""
+    place = Matrix.Translation((UPPER_HW + FA_BACK[0], FA_BACK[1], FA_Z))
+    return place @ Matrix.Rotation(math.radians(FA_ANGLE), 4, "Z")
 # The lower receiver, grip and magazine well (BL1, critic against the owner's photos: the receiver and magazine a third
 # too tall). Drawn in the first pass's heights; lz() lifts the lower's top to SEAM and its depth to LOWER_K of what it
 # was, so the rail top to the magazine well's foot is 0.103 m, as in the photos (it was 0.144).
@@ -157,16 +174,40 @@ WELL_HW = LOWER_HW
 # top rail level with the upper's.
 GUARD_Y = (0.100, 0.2765)
 # The delta ring's length at the handguard's back. The photo's raised bridge of rail over the receiver's front is left
-# off (owner, 2026-11-05): the top rail runs on level from the upper's onto the handguard, over the ring.
+# off (owner, 2026-11-05). The ring goes right round the barrel in sight (owner, 2026-11-15: "it should go around the
+# full body", the rail covered its top): the upper's rail stops at the ring's back and the handguard's starts at its
+# front, as on the M4 quad-rail photo.
 DELTA_LEN = 0.019
-# Where the upper's rail ends and the handguard's begins, one tooth past the upper's end so the teeth keep step.
-RAIL_JOIN = 0.1036
+# The lathe sets the ring this far behind GUARD_Y[0], so its back hides the upper's front edge.
+DELTA_BACK = 0.002
 # The delta ring's radius round the handguard's middle: its top 4 mm under the rail top, as in the photo.
 DELTA_R = 0.0250
 # The ring's centre below the handguard's middle, so its foot reaches down past the body, as the photo's.
 DELTA_DROP = 0.0028
 GUARD_HW = 0.0165
 GUARD_Z = (0.031, RAIL_BASE)
+# The handguard's corners (owner, 2026-11-15, the M4 quad-rail photo: open gaps between the rails, not the rails):
+# each 45-degree corner face is CHAMFER in from the square (each flat face just wider than a rail's foot), and a row
+# of GAP_COUNT holes through its wall shows the barrel inside: long oval slots in the top corners, small round holes
+# in the bottom ones, as in the photo. The wall's thickness, each slot's length and height (across the corner face), a
+# round hole's radius, and the solid ends before the first and after the last slot.
+GUARD_CHAMFER = 0.0078
+GUARD_WALL = 0.0018
+GAP_COUNT = 7
+GAP_LEN = 0.0160
+GAP_H = 0.0084
+GAP_HOLE_R = 0.0026
+GAP_END = 0.0105
+# The left rail's ribbed cover, as tall as the rail's top (half height), so the corner gaps show either side of it.
+COVER_HH = 0.0112
+# The hollow handguard's pieces, joined into the body only after the figures' copy is made: a figure's copy, cut down
+# to a few thousand triangles, frayed the slots into spikes, so it is made from a solid stand-in (GuardStandIn) the
+# handguard's outside shape instead, as it was before the gaps (AF1).
+GUARD_HOLLOW = ("Handguard", "GasTube")
+STAND_IN_CHAMFER = 0.0045
+# The gas tube inside the handguard, over the barrel (seen through the top gaps): its radius and its axis's height.
+GAS_R = 0.0021
+GAS_Z = 0.0578
 TUBE_Z = 0.044
 TUBE_R = 0.0148
 TUBE_Y = (-0.335 + STOCK_IN, -0.094)
@@ -221,7 +262,8 @@ SURFACES = {"Body": "aluminium", "Furniture": "polymer", "Detail": "steel", "Acc
 # handguard, magazine and charging handle, the stamped steel dust cover, the bright mock bolt behind it.
 PART_SURFACES = {
     "Grip": "polymer", "GripPanels": "polymer", "Tube": "aluminium", "Handguard": "aluminium",
-    "GuardRails": "aluminium", "Magazine": ("aluminium", ("Detail",)), "ChargingHandle": "aluminium",
+    "GuardRails": "aluminium", "GuardStandIn": "aluminium", "Magazine": ("aluminium", ("Detail",)),
+    "ChargingHandle": "aluminium",
     "DustCover": "steel", "PortFloor": "bare",
 }
 
@@ -264,6 +306,23 @@ def rail_on(face: str, y0: float, y1: float, x: float = 0.0, z: float = 0.0) -> 
     return Matrix.Translation((x, 0.0, z)) @ Matrix.Rotation(-math.pi * 0.5, 4, "Y")
 
 
+def octagon(hw: float, hh: float, ch: float, zc: float) -> list:
+    """A square section (half width, half height about height zc) with each corner cut at 45 degrees, `ch` in."""
+    return [(-hw + ch, zc - hh), (hw - ch, zc - hh), (hw, zc - hh + ch), (hw, zc + hh - ch), (hw - ch, zc + hh),
+            (-hw + ch, zc + hh), (-hw, zc + hh - ch), (-hw, zc - hh + ch)]
+
+
+def stadium(w: float, length: float, seg: int = 4) -> list:
+    """An oval slot's outline (x across, y along), `w` wide and `length` long, its ends half circles of `seg` steps
+    (a round hole when the two are equal)."""
+    r = 0.5 * w
+    c = 0.5 * length - r
+    if c <= 0.0:
+        return [(r * math.cos(math.pi * i / seg), r * math.sin(math.pi * i / seg)) for i in range(2 * seg)]
+    pts = [(r * math.cos(math.pi * i / seg), c + r * math.sin(math.pi * i / seg)) for i in range(seg + 1)]
+    return pts + [(-x, -y) for x, y in pts]
+
+
 # --------------------------------------------------------------------------------------------------------- parts
 
 def ch_channel() -> object:
@@ -284,11 +343,11 @@ def upper() -> list:
     # Brass deflector, behind the ejection port.
     b.prism([(-0.017, 0.042), (-0.001, 0.042), (0.002, 0.051), (-0.003, 0.0590), (-0.017, 0.0590)], "x",
             UPPER_HW - 0.002, UPPER_HW + 0.0062, "Body")
-    # Forward-assist housing: a round boss on the right at the back, blending forward into the side in a teardrop.
+    # Forward-assist housing: a round boss on the right at the back, its axis angled out toward the back (FA_ANGLE) so
+    # its front sinks into the side in a teardrop and its back stands out of it (owner, 2026-11-15, the M4 photo).
     rings = []
-    for y, r, dx in ((-0.0660, 0.0089, 0.0016), (-0.0600, 0.0090, 0.0016), (-0.0540, 0.0085, 0.0008),
-                     (-0.0480, 0.0072, -0.0008), (-0.0420, 0.0054, -0.0028), (-0.0370, 0.0034, -0.0050)):
-        rings.append([(UPPER_HW + dx + r * math.cos(t), y, FA_Z + r * math.sin(t))
+    for s_, r in FA_HOUSING:
+        rings.append([fa_frame() @ Vector((r * math.cos(t), s_, r * math.sin(t)))
                       for t in (2.0 * math.pi * i / 24 for i in range(24))])
     b.loft(rings, "Body")
     ob = b.build()
@@ -313,15 +372,18 @@ def upper() -> list:
     b.box((UPPER_HW - 0.0070, 0.001, 0.0335), (UPPER_HW - 0.0050, 0.051, 0.0550), "Detail")
     out.append(hs.finish(b.build(), 0.0))
 
-    # Forward-assist plunger, ribbed, out of the back of the boss.
+    # Forward-assist plunger out of the back of the boss on its axis (owner, 2026-11-15: larger, standing out at an
+    # angle): a short neck, then a round head with grooves round it and a domed end.
     b = hs.Builder("ForwardAssist", ["Detail"])
-    prof = [(0.0, 0.0), (0.0, 0.0068)]
+    hr = FA_HEAD_R
+    prof = [(0.004, 0.0), (0.004, FA_NECK_R), (-0.0022, FA_NECK_R), (-0.0025, hr - 0.0004), (-0.0029, hr)]
     for i in range(3):
-        a = 0.002 + i * 0.0028
-        prof += [(a, 0.0068), (a + 0.0005, 0.0075), (a + 0.0018, 0.0075), (a + 0.0023, 0.0068)]
-    prof += [(0.0118, 0.0068), (0.0130, 0.0056), (0.0134, 0.0030), (0.0134, 0.0)]
+        a = -0.0045 - i * 0.0026
+        prof += [(a, hr), (a - 0.0004, hr - 0.0008), (a - 0.0012, hr - 0.0008), (a - 0.0016, hr)]
+    tip = -FA_OUT
+    prof += [(tip + 0.0016, hr), (tip + 0.0006, hr - 0.0008), (tip, hr - 0.0028), (tip - 0.0002, 0.0)]
     fa = b.lathe(prof, "Detail", 16)
-    b.transform(fa, Matrix.Translation((UPPER_HW + 0.0016, -0.0655, FA_Z)) @ Matrix.Rotation(math.pi, 4, "Z"))
+    b.transform(fa, fa_frame())
     out.append(hs.finish(b.build(), 0.0003, 1))
 
     # The upper's rail, full length.
@@ -333,7 +395,8 @@ def upper() -> list:
     picatinny(b, UPPER_Y[0] + 0.0002, ch_end, "Body", rail_on("top", 0, 0, 0.0, RAIL_BASE),
               notch=(CH_HW + 0.0004, CH_CHANNEL_TOP - RAIL_BASE))
     first = UPPER_Y[0] + 0.0026
-    picatinny(b, ch_end, RAIL_JOIN, "Body", rail_on("top", 0, 0, 0.0, RAIL_BASE),
+    # It stops 0.3 mm short of the delta ring's back, so the ring's top shows (owner, 2026-11-15).
+    picatinny(b, ch_end, GUARD_Y[0] - DELTA_BACK - 0.0003, "Body", rail_on("top", 0, 0, 0.0, RAIL_BASE),
               teeth_from=first + math.ceil((ch_end - first) / 0.0100) * 0.0100)
     # Its back 2 mm closed either side of the channel, so its side grooves don't show as holes from behind.
     for sx in (-1, 1):
@@ -791,6 +854,17 @@ def stock() -> list:
     return out
 
 
+def guard_stand_in() -> object:
+    """The handguard's outside shape, solid and without its gaps: what the figures' copy is cut down from. Its corners
+    are cut STAND_IN_CHAMFER in, as before the gaps, so the rails' feet stay inside its flat faces (on the wider
+    corners the cut-down copy tore open between the side rail's teeth)."""
+    z0, z1 = GUARD_Z
+    b = hs.Builder("GuardStandIn", ["Furniture"])
+    b.prism(octagon(GUARD_HW, 0.5 * (z1 - z0), STAND_IN_CHAMFER, 0.5 * (z0 + z1)), "y",
+            GUARD_Y[0] + DELTA_LEN - DELTA_BACK - 0.0005, GUARD_Y[1], "Furniture")
+    return hs.finish(b.build(), 0.0006, 1)
+
+
 def handguard() -> list:
     """The quad-rail handguard as on the owner's photos' carbines: a square body round the barrel with a rail on each
     face, a ribbed delta ring behind it and a cap in front; the barrel (thick under the rail, stepped down past the
@@ -799,13 +873,43 @@ def handguard() -> list:
     z0, z1 = GUARD_Z
     hw = GUARD_HW
     zc = 0.5 * (z0 + z1)
-    ch = 0.0045
-    sec = [(-hw + ch, z0), (hw - ch, z0), (hw, z0 + ch), (hw, z1 - ch), (hw - ch, z1), (-hw + ch, z1),
-           (-hw, z1 - ch), (-hw, z0 + ch)]
+    hh = 0.5 * (z1 - z0)
     ring_end = GUARD_Y[0] + DELTA_LEN
+    # The ring's front face (the lathe sets it DELTA_BACK back): the handguard starts just inside it.
+    ring_front = ring_end - DELTA_BACK
     b = hs.Builder("Handguard", ["Furniture"])
-    b.prism(sec, "y", ring_end - 0.001, GUARD_Y[1], "Furniture")
-    out.append(hs.finish(b.build(), 0.0008, 1))
+    b.prism(octagon(hw, hh, GUARD_CHAMFER, zc), "y", ring_front - 0.0005, GUARD_Y[1], "Furniture")
+    # Its long edges rounded before the cut, so the slots' rims stay sharp-cut and cheap (the triangle budget).
+    ob = hs.finish(b.build(), 0.0006, 1, weighted=False)
+    # Hollow, its back open into the ring's solid face and its front 3 mm closed under the cap; an oval slot through
+    # each corner face between each pair of rails, the barrel and gas tube in sight through them (owner, 2026-11-15).
+    w = GUARD_WALL
+    cutters = []
+    c = hs.Builder("c_bore", ["Furniture"])
+    c.prism(octagon(hw - w, hh - w, GUARD_CHAMFER - w * (math.sqrt(2.0) - 1.0), zc), "y", ring_front - 0.002,
+            GUARD_Y[1] - 0.003, "Furniture")
+    cutters.append(c.build())
+    span = GUARD_Y[1] - ring_front - 2.0 * GAP_END - GAP_LEN
+    for k in range(GAP_COUNT):
+        y = ring_front + GAP_END + 0.5 * GAP_LEN + k * span / (GAP_COUNT - 1)
+        for sx in (-1, 1):
+            for sz in (-1, 1):
+                c = hs.Builder("c_gap", ["Furniture"])
+                outline = stadium(GAP_H, GAP_LEN, 5) if sz > 0 else stadium(2.0 * GAP_HOLE_R, 2.0 * GAP_HOLE_R, 5)
+                faces = c.prism(outline, "z", -0.006, 0.006, "Furniture")
+                # Its long side along the rifle, its short one across the corner face, cut along the face's normal.
+                d = 0.5 * GUARD_CHAMFER
+                c.transform(faces, Matrix.Translation((sx * (hw - d), y, zc + sz * (hh - d))) @
+                            Matrix.Rotation(math.atan2(sx, sz), 4, "Y"))
+                cutters.append(c.build())
+    hs.cut(ob, cutters)
+    out.append(hs.finish(ob, 0.0))
+
+    # The gas tube from the upper to the front sight base, above the barrel inside the handguard.
+    b = hs.Builder("GasTube", ["Metal"])
+    b.lathe([(UPPER_Y[1] - 0.002, 0.0), (UPPER_Y[1] - 0.002, GAS_R), (FSB_Y[0] + 0.004, GAS_R),
+             (FSB_Y[0] + 0.004, 0.0)], "Metal", 8, centre=(0.0, 0.0, GAS_Z))
+    out.append(hs.finish(b.build(), 0.0, 1))
 
     # Delta ring (ribbed, as tall as the handguard's body) and the handguard's rounded front cap.
     b = hs.Builder("GuardEnds", ["Detail"])
@@ -816,27 +920,27 @@ def handguard() -> list:
         a = GUARD_Y[0] + 0.0012 + k * pitch
         ring += [(a - 0.0005, r), (a, r - 0.0008), (a + 0.0005, r)]
     ring += [(ring_end - 0.0012, r), (ring_end, r - 0.0012), (ring_end, 0.0)]
-    b.lathe(ring, "Detail", 22, centre=(0.0, -0.002, zc - DELTA_DROP))
+    b.lathe(ring, "Detail", 22, centre=(0.0, -DELTA_BACK, zc - DELTA_DROP))
     b.lathe([(GUARD_Y[1] - 0.001, 0.0), (GUARD_Y[1] - 0.001, 0.0150), (GUARD_Y[1] + 0.0002, 0.0148),
              (GUARD_Y[1] + 0.0010, 0.0140), (GUARD_Y[1] + 0.0013, 0.0126), (GUARD_Y[1] + 0.0013, 0.0)], "Detail", 24,
             centre=(0.0, 0.0, BORE_Z))
     out.append(hs.finish(b.build(), 0.0004, 1))
 
-    # Rails: the top one level with the upper's, on from where it ends over the delta ring along the handguard, its
-    # teeth in step with the upper's; the bottom and right ones bare.
+    # Rails: the top one level with the upper's, from the ring's front (owner, 2026-11-15: the ring shows all round);
+    # the bottom and right ones bare, each over a flat face between two rows of gaps.
     b = hs.Builder("GuardRails", ["Furniture"])
-    picatinny(b, RAIL_JOIN, GUARD_Y[1] - 0.001, "Furniture", rail_on("top", 0, 0, 0.0, RAIL_BASE),
-              teeth_from=UPPER_Y[0] + 0.0026 + 19 * 0.0100)
-    picatinny(b, ring_end - 0.0002, GUARD_Y[1] - 0.001, "Furniture", rail_on("bottom", 0, 0, 0.0, z0 + 0.0006))
-    picatinny(b, ring_end - 0.0002, GUARD_Y[1] - 0.001, "Furniture", rail_on("right", 0, 0, hw - 0.0006, zc))
+    y0 = ring_front + 0.0002
+    picatinny(b, y0, GUARD_Y[1] - 0.001, "Furniture", rail_on("top", 0, 0, 0.0, RAIL_BASE))
+    picatinny(b, y0, GUARD_Y[1] - 0.001, "Furniture", rail_on("bottom", 0, 0, 0.0, z0 + 0.0006))
+    picatinny(b, y0, GUARD_Y[1] - 0.001, "Furniture", rail_on("right", 0, 0, hw - 0.0006, zc))
     out.append(hs.finish(b.build(), 0.0003, 1))
 
-    # The left rail under a cover with raised ribs across it, as in the owner's photo; the right one stays bare for
-    # the torch.
+    # The left rail under a ladder cover with raised ribs across it, as in the owner's photo, as tall as a rail so the
+    # corner gaps show above and below it (owner, 2026-11-15); the right one stays bare for the torch.
     b = hs.Builder("RailCover", ["Furniture"])
-    # From the ring's back face, so no daylight shows between them (owner, 2026-11-05: no gaps in the body).
-    cy0, cy1 = ring_end - 0.0002, GUARD_Y[1] - 0.003
-    ch_ = 0.0180
+    # From the ring's front face, so no daylight shows between them (owner, 2026-11-05: no gaps in the body).
+    cy0, cy1 = y0, GUARD_Y[1] - 0.003
+    ch_ = COVER_HH
     b.prism(hs.fillet([(-hw + 0.0050, zc - ch_, 0.0), (-hw + 0.0050, zc + ch_, 0.0),
                        (-hw - 0.0030, zc + ch_, 0.0020), (-hw - 0.0045, zc + ch_ - 0.0022, 0.0020),
                        (-hw - 0.0045, zc - ch_ + 0.0022, 0.0020), (-hw - 0.0030, zc - ch_, 0.0020)], 3), "y", cy0,
@@ -1183,8 +1287,11 @@ def build() -> None:
     body_parts += handguard()
     for ob in body_parts:
         print("  part %-14s %6d" % (ob.name, hs.tris(ob)))
-    surface.tag_named(body_parts, PART_SURFACES)
-    body = hs.join("Body", body_parts)
+    # The hollow handguard stays out of the body until the figures' copy is made from a solid stand-in (AF1).
+    hollow = [ob for ob in body_parts if ob.name in GUARD_HOLLOW]
+    stand_in = guard_stand_in()
+    surface.tag_named(body_parts + [stand_in], PART_SURFACES)
+    body = hs.join("Body", [ob for ob in body_parts if ob not in hollow])
     body.parent = arm
     fh = flash_hider()
     fh.parent = arm
@@ -1201,7 +1308,9 @@ def build() -> None:
     fh.location = BARREL_END
     clips(arm)
     surface.resolve(SURFACES)
-    fig = figure_copy.make(FIGURE_TRIS)
+    fig = figure_copy.make(FIGURE_TRIS, skip=GUARD_HOLLOW)
+    bpy.data.objects.remove(stand_in, do_unlink=True)
+    body = hs.join("Body", [body] + hollow)
     surface.strip()
     total = 0
     for ob in bpy.data.objects:

@@ -995,6 +995,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   coat (about half metallic, a broad highlight, near black when painted black) and polymer draws its paint nearly
   as it is; white polymer stays a touch off-white and no replica is wood. He answered "Perfect" to the pictures; the
   values are not re-tuned without him (docs/records/MQ4.md).
+- **The AEG's delta ring, handguard gaps and forward assist (owner, 2026-11-15, AF1).** On the all-angles sheet,
+  against an M4 quad-rail photo: the ring "should go around the full body" (the rail covered its top), the handguard
+  "should have gaps in between the rails (not the rails themselves)" and the forward assist was "too small and
+  recessed. It should be slightly larger and stick out at more of an angle." So the upper's top rail stops at the
+  ring and the handguard's starts in front of it; the handguard is hollow with oval slots in its top corners and small
+  round holes in its lower ones, the barrel and a gas tube seen through them; the left rail cover is a rail's height;
+  the forward assist's axis turns 18 degrees out toward the back (docs/records/AF1.md).
 - **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
   handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
   sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip

@@ -48,7 +48,8 @@ An electric rifle (an AEG, "automatic electric gun"), with a motor whirr on ever
 3-round bursts or full auto**: press **B** to change mode, and the fire selector on the replica shows the mode you
 are in. On an indoor field (Depot) it starts each round on single shots: [no full auto indoors](Maps#depot).
 A battery drives it, so the battery you fit sets its rate of fire. It is a short carbine, about 67 cm long: a
-quad-rail handguard with a ribbed cover, an A-frame front sight, a small ghost-ring rear sight, a raked grip moulded
+quad-rail handguard with open gaps between its rails and a ribbed cover on the left one, a ribbed ring behind it, an
+angled forward assist, an A-frame front sight, a small ghost-ring rear sight, a raked grip moulded
 in one piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the
 charging handle pulled back, the dust cover open and the hop-up dial turn.
 
