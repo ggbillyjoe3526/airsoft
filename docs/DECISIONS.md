@@ -968,6 +968,25 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   (231). By the pole the attackers stood nearer in a round's last 15 s they won 72 % ±3 at flag A and 65 % ±3 at
   flag B (64 seeds, 7 s), so flag B's cover was not it, and sending more defenders to pull a flag down
   (`BotConfig.retakers` 3 or 4 for 2) moved it by less than the noise (`docs/records/MB3.md`).
+- **Woodland is Concept B of the map action redesign (owner, 2026-11-15, WB1).** He picked the recommended concepts
+  ("Go with the recommended options"; report https://claude.ai/artifact/MJvwgMNiyip7EaH5Mxa6Sz). The field keeps its
+  size and its road stays clear. Six bot routes, the first three in their places: the north edge (Pine slope, the
+  Ridge's far side, the stream's north end in its valley, the Tower), the north middle (between the west thickets,
+  along the Berm, over the stream north of the Clearing to the Hollow way's head) and the south middle (the
+  Clearing's south side, over the stream by the Knoll, to Log stacks) join the north, middle and south. Flag A stands
+  in Fern hollow at (42.2, -41.4), beside the oak west of the Fort (the concept's (41, -42), 1.4 m off so its trunk
+  is out of the ring); flag B at Log stacks, (40, 42), in the pocket of three cordwood stacks south of the road. The
+  concept's (36, 40) was on the gravel's edge, and anywhere on that verge the road's S, 40 m west, saw the pole down
+  the Culvert's straight, a line that runs along the strip itself, so no piece could shut it (MB2's rule that the
+  road west of the Culvert sees nothing of B holds). Plant The Bomb's sites follow the flags. Each route's forward
+  defender post holds the stream side (the Tower, the Hollow way's head, Hut row, the Knoll's east side, the
+  Culvert's east head), the other one is by its pole; the middle route ends at Hut row. The Fort and the Sawmill stay
+  as the defenders' ground behind the flags and keep their names; the areas at the poles are A site and B site. The
+  Box lantern and the Sawmill's work lamp moved to the flags. Bots, 6v6, Normal, seeds 1 to 32, both with RV1's route
+  variety: Attack / Defend attackers 54 % ±3 (55 % ±3 before), the first hit at 20 s (24 s), 53 % of knock-outs
+  outside the defenders' third (12 %); Plant The Bomb attackers 53 % ±3 at the 23 s fuse (46 % ±3 before), so the
+  fuse stays; Elimination (16 seeds) the west end 47 % ±4.5 (45 %). Ground a bot stands on in at least one round in
+  ten grew by 28 % in Elimination and 28 % in Attack / Defend (`docs/records/WB1.md`).
 - **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the

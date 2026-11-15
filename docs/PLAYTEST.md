@@ -1715,6 +1715,24 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 - [ ] **Attacking is worth it now.** Attack on the same fields and hold the site after the plant.
   Pass: holding the site feels like it wins rounds; the bomb goes off now and then, not every time.
 
+## Woodland's nearer flags and six routes (WB1)
+
+- [ ] **The fight comes to the middle.** Attack on Woodland at Normal, by day: walk any route east without hurrying.
+  Pass: you meet defenders around the stream (the Tower, the Hollow way's head, Hut row, the Culvert) more often than
+  at the flags, and the first shot of a round comes about 20 s in, not half a minute.
+- [ ] **Flag A in Fern hollow.** Raise it from the west, then defend it from the Fort's window and from the
+  windthrow beside it. Pass: it is readable where the pole stands (the oak beside it, not in the ring), the Fort's
+  window and gate are worth holding, and neither side gets a spot that wins every duel.
+- [ ] **Flag B between the woodpiles.** Raise it coming along the road, then from the north (the Knoll side). Defend
+  it from inside the pocket and from the road side. Pass: the road's double bend never sees the pole; whoever is in
+  the pocket can be flushed with a smoke or a flash; a raise there is a fair fight, not a free one either way.
+- [ ] **Bots use the whole wood.** Spectate a few Elimination and Attack / Defend rounds. Pass: bots walk the north
+  edge, the Berm and the Clearing's south side as well as the old three routes, nobody gets stuck on the new routes
+  (the stream's north end, the Knoll's slope), and none walk on top of each other.
+- [ ] **Plant The Bomb.** Attack and defend both sites with the 23 s fuse. Pass: from either site a defender has time
+  to come over; the pocket at B is hard but not hopeless to retake.
+- [ ] **At night** both flags have a lantern by them and the fights at them are lit.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
