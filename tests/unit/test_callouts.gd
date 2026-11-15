@@ -11,11 +11,11 @@ const LINES: PackedStringArray = [
 	"Pushing {area}!", "Flanking {area}.", "Checking {area}.", "Holding {area}.", "Raising!", "Flag!",
 	"Overtime, {area}!", "Going to {area}.", "Watching {area}.", "Need a mag!", "Mag coming!", "Thanks for the mag!",
 	"Need help!", "Go round!", "Cover me!", "Watching with you.", "It's yours.", "Planting {area}!", "Bomb, {area}!",
-	"Armed, {area}!", "Defusing!", "Bomb down, {area}!",
+	"Armed, {area}!", "Defusing!", "Bomb down, {area}!", "Flash out!",
 ]
 ## The shipped order of urgency.
 const ORDER: Array[int] = [
-	E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING, E.WATCH_JOIN, E.WATCH_REST, E.NEED_MAG, E.MAG_COMING,
+	E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING, E.FLASH_OUT, E.WATCH_JOIN, E.WATCH_REST, E.NEED_MAG, E.MAG_COMING,
 	E.NEED_HELP, E.COVER_ME,
 	E.GO_ROUND, E.OVERTIME, E.FLAG,
 	E.RAISING, E.BOMB, E.BOMB_DOWN, E.PLANTING, E.DEFUSING, E.BOMB_ARMED, E.CONTACTS, E.CONTACT, E.RELOADING, E.MAG_THANKS, E.HEARD, E.PUSHING, E.FLANKING, E.CHECKING,
@@ -292,6 +292,24 @@ func test_plant_the_bomb_the_planter_says_so_and_a_defender_in_earshot_calls_the
 	t.state.round_state.attackers = 1
 	assert_eq(t.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.ARMING, "actor": 99, "position": BAY}]),
 			_said([]))
+
+
+func test_a_bot_s_flash_is_called_by_its_thrower_even_inside_its_own_gap() -> void:
+	var r := _rig()
+	var flash := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 0, "position": YARD}
+	assert_eq(r.tick([{"kind": GameEvent.Kind.MAG_CATCH, "target": 0, "value": 30}]), _said(["0: Thanks for the mag!"]))
+	r.run(2.0) # the team's gap has passed, bot 0's own has not
+	assert_eq(r.tick([flash]), _said(["0: Flash out!"]), "the thrower warns its team (BC1)")
+	r.run(5.0)
+	# Inside the team's gap too: the bang is only a moment off.
+	assert_eq(r.tick([{"kind": GameEvent.Kind.MAG_CATCH, "target": 1, "value": 30}]), _said(["1: Thanks for the mag!"]))
+	assert_eq(r.tick([flash]), _said(["0: Flash out!"]), "said at once, the team's gap or not")
+	r.run(5.0)
+	# A smoke, and a throw by someone who is not a bot (you), are never called.
+	var smoke := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.SMOKE, "actor": 2, "position": YARD}
+	assert_eq(r.tick([smoke]), _said([]))
+	var yours := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 99, "position": YARD}
+	assert_eq(r.tick([yours]), _said([]))
 
 
 func test_plant_the_bomb_armed_defusing_and_dropped_are_called_by_the_side_they_matter_to() -> void:

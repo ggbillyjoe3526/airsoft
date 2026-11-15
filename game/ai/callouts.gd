@@ -20,14 +20,14 @@ extends RefCounted
 ## Cover me and pings the spot for you (Pings.ask); only while you are in play and far off, as often as Asks allows.
 
 const TEAMS := 2
-## The events any teammate may say (the one nearest to where it happened), not only the bot it happened to: its own
-## gap doesn't hold one back.
+## The events whose speaker's own gap doesn't hold them back: those any teammate may say (the one nearest to where it
+## happened), not only the bot it happened to, and Flash out, which warns the team as the flash leaves the hand.
 const TEAM_EVENTS: Array[int] = [
 	CalloutsFile.Event.DOWN, CalloutsFile.Event.LAST_ONE, CalloutsFile.Event.TAGGED, CalloutsFile.Event.RAISING,
 	CalloutsFile.Event.FLAG, CalloutsFile.Event.OVERTIME, CalloutsFile.Event.PING_GOING,
 	CalloutsFile.Event.PING_WATCHING, CalloutsFile.Event.COVER_ME, CalloutsFile.Event.WATCH_JOIN,
 	CalloutsFile.Event.WATCH_REST, CalloutsFile.Event.BOMB, CalloutsFile.Event.BOMB_ARMED,
-	CalloutsFile.Event.BOMB_DOWN,
+	CalloutsFile.Event.BOMB_DOWN, CalloutsFile.Event.FLASH_OUT,
 ]
 ## The answers to a player's ping and the asks and answers for a magazine: a personality's Talks (×) never makes them
 ## less likely.
@@ -208,8 +208,8 @@ func _reset() -> void:
 	_held_called.fill(0)
 
 
-## What one of this tick's events gives to call: a hit, a reload, a magazine caught, the flag going up, the overtime
-## flag going up.
+## What one of this tick's events gives to call: a hit, a reload, a magazine caught, a flash thrown, the flag going
+## up, the overtime flag going up.
 func _on_event(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
 	match e.kind:
 		GameEvent.Kind.CHARACTER_HIT:
@@ -236,6 +236,11 @@ func _on_event(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
 			if _far_from_you(e.position):
 				var ask := CalloutsFile.Event.COVER_ME if you.team == attackers else CalloutsFile.Event.NEED_HELP
 				_offer_from_team(you.team, ask, -1, e.position, bots, area_of(e.position), 0, 0, e.position)
+		GameEvent.Kind.GRENADE_THROW:
+			# A bot's flash leaving its hand (BC1): it warns its team; a player's own throw is never called for them.
+			var i := _bot_index(bots, e.actor)
+			if e.value == Grenade.Kind.FLASH and i >= 0 and Elimination.is_in_play(bots[i].character):
+				_offer(bots[i].character.team, CalloutsFile.Event.FLASH_OUT, i, bots, "", 0, 0, -1)
 		GameEvent.Kind.PLANT:
 			_on_plant_cue(e, state, bots)
 		GameEvent.Kind.OVERTIME:
@@ -606,8 +611,9 @@ func _allowed(talk: TeamTalk, event: int, i: int, bots: Array[Bot], area: String
 	return event != CalloutsFile.Event.HEARD or area != talk.heard_area or _now - talk.heard_at >= pace.same_enemy_gap
 
 
-## Says team `t`'s most urgent waiting call once its team gap has passed. A call too old, or one a gap now stops (its
-## caller hit, or a teammate called the same since), goes.
+## Says team `t`'s most urgent waiting call once its team gap has passed; Flash out goes at once, gap or not, as the
+## bang is only flash_fuse off. A call too old, or one a gap now stops (its caller hit, or a teammate called the same
+## since), goes.
 func _flush(t: int, state: GameState, w: BotWorld, live: bool) -> void:
 	var bots := w.bots
 	var talk := _teams[t]
@@ -620,9 +626,11 @@ func _flush(t: int, state: GameState, w: BotWorld, live: bool) -> void:
 				or (ready and not _allowed(talk, p.event, p.bot, bots, p.area, p.enemy)):
 			p.until = -INF
 			continue
+		if not ready and p.event != CalloutsFile.Event.FLASH_OUT:
+			continue
 		if next == null or p.priority < next.priority:
 			next = p
-	if not ready or next == null:
+	if next == null:
 		return
 	next.until = -INF
 	var b := bots[next.bot]

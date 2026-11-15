@@ -24,9 +24,12 @@ items on those topics are held for them.
   Second, bots' flashes still dazzled their own side (FL1's check): in 12 Depot Attack / Defend matches two of five
   dazzles were the thrower's teammates, standing 12 and 15 m from the bang, inside the thrower's own checks (the
   thrower judges where a mate stands and walks, but not one who turns or steps into view after the throw, nor where a
-  bounce takes the bomb). Now a teammate's flash is "called" as it goes: a bot that sees its own side's flash looks
-  away from it, at every level and with no roll, out to the flash's reach (22 m); an enemy's is still a roll of the
-  skill's dodge chance inside 16 m. Tests: three in `tests/unit/test_pp1_balance_qa.gd`.
+  bounce takes the bomb). Now the thrower calls it as it lets go ("Flash out!", a new callout event in
+  `data/callouts.md`, said whatever the bot's own gap, shown in your hit feed), and a bot that sees its own side's
+  flash looks away from it, at every level and with no roll, out to the flash's reach (22 m); an enemy's is still a
+  roll of the skill's dodge chance inside 16 m. You, on a bot's team, get the call in the feed and look away yourself.
+  Tests: three in `tests/unit/test_pp1_balance_qa.gd` (two more by QA), one in `tests/unit/test_callouts.gd`. The
+  bots' five copies of the same character lookup became one, `BotWorld.character` (the critic's ask).
 - **Checked without play** (below): every mechanical claim was matched to the tests that hold it (all green on `main`
   at a8e9863, CI run 43660324307), and where none did, checked fresh: whole bot matches, a load of every map by day
   and night on the simpler renderer, pictures of every menu, and the code.
@@ -181,6 +184,11 @@ later change replaced.
 
 ## Decisions
 
+- **The flash is called in words (critic, attempt 1):** a new callout event, Flash out, said by the thrower as it lets
+  go, past the bot's and the team's gaps (the bang is 1.5 s off). Bots' look-away stays on the throw, as callouts.md
+  says: what a bot says never changes how anyone plays.
+- **MQ4's check came in during the pass** (its thread added it to the old list at 06:46); it stands as N1 under New
+  checks, in the same words, as it needs the owner's eye in play.
 - **Feel questions on a default already taken are dropped** where nothing hangs on them (the Lasers egg, the skip's
   length on his PC, refused magazine tosses): the owner's defaults rule says the default stands; he can raise any.
 - **Several old items share one new one** where one sitting covers them (every Woodland model is one walk, D2; every

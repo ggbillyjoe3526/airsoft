@@ -54,10 +54,10 @@ static func step(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand, dt:
 
 
 ## Someone else's flash in the air or down within flash_dodge_reach, in its view and sight: one roll of the skill's
-## flash_dodge_chance, and on a win the bot looks away from it until just past its bang (PP1). A teammate's flash, called
-## as it goes ("Flash out!"), is always looked away from, at every level and out to the flash's own reach: the thrower
-## can't see a mate step into view after the throw, nor where a bounce takes it (BC1: two of five dazzles in 12 Depot
-## matches were a mate's).
+## flash_dodge_chance, and on a win the bot looks away from it until just past its bang (PP1). A teammate's flash is
+## called as it leaves the hand (Callouts' Flash out, which the player reads in the feed), so it is always looked away
+## from, at every level and out to the flash's own reach: the thrower can't see a mate step into view after the throw,
+## nor where a bounce takes it (BC1: two of five dazzles in 12 Depot matches were a mate's).
 static func _judge_flash(b: Bot, w: BotWorld) -> void:
 	var chance := b.skill.flash_dodge_chance
 	var me := b.character
@@ -70,7 +70,7 @@ static func _judge_flash(b: Bot, w: BotWorld) -> void:
 	for g in w.grenades:
 		if not g.active or g.kind != Grenade.Kind.FLASH or g.owner == me.id or fuse - g.age >= bang_in:
 			continue
-		var thrower := _character(w, g.owner)
+		var thrower := w.character(g.owner)
 		var mates := thrower != null and thrower.team == me.team
 		if (not mates and chance <= 0.0) \
 				or _flat(eye, g.position) > (w.tuning.grenades.flash_reach if mates else w.cfg.flash_dodge_reach) \
@@ -249,14 +249,6 @@ static func _hold_still(cmd: PlayerCommand) -> void:
 	cmd.sprint = false
 	cmd.walk = false
 	cmd.jump = false
-
-
-## The character of id `id` in `w`, or null.
-static func _character(w: BotWorld, id: int) -> Character:
-	for c in w.characters:
-		if c.id == id:
-			return c
-	return null
 
 
 static func _flat(a: Vector3, b: Vector3) -> float:
