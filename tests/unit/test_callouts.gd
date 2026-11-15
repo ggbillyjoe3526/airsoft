@@ -526,3 +526,23 @@ func test_a_warm_tick_makes_no_object_and_a_call_only_its_line() -> void:
 	assert_eq(r.director.said.total - said, 200, "a call every other tick")
 	assert_eq(objects_after, objects, "no objects")
 	assert_lte(memory_after, memory, "the ring's lines replaced, no more")
+
+
+func test_a_flash_out_inside_the_team_gap_leaves_other_waiting_calls_for_when_it_passes() -> void:
+	var r := _rig({}, {}, [4, 1.5, 10, 5])
+	var flash := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 0, "position": YARD}
+	assert_eq(r.tick([{"kind": GameEvent.Kind.MAG_CATCH, "target": 0, "value": 30}]), _said(["0: Thanks for the mag!"]))
+	r.bot(1).last_threat_at = r.state.time + 0.1
+	# Inside the team's gap: a flash is said at once, a Reloading (less urgent) waits and is not lost.
+	var out := r.tick([flash, {"kind": GameEvent.Kind.RELOAD_START, "actor": 1}])
+	assert_true(out.has("0: Flash out!"), "the flash goes inside the gap")
+	assert_false(out.has("1: Reloading!"), "the other call keeps waiting ")
+	assert_eq(r.run(0.5).size(), 0, "nothing else slips out inside the new gap")
+	assert_true(" ".join(r.run(2.0)).contains("1: Reloading!"), "and it is said once the gap has passed")
+
+
+func test_a_thrower_hit_in_the_same_tick_does_not_call_its_flash() -> void:
+	var r := _rig()
+	var flash := {"kind": GameEvent.Kind.GRENADE_THROW, "value": Grenade.Kind.FLASH, "actor": 0, "position": YARD}
+	var out := r.tick([r.hit(0, 2), flash])
+	assert_false(out.has("0: Flash out!"), "a hit thrower says nothing")
