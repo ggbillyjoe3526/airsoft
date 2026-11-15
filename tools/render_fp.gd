@@ -3,10 +3,13 @@ extends SceneTree
 ## the game's eye camera) on the Depot on High, one picture a shot. Each shot is `<name>:<replica id>` followed by any
 ## of `:aim=<0..1>` (the sight's raise), `:skin` (skin-only arms), `:reload=<0..1>` (that share through a reload),
 ## `:fire=<seconds>` (that long after a shot), `:sprint`, `:walk=<seconds>` (that long into a walk), `:grip=<key>`,
+## `:paint=<paint>` (a ReplicaSchemes paint, the replica's default otherwise),
 ## `:optic=<key>` and `:out=<x>,<y>,<z>,<far>` (seen from outside: the camera that way from your right hand along the
 ## eye's axes, that far off). An argument `set:<property>[.<key>]=<value>` changes a ViewModelConfig value for every
 ## shot (a number, or three for a Vector3), for trying a pose before it goes in the config; `size:<w>x<h>` draws the
-## pictures that large (1280x720 otherwise: a texture's fine detail wants 2560x1440). Needs a display; Forward+
+## pictures that large (1280x720 otherwise: a texture's fine detail wants 2560x1440); `preset:<id>` draws on that
+## graphics preset (High otherwise), `map:<id>` on that map (the Depot otherwise) and `spot:<x>,<z>,<yaw>,<pitch>`
+## stands you there (MQ4: the outdoor sun on a replica's metal). Needs a display; Forward+
 ## under xvfb with lavapipe (mesa-vulkan-drivers):
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . -s res://tools/render_fp.gd -- <folder> [set:...] <shot> ...
 ## Dev only: tools/ never ships.
@@ -16,6 +19,7 @@ const QUALITY := 0.92
 const SETTLE_FRAMES := 90
 const DT := 1.0 / 60.0
 const MAP := "depot"
+const PRESET := &"high"
 ## Where you stand: x, z, yaw and pitch (degrees), as render_arms.gd's spot.
 const SPOT := Vector4(0.0, 0.0, 0.0, 0.0)
 const OUTSIDE_FOV := 40.0
@@ -26,6 +30,9 @@ const RIGHT_HAND := "Hand_R"
 const WALK_SPEED := 3.0
 
 var _size := SIZE
+var _map := MAP
+var _preset := PRESET
+var _spot := SPOT
 var _port: SubViewport = null
 var _camera: Camera3D = null
 var _outside: Camera3D = null
@@ -58,6 +65,13 @@ func _run() -> void:
 		elif args[i].begins_with("size:"):
 			var sides := args[i].trim_prefix("size:").split("x")
 			_size = Vector2i(int(sides[0]), int(sides[1]))
+		elif args[i].begins_with("preset:"):
+			_preset = StringName(args[i].trim_prefix("preset:"))
+		elif args[i].begins_with("map:"):
+			_map = args[i].trim_prefix("map:")
+		elif args[i].begins_with("spot:"):
+			var at := args[i].trim_prefix("spot:").split_floats(",")
+			_spot = Vector4(at[0], at[1], at[2], at[3])
 		else:
 			shots.append(args[i])
 	if not _build_scene():
@@ -91,9 +105,9 @@ func _change(spec: String) -> void:
 
 func _build_scene() -> bool:
 	var tuning := SimTuning.load_default()
-	var map := MapData.load_map(MAP, _play.map_style, tuning.rounds.team_size)
+	var map := MapData.load_map(_map, _play.map_style, tuning.rounds.team_size)
 	if not map.ok():
-		push_error("render_fp: %s refused" % MAP)
+		push_error("render_fp: %s refused" % _map)
 		return false
 	_port = SubViewport.new()
 	_port.size = _size
@@ -116,7 +130,7 @@ func _build_scene() -> bool:
 	var roof := RoofView.build(map, _play.roof)
 	if roof != null:
 		_port.add_child(roof)
-	var values := GraphicsTable.shared().preset(&"high")
+	var values := GraphicsTable.shared().preset(_preset)
 	GraphicsApply.apply(values, _port)
 	GraphicsApply.apply_field(values, lighting, null, null, level)
 	if site != null:
@@ -126,11 +140,11 @@ func _build_scene() -> bool:
 	_camera.far = _play.view.far
 	_camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	_port.add_child(_camera)
-	var ground := map.terrain.height_at(SPOT.x, SPOT.y) if map.terrain != null else 0.0
-	_feet = Vector3(SPOT.x, ground, SPOT.y)
+	var ground := map.terrain.height_at(_spot.x, _spot.y) if map.terrain != null else 0.0
+	_feet = Vector3(_spot.x, ground, _spot.y)
 	_eye = _feet + Vector3.UP * tuning.body.stand_eye_height
-	_yaw = deg_to_rad(SPOT.z)
-	_pitch = deg_to_rad(SPOT.w)
+	_yaw = deg_to_rad(_spot.z)
+	_pitch = deg_to_rad(_spot.w)
 	_camera.global_position = _eye
 	_camera.global_rotation = Vector3(_pitch, _yaw, 0.0)
 	_look = -_camera.global_basis.z
@@ -173,7 +187,10 @@ func _shoot(shot: String, folder: String) -> int:
 	var hands := ReplicaView.new()
 	hands.skin_arms = opts.has("skin")
 	_camera.add_child(hands)
-	hands.setup(_play.viewmodel, loadout, BoxWorld.new(), [], false, parts, _play.view, _camera)
+	var paints: Array[StringName] = []
+	if opts.has("paint"):
+		paints.append(StringName(opts["paint"]))
+	hands.setup(_play.viewmodel, loadout, BoxWorld.new(), paints, false, parts, _play.view, _camera)
 	_play.viewmodel.depth_scale = kept_depth
 	var c := Character.new(0, 0, _feet, _yaw, loadout)
 	c.pitch = _pitch
