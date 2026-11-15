@@ -130,6 +130,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"range_wall": "res://assets/models/props/range_wall.glb",
 	&"range_backstop": "res://assets/models/props/range_backstop.glb",
 	&"sandbags": "res://assets/models/props/sandbags.glb",
+	&"sandbags_b": "res://assets/models/props/sandbags_b.glb",
+	&"sandbags_c": "res://assets/models/props/sandbags_c.glb",
 	&"sandbags_start": "res://assets/models/props/sandbags_start.glb",
 	&"sandbags_end": "res://assets/models/props/sandbags_end.glb",
 	&"site_toilet": "res://assets/models/props/site_toilet.glb",
@@ -216,13 +218,15 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## wall.
 @export var kind_max_depth: Dictionary[StringName, float] = {&"plywood": 0.5}
 ## Other models a lining model (TILE) takes turns with, place by place along a rack, never the same twice in a row,
-## and a GRID model's cells pick among at random (WG2: Woodland's woodpiles, three sections each its own ragged top),
+## and a GRID model's cells pick among at random (WG2: Woodland's woodpiles, three sections each its own ragged top;
+## RM2: the Range's sandbag sections, which share the bags over their ends),
 ## so a long rack wall or stack never reads as one bay repeated (the owner, 2026-11-09: the racking loaded three ways;
 ## five drew three times the hall's draws on Low). Each is in `models`, the same size as the model it stands in for.
 ## Their chunks are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
 @export var variants: Dictionary[StringName, PackedStringArray] = {
 	&"shelf": PackedStringArray(["shelf_b", "shelf_c"]),
 	&"cordwood": PackedStringArray(["cordwood_b", "cordwood_c"]),
+	&"sandbags": PackedStringArray(["sandbags_b", "sandbags_c"]),
 }
 ## How a prop a block names (MapData.Block.dress, WR3) is laid in it; one not listed is fitted to the box (FIT, long
 ## side along the box's).
@@ -402,7 +406,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	# Subway's escalators' brushed stainless (SM2): a soft sheen.
 	&"escalator_upper": 0.4, &"escalator_lower": 0.4,
 	# The Range's sandbags' sacking (RM2): matt, as the site's own bags (SiteLook's fabric), never a pillow's sheen.
-	&"sandbags": 0.97, &"sandbags_start": 0.97, &"sandbags_end": 0.97,
+	&"sandbags": 0.97, &"sandbags_b": 0.97, &"sandbags_c": 0.97, &"sandbags_start": 0.97, &"sandbags_end": 0.97,
 }
 ## How worn the props are drawn (SL2, look_vertex.gdshader's `wear`; LookConfig.wear scales it): grime up their feet,
 ## streaks, stains and dust on top. Models worn otherwise (each its own material): the trees' crowns are clean, as

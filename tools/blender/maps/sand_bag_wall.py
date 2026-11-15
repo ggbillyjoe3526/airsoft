@@ -4,25 +4,29 @@ that lock into each other along a wall as a real wall's courses do. Built agains
 3 and 5).
 
 Each bag is a sack filled and laid flat: a pillow, full in its belly and thinning to its ends, each end sewn or folded
-flat to a seam whose corners stand out as ears (photo 4: an end about 0.6 of the belly high), a tied corner here and
-there gathered to a tail bound with cord (photo 5), the sacking lumped and creased towards its ends. A bag is 2.6 to
-3.2 times as long as it stands on the face (photo 4: 3.1); its length, its height, how deep it sits in the course
-below and how it lies are its own, so the joints wander as the photo's do.
+flat to a seam whose corners stand out as ears (photo 4: an end about 0.6 of the belly high, two bags end to end
+meeting in a V), a tied corner here and there gathered to a tail bound with cord (photo 5), the sacking lumped and
+creased towards its ends. A bag is 2.6 to 3.2 times as long as it stands on the face (photo 4: 3.1); its length, its
+height, how deep it sits in the course below, how it falls along its length and how it leans are its own, so the
+bed joints wander as the photo's do.
 
-The bond: the first and third courses end at the section's ends; the second and fourth lie half a bag over, the bag
-over the section's +x end running on into the next section, which carries the rest of it at its -x end (cut flush
-at the section's ends, the cut never seen). So no joint runs straight up a wall, and a wall reads as one, not a
-section repeated. PropLayout lays the sections all one way round (PropDressConfig.grid_unturned) and closes each wall
-with its end models (PropDressConfig.grid_ends): sandbags_start.glb at the wall's -x end and sandbags_end.glb at its
-+x end, where the part of a running-on bag gives way to a bag laid across the wall (a header, its ends on the faces,
-0.34 m wide: 1.5 times a course), as a real wall's ends are built.
+The bond: every course's joints lie inside a section, a row's half a bag over the course under it and the two rows a
+quarter of a bag apart (so no light finds a way through); each course's bag over the section's +x end runs on into
+the next section, which carries the rest of it at its -x end (cut flush at the section's ends, the cut never seen).
+So no joint runs straight up a wall and nothing ends flat at a section's end. Three sections (sandbags.glb, _b, _c)
+share those bags and differ in their own, and the game lays them at random (PropDressConfig.variants), so a wall
+never repeats every 1.2 m. PropLayout lays the sections all one way round (PropDressConfig.grid_unturned) and closes
+each wall with its end models (PropDressConfig.grid_ends): sandbags_start.glb at the wall's -x end and
+sandbags_end.glb at its +x end, a bag laid across the wall in every other course there (a header, its ends on the
+faces, 0.34 m wide: 1.5 times a course), as a real wall's ends are built.
 
 The creases are baked in (Cycles' ambient occlusion, range_kit.occlude, with the next sections beside it so the joins
 shade alike), the bags' tops paler where the sun bleaches them, their feet darker where rain splashes soil up; the
 game draws the sacking matte (PropDressConfig.model_roughness). Each bag keeps one shade of its own (range_kit.tint),
 so the two parts of a bag split between sections match.
 
-Writes assets/models/props/sandbags.glb, sandbags_start.glb and sandbags_end.glb, each one vertex-coloured mesh
+Writes assets/models/props/sandbags.glb, sandbags_b.glb, sandbags_c.glb, sandbags_start.glb and sandbags_end.glb, each
+one vertex-coloured mesh
 filling x -0.6..0.6, y -0.3..0.3, z 0..0.9 exactly (Godot: x along, y up, z across).
 
 Usage: python3 tools/blender/maps/sand_bag_wall.py [--render <sheet.jpg>]
@@ -37,40 +41,50 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import range_kit as rk  # noqa: E402
 
-MODELS = (("sandbags", 0), ("sandbags_start", -1), ("sandbags_end", 1))  # (name, the end it closes: -x, none, +x)
+# (name, the end it closes: -x, none, +x): three sections that take turns along a wall (PropDressConfig.variants),
+# their own bags between the bags they share at their ends, and the wall's two end models
+MODELS = (("sandbags", 0), ("sandbags_b", 0), ("sandbags_c", 0), ("sandbags_start", -1), ("sandbags_end", 1))
 BUDGET = 5000  # docs/CC0_ASSETS.md › Size limits: a prop; about 95 % of it (RM2)
 LONG, DEEP, HIGH = 1.2, 0.6, 0.9
 HL = LONG * 0.5
 COURSES = 4  # 0.225 m a course: a 0.6 m bag 2.67 times as long as it stands (photo 4: 2.7 to 3.1, photo 5: 3.0)
 PITCH = HIGH / COURSES
 BED = (0.02, 0.04)  # m each bag sits down into the crowns of the bags under it
+CROWN = (-0.028, 0.022)  # m a bag's crown stands under or over its course's line, so the bed joints wander
+TILT = 0.05  # how far a bag's line may fall along it, m a metre: one end down, one up (photo 4)
+ROLL = 0.05  # how far it may lean, m across a metre up: its crown towards one face
 ROW = 0.137  # the two rows' middles, m either side of the wall's middle
 HALF_W = 0.145  # a stretcher's half width: the rows' bellies pressed together, their faces 0.282 out (its ears,
 # creased, 0.298)
 HEADER_HW = 0.17  # a header's half width along the wall: 0.34 wide, 1.5 times a course
-OVERLAP = 0.05  # m bags end to end in a course run into each other, their ends pressed together
-JOINT = 0.08  # m the middle joint of a course that ends at the section's ends may wander either way
-STRADDLE = (0.26, 0.34)  # m of the running-on bag inside each of the two sections that carry it
+OVERLAP = 0.03  # m bags end to end in a course run into each other, their eared ends pressed together in a V
+# The joints of a course in a section (m from its middle), by (the course's parity, row): every course's bags run on
+# over both of the section's ends, so no joint lies at a section's end; a row's joints half a bag over the course
+# under them, and the two rows' a quarter of a bag apart, so no light finds a way through the wall.
+JOINTS = {(0, 0): (-0.375, 0.225), (1, 0): (-0.075, 0.525), (0, 1): (-0.225, 0.375), (1, 1): (-0.525, 0.075)}
+JOINT = 0.035  # m each joint wanders either way
+MIN_BAG = 0.2  # m: a closing bag shorter than this joins the bag beside it instead
+HEADED = 0  # the parity of the courses a wall's end lays a header across, its ends on the wall's faces
 # Points round a bag, (across, up) from its widest line: 13 on its sides and crown, 0 and 180 degrees its widest (the
-# ears' corners), and one under it, where it sits.
+# ears' corners); its foot, flat where it sits, is the chord between the first and the last.
 ARC = [math.radians(a) for a in (-55, -25, 0, 25, 50, 70, 90, 110, 130, 155, 180, 205, 235)]
-UNDER = math.radians(-90.0)
-FOOT = (0, len(ARC) - 1, len(ARC))  # the points that stay down on the course below
+FOOT = (0, len(ARC) - 1)  # the points that stay down on the course below
 SIDE_ROUND = 2.3  # the belly's squareness (2 an ellipse): full shoulders, a soft crown
 FOOT_ROUND = 4.0  # flatter underneath: it spreads where it sits
-CENTRE = 0.42  # its widest line, a share of its height up
+CENTRE = (0.36, 0.43)  # its widest line, a share of its height up: lower where the fill has slumped
 # Along a bag from an end (m): (along, across scale, up scale, crown sag scale, the seam's middle drawn in): the end's
-# flat seam, its corners standing out as ears, then the bag filling out to its belly.
-END = ((0.0, 1.04, 0.32, 0.0, 0.026), (0.02, 1.01, 0.56, 0.15, 0.012), (0.06, 0.995, 0.75, 0.45, 0.0),
+# flat seam (0.6 of the belly high, its corners standing out as ears), then the bag filling out to its belly; two
+# bags pressed end to end meet about 0.68 of their bellies high, a V between them (photo 4).
+END = ((0.0, 1.04, 0.32, 0.0, 0.026), (0.02, 1.01, 0.5, 0.15, 0.012), (0.06, 0.995, 0.72, 0.45, 0.0),
        (0.14, 1.0, 0.92, 0.8, 0.0))
-# An end at a section's end that the next section's bag meets: pressed full against it, so no light shows through the
-# joint between the two (the bags inside a section run into each other OVERLAP instead).
+# An end pressed full against a header's side, so no light shows between them.
 PRESSED = ((0.0, 0.94, 0.8, 0.2, 0.0), (0.015, 0.975, 0.9, 0.45, 0.0), (0.05, 0.995, 0.96, 0.7, 0.0),
            (0.14, 1.0, 0.985, 0.9, 0.0))
-LUMP = 0.007  # the sacking's lumps, m in or out
+INTO_HEADER = 0.035  # m such an end runs into the header
+LUMP = 0.008  # the sacking's lumps, m in or out
 CREASE = 0.006  # its creases fanning in from the ears, m at the seam
 SOIL = 0.12  # the splashed foot of the wall, m up
-TIE = 0.55  # the share of a bag's ends inside a section that show a tied corner on the wall's face
+TIE = 0.6  # the share of a section's own bags' ends inside a wall that show a tied corner on the wall's face
 
 rk.check_colours(["hessian", "hessian_dark", "tie"], shade=0.08)
 
@@ -79,18 +93,20 @@ def _pow(v: float, e: float) -> float:
     return math.copysign(abs(v) ** e, v)
 
 
-def _ring(w: float, h: float, kw: float, kh: float, sag: float) -> list:
-    """A bag's cross-section as (across, up) points from its foot: a loaf w either side and h tall, scaled kw across
-    and kh up about its widest line (the lower half shrinks less, so a bag's ends stay down on the course below), its
-    crown dipped `sag` m."""
+def _ring(w: float, h: float, kw: float, kh: float, sag: float, centre: float) -> list:
+    """A bag's cross-section as (across, up) points from its foot: a loaf w either side and h tall, its widest line
+    `centre` of it up, scaled kw across and kh up about that line (the lower half shrinks less, so a bag's ends stay
+    down on the course below), its crown dipped `sag` m."""
     pts = []
-    c = CENTRE * h
+    c = centre * h
     up, down = (h - c) * kh, c * min(1.0, kh + 0.5)
-    for a in ARC + [UNDER]:
+    for j, a in enumerate(ARC):
         cs, sn = math.cos(a), math.sin(a)
         y = w * kw * _pow(cs, 2.0 / SIDE_ROUND)
         if sn >= 0.0:
             z = c + up * _pow(sn, 2.0 / SIDE_ROUND) - sag * sn ** 4
+        elif j in FOOT:
+            z = c - down  # the foot's corners, down where it sits
         else:
             z = c + down * _pow(sn, 2.0 / FOOT_ROUND)
         pts.append((y, z))
@@ -99,37 +115,62 @@ def _ring(w: float, h: float, kw: float, kh: float, sag: float) -> list:
 
 class Bag:
     """One bag from `a0` to `a1` along the wall (x), or across it (y) when a `header`, its middle line at `mid` the
-    other way, its foot at `zb`, `w` either side and `h` tall. The bag running on past the section's +x end is `cut`
-    there into the part each section carries. Its sag, lumps, lean, turn and shade come from its own random stream,
-    seeded by its place in the bond, so it is the same bag in every model that has it."""
+    other way, `w` either side. A bag `cut` runs on over the section's +x end, each section carrying its part. Its
+    shape, lumps, lean, tilt and shade come from its own random stream, seeded by its place in the bond, so a bag
+    shared by two sections is the same bag in both; `rest` then sets its foot and height."""
 
-    def __init__(self, seed: int, a0: float, a1: float, mid: float, zb: float, w: float, h: float,
-                 header: bool = False, cut: bool = False, ties: tuple = (False, False), face: float = 1.0,
-                 pressed: tuple = (False, False)):
+    def __init__(self, seed: int, a0: float, a1: float, mid: float, w: float, header: bool = False,
+                 cut: bool = False, face: float = 1.0, tilt: bool = True, pressed: tuple = (False, False)):
         rng = random.Random(seed)
-        self.a0, self.a1, self.mid, self.zb, self.w, self.h = a0, a1, mid, zb, w, h
-        self.header, self.cut, self.ties, self.face, self.pressed = header, cut, ties, face, pressed
-        self.sag = h * rng.uniform(0.03, 0.07)
+        self.rng = rng
+        self.a0, self.a1, self.mid, self.w = a0, a1, mid, w
+        self.header, self.cut, self.face, self.pressed = header, cut, face, pressed
+        self.zb, self.h = 0.0, PITCH
+        self.sag_k = rng.uniform(0.04, 0.08)
+        self.centre = rng.uniform(*CENTRE)
         # a bag that is cut, or ends at the section's end, lies square, so it ends flush there
-        yaw = rng.uniform(-0.03, 0.03)
-        self.yaw = 0.0 if cut or abs(abs(a0) - HL) < 1e-6 or abs(abs(a1) - HL) < 1e-6 else yaw
-        self.lean = rng.uniform(-0.03, 0.03)
+        ends_flush = cut or any(abs(abs(e) - HL) < 1e-6 for e in (a0, a1))
+        self.yaw = 0.0 if ends_flush else rng.uniform(-0.03, 0.03)
+        self.lean = rng.uniform(-ROLL, ROLL)
+        self.tilt = rng.uniform(-TILT, TILT) if tilt and not header else 0.0
         self.phase = (rng.random(), rng.random(), rng.random())
-        self.paint = rk.tint("hessian" if rng.random() > 0.35 else "hessian_dark", rng.uniform(0.94, 1.05))
+        self.paint = rk.tint("hessian" if rng.random() > 0.35 else "hessian_dark", rng.uniform(0.93, 1.06))
         self.tie_turn = (rng.uniform(-0.4, 0.4), rng.uniform(-0.4, 0.4))
+        # tied corners only on a section's own bags (so they differ from section to section, never repeating every
+        # section's length), on ends inside the wall, never at the wall's end or against a header
+        self.ties = tuple(abs(abs(e) - HL) > 0.01 and rng.random() < TIE and not p and not cut
+                          for e, p in zip((a0, a1), pressed)) if not header else (True, False)
+        self.bed = rng.uniform(*BED)
         self.tie_rng = random.Random(seed + 1)
 
+    def middle(self) -> float:
+        return (self.a0 + self.a1) * 0.5
+
+    def rest(self, zb: float, crown: float) -> None:
+        """Sits the bag's foot at `zb` (its middle; it tilts about it) and fills it so its crown, sagged, is at
+        `crown`."""
+        self.zb = zb
+        self.h = (crown - zb) / (1.0 - self.sag_k)
+
+    def crown_at(self, x: float) -> float:
+        """Its crown's height over the wall's x, where the bag is full."""
+        return self.zb + self.h * (1.0 - self.sag_k) + self.tilt * (x - self.middle())
+
     def stations(self) -> list:
-        """(along from a0, across scale, up scale, sag scale, seam drawn in, its end: -1 a0, 1 a1, 0 the belly)."""
+        """(along from a0, across scale, up scale, sag scale, seam drawn in, its end: -1 a0, 1 a1, 0 the belly); a
+        cut bag has one more, where it is cut, the same in both parts."""
         n = abs(self.a1 - self.a0)
         ends = [PRESSED if p else END for p in self.pressed]
-        st = [s + (-1,) for s in ends[0]]
-        if not self.cut:
-            st.append((n * 0.5, 1.0, 1.0, 1.0, 0.0, 0))
-        else:
+        st = [s + (-1,) for s in ends[0]] + [(n * 0.5, 1.0, 1.0, 1.0, 0.0, 0)] + \
+             [(n - s[0],) + s[1:5] + (1,) for s in reversed(ends[1])]
+        if self.cut:
             t = HL - self.a0
-            st += [(t - 0.05, 1.0, 1.0, 1.0, 0.0, 0), (t, 1.0, 1.0, 1.0, 0.0, 0), (t + 0.05, 1.0, 1.0, 1.0, 0.0, 0)]
-        return st + [(n - s[0],) + s[1:4] + (s[4], 1) for s in reversed(ends[1])]
+            st = [s for s in st if abs(s[0] - t) > 0.004]
+            i = next(k for k, s in enumerate(st) if s[0] > t)
+            p, q = st[i - 1], st[i]
+            f = (t - p[0]) / (q[0] - p[0])
+            st.insert(i, (t,) + tuple(p[k] + (q[k] - p[k]) * f for k in range(1, 5)) + (p[5] if f < 0.5 else q[5],))
+        return st
 
     def rings(self) -> tuple:
         """The bag's rings, 3D, from its a0 end, and the index of the ring at its cut (or None)."""
@@ -137,10 +178,10 @@ class Bag:
         sense = 1.0 if self.a1 >= self.a0 else -1.0
         tcut = HL - self.a0 if self.cut else None
         p1, p2, p3 = self.phase
-        zc = CENTRE * self.h
+        zc = self.centre * self.h
         out, cut_i = [], None
         for i, (t, kw, kh, ks, recess, end) in enumerate(self.stations()):
-            ring = _ring(self.w, self.h, kw, kh, self.sag * ks)
+            ring = _ring(self.w, self.h, kw, kh, self.h * self.sag_k * ks, self.centre)
             u = t / n
             # the lumps fade out at the seams and, on a cut bag, at its cut (where both parts must meet alike)
             fade = min(1.0, t / 0.06, (n - t) / 0.06)
@@ -151,7 +192,7 @@ class Bag:
             crease = CREASE * max(0.0, 1.0 - min(t, n - t) / 0.14)
             pts = []
             for j, (y, z) in enumerate(ring):
-                a = (ARC + [UNDER])[j]
+                a = ARC[j]
                 if j not in FOOT:
                     f = 0.6 * math.sin(math.tau * (1.5 * u + p1) + 2.0 * a) + \
                         0.4 * math.sin(math.tau * (2.5 * u + p2) - 3.0 * a)
@@ -166,18 +207,15 @@ class Bag:
         return out, cut_i
 
     def place(self, a: float, side: float, z: float) -> tuple:
-        """A point `a` along the bag's line, `side` across it, `z` over its foot, turned `yaw` about its middle and
-        leaning `lean` (its crown towards one face)."""
-        mid_a = (self.a0 + self.a1) * 0.5
+        """A point `a` along the bag's line, `side` across it, `z` over its foot, turned `yaw` about its middle,
+        leaning `lean` (its crown towards one face) and tilted `tilt` along it."""
+        mid_a = self.middle()
         d = a - mid_a
         side += self.lean * z
         dx = d * math.cos(self.yaw) - side * math.sin(self.yaw)
         dy = d * math.sin(self.yaw) + side * math.cos(self.yaw)
-        z += self.zb
+        z += self.zb + self.tilt * d
         return (self.mid + dy, mid_a + dx, z) if self.header else (mid_a + dx, self.mid + dy, z)
-
-    def crown(self) -> float:
-        return self.zb + self.h
 
 
 def _tie(kit: rk.Kit, bag: Bag, ring: list, end: int) -> None:
@@ -229,82 +267,154 @@ def _part(kit: rk.Kit, bag: Bag, rings: list, end: int, shift: float) -> None:
             _tie(kit, bag, rs[i], e)
 
 
-def bags(closes: int) -> list:
-    """Every bag of a section, as (course, bag). `closes` -1 or 1: the section ends a wall at that end, a header there
-    in each course that runs on; 0: it runs on both ways."""
-    plan = random.Random(23)
+def _joints(c: int, ri: int) -> tuple:
+    """Course `c`'s two joints in row `ri` of every section, each a little off its place in the bond."""
+    rng = random.Random(3000 + c * 10 + ri)
+    j1, j2 = JOINTS[(c % 2, ri)]
+    return j1 + rng.uniform(-JOINT, JOINT), j2 + rng.uniform(-JOINT, JOINT)
+
+
+def _spans(c: int, ri: int, closes: int) -> list:
+    """Row `ri` of course `c` in a model closing the wall at `closes` (-1 its -x end, 1 its +x, 0 neither) as (a0,
+    a1, the ends pressed against a header) spans of the model's own bags; the bag over the +x end that every section
+    shares is laid apart (`plan`)."""
+    j1, j2 = _joints(c, ri)
+    ov = OVERLAP * 0.5
+    lo, hi = j1 - ov, j2 + ov
+    press = (False, False)
     out = []
-    below = []  # (x0, x1, row, crown) of the course under, its bags repeated a section either way (the bond runs on)
-    for c in range(COURSES):
-        course = []
-        top = (c + 1) * PITCH
-        last = c == COURSES - 1
-        runs_on = c % 2 == 1
-        for ri, row in enumerate((-ROW, ROW)):
-            if not runs_on:
-                j = plan.uniform(-JOINT, JOINT) + (0.03 if ri else -0.03)
-                spans = [(-HL, j + OVERLAP * 0.5, False), (HL, j - OVERLAP * 0.5, False)]
-            else:
-                a, b = plan.uniform(*STRADDLE), plan.uniform(*STRADDLE)
-                # the bag over the +x end, HL - a in this section to HL + b in the next (whose -x end carries it from
-                # -HL to -HL + b), and the middle bag between, pressed into both
-                spans = [(HL - a - OVERLAP * 0.5, HL + b + OVERLAP * 0.5, True),
-                         (-HL + b - OVERLAP * 0.5, HL - a + OVERLAP * 0.5, False)]
-            for si, (a0, a1, cut) in enumerate(spans):
-                seed = 1000 + c * 100 + ri * 10 + si
-                rng = random.Random(seed + 7)
-                lo, hi = min(a0, a1), max(a0, a1)
-                zb = 0.0
-                if c > 0:
-                    zb = min(cr for x0, x1, r_, cr in below if r_ == ri and x1 > lo + 0.05 and x0 < hi - 0.05) - \
-                        rng.uniform(*BED)
-                # the top course's middle bags are the wall's highest, in every model alike; the rest stand a little
-                # under or over their course's line, so the bed joints wander
-                if last:
-                    h = top - (rng.uniform(0.012, 0.03) if cut else rng.uniform(0.0, 0.006)) - zb
-                else:
-                    h = top + rng.uniform(-0.02, 0.012) - zb
-                # tied corners only on ends inside the section, never at its ends, where the next bag is
-                ties = tuple(abs(abs(e) - HL) > 0.01 and rng.random() < TIE for e in (a0, a1))
-                # an end at a section's end is pressed against the next section's bag, unless it ends the wall
-                pressed = tuple(abs(abs(e) - HL) < 1e-6 and closes * e <= 0.0 for e in (a0, a1))
-                course.append(Bag(seed, a0, a1, row, zb, HALF_W * rng.uniform(0.97, 1.03), h, cut=cut,
-                                  ties=ties, face=-1.0 if row < 0 else 1.0, pressed=pressed))
-        if runs_on and closes:
-            sx = closes
-            seed = 5000 + c
-            rng = random.Random(seed + 7)
-            x_in = sx * (HL - 2.0 * HEADER_HW)
-            zb = min(cr for x0, x1, r_, cr in below if x1 > min(x_in, sx * HL) and x0 < max(x_in, sx * HL)) - \
-                rng.uniform(*BED)
-            h = top - rng.uniform(0.012, 0.03) - zb
-            course.append(Bag(seed, -sx * (DEEP * 0.5 - 0.012), sx * (DEEP * 0.5 - 0.012),
-                              sx * (HL - HEADER_HW * END[0][1] - 0.002), zb, HEADER_HW, h, header=True, ties=(True, c == 1),
-                              face=sx))
-        below = []
-        for b in course:
-            out.append((c, b))
-            if b.header:
-                below += [(b.mid - b.w, b.mid + b.w, r_, b.crown()) for r_ in (0, 1)]
-                continue
-            lo, hi = min(b.a0, b.a1), max(b.a0, b.a1)
-            ri = 0 if b.mid < 0 else 1
-            below += [(lo + s, hi + s, ri, b.crown()) for s in (-LONG, 0.0, LONG)]
+    if closes:
+        # the wall's end: a bag laid across it in a headed course, else this row's bags run on to the end, one
+        # more short one, or the bag by it longer
+        headed = c % 2 == HEADED
+        edge = HL - 2.0 * HEADER_HW if headed else HL
+        e = edge + INTO_HEADER if headed else edge
+        j = -j1 if closes < 0 else j2
+        if edge - j >= MIN_BAG:
+            out.append((-e, j1 + ov, (headed, False)) if closes < 0 else (j2 - ov, e, (False, headed)))
+        elif closes < 0:
+            lo, press = -e, (headed, False)
+        else:
+            hi, press = e, (False, headed)
+    out.append((lo, hi, press))
     return out
 
 
-def section(name: str, closes: int) -> object:
-    """One model: the section's bags in its own place; at the end it `closes`, a header instead of the part of the
-    running-on bag that would lie there."""
+def _rest(bag: Bag, belows: list, rows: tuple, crown: float) -> None:
+    """Sits `bag` down into the crowns under it, in `rows`, wherever both are full (every 3 cm along it): the lowest
+    of `belows` (one list a model; a bag shared by several sits on the lowest of them all) less its bed, so it never
+    stands off any of them."""
+    if bag.header:
+        xs = [bag.mid + bag.w * k for k in (-0.5, 0.0, 0.5)]
+    else:
+        lo, hi = min(bag.a0, bag.a1) + 0.08, max(bag.a0, bag.a1) - 0.08
+        xs = [lo + (hi - lo) * i / max(1, round((hi - lo) / 0.03)) for i in range(round((hi - lo) / 0.03) + 1)]
+    zb = None
+    for below in belows:
+        for x in xs:
+            for b, r in below:
+                if r in rows and min(b.a0, b.a1) + 0.08 <= x <= max(b.a0, b.a1) - 0.08:
+                    z = b.crown_at(x) - bag.tilt * (x - bag.middle())
+                    zb = z if zb is None else min(zb, z)
+    bag.rest(0.0 if zb is None else zb - bag.bed, crown)
+
+
+def _crown(bag: Bag, c: int, shared: bool) -> float:
+    """Where `bag`'s crown stands in course `c`: about its course's line; on top, the bags every section shares stand
+    a little over the top (the box flattens them to it, so every model is as high), the rest a little under it."""
+    if c == COURSES - 1:
+        if shared and not bag.header:
+            return HIGH + 0.012
+        return HIGH - bag.rng.uniform(0.0, 0.035) - abs(bag.tilt) * 0.35
+    return (c + 1) * PITCH + bag.rng.uniform(*CROWN)
+
+
+def plan() -> dict:
+    """Every model's bags, as (course, bag, part: "whole", or the a0 or a1 part of a bag shared over a section's
+    end), course by course: each model's own bags sit on its own courses; the shared ones, on the lowest of them."""
+    own = {name: i for i, (name, _) in enumerate(MODELS)}
+    out = {name: [] for name, _ in MODELS}
+    below = {name: [] for name, _ in MODELS}  # (bag, row) under the next course, repeated a section either way
+    for c in range(COURSES):
+        last = c == COURSES - 1
+        course = {name: [] for name, _ in MODELS}
+        for ri, row in enumerate((-ROW, ROW)):
+            j1, j2 = _joints(c, ri)
+            ov = OVERLAP * 0.5
+            seed = 1000 + c * 100 + ri * 10
+            shared = Bag(seed, j2 - ov, j1 + LONG + ov, row, HALF_W * random.Random(seed + 5).uniform(0.97, 1.03),
+                         cut=True, face=-1.0 if row < 0 else 1.0, tilt=c > 0 and not last)
+            _rest(shared, [below[name] for name, _ in MODELS], (ri,), _crown(shared, c, True))
+            for name, closes in MODELS:
+                if closes <= 0:
+                    course[name].append((shared, "a0", ri))
+                if closes >= 0:
+                    course[name].append((shared, "a1", ri))
+                for si, (a0, a1, pressed) in enumerate(_spans(c, ri, closes)):
+                    s = 20000 + own[name] * 1000 + c * 100 + ri * 10 + si
+                    bag = Bag(s, a0, a1, row, HALF_W * random.Random(s + 5).uniform(0.97, 1.03),
+                              face=-1.0 if row < 0 else 1.0, tilt=c > 0, pressed=pressed)
+                    _rest(bag, [below[name]], (ri,), _crown(bag, c, False))
+                    course[name].append((bag, "whole", ri))
+        for name, closes in MODELS:
+            if closes and c % 2 == HEADED:
+                s = 5000 + c * 10 + (closes > 0)
+                head = Bag(s, -closes * (DEEP * 0.5 - 0.012), closes * (DEEP * 0.5 - 0.012),
+                           closes * (HL - HEADER_HW * END[0][1] - 0.002), HEADER_HW, header=True, face=closes)
+                _rest(head, [below[name]], (0, 1), _crown(head, c, False))
+                course[name].append((head, "whole", -1))
+            below[name] = []
+            seen = set()
+            for bag, part, ri in course[name]:
+                out[name].append((c, bag, part))
+                if id(bag) in seen:
+                    continue  # a shared bag is under the next course once, with its copies
+                seen.add(id(bag))
+                if bag.header:
+                    below[name] += [(_moved(bag, 0.0), r) for r in (0, 1)]
+                    continue
+                below[name] += [(_moved(bag, s), ri) for s in (-LONG, 0.0, LONG)]
+    return out
+
+
+class _Under:
+    """A bag under the next course, `shift` m along the wall (the same bag a section either way)."""
+
+    def __init__(self, bag: Bag, shift: float):
+        self.bag, self.shift = bag, shift
+        if bag.header:
+            self.a0, self.a1 = bag.mid - bag.w * 1.3 + shift, bag.mid + bag.w * 1.3 + shift
+        else:
+            self.a0, self.a1 = bag.a0 + shift, bag.a1 + shift
+
+    def crown_at(self, x: float) -> float:
+        b = self.bag
+        if b.header:
+            return b.zb + b.h * (1.0 - b.sag_k)
+        return b.crown_at(x - self.shift)
+
+
+def _moved(bag: Bag, shift: float) -> _Under:
+    return _Under(bag, shift)
+
+
+_PLAN = {}
+
+
+def section(name: str) -> object:
+    """One model: its bags in their own places, the shared bags' parts by its two ends (or, at an end it closes, the
+    wall's end instead)."""
+    if not _PLAN:
+        _PLAN.update(plan())
     k = rk.Kit(name)
-    for c, b in bags(closes):
-        if not b.cut:
+    for _c, b, part in _PLAN[name]:
+        if part == "whole":
             _part(k, b, b.rings()[0], 0, 0.0)
             continue
         rings, i = b.rings()
-        if closes <= 0:
+        if part == "a0":
             _part(k, b, rings[:i + 1], -1, 0.0)  # its a0 part, by this section's +x end
-        if closes >= 0:
+        else:
             _part(k, b, rings[i:], 1, -LONG)  # its a1 part, the next section's, carried here at the -x end
     ob = k.build()
     ob.name = name
@@ -341,54 +451,46 @@ def _seam(ob: object) -> dict:
     return out
 
 
-def _match_seams(main: object, others: list) -> None:
-    """Gives each cut bag's corners at the main section's two ends one colour, the mean of the two sides' bakes (the
-    same ring of the same bag, seen from each section), and the end models' running-on ends the same, so no line of
-    shade shows where two sections meet."""
-    col = main.data.color_attributes["Color"]
-    seam = _seam(main)
-    mean = {}
-    for (side, y, z), loops in seam.items():
-        if side < 0 or (-1, y, z) not in seam:
-            continue
-        both = loops + seam[(-1, y, z)]
-        c = tuple(sum(col.data[li].color[i] for li in both) / len(both) for i in range(3))
-        mean[(y, z)] = c
-        for li in both:
-            col.data[li].color = c + (1.0,)
-    for ob, side in others:
-        cm = ob.data.color_attributes["Color"]
-        for (s, y, z), loops in _seam(ob).items():
-            if s == side and (y, z) in mean:
-                for li in loops:
-                    cm.data[li].color = mean[(y, z)] + (1.0,)
+def _match_seams(obs: dict) -> None:
+    """Gives each shared bag's corners at the sections' ends one colour, the mean of every model's bakes of that ring
+    (the same ring of the same bag, seen from each side), so no line of shade shows where two sections meet."""
+    seams = {name: _seam(ob) for name, ob in obs.items()}
+    rings = {}
+    for name, closes in MODELS:
+        for (side, y, z), loops in seams[name].items():
+            if side * closes <= 0 or not closes:
+                rings.setdefault((y, z), []).append((name, loops))
+    for parts in rings.values():
+        cols = [obs[name].data.color_attributes["Color"].data[li].color for name, loops in parts for li in loops]
+        c = tuple(sum(col[i] for col in cols) / len(cols) for i in range(3)) + (1.0,)
+        for name, loops in parts:
+            col = obs[name].data.color_attributes["Color"]
+            for li in loops:
+                col.data[li].color = c
 
 
 def build_all() -> dict:
     import bpy
-    obs = {name: section(name, closes) for name, closes in MODELS}
-    main = obs["sandbags"]
-    zmax = max(v.co.z for v in main.data.vertices)
+    obs = {name: section(name) for name, _ in MODELS}
     lo, hi = (-HL, -DEEP * 0.5, 0.0), (HL, DEEP * 0.5, HIGH)
     for name, _ in MODELS:
         ob = obs[name]
         rk.finish(ob, angle=math.radians(70.0))
-        for v in ob.data.vertices:
-            v.co.z *= HIGH / zmax
         rk.clamp_to(ob, lo, hi)
         rk.bake(ob, jitter={}, seed=7, islands=False)
         _soil_and_sun(ob)
+    main = obs["sandbags"]
     for name, closes in MODELS:
-        # each baked alone (the other models moved out of the way), its neighbours in a wall beside it
+        # each baked alone (the other models moved out of the way), sections beside it as in a wall
         for other in obs.values():
             other.location.z = 0.0 if other is obs[name] else 1000.0
         bpy.context.view_layer.update()
-        beside = [(-closes * LONG,)] if closes else [(LONG,), (-LONG,)]
-        rk.occlude(obs[name], strength=0.6, distance=0.15, neighbours=[(main, (o[0], 0.0, 0.0)) for o in beside])
+        beside = [-closes * LONG] if closes else [LONG, -LONG]
+        rk.occlude(obs[name], strength=0.6, distance=0.15, neighbours=[(main, (o, 0.0, 0.0)) for o in beside])
     for ob in obs.values():
         ob.location.z = 0.0
     bpy.context.view_layer.update()
-    _match_seams(main, [(obs["sandbags_start"], 1), (obs["sandbags_end"], -1)])
+    _match_seams(obs)
     for name, _ in MODELS:
         rk.fit_box(obs[name], lo, hi)
     return obs
@@ -420,9 +522,10 @@ def _render(obs: dict, out: str) -> None:
         c.hide_render = False
 
     # A wall six sections long, two deep, as PropLayout lays the backstop: all one way round, its ends closed.
+    mains = ("sandbags", "sandbags_c", "sandbags_b", "sandbags", "sandbags_c", "sandbags_b")
     for i in range(6):
-        name = "sandbags_start" if i == 0 else "sandbags_end" if i == 5 else "sandbags"
         for j in (0, 1):
+            name = "sandbags_start" if i == 0 else "sandbags_end" if i == 5 else mains[i - 1 + j]
             lay(name, Matrix.Translation((i * LONG, j * DEEP, 0.0)))
     # The firing point's low wall: two sections squeezed to 0.4 m, its ends closed.
     for i, name in enumerate(("sandbags_start", "sandbags_end")):

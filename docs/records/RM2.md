@@ -18,21 +18,29 @@ ATTEMPT_ROWS
   The sandbag wall keeps four courses: his real wall's close-up (photo 4) and the two stacks (photos 3 and 5) give a
   bag 2.6 to 3 times as long as it stands on the face; at 0.225 m a course a 0.6 m bag is 2.67 times. (His first
   photo's long wall, about 5 times, would need six courses and 24 bags, past a prop's 5,000 triangles.)
-- **The sandbags, bag by bag** (second pass, after the critic's attempt 1): each a filled sack laid flat, a pillow
-  full in its belly and thinning to its ends, each end a flat seam about 0.3 of the belly high whose corners stand
-  out as ears, the seam's middle drawn in 2.6 cm; the sacking lumped and creased in from the ears; 14 points round;
-  a tied corner on 55 % of the ends inside a section (a tail gathered on the ear on the wall's face, bound with cord,
-  frayed). Bags inside a section run 5 cm into each other; each bag's height, bed (2 to 4 cm into the bags under it)
-  and lean are its own, so the bed joints wander.
-- **The sections lock into each other:** the 2nd and 4th courses' bag over the section's +x end runs on into the
-  next section, which carries the rest of the same bag at its -x end (one random stream a bag, seeded by its place,
-  so both parts are one bag; cut flush, closed flat inside); the 1st and 3rd courses end at the section's ends,
-  pressed full against the next section's bags so no light shows. The cut bags' corners take one colour, the mean of
-  both sides' bakes, and the AO is baked with the neighbouring sections beside it. PropLayout lays sandbags unturned
-  (`grid_unturned`) and closes each wall with its own end models (`PropDressConfig.grid_ends`: `sandbags_start` at
-  the -x end, `sandbags_end` at the +x end, a header 0.34 m wide across the wall in the running-on courses, the bags
-  there pinched and eared, not pressed); a closed line keeps one shade. A line one cell long would take the start
-  model (none exists). 4,800 / 4,740 / 4,632 triangles.
+- **The sandbags, bag by bag** (third pass, after the critic's attempt 2): each a filled sack laid flat, a pillow
+  full in its belly and thinning to its ends, each end a flat seam 0.6 of the belly high whose corners stand out as
+  ears, the seam's middle drawn in 2.6 cm; two bags end to end run 3 cm into each other and meet about 0.68 of their
+  bellies high, a V between them (photo 4); the sacking lumped and creased in from the ears; 13 points round, the
+  foot a flat chord; a tied corner on 60 % of a section's own bags' ends. Each bag's crown stands 2.8 cm under to
+  2.2 cm over its course's line, it falls up to 5 cm a metre along its length and leans up to 5 cm a metre, its
+  widest line 0.36 to 0.43 of it up (slumped); it sits 2 to 4 cm into the lowest crown under it, so it never stands
+  off one. The bed joints wander -11 to +13 % of a course.
+- **The bond runs through every section's ends** (third pass): every course's two joints lie inside the section, so
+  each course's bag over the +x end runs on into the next section, which carries the rest of it at its -x end (cut
+  flush there, closed inside, one random stream a bag seeded by its place, so both parts are one bag; the cut ring
+  is the bag's own profile there). Joints sit half a bag over the course under them and the two rows a quarter of a
+  bag apart (each wandering 3.5 cm), so no light finds a way through: a ray test square on and 15 degrees up or down
+  finds no hole; at 20 degrees along, 12 rays of 4 mm in a 7.2 m wall. Nothing ends flat at a section's end any more.
+- **Three main sections take turns** (`sandbags`, `sandbags_b`, `sandbags_c`, `PropDressConfig.variants`): they
+  share the bags over their ends and differ in their own bags (height, tilt, lean, shade, tied corners: only a
+  section's own bags are tied, so the knots never repeat every 1.2 m). A bag shared over an end sits on the lowest
+  crowns of every section that may lie under it. PropLayout lays sandbags unturned (`grid_unturned`) and closes each
+  wall with its own end models (`PropDressConfig.grid_ends`: `sandbags_start` at the -x end, `sandbags_end` at the
+  +x end): in the 1st and 3rd courses a header 0.34 m wide (1.5 times a course) lies across the wall, the stretchers
+  against it pressed full and 3.5 cm into it; in the 2nd and 4th, each row runs to the wall's end, a closing bag
+  0.2 m or longer, else the bag by it longer. A closed line keeps one shade. A line one cell long takes the start
+  model. 4,538 / 4,484 / 4,700 / 4,654 / 4,492 triangles.
 - **Each bag keeps one shade of its own** (`range_kit.tint`, a paint `name~k`), not bake's random shade per piece,
   so the two parts of a split bag match; the tops a little paler (sun).
 - **Creases baked in** (`range_kit.occlude`): Cycles' ambient occlusion baked to the corners, 0.6 of the colour kept at
@@ -56,10 +64,15 @@ ATTEMPT_ROWS
   a row high (were 0.86 to 1), so the rows of scales break up; no square heart pieces; a piece may run up to 35 % of
   its width past the section's end, cut flush there and drawn as a sawn face without a bark rim, so no dark seam runs
   up a stack where two sections meet; each bark arc in about 24° steps (3 to 6); the sawn ends weighted to the deep
-  tans with a brown added (their hue is already at the team-hue limit, 37° linear, so warmer means deeper, not more
-  orange); the stack's ends built from the end pieces' own round bark sides (a pale split side 15 % of the time),
-  from the face to the middle, set 5 cm in, the dark of the stack between. The same 3,200 triangles a section
-  (3,164 / 3,011 / 3,024): Woodland draws no more.
+  tans with a brown added, and (third pass) every end colour 14 % darker, as the photo's warm brown at eye height
+  (their hue is already at the team-hue limit, 37° linear, so warmer means deeper, not more orange; each nudged back
+  to 37 to 38°). The stack's ends (third pass): the end pieces' own bark sides, each its own: set up to 3.5 cm further
+  in, bulging 45 to 100 % of 8 cm out of the dark end (a pale split side 15 % of the time, flatter), a wedge's edge or
+  a flatter face, uneven, twisting up to 15° and narrowing or swelling along it, starting up to 4 cm inside the face
+  and stopping short of the middle or running up to 12 cm past it, so the front and back halves stagger; its bark in
+  streaks (five barks a facet), 5 facets round, drawn smooth. The core's top stops at the end (no slab over it); the
+  loose pieces on top keep 0.2 m in from the ends, lower and never dark; a piece cut at the section's end shows bark
+  on its cut side, not a pale strip. The same 3,200 triangles a section (3,177 / 3,056 / 3,043): Woodland draws no more.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second).

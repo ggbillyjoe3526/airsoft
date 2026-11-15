@@ -235,3 +235,51 @@ func test_end_models_stay_inside_their_blocks_on_range_and_stockade() -> void:
 				for bx: AABB in boxes:
 					ok = ok or bx.grow(0.05).encloses(w)
 				assert_true(ok, "%s #%d on %s stays in a block" % [e, i, map_id])
+
+
+# ---- attempt 3: three main sections that take turns along a wall ----
+
+const SANDBAG_SECTIONS: Array[StringName] = [&"sandbags", &"sandbags_b", &"sandbags_c"]
+
+
+func test_sandbag_sections_take_turns_and_share_one_box() -> void:
+	var cfg := play.site_look.props
+	assert_eq(cfg.variants_of(&"sandbags"), SANDBAG_SECTIONS, "two more sections take turns with sandbags")
+	for v: StringName in SANDBAG_SECTIONS:
+		assert_almost_eq(cfg.model_roughness.get(v, -1.0) as float, 0.97, 0.0001, "%s drawn matt" % v)
+	var dress := _range_dress()
+	var base := dress.mesh_of(&"sandbags").get_aabb()
+	var laid := 0
+	for v: StringName in SANDBAG_SECTIONS:
+		var mesh := dress.mesh_of(v)
+		assert_not_null(mesh, "%s loads on the range" % v)
+		if mesh == null:
+			continue
+		assert_lt(base.size.distance_to(mesh.get_aabb().size), 0.01, "%s is the sandbags' size" % v)
+		var t := _tris(mesh)
+		assert_lt(t, 5000, "%s within 5,000 triangles (%d)" % [v, t])
+		laid += dress.views_of(v).size()
+	assert_gt(laid, 0, "the range lays its sections")
+
+
+func test_a_long_line_mixes_the_sections_between_its_ends() -> void:
+	var out: Dictionary[StringName, PropLayout.Placed] = {}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var boxes := _boxes()
+	boxes[&"sandbags_b"] = BAG
+	boxes[&"sandbags_c"] = BAG
+	PropLayout._grid(out, SANDBAG_SECTIONS.duplicate(), boxes, Vector3.ZERO, Vector3(24.0, 0.9, 0.6),
+			Vector3(1.2, 0.9, 0.6), play.site_look.props, rng, &"sandbags")
+	var names := _model_at(out, 0)
+	assert_eq(names.size(), 20)
+	assert_eq(names[0], &"sandbags_start")
+	assert_eq(names[-1], &"sandbags_end")
+	var kinds := {}
+	for n: StringName in names.slice(1, -1):
+		assert_true(SANDBAG_SECTIONS.has(n), "%s is a main section" % n)
+		kinds[n] = true
+	assert_eq(kinds.size(), 3, "all three sections laid along 24 m")
+	for name: StringName in out:
+		for s: float in (out[name] as PropLayout.Placed).shades:
+			assert_eq(s, 1.0, "one shade along the line")
