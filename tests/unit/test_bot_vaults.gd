@@ -6,6 +6,8 @@ extends GutTest
 
 const DT := 1.0 / 60.0
 const KILL_Y := -10.0
+## The most rounds a vault field plays.
+const PLAY_ROUNDS := 6
 
 var tuning: SimTuning = SimTuning.load_default()
 var config: BotConfig = BotConfig.load_default()
@@ -173,8 +175,9 @@ func test_bots_go_over_a_low_wall_on_their_way_and_never_over_crouch_cover() -> 
 	assert_eq(cover[0], 0, "crouch cover is never vaulted")
 
 
-## Up to four rounds of bots on the field (RV1: with each round's tempo and lane shift, two rounds can both end in a
-## fight before anyone reaches the wall): [vaults, rounds, ticks anyone stood on or under the wall's line].
+## Up to PLAY_ROUNDS rounds of bots on the field, stopping at the first vault: [vaults, rounds, ticks anyone stood on
+## or under the wall's line]. Which round a lane first takes a bot over the wall swings with any change to how bots
+## fight (AIM1's re-pick-up took it past the first two rounds).
 func _play(height: float) -> Array:
 	var f := _field(height)
 	var map: MapData = f[0]
@@ -194,7 +197,7 @@ func _play(height: float) -> Array:
 	var vaults := 0
 	var rounds := 0
 	var bad := 0
-	for t in roundi(tuning.rounds.round_time / DT) * 4:
+	for t in roundi(tuning.rounds.round_time / DT) * PLAY_ROUNDS:
 		bots.think(state, commands, DT)
 		sim.step(state, commands, DT)
 		bots.observe(state)
@@ -204,7 +207,7 @@ func _play(height: float) -> Array:
 			var on_wall := absf(c.position.x) < 0.2 and c.position.z < 10.5 and not c.vault.active
 			if c.position.y < KILL_Y + 1.0 or (on_wall and c.grounded):
 				bad += 1
-		if rounds >= 4 or (vaults > 0 and rounds >= 2):
+		if rounds >= PLAY_ROUNDS or vaults > 0:
 			break
 	return [vaults, rounds, bad]
 

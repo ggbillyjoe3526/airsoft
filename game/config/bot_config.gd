@@ -82,8 +82,13 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var hit_moving_speed: float = 0.5
 
 @export_group("Aim")
-## Seconds someone can be out of sight and still be the same contact (no new reaction delay).
+## Seconds someone can be out of sight and still be the same contact (no new full reaction delay).
 @export var contact_grace: float = 1.2
+## Out of sight longer than this (s) but within contact_grace, someone seen again is picked up again (AIM1): a short
+## reaction (BotSkill.reacquire_time) before it fires, and its aim kept only partly settled (reacquire_settled), off to
+## one side again. Without it a bot watching where you ducked fired the instant you showed again, its aim already
+## settled. Longer than two sight checks (think_interval), so a pole flicking past the line is no new pick-up.
+@export var reacquire_after: float = 0.25
 ## A bot stays on its target unless another in sight is at least this much closer (m).
 @export var target_switch_margin: float = 3.0
 ## A fresh contact's first aim is at least this share of its full error off, to one side, tilted at most this far from

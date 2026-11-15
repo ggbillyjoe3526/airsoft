@@ -1,6 +1,6 @@
 # RV1 · Bots vary their routes and timing each round
 
-**Review:** critic Accept 8/8 · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner, 2026-11-15: bots are "too predictive and follow the same routes each time. It should feel more random
 while teams still follow a general strategy/plan", and "bots don't come out far enough and I find myself running

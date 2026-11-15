@@ -540,11 +540,16 @@ func _watch_held_up(state: GameState, bots: BotController, t: MatchTally, trail:
 
 
 ## A bot's errand for held_up_sample: its mode, and while it hunts, the spot it hunts (WR1: a Woodland hunter whose spot a
-## teammate checked first turned for one the way it came, out and back 57 m, and was judged going round in a loop).
+## teammate checked first turned for one the way it came, out and back 57 m, and was judged going round in a loop);
+## searching, the spot it searches (AIM1: a Depot bot off after one noise heard another behind it and walked back 10 m).
 static func errand_of(b: Bot, bot_mode: int) -> int:
-	if b == null or not b.hunting:
+	if b == null:
 		return bot_mode
-	return bot_mode + Bot.Mode.size() * (hash(b.hunt_goal) & 0xFFFFFF)
+	if b.hunting:
+		return bot_mode + Bot.Mode.size() * (hash(b.hunt_goal) & 0xFFFFFF)
+	if bot_mode == Bot.Mode.SEARCH and b.has_last_known:
+		return bot_mode + Bot.Mode.size() * (hash(b.last_known) & 0xFFFFFF)
+	return bot_mode
 
 
 ## Records this second's sample in `ring` (one a second for HELD_UP_SECONDS; INF for a second it wasn't on its way) and

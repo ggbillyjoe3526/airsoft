@@ -280,6 +280,8 @@ func test_two_handed_pistol_hold_keeps_the_right_arm_but_the_thumb_and_the_thumb
 
 
 func test_the_hint_reaches_its_values_at_the_spans_ends_and_the_arms_wear_their_own_again_at_0() -> void:
+	# No replica fades its hands since HA2: the knob is tested with the pistols put in it.
+	cfg.aim_hands_hint = [&"pistol", &"cyber"]
 	for id: StringName in PISTOLS:
 		var hands := _hands([id])
 		hands._show(0)
@@ -303,6 +305,7 @@ func test_the_hint_reaches_its_values_at_the_spans_ends_and_the_arms_wear_their_
 
 
 func test_fading_copies_are_made_once_per_material_and_not_per_frame() -> void:
+	cfg.aim_hands_hint = [&"pistol", &"cyber"]
 	var hands := _hands([&"pistol", &"aeg"])
 	hands._show(0)
 	var arms := hands._arms

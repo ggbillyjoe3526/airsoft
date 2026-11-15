@@ -47,10 +47,10 @@ static func first_error_size(since: float, dist: float, skill: BotSkill) -> floa
 	return maxf(0.0, start - deg_to_rad(skill.aim_error_settled_deg)) * (1.0 - t)
 
 
-## How long a contact's aim has been settling at `time` (s), less the part of its reaction it doesn't settle over.
-## Negative while it still reacts.
+## How long a contact's aim has been settling at `time` (s), less the part of its latest reaction (from reaction_from
+## to react_at) it doesn't settle over. Negative while it still reacts.
 static func settling(time: float, c: Bot.Contact, cfg: BotConfig) -> float:
-	return time - c.acquired_at - (1.0 - cfg.aim_settle_while_reacting) * maxf(0.0, c.react_at - c.first_seen_at)
+	return time - c.acquired_at - (1.0 - cfg.aim_settle_while_reacting) * maxf(0.0, c.react_at - c.reaction_from)
 
 
 ## Turns `b`'s view towards (yaw, pitch) plus its wandering error of size `error` and the first aim's of size `first`,
