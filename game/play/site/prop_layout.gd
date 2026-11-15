@@ -260,7 +260,7 @@ static func _cluster(p: Placed, model: AABB, foot: Vector3, size: Vector3, cfg: 
 ## one model repeated; never turned for a model (`model_name`) in PropDressConfig.grid_unturned. Each cell takes one of
 ## `picks` at random (the model and its variants). A model in PropDressConfig.grid_scatter stands off its even place,
 ## inside the box (WS1). A model in PropDressConfig.grid_ends has its line's first and last cells take its end models
-## (RM2: a sandbag wall closed at both ends).
+## (RM2: a sandbag wall closed at both ends), a line one cell long its third, closed at both ends, where one is listed.
 static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName], boxes: Dictionary[StringName, AABB],
 		foot: Vector3, size: Vector3, cell: Vector3, cfg: PropDressConfig, rng: RandomNumberGenerator,
 		model_name: StringName = &"") -> void:
@@ -289,7 +289,10 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 	# A line closed by end models (grid_ends, RM2): its model's -x end at the line's low end on a box long in x; a
 	# box long in z turns the model's +x to world -z, so there its +x end is at the line's low end.
 	var ends: PackedStringArray = cfg.grid_ends.get(model_name, PackedStringArray())
-	var closed := ends.size() == 2 and boxes.has(StringName(ends[0])) and boxes.has(StringName(ends[1]))
+	var closed := ends.size() >= 2 and boxes.has(StringName(ends[0])) and boxes.has(StringName(ends[1]))
+	# a line one cell long: the model closed at both ends where one is listed, else the -x end's
+	var single := StringName(ends[2]) if closed and ends.size() > 2 and boxes.has(StringName(ends[2])) \
+			else (StringName(ends[0]) if closed else &"")
 	var low_end := StringName(ends[0 if along_x else 1]) if closed else &""
 	var high_end := StringName(ends[1 if along_x else 0]) if closed else &""
 	for i in n.x:
@@ -306,7 +309,7 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 					turn = yaw
 				var pick := picks[0] if picks.size() == 1 else picks[rng.randi_range(0, picks.size() - 1)]
 				if closed and n.x == 1:
-					pick = StringName(ends[0])
+					pick = single
 				elif closed and i == 0:
 					pick = low_end
 				elif closed and i == n.x - 1:

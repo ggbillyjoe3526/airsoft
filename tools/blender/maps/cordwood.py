@@ -81,7 +81,7 @@ END_SET = 0.06          # m the stack's end stands inside the section's end; its
 END_NEAR = 0.1          # m from the end a piece's sawn end may stand back and still show its side there
 END_ARC = 6             # a log's side's segments round (27 degrees each: round, drawn smooth under SMOOTH)
 END_PROUD = 0.012       # m past the core an end log's side starts, out with the face's sawn ends
-END_SPLIT = 0.15        # the share of the end's pieces showing a pale split side, not bark
+END_SPLIT = 0.06        # the share of the end's pieces showing a pale split side, not bark
 LOOSE = 0               # split pieces lying across the top (RM2: none; they read as planks along the top edge)
 LOOSE_IN = 0.2          # m they keep in from the section's ends, never over the stack's end
 SMOOTH = 34.0           # degrees: faces meeting at less than this are drawn smooth
@@ -94,7 +94,9 @@ END_PAINTS = {"EndPale": 0xC4AF7F, "EndLight": 0xBDA56B, "EndWarm": 0xB69D5B, "E
               "EndHeart": 0x7C6838}
 END_MATS = tuple(k for k in END_PAINTS if k not in ("Rim", "EndHeart"))  # Rim: a split piece's bark, a warm brown;
 # EndHeart: its heart, darker (RM2, the photo's pieces)
-HEART_SHARE = 0.3       # how far out from a wedge's point its dark heart reaches
+HEART_SHARE = 0.45      # how far out from a wedge's point its dark heart reaches
+TOP_DIP = 0.02          # m the stack's top dips between the top course's logs (RM2)
+TOP_BARK = ("Bark", "Bark", "BarkDark", "BarkGrey")  # the top's logs' bark, each its own
 END_WEIGHTS = (1, 2, 3, 3, 3, 2, 1)
 # the boards (m)
 BOARDS_LEN, BOARDS_DEPTH, BOARDS_TOP = 6.4, 1.0, 2.0
@@ -117,6 +119,7 @@ def cordwood(seed: int, hearts: float = 1.0) -> object:
     mk.paints(END_PAINTS)
     r = wk.rng(seed)
     dark = random.Random(seed * 7 + 1)  # which wedges show a dark heart: a stream of its own
+    top = random.Random(seed * 7 + 2)  # the top's logs' bark: a stream of its own, so the pieces stay put
     b = hs.Builder("Cordwood", [])
     half_x, half_y = SECTION * 0.5, DEPTH * 0.5
     core = half_y - PROUD[1]
@@ -146,10 +149,13 @@ def cordwood(seed: int, hearts: float = 1.0) -> object:
             q = wk.verts(b, [(x0, y, 0.0), (x1, y, 0.0), (x1, y, z1), (x0, y, z0)])
             wk.face(b, q, "Gap", Vector((0, side, 0)))
         # its top, stopping at the stack's end (END_SET in), so it never stands out over the end's logs
+        # (RM2) in bark, a column a log lying front to back, its edges dipped between logs every other column, so
+        # seen from above the stack's top reads as the top course's round sides, not a black lid
         t0, t1 = max(x0, -half_x + END_SET), min(x1, half_x - END_SET)
-        q = wk.verts(b, [(t0, -core, env[-1.0][k]), (t1, -core, env[-1.0][k + 1]), (t1, core, env[1.0][k + 1]),
-                         (t0, core, env[1.0][k])])
-        wk.face(b, q, "Gap", Vector((0, 0, 1)))
+        d0, d1 = (TOP_DIP if k % 2 == 0 else 0.0), (TOP_DIP if k % 2 == 1 else 0.0)
+        q = wk.verts(b, [(t0, -core, env[-1.0][k] - d0), (t1, -core, env[-1.0][k + 1] - d1),
+                         (t1, core, env[1.0][k + 1] - d1), (t0, core, env[1.0][k] - d0)])
+        wk.face(b, q, top.choice(TOP_BARK), Vector((0, 0, 1)))
     # its ends, seen at a stack's end: the bark sides of the end pieces, each log's side rounded out of the end from
     # the face its sawn end shows on to where the front pieces meet the back ones, the dark of the stack between (RM2:
     # were flat slabs in rows, as brick)
@@ -170,7 +176,10 @@ def cordwood(seed: int, hearts: float = 1.0) -> object:
         for kind, poly in pieces:
             outline = [(px, side * core, pz) for px, pz in poly]
             end_mat = r.choices(END_MATS, END_WEIGHTS)[0]
-            piece_end(b, outline, r.triangular(PROUD[0], PROUD[1], PROUD_MODE), out, end_mat, kind,
+            depth = r.triangular(PROUD[0], PROUD[1], PROUD_MODE)
+            if any(abs(px) >= SECTION * 0.5 - GAP - 1e-6 for px, _ in poly):
+                depth = PROUD[0]  # cut at the section's end: flush, so no side of it stands out past the end's logs
+            piece_end(b, outline, depth, out, end_mat, kind,
                       (r.uniform(-TILT, TILT), r.uniform(-TILT, TILT)), r.choices((0, 1, 2, 3), CHECKS)[0], r,
                       heart=dark.random() < hearts)
     # split pieces lying across the top here and there, on the pieces' top

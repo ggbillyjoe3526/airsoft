@@ -45,7 +45,13 @@ ATTEMPT_ROWS
   +x end): in the 1st and 3rd courses a header 0.34 m wide (1.5 times a course) lies across the wall, the stretchers
   against it pressed full and 3.5 cm into it; in the 2nd and 4th, each row runs to the wall's end, a closing bag
   0.2 m or longer, else the bag by it longer. A closed line keeps one shade. A line one cell long takes the start
-  model. 4,538 / 4,484 / 4,700 / 4,654 / 4,492 triangles.
+  model. A line one cell long takes `sandbags_single` (fifth pass, the third `grid_ends` entry), closed at both
+  ends: headers at both ends of the 1st and 3rd courses, closing bags at both ends of the 2nd and 4th, its longest top
+  bag a row standing to the top in place of the shared ones (falls back to `sandbags_start` when not loaded). A
+  header's and a closing bag's end seen end on is closed by a soft dome (fifth pass: a ring 0.6 of the way in, 1.2 cm
+  out, then its middle), not a flat fan; a bag laid on a header sits down on its rounded sides (its top falls away
+  to half its height at its edges), so no light shows between them. 4,538 / 4,484 / 4,700 / 4,862 / 4,700 / 4,592
+  triangles.
 - **Each bag keeps one shade of its own** (`range_kit.tint`, a paint `name~k`), not bake's random shade per piece,
   so the two parts of a split bag match; the tops a little paler (sun).
 - **Creases baked in** (`range_kit.occlude`): Cycles' ambient occlusion baked to the corners, 0.6 of the colour kept at
@@ -81,12 +87,15 @@ ATTEMPT_ROWS
   ends (fourth pass): a darker heart at each wedge's point (`EndHeart`, 0.3 of the way to its bark) and more drying
   checks (a third of the pieces have one or more, was 30 %); to pay for them the bark arcs step 28°, not 24°, and a
   section draws as many hearts as its 3,200 triangles leave room for (built once with all, then again with that share;
-  the hearts draw from a stream of their own, so the pieces stay put). 3,185 / 3,128 / 3,075 triangles: Woodland
-  draws no more.
+  the hearts draw from a stream of their own, so the pieces stay put). Fifth pass: the core's top in bark, each 6.7 cm
+  column a log lying front to back in its own shade, dipping 2 cm between them (was a near-black lid); hearts reach
+  0.45 of the way to the bark (were 0.3); a piece cut at the section's end stands flush (no side of it out past the
+  end's logs: the floating sliver); a pale split side on 6 % of the end logs (were 15 %, read as planks).
+  3,191 / 3,135 / 3,039 triangles: Woodland draws no more.
 - **Picture tools:** `prop_pictures.gd` draws each model at its own roughness; `woodland_pictures.gd` has the west
   camp's woodpile (`woodpile_near`, `woodpile_along`); `range_pictures.gd` (new) shows the Range's props in the game.
   Pictures: `art/blender/range-rm2/` in the shared files (v1 the first pass, v2 the second, v3 the third, v4 the
-  fourth).
+  fourth, v5 the fifth).
 
 ## Known issues left
 

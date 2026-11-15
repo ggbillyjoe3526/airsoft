@@ -93,7 +93,7 @@ const BAG := AABB(Vector3(-0.6, 0.0, -0.3), Vector3(1.2, 0.9, 0.6))
 
 func _boxes() -> Dictionary[StringName, AABB]:
 	var b: Dictionary[StringName, AABB] = {}
-	for n: StringName in [&"sandbags", &"sandbags_start", &"sandbags_end", &"cordwood", &"crate"]:
+	for n: StringName in [&"sandbags", &"sandbags_start", &"sandbags_end", &"sandbags_single", &"cordwood", &"crate"]:
 		b[n] = BAG
 	return b
 
@@ -133,10 +133,20 @@ func test_a_sandbag_line_along_z_swaps_the_ends() -> void:
 	assert_eq(names, [&"sandbags_end", &"sandbags", &"sandbags_start"] as Array, "+x turns to world -z")
 
 
-func test_a_one_cell_sandbag_line_takes_the_start_model() -> void:
+func test_a_one_cell_sandbag_line_takes_the_model_closed_at_both_ends() -> void:
 	var out := _line(&"sandbags", Vector3(1.2, 0.9, 0.6))
+	assert_eq(out.keys(), [&"sandbags_single"] as Array)
+	assert_eq((out[&"sandbags_single"] as PropLayout.Placed).transforms.size(), 1)
+
+
+func test_a_one_cell_sandbag_line_without_its_model_takes_the_start_model() -> void:
+	var out: Dictionary[StringName, PropLayout.Placed] = {}
+	var boxes := _boxes()
+	boxes.erase(&"sandbags_single")
+	var picks: Array[StringName] = [&"sandbags"]
+	PropLayout._grid(out, picks, boxes, Vector3.ZERO, Vector3(1.2, 0.9, 0.6), Vector3(1.2, 0.9, 0.6),
+			play.site_look.props, RandomNumberGenerator.new(), &"sandbags")
 	assert_eq(out.keys(), [&"sandbags_start"] as Array)
-	assert_eq((out[&"sandbags_start"] as PropLayout.Placed).transforms.size(), 1)
 
 
 func test_a_two_cell_line_has_no_middle_cell() -> void:
@@ -200,7 +210,8 @@ func test_the_end_models_share_the_sandbag_box_and_load_with_the_range_and_stock
 	for map_id: String in ["range", "stockade"]:
 		var m := MapData.load_map(map_id, play.map_style, 1)
 		var used := PropDress._models_used(m, play.site_look.props)
-		assert_true(used.has(&"sandbags_start") and used.has(&"sandbags_end"), "%s loads the end models" % map_id)
+		assert_true(used.has(&"sandbags_start") and used.has(&"sandbags_end") and used.has(&"sandbags_single"),
+				"%s loads the end models" % map_id)
 		var dress := PropDress.build(m, play.site_look.props)
 		add_child_autofree(dress)
 		var base := dress.mesh_of(&"sandbags").get_aabb()
@@ -322,7 +333,7 @@ func test_short_lines_with_variants_keep_their_ends_and_use_no_variant() -> void
 				Vector3(1.2, 0.9, 0.6), play.site_look.props, rng, &"sandbags")
 		var names := _model_at(out, 0)
 		assert_eq(names.size(), cells)
-		assert_eq(names[0], &"sandbags_start")
+		assert_eq(names[0], &"sandbags_single" if cells == 1 else &"sandbags_start")
 		if cells > 1:
 			assert_eq(names[-1], &"sandbags_end")
 		if cells == 3:

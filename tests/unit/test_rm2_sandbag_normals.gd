@@ -2,7 +2,7 @@ extends GutTest
 ## RM2: the sandbag models carry custom split normals; every imported normal must be finite and unit length.
 
 const MODELS: Array[String] = [
-	"sandbags", "sandbags_b", "sandbags_c", "sandbags_start", "sandbags_end",
+	"sandbags", "sandbags_b", "sandbags_c", "sandbags_start", "sandbags_end", "sandbags_single",
 ]
 
 

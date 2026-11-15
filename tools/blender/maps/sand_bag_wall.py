@@ -25,9 +25,8 @@ shade alike), the bags' tops paler where the sun bleaches them, their feet darke
 game draws the sacking matte (PropDressConfig.model_roughness). Each bag keeps one shade of its own (range_kit.tint),
 so the two parts of a bag split between sections match.
 
-Writes assets/models/props/sandbags.glb, sandbags_b.glb, sandbags_c.glb, sandbags_start.glb and sandbags_end.glb, each
-one vertex-coloured mesh
-filling x -0.6..0.6, y -0.3..0.3, z 0..0.9 exactly (Godot: x along, y up, z across).
+Writes assets/models/props/sandbags.glb, sandbags_b.glb, sandbags_c.glb, sandbags_start.glb, sandbags_end.glb and
+sandbags_single.glb (a wall one section long, closed at both ends), each one vertex-coloured mesh filling x -0.6..0.6, y -0.3..0.3, z 0..0.9 exactly (Godot: x along, y up, z across).
 
 Usage: python3 tools/blender/maps/sand_bag_wall.py [--render <sheet.jpg>]
 """
@@ -43,7 +42,8 @@ import range_kit as rk  # noqa: E402
 
 # (name, the end it closes: -x, none, +x): three sections that take turns along a wall (PropDressConfig.variants),
 # their own bags between the bags they share at their ends, and the wall's two end models
-MODELS = (("sandbags", 0), ("sandbags_b", 0), ("sandbags_c", 0), ("sandbags_start", -1), ("sandbags_end", 1))
+MODELS = (("sandbags", 0), ("sandbags_b", 0), ("sandbags_c", 0), ("sandbags_start", -1), ("sandbags_end", 1),
+          ("sandbags_single", 2))  # (2: both ends, a wall one section long)
 BUDGET = 5000  # docs/CC0_ASSETS.md › Size limits: a prop; about 95 % of it (RM2)
 LONG, DEEP, HIGH = 1.2, 0.6, 0.9
 HL = LONG * 0.5
@@ -84,6 +84,7 @@ END = ((0.0, 1.04, 0.32, 0.0, 0.026), (0.02, 1.01, 0.5, 0.15, 0.012), (0.06, 0.9
 # An end pressed full against a header's side, so no light shows between them.
 PRESSED = ((0.0, 0.94, 0.8, 0.2, 0.0), (0.015, 0.975, 0.9, 0.45, 0.0), (0.05, 0.995, 0.96, 0.7, 0.0),
            (0.14, 1.0, 0.985, 0.9, 0.0))
+DOME = 0.012  # m an end seen end on bulges past its seam
 INTO_HEADER = 0.035  # m such an end runs into the header
 LUMP = 0.008  # the sacking's lumps, m in or out
 CREASE = 0.006  # its creases fanning in from the ears, m at the seam
@@ -145,6 +146,8 @@ class Bag:
         self.ties = tuple(abs(abs(e) - HL) > 0.01 and rng.random() < TIE and not p and not cut
                           for e, p in zip((a0, a1), pressed)) if not header else (True, False)
         self.bed = rng.uniform(*BED)
+        # its ends seen end on: a header's both, a bag's at the wall's end (drawn domed, `_dome`)
+        self.end_on = tuple(header or abs(abs(e) - HL) < 1e-6 for e in (a0, a1))
         self.tie_rng = random.Random(seed + 1)
 
     def middle(self) -> float:
@@ -291,9 +294,23 @@ def _part(kit: rk.Kit, bag: Bag, rings: list, end: int, shift: float) -> None:
     rs = [[(p[0] + shift, p[1], p[2]) for p in r] for r in rings]
     _outward(kit, kit.loft(rs, bag.paint, cap0=False, cap1=False), rs)
     for e, i, j in ((-1, 0, 1), (1, -1, -2)):
-        kit.fan(rs[i], _facing(rs[i], rs[j]), bag.paint)
+        if end in (0, e) and bag.end_on[0 if e < 0 else 1]:
+            _dome(kit, bag, rs[i], _facing(rs[i], rs[j]))
+        else:
+            kit.fan(rs[i], _facing(rs[i], rs[j]), bag.paint)
         if end in (0, e) and bag.ties[0 if e < 0 else 1]:
             _tie(kit, bag, rs[i], e)
+
+
+def _dome(kit: rk.Kit, bag: Bag, ring: list, facing: tuple) -> None:
+    """An end seen end on (a header's, or a bag's at the wall's end): its seam closed by a soft dome, a ring 0.6 of
+    the way in and DOME out, then to its middle, so it reads round, never a flat star."""
+    from mathutils import Vector
+    f = Vector(facing).normalized()
+    m = sum((Vector(p) for p in ring), Vector()) / len(ring)
+    inner = [tuple(m + (Vector(p) - m) * 0.6 + f * DOME) for p in ring]
+    _outward(kit, kit.loft([ring, inner], bag.paint, cap0=False, cap1=False), [ring, inner])
+    kit.fan(inner, tuple(f), bag.paint, apex=tuple(f * DOME * 0.5))
 
 
 _JOINTS = {}
@@ -327,6 +344,11 @@ def _joints(c: int, ri: int) -> tuple:
     return _JOINTS[(c, ri)]
 
 
+def _closing(closes: int) -> tuple:
+    """The ends (-1 its -x, 1 its +x) a model closes: 2 both."""
+    return (-1, 1) if closes == 2 else (closes,) if closes else ()
+
+
 def _spans(c: int, ri: int, closes: int) -> list:
     """Row `ri` of course `c` in a model closing the wall at `closes` (-1 its -x end, 1 its +x, 0 neither) as (a0,
     a1, the ends pressed against a header) spans of the model's own bags; the bag over the +x end that every section
@@ -334,22 +356,22 @@ def _spans(c: int, ri: int, closes: int) -> list:
     j1, j2 = _joints(c, ri)
     ov = OVERLAP * 0.5
     lo, hi = j1 - ov, j2 + ov
-    press = (False, False)
+    press = [False, False]
     out = []
-    if closes:
-        # the wall's end: a bag laid across it in a headed course, else this row's bags run on to the end, one
-        # more short one, or the bag by it longer
-        headed = c % 2 == HEADED
-        edge = HL - 2.0 * HEADER_HW if headed else HL
-        e = edge + INTO_HEADER if headed else edge
-        j = -j1 if closes < 0 else j2
+    # the wall's end: a bag laid across it in a headed course, else this row's bags run on to the end, one more
+    # short one, or the bag by it longer
+    headed = c % 2 == HEADED
+    edge = HL - 2.0 * HEADER_HW if headed else HL
+    e = edge + INTO_HEADER if headed else edge
+    for side in _closing(closes):
+        j = -j1 if side < 0 else j2
         if edge - j >= MIN_BAG:
-            out.append((-e, j1 + ov, (headed, False)) if closes < 0 else (j2 - ov, e, (False, headed)))
-        elif closes < 0:
-            lo, press = -e, (headed, False)
+            out.append((-e, j1 + ov, (headed, False)) if side < 0 else (j2 - ov, e, (False, headed)))
+        elif side < 0:
+            lo, press[0] = -e, headed
         else:
-            hi, press = e, (False, headed)
-    out.append((lo, hi, press))
+            hi, press[1] = e, headed
+    out.append((lo, hi, tuple(press)))
     return out
 
 
@@ -399,23 +421,28 @@ def plan() -> dict:
             # every model fills its box's depth exactly)
             shared = Bag(seed, j2 - ov, j1 + LONG + ov, row, DEEP * 0.5 - ROW + 0.003,
                          cut=True, face=-1.0 if row < 0 else 1.0, tilt=c > 0 and not last)
-            _rest(shared, [below[name] for name, _ in MODELS], (ri,), _crown(shared, c, True))
+            # (on every section it may lie over: never the one-cell wall's, which shares none)
+            _rest(shared, [below[name] for name, closes in MODELS if closes != 2], (ri,), _crown(shared, c, True))
             for name, closes in MODELS:
-                if closes <= 0:
+                if closes in (0, -1):
                     course[name].append((shared, "a0", ri))
-                if closes >= 0:
+                if closes in (0, 1):
                     course[name].append((shared, "a1", ri))
-                for si, (a0, a1, pressed) in enumerate(_spans(c, ri, closes)):
+                spans = _spans(c, ri, closes)
+                # (a one-cell wall shares no bags, so its longest top bag a row stands over the top in their place)
+                reach = max(range(len(spans)), key=lambda i: spans[i][1] - spans[i][0]) \
+                    if last and closes == 2 else -1
+                for si, (a0, a1, pressed) in enumerate(spans):
                     s = 20000 + own[name] * 1000 + c * 100 + ri * 10 + si
                     bag = Bag(s, a0, a1, row, HALF_W * random.Random(s + 5).uniform(0.97, 1.03),
-                              face=-1.0 if row < 0 else 1.0, tilt=c > 0, pressed=pressed)
-                    _rest(bag, [below[name]], (ri,), _crown(bag, c, False))
+                              face=-1.0 if row < 0 else 1.0, tilt=c > 0 and si != reach, pressed=pressed)
+                    _rest(bag, [below[name]], (ri,), _crown(bag, c, si == reach))
                     course[name].append((bag, "whole", ri))
         for name, closes in MODELS:
-            if closes and c % 2 == HEADED:
-                s = 5000 + c * 10 + (closes > 0)
-                head = Bag(s, -closes * (DEEP * 0.5 - 0.012), closes * (DEEP * 0.5 - 0.012),
-                           closes * (HL - HEADER_HW * END[0][1] - 0.002), HEADER_HW, header=True, face=closes)
+            for side in _closing(closes) if c % 2 == HEADED else ():
+                s = 5000 + c * 10 + (side > 0)
+                head = Bag(s, -side * (DEEP * 0.5 - 0.012), side * (DEEP * 0.5 - 0.012),
+                           side * (HL - HEADER_HW * END[0][1] - 0.002), HEADER_HW, header=True, face=side)
                 _rest(head, [below[name]], (0, 1), _crown(head, c, False))
                 course[name].append((head, "whole", -1))
             below[name] = []
@@ -445,7 +472,9 @@ class _Under:
     def crown_at(self, x: float) -> float:
         b = self.bag
         if b.header:
-            return b.zb + b.h * (1.0 - b.sag_k)
+            # a bag laid across: its top falls away round its two sides, so a bag over its side sits down on it
+            f = min(1.0, abs(x - self.shift - b.mid) / b.w)
+            return b.zb + b.h * (1.0 - b.sag_k) * (1.0 - 0.5 * (1.0 - math.sqrt(1.0 - f * f)))
         return b.crown_at(x - self.shift)
 
 
@@ -555,7 +584,7 @@ def _match_seams(obs: dict) -> None:
     rings = {}
     for name, closes in MODELS:
         for (side, y, z), loops in seams[name].items():
-            if side * closes <= 0 or not closes:
+            if closes != 2 and side * closes <= 0:
                 rings.setdefault((y, z), []).append((name, loops))
     for parts in rings.values():
         cols = [obs[name].data.color_attributes["Color"].data[li].color for name, loops in parts for li in loops]
@@ -583,7 +612,7 @@ def build_all() -> dict:
         for other in obs.values():
             other.location.z = 0.0 if other is obs[name] else 1000.0
         bpy.context.view_layer.update()
-        beside = [-closes * LONG] if closes else [LONG, -LONG]
+        beside = [] if closes == 2 else [-closes * LONG] if closes else [LONG, -LONG]
         rk.occlude(obs[name], strength=0.6, distance=0.15, neighbours=[(main, (o, 0.0, 0.0)) for o in beside])
     for ob in obs.values():
         ob.location.z = 0.0

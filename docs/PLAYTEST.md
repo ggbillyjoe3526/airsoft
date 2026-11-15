@@ -1712,8 +1712,8 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   pillows full in the middle and thinner at their sewn ends, the ends' corners standing out as ears, a tied corner
   here and there; the courses' lines wander up and down, no joint runs straight up the wall and no bag ends flat
   anywhere along the backstop, and from 5 to 10 m the bags and knots don't repeat every 1.2 m; no light shows between
-  the bags; no shine on the sacking. Each wall's two ends are closed by bags laid across it or eared ends, never a cut
-  bag.
+  the bags; no shine on the sacking. Each wall's two ends are closed by bags laid across it or eared ends, rounded,
+  never a cut bag or a flat cap, and a wall one section long is closed at both ends.
 - [ ] **The site toilet's** side and back panels have sweeping scoops pressed into them (a shadow along each one's
   upper edge), ending short of the corner posts with no dark holes; the door has two the same; the roof is a firm
   white moulding with a square lip all round.
@@ -1722,7 +1722,8 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   10 m.
 - [ ] **The woodpiles** look stacked by hand: pieces of every shape and size, no neat rows, no square blocks, no dark
   line up the stack where two 2 m sections meet; the wood is a warm brown at eye height, not pale cream; the stack's
-  ends show the uneven bark sides of the end logs, some further in than others, not a flat column of pipes or slabs.
+  ends show the uneven bark sides of the end logs, some further in than others, not a flat column of pipes or slabs,
+  and nothing hangs off them; from a raised spot the stack's top shows the logs' bark, not a black lid.
 
 ## Reporting what you find
 
