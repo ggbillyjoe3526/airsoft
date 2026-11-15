@@ -223,8 +223,10 @@ func test_a_bot_holds_fire_with_a_teammate_in_the_line() -> void:
 func test_a_bot_holds_fire_over_a_crouched_teammate_who_could_stand_into_the_line() -> void:
 	# HV1 (CI's Attack / Defend guard, Depot seed 9): a shot pressed over a crouched teammate's head fired as it stood
 	# up. Up East yard at an enemy raised 1.4 m, the line runs over the teammate's crouched head but through where its
-	# head is standing: the bot holds fire.
+	# head is standing: the bot holds fire. The case was found on the authored lanes: no per-round shift (RV1).
 	_start(6)
+	for b in bots.world.bots:
+		b.lane_shift = 0.0
 	var shooter := _bot(0)
 	var mate := state.characters[1]
 	var enemy := state.characters[3]

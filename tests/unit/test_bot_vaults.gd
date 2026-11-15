@@ -173,7 +173,8 @@ func test_bots_go_over_a_low_wall_on_their_way_and_never_over_crouch_cover() -> 
 	assert_eq(cover[0], 0, "crouch cover is never vaulted")
 
 
-## Two rounds of bots on the field: [vaults, rounds, ticks anyone stood on or under the wall's line].
+## Up to four rounds of bots on the field (RV1: with each round's tempo and lane shift, two rounds can both end in a
+## fight before anyone reaches the wall): [vaults, rounds, ticks anyone stood on or under the wall's line].
 func _play(height: float) -> Array:
 	var f := _field(height)
 	var map: MapData = f[0]
@@ -193,7 +194,7 @@ func _play(height: float) -> Array:
 	var vaults := 0
 	var rounds := 0
 	var bad := 0
-	for t in roundi(tuning.rounds.round_time / DT) * 2:
+	for t in roundi(tuning.rounds.round_time / DT) * 4:
 		bots.think(state, commands, DT)
 		sim.step(state, commands, DT)
 		bots.observe(state)
@@ -203,7 +204,7 @@ func _play(height: float) -> Array:
 			var on_wall := absf(c.position.x) < 0.2 and c.position.z < 10.5 and not c.vault.active
 			if c.position.y < KILL_Y + 1.0 or (on_wall and c.grounded):
 				bad += 1
-		if rounds >= 2:
+		if rounds >= 4 or (vaults > 0 and rounds >= 2):
 			break
 	return [vaults, rounds, bad]
 
