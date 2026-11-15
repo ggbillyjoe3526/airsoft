@@ -34,7 +34,9 @@ items on those topics are held for them.
 ## Fresh checks
 
 - **Bots' flashes and their own side (FL1):** 12 whole Attack / Defend matches on Depot at Normal, bots only (seeds 1
-  to 12): FLASH_RESULT.
+  to 12): before the fix, 88 rounds, 7 bot flashes, 3 enemies and 2 teammates dazzled (the teammates 12 and 15 m from
+  the bang, standing still and walking); after it, 85 rounds, 7 flashes, 5 enemies and no teammate dazzled. The
+  existing whole-match test on Depot (3 seeds) reads 11 flashes, 7 enemies, 0 teammates, 1 thrower.
 - **Every map loads clean:** Depot, Woodland, the Range, Subway and Stockade, each by day and at night, started in a
   match on the simpler renderer under xvfb and played a few seconds: no missing file, no script error and no engine
   error on any of the ten loads (after the fix below; before it, Woodland logged about 90), and every picture showed
@@ -56,7 +58,7 @@ later change replaced.
 
 | # | Item | Outcome | How |
 |---|---|---|---|
-| 1 | Bots' flashes and teammates (FL1) | Checked; feel → C5 | The fresh 12-match count above; test_bot_bombs (no flash by a teammate, re-check at the press). |
+| 1 | Bots' flashes and teammates (FL1) | Fixed; feel → C5 | The fresh 12-match count found 2 teammates dazzled; teammates now look away from their own side's flash (0 after). |
 | 2 | Depot's hall shell (DH1) | → D1, A1 | test_dh1_hall_shell holds the shell's boxes; the floor choice and the look are his. |
 | 3 | Depot's models in Woodland (DM1) | → D2 | test_dm1_map_models (frames in their walls' middle, flagpoles). The "plain boxes" note is gone (WG3, WG4). |
 | 4 | Flagpole and the Range's skyline (FS1) | → D2, D6 | test_skyline, test_flag. The skyline's look by day and night is his. |
