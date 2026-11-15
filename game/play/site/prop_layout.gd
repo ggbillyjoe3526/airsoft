@@ -259,7 +259,8 @@ static func _cluster(p: Placed, model: AABB, foot: Vector3, size: Vector3, cfg: 
 ## way at random where that keeps it so (a round model, a square one), else a half turn, so a stack never reads as
 ## one model repeated; never turned for a model (`model_name`) in PropDressConfig.grid_unturned. Each cell takes one of
 ## `picks` at random (the model and its variants). A model in PropDressConfig.grid_scatter stands off its even place,
-## inside the box (WS1).
+## inside the box (WS1). A model in PropDressConfig.grid_ends has its line's first and last cells take its end models
+## (RM2: a sandbag wall closed at both ends).
 static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName], boxes: Dictionary[StringName, AABB],
 		foot: Vector3, size: Vector3, cell: Vector3, cfg: PropDressConfig, rng: RandomNumberGenerator,
 		model_name: StringName = &"") -> void:
@@ -285,6 +286,12 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 	if scattered:
 		own.seed = hash(Vector3i(roundi(foot.x * 100.0), roundi(foot.y * 100.0), roundi(foot.z * 100.0)))
 	var room := Vector2(maxf(long - drawn.x, 0.0) * 0.5, maxf(across - drawn.z, 0.0) * 0.5)
+	# A line closed by end models (grid_ends, RM2): its model's -x end at the line's low end on a box long in x; a
+	# box long in z turns the model's +x to world -z, so there its +x end is at the line's low end.
+	var ends: PackedStringArray = cfg.grid_ends.get(model_name, PackedStringArray())
+	var closed := ends.size() == 2 and boxes.has(StringName(ends[0])) and boxes.has(StringName(ends[1]))
+	var low_end := StringName(ends[0 if along_x else 1]) if closed else &""
+	var high_end := StringName(ends[1 if along_x else 0]) if closed else &""
 	for i in n.x:
 		for k in n.z:
 			var u := (drawn.x - long) * 0.5 + i * pitch.x
@@ -298,10 +305,16 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 				if cfg.grid_unturned.has(model_name):
 					turn = yaw
 				var pick := picks[0] if picks.size() == 1 else picks[rng.randi_range(0, picks.size() - 1)]
-				# a stack of variant sections keeps one shade along it, so its joins don't show as steps; the shade is
-				# still drawn, so every model's random stream stays as it was
+				if closed and n.x == 1:
+					pick = StringName(ends[0])
+				elif closed and i == 0:
+					pick = low_end
+				elif closed and i == n.x - 1:
+					pick = high_end
+				# a stack of variant sections, or a closed line, keeps one shade along it, so its joins don't show as
+				# steps; the shade is still drawn, so every model's random stream stays as it was
 				var shade := _shade(cfg, rng)
-				if picks.size() > 1:
+				if picks.size() > 1 or closed:
 					shade = 1.0
 				_placed(out, pick).add(fit(boxes[pick], at + Vector3(0.0, j * step.y, 0.0), _turned(drawn, turn - yaw),
 						turn), shade)

@@ -152,9 +152,10 @@ func light_of(model: StringName, i: int) -> Color:
 	return each[i] if i < each.size() else Color.WHITE
 
 
-## The models some block of `map` is dressed with, their variants (lining or grid), the pallet too when a cluster
-## stands on one, the earth bank when a prop stands on the ground (GROUND), a palisade's rail with its stakes, and a
-## lined model's cap and mouth (PropDressConfig.lined_caps, lined_mouths).
+## The models some block of `map` is dressed with, their variants (lining or grid) and a grid's end models
+## (PropDressConfig.grid_ends), the pallet too when a cluster stands on one, the earth bank when a prop stands on the
+## ground (GROUND), a palisade's rail with its stakes, and a lined model's cap and mouth (PropDressConfig.lined_caps,
+## lined_mouths).
 static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName]:
 	var used: Array[StringName] = []
 	for b in map.blocks:
@@ -164,6 +165,9 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 		var each: Array[StringName] = [model]
 		if cfg.lay_of(b) == PropDressConfig.Lay.TILE or cfg.lay_of(b) == PropDressConfig.Lay.GRID:
 			each = cfg.variants_of(model)
+		if cfg.lay_of(b) == PropDressConfig.Lay.GRID:
+			for end: String in cfg.grid_ends.get(model, PackedStringArray()):
+				each.append(StringName(end))
 		for m in each:
 			if not used.has(m):
 				used.append(m)

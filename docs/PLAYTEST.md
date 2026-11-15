@@ -1708,15 +1708,20 @@ Look at several: there are four faces (fair with blue eyes, medium with green, t
 
 On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west camp's woodpile in the sun.
 
-- [ ] **The sandbag walls** (the firing point's low wall and the backstop's long line) read as heavy sacks: soft
-  rounded loaves, a dark crease between every bag, no light showing between the courses or under the bottom row, and
-  no shine on the sacking under the sun. The small tied knots show on both faces of the wall.
-- [ ] **The site toilet's** side and back ribs look moulded into the walls (a swoosh with a shadow under it), not
-  tubes stuck on; the roof is a smooth white dome.
-- [ ] **The water tote's** cage tubes look round, the rows sitting outside the uprights, the cage's shadow on the
-  tank.
-- [ ] **The woodpiles** look stacked by hand: pieces of every shape and size, no neat rows, no dark line up the stack
-  where two 2 m sections meet; the stack's ends show bark and pale split sides, not dark brickwork.
+- [ ] **The sandbag walls** (the firing point's low wall and the backstop's long line) read as heavy filled sacks:
+  pillows full in the middle and thinner at their sewn ends, the ends' corners standing out as ears, a tied corner
+  here and there; the joints wander, and no joint runs straight up the wall anywhere along the backstop (it used to
+  every 1.2 m); no light shows between the bags; no shine on the sacking. Each wall's two ends are closed by bags laid
+  across it, never a cut bag.
+- [ ] **The site toilet's** side and back panels have sweeping scoops pressed into them (a shadow along each one's
+  upper edge), ending short of the corner posts with no dark holes; the door has two the same; the roof is a firm
+  white moulding with a square lip all round.
+- [ ] **The water tote's** valve sits back in a recess in the tank's foot, behind the cage, with no bar running
+  through it or its yellow lever; the cage's top corners are bent round; the water's line shows through the tank from
+  10 m.
+- [ ] **The woodpiles** look stacked by hand: pieces of every shape and size, no neat rows, no square blocks, no dark
+  line up the stack where two 2 m sections meet; the wood is warm tan; the stack's ends show the round bark sides of
+  the end logs, not slabs or brickwork.
 
 ## Reporting what you find
 

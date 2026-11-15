@@ -68,6 +68,7 @@ PAINT = {
     # lever (yellow is clear of the teams' hues), the dark label plate.
     "tank": 0xe8e6de,
     "tank_shade": 0xc8c6be,
+    "tank_water": 0xb6b8b0,  # the water seen through the milky tank, below its line (RM2)
     "cage": 0xa8a8aa,
     "pallet_black": 0x343434,
     "cap": 0x2e2e2e,
@@ -140,6 +141,23 @@ def reset() -> None:
         hs.material(n, PAINT[n], 0.7)
 
 
+TINT = "~"
+
+
+def tint(paint: str, k: float) -> str:
+    """The paint `paint` k times as light (a material of its own, `paint~k`), for a piece that keeps one shade of its
+    own wherever it is built (RM2: a sandbag split between two sections), where bake's random shade per piece won't."""
+    name = "%s%s%.3f" % (paint, TINT, k)
+    if bpy.data.materials.get(name) is None:
+        hs.material(name, PAINT[paint], 0.7)
+    return name
+
+
+def _paint_of(name: str) -> tuple:
+    base, _, k = name.partition(TINT)
+    return base, float(k) if k else 1.0
+
+
 class Kit(hs.Builder):
     """hardsurface's Builder, its materials the PAINT names, plus the shapes the range's models repeat."""
 
@@ -205,7 +223,7 @@ def bake(ob: bpy.types.Object, jitter: dict = None, seed: int = 1, islands: bool
         for f in bm.faces:
             if f.index in seen:
                 continue
-            k = 1.0 + rng.uniform(-1.0, 1.0) * jitter.get(names[f.material_index], 0.0)
+            k = 1.0 + rng.uniform(-1.0, 1.0) * jitter.get(_paint_of(names[f.material_index])[0], 0.0)
             stack = [f]
             seen.add(f.index)
             while stack:
@@ -220,8 +238,9 @@ def bake(ob: bpy.types.Object, jitter: dict = None, seed: int = 1, islands: bool
     attr = me.color_attributes.new("Color", "FLOAT_COLOR", "CORNER")
     me.color_attributes.active_color = attr
     for p in me.polygons:
-        col = linear(PAINT[names[p.material_index]])
-        k = shade.get(p.index, 1.0)
+        base, kt = _paint_of(names[p.material_index])
+        col = linear(PAINT[base])
+        k = shade.get(p.index, 1.0) * kt
         rgba = (min(1.0, col[0] * k), min(1.0, col[1] * k), min(1.0, col[2] * k), 1.0)
         for li in p.loop_indices:
             attr.data[li].color = rgba
@@ -231,10 +250,12 @@ def bake(ob: bpy.types.Object, jitter: dict = None, seed: int = 1, islands: bool
 
 
 def occlude(ob: bpy.types.Object, strength: float = 0.5, distance: float = 0.15, samples: int = 64,
-            ground: bool = True) -> None:
+            ground: bool = True, neighbours: list = ()) -> None:
     """Darkens `ob`'s corner colours where the model shades itself (Cycles' ambient occlusion baked to its corners,
     `distance` m reach, over a ground plane at z 0 when `ground`): the creases between bags, the wall behind a rib or
-    a cage bar, a foot on the ground. A corner fully shut in keeps 1 - `strength` of its colour (RM2)."""
+    a cage bar, a foot on the ground. A corner fully shut in keeps 1 - `strength` of its colour (RM2). `neighbours`,
+    (object, offset) pairs, stand beside it for the bake only (the object's mesh, moved `offset` from the origin): the sections a wall's section is laid between, so the
+    crease at its ends is shaded as it will be in the game."""
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     sc.cycles.device = "CPU"
@@ -252,6 +273,12 @@ def occlude(ob: bpy.types.Object, strength: float = 0.5, distance: float = 0.15,
                         (hi[0] + pad, hi[1] + pad, 0.0), (lo[0] - pad, hi[1] + pad, 0.0)], [], [(0, 1, 2, 3)])
         floor = bpy.data.objects.new("AoFloor", me)
         sc.collection.objects.link(floor)
+    beside = []
+    for other, offset in neighbours:
+        c = bpy.data.objects.new("AoBeside", other.data.copy())
+        c.matrix_world = Matrix.Translation(Vector(offset))
+        sc.collection.objects.link(c)
+        beside.append(c)
     me = ob.data
     base = me.color_attributes["Color"]
     ao = me.color_attributes.new("AO", "FLOAT_COLOR", "CORNER")
@@ -270,6 +297,10 @@ def occlude(ob: bpy.types.Object, strength: float = 0.5, distance: float = 0.15,
     me.color_attributes.active_color = me.color_attributes["Color"]
     if floor is not None:
         bpy.data.objects.remove(floor)
+    for c in beside:
+        me_c = c.data
+        bpy.data.objects.remove(c)
+        bpy.data.meshes.remove(me_c)
 
 
 def finish(ob: bpy.types.Object, bevel: float = 0.0, angle: float = math.radians(40.0)) -> bpy.types.Object:
