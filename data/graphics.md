@@ -84,9 +84,10 @@ never stops the game from starting.
 - **Reflections**: Probes are the map's reflection probes, one over the field and one in each large named area,
   captured once at the start (`AreaProbes`), so a smooth floor or paint reflects the hall it is in, not the sky. Each
   captures from eye height at the nearest spot of its area with `LookConfig.probe_clearance` (0.6 m) of room round it,
-  never from inside a prop (BP9). Under a roof (Depot, Subway) a probe gives reflections alone and the field's
-  ambient lights its halls: a probe's own ambient is darker there, and drew the lockers and panels in Depot's Lounge
-  fading to black towards their tops and a dark band along every wall of Subway.
+  never from inside a prop (BP9). Under a roof (Depot, Subway) a probe gives reflections alone while the field's
+  ambient lights its halls (Global illumination Off or Screen): a probe's own ambient is darker there, and drew the
+  lockers and panels in Depot's Lounge fading to black towards their tops and a dark band along every wall of
+  Subway. Under the scene's bounce light (Scene: Ultra) nothing else fills the shade and a probe keeps its ambient.
   Screen (Ultra) adds screen-space reflections over them.
 - **Lamp light** makes an indoor field's roof lamps (Depot's hall) real lights, each casting its own shadow, and the
   hall is lit by them alone (owner, 2026-11-10: no sun gets indoors): while they shine the preset's overhead sun goes

@@ -200,11 +200,16 @@ Lounge at 64, its top shelves dark. William saw that against main (sheet f in th
 better before." So Ultra keeps its lamps as they were. A hall's lamps now have two strengths: `lamp_light_energy`
 (2.4) while the field's ambient fills the shade and `RoofConfig.lamp_bounce_energy` (6, as first tuned) under the
 scene's bounce light, with the engine's own share in the bounce (`RoofLamps.set_mode`'s `bounce`, which
-`GraphicsApply` sets from Global illumination, so a custom mix of settings draws right too). On this head Ultra
-measures U6_HALL in the open hall, U6_CONT at the Containers and U6_LOUNGE in the Lounge with U6_LBLACK % black (162,
-146, 88 and 6 % on main): U6_VERDICT. What that leaves: on Ultra the hall is brighter than on any other preset (162
-against High's 118), so if what William saw "intensely bright" was on Ultra it is as it was, and the thread asks
-him where he saw it.
+`GraphicsApply` sets from Global illumination, so a custom mix of settings draws right too). The lamps alone did not
+bring the old look back: with the probes giving reflections alone the Lounge still drew at 68 with 15 % black on
+Ultra, its lockers' tops and top shelves black. Under the bounce light a probe's ambient is light the shade would not
+have (there is no field's ambient for it to darken), so an interior probe keeps it there (`AreaProbes.set_bounce`,
+from `FieldLighting.set_effects`), on Subway too. On this head Ultra measures 161 in the open hall, 146 at the
+Containers and 89 in the Lounge with 4 % black (162, 146, 88 and 6 % on main): as it was, the Lounge's black share a
+little lower as its probe captures clear of the props (sheet g in the thread). What that leaves: on Ultra the hall is
+brighter than on any other preset (161 against High's 118; out of the Shoot House 198 against 150, Staging 179
+against 129; sheet h), so if what William saw "intensely bright" was on Ultra it is as it was, and the thread asks
+him where he saw it and on which preset.
 
 **Harsh: the sun's shadow edge on Medium and High.** The engine widens a shadow's edge by the light's blur times its
 filter's radius, in the shadow map's pixels, and spreads the filter's samples over it. High's edge was 3 pixels wide
@@ -235,14 +240,15 @@ unchanged.
 **Black lockers in Depot's Lounge: the same ambient.** Depot's probes reach the roof, so their light stands at full
 weight from 1.5 m up, and where few lamps hang their picture of the hall is near black. In the Lounge the lockers, a
 tall panel and the trusses over them drew lit at the foot (the field's ambient, under the fade) and fading to black
-above. Main drew it too (2.7 % of the view black on High, 7.6 % on Medium), and the dimmer lamps made it worse on
-High (5.8 %). So the rule is the same for every probe under a roof: reflections alone. The Lounge's view is 0.2 %
-black on High and 0.9 % on Medium, its darkest twentieth 48 for 22 and 26 for 9. The open hall's views measure as
-they did with the lamps alone on High (the hall 118 for 120, the Shoot House 150 for 151, the Containers 89 for
-89) and 5 % brighter on Medium (the hall 115 for 109), which brings Medium, High and Low (122) together. What it
-costs: the crates and walls of the open hall took a warm tint from the probes' picture of the lamplit floor and draw
-a shade paler and cooler now. Both are in the thread's pictures, and his checklist asks William (N23). Woodland's
-and the Range's probes are open to the sky and keep their ambient.
+above. Main drew it too (2.7 % of the view black on High, 7.6 % on Medium), and the dimmer lamps made it worse on High
+(5.8 %). So the rule is the same for every probe under a roof: reflections alone while the field's ambient fills the
+hall (Medium and High; Ultra below). The Lounge's view is 0.2 % black on High and 0.9 % on Medium, its darkest
+twentieth 48 for 22 and 26 for 9. The open hall's views measure as they did with the lamps alone on High (the hall 118
+for 120, the Shoot House 150 for 151, the Containers 89 for 89) and 5 % brighter on Medium (the hall 115 for 109),
+which brings Medium, High and Low (122) together. What it costs: the crates and walls of the open hall took a warm
+tint from the probes' picture of the lamplit floor and draw a shade paler and cooler now. Both are in the thread's
+pictures, and his checklist asks William (N23). Woodland's and the Range's probes are open to the sky and keep their
+ambient.
 
 **Bounce light captured inside props.** A probe captures its area once from one point, at eye height over the
 area's middle wherever that fell. Seven of Subway's 16 captured from inside a prop (the concourse's kiosk, the works
@@ -261,11 +267,11 @@ both), with the open ground as it was. Subway's and Depot's views moved little (
 third): a probe captures only once a camera has had it in view. `tools/eye_pictures.gd` now visits every spot in a
 small picture first and waits for the probes it saw, and every reading above was taken again with it.
 
-**Not changed.** Woodland on Medium draws about half as bright as on High (its middle 50 against 110): Medium has no
-eye adaptation, as tuned (UG3). Subway on Ultra draws far darker than on High (the concourse's view 33 against 78
-on main, 13 % of it black): Ultra lights the station by its fittings and their bounce alone, as tuned (UL2), and a
-wall out of a fitting's light is dark above knee height there. This change leaves it as it was (30 after). The haze
-stays as ruled ("same haze, finer").
+**Not changed.** Woodland on Medium draws about half as bright as on High (its middle 50 against 110): Medium has no eye
+adaptation, as tuned (UG3). Subway on Ultra draws far darker than on High (the concourse's view 33 against 78 on main,
+13 % of it black): Ultra lights the station by its fittings and their bounce alone, as tuned (UL2), and a wall out of a
+fitting's light is dark above knee height there. This change leaves it as it was (33 and 13 % on this head): under the
+bounce light its probes keep their ambient, as Depot's do. The haze stays as ruled ("same haze, finer").
 
 Tests: `test_bp9_light.gd`: Depot's lamps light the middle of its open floor 0.7 to 1.1 times the stand-in's and
 nowhere 1.6 times, and at their first strength put twice and 3.5 times; the presets light Depot's lamps turned down on
@@ -275,12 +281,14 @@ twice as wide as it was, by day and night on both open fields; Medium spreads at
 fewer samples than a quarter of its edge's pixels squared; Low draws no sun shadow and Ultra keeps its sun's size and
 16 samples; the lamps keep their filters on every preset; no probe on any field captures within the clearance of a
 block, and each captures inside its box; Subway's probes moved out of its props while a clear middle stays; the probes
-under a roof give no ambient light and the open fields' keep theirs; a probe in a kiosk captures from the nearest
-clear spot, and from its middle when nothing is clear. QA's (`test_bp9_light_qa.gd`, 7): a box smaller than the
-clearance, a clearance of nought or less, a slope, a box off the terrain, ground under the probe's floor, every
-field's eye finite and in its box, and the sun's filter never coarser than the lamps' on any preset. Woodland's
-eye-height test (`test_bp2.gd`) measures the ground under the capture point, which moves where a prop stands at the
-middle.
+under a roof give no ambient light while the field's ambient fills and the open fields' keep theirs; under the scene's
+bounce light an interior's probes keep their ambient, through a change of preset and back, and probes built after it
+came on do too; a probe in a kiosk captures from the nearest clear spot, and from its middle when nothing is clear.
+QA's (`test_bp9_light_qa.gd`, 11): a box smaller than the clearance, a clearance of nought or less, a slope, a box off
+the terrain, ground under the probe's floor, every field's eye finite and in its box, the sun's filter never coarser
+than the lamps' on any preset, a hall first set with the bounce on, a flicker step taken while the lamps are off, a
+plain roof's flicker under the bounce switch, and a roof whose lamps are all dead. Woodland's eye-height test
+(`test_bp2.gd`) measures the ground under the capture point, which moves where a prop stands at the middle.
 
 ## Decisions
 
@@ -336,10 +344,11 @@ middle.
 - **The sun's shadows soften by samples; the lamps' filters stay** (part 3). A wider blur alone speckles with Edge
   smoothing Off, so High takes 16 samples and Medium 4; the lamps overlap and would pay each sample many times, and
   their shadows already fall soft. Ultra's sun keeps its size.
-- **A probe under a roof gives reflections alone** (part 3), over the two other ways tried: growing the boxes past
-  floor and ceiling drew the whole station as dark as the band, and leaving Depot's probes their ambient kept the
-  hall's warm tint with the Lounge's lockers black. The tint is William's to judge (his checklist, N23); putting it back
-  is one line (`AreaProbes._add`).
+- **A probe under a roof gives reflections alone while the field's ambient fills the hall** (part 3; under Ultra's
+  bounce light it keeps its ambient, as it was), over the two other ways tried: growing the boxes past floor and
+  ceiling drew the whole station as dark as the band, and leaving Depot's probes their ambient kept the hall's warm
+  tint with the Lounge's lockers black. The tint is William's to judge (his checklist, N23); putting it back is one
+  line (`AreaProbes._add`).
 - **A probe finds its own clear spot** (part 3), on rings outward from its area's middle, in place of a hand-set
   point per area: nothing to keep in step when a map's props move.
 - **Subway on Ultra and Woodland on Medium are left as tuned** (part 3; UL2, UG3). Both are darker than the same
@@ -357,10 +366,10 @@ middle.
   whether the softer edges read soft or blurred are his to say (N23 on his Beta 1 checklist,
   `/mnt/project-files/playtest/0.1-beta1-checklist.md`; the checks are `docs/PLAYTEST.md` › The pass before 0.1
   Beta 1).
-- Depot on Ultra is as bright as it was (part 3; William kept its look): its open hall reads 162 of 255 against 118
+- Depot on Ultra is as bright as it was (part 3; William kept its look): its open hall reads 161 of 255 against 118
   on High. If the brightness he saw was on Ultra it is still there; the thread asks him where.
 - Woodland on Medium is about half as bright as on High in deep shade, where High's eyes open up (UG3); not changed.
 - Subway on Ultra is far darker than on High, as on main (UL2): walls out of a fitting's light are dark above knee
   height. Not changed; William's to say (his checklist, N23).
-- Depot's crates and walls are a shade paler and cooler from Medium up (part 3: its probes give reflections alone);
+- Depot's crates and walls are a shade paler and cooler on Medium and High (part 3: its probes give reflections alone);
   William's to say (his checklist, N23).

@@ -396,17 +396,21 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   (0.6°: sharp at a shadow's foot, soft away from it): at 1° its edges speckle and at 2° the shade under the crowns
   blurs into fog. The lamps, the light pools and the torch keep their filters (`LAMP_SOFTNESS`): their shadows
   already fall soft, and many lamps overlap on one spot, so each sample is paid many times.
-- **A reflection probe under a roof gives reflections alone (2026-11-16, BP9).** A probe lights what stands in its box
-  from its own picture of the hall, fading in over `LookConfig.probe_margin` (1.5 m) from each face of the box, and
-  indoors that picture is far darker than the field's ambient. Subway's probes stand in their area's band of floor
-  heights, 3.2 m tall for most, so their light peaked at chest height and drew a dark band along every wall. Depot's
-  reach the roof, and where few lamps hang (the Lounge) lockers, a tall panel and the trusses over them drew lit at
-  the foot and black above: 5.8 % of the view black on High and 7.6 % on Medium, 0.2 % and 0.9 % now. An interior
-  probe keeps its reflections and leaves the ambient to the field (`AreaProbes`, `ambient_mode` off). Growing Subway's
-  boxes past floor and ceiling instead drew the whole station as dark as the band (a view's middle 78 to 29). Depot's
-  open hall measures the same on High (each view's middle within 4) and 5 % brighter on Medium; its crates and walls
-  draw a shade paler and cooler, the lamps' warm bounce the probes pictured being gone from them, which is the owner's
-  to judge (his checklist, N23). Woodland's and the Range's probes are open to the sky and keep their ambient.
+- **A reflection probe under a roof gives reflections alone while the field's ambient fills the hall (2026-11-16,
+  BP9).** A probe lights what stands in its box from its own picture of the hall, fading in over
+  `LookConfig.probe_margin` (1.5 m) from each face of the box, and indoors that picture is far darker than the field's
+  ambient. Subway's probes stand in their area's band of floor heights, 3.2 m tall for most, so their light peaked at
+  chest height and drew a dark band along every wall. Depot's reach the roof, and where few lamps hang (the Lounge)
+  lockers, a tall panel and the trusses over them drew lit at the foot and black above: 5.8 % of the view black on
+  High and 7.6 % on Medium, 0.2 % and 0.9 % now. An interior probe keeps its reflections and leaves the ambient to the
+  field (`AreaProbes`, `ambient_mode` off). Growing Subway's boxes past floor and ceiling instead drew the whole
+  station as dark as the band (a view's middle 78 to 29). Depot's open hall measures the same on High (each view's
+  middle within 4) and 5 % brighter on Medium; its crates and walls draw a shade paler and cooler, the lamps' warm
+  bounce the probes pictured being gone from them, which is the owner's to judge (his checklist, N23). Under the
+  scene's bounce light (Global illumination Scene: Ultra) there is no such ambient and a probe's own is light the
+  shade would not have, so an interior keeps it there (`AreaProbes.set_bounce`): with reflections alone Depot's Lounge
+  drew its lockers' tops and top shelves black on Ultra, and the owner kept Ultra as it was. Woodland's and the
+  Range's probes are open to the sky and keep their ambient.
 - **A reflection probe never captures from inside a prop (2026-11-16, BP9).** A probe captured at eye height over its
   area's middle, wherever that fell: seven of Subway's 16 sat in a kiosk, a hoarding, a locker or a wagon, six of
   Depot's 21 in a crate, a drum or a plywood wall, three of Woodland's 24 in a thicket. Each captures from the
