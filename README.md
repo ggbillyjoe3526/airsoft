@@ -64,8 +64,9 @@ walk-off, settings, saves and accessibility.
 
 ## Checks
 
-`tools/check.sh` runs every check CI runs (lint, the wiki, unit tests, a headless smoke test, the licence notices); it
-needs `godot` on PATH (or `GODOT=/path/to/godot`) and, for lint, `pip install "gdtoolkit==4.5.0"`. How work moves:
+`tools/check.sh` runs every check CI runs (lint, the wiki, the models' flat faces, unit tests, a headless smoke test,
+the licence notices); it needs `godot` on PATH (or `GODOT=/path/to/godot`), for lint `pip install "gdtoolkit==4.5.0"`
+and for the models' check `pip install "numpy==2.5.3"`. How work moves:
 `docs/PROCESS.md` and `CLAUDE.md`.
 
 ## Licence

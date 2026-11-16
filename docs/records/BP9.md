@@ -69,14 +69,17 @@ it. The pass measured every model file and every field for them, fixed what it f
 
 **In the models (111 of 249 files).** `tools/coplanar_models.py check` reads every `.glb` under `assets/models/` and
 lists, part by part, the faces of one part lying in one plane over one another: 1,733 sheets, 2,866 pairs, 168 m2 in
-all. 136 m2 of it was in seven skyline models (the far sheds' cladding and the crane), 32 m2 in 86 props (the watch
-tower, the roof truss with 1,020 pairs, the Range's backstop and wall, the works hoardings, the pallet racking), and a
-few square centimetres in the two figures and thirteen replica files. `fix` lifts one sheet of each pair along its
+all. 136 m2 of it was in seven skyline models (the far sheds and the crane), 32 m2 in 86 props (the watch tower, the
+roof truss with 1,020 pairs, the Range's backstop and wall, the works hoardings, the pallet racking), and under a
+tenth of a square metre in the other 18 files (the two figures, thirteen replica files, a range target, the bomb and
+the smoke grenade). `fix` lifts one sheet of each pair along its
 facing by a step sized to the model (a ten-thousandth of its length and never less than three of the 65,536 steps the
 engine stores a model's positions in: 0.05 to 0.09 mm on a replica, 0.2 mm on a figure, up to 0.9 mm on a prop and
-2.6 mm on a far shed), up to three levels where sheets stack. A fixed 0.3 mm lift was tried first and moved a laser's
-emitter and a delta ring past what their fit tests allow, hence the size. No triangle count, UV, colour or bound that
-a test reads moved: the 76 test files that load models (829 tests) pass. `check` now finds none, and CI's lint job
+2.6 mm on a far shed), up to three levels where sheets stack (the most any vertex moved is 5.2 mm, two levels on the
+longest skyline shed, which stands beyond the field). A fixed 0.3 mm lift was tried first and moved a laser's
+emitter and a delta ring past what their fit tests allow, hence the size. QA compared all 111 files with
+their old copies: nodes, materials, indices, UVs, normals, colours, weights and animations are identical, only
+positions differ; the 76 test files that load models (829 tests) pass. `check` now finds none, and CI's lint job
 runs it on every pull request (`tools/check.sh` too, where numpy is installed), so a rebuilt model that brings one
 back fails. `tools/coplanar_scales.json` names the models the game draws shrunk (the door leaves), whose lift is
 sized for the size they are drawn at.
@@ -114,7 +117,8 @@ William which is which.
 Tests: `test_bp9_flicker.gd` (5): Subway's six linings stand proud of every block's face; no level face of a tiled
 prop lies in its backing's top, and the old 0.05 m is caught; every door frame's head on Depot and Woodland stands
 `FRAME_HEAD_CLEAR` under its opening's top with its foot on the floor; every texture drawn in the world carries
-mipmaps (a swatch of a few pixels aside); Depot's sign sheet is stored as Subway's.
+mipmaps (a swatch of a few pixels aside); Depot's sign sheet is stored as Subway's. `test_bp9_flicker_qa.gd` (QA): every door's
+leaves stand on its frame's floor.
 
 ## Decisions
 
