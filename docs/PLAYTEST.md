@@ -1854,9 +1854,11 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   Pass: each time the wheel's circle shows alone over the crosshair with "Back to the team plan" for two seconds, the
   wheel shut, and you can still see your crosshair through it.
 - [ ] **Flicker (faces crawling through one another).** Subway: walk both platforms looking at the platform's edge
-  over the track, from the platform and from the track bed. Depot: look along a racking aisle, at the doors and their
-  frames, at a parts cage, and at a fire point board and the safety signs from across the hall. The Range: strafe
-  along the side wall and look at the backstop. Woodland: the watch tower, a hut's door, the far sheds from the Ridge.
+  over the track, from the platform and from the track bed (the edge is its dark lining now, as it was built; before,
+  it crawled between that and the slab's white tile), and look down into a works hoarding's compound from the
+  stairs. Depot: look along a racking aisle, at the doors and their frames, at a parts cage, and at a fire point
+  board and the safety signs from across the hall. The Range: strafe along the side wall and look at the backstop.
+  Woodland: the watch tower, a hut's door, the far sheds from the Ridge.
   Pass: no surface shows a second one crawling through it in stripes or speckles as you move, and the signs' print
   stays steady from afar. Thin things (a cage's wire, far rails, a stack's edges) still shimmer along their edges:
   Edge smoothing is Off on every preset (FB2), and that is not this fix. If that shimmer is the flicker you meant,

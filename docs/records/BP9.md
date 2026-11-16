@@ -79,8 +79,10 @@ ten-thousandth of its length and never less than three of the 65,536 steps the e
 in: 0.05 to 0.11 mm on a replica, 0.2 mm on a figure, up to 0.9 mm on a prop and 2.6 mm on a far shed), up to three
 steps where sheets stack (1,141 sheets moved; the most any moved is 2.6 mm, on the longest skyline shed, which
 stands beyond the field, and 2.1 mm on a prop). A sheet sinks alone: the faces behind it (its rim) stay, so no
-edge, corner or outline of a model moves and every mesh's bounds are what they were; a face that stands on a
-sinking sheet is drawn out to follow it. Of the 751 piles, 641 sank that way; in 52 a sheet shares its corners with
+edge, corner or outline of a model moves and every mesh's bounds are what they were (QA compared all 99 files
+with main's, 255 meshes: bounds the same to the float, and nothing but vertex positions differs; inside a mesh one
+surface's own bounds moved in 15 places, by 0.21 mm at most, under another surface of the same mesh); a face that
+stands on a sinking sheet is drawn out to follow it. Of the 751 piles, 641 sank that way; in 52 a sheet shares its corners with
 its rim (sinking would draw the rim in, away from what stands against it), so the upper sheets rose instead, their
 rims drawn out after them; 54 were cards drawn from both sides and facing both ways, which rise each along its own
 facing; and in 4 rising would have left the bounds, so they sank with their rims. `check` now finds none, and CI's
@@ -97,20 +99,31 @@ the bounds of 50 models and opened 296 cm2 of slits; this one moves no mesh's bo
 under 0.2 mm wide, where a slanted face follows a sheet. A fixed 0.3 mm step, tried before either, moved a
 laser's emitter and a delta ring past what their fit tests allow, hence the size.
 
+A sunk sheet leaves a pocket where it stood, and QA asked whether one shows where two wall sections meet: a
+section's end face (its posts, cap and base) lies 0.4 mm inside its rim now, under the panel's end, so each join
+holds a pocket 0.8 mm wide. It is closed all round: the faces across the wall, above and below still reach the
+section's end at every height. Rays cast straight into the join of two sections drawn to their cells (2,052 of
+them, 0.05 to 0.35 mm either side of it, from 80° down to 80° up at 60 heights) all meet a face, on main too; on
+the first way's file 1,770 pass through, the daylight the pictures showed. QA's test holds it.
+
 **On the fields**, measured as a match draws them (`tools/coplanar_dump.gd` under a real renderer, then
 `tools/coplanar_check.py`), faces of different pieces in one plane, before and after:
 
 | Field | Before (m2) | After (m2) | What it was |
 |---|---|---|---|
-| Depot | 284.3 | DEPOT_NOW | the pallet racking's own sheets, tiled along every rack (244); the door leaves (13); the parts cages' roofs in the top of the box drawn behind them (12) |
-| Subway | 155.0 | 13.8 | the platform edges' lining in the plane of the platforms' slab (119, both platforms); the works hoardings (13) |
+| Depot | 284.3 | 1.6 | the pallet racking's own sheets, tiled along every rack (244); the door leaves (13); the parts cages' roofs in the top of the box drawn behind them (12) |
+| Subway | 155.0 | 12.5 | the platform edges' lining in the plane of the platforms' slab (119, both platforms); the works hoardings' own sheets (13) and their ground sheets in the platform's edge strips (6) |
 | The Range | 142.6 | 3.5 | the Range's wall (106) and backstop (27); the skyline's sheds (8) |
-| Woodland | 13.3 | WOODLAND_NOW | the door leaves (7); the watch tower; a hut's door frame's head in its roof's underside |
+| Woodland | 13.3 | 3.8 | the door leaves (7); the watch tower; a hut's door frame's head in its roof's underside |
 
 - **Subway's platform edges** (`tools/subway/station_dress.py`: `EDGE_FACE` 0.01 to 0.02 m; `data/maps/subway.json`
   rebuilt, six trims moved a centimetre, nothing else). The map's builder grows each floor a centimetre past its
   room, which put the slab's white tiled edge in the dark lining's own plane along both platforms: the edge over the
   track drew as a crawling mix of the two. The lining now stands a centimetre proud.
+- **Subway's works hoardings** (`tools/blender/maps/works_hoarding.py`: `FLOOR_TOP` 0.01 to 0.013 m; the three
+  `works_hoarding*.glb` files, 12 vertices each moved by hand to match, bounds unchanged). The compound's ground
+  sheet was built with its top a centimetre up, the height the platform's edge strips are drawn at
+  (`StationLook.strip_lift`), and the hoardings stand over those strips. It now stands 3 mm over them.
 - **Depot's parts cages** (`PropDressConfig.backing_top` 0.05 to 0.053 m). The box drawn behind a tiled prop stopped
   0.05 m under the block's top, the height of a parts cage's roof. It now stops 3 mm clear of every tiled model's
   level faces (0.044, 0.05 and 0.056 m under the top).
@@ -122,17 +135,36 @@ laser's emitter and a delta ring past what their fit tests allow, hence the size
 **What is left does not show.** The checker lists every pair, seen or not, and most of what is left is hidden (a
 fitting's back plate against its wall, a far skyline shed's underside). `tools/flicker_map.py` settles it by
 pictures: for each group left it draws the view twice, 3 mm and 0.02° apart (under half a pixel), and counts the
-pixels that changed by more than the picture's own detail there allows. Over 29 aimed views (Depot 4, Subway 14, Woodland 8, the Range 3) no view changed in more than 0.3 % of its pixels, none in a patch and none standing still. What it does mark is thin lines
-(a cage's wire, a cordwood stack's edges): the presets draw with no edge smoothing (owner, FB2), so a line thinner
-than a pixel crawls as the eye moves. That is not two faces fighting and is left as ruled; the checklist tells
-William which is which.
+pixels that changed by more than the picture's own detail there allows. Over the 25 groups left of 0.05 m2 or more
+(Subway 14, Woodland 6, the Range 3, Depot 2) no view changed in more than 0.3 % of its pixels (Subway's worst
+0.012 %), none in a patch and none standing still. What it does mark is thin lines (a cage's wire, a container's
+lock rods, a cordwood stack's edges): the presets draw with no edge smoothing (owner, FB2), so a line thinner than
+a pixel crawls as the eye moves. That is not two faces fighting and is left as ruled; the checklist tells William
+which is which.
 
-Tests: `test_bp9_flicker.gd` (6): Subway's six linings stand proud of every block's face; no level face of a tiled
-prop lies in its backing's top, and the old 0.05 m is caught; a section built to its grid cell (the Range's wall and
-backstop, the sandbags) is the cell's size to a tenth of a millimetre (the first way's models fail it: 2.4015 m for
-2.4); every door frame's head on Depot and Woodland stands `FRAME_HEAD_CLEAR` under its opening's top with its foot
-on the floor; every texture drawn in the world carries mipmaps (a swatch of a few pixels aside); Depot's sign sheet
-is stored as Subway's. `test_bp9_flicker_qa.gd` (QA): every door's leaves stand on its frame's floor.
+**What crawled before, from the same spots.** The groups that fought most on main (each field's groups of 0.3 m2
+or more, twelve at most: 42 views) were pictured the same way on main and on this head, the eye in the same places.
+Depot's pallet racking crawled over 2.1 % and 0.8 % of the picture (its deck boards and uprights, from below) and
+crawls over 0.003 % now; Subway's platform edges over 1.2 % and 0.4 %, now 0.004 %; a far skyline shed seen from
+the Range over 2.7 % (faintly: its sheets are nearly one colour), now none; Woodland's worst, a hut's frame under
+its roof, over 0.045 %, now 0.002 %. Not everything listed showed: the Range's wall and backstop changed in no
+view before or after (their sheets fought inside the joins between sections, where no eye reaches), and the works
+hoardings' ground sheets showed from none of these spots either (one sheet happened to win everywhere); both are
+parted all the same, so the gate can be strict and nothing depends on luck. One Subway view stands inside a
+hoarding with a brace a hand's width from the eye, whose edge crosses 2.4 % of the picture before and after alike:
+parallax, not flicker; a Depot view of a door seen edge-on past a drum changes by 0.08 % before and after for the
+same reason (the drum's outline by the eye, the thin edges of the door's panels).
+
+Tests: `test_bp9_flicker.gd` (7): Subway's six linings stand proud of every block's face; no level face of a tiled
+prop lies in its backing's top, and the old 0.05 m is caught; no level face of a prop lies in a platform strip it
+stands over, and strips at the hoardings' sheet's height are caught; a section built to its grid cell (the Range's
+wall and backstop, the sandbags) is the cell's size to a tenth of a millimetre (the first way's models fail it:
+2.4015 m for 2.4); every door frame's head on Depot and Woodland stands `FRAME_HEAD_CLEAR` under its opening's top
+with its foot on the floor; every texture drawn in the world carries mipmaps (a swatch of a few pixels aside);
+Depot's sign sheet is stored as Subway's. QA's: every door's leaves stand on its frame's floor
+(`test_bp9_flicker_qa.gd`), and a section built to its cell is closed at both ends at every height
+(`test_bp9_flicker_qa2.gd`). One older test moved: Woodland's gap test (`test_wg3_woodland_models.gd`) allows a
+face's back 4 mm before a face turned to the eye, not 3 (Decisions).
 
 ## Decisions
 
@@ -163,6 +195,12 @@ is stored as Subway's. `test_bp9_flicker_qa.gd` (QA): every door's leaves stand 
   tiled sections by a mesh's bounds, and parts of one model meet along its edges, so the fix moves a sheet inside
   its own rim and never an edge; `fix` fails if a pile cannot be parted inside the bounds (none does today), and
   `test_bp9_flicker.gd` holds the sections built to their grid cells to the cell's size.
+- **Woodland's gap test allows 4 mm where it allowed 3** (part 2, `GAP_TOUCH`). The sawmill shed's posts' faces lie
+  0.7 mm inside their rims now (the base sheet under a brace's end). The line the test tried runs along a brace's
+  axis, inside it; the brace's square-cut end stood 3.8 mm off its post on main, inside the 3 mm allowance only
+  through the test's hairline rule and by 0.7 mm, and stands 4.7 mm off. Nothing is seen through (QA read the
+  crossings: the same faces in the same order). Moving the brace's end instead of the post's face was tried over
+  every model: it opened more edges in 23 files, 12 of them real slits in the roof truss, so the tool stayed.
 - **What is hidden is left alone** (part 2). Faces in one plane that no eye reaches (a fitting's back on its wall, two
   floors under a wall) cost nothing and moving them risks the fits the tests hold. Pictures decide what shows
   (`tools/flicker_map.py`), not the list.

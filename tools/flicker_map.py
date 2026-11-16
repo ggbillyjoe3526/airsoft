@@ -106,6 +106,13 @@ def changes(a, b, c):
     return moved, still
 
 
+def _mark(value):
+    """A counted pixel's mark on an overlay: plain to see however little it changed, brighter the more it did (two
+    sheets of nearly one colour fight in a faint pattern that a mark by size alone leaves dark)."""
+    wide = _widen(value)
+    return np.where(wide > 0, np.clip(110 + wide * 12, 0, 255), 0)
+
+
 def read(folder, overlays):
     rows = []
     for name in sorted(f[:-6] for f in os.listdir(folder) if f.endswith('_a.png')):
@@ -126,8 +133,8 @@ def read(folder, overlays):
         print('%7.3f %% moving  %7.3f %% standing  %s' % (mv, st, name))
         if i < overlays:
             base = a * 0.35
-            base[..., 0] = np.maximum(base[..., 0], np.clip(_widen(moved) * 12, 0, 255))
-            base[..., 2] = np.maximum(base[..., 2], np.clip(_widen(still) * 12, 0, 255))
+            base[..., 0] = np.maximum(base[..., 0], _mark(moved))
+            base[..., 2] = np.maximum(base[..., 2], _mark(still))
             Image.fromarray(np.concatenate([a, base], axis=1).astype(np.uint8)).save(
                 '%s/maps/%02d_%s.jpg' % (folder, i, name), quality=88)
     return 0
