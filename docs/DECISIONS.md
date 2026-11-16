@@ -394,8 +394,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   nothing smooths the picture (Edge smoothing is Off on every preset, FB2), so Softer takes 16 samples over an edge
   twice as wide and Soft 4 (`GraphicsApply.SOFTNESS`, `LightingConfig.shadow_blur` 2). Ultra keeps its sun's size
   (0.6°: sharp at a shadow's foot, soft away from it): at 1° its edges speckle and at 2° the shade under the crowns
-  blurs into fog. The lamps, the light pools and the torch keep their filters (`LAMP_SOFTNESS`): their shadows
-  already fall soft, and many lamps overlap on one spot, so each sample is paid many times.
+  blurs into fog. It keeps its blur too (`LightingConfig.soft_sun_blur`, the day's 1.5): where shadows harden at
+  contact the blur scales the sun's size, so the wider blur would have drawn Ultra's edges a third wider. The lamps,
+  the light pools and the torch keep their filters (`LAMP_SOFTNESS`): their shadows already fall soft, and many lamps
+  overlap on one spot, so each sample is paid many times.
 - **A reflection probe under a roof gives reflections alone while the field's ambient fills the hall (2026-11-16,
   BP9).** A probe lights what stands in its box from its own picture of the hall, fading in over
   `LookConfig.probe_margin` (1.5 m) from each face of the box, and indoors that picture is far darker than the field's

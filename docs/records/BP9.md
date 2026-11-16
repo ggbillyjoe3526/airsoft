@@ -4,6 +4,7 @@
 
 - part 1 (bugs): critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
 - part 2 (flicker): critic Accept 8/8 (attempt 1) · qa Pass · performance Pass
+- part 3 (light): critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
 
 William's full pass before he tags 0.1 Beta 1 (owner, 2026-11-15 and 16): bugs, balance, performance, quality and
 edge cases over the whole game, with a clean-out of unused files, a hunt for flicker (faces lying over one another),
@@ -16,6 +17,8 @@ the harsh shadows and the over-bright spots under Depot's lamps. It goes out in 
 | 2026-11-16 | part 1: 1 | Fable 5.2 | lint, wiki, 110 touched test files | Retry 5/8 | an order that ended by itself never showed with the wheel shut; the view's wait inside a tap; the wiki and play checks claimed a live turn |
 | 2026-11-16 | part 1: 2 | Fable 5.2 | lint, wiki, whole unit suite, smoke; CI | Accept 8/8 | – |
 | 2026-11-16 | part 2: 1 | Fable 5.2 | lint, wiki, the models' gate, 158 touched test files, smoke; CI | Accept 8/8 | – |
+| 2026-11-16 | part 3: 1 | Fable 5.2 | lint, wiki, 82 touched test files, smoke | Accept 7/8 | docs said Medium's edges drew smooth (they are softer, with a grain), the blur's old value, a checklist number with no home; then the owner, on the pictures: Depot on Ultra "looks better before" |
+| 2026-11-16 | part 3: 2 | Fable 5.2 | lint, wiki, 82 touched test files, smoke; CI | Accept 8/8 | – |
 
 ## Part 1: bugs
 
@@ -215,12 +218,18 @@ him where he saw it and on which preset.
 filter's radius, in the shadow map's pixels, and spreads the filter's samples over it. High's edge was 3 pixels wide
 (about 3 cm on the nearest cascade) under 4 samples, and Medium took a single sample: a hard edge both. A wider blur
 over 4 samples speckled, as nothing smooths the picture (Edge smoothing is Off, FB2); 8 samples over 6 pixels speckled
-too; 16 over 6 drew smooth. High now spreads 16 samples over twice its old edge (blur 2.0 for 1.5, with the next
-filter up) and Medium 4 where it took 1: Medium's edge is softer than it was, with a fine grain along it (4 samples
-over 4 pixels; 8 would smooth it, at a cost on the preset for modest cards, so it is William's to ask for). Ultra
-keeps its 0.6° sun (at 1° its edges speckled, at 2° the shade under the crowns blurred into fog). The lamps, the light
-pools and the torch keep the filters they were tuned on (`GraphicsApply.LAMP_SOFTNESS`): many of them overlap on one
-spot, so their samples are paid many times over, and their shadows already fall soft.
+too; 16 over 6 drew smooth. High now spreads 16 samples over twice its old edge (blur 2.0 for 1.5, with the next filter
+up) and Medium 4 where it took 1: Medium's edge is softer than it was, with a fine grain along it (4 samples over 4
+pixels; 8 would smooth it, at a cost on the preset for modest cards, so it is William's to ask for). Ultra keeps its
+0.6° sun (at 1° its edges speckled, at 2° the shade under the crowns blurred into fog) and its blur. The blur was nearly
+missed: the critic's second review noted that the day's wider blur reached Ultra too, and where shadows harden at
+contact (Softest) the engine scales the sun's size by it, so Ultra's edges drew a third wider than on main while every
+text said its sun was unchanged. Softest now has a blur of its own (`LightingConfig.soft_sun_blur`: 1.5 by day, and the
+night's 2, which never moved; `FieldLighting.set_effects` sets it with the sun's size). Pictured by the Tower on Ultra
+with both (picture 13): at 2 the edges are visibly wider, with a little more grain; at 1.5 they are main's. Whether
+Ultra's sun should be the softer one is William's to say (one number), and the thread shows him both. The lamps, the
+light pools and the torch keep the filters they were tuned on (`GraphicsApply.LAMP_SOFTNESS`): many of them overlap on
+one spot, so their samples are paid many times over, and their shadows already fall soft.
 
 **Dark bands along Subway's walls: a probe's ambient light in a box one storey tall.** From Medium up a reflection
 probe lights what stands in its box from its own picture of the hall, and its light fades in over `probe_margin`
@@ -273,22 +282,23 @@ adaptation, as tuned (UG3). Subway on Ultra draws far darker than on High (the c
 fitting's light is dark above knee height there. This change leaves it as it was (33 and 13 % on this head): under the
 bounce light its probes keep their ambient, as Depot's do. The haze stays as ruled ("same haze, finer").
 
-Tests: `test_bp9_light.gd`: Depot's lamps light the middle of its open floor 0.7 to 1.1 times the stand-in's and
-nowhere 1.6 times, and at their first strength put twice and 3.5 times; the presets light Depot's lamps turned down on
-High and at their first strength on Ultra, with the engine's own share in the bounce; a dim lamp keeps its share and a
-flickering one its step through that change; a plain roof's lamps shine the same either way; the sun's edge on High is
-twice as wide as it was, by day and night on both open fields; Medium spreads at least 4 samples; no preset spreads
-fewer samples than a quarter of its edge's pixels squared; Low draws no sun shadow and Ultra keeps its sun's size and
-16 samples; the lamps keep their filters on every preset; no probe on any field captures within the clearance of a
-block, and each captures inside its box; Subway's probes moved out of its props while a clear middle stays; the probes
-under a roof give no ambient light while the field's ambient fills and the open fields' keep theirs; under the scene's
-bounce light an interior's probes keep their ambient, through a change of preset and back, and probes built after it
-came on do too; a probe in a kiosk captures from the nearest clear spot, and from its middle when nothing is clear.
-QA's (`test_bp9_light_qa.gd`, 11): a box smaller than the clearance, a clearance of nought or less, a slope, a box off
-the terrain, ground under the probe's floor, every field's eye finite and in its box, the sun's filter never coarser
-than the lamps' on any preset, a hall first set with the bounce on, a flicker step taken while the lamps are off, a
-plain roof's flicker under the bounce switch, and a roof whose lamps are all dead. Woodland's eye-height test
-(`test_bp2.gd`) measures the ground under the capture point, which moves where a prop stands at the middle.
+Tests: `test_bp9_light.gd`: Depot's lamps light the middle of its open floor 0.7 to 1.1 times the stand-in's and nowhere
+1.6 times, and at their first strength put twice and 3.5 times; the presets light Depot's lamps turned down on High and
+at their first strength on Ultra, with the engine's own share in the bounce; a dim lamp keeps its share and a flickering
+one its step through that change; a plain roof's lamps shine the same either way; the sun's edge on High is twice as
+wide as it was, by day and night on both open fields; Medium spreads at least 4 samples; no preset spreads fewer samples
+than a quarter of its edge's pixels squared; Low draws no sun shadow and Ultra keeps its sun's size and 16 samples, and
+its blur by day and by night through a change of preset and back; the lamps keep their filters on every preset; no probe
+on any field captures within the clearance of a block, and each captures inside its box; Subway's probes moved out of
+its props while a clear middle stays; the probes under a roof give no ambient light while the field's ambient fills and
+the open fields' keep theirs; under the scene's bounce light an interior's probes keep their ambient, through a change
+of preset and back, and probes built after it came on do too; a probe in a kiosk captures from the nearest clear spot,
+and from its middle when nothing is clear. QA's (`test_bp9_light_qa.gd`, 11): a box smaller than the clearance, a
+clearance of nought or less, a slope, a box off the terrain, ground under the probe's floor, every field's eye finite
+and in its box, the sun's filter never coarser than the lamps' on any preset, a hall first set with the bounce on, a
+flicker step taken while the lamps are off, a plain roof's flicker under the bounce switch, and a roof whose lamps are
+all dead. Woodland's eye-height test (`test_bp2.gd`) measures the ground under the capture point, which moves where a
+prop stands at the middle.
 
 ## Decisions
 
@@ -343,7 +353,7 @@ plain roof's flicker under the bounce switch, and a roof whose lamps are all dea
   bounce seven times over, which matched High's brightness and which he liked less than the old look.
 - **The sun's shadows soften by samples; the lamps' filters stay** (part 3). A wider blur alone speckles with Edge
   smoothing Off, so High takes 16 samples and Medium 4; the lamps overlap and would pay each sample many times, and
-  their shadows already fall soft. Ultra's sun keeps its size.
+  their shadows already fall soft. Ultra's sun keeps its size and its blur.
 - **A probe under a roof gives reflections alone while the field's ambient fills the hall** (part 3; under Ultra's
   bounce light it keeps its ambient, as it was), over the two other ways tried: growing the boxes past floor and
   ceiling drew the whole station as dark as the band, and leaving Depot's probes their ambient kept the hall's warm

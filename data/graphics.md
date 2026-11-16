@@ -140,10 +140,11 @@ never stops the game from starting.
   An underground field (Subway, UL1) never takes the sun's shadow, so it draws the disc on every preset.
 - **Shadow softness** (BP9) is the sun's and the moon's shadow filter (`GraphicsApply.SOFTNESS`): Hard one sample,
   Soft 4, Softer 16 over an edge one and a half times as wide, each spread over the light's blur
-  (`LightingConfig.shadow_blur`, 2), Softest the same 16 round a sun with a size. Too few samples over a wide edge
-  speckle, as nothing smooths the picture while Edge smoothing is Off, so the blur and the samples change together
-  (`tests/unit/test_bp9_light.gd`). The lamps, the light pools and the torch keep filters of their own
-  (`GraphicsApply.LAMP_SOFTNESS`: 1, 4 and 16 samples), as many lamps overlap on one spot.
+  (`LightingConfig.shadow_blur`, 2), Softest the same 16 round a sun with a size, on a blur of its own
+  (`soft_sun_blur`: the day's 1.5 and the night's 2, as they were; there the blur scales the sun's size). Too few
+  samples over a wide edge speckle, as nothing smooths the picture while Edge smoothing is Off, so the blur and the
+  samples change together (`tests/unit/test_bp9_light.gd`). The lamps, the light pools and the torch keep filters of
+  their own (`GraphicsApply.LAMP_SOFTNESS`: 1, 4 and 16 samples), as many lamps overlap on one spot.
 - **Mesh detail** also sets a smoke cloud's puffs (`game/config/effects_config.gd`, `smoke_puffs`): fewer and larger
   on Low and Medium, so from inside a cloud fewer see-through layers are drawn over the screen.
 - **Occlusion culling** leaves out what the map's tall solid blocks hide from the eye (plywood, containers, walls,
