@@ -371,6 +371,54 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   of a millimetre no script's author would see, and one pass covers every model. What a field lays in one plane
   (a prop on a strip, a trim on a slab) is found with `tools/coplanar_dump.gd` and judged by pictures
   (`tools/flicker_map.py`), not by the list (docs/records/BP9.md › Part 2).
+- **On High a hall's lamps light it as brightly as the overhead light that stands in for them (2026-11-16, BP9).**
+  The owner saw Depot "intensely bright ... in some areas". On High and Ultra the roof lamps light the hall alone; on
+  Low and Medium an overhead light stands in. `RoofConfig.lamp_light_energy`, the lamps' strength while the field's
+  ambient fills the shade (High), is set so the lamps together put about what the stand-in does on the open floor
+  (0.9 of it in the middle of the floor's, 1.5 times it where they hang closest); at their first strength they put
+  twice to nearly four times as much, the open hall drew washed out, and seen from a covered place (the Lounge, a
+  container), where the eyes open up, it drew white. The haze adds nothing to it. UG2's rulings stand: wide and
+  soft, no visible cone, shadows dark but readable. Re-measure when the lamps' cone, range, falloff or number change
+  (`tests/unit/test_bp9_light.gd`).
+- **Depot on Ultra keeps its lamps as they were (owner, 2026-11-16, BP9).** Under a roof Ultra has no fill light but
+  what the lamps bounce off the hall (SDFGI), where High fills its shade with the field's ambient. Turned down as on
+  High, the lamps left Ultra with a black roof and its open hall at 91 of 255 against High's 118; fed seven times
+  over into the bounce light they matched High (the hall 124, the Lounge 64 with its top shelves dark). The owner
+  compared that with main's pictures: "f-depot-ultra.jpg looks better before." So a hall's lamps shine at
+  `RoofConfig.lamp_bounce_energy` (6, as first tuned) under the scene's bounce light (Global illumination Scene:
+  Ultra) with the engine's own share in the bounce, and at `lamp_light_energy` wherever the ambient fills. Ultra's
+  hall is brighter than the other presets' (162 against High's 118). Don't turn Ultra's lamps down without him.
+- **The sun's shadows soften with samples, not blur alone (2026-11-16, BP9).** The owner saw "harsh/sharp shadows":
+  on High a shadow's edge was 3 of the shadow map's pixels wide, so the shade under Woodland's crowns lay in
+  hard-edged patches, and Medium took one sample (a hard edge). A wider blur over the same 4 samples speckles, as
+  nothing smooths the picture (Edge smoothing is Off on every preset, FB2), so Softer takes 16 samples over an edge
+  twice as wide and Soft 4 (`GraphicsApply.SOFTNESS`, `LightingConfig.shadow_blur` 2). Ultra keeps its sun's size
+  (0.6°: sharp at a shadow's foot, soft away from it): at 1° its edges speckle and at 2° the shade under the crowns
+  blurs into fog. It keeps its blur too (`LightingConfig.soft_sun_blur`, the day's 1.5): where shadows harden at
+  contact the blur scales the sun's size, so the wider blur would have drawn Ultra's edges a third wider. The lamps,
+  the light pools and the torch keep their filters (`LAMP_SOFTNESS`): their shadows already fall soft, and many lamps
+  overlap on one spot, so each sample is paid many times.
+- **A reflection probe under a roof gives reflections alone while the field's ambient fills the hall (2026-11-16,
+  BP9).** A probe lights what stands in its box from its own picture of the hall, fading in over
+  `LookConfig.probe_margin` (1.5 m) from each face of the box, and indoors that picture is far darker than the field's
+  ambient. Subway's probes stand in their area's band of floor heights, 3.2 m tall for most, so their light peaked at
+  chest height and drew a dark band along every wall. Depot's reach the roof, and where few lamps hang (the Lounge)
+  lockers, a tall panel and the trusses over them drew lit at the foot and black above: 5.8 % of the view black on
+  High and 7.6 % on Medium, 0.2 % and 0.9 % now. An interior probe keeps its reflections and leaves the ambient to the
+  field (`AreaProbes`, `ambient_mode` off). Growing Subway's boxes past floor and ceiling instead drew the whole
+  station as dark as the band (a view's middle 78 to 29). Depot's open hall measures the same on High (each view's
+  middle within 4) and 5 % brighter on Medium; its crates and walls draw a shade paler and cooler, the lamps' warm
+  bounce the probes pictured being gone from them, which is the owner's to judge (his checklist, N23). Under the
+  scene's bounce light (Global illumination Scene: Ultra) there is no such ambient and a probe's own is light the
+  shade would not have, so an interior keeps it there (`AreaProbes.set_bounce`): with reflections alone Depot's Lounge
+  drew its lockers' tops and top shelves black on Ultra, and the owner kept Ultra as it was. Woodland's and the
+  Range's probes are open to the sky and keep their ambient.
+- **A reflection probe never captures from inside a prop (2026-11-16, BP9).** A probe captured at eye height over its
+  area's middle, wherever that fell: seven of Subway's 16 sat in a kiosk, a hoarding, a locker or a wagon, six of
+  Depot's 21 in a crate, a drum or a plywood wall, three of Woodland's 24 in a thicket. Each captures from the
+  nearest spot of its area with `LookConfig.probe_clearance` (0.6 m) of room round it, at eye height over the ground
+  there; a probe whose middle is clear keeps it. A prop placed over a capture spot moves it by itself;
+  `tests/unit/test_bp9_light.gd` holds every field's.
 - **Ultra pushes Godot's light as far as it goes, for the whole game (owner, 2026-11-09, UG1).** "Use all of Godot's
   graphics abilities": baked path-traced-like light on Ultra only, every effect scaling down per preset, every map
   (he said twice it is not one map). Baked path tracing comes before any live ray tracing (his card answer). Built as

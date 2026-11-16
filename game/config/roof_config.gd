@@ -65,13 +65,23 @@ extends Resource
 ## The lamps as real lights (Settings › Graphics › Lamp light, RoofLamps): each a spot `lamp_light_drop` m under the
 ## lamp's lowest point, shining straight down, `lamp_cone` degrees from its axis to the cone's edge (dimming from its
 ## axis to the edge by the engine's curve `lamp_cone_falloff`: below 1 soft, so neighbouring pools blend), reaching
-## `lamp_range` m at `lamp_light_energy` with the engine's distance falloff `lamp_falloff` (1: inverse distance), in
-## `lamp_colour`. On the haze (Volumetric fog) it shines `lamp_fog` of itself.
+## `lamp_range` m with the engine's distance falloff `lamp_falloff` (1: inverse distance), in `lamp_colour`. On the
+## haze (Volumetric fog) it shines `lamp_fog` of itself. Its strength goes by what else lights the hall (BP9):
+## - `lamp_light_energy` while the field's ambient fills the hall's shade (Global illumination Off or Screen: High).
+##   It is set against the overhead light that stands in for the lamps on Low and Medium: together the lamps put
+##   about as much light on Depot's open floor as it does (0.9 of it in the middle of the hall's floor, 1.5 times it
+##   where the lamps hang closest), so the hall is as bright on High as on Low and Medium. At 6 they put twice to
+##   nearly four times as much there on top of the ambient and the open hall drew washed out, most where the lamps
+##   cluster (the owner: "intensely bright ... in some areas").
+## - `lamp_bounce_energy` under the scene's bounce light (Global illumination Scene: Ultra), where no ambient fills
+##   the shade and the lamps and what they bounce off the hall light it alone. The owner's (2026-11-16, on pictures of
+##   Depot on Ultra turned down to match High): it "looks better before", so Ultra keeps the lamps as they were.
 @export var lamp_light_drop: float = 0.05
 @export var lamp_cone: float = 70.0
 @export var lamp_cone_falloff: float = 0.15
 @export var lamp_range: float = 24.0
-@export var lamp_light_energy: float = 6.0
+@export var lamp_light_energy: float = 2.4
+@export var lamp_bounce_energy: float = 6.0
 @export var lamp_falloff: float = 0.6
 @export var lamp_fog: float = 0.3
 ## A plain roof's lamps (MT1, a station's low ceilings, one level over another): each reaching only

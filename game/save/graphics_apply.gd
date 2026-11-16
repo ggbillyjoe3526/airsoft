@@ -34,8 +34,17 @@ const SURFACE_DETAIL: Array[float] = [0.0, 1.0, 1.0, 1.0]
 const SURFACE_DETAIL_GLOBAL := &"look_surface_detail"
 ## From this Mesh detail up your own weapon torch's real spot casts shadows (High and Ultra, data/graphics.md).
 const TORCH_SHADOWS_FROM := GraphicsQuality.MeshDetail.HIGH
-## Each ShadowSoftness as the sun's shadow filter: Softer is the engine's default (SOFT_LOW), so High keeps its look.
-const SOFTNESS: Array[int] = [RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_VERY_LOW,
+## Each ShadowSoftness as the sun's shadow filter (BP9; the owner: "harsh/sharp shadows"). The engine widens a shadow's
+## edge by the light's blur times the filter's own radius, in the shadow map's pixels, and spreads its samples over
+## it: Soft takes 4 samples (it took 1, a hard edge), Softer 16 at one and a half times the radius (it took 4, which
+## over an edge this wide speckle, as nothing smooths the picture: Edge smoothing is Off), and Softest the same 16
+## round a sun with a size (`LookConfig.sun_size`). The project starts on Softer's (project.godot), so High sends
+## nothing new.
+const SOFTNESS: Array[int] = [RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_LOW,
+		RenderingServer.SHADOW_QUALITY_SOFT_HIGH, RenderingServer.SHADOW_QUALITY_SOFT_HIGH]
+## Each ShadowSoftness as the lamps', the light pools' and the torch's filter, as they were tuned: many lamps overlap
+## on one spot, so each one's samples are paid many times over, and their shadows already fall soft.
+const LAMP_SOFTNESS: Array[int] = [RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_VERY_LOW,
 		RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_HIGH]
 ## The project settings kept as they are when the presets change the shadow map or ambient occlusion's size.
 const SHADOW_16_BITS := "rendering/lights_and_shadows/directional_shadow/16_bits"
@@ -275,7 +284,7 @@ static func apply(values: GraphicsQuality, viewport: Viewport, rs: Server = null
 	if viewport.positional_shadow_atlas_size != atlas:
 		viewport.positional_shadow_atlas_size = atlas
 	apply_slots(values, viewport)
-	to.set_lamp_soft(SOFTNESS[values.shadow_softness])
+	to.set_lamp_soft(LAMP_SOFTNESS[values.shadow_softness])
 
 
 ## The root viewport's shadow atlas for the lamps and the torch's spot with `values`: the sun's Shadow detail while the
@@ -336,7 +345,8 @@ static func apply_station(values: GraphicsQuality, lifts: LiftView, fixtures: St
 ## while the roof lamps shine) and a wood's dressing (WoodsView: its parts by Mesh detail, its fireflies and motes by
 ## the wind dust's share), from `values`
 ## (already drawable), and an indoor field's roof lamps as real lights (RoofLamps, Lamp light; their shadows
-## contact-hardening on Softest) with the sun turned down while they shine, and the floors' worn marks (WearMarks,
+## contact-hardening on Softest, a hall's at their strength under the scene's bounce light when that is on, BP9)
+## with the sun turned down while they shine, and the floors' worn marks (WearMarks,
 ## Wear marks). Any of `lighting`, `dust`, `level`, `kicked`, `woods`, `lamps` and `marks` may be null.
 static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: WindDust, rs: Server = null,
 		level: MapLevel = null, kicked: KickedDust = null, woods: WoodsView = null, lamps: RoofLamps = null,
@@ -369,7 +379,8 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 	if woods != null:
 		woods.set_quality(values.mesh_detail, values.wind_dust / PERCENT)
 	if lamps != null:
-		lamps.set_mode(values.lamp_lights, values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
+		lamps.set_mode(values.lamp_lights, values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST,
+				values.global_illumination == GraphicsQuality.GlobalIllumination.SCENE)
 		if lighting != null:
 			lighting.set_key_share(lamps.key_share(values.lamp_lights))
 			lighting.set_ambient_share(lamps.ambient_share(values.lamp_lights))

@@ -71,10 +71,13 @@ var _ssao: bool = false
 var _look: LookConfig = null
 ## The sun's strength as the preset sets it, which `set_key_share` scales.
 var _key_energy: float = 0.0
+## The sun's shadow blur under the fixed filters, and while its shadows harden at contact (`set_effects`'s `soft_sun`).
+var _blur: float = 0.0
+var _soft_blur: float = 0.0
 ## The preset's ambient light's strength, before set_ambient_share.
 var _ambient_energy: float = 0.0
 ## The map's reflection probes (`add_probes`), shown while Reflections draw them.
-var _probes: Node3D = null
+var _probes: AreaProbes = null
 ## The preset's share of the sky in the ambient light, which an underground field drops (`set_underground`).
 var _sky_share: float = 0.0
 ## Whether no sky reaches the field (`set_underground`).
@@ -143,6 +146,8 @@ static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting
 	sun.light_energy = cfg.sun_energy
 	sun.shadow_enabled = true
 	sun.shadow_blur = cfg.shadow_blur
+	root._blur = cfg.shadow_blur
+	root._soft_blur = cfg.soft_sun_blur
 	sun.directional_shadow_max_distance = cfg.shadow_distance
 	root.add_child(sun)
 	root.sun = sun
@@ -232,12 +237,14 @@ func look() -> LookConfig:
 func add_probes(map: MapData) -> void:
 	_probes = AreaProbes.build(map, _look)
 	if _probes != null:
+		_probes.set_bounce(_scene_light)
 		add_child(_probes)
 
 
 ## Switches the dearer effects (GraphicsQuality's rows): global illumination (screen: SSIL; scene: SSIL and SDFGI),
 ## reflections (probes: the area probes; screen: and SSR), glow, volumetric fog, and the sun's contact-hardening soft
-## shadows (`soft_sun`). Only properties that change are set, so a repeat is free; never per frame.
+## shadows (`soft_sun`, with the blur that goes with them). Only properties that change are set, so a repeat is free;
+## never per frame.
 func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQuality.Reflections, glow: bool,
 		fog: bool, soft_sun: bool) -> void:
 	var env := environment
@@ -255,6 +262,8 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 		var probes := reflections != GraphicsQuality.Reflections.OFF
 		if _probes.visible != probes:
 			_probes.visible = probes
+		# Under the scene's bounce light an interior probe keeps its ambient light (AreaProbes, BP9).
+		_probes.set_bounce(_scene_light)
 	if env.glow_enabled != glow:
 		env.glow_enabled = glow
 	if env.volumetric_fog_enabled != fog:
@@ -262,6 +271,10 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 	var size := _look.sun_size if soft_sun else 0.0
 	if not is_equal_approx(sun.light_angular_distance, size):
 		sun.light_angular_distance = size
+	# Hardening at contact, the blur scales the sun's size: its own value, so Ultra's sun is as it was tuned (BP9).
+	var blur := _soft_blur if soft_sun else _blur
+	if not is_equal_approx(sun.shadow_blur, blur):
+		sun.shadow_blur = blur
 
 
 ## Gathers the scene's bounced light (SDFGI) afresh: off for SCENE_LIGHT_REFRESH_FRAMES frames, then on again. What it

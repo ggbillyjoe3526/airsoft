@@ -16,13 +16,19 @@ const PRESETS: Array[StringName] = [DAY, NIGHT]
 @export var id: StringName = DAY
 ## The sun (the moon at night): how high (degrees above the horizon), which way its light travels (degrees, 0 along
 ## -Z, turning left as yaw does; a map's moonOver turns it), colour, strength, and how far its shadows reach (m) and
-## how soft they are.
+## how soft they are: `shadow_blur` widens a shadow's edge, times the Shadow softness's filter radius
+## (GraphicsApply.SOFTNESS), in the shadow map's pixels. At 2 with High's filter a shadow's edge is twice as wide as
+## it was at 1.5 with the coarser one, which read hard-edged under Woodland's crowns (BP9). `soft_sun_blur` is the
+## blur while the sun's shadows harden at contact (Shadow softness Softest: Ultra), where it scales the sun's own size
+## (`LookConfig.sun_size`) and no fixed filter: the day's as first tuned, so that Ultra's sun stayed as it was when
+## `shadow_blur` grew (BP9: it would have drawn Ultra's edges a third wider).
 @export var sun_elevation: float = 52.0
 @export var sun_heading: float = 35.0
 @export var sun_colour: Color = Color(1.0, 0.92, 0.8)
 @export var sun_energy: float = 2.0
 @export var shadow_distance: float = 70.0
-@export var shadow_blur: float = 1.5
+@export var shadow_blur: float = 2.0
+@export var soft_sun_blur: float = 1.5
 ## The sky: top, horizon, and the ground's colour below the horizon.
 @export var sky_top: Color = Color(0.36, 0.56, 0.84)
 @export var sky_horizon: Color = Color(0.74, 0.8, 0.86)

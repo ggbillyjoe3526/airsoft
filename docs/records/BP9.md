@@ -4,6 +4,7 @@
 
 - part 1 (bugs): critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
 - part 2 (flicker): critic Accept 8/8 (attempt 1) · qa Pass · performance Pass
+- part 3 (light): critic Accept 7/8 (attempt 2) · qa Pass · performance Pass
 
 William's full pass before he tags 0.1 Beta 1 (owner, 2026-11-15 and 16): bugs, balance, performance, quality and
 edge cases over the whole game, with a clean-out of unused files, a hunt for flicker (faces lying over one another),
@@ -16,6 +17,8 @@ the harsh shadows and the over-bright spots under Depot's lamps. It goes out in 
 | 2026-11-16 | part 1: 1 | Fable 5.2 | lint, wiki, 110 touched test files | Retry 5/8 | an order that ended by itself never showed with the wheel shut; the view's wait inside a tap; the wiki and play checks claimed a live turn |
 | 2026-11-16 | part 1: 2 | Fable 5.2 | lint, wiki, whole unit suite, smoke; CI | Accept 8/8 | – |
 | 2026-11-16 | part 2: 1 | Fable 5.2 | lint, wiki, the models' gate, 158 touched test files, smoke; CI | Accept 8/8 | – |
+| 2026-11-16 | part 3: 1 | Fable 5.2 | lint, wiki, 82 touched test files, smoke | Accept 7/8 | docs said Medium's edges drew smooth (they are softer, with a grain), the blur's old value, a checklist number with no home; then the owner, on the pictures: Depot on Ultra "looks better before" |
+| 2026-11-16 | part 3: 2 | Fable 5.2 | lint, wiki, the changelog and models' gates, 82 touched test files, smoke; CI | Accept 7/8 | – (8/8 on the owner's change; its note that the wider blur reached Ultra's sun was checked and fixed, and the re-read of that fix failed the record's count of QA's tests, corrected in the same commit) |
 
 ## Part 1: bugs
 
@@ -168,6 +171,139 @@ Depot's sign sheet is stored as Subway's. QA's: every door's leaves stand on its
 (`test_bp9_flicker_qa2.gd`). One older test moved: Woodland's gap test (`test_wg3_woodland_models.gd`) allows the
 sawmill shed a face's back 4 mm before a face turned to the eye, not 3 (Decisions).
 
+## Part 3: light
+
+William: "the game seems to cast harsh/sharp shadows. Look at light sources and shadows during the pass", and
+"lighting can get intensely bright in the depot map (check all maps) in some areas. This may be related to
+volumetric haze." Every field was pictured on each preset, by day and by night, from the same spots
+(`tools/eye_pictures.gd`, 960x540), and each picture read for its middle brightness (of 255), its brightest
+twentieth, the share blown (250 or more) and the share black (5 or less). The lights looked at: the sun on the open
+fields, Depot's 87 roof lamps (High and Ultra) and the overhead light that stands in for them (Low and Medium),
+Subway's fittings and light pools, the night's lanterns and fire, the torch, the reflection probes' bounce light,
+the haze, and the eye's adaptation (High and Ultra).
+
+**Too bright: Depot's lamps, not the haze.** On High the hall's west view measured 175 against 122 on Low and 109 on
+Medium (Ultra's 162). The haze adds nothing (176.9 with it, 176.3 without). Worked out as the engine
+works a spot's light out (its falloff, its range's window, its cone and the angle it falls at), the lamps at their
+first strength (6) put 2.1 times the stand-in's light on the middle of the floor and 3.8 times where they hang
+closest (over the Shoot House 3.4, the Chrono hall 3.5, the Containers 3.1; the Lounge 0.9). The eye's adaptation
+then lifts a view out of cover up to three times, so the open hall seen from cover drew white. At 2.4
+(`RoofConfig.lamp_light_energy`) they put 0.86 and 1.53 times the stand-in's, and on High the hall's view measures
+118 for 175, the Shoot House's 150 for 200, Staging's 129 for 181 and the Containers' 89 for 146 (at 3.0 the hall
+still drew a tenth brighter than Low). No other field has blown areas: Subway 0.03 % of a view, the Range and
+Woodland none, the nights none.
+
+**Ultra: as it was, by William's word.** Ultra pictures came last (a run takes twenty minutes here). Under a roof
+Ultra has no fill light but what the lamps bounce off the hall (SDFGI), where High fills its shade with the field's
+ambient, so the lamps at 2.4 drew Depot on Ultra with a black roof (19 % of the hall's view), its open hall at 91
+against High's 118 and its Lounge, which has no lamps of its own, at 34 with a third of the view black (88 and 6 % on
+main). Tried: each lamp feeding the bounce light 2.5 times its strength (the bounce as strong as it was; the hall 98
+and the Lounge 46, at quarter size), then 7 times, where the open hall matched High's (124) with the roof lit and the
+Lounge at 64, its top shelves dark. William saw that against main (sheet f in the thread): "f-depot-ultra.jpg looks
+better before." So Ultra keeps its lamps as they were. A hall's lamps now have two strengths: `lamp_light_energy`
+(2.4) while the field's ambient fills the shade and `RoofConfig.lamp_bounce_energy` (6, as first tuned) under the
+scene's bounce light, with the engine's own share in the bounce (`RoofLamps.set_mode`'s `bounce`, which
+`GraphicsApply` sets from Global illumination, so a custom mix of settings draws right too). The lamps alone did not
+bring the old look back: with the probes giving reflections alone the Lounge still drew at 68 with 15 % black on
+Ultra, its lockers' tops and top shelves black. Under the bounce light a probe's ambient is light the shade would not
+have (there is no field's ambient for it to darken), so an interior probe keeps it there (`AreaProbes.set_bounce`,
+from `FieldLighting.set_effects`), on Subway too. On this head Ultra measures 161 in the open hall, 146 at the
+Containers and 89 in the Lounge with 4 % black (162, 146, 88 and 6 % on main): as it was, the Lounge's black share a
+little lower as its probe captures clear of the props (sheet g in the thread). What that leaves: on Ultra the hall is
+brighter than on any other preset (161 against High's 118; out of the Shoot House 198 against 150, Staging 179
+against 129; sheet h), so if what William saw "intensely bright" was on Ultra it is as it was, and the thread asks
+him where he saw it and on which preset.
+
+**Harsh: the sun's shadow edge on Medium and High.** The engine widens a shadow's edge by the light's blur times its
+filter's radius, in the shadow map's pixels, and spreads the filter's samples over it. High's edge was 3 pixels wide
+(about 3 cm on the nearest cascade) under 4 samples, and Medium took a single sample: a hard edge both. A wider blur
+over 4 samples speckled, as nothing smooths the picture (Edge smoothing is Off, FB2); 8 samples over 6 pixels speckled
+too; 16 over 6 drew smooth. High now spreads 16 samples over twice its old edge (blur 2.0 for 1.5, with the next filter
+up) and Medium 4 where it took 1: Medium's edge is softer than it was, with a fine grain along it (4 samples over 4
+pixels; 8 would smooth it, at a cost on the preset for modest cards, so it is William's to ask for). Ultra keeps its
+0.6° sun (at 1° its edges speckled, at 2° the shade under the crowns blurred into fog) and its blur. The blur was nearly
+missed: the critic's second review noted that the day's wider blur reached Ultra too, and where shadows harden at
+contact (Softest) the engine scales the sun's size by it, so Ultra's edges drew a third wider than on main while every
+text said its sun was unchanged. Softest now has a blur of its own (`LightingConfig.soft_sun_blur`: 1.5 by day, and the
+night's 2, which never moved; `FieldLighting.set_effects` sets it with the sun's size). Pictured by the Tower on Ultra
+with both (picture 13): at 2 the edges are visibly wider, with a little more grain; at 1.5 they are main's. Whether
+Ultra's sun should be the softer one is William's to say (one number), and the thread shows him both. The lamps, the
+light pools and the torch keep the filters they were tuned on (`GraphicsApply.LAMP_SOFTNESS`): many of them overlap on
+one spot, so their samples are paid many times over, and their shadows already fall soft.
+
+**Dark bands along Subway's walls: a probe's ambient light in a box one storey tall.** From Medium up a reflection
+probe lights what stands in its box from its own picture of the hall, and its light fades in over `probe_margin`
+(1.5 m) from each face of the box (the engine's blend, read from its shader: full weight only that far inside every
+face). Subway's probes stand in their area's band of floor heights, 3.2 m tall for most, so each one's weight peaked
+within a hand of chest height and fell to nothing at the floor and the ceiling; and its ambient light is far darker
+than the field's own (with the boxes grown past floor and ceiling as a trial the concourse's view fell from 78 to
+29). Together that drew a dark band along every wall and across the kiosk's sides. A storey's probes now give
+reflections alone (`ambient_mode` off) and the field's ambient lights the hall evenly: the band is gone, the
+concourse's view measures 82 for 78 with its darkest twentieth at 29 for 18, the ticket hall's darkest twentieth 56
+for 30, and the platform's and the lockers' passage's views are as they were within 2. On Medium the band drew
+warm brown across the kiosk's white tiles and is gone too; the concourse's view measures 87 for 91 there, its walls
+a shade cooler. Growing the boxes instead would have drawn the whole station as dark as the band. The first reading
+was wrong: the band was put down to the capture points below, and pictures taken after moving them showed the band
+unchanged.
+
+**Black lockers in Depot's Lounge: the same ambient.** Depot's probes reach the roof, so their light stands at full
+weight from 1.5 m up, and where few lamps hang their picture of the hall is near black. In the Lounge the lockers, a
+tall panel and the trusses over them drew lit at the foot (the field's ambient, under the fade) and fading to black
+above. Main drew it too (2.7 % of the view black on High, 7.6 % on Medium), and the dimmer lamps made it worse on High
+(5.8 %). So the rule is the same for every probe under a roof: reflections alone while the field's ambient fills the
+hall (Medium and High; Ultra below). The Lounge's view is 0.2 % black on High and 0.9 % on Medium, its darkest
+twentieth 48 for 22 and 26 for 9. The open hall's views measure as they did with the lamps alone on High (the hall 118
+for 120, the Shoot House 150 for 151, the Containers 89 for 89) and 5 % brighter on Medium (the hall 115 for 109),
+which brings Medium, High and Low (122) together. What it costs: the crates and walls of the open hall took a warm
+tint from the probes' picture of the lamplit floor and draw a shade paler and cooler now. Both are in the thread's
+pictures, and his checklist asks William (N23). Woodland's and the Range's probes are open to the sky and keep their
+ambient.
+
+**Bounce light captured inside props.** A probe captures its area once from one point, at eye height over the
+area's middle wherever that fell. Seven of Subway's 16 captured from inside a prop (the concourse's kiosk, the works
+hoardings, the lockers, a wagon, a container) and two more a hand's width from one; Depot had six of its 21 inside
+a crate, a drum or a plywood wall and three more within 0.4 m of one, and Woodland three of its 24 inside a spruce
+thicket and three by a trunk or a woodpile. Each now captures from eye height at the nearest spot of its area with
+`LookConfig.probe_clearance` (0.6 m) of room round it, on rings that far apart outward from the middle
+(`AreaProbes.capture_spot`), on ground the probe's box still reaches down to. 24 of the 62 moved, most by 0.6 to
+2.4 m; one of Woodland's by 12 m along its long, narrow area to get out of the thicket. Finding the spots costs 1
+to 11 ms a field at load. Where it shows is Woodland: the spruce rows beside the thickets in the north-east and the
+south-east drew their shaded sides black (18 % and 14 % of the view black) and draw them dark green now (2.6 %
+both), with the open ground as it was. Subway's and Depot's views moved little (the ticket hall's darkest twentieth
+30 to 41, the Lounge's black share 6.4 % to 5.8 %).
+
+**The picture tool.** A run's first pictures had no bounce light (a wall drew black in the first and lit in the
+third): a probe captures only once a camera has had it in view. `tools/eye_pictures.gd` now visits every spot in a
+small picture first and waits for the probes it saw, and every reading above was taken again with it.
+
+**Not changed.** Woodland on Medium draws about half as bright as on High (its middle 50 against 110): Medium has no eye
+adaptation, as tuned (UG3). Subway on Ultra draws far darker than on High (the concourse's view 33 against 78 on main,
+13 % of it black): Ultra lights the station by its fittings and their bounce alone, as tuned (UL2), and a wall out of a
+fitting's light is dark above knee height there. This change leaves it as it was (33 and 13 % on this head): under the
+bounce light its probes keep their ambient, as Depot's do. The haze stays as ruled ("same haze, finer").
+
+Tests: `test_bp9_light.gd`: Depot's lamps light the middle of its open floor 0.7 to 1.1 times the stand-in's and nowhere
+1.6 times, and at their first strength put twice and 3.5 times; the presets light Depot's lamps turned down on High and
+at their first strength on Ultra, with the engine's own share in the bounce; a dim lamp keeps its share and a flickering
+one its step through that change; a plain roof's lamps shine the same either way; the sun's edge on High is twice as
+wide as it was, by day and night on both open fields; Medium spreads at least 4 samples; no preset spreads fewer samples
+than a quarter of its edge's pixels squared; Low draws no sun shadow and Ultra keeps its sun's size and 16 samples, and
+its blur by day and by night through a change of preset and back; the lamps keep their filters on every preset; no probe
+on any field captures within the clearance of a block, and each captures inside its box; Subway's probes moved out of
+its props while a clear middle stays; the probes under a roof give no ambient light while the field's ambient fills and
+the open fields' keep theirs; under the scene's bounce light an interior's probes keep their ambient, through a change
+of preset and back, and probes built after it came on do too; a probe in a kiosk captures from the nearest clear spot,
+and from its middle when nothing is clear. QA's (`test_bp9_light_qa.gd`, 21): a box smaller than the clearance, a
+clearance of nought or less, a slope, a box off the terrain, ground under the probe's floor, every field's eye finite
+and in its box, the sun's filter never coarser than the lamps' on any preset, a hall first set with the bounce on, a
+flicker step taken while the lamps are off, a plain roof's flicker under the bounce switch, a roof whose lamps are all
+dead; the probes' ambient set while Reflections are Off and right when they come back, no probes at all, an open field's
+probes untouched through the presets, the switch repeated on no probes, and Depot's probes keeping their ambient exactly
+when the lamps take their bounce strength; and Softest's sun with main's blur and size on every field by day and by
+night, the softer presets keeping the wider blur and no sun size, a field's light never given its effects, Softest with
+the sun shut out and back, and a map's override and the moon keeping Softest's blur. Woodland's eye-height test
+(`test_bp2.gd`) measures the ground under the capture point, which moves where a prop stands at the middle.
+
 ## Decisions
 
 - **A pull of the trigger inside a tap is a shot, in Click mode too.** The wheel is not up yet, so there is nothing
@@ -210,6 +346,27 @@ sawmill shed a face's back 4 mm before a face turned to the eye, not 3 (Decision
   (`tools/flicker_map.py`), not the list.
 - **Edge smoothing stays Off** (owner, FB2). The shimmer along a thin wire or a far rail is its cost and is not
   changed here; the checklist asks William whether that is part of what he sees.
+- **Depot's lamps are turned down on High, not the eye's adaptation or the haze** (part 3). The lamps put up to 3.8
+  times the light Low and Medium draw the same hall with; the eye's adaptation (UG3) and the haze (VF1) were ruled on
+  and measure innocent. One number moved (`RoofConfig.lamp_light_energy`), and the lamps' cone, range and softness
+  stay as ruled (UG2). `docs/DECISIONS.md` has the measurements.
+- **Depot on Ultra keeps its lamps as they were** (part 3; William, 2026-11-16, on the pictures: "looks better
+  before"). The lamps' strength goes by what else lights the hall: turned down where the field's ambient fills the
+  shade, as first tuned under the scene's bounce light. It follows Global illumination, not the preset's name or
+  Lamp light, so a custom mix draws right. Tried and dropped: one strength for both, the lamps feeding Ultra's
+  bounce seven times over, which matched High's brightness and which he liked less than the old look.
+- **The sun's shadows soften by samples; the lamps' filters stay** (part 3). A wider blur alone speckles with Edge
+  smoothing Off, so High takes 16 samples and Medium 4; the lamps overlap and would pay each sample many times, and
+  their shadows already fall soft. Ultra's sun keeps its size and its blur.
+- **A probe under a roof gives reflections alone while the field's ambient fills the hall** (part 3; under Ultra's
+  bounce light it keeps its ambient, as it was), over the two other ways tried: growing the boxes past floor and
+  ceiling drew the whole station as dark as the band, and leaving Depot's probes their ambient kept the hall's warm
+  tint with the Lounge's lockers black. The tint is William's to judge (his checklist, N23); putting it back is one
+  line (`AreaProbes._add`).
+- **A probe finds its own clear spot** (part 3), on rings outward from its area's middle, in place of a hand-set
+  point per area: nothing to keep in step when a map's props move.
+- **Subway on Ultra and Woodland on Medium are left as tuned** (part 3; UL2, UG3). Both are darker than the same
+  field on High, neither is new, and how dark a field should read is the owner's call: the checklist asks.
 
 ## Known issues left
 
@@ -219,3 +376,14 @@ sawmill shed a face's back 4 mm before a face turned to the eye, not 3 (Decision
 - Flicker was measured on the cloud's software renderer, whose depth is the game's own (32-bit, reversed). A real
   card draws the same planes, but what William saw is his to confirm (`docs/PLAYTEST.md`, checklist N22).
 - Thin lines shimmer with Edge smoothing Off (FB2): a cage's wire, far rails, a cordwood stack's edges.
+- Light was pictured on the cloud's software renderer (part 3): how bright Depot reads on William's screen and
+  whether the softer edges read soft or blurred are his to say (N23 on his Beta 1 checklist,
+  `/mnt/project-files/playtest/0.1-beta1-checklist.md`; the checks are `docs/PLAYTEST.md` › The pass before 0.1
+  Beta 1).
+- Depot on Ultra is as bright as it was (part 3; William kept its look): its open hall reads 161 of 255 against 118
+  on High. If the brightness he saw was on Ultra it is still there; the thread asks him where.
+- Woodland on Medium is about half as bright as on High in deep shade, where High's eyes open up (UG3); not changed.
+- Subway on Ultra is far darker than on High, as on main (UL2): walls out of a fitting's light are dark above knee
+  height. Not changed; William's to say (his checklist, N23).
+- Depot's crates and walls are a shade paler and cooler on Medium and High (part 3: its probes give reflections alone);
+  William's to say (his checklist, N23).
