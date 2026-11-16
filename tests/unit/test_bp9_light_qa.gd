@@ -213,3 +213,65 @@ func test_the_probes_follow_the_lamps_flag_for_the_bounce_light() -> void:
 		var scene := values.global_illumination == GraphicsQuality.GlobalIllumination.SCENE
 		for m in _probe_modes(lighting):
 			assert_eq(m == ReflectionProbe.AMBIENT_ENVIRONMENT, scene, str(preset))
+
+
+## The sun's blur and size on `preset` for `map` by `time`, as a match sets them.
+func _sun_blur_and_size(preset: StringName, map: String, time: StringName) -> Vector2:
+	var field := MapData.load_map(map, play.map_style, SimTuning.new().rounds.team_size)
+	var lighting := FieldLighting.build(LightingConfig.for_map(play.lighting, play.night_lighting, field, time),
+			play.look)
+	add_child_autofree(lighting)
+	GraphicsApply.apply_field(table.preset(preset), lighting, null, GraphicsApply.Server.new())
+	return Vector2(lighting.sun.shadow_blur, lighting.sun.light_angular_distance)
+
+
+func test_softest_sun_has_mains_blur_and_size_on_every_field_by_day_and_night() -> void:
+	# On main the blur was 1.5 by day and 2 by night on every preset, the size the Look's on Softest.
+	for map: String in ["woodland", "range", "depot", "subway"]:
+		for c: Array in [[LightingConfig.DAY, 1.5], [LightingConfig.NIGHT, 2.0]]:
+			var got := _sun_blur_and_size(&"ultra", map, c[0])
+			assert_almost_eq(got.x, c[1], 0.0001, "%s by %s: Softest's blur" % [map, c[0]])
+			assert_almost_eq(got.y, play.look.sun_size, 0.0001, "%s by %s: Softest's size" % [map, c[0]])
+
+
+func test_the_softer_presets_keep_the_wider_blur_and_no_sun_size() -> void:
+	for preset: StringName in [&"medium", &"high"]:
+		for time: StringName in [LightingConfig.DAY, LightingConfig.NIGHT]:
+			var got := _sun_blur_and_size(preset, "woodland", time)
+			assert_almost_eq(got.x, 2.0, 0.0001, "%s by %s: the blur the fixed filters took" % [preset, time])
+			assert_almost_eq(got.y, 0.0, 0.0001, "%s by %s: no size" % [preset, time])
+
+
+func test_a_field_lighting_never_given_effects_keeps_the_shadow_blur() -> void:
+	var cfg := LightingConfig.new()
+	cfg.shadow_blur = 3.0
+	cfg.soft_sun_blur = 0.7
+	var lighting := FieldLighting.build(cfg)
+	add_child_autofree(lighting)
+	assert_almost_eq(lighting.sun.shadow_blur, 3.0, 0.0001, "built: shadow_blur")
+
+
+func test_softest_with_the_sun_shut_out_takes_the_fixed_blur_and_comes_back() -> void:
+	# Underground (Subway) the sun casts nothing on Softest: the blur is the fixed one; nothing is lost on a return.
+	var field := MapData.load_map("subway", play.map_style, SimTuning.new().rounds.team_size)
+	var cfg := LightingConfig.for_map(play.lighting, play.night_lighting, field, LightingConfig.DAY)
+	var lighting := FieldLighting.build(cfg, play.look)
+	add_child_autofree(lighting)
+	lighting.set_underground(true)
+	var rs := GraphicsApply.Server.new()
+	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, rs)
+	assert_false(lighting.sun.shadow_enabled, "shut out")
+	assert_almost_eq(lighting.sun.shadow_blur, cfg.shadow_blur, 0.0001, "the fixed blur, nothing reads it")
+	assert_almost_eq(lighting.sun.light_angular_distance, 0.0, 0.0001, "no size")
+	lighting.set_underground(false)
+	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, rs)
+	assert_almost_eq(lighting.sun.shadow_blur, cfg.soft_sun_blur, 0.0001, "back on: Softest's blur")
+
+
+func test_a_map_override_and_the_moon_keep_the_softest_blur() -> void:
+	# for_map duplicates the preset: the copy carries soft_sun_blur, not the class default.
+	var cfg := LightingConfig.new()
+	cfg.id = &"x"
+	cfg.soft_sun_blur = 0.9
+	var copy := cfg.duplicate() as LightingConfig
+	assert_almost_eq(copy.soft_sun_blur, 0.9, 0.0001)
