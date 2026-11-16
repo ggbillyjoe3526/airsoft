@@ -173,10 +173,13 @@ Every task runs through the pipeline: `pipeline/README.md` (the protocol, the cr
 
 ## 12. Repo-Specific
 
-- **Checks:** `tools/check.sh` runs every local gate (gdlint, the changelog notes, the wiki, the GUT unit tests in
-  seven parts, the headless smoke test, the licence notices); CI runs the same on every pull request, with the match
-  guards. Output is failures and totals only. The whole suite is long in a cloud session (6,650 tests, the parts one
-  after another): run the touched test files locally and let CI run the rest.
+- **Checks:** `tools/check.sh` runs every local gate (gdlint, the changelog notes, the wiki, the models' flat faces,
+  the GUT unit tests in seven parts, the headless smoke test, the licence notices); CI runs the same on every pull
+  request, with the match guards. Output is failures and totals only. The whole suite is long in a cloud session
+  (7,100 tests, the parts one after another): run the touched test files locally and let CI run the rest.
+- **Model files** (BP9): after any Blender build run `python3 tools/coplanar_models.py fix <files>`; CI fails a model
+  whose own faces lie over one another in one plane (they flicker). A whole field: `tools/coplanar_dump.gd`, then
+  `tools/coplanar_check.py` and `tools/flicker_map.py` (their headers).
 - **Cloud sessions** get the pinned Godot from `.claude/hooks/session-start.mjs`, as `godot` on PATH. Export templates
   are not installed; CI builds releases.
 - **Releases:** the owner's tag starts `.github/workflows/release.yml` (Windows installer and zip, Linux build,

@@ -60,6 +60,62 @@ defender test in `test_bot_flag.gd`, and the wheel tests that meant a hold now h
 (`test_order_wheel_input.gd`, `test_cw1_qa.gd`, `test_so3_qa.gd`, `test_so4_qa.gd`, `test_so4_orders_hud.gd`,
 `test_bp8_watching_here.gd`, `test_mag_hand_off_hud.gd`, `test_fm1_field_map.gd`).
 
+## Part 2: flicker
+
+William: "a lot of texture/model flickering". Two faces that lie in one plane over one another, facing the same way,
+are each drawn through the other in a pattern that crawls as the eye moves (z-fighting): the game's depth is exact to
+about 0.004 mm at 60 m, so only faces truly in one plane fight, and a fraction of a millimetre apart is enough to end
+it. The pass measured every model file and every field for them, fixed what it found and added a gate.
+
+**In the models (111 of 249 files).** `tools/coplanar_models.py check` reads every `.glb` under `assets/models/` and
+lists, part by part, the faces of one part lying in one plane over one another: 1,733 sheets, 2,866 pairs, 168 m2 in
+all. 136 m2 of it was in seven skyline models (the far sheds' cladding and the crane), 32 m2 in 86 props (the watch
+tower, the roof truss with 1,020 pairs, the Range's backstop and wall, the works hoardings, the pallet racking), and a
+few square centimetres in the two figures and thirteen replica files. `fix` lifts one sheet of each pair along its
+facing by a step sized to the model (a ten-thousandth of its length and never less than three of the 65,536 steps the
+engine stores a model's positions in: 0.05 to 0.09 mm on a replica, 0.2 mm on a figure, up to 0.9 mm on a prop and
+2.6 mm on a far shed), up to three levels where sheets stack. A fixed 0.3 mm lift was tried first and moved a laser's
+emitter and a delta ring past what their fit tests allow, hence the size. No triangle count, UV, colour or bound that
+a test reads moved: the 76 test files that load models (829 tests) pass. `check` now finds none, and CI's lint job
+runs it on every pull request (`tools/check.sh` too, where numpy is installed), so a rebuilt model that brings one
+back fails. `tools/coplanar_scales.json` names the models the game draws shrunk (the door leaves), whose lift is
+sized for the size they are drawn at.
+
+**On the fields**, measured as a match draws them (`tools/coplanar_dump.gd` under a real renderer, then
+`tools/coplanar_check.py`), faces of different pieces in one plane, before and after:
+
+| Field | Before (m2) | After (m2) | What it was |
+|---|---|---|---|
+| Depot | 284.3 | DEPOT_NOW | the pallet racking's own sheets, tiled along every rack (244); the door leaves (13); the parts cages' roofs in the top of the box drawn behind them (12) |
+| Subway | 155.0 | 13.8 | the platform edges' lining in the plane of the platforms' slab (119, both platforms); the works hoardings (13) |
+| The Range | 142.6 | 3.5 | the Range's wall (106) and backstop (27); the skyline's sheds (8) |
+| Woodland | 13.3 | WOODLAND_NOW | the door leaves (7); the watch tower; a hut's door frame's head in its roof's underside |
+
+- **Subway's platform edges** (`tools/subway/station_dress.py`: `EDGE_FACE` 0.01 to 0.02 m; `data/maps/subway.json`
+  rebuilt, six trims moved a centimetre, nothing else). The map's builder grows each floor a centimetre past its
+  room, which put the slab's white tiled edge in the dark lining's own plane along both platforms: the edge over the
+  track drew as a crawling mix of the two. The lining now stands a centimetre proud.
+- **Depot's parts cages** (`PropDressConfig.backing_top` 0.05 to 0.053 m). The box drawn behind a tiled prop stopped
+  0.05 m under the block's top, the height of a parts cage's roof. It now stops 3 mm clear of every tiled model's
+  level faces (0.044, 0.05 and 0.056 m under the top).
+- **Door frames' heads** (`DoorView.FRAME_HEAD_CLEAR`, 2 mm). A frame's head stood in the plane of whatever closes
+  its opening (a hut's roof, Depot's plywood): it now stands 2 mm under it, its foot on the floor as before.
+- **Depot's sign sheet had no mipmaps** (`assets/textures/depot/signs.png.import`): the print of its fire point
+  boards and safety signs crawled from across the hall. It is stored as Subway's sheet is (BC7, mipmaps).
+
+**What is left does not show.** The checker lists every pair, seen or not, and most of what is left is hidden (a
+fitting's back plate against its wall, a far skyline shed's underside). `tools/flicker_map.py` settles it by
+pictures: for each group left it draws the view twice, 3 mm and 0.02° apart (under half a pixel), and counts the
+pixels that changed by more than the picture's own detail there allows. Over 29 aimed views (Depot 4, Subway 14, Woodland 8, the Range 3) no view changed in more than 0.3 % of its pixels, none in a patch and none standing still. What it does mark is thin lines
+(a cage's wire, a cordwood stack's edges): the presets draw with no edge smoothing (owner, FB2), so a line thinner
+than a pixel crawls as the eye moves. That is not two faces fighting and is left as ruled; the checklist tells
+William which is which.
+
+Tests: `test_bp9_flicker.gd` (5): Subway's six linings stand proud of every block's face; no level face of a tiled
+prop lies in its backing's top, and the old 0.05 m is caught; every door frame's head on Depot and Woodland stands
+`FRAME_HEAD_CLEAR` under its opening's top with its foot on the floor; every texture drawn in the world carries
+mipmaps (a swatch of a few pixels aside); Depot's sign sheet is stored as Subway's.
+
 ## Decisions
 
 - **A pull of the trigger inside a tap is a shot, in Click mode too.** The wheel is not up yet, so there is nothing
@@ -80,9 +136,22 @@ defender test in `test_bot_flag.gd`, and the wheel tests that meant a hold now h
   circle alone is see-through, so the crosshair stays readable in a fight. No sound was added (owner: sounds later).
 - **A bot keeps its own news over a Spotted for `BotConfig.hearing_contact_time`,** the time its own sighting
   already counts for against a sound.
+- **A model's flicker is fixed in the model file, not in its build script** (part 2). The lift is a fraction of a
+  millimetre that no build script's author would see, the same pass covers models from every script (and the ones
+  with none), and the gate keeps a rebuilt model honest: after a Blender build, `tools/coplanar_models.py fix`.
+- **The lift is sized to the model** (part 2): a fixed 0.3 mm broke two replica fit tests and would still be under
+  the engine's stored step on a 100 m skyline shed.
+- **What is hidden is left alone** (part 2). Faces in one plane that no eye reaches (a fitting's back on its wall, two
+  floors under a wall) cost nothing and moving them risks the fits the tests hold. Pictures decide what shows
+  (`tools/flicker_map.py`), not the list.
+- **Edge smoothing stays Off** (owner, FB2). The shimmer along a thin wire or a far rail is its cost and is not
+  changed here; the checklist asks William whether that is part of what he sees.
 
 ## Known issues left
 
 - A tap is timed on the wall clock (CW1): a hitch over 0.2 s makes it a hold.
 - How the tap feels with a real mouse (spotting while turning or firing) is William's check
   (`docs/PLAYTEST.md` › The pass before 0.1 Beta 1).
+- Flicker was measured on the cloud's software renderer, whose depth is the game's own (32-bit, reversed). A real
+  card draws the same planes, but what William saw is his to confirm (`docs/PLAYTEST.md`, checklist N22).
+- Thin lines shimmer with Edge smoothing Off (FB2): a cage's wire, far rails, a cordwood stack's edges.

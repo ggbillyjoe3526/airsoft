@@ -170,6 +170,7 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
 | Godot Engine | 4.7.2 | MIT | The engine |
 | GUT (Godot Unit Test) | 9.7.1 | MIT | Unit tests, in `addons/gut/`; tests only, never exported |
 | gdtoolkit (gdlint) | 4.5.0 | MIT | Lint; CI only, installed with pip, not in the repo |
+| NumPy | 2.5.3 | BSD-3-Clause | The models' flat-face check (`tools/coplanar_models.py`, BP9) in CI's lint job, and the tools that make maps, sounds and textures; dev only, installed with pip, not in the repo |
 | Inno Setup | 6 | Inno Setup License (permissive) | Builds the Windows installer; CI only, not in the repo |
 
 Every export ships `THIRD_PARTY_NOTICES.txt`, written by `tools/make_notices.gd` from the licence files in its
