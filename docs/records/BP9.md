@@ -37,7 +37,7 @@ code before it was fixed. Eleven were real:
   the wheel is as before: its pointer has the mouse, fire and aim need a fresh press once it closes.
 - **Defenders held one lane point short of their post.** Cover taken by a lane point on the way counted as the post's
   (`Bot.post_cover` now tells them apart; `BotMovement`), so a defender who ducked on the way stayed there for the
-  round. They go on to the post. This moves where defenders stand: the balance figures are re-measured in part 2.
+  round. They go on to the post. This moves where defenders stand: the balance figures were measured again with it (Part 4).
 - **A bot dazzled in the middle of a burst fired the rest of it** (`BotBrain`: `stop_burst`).
 - **How soon a bot noticed the target it kept was read from a nearer one's range** (`BotSenses.perceive`).
 - **Spotted overwrote a teammate's fresher news of someone else** (`Spots.share`): a bot that saw another opponent

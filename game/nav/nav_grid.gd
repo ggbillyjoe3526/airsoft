@@ -56,7 +56,8 @@ var leaves: Foliage = null
 var bush_probe: float = 0.0
 ## Each node under wading water (1; NavConfig.wade_from deep or more), or empty on a field with no water: a place a bot
 ## never picks to go and look at (RoundPlanner.hunt_point). Wading is slow, and a route to a spot in the stream's bed
-## makes the search price every way round it first (BP9: up to 85 ms in one tick on Woodland).
+## makes the search price every way round it first (BP9, Woodland: 38 ms on average and 241 at worst, against 3 ms to
+## the bank beside it).
 var wade: PackedByteArray = PackedByteArray()
 ## The smoke clouds priced on the search while they stand (NavSmoke, made by the first bots to route here).
 var smoke: NavSmoke = null

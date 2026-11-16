@@ -2,8 +2,9 @@ extends GutTest
 ## BP9 part 4 (the full pass before 0.1 Beta 1: performance). Woodland stuttered: a bot with nobody in sight picks a
 ## spot to go and look at (RoundPlanner.hunt_point) anywhere a route reaches, and 2.8 % of Woodland's walkable ground
 ## is the stream's bed. Wading is priced eight times a dry step (WS1), so the search to a spot in the water priced
-## every dry way round it first: up to 85 ms in one tick of the simulation, five frames' worth. The grid now marks its
-## wading nodes (NavGrid.wade) and a hunt never picks one. Nobody stands in a stream to look for someone.
+## every dry way round it first: 38 ms on average over 300 such searches and 241 ms at worst, in one tick of the
+## simulation, against 3 ms to the bank beside the same spot. The grid now marks its wading nodes (NavGrid.wade) and a
+## hunt never picks one. Nobody stands in a stream to look for someone.
 
 ## A height over every floor of Woodland (m), for drawing its hunt spots as BotController does.
 const WOODLAND_TOP := 60.0
