@@ -1749,7 +1749,7 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 
 ## Plant The Bomb's fuse on each field (PB4)
 
-- [ ] **A short fuse is fair to the defenders.** Defend on Depot (24 s fuse), Woodland (27 s) and Subway (22 s) at
+- [ ] **A short fuse is fair to the defenders.** Defend on Depot (24 s fuse), Woodland (25 s) and Subway (22 s) at
   Normal and Hard; let the attackers arm the bomb on the site nearest you and on the one farthest away, then go for
   it. The Match page says the field's fuse under the rules.
   Pass: from the near site you always have time to defuse it yourself; from the far site it is a race you can win if
@@ -1771,7 +1771,7 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 - [ ] **Bots use the whole wood.** Spectate a few Elimination and Attack / Defend rounds. Pass: bots walk the north
   edge, the Berm and the Clearing's south side as well as the old three routes, nobody gets stuck on the new routes
   (the stream's north end, the Knoll's slope), and none walk on top of each other.
-- [ ] **Plant The Bomb.** Attack and defend both sites with the 27 s fuse. Pass: from either site a defender has time
+- [ ] **Plant The Bomb.** Attack and defend both sites with the 25 s fuse. Pass: from either site a defender has time
   to come over; the pocket at B is hard but not hopeless to retake.
 - [ ] **At night** both flags have a lantern by them and the fights at them are lit, and the Box and the Sawmill,
   without theirs now, aren't too dark to fight in.
@@ -1893,6 +1893,15 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   fittings and their bounce alone (UL2), so it is much darker than on High and a wall out of a fitting's light is
   dark above knee height. Walk the concourse and a platform on High, then on Ultra.
   Pass: Ultra reads moodier but you can still see who stands by a wall; if it is too dark, say where.
+- [ ] **Woodland's worst stall is gone; say what hitches are left.** Two rounds of Elimination on Woodland at 6v6,
+  then at 8v8, with F3 up; stay alive late into a round if you can, when the bots hunt for the last players. On a
+  slower PC too, on Low, if one is to hand.
+  Pass: no long stall (a bot with nobody in sight used to choose spots in the stream to go and look at, and working
+  out a route into the water was the dearest thing a bot did: up to a quarter of a second on the cloud's
+  processor). No bot stands in the stream to look round; bots still cross at the Ford and the bridges. Shorter
+  hitches are still there on a slow processor (four to five frames at worst, up to about 25 in a four-minute match,
+  mostly a bot working out a long route: `docs/KNOWN_ISSUES.md`, Bots): say whether you feel any on yours, at which
+  team size and preset, and about how often.
 
 ## Reporting what you find
 

@@ -393,6 +393,9 @@ static func _link(g: NavGrid, weight: float, water: Water = null, cfg: NavConfig
 	var wet := water != null and not water.is_empty() and cfg != null
 	var slow := g.slow
 	var bushy := not slow.is_empty() and cfg != null
+	var wade := PackedByteArray()
+	if wet:
+		wade.resize(count)
 	for k in count:
 		if walkable[k] == 1:
 			var at := g.node_position(k)
@@ -400,6 +403,8 @@ static func _link(g: NavGrid, weight: float, water: Water = null, cfg: NavConfig
 			var price := 1.0
 			if depth > 0.0:
 				price = cfg.wade_cost if depth >= cfg.wade_from else cfg.splash_cost
+				if depth >= cfg.wade_from:
+					wade[k] = 1
 			if bushy and slow[k] == 1:
 				price *= cfg.bush_cost
 			astar.add_point(k, at, weight * price)
@@ -441,6 +446,7 @@ static func _link(g: NavGrid, weight: float, water: Water = null, cfg: NavConfig
 			elif rb < ra:
 				parent[ra] = rb
 	g.astar = astar
+	g.wade = wade
 	for k in count:
 		parent[k] = parent[parent[k]] if walkable[k] == 1 else -1
 	g.region = parent

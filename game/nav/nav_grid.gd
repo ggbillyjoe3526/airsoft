@@ -54,6 +54,11 @@ var slow: PackedByteArray = PackedByteArray()
 var leaves: Foliage = null
 ## How high over a floor a body's point in a bush is tested (NavConfig.bush_probe_height).
 var bush_probe: float = 0.0
+## Each node under wading water (1; NavConfig.wade_from deep or more), or empty on a field with no water: a place a bot
+## never picks to go and look at (RoundPlanner.hunt_point). Wading is slow, and a route to a spot in the stream's bed
+## makes the search price every way round it first (BP9, Woodland: 38 ms on average and 241 at worst, against 3 ms to
+## the bank beside it).
+var wade: PackedByteArray = PackedByteArray()
 ## The smoke clouds priced on the search while they stand (NavSmoke, made by the first bots to route here).
 var smoke: NavSmoke = null
 ## The route search: a point per walkable node (id = node), linked by the step rules.
@@ -171,6 +176,14 @@ func floor_at(p: Vector3) -> float:
 func is_walkable_at(p: Vector3) -> bool:
 	var k := node_at(p)
 	return k >= 0 and walkable[k] == 1
+
+
+## True if the floor under the point is wading water (`wade`); false off the grid and on a field with no water.
+func wades_at(p: Vector3) -> bool:
+	if wade.is_empty():
+		return false
+	var k := node_at(p)
+	return k >= 0 and wade[k] == 1
 
 
 ## Node `k`'s cell centre on its floor.

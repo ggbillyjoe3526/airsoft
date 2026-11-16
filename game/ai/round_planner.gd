@@ -183,7 +183,8 @@ func in_enemy_half_at(at: Vector3, team: int) -> bool:
 ## from where it stands is checked there and then, and picked only if every spot drawn was one. A spot is on the highest
 ## walkable floor over it a route from the bot reaches (inside a hut, not on its roof); one with none is drawn again. At
 ## night a bot that keeps dark moves its pick out of the light. A spot in the area a player of its team covers (Watching
-## here, BotWorld.covered) is never picked. False if none turned up.
+## here, BotWorld.covered) is never picked, nor one in wading water (NavGrid.wade, BP9: nobody stands in a stream, and a
+## route to its bed is the dearest search there is). False if none turned up.
 func hunt_point(b: Bot, w: BotWorld) -> bool:
 	var cfg := w.cfg
 	var team := b.character.team
@@ -198,7 +199,7 @@ func hunt_point(b: Bot, w: BotWorld) -> bool:
 		tries += 1
 		var spot := Vector3(b.rng.randf_range(bounds_lo.x, bounds_hi.x), top_y, b.rng.randf_range(bounds_lo.y, bounds_hi.y))
 		var k := _reached_floor(w.nav, home, w.nav.node_at(spot))
-		if k < 0:
+		if k < 0 or (not w.nav.wade.is_empty() and w.nav.wade[k] == 1):
 			continue
 		spot.y = w.nav.floor_y[k]
 		# Watching here (BP8): the area a teammate player covers is theirs; the bot hunts elsewhere.

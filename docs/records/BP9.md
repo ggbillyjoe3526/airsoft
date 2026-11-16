@@ -5,6 +5,7 @@
 - part 1 (bugs): critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
 - part 2 (flicker): critic Accept 8/8 (attempt 1) · qa Pass · performance Pass
 - part 3 (light): critic Accept 7/8 (attempt 2) · qa Pass · performance Pass
+- part 4 (performance): critic Accept 8/8 (attempt 1) · qa Pass · performance Pass
 
 William's full pass before he tags 0.1 Beta 1 (owner, 2026-11-15 and 16): bugs, balance, performance, quality and
 edge cases over the whole game, with a clean-out of unused files, a hunt for flicker (faces lying over one another),
@@ -19,6 +20,7 @@ the harsh shadows and the over-bright spots under Depot's lamps. It goes out in 
 | 2026-11-16 | part 2: 1 | Fable 5.2 | lint, wiki, the models' gate, 158 touched test files, smoke; CI | Accept 8/8 | – |
 | 2026-11-16 | part 3: 1 | Fable 5.2 | lint, wiki, 82 touched test files, smoke | Accept 7/8 | docs said Medium's edges drew smooth (they are softer, with a grain), the blur's old value, a checklist number with no home; then the owner, on the pictures: Depot on Ultra "looks better before" |
 | 2026-11-16 | part 3: 2 | Fable 5.2 | lint, wiki, the changelog and models' gates, 82 touched test files, smoke; CI | Accept 7/8 | – (8/8 on the owner's change; its note that the wider blur reached Ultra's sun was checked and fixed, and the re-read of that fix failed the record's count of QA's tests, corrected in the same commit) |
+| 2026-11-16 | part 4: 1 | Fable 5.2 | lint, wiki, the changelog gate, 8 touched test files, smoke; CI | Accept 7/8, then 8/8 on the re-read | the texts said every slow tick left was a route search, on a tally of searches over 16 ms alone; "a dropped frame" for a hitch of three to five; the greedier search called one number (`bush_cost` is held to it); Dev 3's worst ticks put down to the stream untraced. Each slow tick was then timed part by part (42 of 50 are route searches) and the texts corrected in the same attempt |
 
 ## Part 1: bugs
 
@@ -37,7 +39,7 @@ code before it was fixed. Eleven were real:
   the wheel is as before: its pointer has the mouse, fire and aim need a fresh press once it closes.
 - **Defenders held one lane point short of their post.** Cover taken by a lane point on the way counted as the post's
   (`Bot.post_cover` now tells them apart; `BotMovement`), so a defender who ducked on the way stayed there for the
-  round. They go on to the post. This moves where defenders stand: the balance figures are re-measured in part 2.
+  round. They go on to the post. This moves where defenders stand: the balance figures were measured again with it (Part 4).
 - **A bot dazzled in the middle of a burst fired the rest of it** (`BotBrain`: `stop_burst`).
 - **How soon a bot noticed the target it kept was read from a nearer one's range** (`BotSenses.perceive`).
 - **Spotted overwrote a teammate's fresher news of someone else** (`Spots.share`): a bot that saw another opponent
@@ -304,6 +306,124 @@ night, the softer presets keeping the wider blur and no sun size, a field's ligh
 the sun shut out and back, and a map's override and the moon keeping Softest's blur. Woodland's eye-height test
 (`test_bp2.gd`) measures the ground under the capture point, which moves where a prop stands at the middle.
 
+## Part 4: balance, performance, clean-out
+
+**Balance: no figure outside its band.** `tests/balance/balance_run.gd` on part 1's head (`c6d2cdc`): every mode on
+every field, Normal on seeds 1 to 32, Easy and Hard on 1 to 16, 67 figures a field (the reports are in the run's
+shared folder, `pipeline/runs/BP9/balance/`). At Normal the attackers take 46.2 % of Depot's rounds in Attack / Defend
+and 51.4 % in Plant The Bomb, 54.2 % and 48.5 % of Subway's, 54.6 % and 50.4 % of Woodland's; the west end takes
+51.0 % of Elimination's decided rounds on Depot, 51.6 % on Subway and 45.7 % on Woodland. Three figures read outside
+their band on their first seeds, inside its noise, and were played on more seeds, as the bug pass rules
+(`docs/PROCESS.md` › Bug pass). All three came back in:
+
+| Figure | First seeds | With more | Band |
+|---|---|---|---|
+| Subway, Attack / Defend, Easy: the attackers' share of rounds | 70.4 % ±4.1 (16 seeds) | 64.6 % ±2.5 (48) | 35 to 65 % |
+| Woodland, Attack / Defend, Hard: the attackers' share of rounds | 61.9 % ±4.3 (16) | 55.8 % ±2.6 (48) | 40 to 60 % |
+| Woodland, Elimination, Normal: the west end's share of the decided rounds | 44.4 % ±3.1 (32) | 45.7 % ±2.3 (64) | 45 to 55 % |
+
+Near an edge and left to watch, with no number changed: the first and the third above, Woodland's Attack / Defend at
+Easy (62.2 % ±4.3 in 35 to 65) and Depot's west end at Hard (41.7 % ±4.5 in 40 to 60). The third was played on to 128
+seeds with this part's change (below): 45.2 % ±1.6.
+
+**Performance: what was measured.** All of it headless on the cloud's machine (four cores of a 2.1 GHz Xeon, no
+graphics card), this head against 0.1 Dev 3 back to back:
+
+- The install: Dev 3's Windows zip is 140.0 MiB, its installer 119.9 MiB and the Linux build 130.9 MiB, against the
+  500 MB budget. Nothing large has come in since.
+- The smoke match: 87 to 92 s on the clock, 649 to 653 MiB at its peak, 2,036 nodes and no orphans (Dev 3: 99 to
+  102 s, 648 to 651 MiB, 1,986 nodes).
+- `tools/team_bench.gd`, a minute a field, twice (a tick and a frame's script, ms on average, at 6v6 and at 8v8):
+  Depot 4.4 to 5.0 and 5.5 to 5.8 (Dev 3: 4.1 to 4.9 and 4.5 to 4.9), Woodland 4.7 to 4.8 and 6.2 to 6.4 (4.5 to 4.8
+  and 6.0 to 6.3), Subway 4.8 and 6.3 to 6.4 (4.2 to 4.3 and 5.3 to 5.8). Depot at 8v8 and Subway cost half a
+  millisecond to a millisecond more than in Dev 3; both fields were rebuilt since (DC1, SW1), and it was not traced
+  further. The 99th percentile is 15.4 ms at worst (Subway at 8v8). Peak memory 759 MiB (Dev 3: 720).
+- The worst single tick was Woodland's in every run: 85 and 91 ms at 6v6 on this head, 172 and 267 ms at 8v8 in
+  Dev 3. None of those ticks was traced one by one; the search below is the one cause found that takes that long,
+  and Dev 3 has the same hunt and the same price of wading.
+
+**Woodland stuttered: a bot's route search into the stream.** A bot with nobody in sight picks a spot to go and look
+at (`RoundPlanner.hunt_point`), anywhere a route reaches. Of Woodland's 323,858 walkable nodes 9,157 (2.8 %) lie in
+the stream's bed, and a step in wading water is priced eight times a dry one (WS1), so a search to a spot in the
+water prices every dry way round it before it steps in. Over 300 pairs of a dry start and a spot in the stream, the
+search took 37.5 ms on average (24.6 at the middle, 87.8 at the ninetieth percentile, 240.9 at worst; 187 of the 300
+took over 16 ms, where a tick is 16.7), against 3.3 ms to the first dry node beside the same spot (1.8, 6.4, 31.4; 14 of
+300). The performance review ran the pairs again with the machine busy: 36.6 ms against 3.3, the same eleven
+to one. One is searched a tick (BE1), so one such search is one hitch of up to fourteen frames on this
+processor.
+
+The grid now marks its wading nodes as it prices them (`NavGrid.wade`, a byte a node, on a field with water only:
+half a megabyte on Woodland) and a hunt never picks one; nor does the night's move of a pick out of a lamp's light
+(`BotWorld.out_of_light`, QA's find: 28 of 30 such picks on its test field landed in the water). The Ford (ankle
+deep, not slowed) and the bridges' decks stay places to look at. Nobody stands in a stream to look for someone, so
+the rule is right for play as well.
+
+**What it bought, and what is left.** Three Woodland matches (6v6, 240 s, seeds 1 to 3), ticks over 16 ms and the
+worst tick: 16 and 85.9 ms before against 13 and 44.0 after, 11 and 30.3 against 8 and 25.0, 24 and 52.5 against 25 and
+75.3. Together 51 slow ticks before and 46 after, 1,313 ms of them against 1,068: the dearest searches are gone and
+the long ones are not (a match's picks differ once a hunt's spot does, so single seeds are not like for like). The
+performance review's minute of `tools/team_bench.gd` on the fixed code, with the machine busy: Woodland's worst tick
+and frame 50 ms at 6v6 and 34 ms at 8v8, where main's two runs gave 85 and 91 ms at 6v6 and 39 and 44 ms at 8v8:
+read as no worse, not as a measured gain.
+
+What is left, with every slow tick of three matches on the fixed code timed part by part (50 ticks over 16 ms): 42
+held a route search that was most of the tick (10.6 to 52.6 ms: 20 chases to where someone was last seen, 18 hunts,
+3 flanks and 1 lane's point, 24 to 95 m as the crow flies), 4 were the bots' thinking (7 to 21 ms a tick, one bot's
+14 ms at worst; not traced further) and 4 held neither (17 to 21 ms; not traced). A search need not pass 16 ms to
+make a slow tick: the rest of a tick takes 3 to 5. The worst tick of the three matches (54 ms here, 75.3 in the
+run above, the same tick of seed 3) is a hunt's search over 90 m of dry ground. Of the 1,588 searches of three
+matches 23 still ended in wading water (19 to a lane's point, 2 round a flank, 1 to cover, 1 to where someone was
+last seen), one of them over 16 ms (a flank's 21.4). Over 598 dry pairs anywhere on Woodland a search takes 6.1 ms
+on average and 14.1 at the ninetieth percentile, with 50 over 16 ms and 57.8 ms at worst; under 40 m none is, from
+60 m one in eight. Nine tenths of a slow search's time is the engine's own (`AStar3D`).
+Depot's searches take 0.6 ms on average and 8.5 at worst, Subway's 1.1 and 18.2.
+
+That is the route search AUD1 already wrote down as costing more than its aim (`docs/KNOWN_ISSUES.md`, Bots), now
+with Woodland's figures: nothing exact cuts it. Measured for whoever takes it on, and not shipped: a greedier search
+(`NavConfig.search_greed` 2 for 1.5; `bush_cost` is held to it by a test and stood at 2 here, so the built change
+would reprice bushes too) takes 4.1 ms on average over 600 dry pairs for 6.0, with 9 over 16 ms for 50
+and 21.9 ms at worst for 51.6, on routes 1.8 % longer; at 3, none over 16 ms, 12.2 ms at worst, routes 2.7 % longer.
+It moves every bot's routes on every field, so every field's balance would be played again, and the other way
+(searches off the frame, a route arriving a tick or two later) needs the owner's ruling AUD1 left open. On a
+quicker processor every figure here shrinks in step; how Woodland runs on a real one is the owner's check (his
+checklist, N24).
+
+**Woodland's balance with the change** (Normal, on `b67527f`; the reports are in
+`pipeline/runs/BP9/balance/part-4-woodland/`). Attack / Defend and Plant The Bomb played out the same to the round
+on seeds 1 to 32 (the attackers 130 of 238 rounds and 123 of 244, as before): no hunt there drew a spot in the
+stream. Elimination's matches differ once a hunt's spot does. Its west end took 43.3 % ±3.2 of the decided rounds
+on seeds 1 to 32 (44.4 % before) and 42.6 % ±2.3 on 1 to 64 (200 of 469; before, 45.7 % ±2.3, 222 of 486): outside
+its band of 45 to 55 %, inside the noise, so 64 more seeds were played, as the bug pass rules. On seeds 1 to 128 it
+takes 45.2 % ±1.6 (432 of 955): in band, at its low edge, where it stood before the change. The same 64 further
+seeds were not played on main: the figure to judge was the one with the change.
+
+**Clean-out: nothing new to remove.** AUD1 cleaned the repository out two days before this pass (#350;
+`_archive/README.md` lists what it set aside). A scan for files that no code, data, tool or doc names brought up 43
+asset files (13.4 MB: the figures', the arms' and the replicas' textures, which their models' imports load, and the
+fonts, loaded by a name built from their weight) and 140 scripts (the game's, reached by their class names, and Blender build scripts, run by hand): all in use.
+Nothing was deleted or moved. `legacy/katanashotgun/` (16 files, 184 KB, the owner's reference scripts) stays.
+`docs/PLAYTEST.md` gave Woodland's fuse as 27 s in two play checks; it is 25 (PB5).
+
+**Got wrong on the way.** I first put the whole stutter down to hunts into the stream and expected the slow ticks
+to go; three matches showed 51 become 46, and the pairs told the two costs apart. My test's header said one pick in
+a dozen fell in the stream before anything had counted it (2.8 % of the ground is stream). TS1's note on these
+ticks ("look like the busy cloud machine", `docs/KNOWN_ISSUES.md`) was the same reading error a pass earlier: most
+are searches. And this record's first form said all of them were, on a tally that counted only the searches over
+16 ms (about 20 for 46 slow ticks; the critic's find): each slow tick was then timed part by part, and 42 of 50 are
+searches, 8 are not.
+
+**Changed:** `game/nav/nav_grid.gd` (`wade`, `wades_at`), `game/nav/nav_grid_builder.gd` (`_link` fills it),
+`game/ai/round_planner.gd` (`hunt_point`), `game/ai/bot_world.gd` (`out_of_light`), `docs/PLAYTEST.md` (the fuse,
+the play check), `docs/KNOWN_ISSUES.md`, `docs/DECISIONS.md`.
+
+**Tests:** `tests/unit/test_bp9_stream_hunts.gd` (7: each mark agrees with the water's depth over its node, a dry
+field keeps none, a hunt never picks wading water, a strip that is all water gives no spot, Woodland's bed is marked
+and its Ford and North bridge are not, Woodland's hunts stay out of its stream by day and by night; three fail
+without the planner's change) and QA's `tests/unit/test_bp9_stream_hunts_qa.gd` (5: ankle deep against knee deep, a
+deck over the water, a hunt on a deck, the night's move out of a lamp's light, a bot with nowhere dry to look).
+QA's sixth, Woodland's night picks, built the field's grid a second time to print a count; it moved onto the first
+file's grid and asserts (the critic's note).
+
 ## Decisions
 
 - **A pull of the trigger inside a tap is a shot, in Click mode too.** The wheel is not up yet, so there is nothing
@@ -367,6 +487,12 @@ the sun shut out and back, and a map's override and the moon keeping Softest's b
   point per area: nothing to keep in step when a map's props move.
 - **Subway on Ultra and Woodland on Medium are left as tuned** (part 3; UL2, UG3). Both are darker than the same
   field on High, neither is new, and how dark a field should read is the owner's call: the checklist asks.
+- **A hunt keeps out of wading water; the price of wading stays** (part 4). Pricing the stream less would also end
+  the dear searches, and would send bots wading where WS1 priced it so they take a bridge. Only where a bot chooses
+  to stand changed.
+- **The long dry searches are written down, not fixed** (part 4). A greedier search and searches off the frame both
+  move every bot's routes or their timing on every field, days before a release and with three balance figures at
+  their band's edge. Both are measured in Part 4 for the owner's call.
 
 ## Known issues left
 
@@ -387,3 +513,12 @@ the sun shut out and back, and a map's override and the moon keeping Softest's b
   height. Not changed; William's to say (his checklist, N23).
 - Depot's crates and walls are a shade paler and cooler on Medium and High (part 3: its probes give reflections alone);
   William's to say (his checklist, N23).
+- Woodland still hitches now and then (part 4): 8 to 25 ticks over 16 ms in a four-minute match on the cloud's
+  processor, up to 75 ms at worst (four to five frames), most of them a hunt's or a chase's route search over 40 m
+  or more. Two measured ways on are in `docs/KNOWN_ISSUES.md` (Bots); how Woodland runs on a real processor is
+  William's check (his checklist, N24).
+- Depot at 8v8 and Subway cost up to a millisecond more script time a frame than in Dev 3 (part 4), inside the
+  frame's budget; not traced.
+- Four balance figures sit near their band's edge (part 4): Woodland's west end in Elimination at Normal (45.2 % ±1.6
+  on 128 seeds), Subway's and Woodland's attackers in Attack / Defend at Easy, Depot's west end in Elimination at
+  Hard. Nothing was changed; `docs/KNOWN_ISSUES.md` (Balance) lists them.
