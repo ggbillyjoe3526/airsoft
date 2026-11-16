@@ -1863,23 +1863,23 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   stays steady from afar. Thin things (a cage's wire, far rails, a stack's edges) still shimmer along their edges:
   Edge smoothing is Off on every preset (FB2), and that is not this fix. If that shimmer is the flicker you meant,
   say so. Anywhere a whole patch still flickers: the map, the spot and a screenshot.
-- [ ] **Depot is no brighter on High and Ultra than on Medium.** On Depot on High, stand in the open hall and look
-  down its length, then at the floor where the lamps hang closest (the Shoot House, the Chrono hall, the
-  Containers), then go into the Lounge or a container and look out at the hall. Switch to Medium in the pause menu
-  and back.
+- [ ] **Depot is no brighter on High than on Medium; Ultra is as it was.** On Depot on High, stand in the open hall
+  and look down its length, then at the floor where the lamps hang closest (the Shoot House, the Chrono hall, the
+  Containers), then go into the Lounge or a container and look out at the hall. Switch to Medium in the pause menu and
+  back.
   Pass: the open hall is about as bright on High as on Medium; no floor or wall is washed out towards white and the
   containers keep their colours; from the Lounge or inside a container the hall outside is bright but you still see
-  what stands in it. The same on Ultra, where the roof over the hall is lit and the dim Lounge is dimmer than it
-  was but you still see its lockers and who stands by them. The lamps still light wide and soft with no cone on the
-  floor, and shadows are dark but you can make out who is in them (UG2). If a place is still too bright, or the hall is now too dim:
+  what stands in it. Ultra is as it was (the owner, 2026-11-16, on its pictures: "looks better before"): its hall is
+  brighter than on High. The lamps still light wide and soft with no cone on the floor, and shadows are dark but you
+  can make out who is in them (UG2). If a place is still too bright on any preset, or the hall is now too dim on High:
   the spot, the preset and a screenshot.
 - [ ] **Softer shadows.** On Woodland by day on High, walk the wood from the Tower to the Hut row and look at the
   shade the crowns throw on the ground and on a hut's wall, then at your own team's shadows.
-  Pass: a shadow's edge is soft and even (about a hand wide near you), with no hard-edged patches and no speckle
-  along it. On Medium the edges are a little soft (they were hard). On Ultra they are as before: sharp at a trunk's
-  or a player's foot, soft away from it. The Range's wall and targets the same. If shadows still read harsh
-  anywhere, say which it is: the edge (too sharp) or the shade itself (too dark), with the map, the spot and the
-  preset.
+  Pass: a shadow's edge is soft and even (about a hand wide near you), with no hard-edged patches and no speckle along
+  it. On Medium the edges are softer than they were (they were hard), with a fine grain along them. On Ultra they are
+  as before: sharp at a trunk's or a player's foot, soft away from it. The Range's wall and targets the same. If
+  shadows still read harsh anywhere, say which it is: the edge (too sharp) or the shade itself (too dark), with the
+  map, the spot and the preset.
 - [ ] **No dark bands across walls.** On Subway on Medium, then High, walk round the concourse's kiosk and along both
   platforms by the works hoardings, then the passages by the lockers.
   Pass: a wall or a kiosk's side is lit evenly from top to bottom, with no darker band at chest height along it. The

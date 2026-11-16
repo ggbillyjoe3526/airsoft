@@ -345,7 +345,8 @@ static func apply_station(values: GraphicsQuality, lifts: LiftView, fixtures: St
 ## while the roof lamps shine) and a wood's dressing (WoodsView: its parts by Mesh detail, its fireflies and motes by
 ## the wind dust's share), from `values`
 ## (already drawable), and an indoor field's roof lamps as real lights (RoofLamps, Lamp light; their shadows
-## contact-hardening on Softest) with the sun turned down while they shine, and the floors' worn marks (WearMarks,
+## contact-hardening on Softest, a hall's at their strength under the scene's bounce light when that is on, BP9)
+## with the sun turned down while they shine, and the floors' worn marks (WearMarks,
 ## Wear marks). Any of `lighting`, `dust`, `level`, `kicked`, `woods`, `lamps` and `marks` may be null.
 static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: WindDust, rs: Server = null,
 		level: MapLevel = null, kicked: KickedDust = null, woods: WoodsView = null, lamps: RoofLamps = null,
@@ -378,7 +379,8 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 	if woods != null:
 		woods.set_quality(values.mesh_detail, values.wind_dust / PERCENT)
 	if lamps != null:
-		lamps.set_mode(values.lamp_lights, values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
+		lamps.set_mode(values.lamp_lights, values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST,
+				values.global_illumination == GraphicsQuality.GlobalIllumination.SCENE)
 		if lighting != null:
 			lighting.set_key_share(lamps.key_share(values.lamp_lights))
 			lighting.set_ambient_share(lamps.ambient_share(values.lamp_lights))

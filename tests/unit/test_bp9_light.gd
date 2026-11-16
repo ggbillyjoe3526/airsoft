@@ -20,7 +20,8 @@ const INSET := 1.0
 const MIDDLE_LEAST := 0.7
 const MIDDLE_MOST := 1.1
 const MOST := 1.6
-## The lamps' strength as first tuned (UG1), which the open hall drew washed out at.
+## The lamps' strength as first tuned (UG1), which the open hall drew washed out at with the ambient filling its
+## shade (High), and which Ultra keeps (the owner's, 2026-11-16).
 const LAMPS_FIRST := 6.0
 
 ## The engine's shadow filters (RenderingServer.ShadowQuality, in order): the samples each spreads over a shadow's
@@ -31,7 +32,8 @@ const FILTER_RADIUS: Array[float] = [1.0, 1.5, 2.0, 2.0, 3.0, 4.0]
 ## The sun's shadow edge on High as it was: 4 samples over a blur of 1.5 (3 px), which read hard-edged.
 const EDGE_BEFORE := 3.0
 ## An edge's samples for each pixel of its radius, squared, below which it speckled in the pictures (8 over 6 px did,
-## and 4 over 6 px badly; 4 over 4 px and 16 over 6 px drew smooth).
+## and 4 over 6 px badly; 16 over 6 px drew smooth, and 4 over 4 px, Medium's, sits on the limit: softer than its old
+## hard edge, with a fine grain along it).
 const SAMPLES_A_PIXEL := 0.25
 ## The outdoor fields, whose sun casts the shadows.
 const OPEN_FIELDS: Array[String] = ["woodland", "range"]
@@ -103,19 +105,63 @@ func test_the_lamps_first_strength_put_twice_the_stand_ins_light_on_the_floor() 
 	assert_gt(shares[-1], 3.5, "and its brightest patch")
 
 
-func test_depots_lamps_feed_ultras_bounce_light_more_than_their_own_strength() -> void:
-	# Under a roof Ultra has no fill light but the lamps' bounce (SDFGI), where High fills with the field's ambient.
-	# Turned down with nothing else, the lamps left Ultra's roof black and a third of the Lounge's view with it; with
-	# the bounce only as strong as it was under the lamps' first strength the hall still drew a sixth darker than High.
+func test_depots_lamps_keep_their_first_strength_under_the_bounce_light() -> void:
+	# Under the scene's bounce light (Ultra) no ambient fills the hall's shade, and the owner kept Ultra's hall as it
+	# was (2026-11-16: turned down to match High, it "looks better before"). With the ambient filling (High) the lamps
+	# stay turned down. The presets say which: High's lamps under its screen bounce, Ultra's under the scene's.
 	var cfg := play.roof
-	assert_gt(cfg.lamp_light_energy * cfg.lamp_indirect, LAMPS_FIRST, "more bounce than the lamps' first strength gave")
+	assert_almost_eq(cfg.lamp_bounce_energy, LAMPS_FIRST, 0.0001, "Ultra's lamps as first tuned")
 	var roof := RoofView.build(depot, cfg)
 	add_child_autofree(roof)
-	var lights := roof.lamp_lights().lights()
-	assert_gt(lights.size(), 50, "Depot's lamps")
-	for l in lights:
-		assert_almost_eq(l.light_indirect_energy, cfg.lamp_indirect, 0.0001, l.name)
-		assert_lte(l.light_energy, cfg.lamp_light_energy + 0.0001, "%s: its own light stays turned down" % l.name)
+	var lamps := roof.lamp_lights()
+	var working := lamps.light_of(Array(depot.roof_lamp_states).find(MapData.LAMP_WORKING))
+	var rs := GraphicsApply.Server.new()
+	GraphicsApply.apply_field(table.preset(&"high"), null, null, rs, null, null, null, lamps)
+	assert_true(lamps.visible, "High lights the lamps")
+	assert_almost_eq(working.light_energy, cfg.lamp_light_energy, 0.0001, "High: turned down, the ambient fills")
+	GraphicsApply.apply_field(table.preset(&"ultra"), null, null, rs, null, null, null, lamps)
+	assert_almost_eq(working.light_energy, cfg.lamp_bounce_energy, 0.0001, "Ultra: the lamps light the hall alone")
+	for l in lamps.lights():
+		assert_almost_eq(l.light_indirect_energy, 1.0, 0.0001, "%s: the engine's own share in the bounce" % l.name)
+	GraphicsApply.apply_field(table.preset(&"high"), null, null, rs, null, null, null, lamps)
+	assert_almost_eq(working.light_energy, cfg.lamp_light_energy, 0.0001, "and back")
+
+
+func test_a_worn_lamp_keeps_its_share_and_its_flicker_through_a_change_of_strength() -> void:
+	var cfg := play.roof
+	var roof := RoofView.build(depot, cfg)
+	add_child_autofree(roof)
+	roof.set_process(false)
+	var lamps := roof.lamp_lights()
+	var states := Array(depot.roof_lamp_states)
+	var dim := lamps.light_of(states.find(MapData.LAMP_DIM))
+	var flicker_lamp := states.find(MapData.LAMP_FLICKER)
+	var flicker := lamps.light_of(flicker_lamp)
+	lamps.set_mode(GraphicsQuality.LampLights.FAR, false, false)
+	lamps.set_flicker(flicker_lamp, cfg.lamp_flicker_low)
+	lamps.set_mode(GraphicsQuality.LampLights.FAR, false, true)
+	assert_almost_eq(dim.light_energy, cfg.lamp_bounce_energy * cfg.lamp_dim_share, 0.0001, "a dim lamp's share")
+	assert_almost_eq(flicker.light_energy, cfg.lamp_bounce_energy * cfg.lamp_flicker_low, 0.0001, "a stutter's step")
+	lamps.set_flicker(flicker_lamp, 1.0)
+	assert_almost_eq(flicker.light_energy, cfg.lamp_bounce_energy, 0.0001, "and its next step, at the new strength")
+	lamps.set_mode(GraphicsQuality.LampLights.NEAR, true, false)
+	assert_almost_eq(dim.light_energy, cfg.lamp_light_energy * cfg.lamp_dim_share, 0.0001, "and back")
+
+
+func test_a_plain_roofs_lamps_shine_the_same_under_the_bounce_light() -> void:
+	var cfg := play.roof
+	var subway := MapData.load_map("subway", play.map_style, SimTuning.new().rounds.team_size)
+	var roof := RoofView.build(subway, cfg)
+	add_child_autofree(roof)
+	var lamps := roof.lamp_lights()
+	assert_gt(lamps.light_count(), 10, "Subway's strip lamps")
+	lamps.set_mode(GraphicsQuality.LampLights.FAR, false, false)
+	var before: Array[float] = []
+	for l in lamps.lights():
+		before.append(l.light_energy)
+	lamps.set_mode(GraphicsQuality.LampLights.FAR, false, true)
+	for i in lamps.light_count():
+		assert_almost_eq(lamps.lights()[i].light_energy, before[i], 0.0001, "a station's lamps: one strength")
 
 
 ## A viewport of its own for a preset's knobs, so the root's stay as they are.

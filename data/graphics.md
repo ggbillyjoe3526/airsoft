@@ -99,11 +99,11 @@ never stops the game from starting.
   their foot). At night it also gives a field's fires and lanterns (its light pools) shadows, and Far gives real
   lights to `LightingConfig.real_lights_far` of them. Off (Low, Medium) the overhead light stands in for the lamps,
   and on a field with no roof lamps or light pools it costs nothing; an open field keeps its sun on every preset.
-  The lamps' strength (`RoofConfig.lamp_light_energy`, 2.4) is set against that stand-in (BP9): together they put
-  about as much light on Depot's open floor as it does, so the hall is as bright on every preset
-  (`tests/unit/test_bp9_light.gd`). On Ultra each lamp feeds the bounce light `RoofConfig.lamp_indirect` (7) times
-  its own strength: under a roof Ultra has no other fill light, and at 1 the roof drew black and the hall darker
-  than on High.
+  The lamps' strength while the field's ambient fills the hall's shade (`RoofConfig.lamp_light_energy`, 2.4: High)
+  is set against that stand-in (BP9): together they put about as much light on Depot's open floor as it does, so the
+  hall is as bright on High as on Low and Medium (`tests/unit/test_bp9_light.gd`). Under the scene's bounce light
+  (Global illumination Scene: Ultra) no ambient fills the shade and the lamps keep their first strength
+  (`lamp_bounce_energy`, 6; the owner's, 2026-11-16), so Ultra's hall is the brightest.
 - **Eye adaptation** (UG3, High and Ultra) meters what the camera sees, as eyes do: in a view darker than the
   preset's middle (`LightingConfig.eye_middle`, 0.25; Depot's lamp-lit hall and Woodland's open field meter above it)
   the picture opens up slowly towards it, at most `eye_lift` (3) times, so a tunnel or the wood under its crowns reads;

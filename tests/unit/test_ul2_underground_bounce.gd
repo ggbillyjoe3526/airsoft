@@ -42,12 +42,11 @@ func test_a_plain_roofs_lamps_feed_the_bounce_more() -> void:
 	assert_gt(cfg.plain_lamp_indirect, 1.0)
 
 
-func test_a_halls_lamps_keep_their_own_bounce() -> void:
+func test_a_halls_lamps_keep_the_engines_bounce() -> void:
 	var hall := RoofLamps.build(spots, cfg)
 	add_child_autofree(hall)
 	for spot in hall.lights():
-		assert_almost_eq(spot.light_indirect_energy, cfg.lamp_indirect, 0.0001, "Depot's lamps: theirs, not a plain roof's")
-	assert_ne(cfg.lamp_indirect, cfg.plain_lamp_indirect)
+		assert_almost_eq(spot.light_indirect_energy, 1.0, 0.0001, "Depot's lamps unchanged")
 
 
 func test_subway_lamps_are_plain_and_depots_are_not() -> void:
