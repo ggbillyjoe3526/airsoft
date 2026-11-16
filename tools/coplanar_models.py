@@ -1,21 +1,27 @@
 #!/usr/bin/env python3
-"""Finds, and lifts apart, the faces inside one model file that lie in one plane over one another: the cause of
+"""Finds, and parts, the faces inside one model file that lie in one plane over one another: the cause of
 z-fighting (two colours flickering through each other as the eye moves).
 
     python3 tools/coplanar_models.py check [files or folders...]      # the gate: fails on any fight left
     python3 tools/coplanar_models.py fix <files or folders...>        # rewrites the .glb files in place
 
-A model's triangles are joined into flat sheets (triangles that share an edge and a plane). Two sheets of one node
-fight when they face the same way (or either is drawn from both sides), their planes are within a hair and they
-overlap in two looks (another colour or material) by `min-area` or more. Sheets of two nodes are not compared: a
-file's nodes are often its choices (detail levels, a figure's heads, a replica's parts), never drawn together.
-`fix` lifts the smaller sheet of each fighting pair along its normal by one step, with the side faces that end on
-it, so a box grows by a hair and no gap opens; the larger sheet stays. The step is a ten-thousandth of the model's
-size (0.05 mm at least, 0.7 mm at most), so a replica's fitted parts move by less than a tenth of a millimetre and
-a shed's by more; planes within 0.4 of a step count as one. Only vertex positions change (and the accessors'
-bounds); `check` then finds nothing. A model the game draws shrunk along an axis (a door leaf, a unit box, is as
-thin as its wall) is measured and lifted at that size, from tools/coplanar_scales.json. Run `fix` after any Blender
-build that writes a model. Dev only: tools/ never ships.
+A model's triangles are joined into flat sheets (triangles of one plane that share an edge or a vertex). Two sheets
+of one node fight when they face the same way (or either is drawn from both sides and is not the skin of a closed
+solid, whose back is never seen), their planes are within a hair and they overlap in two looks (another colour or
+material) by `min-area` or more. Sheets of two nodes are not compared: a file's nodes are often its choices (detail
+levels, a figure's heads, a replica's parts), never drawn together.
+`fix` keeps the order of each fight (a smaller sheet lies over a larger one: a panel on its wall) and sinks every
+sheet under the top one behind it, against its facing, by one step each. A sheet sinks alone: the faces behind it
+(its rim) stay, so no edge, corner or outline of the model moves, its bounds stay (the game sizes and places a prop
+by them, and a wall's sections meet at them) and nothing shows through; a face standing on the sheet from the front
+is drawn out to follow it. Where a sinking sheet shares its corners with its rim (it would draw the rim in, away
+from what stands against it), or sinking would leave the mesh's bounds, the upper sheets rise instead, their rims
+drawn out after them; that too must keep the bounds, or the sheets sink after all. `fix` fails for a model it cannot
+part inside its bounds. The step is a ten-thousandth of the model's size (0.05 mm at least, 0.7 mm at most), so a
+replica's fitted parts move by less than a tenth of a millimetre and a shed's by more; planes within 0.4 of a step
+count as one. Only vertex positions change; `check` then finds nothing. A model the game draws shrunk along an axis
+(a door leaf, a unit box, is as thin as its wall) is measured and parted at that size, from
+tools/coplanar_scales.json. Run `fix` after any Blender build that writes a model. Dev only: tools/ never ships.
 """
 import argparse
 import json
@@ -47,15 +53,17 @@ SAME_PLANE_COS = 1.0 - 4e-7
 PARALLEL_COS = 0.9999
 ## A sheet this many times another's size is its base: the smaller always goes over it.
 BASE_RATIO = 1.5
-## The lift for each step (m) is this share of the model's size, kept between a least and a most: a small model is
+## The step between two sheets (m) is this share of the model's size, kept between a least and a most: a small model is
 ## seen close up, where a hair is enough, and its parts are fitted to a tenth of a millimetre. Never under three of
 ## the 65,536 steps the engine keeps a mesh's positions in across its bounds.
 EPS_SHARE = 1e-4
 EPS_LEAST = 5e-5
 EPS_MOST = 7e-4
 STORED_STEPS = 65535.0
-## Planes closer than this share of the model's lift are one plane.
+## Planes closer than this share of the model's step are one plane.
 TOL_SHARE = 0.4
+## A vertex this far outside its mesh's bounds (a share of the mesh's size, m for one under a metre) has left them.
+BOUNDS_SLACK = 2e-6
 ## The least the game draws each model along its axes, for the models it shrinks (tools/coplanar_dump.gd).
 SCALES_FILE = "coplanar_scales.json"
 
@@ -212,14 +220,23 @@ class Faces:
         n = np.cross(p[:, 1] - p[:, 0], p[:, 2] - p[:, 0])
         length = np.linalg.norm(n, axis=1)
         keep = length > 2e-10  # over 0.0001 mm2
-        self.p, self.vid, self.prim, self.col, self.two = p[keep], vid[keep], prim[keep], col[keep], two[keep]
+        self.p, self.vid, self.prim, self.col = p[keep], vid[keep], prim[keep], col[keep]
         self.n = n[keep] / length[keep][:, None]
         self.area = length[keep] * 0.5
         self.count = len(self.p)
         # Every triangle (the slivers too) for the side faces: a sliver still closes a box.
         self.all_p, self.all_vid = p, vid
+        self.kept = np.nonzero(keep)[0]
         self.all_n = np.where(length[:, None] > 0.0, n / np.maximum(length, 1e-30)[:, None], 0.0)
         self._weld()
+        # A face drawn from both sides whose three edges all meet another face is the skin of a solid: its back is
+        # never seen, so it fights as a one-sided face does.
+        edge = self.all_point[:, [0, 1, 1, 2, 2, 0]].reshape(-1, 2)
+        span = int(self.all_point.max()) + 1
+        there = np.unique(edge[:, 0] * span + edge[:, 1])
+        mine = self.point[:, [1, 0, 2, 1, 0, 2]].reshape(-1, 2)
+        closed = np.isin(mine[:, 0] * span + mine[:, 1], there).reshape(-1, 3).all(axis=1)
+        self.two = two[keep] & ~closed
         self._sheets()
 
     def _weld(self):
@@ -258,6 +275,18 @@ class Faces:
                         rt, ru = find(t), find(u)
                         if rt != ru:
                             parent[ru] = rt
+        # Triangles of one plane that share a vertex move as one (a strip joined to a panel at a corner).
+        flat = self.vid.reshape(-1)
+        order = np.argsort(flat, kind="stable")
+        owner = order // 3
+        cuts = np.nonzero(np.diff(flat[order]))[0] + 1
+        for group in np.split(owner, cuts):
+            first = int(group[0])
+            for t in group[1:]:
+                if float(n[first] @ n[int(t)]) > SAME_PLANE_COS:
+                    rt, ru = find(first), find(int(t))
+                    if rt != ru:
+                        parent[ru] = rt
         roots = np.array([find(i) for i in range(self.count)])
         _, self.sheet = np.unique(roots, return_inverse=True)
         self.sheet = self.sheet.reshape(-1)
@@ -268,6 +297,8 @@ class Faces:
         self.sheet_normal = normal / np.maximum(np.linalg.norm(normal, axis=1), 1e-30)[:, None]
         self.sheet_first = np.full(self.sheets, self.count, dtype=np.int64)
         np.minimum.at(self.sheet_first, self.sheet, np.arange(self.count))
+        self.all_sheet = np.full(len(self.all_p), -1, dtype=np.int64)
+        self.all_sheet[self.kept] = self.sheet
 
     def fights(self, model, tol, min_area):
         """{(sheet a, sheet b): overlap in two looks, m2} for every pair of sheets at or over `min_area`."""
@@ -332,7 +363,7 @@ class Faces:
                             continue
                         a, bb = int(sh[i]), int(sh[j])
                         found[(min(a, bb), max(a, bb))] += abs(area(over))
-        # Two sheets that share a vertex are one skin folded over itself: no lift parts them, and they are left alone.
+        # Two sheets that share a vertex are one skin folded over itself: no step parts them, and they are left alone.
         out = {}
         for (a, b), ar in found.items():
             if ar < min_area:
@@ -343,9 +374,10 @@ class Faces:
         return out
 
     def levels(self, fights):
-        """{sheet: steps it is lifted by}. Sheets are taken largest first (the earlier in the file of two alike): each
-        goes over every sheet it fights that is clearly larger (a panel on its wall), and otherwise takes the lowest
-        step no sheet it fights has, so a row of boards that overlap by a hair alternates between two steps."""
+        """{sheet: its step in the pile} for every sheet in a fight, 0 for one that lies under the rest. Sheets are
+        taken largest first (the earlier in the file of two alike): each goes over every sheet it fights that is
+        clearly larger (a panel on its wall), and otherwise takes the lowest step no sheet it fights has, so a row of
+        boards that overlap by a hair alternates between two steps."""
         rank = np.empty(self.sheets, dtype=np.int64)
         rank[np.lexsort((self.sheet_first, -self.sheet_area))] = np.arange(self.sheets)
         near = defaultdict(list)
@@ -363,30 +395,161 @@ class Faces:
             while step in taken:
                 step += 1
             level[s] = step
-        return {s: k for s, k in level.items() if k > 0}
+        return level
 
-    def lift(self, model, level, eps):
-        """Moves each lifted sheet, and the side faces ending on it, by its level times `eps` along its normal."""
+    def part(self, model, fights, eps):
+        """Parts the sheets of every fight by `eps` a step and returns (sheets moved, the most steps one moved, piles
+        that could not keep the mesh's bounds).
+
+        A pile is every sheet joined to another by a fight; its sheets keep their order. Either the top one stays
+        and each one under it sinks behind it, against the pile's facing, or the bottom one stays and the others
+        rise. A sheet moves with nothing but the faces that end on it from the side it leaves (its rim, when it
+        rises), which are drawn out after it so no slit opens; the faces on the side it moves toward stay, so a
+        sunk sheet lies a hair inside its own rim and no edge, corner or outline of the model moves. Sinking is
+        taken where every sheet that sinks has corners of its own; where one shares them with its rim (it would
+        draw the rim in, away from what stood against it) the pile rises, the boxes growing by a hair into what
+        they touch. Whichever is taken first must keep every mesh's bounds (the game sizes and places a prop by
+        them); a pile whose sheets face both ways (cards drawn from both sides) rises, each along its own facing."""
+        level = self.levels(fights)
+        root = {s: s for s in level}
+
+        def find(s):
+            while root[s] != s:
+                root[s] = root[root[s]]
+                s = root[s]
+            return s
+
+        for a, b in fights:
+            ra, rb = find(a), find(b)
+            if ra != rb:
+                root[rb] = ra
+        piles = defaultdict(list)
+        for s in level:
+            piles[find(s)].append(s)
+        lo, hi, owner = self._bounds(model)
         move = np.zeros((model.vertices, 3))
-        for s, k in level.items():
-            normal = self.sheet_normal[s]
-            tris = np.nonzero(self.sheet == s)[0]
-            own = np.unique(self.vid[tris].reshape(-1))
-            points = np.unique(self.point[tris].reshape(-1))
-            # Vertices on the sheet's points that belong to a face parallel to it and outside it (the sheet it lies
-            # on, a back face) stay; those of its side faces come along.
-            at = np.isin(self.all_point, points)
-            parallel = np.abs(self.all_n @ normal) > PARALLEL_COS
-            held = np.setdiff1d(np.unique(self.all_vid[parallel][at[parallel]]), own)
-            sides = np.setdiff1d(np.unique(self.all_vid[~parallel][at[~parallel]]), held)
-            moved = np.union1d(own, sides)
-            move[moved] += normal[None, :] * (k * eps)
+        moved = 0
+        most = 0
+        grew = 0
+        for members in piles.values():
+            top = max(level[s] for s in members)
+            facing = [s for s in members if not self.two[self.sheet_first[s]]] or members
+            ref = self.sheet_normal[max(facing, key=lambda s: self.sheet_area[s])]
+            if any(float(self.sheet_normal[s] @ ref) < 0.0 for s in facing):
+                plans = [{s: level[s] * eps * self.sheet_normal[s] for s in members if level[s] > 0}]
+            else:
+                sink = {s: (level[s] - top) * eps * ref for s in members if level[s] < top}
+                rise = {s: level[s] * eps * ref for s in members if level[s] > 0}
+                plans = [rise, sink] if any(self._shares_rim(s) for s in sink) else [sink, rise]
+            chosen = None
+            for plan in plans:
+                steps = [self._steps(s, by) for s, by in plan.items()]
+                if all(self._inside(ids, by, model, lo, hi, owner) for ids, by in steps):
+                    chosen = steps
+                    break
+            if chosen is None:
+                grew += 1
+                chosen = [self._steps(s, by) for s, by in plans[0].items()]
+            for ids, by in chosen:
+                far = np.einsum("ij,ij->i", move[ids], move[ids]) < float(by @ by)
+                move[ids[far]] = by[None, :]
+            moved += len(chosen)
+            most = max(most, top)
         for p in model.prims:
             part = move[p["base"]: p["base"] + len(p["pos"])]
             if not part.any():
                 continue
             local = (part / self.scale[None, :]) @ np.linalg.inv(p["m3"]).T
             p["pos"][:, :] = (p["pos"].astype(np.float64) + local).astype(np.float32)
+        return moved, most, grew
+
+    def _shares_rim(self, s):
+        """True when sheet `s` shares a vertex with a face that leaves its plane: moved, it takes that face along."""
+        tris = np.nonzero(self.sheet == s)[0]
+        own = np.unique(self.vid[tris].reshape(-1))
+        uses = np.isin(self.all_vid, own).any(axis=1) & (self.all_sheet != s)
+        if not uses.any():
+            return False
+        height = (self.all_p[uses] - self.p[tris[0], 0][None, None, :]) @ self.sheet_normal[s]
+        return bool((np.abs(height) > WELD).any())
+
+    def _steps(self, s, by):
+        """(vertices, move) for sheet `s` moved by `by`: its own vertices, and every vertex lying on it of a face
+        that stands wholly on the side it leaves (that face is drawn out after it)."""
+        normal = self.sheet_normal[s]
+        tris = np.nonzero(self.sheet == s)[0]
+        own = np.unique(self.vid[tris].reshape(-1))
+        on, height = self._on_sheet(s, tris)
+        leaving = -1.0 if float(by @ normal) > 0.0 else 1.0
+        off = np.where(np.abs(height) < 2.0 * WELD, 0.0, height * leaving)
+        stands = (self.all_sheet != s) & on.any(axis=1) & (off.max(axis=1) > 0.0) & (off.min(axis=1) >= 0.0)
+        ids = np.union1d(own, np.unique(self.all_vid[stands][on[stands]]))
+        return ids, np.asarray(by, dtype=np.float64)
+
+    def _on_sheet(self, s, tris):
+        """(which corners of every triangle lie on sheet `s`, every corner's height over its plane): a corner at one
+        of the sheet's points, or in its plane within its outline (a face that meets the sheet part-way along an
+        edge has no point of the sheet's there)."""
+        normal = self.sheet_normal[s]
+        height = (self.all_p - self.p[tris[0], 0][None, None, :]) @ normal
+        on = np.isin(self.all_point, np.unique(self.point[tris].reshape(-1)))
+        axis = int(np.argmax(np.abs(normal)))
+        u, v = [(1, 2), (2, 0), (0, 1)][axis]
+        flat = self.p[tris][:, :, [u, v]]
+        lo = flat.reshape(-1, 2).min(axis=0) - WELD
+        hi = flat.reshape(-1, 2).max(axis=0) + WELD
+        q = self.all_p[:, :, [u, v]]
+        near = (np.abs(height) < 2.0 * WELD) & ~on & ((q >= lo) & (q <= hi)).all(axis=2)
+        if not near.any():
+            return on, height
+        rows, cols = np.nonzero(near)
+        points, back = np.unique(self.all_point[rows, cols], return_inverse=True)
+        first = np.zeros(len(points), dtype=np.int64)
+        first[back] = np.arange(len(back))
+        at = q[rows[first], cols[first]]
+        a, b, c = flat[:, 0], flat[:, 1], flat[:, 2]
+
+        def side(p0, p1, pts):
+            e = p1 - p0
+            w = pts[:, None, :] - p0[None, :, :]
+            return (e[None, :, 0] * w[:, :, 1] - e[None, :, 1] * w[:, :, 0]) / np.maximum(
+                np.linalg.norm(e, axis=1), 1e-12)[None, :]
+
+        inside = np.zeros(len(points), dtype=bool)
+        for i in range(0, len(points), 512):
+            pts = at[i: i + 512]
+            d = np.stack([side(a, b, pts), side(b, c, pts), side(c, a, pts)])
+            inside[i: i + 512] = ((d >= -WELD).all(axis=0) | (d <= WELD).all(axis=0)).any(axis=1)
+        on[rows, cols] = inside[back]
+        return on, height
+
+    def _bounds(self, model):
+        """Each mesh's bounds in its own space, and the mesh of every vertex."""
+        nodes = sorted({p["node"] for p in model.prims})
+        lo = np.full((len(nodes), 3), np.inf)
+        hi = np.full((len(nodes), 3), -np.inf)
+        owner = np.zeros(model.vertices, dtype=np.int64)
+        for k, p in enumerate(model.prims):
+            n = nodes.index(p["node"])
+            owner[p["base"]: p["base"] + len(p["pos"])] = k
+            if len(p["pos"]):
+                lo[n] = np.minimum(lo[n], p["pos"].min(axis=0))
+                hi[n] = np.maximum(hi[n], p["pos"].max(axis=0))
+        self._node_of_prim = np.array([nodes.index(p["node"]) for p in model.prims])
+        return lo, hi, owner
+
+    def _inside(self, ids, by, model, lo, hi, owner):
+        """True when moving vertices `ids` by `by` (model space) keeps each inside its mesh's bounds."""
+        for k in np.unique(owner[ids]):
+            p = model.prims[int(k)]
+            mine = ids[owner[ids] == k] - p["base"]
+            local = (by / self.scale) @ np.linalg.inv(p["m3"]).T
+            after = p["pos"][mine].astype(np.float64) + local[None, :]
+            n = self._node_of_prim[int(k)]
+            slack = BOUNDS_SLACK * max(1.0, float(np.abs(hi[n] - lo[n]).max()))
+            if (after < lo[n][None, :] - slack).any() or (after > hi[n][None, :] + slack).any():
+                return False
+        return True
 
 
 def model_files(paths):
@@ -415,8 +578,8 @@ def describe(model, faces, fights, top):
     return lines
 
 
-def lift_for(faces):
-    """The lift for each step of this model (m), by its size as the game draws it."""
+def step_for(faces):
+    """The step between two sheets of this model (m), by its size as the game draws it."""
     size = float(np.linalg.norm(np.ptp(faces.p.reshape(-1, 3), axis=0)))
     return max(min(max(EPS_SHARE * size, EPS_LEAST), EPS_MOST), 3.0 * size / STORED_STEPS)
 
@@ -427,8 +590,8 @@ def main():
     ap.add_argument("paths", nargs="*")
     ap.add_argument("--tol", type=float, default=0.0, help="planes this close are one plane (m); 0 picks by size")
     ap.add_argument("--min-area", type=float, default=5e-7, help="an overlap under this is no fight (m2)")
-    ap.add_argument("--eps", type=float, default=0.0, help="the lift for each sheet lain on (m); 0 picks by size")
-    ap.add_argument("--passes", type=int, default=8, help="a lift can land a face on another: looked at again")
+    ap.add_argument("--eps", type=float, default=0.0, help="the step between two sheets (m); 0 picks by size")
+    ap.add_argument("--passes", type=int, default=8, help="a moved sheet can land on another: looked at again")
     ap.add_argument("--top", type=int, default=3, help="fights listed for each file")
     ap.add_argument("--json", help="write every file's totals here")
     args = ap.parse_args()
@@ -452,7 +615,7 @@ def main():
         faces = Faces(model, scale)
         if faces.count == 0:
             continue
-        eps = args.eps or lift_for(faces)
+        eps = args.eps or step_for(faces)
         tol = args.tol or TOL_SHARE * eps
         fights = faces.fights(model, tol, args.min_area)
         before = sum(fights.values())
@@ -468,23 +631,27 @@ def main():
             continue
         if not fights:
             continue
-        lifted = 0
+        parted = 0
         top_level = 0
-        for _round in range(args.passes):
-            level = faces.levels(fights)
-            lifted += len(level)
-            top_level = max(top_level, max(level.values(), default=0))
-            faces.lift(model, level, eps)
+        grew = 0
+        for again in range(args.passes):
+            # A sheet moved one step can land on another that stands a step away, which would send it back: each
+            # further look moves by one step more.
+            moved, most, out = faces.part(model, fights, eps * (again + 1))
+            parted += moved
+            top_level = max(top_level, most * (again + 1))
+            grew += out
             faces = Faces(model, scale)
             fights = faces.fights(model, tol, args.min_area)
             if not fights:
                 break
         model.save()
         after = sum(fights.values())
-        totals[name].update({"lifted": lifted, "levels": top_level, "eps": eps, "left": after})
-        print("%s: %.1f cm2 in %d pairs; %d sheets lifted by %.2f mm a level, %d levels at most; %.1f cm2 left" % (
-            name, before * 1e4, totals[name]["pairs"], lifted, eps * 1000.0, top_level, after * 1e4))
-        if fights:
+        totals[name].update({"parted": parted, "levels": top_level, "eps": eps, "left": after, "grew": grew})
+        print("%s: %.1f cm2 in %d pairs; %d sheets parted by %.2f mm a step, %d steps at most; %.1f cm2 left%s" % (
+            name, before * 1e4, totals[name]["pairs"], parted, eps * 1000.0, top_level, after * 1e4,
+            "; %d piles moved the bounds" % grew if grew else ""))
+        if fights or grew:
             bad += 1
             for line in describe(model, faces, fights, args.top):
                 print(line)
@@ -493,7 +660,8 @@ def main():
     if args.mode == "check":
         print("coplanar_models: %d model files, %d with fighting faces (%.1f cm2)" % (len(files), bad, fought * 1e4))
     else:
-        print("coplanar_models: %d model files, %d still with fighting faces" % (len(files), bad))
+        print("coplanar_models: %d model files, %d still with fighting faces or with bounds that moved" % (
+            len(files), bad))
     return 1 if bad else 0
 
 

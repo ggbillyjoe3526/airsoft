@@ -3,12 +3,16 @@ extends GutTest
 ## fixes outside the model files. Subway's platform edge lining stands proud of its platform's slab along both
 ## platforms (the two lay in one plane, 119 m2 of them); no level face of a prop laid in tiles lies in its backing's
 ## top (Depot's parts cages' roofs did); a door frame's head stands under whatever closes its opening (a hut's roof).
-## The model files themselves are checked by tools/coplanar_models.py in CI's lint job. And the other flicker, a
-## texture's own: every texture a model or a field wears carries mipmaps (Depot's sign sheet had none, so its print
-## crawled from across the hall).
+## The model files themselves are checked by tools/coplanar_models.py in CI's lint job, and parting their faces
+## leaves a model the size it was built to: a section laid cell by cell is as long as its cell, so its end posts
+## meet the next section's. And the other flicker, a texture's own: every texture a model or a field wears carries
+## mipmaps (Depot's sign sheet had none, so its print crawled from across the hall).
 
 ## Two faces nearer than this (m) are taken to share a plane.
 const NEAR := 0.002
+## A model within CELL_BUILT (m) of its grid cell was built to it, and is then the cell's size to CELL_EXACT.
+const CELL_BUILT := 0.005
+const CELL_EXACT := 0.0001
 
 ## The folders whose textures are drawn in the world, and the side (px) up to which one is a flat swatch that needs
 ## no smaller copies.
@@ -109,6 +113,28 @@ func test_no_level_face_of_a_tiled_prop_lies_in_its_backings_top() -> void:
 	old.props = look.props.duplicate() as PropDressConfig
 	old.props.backing_top = 0.05
 	assert_gt(_tops_in_a_backing(map, old), 0, "0.05 m under the top is the cages' own roof")
+
+
+# --- a section built to its cell ---
+
+## A prop is drawn at the size of its box by its mesh's bounds (PropLayout.fit), so a wall section whose bounds grew
+## by a hair past its end posts is drawn shrunk by that hair and its posts stop short of the next section's: a
+## dashed line of daylight down every pier (the Range's wall, when a model fix first let a face out of the bounds).
+func test_a_section_built_to_its_grid_cell_is_exactly_as_long_and_as_deep() -> void:
+	var cfg := play.site_look.props
+	var built := 0
+	for model: StringName in cfg.grid_cells:
+		var mesh := cfg.mesh_of(model)
+		if mesh == null:
+			continue
+		var size := mesh.get_aabb().size
+		var cell: Vector3 = cfg.grid_cells[model]
+		if absf(size.x - cell.x) > CELL_BUILT or absf(size.z - cell.z) > CELL_BUILT:
+			continue # drawn wider than its cell, or cut to it, by design
+		built += 1
+		assert_almost_eq(size.x, cell.x, CELL_EXACT, "%s is as long as its cell" % model)
+		assert_almost_eq(size.z, cell.z, CELL_EXACT, "%s is as deep as its cell" % model)
+	assert_gt(built, 2, "the Range's wall and backstop and the sandbags are built to their cells")
 
 
 # --- a door frame's head ---

@@ -9,8 +9,9 @@ Two triangles fight when they face the same way (or either is drawn double-sided
 they overlap by at least `min-area` m2. Pairs of one source and one colour are listed apart: they look alike, so they
 cost a draw but never show. So are two see-through faces (they blend twice, a steady patch, never a flicker) and
 faces looking straight down at the field's lowest floor, which no eye gets under. A source pair is listed once for
-each axis its fighting faces mostly face along. `tol` is under the least lift tools/coplanar_models.py gives (0.05 mm).
-What is listed is not always seen (a fitting's back against its wall): tools/eye_pictures.gd `raw` shows what is.
+each axis its fighting faces mostly face along. `tol` is under the least step tools/coplanar_models.py parts two
+faces by (0.05 mm). What is listed is not always seen (a fitting's back against its wall): tools/eye_pictures.gd
+`raw` shows what is.
 Dev only: tools/ never ships.
 """
 import argparse

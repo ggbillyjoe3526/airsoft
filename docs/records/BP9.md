@@ -67,22 +67,35 @@ are each drawn through the other in a pattern that crawls as the eye moves (z-fi
 about 0.004 mm at 60 m, so only faces truly in one plane fight, and a fraction of a millimetre apart is enough to end
 it. The pass measured every model file and every field for them, fixed what it found and added a gate.
 
-**In the models (111 of 249 files).** `tools/coplanar_models.py check` reads every `.glb` under `assets/models/` and
-lists, part by part, the faces of one part lying in one plane over one another: 1,733 sheets, 2,866 pairs, 168 m2 in
-all. 136 m2 of it was in seven skyline models (the far sheds and the crane), 32 m2 in 86 props (the watch tower, the
-roof truss with 1,020 pairs, the Range's backstop and wall, the works hoardings, the pallet racking), and under a
-tenth of a square metre in the other 18 files (the two figures, thirteen replica files, a range target, the bomb and
-the smoke grenade). `fix` lifts one sheet of each pair along its
-facing by a step sized to the model (a ten-thousandth of its length and never less than three of the 65,536 steps the
-engine stores a model's positions in: 0.05 to 0.09 mm on a replica, 0.2 mm on a figure, up to 0.9 mm on a prop and
-2.6 mm on a far shed), up to three levels where sheets stack (the most any vertex moved is 5.2 mm, two levels on the
-longest skyline shed, which stands beyond the field). A fixed 0.3 mm lift was tried first and moved a laser's
-emitter and a delta ring past what their fit tests allow, hence the size. QA compared all 111 files with
-their old copies: nodes, materials, indices, UVs, normals, colours, weights and animations are identical, only
-positions differ; the 76 test files that load models (829 tests) pass. `check` now finds none, and CI's lint job
-runs it on every pull request (`tools/check.sh` too, where numpy is installed), so a rebuilt model that brings one
-back fails. `tools/coplanar_scales.json` names the models the game draws shrunk (the door leaves), whose lift is
-sized for the size they are drawn at.
+**In the models (99 of 249 files).** `tools/coplanar_models.py check` reads every `.glb` under `assets/models/` and
+lists, part by part, the faces of one part lying in one plane over one another: 2,400 pairs, 135 m2 in all. 106 m2
+of it was in six skyline models (the far sheds and the crane), 29 m2 in 78 props (the watch tower, the roof truss
+with 1,020 pairs, the Range's backstop and wall, the works hoardings, the pallet racking), and under a tenth of a
+square metre in the other 15 files (the two figures, eleven replica files, a range target and the smoke grenade).
+A face drawn from both sides that is the skin of a closed solid counts as one-sided (its back is never seen), so
+two boards' touching faces are no fight. `fix` keeps the order of each pile (the smaller sheet lies over the
+larger) and sinks every sheet under the top one behind it, against its facing, by a step sized to the model (a
+ten-thousandth of its length and never less than three of the 65,536 steps the engine stores a model's positions
+in: 0.05 to 0.11 mm on a replica, 0.2 mm on a figure, up to 0.9 mm on a prop and 2.6 mm on a far shed), up to three
+steps where sheets stack (1,141 sheets moved; the most any moved is 2.6 mm, on the longest skyline shed, which
+stands beyond the field, and 2.1 mm on a prop). A sheet sinks alone: the faces behind it (its rim) stay, so no
+edge, corner or outline of a model moves and every mesh's bounds are what they were; a face that stands on a
+sinking sheet is drawn out to follow it. Of the 751 piles, 641 sank that way; in 52 a sheet shares its corners with
+its rim (sinking would draw the rim in, away from what stands against it), so the upper sheets rose instead, their
+rims drawn out after them; 54 were cards drawn from both sides and facing both ways, which rise each along its own
+facing; and in 4 rising would have left the bounds, so they sank with their rims. `check` now finds none, and CI's
+lint job runs it on every pull request (`tools/check.sh` too, where numpy is installed), so a rebuilt model that
+brings one back fails. `tools/coplanar_scales.json` names the models
+the game draws shrunk (the door leaves), whose step is sized for the size they are drawn at.
+
+The first way tried lifted the smaller sheet outward with its side faces, so a box grew by a hair. The before and
+after pictures caught what that did on the Range: the wall section's bounds grew 1.5 mm past its end posts, a prop
+is drawn at its box's size by its bounds (`PropLayout.fit`), so every section was drawn a hair short and daylight
+showed between each pair of posts as a dashed line; the cap's side faces had also been pulled 0.4 mm off its
+underside. Measured over all the files (every edge two faces shared before, against after), that way had moved
+the bounds of 50 models and opened 296 cm2 of slits; this one moves no mesh's bounds and leaves 0.9 cm2, all
+under 0.2 mm wide, where a slanted face follows a sheet. A fixed 0.3 mm step, tried before either, moved a
+laser's emitter and a delta ring past what their fit tests allow, hence the size.
 
 **On the fields**, measured as a match draws them (`tools/coplanar_dump.gd` under a real renderer, then
 `tools/coplanar_check.py`), faces of different pieces in one plane, before and after:
@@ -114,11 +127,12 @@ pixels that changed by more than the picture's own detail there allows. Over 29 
 than a pixel crawls as the eye moves. That is not two faces fighting and is left as ruled; the checklist tells
 William which is which.
 
-Tests: `test_bp9_flicker.gd` (5): Subway's six linings stand proud of every block's face; no level face of a tiled
-prop lies in its backing's top, and the old 0.05 m is caught; every door frame's head on Depot and Woodland stands
-`FRAME_HEAD_CLEAR` under its opening's top with its foot on the floor; every texture drawn in the world carries
-mipmaps (a swatch of a few pixels aside); Depot's sign sheet is stored as Subway's. `test_bp9_flicker_qa.gd` (QA): every door's
-leaves stand on its frame's floor.
+Tests: `test_bp9_flicker.gd` (6): Subway's six linings stand proud of every block's face; no level face of a tiled
+prop lies in its backing's top, and the old 0.05 m is caught; a section built to its grid cell (the Range's wall and
+backstop, the sandbags) is the cell's size to a tenth of a millimetre (the first way's models fail it: 2.4015 m for
+2.4); every door frame's head on Depot and Woodland stands `FRAME_HEAD_CLEAR` under its opening's top with its foot
+on the floor; every texture drawn in the world carries mipmaps (a swatch of a few pixels aside); Depot's sign sheet
+is stored as Subway's. `test_bp9_flicker_qa.gd` (QA): every door's leaves stand on its frame's floor.
 
 ## Decisions
 
@@ -140,11 +154,15 @@ leaves stand on its frame's floor.
   circle alone is see-through, so the crosshair stays readable in a fight. No sound was added (owner: sounds later).
 - **A bot keeps its own news over a Spotted for `BotConfig.hearing_contact_time`,** the time its own sighting
   already counts for against a sound.
-- **A model's flicker is fixed in the model file, not in its build script** (part 2). The lift is a fraction of a
+- **A model's flicker is fixed in the model file, not in its build script** (part 2). The step is a fraction of a
   millimetre that no build script's author would see, the same pass covers models from every script (and the ones
   with none), and the gate keeps a rebuilt model honest: after a Blender build, `tools/coplanar_models.py fix`.
-- **The lift is sized to the model** (part 2): a fixed 0.3 mm broke two replica fit tests and would still be under
+- **The step is sized to the model** (part 2): a fixed 0.3 mm broke two replica fit tests and would still be under
   the engine's stored step on a 100 m skyline shed.
+- **A fixed model keeps its bounds and its outline** (part 2). The game sizes and places props, skyline pieces and
+  tiled sections by a mesh's bounds, and parts of one model meet along its edges, so the fix moves a sheet inside
+  its own rim and never an edge; `fix` fails if a pile cannot be parted inside the bounds (none does today), and
+  `test_bp9_flicker.gd` holds the sections built to their grid cells to the cell's size.
 - **What is hidden is left alone** (part 2). Faces in one plane that no eye reaches (a fitting's back on its wall, two
   floors under a wall) cost nothing and moving them risks the fits the tests hold. Pictures decide what shows
   (`tools/flicker_map.py`), not the list.

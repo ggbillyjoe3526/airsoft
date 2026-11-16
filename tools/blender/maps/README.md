@@ -84,8 +84,9 @@ crown evenly over it.
 
 Run each with Blender 5.x or pip's `bpy` (`pip install bpy==5.2.3`): `python3 -I tools/blender/maps/<script>.py <repo
 root>`, then `python3 tools/coplanar_models.py fix <the files it wrote>` (faces of one part lying over one another
-in one plane flicker in the game: the fix lifts one of each by a fraction of a millimetre, and CI's lint job fails a
-model that still has any, BP9) and `godot --headless --path . --import`. Pictures for review: `tools/prop_pictures.gd` (a model alone),
+in one plane flicker in the game: the fix sinks one of each inside its own rim by a fraction of a millimetre, the
+model's bounds and edges staying where they were, and CI's lint job fails a model that still has any, BP9) and
+`godot --headless --path . --import`. Pictures for review: `tools/prop_pictures.gd` (a model alone),
 `tools/hall_pictures.gd` (Depot) and `tools/woodland_pictures.gd` (Woodland), all under xvfb; `tools/eye_pictures.gd`
 for a field (`night` lights its fires and lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's
 scripts run as `python3 tools/blender/maps/<script>.py`), `docs/records/WG2.md`, `docs/records/WG3.md`,
