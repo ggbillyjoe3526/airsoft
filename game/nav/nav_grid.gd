@@ -54,6 +54,10 @@ var slow: PackedByteArray = PackedByteArray()
 var leaves: Foliage = null
 ## How high over a floor a body's point in a bush is tested (NavConfig.bush_probe_height).
 var bush_probe: float = 0.0
+## Each node under wading water (1; NavConfig.wade_from deep or more), or empty on a field with no water: a place a bot
+## never picks to go and look at (RoundPlanner.hunt_point). Wading is slow, and a route to a spot in the stream's bed
+## makes the search price every way round it first (BP9: up to 85 ms in one tick on Woodland).
+var wade: PackedByteArray = PackedByteArray()
 ## The smoke clouds priced on the search while they stand (NavSmoke, made by the first bots to route here).
 var smoke: NavSmoke = null
 ## The route search: a point per walkable node (id = node), linked by the step rules.
