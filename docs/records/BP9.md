@@ -4,7 +4,7 @@
 
 - part 1 (bugs): critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
 - part 2 (flicker): critic Accept 8/8 (attempt 1) · qa Pass · performance Pass
-- part 3 (light): critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
+- part 3 (light): critic Accept 7/8 (attempt 2) · qa Pass · performance Pass
 
 William's full pass before he tags 0.1 Beta 1 (owner, 2026-11-15 and 16): bugs, balance, performance, quality and
 edge cases over the whole game, with a clean-out of unused files, a hunt for flicker (faces lying over one another),
@@ -18,7 +18,7 @@ the harsh shadows and the over-bright spots under Depot's lamps. It goes out in 
 | 2026-11-16 | part 1: 2 | Fable 5.2 | lint, wiki, whole unit suite, smoke; CI | Accept 8/8 | – |
 | 2026-11-16 | part 2: 1 | Fable 5.2 | lint, wiki, the models' gate, 158 touched test files, smoke; CI | Accept 8/8 | – |
 | 2026-11-16 | part 3: 1 | Fable 5.2 | lint, wiki, 82 touched test files, smoke | Accept 7/8 | docs said Medium's edges drew smooth (they are softer, with a grain), the blur's old value, a checklist number with no home; then the owner, on the pictures: Depot on Ultra "looks better before" |
-| 2026-11-16 | part 3: 2 | Fable 5.2 | lint, wiki, 82 touched test files, smoke; CI | Accept 8/8 | – |
+| 2026-11-16 | part 3: 2 | Fable 5.2 | lint, wiki, the changelog and models' gates, 82 touched test files, smoke; CI | Accept 7/8 | – (8/8 on the owner's change; its note that the wider blur reached Ultra's sun was checked and fixed, and the re-read of that fix failed the record's count of QA's tests, corrected in the same commit) |
 
 ## Part 1: bugs
 
@@ -293,12 +293,16 @@ on any field captures within the clearance of a block, and each captures inside 
 its props while a clear middle stays; the probes under a roof give no ambient light while the field's ambient fills and
 the open fields' keep theirs; under the scene's bounce light an interior's probes keep their ambient, through a change
 of preset and back, and probes built after it came on do too; a probe in a kiosk captures from the nearest clear spot,
-and from its middle when nothing is clear. QA's (`test_bp9_light_qa.gd`, 11): a box smaller than the clearance, a
+and from its middle when nothing is clear. QA's (`test_bp9_light_qa.gd`, 21): a box smaller than the clearance, a
 clearance of nought or less, a slope, a box off the terrain, ground under the probe's floor, every field's eye finite
 and in its box, the sun's filter never coarser than the lamps' on any preset, a hall first set with the bounce on, a
-flicker step taken while the lamps are off, a plain roof's flicker under the bounce switch, and a roof whose lamps are
-all dead. Woodland's eye-height test (`test_bp2.gd`) measures the ground under the capture point, which moves where a
-prop stands at the middle.
+flicker step taken while the lamps are off, a plain roof's flicker under the bounce switch, a roof whose lamps are all
+dead; the probes' ambient set while Reflections are Off and right when they come back, no probes at all, an open field's
+probes untouched through the presets, the switch repeated on no probes, and Depot's probes keeping their ambient exactly
+when the lamps take their bounce strength; and Softest's sun with main's blur and size on every field by day and by
+night, the softer presets keeping the wider blur and no sun size, a field's light never given its effects, Softest with
+the sun shut out and back, and a map's override and the moon keeping Softest's blur. Woodland's eye-height test
+(`test_bp2.gd`) measures the ground under the capture point, which moves where a prop stands at the middle.
 
 ## Decisions
 
