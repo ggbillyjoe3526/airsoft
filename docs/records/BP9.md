@@ -5,6 +5,7 @@
 - part 1 (bugs): critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
 - part 2 (flicker): critic Accept 8/8 (attempt 1) · qa Pass · performance Pass
 - part 3 (light): critic Accept 7/8 (attempt 2) · qa Pass · performance Pass
+- part 4 (performance): critic Accept 8/8 (attempt 1) · qa Pass · performance Pass
 
 William's full pass before he tags 0.1 Beta 1 (owner, 2026-11-15 and 16): bugs, balance, performance, quality and
 edge cases over the whole game, with a clean-out of unused files, a hunt for flicker (faces lying over one another),
@@ -19,6 +20,7 @@ the harsh shadows and the over-bright spots under Depot's lamps. It goes out in 
 | 2026-11-16 | part 2: 1 | Fable 5.2 | lint, wiki, the models' gate, 158 touched test files, smoke; CI | Accept 8/8 | – |
 | 2026-11-16 | part 3: 1 | Fable 5.2 | lint, wiki, 82 touched test files, smoke | Accept 7/8 | docs said Medium's edges drew smooth (they are softer, with a grain), the blur's old value, a checklist number with no home; then the owner, on the pictures: Depot on Ultra "looks better before" |
 | 2026-11-16 | part 3: 2 | Fable 5.2 | lint, wiki, the changelog and models' gates, 82 touched test files, smoke; CI | Accept 7/8 | – (8/8 on the owner's change; its note that the wider blur reached Ultra's sun was checked and fixed, and the re-read of that fix failed the record's count of QA's tests, corrected in the same commit) |
+| 2026-11-16 | part 4: 1 | Fable 5.2 | lint, wiki, the changelog gate, 8 touched test files, smoke; CI | Accept 7/8, then 8/8 on the re-read | the texts said every slow tick left was a route search, on a tally of searches over 16 ms alone; "a dropped frame" for a hitch of three to five; the greedier search called one number (`bush_cost` is held to it); Dev 3's worst ticks put down to the stream untraced. Each slow tick was then timed part by part (42 of 50 are route searches) and the texts corrected in the same attempt |
 
 ## Part 1: bugs
 
@@ -512,9 +514,9 @@ file's grid and asserts (the critic's note).
 - Depot's crates and walls are a shade paler and cooler on Medium and High (part 3: its probes give reflections alone);
   William's to say (his checklist, N23).
 - Woodland still hitches now and then (part 4): 8 to 25 ticks over 16 ms in a four-minute match on the cloud's
-  processor, up to 75 ms at worst (four frames), most of them a hunt's or a chase's route search over 40 m
-  or more. Two measured ways on are in
-  `docs/KNOWN_ISSUES.md` (Bots); how Woodland runs on a real processor is William's check (his checklist, N24).
+  processor, up to 75 ms at worst (four to five frames), most of them a hunt's or a chase's route search over 40 m
+  or more. Two measured ways on are in `docs/KNOWN_ISSUES.md` (Bots); how Woodland runs on a real processor is
+  William's check (his checklist, N24).
 - Depot at 8v8 and Subway cost up to a millisecond more script time a frame than in Dev 3 (part 4), inside the
   frame's budget; not traced.
 - Four balance figures sit near their band's edge (part 4): Woodland's west end in Elimination at Normal (45.2 % ±1.6

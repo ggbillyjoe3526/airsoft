@@ -1899,9 +1899,9 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   Pass: no long stall (a bot with nobody in sight used to choose spots in the stream to go and look at, and working
   out a route into the water was the dearest thing a bot did: up to a quarter of a second on the cloud's
   processor). No bot stands in the stream to look round; bots still cross at the Ford and the bridges. Shorter
-  hitches are still there on a slow processor (three to four frames at worst, a few a match, mostly a bot working
-  out a long route: `docs/KNOWN_ISSUES.md`, Bots): say whether you feel any on yours, at which team size and preset,
-  and about how often.
+  hitches are still there on a slow processor (four to five frames at worst, up to about 25 in a four-minute match,
+  mostly a bot working out a long route: `docs/KNOWN_ISSUES.md`, Bots): say whether you feel any on yours, at which
+  team size and preset, and about how often.
 
 ## Reporting what you find
 
