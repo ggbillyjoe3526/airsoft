@@ -31,6 +31,9 @@ const FILTER_SAMPLES: Array[int] = [0, 1, 4, 8, 16, 32]
 const FILTER_RADIUS: Array[float] = [1.0, 1.5, 2.0, 2.0, 3.0, 4.0]
 ## The sun's shadow edge on High as it was: 4 samples over a blur of 1.5 (3 px), which read hard-edged.
 const EDGE_BEFORE := 3.0
+## The sun's blur as it was by day, which Softest (Ultra) keeps, and the night's, which never moved.
+const BLUR_BEFORE := 1.5
+const NIGHT_BLUR := 2.0
 ## An edge's samples for each pixel of its radius, squared, below which it speckled in the pictures (8 over 6 px did,
 ## and 4 over 6 px badly; 16 over 6 px drew smooth, and 4 over 4 px, Medium's, sits on the limit: softer than its old
 ## hard edge, with a fine grain along it).
@@ -221,6 +224,24 @@ func test_low_draws_no_sun_shadow_and_ultra_keeps_its_suns_size() -> void:
 	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, rs)
 	assert_almost_eq(lighting.sun.light_angular_distance, play.look.sun_size, 0.0001, "Softest: the sun's size")
 	assert_eq(rs.soft_shadows, RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "and its 16 samples")
+
+
+func test_ultras_sun_keeps_the_blur_it_was_tuned_on() -> void:
+	# Hardening at contact (Softest) the blur scales the sun's own size, so the wider blur the fixed filters took
+	# would have drawn Ultra's edges a third wider. Ultra's sun is as it was: 1.5 by day, and the night's 2, which
+	# this change never moved. A change of preset takes the blur with it, there and back.
+	var field := MapData.load_map("woodland", play.map_style, SimTuning.new().rounds.team_size)
+	for c: Array in [[LightingConfig.DAY, BLUR_BEFORE], [LightingConfig.NIGHT, NIGHT_BLUR]]:
+		var cfg := LightingConfig.for_map(play.lighting, play.night_lighting, field, c[0])
+		var lighting := FieldLighting.build(cfg, play.look)
+		add_child_autofree(lighting)
+		var rs := GraphicsApply.Server.new()
+		for preset: StringName in [&"ultra", &"high", &"ultra", &"medium"]:
+			GraphicsApply.apply(table.preset(preset), _port(), rs)
+			GraphicsApply.apply_field(table.preset(preset), lighting, null, rs)
+			var want: float = c[1] if preset == &"ultra" else cfg.shadow_blur
+			assert_almost_eq(lighting.sun.shadow_blur, want, 0.0001, "%s by %s" % [preset, c[0]])
+		assert_almost_eq(cfg.soft_sun_blur, c[1], 0.0001, "%s: Softest's blur as it was" % c[0])
 
 
 ## Every field's reflection probes as a match builds them, with the blocks round them.
