@@ -24,7 +24,9 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 - **UI.** The menus and HUD are redesigned (UR1 to UR7), with fixes after (UF1, UF2).
 - **Bug passes.** BP2 to BP9 are merged; BP8 fixed the owner's thorough Dev 2 playtest, BP9 was the full pass before
   0.1 Beta 1.
-- **Next.** 0.1 Beta 2, from the owner's Beta 1 playtest. His open checks are carried over to his Beta 2
+- **Next.** 0.1 Beta 2, from the owner's Beta 1 playtest. The first Beta 2 bug pass also runs the archive check
+  deferred at Dev 3 and Beta 1: `docs/PLAYTEST.md` (162 KB) and `docs/DECISIONS.md` (169 KB) are over 50 KB
+  (`docs/PROCESS.md` › Releases, step 6). His open checks are carried over to his Beta 2
   list (`/mnt/project-files/playtest/0.1-beta2-checklist.md`).
 
 ## Where to look
