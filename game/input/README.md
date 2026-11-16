@@ -18,7 +18,8 @@ Squad orders (M22, M23): an order key fills the next tick's `PlayerCommand.squad
 side cancels it). Holding the order wheel's key moves the wheel's own pointer instead of the view (`ControlsConfig`
 `wheel_gain` times the sensitivity, kept within the buttons; CW1: `OrderWheelLayout` places Spotted's circle in the
 middle and four same-size buttons a side, nothing straight above or below the circle); a tap (`wheel_tap`) spots
-without showing it; feet still move, the mouse wheel switches nothing, and fire and aim need a fresh press once it closes. Hover (the
+without showing it, wherever the mouse went meanwhile (the view turns by that after), and stops no burst (BP9); feet
+still move; once it is up the mouse wheel switches nothing, and fire and aim need a fresh press once it closes. Hover (the
 default) gives the order pointed at on letting go, Click only on a click (a click gives it either way); the wheel's
 orders, keys and names are `ControlsConfig` data, Hover or Click a saved setting. It closes giving nothing on pause or
 focus loss (`release`), once you are out, and on the range (`allow_orders`). The wheel on screen is the HUD's (`HudOrderWheel`).

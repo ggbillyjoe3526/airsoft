@@ -50,8 +50,8 @@ extends Resource
 @export var pre_aim_reaction_time: Vector2 = Vector2(0.35, 0.6)
 @export var pre_aim_settled: float = 0.0
 ## Someone seen again after a moment out of sight (BotConfig.reacquire_after, within contact_grace; AIM1): it answers
-## in this time (s), its aim keeping at most this share of the settle time's settling, the first aim off to one side
-## again. You ducked back, so it has to find you again: shorter than a fresh reaction, never none.
+## in this time (s), its aim keeping at most this share of the settle time's settling, the rest wandering any way
+## off you. You ducked back, so it has to find you again: shorter than a fresh reaction, never none.
 @export var reacquire_time: Vector2 = Vector2(0.25, 0.4)
 @export var reacquire_settled: float = 0.3
 ## Clearing corners (Hard): near the enemy (in their half, or with a threat in mind) it walks and aims at each corner

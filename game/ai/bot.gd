@@ -134,8 +134,10 @@ var team_wait: float = 0.0
 var wait_for_team: bool = false
 var holding: bool = false
 var hold_crouch: bool = false
-## Stepping into crouch cover by a lane point first, and that spot.
+## Stepping into crouch cover by a lane point first, and that spot; `post_cover` when that point is its post (a
+## defender's or an anchor's last point, BotMovement._hold_post), where it stays once in the cover.
 var hold_cover: bool = false
+var post_cover: bool = false
 var hold_spot: BotCover.Spot = BotCover.Spot.new()
 
 ## In cover: the spot, ducked or peeking, seconds left down, to give up getting there, settled there, since the episode
@@ -363,6 +365,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	holding = false
 	hold_crouch = false
 	hold_cover = false
+	post_cover = false
 	cover_phase = CoverPhase.DOWN
 	cover_left = 0.0
 	cover_since = -INF

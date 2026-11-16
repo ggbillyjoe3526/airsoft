@@ -141,6 +141,9 @@ func try_again(s: Settings) -> void:
 	merged.erase("graphics_choice")
 	for key in KEEP_KEYS:
 		merged[key] = previous[key]
+	# Put by before Volumetric haze had levels (a safe start on an older build, answered on this one): its Custom "on"
+	# is High now, as a settings file's is brought over (BP9: it was read as no level and lost).
+	Settings.custom_rows_now(merged["graphics_custom"])
 	if str(previous["graphics_choice"]) == String(Settings.GRAPHICS_AUTOMATIC):
 		merged.erase("graphics_choice")
 	s.from_dict(merged)

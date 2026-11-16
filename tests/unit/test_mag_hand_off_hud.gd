@@ -190,6 +190,7 @@ func test_the_wheels_need_a_mag_does_what_h_does() -> void:
 		controls.wheel_pick = pick
 		_make_input()
 		_event(&"order_wheel", true)
+		input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 		_move(ON_MAG)
 		if pick == ControlsConfig.WheelPick.CLICK:
 			_event(&"fire", true)

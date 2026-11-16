@@ -52,7 +52,8 @@ again starts the time over. Only your team sees it, and a soft pip says your spo
 While they are spotted, your bot teammates within <!-- wiki:config ping_config.spot_share_radius --> m of them hear
 where they are, at once and again every second. Each one goes after them or watches them from its post, the way it
 plays. Teammates further off, in a fight or with someone else in sight carry on. Nobody under your crosshair spots
-nobody. A tap never shows the wheel.
+nobody. A tap never shows the wheel, and it gets in the way of nothing: your view keeps turning with the mouse, and
+the trigger, your aim and the mouse wheel stay yours, so you can spot someone while you follow them or fire at them.
 
 ## Pings
 

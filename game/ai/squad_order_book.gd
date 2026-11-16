@@ -419,9 +419,12 @@ func update() -> void:
 					order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED)
 				break
 		if not carried:
+			# Everyone who carried it is out (Cover me's one helper hit, most often): its giver is told, as when they
+			# walk away from it, rather than left reading an order nobody follows.
 			_given[id] = SquadOrder.Kind.NONE
 			_own_spot[id] = 0
 			_from_move[id] = 0
+			order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED)
 
 
 ## Before the bots think (as the browser game's updateOrders): each bot back within regroup_arrive of whoever gave it

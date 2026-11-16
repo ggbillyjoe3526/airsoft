@@ -91,10 +91,13 @@ func test_a_tap_never_draws_the_wheel() -> void:
 	wheel.close()
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 5300)
 	assert_false(w.visible)
+	# BP9: a tap is told by its time alone, so the pointer leaving the middle inside a tap draws nothing either.
 	wheel.start(9000)
 	wheel.at = ON_FOLLOW
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 9010)
-	assert_true(w.visible, "out of the middle at once: drawn at once")
+	assert_false(w.visible, "out of the middle at once: still a tap, not drawn")
+	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 9200)
+	assert_true(w.visible, "held past a tap: drawn, the pointer where the flick took it")
 
 
 func test_a_different_wheel_is_drawn_from_its_data() -> void:

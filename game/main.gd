@@ -248,6 +248,8 @@ func _open_settings() -> void:
 
 ## The interface colour changed in the settings (UA2): the menus are built again in it (each page keeps the colours it
 ## was built with), the settings with them, back on Display's colours; deferred, so the click that sent it finishes.
+## The page the settings were opened over (the Loadout, the Armory) is under them again, so BACK returns to it (BP9:
+## it returned to Match), the Loadout saved first as on any way out of it.
 func restyle() -> void:
 	_rebuild_menus.call_deferred()
 
@@ -255,12 +257,18 @@ func restyle() -> void:
 func _rebuild_menus() -> void:
 	if _menus == null or _settings_screen == null:
 		return
+	var tab := _menus.page_tab()
+	_menus.leave_loadout()
 	_settings_screen.closed.disconnect(_settings_closed)
 	_settings_screen.close()
 	_settings_screen = null
 	_free_screens()
 	_build_screens()
 	_scale_menus()
+	if tab == NavRail.Tab.LOADOUT:
+		_menus.show_loadout()
+	elif tab == NavRail.Tab.ARMORY:
+		_menus.show_armory()
 	_open_settings()
 	_settings_screen.show_display_colour()
 

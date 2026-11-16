@@ -1367,8 +1367,8 @@ func hide_pings() -> void:
 
 ## Places Spotted's arrows (CW1) over the enemies `spots` marks for your team at `now` (s of match time), as `camera`
 ## sees them; none when `show` is false (the scoreboard or the match's summary hide them too). Allocates nothing.
-func place_spots(camera: Camera3D, spots: Spots, now: float, show: bool) -> void:
-	_spots.place(camera, spots, now, show and not _board.visible and not _summary.visible, size)
+func place_spots(camera: Camera3D, spots: Spots, now: float, show: bool, fraction: float = 1.0) -> void:
+	_spots.place(camera, spots, now, show and not _board.visible and not _summary.visible, size, fraction)
 
 
 func spot_arrows() -> HudSpotArrows:

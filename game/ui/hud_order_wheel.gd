@@ -4,8 +4,8 @@ extends Control
 ## held: Spotted in a circle in the middle and two columns of equal buttons beside it (OrderWheelLayout, from
 ## ControlsConfig), each with its name alone, the one the pointer is on lit, the order in force banded in your team's
 ## colour on its outer edge, the pointer a white dot. A button kept free is drawn empty and faint, and never lit. Drawn only once
-## the key is held past a tap or the pointer leaves the circle (OrderWheelPointer.held), so a tap that spots never
-## flashes it up. A notice (nobody to order, back on the team plan) shows in the circle, dimming the rest, for
+## the key is held past a tap (OrderWheelPointer.held), wherever the pointer went meanwhile (BP9), so a tap that spots
+## never flashes it up. A notice (nobody to order, back on the team plan) shows in the circle, dimming the rest, for
 ## HudConfig.order_notice_time; there is no order text anywhere else. Built on its first showing and drawn only while
 ## up: shut, it does nothing and a frame costs a comparison. Need a Mag (MH3) reads Toss a Mag while a toss is in reach
 ## (set_mag_toss), and a refusal of the hand-off picked on the wheel shows in the circle as an order's notice does

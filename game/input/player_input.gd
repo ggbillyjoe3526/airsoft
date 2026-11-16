@@ -132,6 +132,12 @@ var mag_sent: bool = false
 var _orders_allowed: bool = true
 var _wheel_allowed: bool = true
 var _wheel: OrderWheelPointer = OrderWheelPointer.new()
+## The open wheel is past a tap (_wheel_held): the trigger, aim and the mouse wheel are its own from then. Until then
+## its key may still be a tap (a Spotted), which stops no burst (BP9).
+var _wheel_taken: bool = false
+## What the mouse moved while the wheel's key might still be a tap (counts): a tap turns the view by it after all, so
+## spotting someone you are following with the sight doesn't drop the sight behind them (BP9).
+var _tap_motion: Vector2 = Vector2.ZERO
 ## The full-screen map's pointer, and whether there is a map to open (allow_map).
 var _map: MapPointer = MapPointer.new()
 var _map_allowed: bool = false
@@ -213,14 +219,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var motion := event as InputEventMouseMotion
 	if motion != null:
-		var turn := _controls.radians_per_count * _controls.sensitivity
-		if _aiming():
-			turn *= _controls.aim_sensitivity
-		if _controls.scale_with_zoom:
-			turn /= maxf(zoom, 1.0)
-		view_yaw = wrapf(view_yaw - motion.screen_relative.x * turn, -PI, PI)
-		var dy := motion.screen_relative.y * turn * (-1.0 if _controls.invert_y else 1.0)
-		view_pitch = clampf(view_pitch - dy, -_max_pitch, _max_pitch)
+		_turn_view(motion.screen_relative)
 		return
 	if event.is_echo() or not event.is_pressed():
 		return
@@ -295,6 +294,18 @@ func _unhandled_input(event: InputEvent) -> void:
 				_slot_steps = 0
 				_shared_steps = 0
 				_holster_latch = false
+
+
+## Turns the view by `counts` of the mouse, at the sensitivity in use (aimed, zoomed).
+func _turn_view(counts: Vector2) -> void:
+	var turn := _controls.radians_per_count * _controls.sensitivity
+	if _aiming():
+		turn *= _controls.aim_sensitivity
+	if _controls.scale_with_zoom:
+		turn /= maxf(zoom, 1.0)
+	view_yaw = wrapf(view_yaw - counts.x * turn, -PI, PI)
+	var dy := counts.y * turn * (-1.0 if _controls.invert_y else 1.0)
+	view_pitch = clampf(view_pitch - dy, -_max_pitch, _max_pitch)
 
 
 ## Whether Inspect was pressed since the last call, once (only while the mouse is captured).
@@ -439,33 +450,52 @@ func _map_input(event: InputEvent) -> bool:
 			or event.is_action(ZOOM_OUT) or event.is_action(ORDER_WHEEL)
 
 
-## Opens the wheel, if orders can be given: the trigger is the wheel's until it closes and is let go.
+## Opens the wheel, if orders can be given. Its key may still be a tap: the trigger is the wheel's only once it is held
+## past one (_wheel_held).
 func _open_wheel() -> void:
 	if not _wheel_allowed:
 		return
 	_wheel.start(Time.get_ticks_msec())
-	hold_fire()
+	_wheel_taken = false
+	_tap_motion = Vector2.ZERO
 
 
-## An event while the wheel is open: true if the wheel took it. The mouse moves its pointer; a click on a button gives
-## its order, on Spotted spots; letting go of the key gives what the pointer is on (Hover), and a tap of it spots either
-## way (CW1); aim waits for a fresh press; the mouse wheel switches nothing. Everything else (the keys that move you)
-## goes on as usual.
+## Whether the open wheel's key is held past a tap (ControlsConfig.wheel_tap), so the wheel is up: from that moment the
+## trigger is the wheel's until it closes and is let go (hold_fire).
+func _wheel_held() -> bool:
+	if not _wheel_taken and _wheel.held(Time.get_ticks_msec(), _controls.wheel_tap):
+		_wheel_taken = true
+		hold_fire()
+	return _wheel_taken
+
+
+## An event while the wheel is open: true if the wheel took it. The mouse moves its pointer from the first count. Its
+## key let go within a tap spots, wherever the pointer went (CW1; BP9: a tap with the mouse moving gave a side order),
+## and the view turns by what the mouse moved meanwhile; until then the trigger, aim and the mouse wheel go on as
+## usual. Past a tap the wheel is up: a click on a button gives its order, on Spotted spots; letting go of the key gives
+## what the pointer is on (Hover); aim waits for a fresh press; the mouse wheel switches nothing. Everything else (the
+## keys that move you) goes on as usual.
 func _wheel_input(event: InputEvent) -> bool:
+	var held := _wheel_held()
 	var motion := event as InputEventMouseMotion
 	if motion != null:
+		if not held:
+			_tap_motion += motion.screen_relative
 		_wheel.move(motion.screen_relative * _controls.wheel_gain * _controls.sensitivity)
 		return true
 	if event.is_echo():
 		return false
 	if event.is_action_released(ORDER_WHEEL):
-		var pick := _wheel.pick()
-		var tap := not _wheel.held(Time.get_ticks_msec(), _controls.wheel_tap)
-		if _controls.wheel_pick == ControlsConfig.WheelPick.HOVER or (tap and pick == OrderWheelPointer.SPOT):
-			_give_from_wheel(pick)
-		_close_wheel()
+		if not held:
+			_close_wheel()
+			_turn_view(_tap_motion)
+			_give_from_wheel(OrderWheelPointer.SPOT)
+		else:
+			if _controls.wheel_pick == ControlsConfig.WheelPick.HOVER:
+				_give_from_wheel(_wheel.pick())
+			_close_wheel()
 		return true
-	if not event.is_pressed():
+	if not held or not event.is_pressed():
 		return false
 	if event.is_action(FIRE):
 		var pick := _wheel.pick()
@@ -491,10 +521,13 @@ func _give_from_wheel(pick: int) -> void:
 		_latch_order(_controls.wheel_orders[pick], true)
 
 
-## Closes the wheel; fire stays held back until it is let go (a click that picked an order is not a shot).
+## Closes the wheel; if it was up (past a tap), fire stays held back until it is let go (a click that picked an order
+## is not a shot).
 func _close_wheel() -> void:
 	_wheel.close()
-	hold_fire()
+	if _wheel_taken:
+		hold_fire()
+	_wheel_taken = false
 
 
 ## The mouse wheel's items: the replicas' two slots (SLOTS), then a smoke and a flash bomb.
@@ -556,6 +589,8 @@ func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null, ho
 	elif _wheel.open and not Input.is_action_pressed(ORDER_WHEEL):
 		# its key let go unseen (a rebind, the window losing it): closed, giving nothing
 		_close_wheel()
+	elif _wheel.open:
+		_wheel_held() # held past a tap with no event since: the trigger is the wheel's from this tick
 	cmd.fire = not _fire_held_back and (Input.is_action_pressed(FIRE) or _fire_latch)
 	cmd.jump = _jump_latch # a press, not a hold: holding Space doesn't hop on every landing
 	cmd.reload = _reload_latch

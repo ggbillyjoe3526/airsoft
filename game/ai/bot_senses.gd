@@ -144,11 +144,14 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 			best_d = d
 	if best != null and best.id != b.target_id and b.target_id >= 0:
 		var cur := w.character(b.target_id)
-		if cur != null and Elimination.is_in_play(cur) and _flat(me.position, cur.position) - best_d < cfg.target_switch_margin:
+		var cur_d := _flat(me.position, cur.position) if cur != null else INF
+		if cur != null and Elimination.is_in_play(cur) and cur_d - best_d < cfg.target_switch_margin:
 			var part := visible_part(me, cur, w, sight_reach(b, cur, w))
 			if part > 0.0:
 				best = cur
 				best_part = part
+				# its own range, not the nearer one's: how soon it is noticed is read from it (notice_time, AIM2)
+				best_d = cur_d
 	if best == null:
 		b.target_visible = false
 		return

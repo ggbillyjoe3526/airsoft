@@ -31,6 +31,8 @@ static func think(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 		# left hanging through the duck (BP6: still down on it for the whole dazzle, as if kneeling to fire)
 		b.bursting = false
 		b.burst_left = 0.0
+		# and the replica's own burst with it (FV1: indoors it fires three to a pull): the BBs left of it would fly blind
+		cmd.stop_burst = true
 		b.aim_yaw = me.yaw
 		b.aim_pitch = me.pitch
 		cmd.crouch = true
@@ -232,6 +234,7 @@ static func _choose_mode(b: Bot, w: BotWorld, target: Character, dt: float) -> v
 		b.wait_for_team = false
 		b.hold_left = 0.0
 		b.hold_cover = false
+		b.post_cover = false
 		# Back on its lane at the point ahead nearest where it now stands (BP6: not walking back to the one it left).
 		if not b.hunting and b.lane_index >= 0:
 			b.lane_index = BotMovement.resume_point(b, w) - b.lane_dir
@@ -246,6 +249,7 @@ static func _choose_mode(b: Bot, w: BotWorld, target: Character, dt: float) -> v
 		b.hold_left = 0.0
 		b.wait_for_team = false
 		b.hold_cover = false
+		b.post_cover = false
 
 
 ## One tick in cover: settling in, ducked, peeking. Returns true when the episode is over (exposed, given up, out of

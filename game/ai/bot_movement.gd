@@ -351,9 +351,12 @@ static func _advance(b: Bot, w: BotWorld, dt: float, at_post: bool = false) -> b
 		if b.route_state == Bot.RouteState.WANTED:
 			return false
 		b.hold_cover = false
-		if BotFlag.holds_post(b, w) and _at_last_point(b, w):
-			# A defender's or an anchor's post is the cover by its last lane point: it holds there (_next_goal gives it no
-			# goal).
+		var at_post_cover := b.post_cover
+		b.post_cover = false
+		if at_post_cover and BotFlag.holds_post(b, w):
+			# A defender's or an anchor's post is the cover by its last lane point (picked by _hold_post): it holds there
+			# (_next_goal gives it no goal). Cover by a point on the way is only a pause: b.lane_index already names the
+			# point after it, so "the last point" can't be read from the index here.
 			BotRoutes.drop(b)
 			return false
 		_start_hold(b, w)
@@ -383,6 +386,7 @@ static func _advance(b: Bot, w: BotWorld, dt: float, at_post: bool = false) -> b
 		if reached and not b.hunting:
 			if _pick_hold_cover(b, w):
 				b.hold_cover = true
+				b.post_cover = false
 				b.route_state = Bot.RouteState.NONE
 				BotRoutes.want(b, b.hold_spot.position, cfg)
 				return false
@@ -544,14 +548,6 @@ static func _lane_shared(b: Bot, w: BotWorld) -> bool:
 	return false
 
 
-## True if the lane point `b` last reached is the last it walks (b.lane_points).
-static func _at_last_point(b: Bot, w: BotWorld) -> bool:
-	if b.hunting or b.lane < 0 or b.lane >= w.lanes.size() or b.lane_index < 0:
-		return false
-	var walked := b.lane_index if b.lane_dir > 0 else w.lanes[b.lane].size() - 1 - b.lane_index
-	return walked + 1 >= b.lane_points
-
-
 static func _pick_hunt(b: Bot, w: BotWorld) -> bool:
 	if not w.planner.hunt_point(b, w):
 		return false
@@ -675,6 +671,7 @@ static func _hold_post(b: Bot, w: BotWorld, dt: float, arrived: bool, at_post: b
 		BotRoutes.drop(b)
 		if _pick_hold_cover(b, w):
 			b.hold_cover = true
+			b.post_cover = true
 			BotRoutes.want(b, b.hold_spot.position, w.cfg)
 			return
 	if not at_post:
