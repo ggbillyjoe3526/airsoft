@@ -154,6 +154,40 @@ func test_a_wheel_shut_inside_a_tap_by_a_pause_or_being_out_holds_no_trigger_bac
 	assert_false(cmd.ping, "the release after spots nothing")
 
 
+func test_a_wheel_shut_inside_a_tap_gives_the_view_the_turn_the_mouse_made() -> void:
+	var counts := Vector2(90.0, 30.0)
+	_move(counts.x, counts.y)
+	var free_yaw := input.view_yaw
+	var free_pitch := input.view_pitch
+	# A pause (or being hit) with the key just down.
+	input.face(0.0)
+	_event(&"order_wheel", true)
+	_move(counts.x, counts.y)
+	input.allow_orders(true, false)
+	assert_almost_eq(input.view_yaw, free_yaw, 1e-6, "shut by a pause inside a tap: the mouse was never the wheel's")
+	assert_almost_eq(input.view_pitch, free_pitch, 1e-6)
+	input.allow_orders(true, true)
+	_event(&"order_wheel", false)
+	assert_almost_eq(input.view_yaw, free_yaw, 1e-6, "and the release after turns nothing more")
+	# The key let go unseen (the window lost it) inside a tap.
+	input.face(0.0)
+	_event(&"order_wheel", true)
+	_move(counts.x, counts.y)
+	Input.action_release(&"order_wheel")
+	input.fill(cmd)
+	assert_false(input.wheel().open)
+	assert_almost_eq(input.view_yaw, free_yaw, 1e-6, "let go unseen inside a tap: the same")
+	assert_false(cmd.ping, "giving nothing")
+	# Held past a tap, then shut: the mouse was the wheel's, the view stays.
+	input.face(0.0)
+	_event(&"order_wheel", true)
+	_hold_past_a_tap()
+	_move(counts.x, counts.y)
+	input.allow_orders(true, false)
+	assert_almost_eq(input.view_yaw, 0.0, 1e-6, "shut past a tap: the view stays")
+	input.allow_orders(true, true)
+
+
 func test_the_wheel_is_not_drawn_inside_a_tap_wherever_the_pointer_went() -> void:
 	var hud_wheel := HudOrderWheel.new()
 	add_child_autofree(hud_wheel)

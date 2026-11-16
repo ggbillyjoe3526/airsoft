@@ -488,7 +488,6 @@ func _wheel_input(event: InputEvent) -> bool:
 	if event.is_action_released(ORDER_WHEEL):
 		if not held:
 			_close_wheel()
-			_turn_view(_tap_motion)
 			_give_from_wheel(OrderWheelPointer.SPOT)
 		else:
 			if _controls.wheel_pick == ControlsConfig.WheelPick.HOVER:
@@ -522,12 +521,16 @@ func _give_from_wheel(pick: int) -> void:
 
 
 ## Closes the wheel; if it was up (past a tap), fire stays held back until it is let go (a click that picked an order
-## is not a shot).
+## is not a shot). Shut inside a tap (the key let go, a pause, the window losing it), the mouse was never the wheel's:
+## the view turns by what it moved meanwhile.
 func _close_wheel() -> void:
 	_wheel.close()
 	if _wheel_taken:
 		hold_fire()
+	else:
+		_turn_view(_tap_motion)
 	_wheel_taken = false
+	_tap_motion = Vector2.ZERO
 
 
 ## The mouse wheel's items: the replicas' two slots (SLOTS), then a smoke and a flash bomb.
@@ -588,6 +591,7 @@ func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null, ho
 			_aim_held_back = false
 	elif _wheel.open and not Input.is_action_pressed(ORDER_WHEEL):
 		# its key let go unseen (a rebind, the window losing it): closed, giving nothing
+		_wheel_held()
 		_close_wheel()
 	elif _wheel.open:
 		_wheel_held() # held past a tap with no event since: the trigger is the wheel's from this tick
