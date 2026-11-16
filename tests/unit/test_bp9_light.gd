@@ -264,9 +264,10 @@ func test_subways_probes_moved_out_of_its_props_and_the_rest_stayed_at_their_mid
 
 
 func test_an_interiors_probes_give_reflections_alone_and_the_open_fields_keep_their_ambient() -> void:
-	# A probe's ambient is its own picture of its hall, darker than the field's in every picture taken indoors, and it
-	# fades in over LookConfig.probe_margin from each face of its box: a band at chest height along every wall of Subway
-	# (a box one storey tall), and the lockers in Depot's Lounge fading to black towards their tops.
+	# As built (the field's ambient filling the hall: Medium and High). A probe's ambient is its own picture of its
+	# hall, darker than the field's in every picture taken indoors, and it fades in over LookConfig.probe_margin from
+	# each face of its box: a band at chest height along every wall of Subway (a box one storey tall), and the lockers
+	# in Depot's Lounge fading to black towards their tops.
 	var subway := MapData.load_map("subway", play.map_style, SimTuning.new().rounds.team_size)
 	var low := 0
 	var probes := _probes(subway)
@@ -285,6 +286,42 @@ func test_an_interiors_probes_give_reflections_alone_and_the_open_fields_keep_th
 		for p in _probes(MapData.load_map(id, play.map_style, SimTuning.new().rounds.team_size)):
 			assert_false(p.interior, "%s %s: open to the sky" % [id, p.name])
 			assert_eq(p.ambient_mode, ReflectionProbe.AMBIENT_ENVIRONMENT, "%s %s: its ambient as tuned" % [id, p.name])
+
+
+func test_under_the_scenes_bounce_light_an_interiors_probes_keep_their_ambient() -> void:
+	# Under the scene's bounce light (Ultra) no ambient fills a hall's shade, and a probe's own is light the shade would
+	# not have: without it Depot's Lounge drew its lockers' tops and its top shelves black on Ultra, and the owner kept
+	# Ultra as it was (2026-11-16). The presets say which, through the field's lighting; an open field's stay as tuned.
+	for id: String in ["depot", "subway", "woodland"]:
+		var field := MapData.load_map(id, play.map_style, SimTuning.new().rounds.team_size)
+		var lighting := FieldLighting.build(LightingConfig.for_map(play.lighting, play.night_lighting, field,
+				LightingConfig.DAY), play.look)
+		add_child_autofree(lighting)
+		lighting.add_probes(field)
+		var probes: Array[ReflectionProbe] = []
+		for p in lighting.find_children("*", "ReflectionProbe", true, false):
+			probes.append(p as ReflectionProbe)
+		assert_gt(probes.size(), 1, id)
+		var rs := GraphicsApply.Server.new()
+		var indoors := id != "woodland"
+		for preset: StringName in [&"medium", &"high", &"ultra", &"high"]:
+			GraphicsApply.apply_field(table.preset(preset), lighting, null, rs)
+			var keeps := not indoors or preset == &"ultra"
+			var mode := ReflectionProbe.AMBIENT_ENVIRONMENT if keeps else ReflectionProbe.AMBIENT_DISABLED
+			for p in probes:
+				assert_eq(p.ambient_mode, mode, "%s on %s, %s" % [id, preset, p.name])
+
+
+func test_probes_built_after_the_bounce_light_is_on_keep_their_ambient() -> void:
+	var lighting := FieldLighting.build(LightingConfig.for_map(play.lighting, play.night_lighting, depot,
+			LightingConfig.DAY), play.look)
+	add_child_autofree(lighting)
+	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, GraphicsApply.Server.new())
+	lighting.add_probes(depot)
+	var probes := lighting.find_children("*", "ReflectionProbe", true, false)
+	assert_gt(probes.size(), 1)
+	for p in probes:
+		assert_eq((p as ReflectionProbe).ambient_mode, ReflectionProbe.AMBIENT_ENVIRONMENT, p.name)
 
 
 func test_a_probe_in_a_prop_captures_from_the_nearest_clear_spot() -> void:

@@ -74,7 +74,7 @@ var _key_energy: float = 0.0
 ## The preset's ambient light's strength, before set_ambient_share.
 var _ambient_energy: float = 0.0
 ## The map's reflection probes (`add_probes`), shown while Reflections draw them.
-var _probes: Node3D = null
+var _probes: AreaProbes = null
 ## The preset's share of the sky in the ambient light, which an underground field drops (`set_underground`).
 var _sky_share: float = 0.0
 ## Whether no sky reaches the field (`set_underground`).
@@ -232,6 +232,7 @@ func look() -> LookConfig:
 func add_probes(map: MapData) -> void:
 	_probes = AreaProbes.build(map, _look)
 	if _probes != null:
+		_probes.set_bounce(_scene_light)
 		add_child(_probes)
 
 
@@ -255,6 +256,8 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 		var probes := reflections != GraphicsQuality.Reflections.OFF
 		if _probes.visible != probes:
 			_probes.visible = probes
+		# Under the scene's bounce light an interior probe keeps its ambient light (AreaProbes, BP9).
+		_probes.set_bounce(_scene_light)
 	if env.glow_enabled != glow:
 		env.glow_enabled = glow
 	if env.volumetric_fog_enabled != fog:

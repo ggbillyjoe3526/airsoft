@@ -11,16 +11,34 @@ extends Node3D
 ## frame. FieldLighting shows or hides them all with the Reflections row. A map built in storeys (MT1: Subway) has no
 ## one floor for a probe over the whole field, so it has none: each area holding its own band of feet heights is an
 ## interior from its band's floor to its top, captured from eye height over that floor, never from inside a slab. An
-## interior probe (a roofed field's, a storey's) gives reflections alone, no ambient light (BP9). A probe's ambient is
-## its own picture of its hall, darker than the field's ambient in every picture taken indoors, and it fades in over
-## `probe_margin` from each face of its box: Depot's Lounge drew its lockers lit at the foot and fading to black
-## above, and in a box one storey tall the probe's light peaked at chest height and drew a dark band along every wall
-## of Subway. The field's ambient lights a hall evenly. A probe open to the sky keeps its ambient.
+## interior probe (a roofed field's, a storey's) gives reflections alone, no ambient light, while the field's ambient
+## fills the hall (BP9). A probe's ambient is its own picture of its hall, darker than the field's ambient in every
+## picture taken indoors, and it fades in over `probe_margin` from each face of its box: Depot's Lounge drew its
+## lockers lit at the foot and fading to black above, and in a box one storey tall the probe's light peaked at chest
+## height and drew a dark band along every wall of Subway. The field's ambient lights a hall evenly. Under the scene's
+## bounce light (`set_bounce`: Ultra) there is no such ambient: the probe's own is light the shade would not have, so
+## an interior keeps it there (without it Depot's Lounge drew its lockers' tops and top shelves black on Ultra). A
+## probe open to the sky always keeps its ambient.
 
 ## The visual layer the probes sit on, which a scope's glass camera (OpticGlass) leaves out: while that second camera
 ## saw them, the field's own reflections broke up into patches on the floor round a scope at the hip (BP8, seen in
 ## tools/render_replica_view.gd's pictures). It sets only which cameras see a probe, not what it captures or lights.
 const LAYER := 1 << 18
+
+## The interior probes, and whether the scene's bounce light is on (`set_bounce`).
+var _interiors: Array[ReflectionProbe] = []
+var _bounce: bool = false
+
+
+## The interior probes' ambient light: on while the scene's bounce light is the hall's fill (`bounce`: Global
+## illumination Scene), off while the field's ambient is. Only a change is set; never per frame.
+func set_bounce(bounce: bool) -> void:
+	if bounce == _bounce:
+		return
+	_bounce = bounce
+	var mode := ReflectionProbe.AMBIENT_ENVIRONMENT if bounce else ReflectionProbe.AMBIENT_DISABLED
+	for probe in _interiors:
+		probe.ambient_mode = mode
 
 
 ## The probes for `map` in `look`, or null for a map with no blocks.
@@ -147,7 +165,7 @@ static func _plan(a: MapAreas.Area) -> Rect2:
 
 ## A probe over `box`, capturing from `capture_spot` clear of `solids`; with a finite `band` (an area's feet heights,
 ## x from and y to) it spans that band, from its floor up to its top (`height` over its floor without one), and is an
-## interior. An interior gives reflections alone.
+## interior. An interior gives reflections alone until `set_bounce` says the scene's bounce light is on.
 func _add(box: Rect2, height: float, interior: bool, look: LookConfig, kind: String, terrain: TerrainGrid,
 		solids: Array[AABB], band: Vector2 = Vector2(-INF, INF)) -> void:
 	var probe := ReflectionProbe.new()
@@ -170,7 +188,8 @@ func _add(box: Rect2, height: float, interior: bool, look: LookConfig, kind: Str
 	probe.box_projection = true
 	probe.interior = interior
 	if interior:
-		probe.ambient_mode = ReflectionProbe.AMBIENT_DISABLED
+		probe.ambient_mode = ReflectionProbe.AMBIENT_ENVIRONMENT if _bounce else ReflectionProbe.AMBIENT_DISABLED
+		_interiors.append(probe)
 	probe.blend_distance = look.probe_margin
 	probe.intensity = look.probe_intensity
 	probe.update_mode = ReflectionProbe.UPDATE_ONCE
