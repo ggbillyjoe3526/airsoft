@@ -3,6 +3,7 @@
 **Review:**
 
 - part 1 (bugs): critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
+- part 2 (flicker): critic Accept 8/8 (attempt 1) · qa Pass · performance Pass
 
 William's full pass before he tags 0.1 Beta 1 (owner, 2026-11-15 and 16): bugs, balance, performance, quality and
 edge cases over the whole game, with a clean-out of unused files, a hunt for flicker (faces lying over one another),
@@ -14,6 +15,7 @@ the harsh shadows and the over-bright spots under Depot's lamps. It goes out in 
 |---|---|---|---|---|---|
 | 2026-11-16 | part 1: 1 | Fable 5.2 | lint, wiki, 110 touched test files | Retry 5/8 | an order that ended by itself never showed with the wheel shut; the view's wait inside a tap; the wiki and play checks claimed a live turn |
 | 2026-11-16 | part 1: 2 | Fable 5.2 | lint, wiki, whole unit suite, smoke; CI | Accept 8/8 | – |
+| 2026-11-16 | part 2: 1 | Fable 5.2 | lint, wiki, the models' gate, 158 touched test files, smoke; CI | Accept 8/8 | – |
 
 ## Part 1: bugs
 
@@ -163,8 +165,8 @@ wall and backstop, the sandbags) is the cell's size to a tenth of a millimetre (
 with its foot on the floor; every texture drawn in the world carries mipmaps (a swatch of a few pixels aside);
 Depot's sign sheet is stored as Subway's. QA's: every door's leaves stand on its frame's floor
 (`test_bp9_flicker_qa.gd`), and a section built to its cell is closed at both ends at every height
-(`test_bp9_flicker_qa2.gd`). One older test moved: Woodland's gap test (`test_wg3_woodland_models.gd`) allows a
-face's back 4 mm before a face turned to the eye, not 3 (Decisions).
+(`test_bp9_flicker_qa2.gd`). One older test moved: Woodland's gap test (`test_wg3_woodland_models.gd`) allows the
+sawmill shed a face's back 4 mm before a face turned to the eye, not 3 (Decisions).
 
 ## Decisions
 
@@ -195,12 +197,14 @@ face's back 4 mm before a face turned to the eye, not 3 (Decisions).
   tiled sections by a mesh's bounds, and parts of one model meet along its edges, so the fix moves a sheet inside
   its own rim and never an edge; `fix` fails if a pile cannot be parted inside the bounds (none does today), and
   `test_bp9_flicker.gd` holds the sections built to their grid cells to the cell's size.
-- **Woodland's gap test allows 4 mm where it allowed 3** (part 2, `GAP_TOUCH`). The sawmill shed's posts' faces lie
-  0.7 mm inside their rims now (the base sheet under a brace's end). The line the test tried runs along a brace's
-  axis, inside it; the brace's square-cut end stood 3.8 mm off its post on main, inside the 3 mm allowance only
-  through the test's hairline rule and by 0.7 mm, and stands 4.7 mm off. Nothing is seen through (QA read the
-  crossings: the same faces in the same order). Moving the brace's end instead of the post's face was tried over
-  every model: it opened more edges in 23 files, 12 of them real slits in the roof truss, so the tool stayed.
+- **Woodland's gap test allows the sawmill shed 4 mm where it allows 3** (part 2, `GAP_TOUCH_OF`; the watch tower
+  and the footbridge keep 3 mm, the critic's note). The shed's posts' faces lie 0.7 mm inside their rims now (the
+  base sheet under a brace's end). The line the test tried runs along a brace's axis, inside it; the brace's
+  square-cut end stood 3.8 mm off its post on main, inside the 3 mm allowance only through the test's hairline rule
+  and by 0.7 mm, and stands 4.7 mm off. Nothing is seen through (QA read the crossings: the same faces in the same
+  order). Moving the brace's end instead of the post's face was tried over every model: it opened more edges in 23
+  files, 12 of them real slits in the roof truss, so the tool stayed. When the shed is next rebuilt with its braces
+  cut to their posts, its entry goes.
 - **What is hidden is left alone** (part 2). Faces in one plane that no eye reaches (a fitting's back on its wall, two
   floors under a wall) cost nothing and moving them risks the fits the tests hold. Pictures decide what shows
   (`tools/flicker_map.py`), not the list.
