@@ -1839,6 +1839,19 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   Pass: the poles and the bomb sites stand at the hall's end of A and B; your bots hold the Offices door, Lower mid
   and the end of the Containers, and the attack meets them there before it reaches a pole.
 
+## The pass before 0.1 Beta 1 (BP9)
+
+- [ ] **Spotting while you turn or fire.** In a match, follow a running opponent with your sight and tap Z; hold the
+  trigger on full auto (or in a burst) and tap Z; tap Z and pull the trigger in the same moment.
+  Pass: every tap is a Spotted (the yellow arrow), never Follow Me or another order; the wheel never flashes up; your
+  view keeps turning through the tap and firing carries on. Holding Z longer than a tap still opens the wheel, and
+  there the mouse moves its pointer and the trigger picks.
+- [ ] **Defenders reach their posts.** Attack on Depot and on Woodland in Attack / Defend at Normal, three rounds each.
+  Pass: you meet defenders at the posts round the flag (not strung out along the lanes behind cover half way there),
+  and the round still feels fair to attack.
+- [ ] **An order with nobody left.** Give Cover Me and let your helper be hit.
+  Pass: the wheel's circle says "Back to the team plan" once.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
