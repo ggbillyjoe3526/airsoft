@@ -82,7 +82,11 @@ never stops the game from starting.
   by it and a corner or a room under a roof fills with soft light. Settings and strengths: `LookConfig`'s Global
   illumination group.
 - **Reflections**: Probes are the map's reflection probes, one over the field and one in each large named area,
-  captured once at the start (`AreaProbes`), so a smooth floor or paint reflects the hall it is in, not the sky.
+  captured once at the start (`AreaProbes`), so a smooth floor or paint reflects the hall it is in, not the sky. Each
+  captures from eye height at the nearest spot of its area with `LookConfig.probe_clearance` (0.6 m) of room round it,
+  never from inside a prop (BP9). Under a roof (Depot, Subway) a probe gives reflections alone and the field's
+  ambient lights its halls: a probe's own ambient is darker there, and drew the lockers and panels in Depot's Lounge
+  fading to black towards their tops and a dark band along every wall of Subway.
   Screen (Ultra) adds screen-space reflections over them.
 - **Lamp light** makes an indoor field's roof lamps (Depot's hall) real lights, each casting its own shadow, and the
   hall is lit by them alone (owner, 2026-11-10: no sun gets indoors): while they shine the preset's overhead sun goes
@@ -95,6 +99,11 @@ never stops the game from starting.
   their foot). At night it also gives a field's fires and lanterns (its light pools) shadows, and Far gives real
   lights to `LightingConfig.real_lights_far` of them. Off (Low, Medium) the overhead light stands in for the lamps,
   and on a field with no roof lamps or light pools it costs nothing; an open field keeps its sun on every preset.
+  The lamps' strength (`RoofConfig.lamp_light_energy`, 2.4) is set against that stand-in (BP9): together they put
+  about as much light on Depot's open floor as it does, so the hall is as bright on every preset
+  (`tests/unit/test_bp9_light.gd`). On Ultra each lamp feeds the bounce light `RoofConfig.lamp_indirect` (7) times
+  its own strength: under a roof Ultra has no other fill light, and at 1 the roof drew black and the hall darker
+  than on High.
 - **Eye adaptation** (UG3, High and Ultra) meters what the camera sees, as eyes do: in a view darker than the
   preset's middle (`LightingConfig.eye_middle`, 0.25; Depot's lamp-lit hall and Woodland's open field meter above it)
   the picture opens up slowly towards it, at most `eye_lift` (3) times, so a tunnel or the wood under its crowns reads;
@@ -128,6 +137,12 @@ never stops the game from starting.
   drawn beam on every preset: a cone, a lens glare and a lit spot.
 - **Sun shadows** off draws a soft dark disc under every other player instead (a contact shadow, free).
   An underground field (Subway, UL1) never takes the sun's shadow, so it draws the disc on every preset.
+- **Shadow softness** (BP9) is the sun's and the moon's shadow filter (`GraphicsApply.SOFTNESS`): Hard one sample,
+  Soft 4, Softer 16 over an edge one and a half times as wide, each spread over the light's blur
+  (`LightingConfig.shadow_blur`, 2), Softest the same 16 round a sun with a size. Too few samples over a wide edge
+  speckle, as nothing smooths the picture while Edge smoothing is Off, so the blur and the samples change together
+  (`tests/unit/test_bp9_light.gd`). The lamps, the light pools and the torch keep filters of their own
+  (`GraphicsApply.LAMP_SOFTNESS`: 1, 4 and 16 samples), as many lamps overlap on one spot.
 - **Mesh detail** also sets a smoke cloud's puffs (`game/config/effects_config.gd`, `smoke_puffs`): fewer and larger
   on Low and Medium, so from inside a cloud fewer see-through layers are drawn over the screen.
 - **Occlusion culling** leaves out what the map's tall solid blocks hide from the eye (plywood, containers, walls,

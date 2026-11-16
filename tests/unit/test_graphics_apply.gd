@@ -54,7 +54,7 @@ func test_high_sets_the_root_viewport_and_the_shadow_map() -> void:
 	assert_eq(root.anisotropic_filtering_level, Viewport.ANISOTROPY_16X)
 	assert_almost_eq(root.mesh_lod_threshold, 1.0, 0.001, "the engine's default")
 	assert_eq(rs.shadow_size, 4096)
-	assert_eq(rs.soft_shadows, RenderingServer.SHADOW_QUALITY_SOFT_LOW, "Softer is the engine's default")
+	assert_eq(rs.soft_shadows, RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "Softer: 16 samples (BP9), the project's")
 
 
 func test_low_sets_the_cheap_knobs() -> void:
@@ -101,6 +101,7 @@ func test_every_edge_smoothing_maps_to_one_filter_at_most() -> void:
 	assert_eq(GraphicsApply.ANISOTROPY.size(), GraphicsQuality.CHOICES[GraphicsQuality.TEXTURE_FILTERING].size())
 	assert_eq(GraphicsApply.MESH_LOD.size(), GraphicsQuality.CHOICES[GraphicsQuality.MESH_DETAIL].size())
 	assert_eq(GraphicsApply.SOFTNESS.size(), GraphicsQuality.CHOICES[GraphicsQuality.SHADOW_SOFTNESS].size())
+	assert_eq(GraphicsApply.LAMP_SOFTNESS.size(), GraphicsQuality.CHOICES[GraphicsQuality.SHADOW_SOFTNESS].size())
 
 
 func test_the_simpler_renderer_draws_bilinear_msaa_and_no_ssao_or_taa() -> void:

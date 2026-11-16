@@ -109,6 +109,11 @@ const GLOBAL_DUST := &"look_dust"
 ## which drew every surface near it rough enough to read them black with a white glow. 12 m cleared it; 40 m did too but darkened the
 ## Clearing (its views took in the dark wood far past its area), so the reach stays short.
 @export var probe_reach: float = 12.0
+## The room (m) every way round a probe's capture point that no block stands in (BP9). A probe captured at its area's
+## middle wherever that fell: seven of Subway's 16 from inside a prop (the concourse's kiosk, a works hoarding, a
+## locker, a wagon) and six of Depot's 21 from inside a crate, a drum or a plywood wall, picturing the prop's inside
+## for their hall. Each captures from the nearest spot with this much room round it.
+@export var probe_clearance: float = 0.6
 ## Screen-space reflections (Screen): steps, fades and depth tolerance.
 @export var ssr_steps: int = 96
 @export var ssr_fade_in: float = 0.15

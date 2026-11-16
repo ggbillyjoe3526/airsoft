@@ -1863,6 +1863,36 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   stays steady from afar. Thin things (a cage's wire, far rails, a stack's edges) still shimmer along their edges:
   Edge smoothing is Off on every preset (FB2), and that is not this fix. If that shimmer is the flicker you meant,
   say so. Anywhere a whole patch still flickers: the map, the spot and a screenshot.
+- [ ] **Depot is no brighter on High and Ultra than on Medium.** On Depot on High, stand in the open hall and look
+  down its length, then at the floor where the lamps hang closest (the Shoot House, the Chrono hall, the
+  Containers), then go into the Lounge or a container and look out at the hall. Switch to Medium in the pause menu
+  and back.
+  Pass: the open hall is about as bright on High as on Medium; no floor or wall is washed out towards white and the
+  containers keep their colours; from the Lounge or inside a container the hall outside is bright but you still see
+  what stands in it. The same on Ultra, where the roof over the hall is lit and the dim Lounge is dimmer than it
+  was but you still see its lockers and who stands by them. The lamps still light wide and soft with no cone on the
+  floor, and shadows are dark but you can make out who is in them (UG2). If a place is still too bright, or the hall is now too dim:
+  the spot, the preset and a screenshot.
+- [ ] **Softer shadows.** On Woodland by day on High, walk the wood from the Tower to the Hut row and look at the
+  shade the crowns throw on the ground and on a hut's wall, then at your own team's shadows.
+  Pass: a shadow's edge is soft and even (about a hand wide near you), with no hard-edged patches and no speckle
+  along it. On Medium the edges are a little soft (they were hard). On Ultra they are as before: sharp at a trunk's
+  or a player's foot, soft away from it. The Range's wall and targets the same. If shadows still read harsh
+  anywhere, say which it is: the edge (too sharp) or the shade itself (too dark), with the map, the spot and the
+  preset.
+- [ ] **No dark bands across walls.** On Subway on Medium, then High, walk round the concourse's kiosk and along both
+  platforms by the works hoardings, then the passages by the lockers.
+  Pass: a wall or a kiosk's side is lit evenly from top to bottom, with no darker band at chest height along it. The
+  station is otherwise as bright as it was.
+- [ ] **Depot's Lounge lit to the top.** On Depot on Medium, then High, stand in the Lounge and look at its lockers,
+  the tall panels and the roof trusses over them, then walk out into the hall and look at the crates and the walls.
+  Pass: lockers and panels are lit from foot to top, none fading to black towards its top, and no truss is black.
+  In the open hall the crates and walls are a shade paler and cooler than they were (they took a warm tint from the
+  lamps' bounce); say if the hall has lost a warmth you liked.
+- [ ] **How dark Subway is on Ultra.** Not changed in the pass, and yours to judge: on Ultra the station is lit by its
+  fittings and their bounce alone (UL2), so it is much darker than on High and a wall out of a fitting's light is
+  dark above knee height. Walk the concourse and a platform on High, then on Ultra.
+  Pass: Ultra reads moodier but you can still see who stands by a wall; if it is too dark, say where.
 
 ## Reporting what you find
 

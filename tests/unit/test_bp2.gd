@@ -58,7 +58,8 @@ func test_woodland_reflection_probes_capture_over_the_ground_not_inside_a_hill()
 	var raised := 0
 	for p: ReflectionProbe in probes.get_children():
 		var eye := p.position + p.origin_offset
-		var ground := woodland.terrain.height_at(p.position.x, p.position.z)
+		# under the capture point, which moves off the middle where a prop stands there (BP9)
+		var ground := woodland.terrain.height_at(eye.x, eye.z)
 		if is_nan(ground):
 			continue
 		if ground > 1.0:

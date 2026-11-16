@@ -66,14 +66,24 @@ extends Resource
 ## lamp's lowest point, shining straight down, `lamp_cone` degrees from its axis to the cone's edge (dimming from its
 ## axis to the edge by the engine's curve `lamp_cone_falloff`: below 1 soft, so neighbouring pools blend), reaching
 ## `lamp_range` m at `lamp_light_energy` with the engine's distance falloff `lamp_falloff` (1: inverse distance), in
-## `lamp_colour`. On the haze (Volumetric fog) it shines `lamp_fog` of itself.
+## `lamp_colour`. On the haze (Volumetric fog) it shines `lamp_fog` of itself. The strength is set against the overhead
+## light that stands in for the lamps on Low and Medium (BP9): together the lamps put about as much light on Depot's
+## open floor as it does (0.9 of it in the middle of the hall's floor, 1.5 times it where the lamps hang closest), so
+## the hall is as bright on every preset. At 6 they put twice to nearly four times as much there and the open hall
+## drew washed out, most where the lamps cluster (the owner: "intensely bright ... in some areas").
 @export var lamp_light_drop: float = 0.05
 @export var lamp_cone: float = 70.0
 @export var lamp_cone_falloff: float = 0.15
 @export var lamp_range: float = 24.0
-@export var lamp_light_energy: float = 6.0
+@export var lamp_light_energy: float = 2.4
 @export var lamp_falloff: float = 0.6
 @export var lamp_fog: float = 0.3
+## How much a lamp feeds the scene's bounce light (Ultra's SDFGI; the engine's 1 is its own strength). Under a roof
+## Ultra has no fill light but that bounce, where High fills its shade with the field's ambient, so at 1 the lamps at
+## 2.4 left Ultra's roof black and its hall and Lounge far darker than High's (BP9). At 7 Depot's open hall measures
+## on Ultra what it does on High (2.5, the bounce as strong as it was under the lamps at 6, still left it a sixth
+## darker and the Lounge half as bright). Ultra only: High's screen bounce doesn't read it.
+@export var lamp_indirect: float = 7.0
 ## A plain roof's lamps (MT1, a station's low ceilings, one level over another): each reaching only
 ## `plain_lamp_reach` m past the storey under it (MapData.storeys), so no light falls through a floor onto the level
 ## under that, at `plain_lamp_energy`.

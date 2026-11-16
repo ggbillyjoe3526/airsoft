@@ -216,8 +216,13 @@ grade with none of the dearer effects; each preset up adds real light on top (`d
 | Volumetric haze | off | off | off | on, lit by the sun and the bounce light |
 
 The reflection probes (`AreaProbes`) are one over the field and one in each named area of 60 m² or more (24 at most),
-box-projected from eye height and captured once at the start; under a roof they are interiors. Volumetric haze is
-faint (density 0.006) so it gives light depth without hiding a player.
+box-projected from eye height and captured once at the start; under a roof they are interiors. Each captures from a
+spot with 0.6 m of room round it (`LookConfig.probe_clearance`), never from inside a prop (BP9). Under a roof (Depot,
+Subway) they give reflections alone and the field's ambient lights the hall: a probe's ambient is its own picture of
+the hall, darker indoors than the field's, and it fades in over 1.5 m from each face of its box, so Depot's Lounge
+drew its lockers and panels fading to black towards their tops and Subway's boxes, one storey tall, drew a dark band
+at chest height along every wall. Volumetric haze is faint (density 0.006) so it gives light depth without hiding a
+player.
 
 Three lighting presets, each shared by every map that uses it and each as readable as the others.
 

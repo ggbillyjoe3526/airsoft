@@ -33,9 +33,15 @@ const CARD_QUALITY := 0.85
 ## `card`: the Match page's copy (px): its cards draw at most about 272 x 152 (136 x 76 at 1080p, twice that at 4K).
 const THUMB_SIZE := Vector2i(480, 270)
 ## Frames to settle under the whole scene's bounce light (SDFGI converges over about 30) and before the first picture
-## (the reflection probes capture once, a face a frame).
+## (the eyes adapt, the haze and the screen's bounce light gather).
 const GI_SETTLE_FRAMES := 40
 const FIRST_SETTLE_FRAMES := 60
+## The frames one reflection probe takes to capture (six faces, then its blur's layers), the small picture the eye
+## visits every spot on while they all do, and the frames it looks from each spot so the probes in view join the queue
+## (`_capture_probes`).
+const PROBE_FRAMES := 16
+const WARM_SIZE := Vector2i(96, 54)
+const WARM_LOOK_FRAMES := 2
 
 
 func _initialize() -> void:
@@ -224,19 +230,14 @@ func _run() -> void:
 	var camera := Camera3D.new()
 	camera.fov = fov
 	port.add_child(camera)
+	await _capture_probes(port, camera, args.slice(2), map, tuning)
 	var failed := 0
 	for spec in args.slice(2):
 		var parts := spec.split(":")
-		var at := parts[1].split_floats(",") if parts.size() == 2 else PackedFloat64Array()
-		if at.size() != 4 and at.size() != 5:
+		if not _stand(camera, spec, map, tuning):
 			push_error("eye_pictures: %s is not name:x,z,yaw,pitch[,floor]" % spec)
 			failed += 1
 			continue
-		var ground := map.terrain.height_at(at[0], at[1]) if map.terrain != null else 0.0
-		if at.size() == 5:
-			ground = at[4]
-		camera.global_position = Vector3(at[0], ground + tuning.body.stand_eye_height, at[1])
-		camera.global_rotation = Vector3(deg_to_rad(at[3]), deg_to_rad(at[2]), 0.0)
 		var settle := GI_SETTLE_FRAMES if values.global_illumination == GraphicsQuality.GlobalIllumination.SCENE \
 				else SETTLE_FRAMES
 		if failed == 0 and spec == args[2]:
@@ -271,6 +272,46 @@ func _run() -> void:
 				continue
 			print("[eye_pictures] %s" % thumb_path)
 	quit(1 if failed > 0 else 0)
+
+
+## Stands `camera` at `spec` (name:x,z,yaw,pitch[,floor]) on `map`, at a standing eye's height; false for a spec that
+## is not one.
+static func _stand(camera: Camera3D, spec: String, map: MapData, tuning: SimTuning) -> bool:
+	var parts := spec.split(":")
+	var at := parts[1].split_floats(",") if parts.size() == 2 else PackedFloat64Array()
+	if at.size() != 4 and at.size() != 5:
+		return false
+	var ground := map.terrain.height_at(at[0], at[1]) if map.terrain != null else 0.0
+	if at.size() == 5:
+		ground = at[4]
+	camera.global_position = Vector3(at[0], ground + tuning.body.stand_eye_height, at[1])
+	camera.global_rotation = Vector3(deg_to_rad(at[3]), deg_to_rad(at[2]), 0.0)
+	return true
+
+
+## Waits for the field's reflection probes before the first picture. The engine captures a probe only once a camera
+## has had its box in view, one probe at a time over about PROBE_FRAMES frames each, and until then draws its area
+## with no bounce light: a wall drew black in a run's first picture and lit in its third, and a hall seen only from
+## the third spot on drew dark throughout (BP9). So the eye visits every spot on a small picture (cheap), then waits
+## for every probe shown; a preset that draws none (Low) waits for nothing.
+func _capture_probes(port: SubViewport, camera: Camera3D, spots: PackedStringArray, map: MapData,
+		tuning: SimTuning) -> void:
+	var probes := 0
+	for probe in port.find_children("*", "ReflectionProbe", true, false):
+		if (probe as ReflectionProbe).is_visible_in_tree():
+			probes += 1
+	if probes == 0:
+		return
+	var size := port.size
+	port.size = WARM_SIZE
+	for spec in spots:
+		if _stand(camera, spec, map, tuning):
+			for i in WARM_LOOK_FRAMES:
+				await RenderingServer.frame_post_draw
+	for i in probes * PROBE_FRAMES:
+		await RenderingServer.frame_post_draw
+	port.size = size
+	print("[eye_pictures] %d probes captured" % probes)
 
 
 ## The map's wood as a match draws it on High by day (WoodsView: crowns, the forest, tufts, puddles and the floor), its

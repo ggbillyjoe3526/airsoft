@@ -69,7 +69,7 @@ func test_every_probe_on_every_map_keeps_its_eye_finite_and_inside_its_box() -> 
 			assert_true(AABB(p.position - p.size * 0.5, p.size).has_point(eye), "%s %s: eye in box" % [id, p.name])
 
 
-func test_the_sun_filter_is_never_softer_than_the_lamp_filter_and_hard_stays_hard() -> void:
+func test_the_suns_filter_is_never_coarser_than_the_lamps_and_low_stays_hard() -> void:
 	var rs := GraphicsApply.Server.new()
 	var vp := SubViewport.new()
 	add_child_autofree(vp)
