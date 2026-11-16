@@ -15,6 +15,8 @@ var cmd: PlayerCommand = PlayerCommand.new()
 
 func before_each() -> void:
 	controls.wheel_pick = ControlsConfig.WheelPick.HOVER
+	# Every press of the wheel's key here is a hold (the wheel up at once) unless a test sets the tap's time back.
+	controls.wheel_tap = 0.0
 	input = PlayerInput.new()
 	input.setup(controls, 1.5)
 	add_child_autofree(input)
@@ -22,6 +24,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
+	controls.wheel_tap = ControlsConfig.new().wheel_tap
 	for action: StringName in ACTIONS:
 		Input.action_release(action)
 
@@ -110,13 +113,14 @@ func test_the_pointer_stays_on_the_wheel_and_opens_again_in_the_middle() -> void
 	assert_eq(w.at, Vector2.ZERO)
 
 
-func test_a_tap_is_a_short_press_that_never_left_the_circle() -> void:
+func test_a_tap_is_a_short_press_wherever_the_pointer_went() -> void:
 	var w := OrderWheelPointer.new(_layout())
 	w.start(1000)
-	assert_false(w.held(1100, 0.2), "0.1 s in the circle: a tap")
+	assert_false(w.held(1100, 0.2), "0.1 s: a tap")
 	assert_true(w.held(1200, 0.2), "0.2 s: held")
 	w.move(Vector2(200, 0))
-	assert_true(w.held(1050, 0.2), "out of the circle: held at once")
+	assert_false(w.held(1050, 0.2), "out of the circle inside a tap: a tap all the same (BP9)")
+	assert_true(w.held(1200, 0.2), "and held once the time is up")
 	w.close()
 	assert_false(w.held(5000, 0.2), "closed")
 
@@ -186,6 +190,7 @@ func test_letting_go_between_the_columns_or_in_click_mode_gives_nothing() -> voi
 
 
 func test_a_tap_of_the_key_spots_either_way_and_a_hold_in_the_middle_only_on_hover() -> void:
+	controls.wheel_tap = ControlsConfig.new().wheel_tap
 	for pick: ControlsConfig.WheelPick in [ControlsConfig.WheelPick.HOVER, ControlsConfig.WheelPick.CLICK]:
 		controls.wheel_pick = pick
 		_tap(&"order_wheel")

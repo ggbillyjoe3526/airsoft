@@ -92,7 +92,9 @@ func step(w: BotWorld) -> void:
 
 
 ## `enemy`'s position now, told to `team`'s bots in play within `radius` m of them (flat) that are neither fighting
-## nor seeing someone: their last-known spot, as a teammate's call heard there (BotRadio.tell's), a threat.
+## nor seeing someone: their last-known spot, as a teammate's call heard there (BotRadio.tell's), a threat. A bot
+## that saw someone itself within BotConfig.hearing_contact_time keeps its own news (as BotRadio.tell leaves it): the
+## enemy it just ducked from matters more than one spotted elsewhere.
 static func share(w: BotWorld, enemy: Character, team: int, radius: float) -> void:
 	var reach_sq := radius * radius
 	var at := enemy.position
@@ -102,6 +104,8 @@ static func share(w: BotWorld, enemy: Character, team: int, radius: float) -> vo
 			continue
 		var p := m.character.position
 		if Vector2(at.x - p.x, at.z - p.z).length_squared() > reach_sq:
+			continue
+		if m.has_last_known and m.target_id != enemy.id and w.time - m.last_seen_at() < w.cfg.hearing_contact_time:
 			continue
 		m.last_known = at
 		m.has_last_known = true

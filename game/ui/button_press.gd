@@ -94,6 +94,7 @@ func play(still: bool = false) -> void:
 		# a dip cut short (a still press after it: Reduced motion turned on between two quick presses) leaves no shrink
 		_set_dip(1.0)
 	_box.set_corner_radius_all(_radius(b) + RING_GAP + RING_WIDTH)
+	_box.border_color = GameTheme.accent # as it is now: a button outlives a change of the interface's colour (BP9)
 	visible = true
 	modulate.a = 1.0
 	queue_redraw()

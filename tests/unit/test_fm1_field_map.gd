@@ -186,6 +186,7 @@ func test_go_theres_key_and_the_wheels_go_there_ping_along_the_view() -> void:
 	assert_eq(controls.wheel_keys[slot], &"ping_move")
 	assert_eq(controls.wheel_labels[slot], "ORDER_MOVE")
 	_event(&"order_wheel", true)
+	input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 	var at := OrderWheelLayout.new(controls).box(slot).get_center() / controls.wheel_gain
 	_move(at.x, at.y)
 	_event(&"order_wheel", false)

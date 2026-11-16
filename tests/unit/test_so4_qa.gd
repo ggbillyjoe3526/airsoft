@@ -56,6 +56,7 @@ func test_a_notice_shows_for_a_key_pressed_with_the_wheel_open_and_for_an_order_
 	_no_teammates(session)
 	var w := session.hud().order_wheel()
 	_event(session, &"order_wheel", true)
+	session._input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 	await wait_process_frames(2)
 	_event(session, &"order_follow", true)
 	_event(session, &"order_follow", false)
@@ -68,6 +69,7 @@ func test_a_notice_shows_for_a_key_pressed_with_the_wheel_open_and_for_an_order_
 	assert_false(w.visible)
 	# The same, picked on the wheel: point at Hold Here and let go (Hover).
 	_event(session, &"order_wheel", true)
+	session._input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 	_move(session, -200.0, 29.0)
 	await wait_process_frames(2)
 	assert_eq(w.lit_slice(), 6, "pointed at Hold Here")
@@ -174,6 +176,7 @@ func test_the_wheel_in_a_session_follows_a_rebound_key_the_pause_menu_and_being_
 	var marker := session.hud().hold_marker()
 	# No key is drawn on the wheel (CW1): its buttons are names alone.
 	_event(session, &"order_wheel", true)
+	session._input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 	_move(session, 200.0, -29.0)
 	await wait_process_frames(2)
 	assert_eq(w.slice_name(1), "FOLLOW ME")
@@ -188,6 +191,7 @@ func test_the_wheel_in_a_session_follows_a_rebound_key_the_pause_menu_and_being_
 	assert_true(_hold(session))
 	session._input.active = true
 	_event(session, &"order_wheel", true)
+	session._input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 	_move(session, 200.0, -29.0)
 	await wait_process_frames(2)
 	assert_true(w.visible)

@@ -109,4 +109,7 @@ func _draw() -> void:
 	var knob_r := radius - KNOB_INSET if on else radius - KNOB_INSET - OFF_OUTLINE
 	draw_circle(Vector2(knob_x, mid), knob_r, col[1])
 	if has_focus():
+		# The ring is one box for every switch, made once: it takes the accent as it is now (UA2: a colour picked in
+		# Settings left the switches' focus ring in the old one until the game was started again, BP9).
+		_ring.border_color = GameTheme.accent
 		draw_style_box(_ring, pill.grow(RING_GAP))

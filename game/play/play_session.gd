@@ -1640,7 +1640,8 @@ func _process(delta: float) -> void:
 	# After the flag's and Hold here's markers, so pinned pings stack under them; through your own eyes only.
 	_hud.place_pings(_eyes.camera, _bots.pings, state.time, watched == player and not _input.field_map().open)
 	# Spotted's arrows over the enemies your team marked (CW1), watching anyone on your team.
-	_hud.place_spots(_eyes.camera, _bots.spots, state.time, watched.team == player.team and not _input.field_map().open)
+	_hud.place_spots(_eyes.camera, _bots.spots, state.time, watched.team == player.team and not _input.field_map().open,
+			fraction)
 	if _intents != null:
 		_intents.visible = not intents_covered(watched)
 		if _intents.visible:

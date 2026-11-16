@@ -136,6 +136,7 @@ func test_watching_here_is_on_the_wheel_and_picked_there_is_a_watch_ping_along_t
 	e.action = &"order_wheel"
 	e.pressed = true
 	input._unhandled_input(e)
+	input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 	var m := InputEventMouseMotion.new()
 	m.screen_relative = OrderWheelLayout.new(controls).box(slot).get_center() / controls.wheel_gain
 	input._unhandled_input(m)

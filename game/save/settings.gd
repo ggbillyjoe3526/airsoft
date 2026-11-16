@@ -220,6 +220,16 @@ func load_file(path: String = PATH) -> void:
 	from_dict(migrate_defaults(r.data, int(r.version)))
 
 
+## A saved Custom graphics table (`custom`, a file's "graphics_custom"; anything else is left alone) with a version 3
+## Volumetric haze row of "on" as the level it drew, High, in place. The value means nothing else, so a table of any
+## age may be passed: a file's as it is brought over, and the graphics the safe start put by (GraphicsGuard.previous,
+## which no file version covers).
+static func custom_rows_now(custom: Variant) -> void:
+	if custom is Dictionary and (custom as Dictionary).get(FOG_ROW_V3) is String \
+			and (custom as Dictionary)[FOG_ROW_V3] == FOG_ON_V3:
+		(custom as Dictionary)[FOG_ROW_V3] = FOG_ON_NOW
+
+
 ## `data` as a version `version` file's, with every value still at the old default moved to the new one (a value the
 ## player changed is kept): the volumes and the field of view (from version 1 to 4), Windowed and V-Sync (from version
 ## 1); and a Custom Volumetric haze row of "on" (version 3 or older) as the level it drew, High. A Power source volume
@@ -233,10 +243,7 @@ static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	if (fov_saved is float or fov_saved is int) and is_equal_approx(float(fov_saved), FOV_DEFAULT_V3):
 		moved["fov"] = FOV_DEFAULT
 	if version < 4:
-		var custom: Variant = moved.get("graphics_custom")
-		if custom is Dictionary and (custom as Dictionary).get(FOG_ROW_V3) is String \
-				and (custom as Dictionary)[FOG_ROW_V3] == FOG_ON_V3:
-			(custom as Dictionary)[FOG_ROW_V3] = FOG_ON_NOW
+		custom_rows_now(moved.get("graphics_custom"))
 	var old_volumes := VOLUME_DEFAULTS_V1 if version < 2 else VOLUME_DEFAULTS_V2 if version < 3 else VOLUME_DEFAULTS_V3
 	var saved_vol: Variant = moved.get("volumes")
 	if saved_vol is Dictionary:

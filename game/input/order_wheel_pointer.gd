@@ -42,10 +42,11 @@ func pick() -> int:
 	return layout.pick(at)
 
 
-## Whether the wheel, open since opened_ms, is held past a tap at `now_ms` (`tap`: s), or the pointer has left the
-## circle: then it is drawn, and letting go is no tap.
+## Whether the wheel, open since opened_ms, is held past a tap at `now_ms` (`tap`: s): then it is drawn, and letting
+## go is no tap. Where the pointer went meanwhile doesn't count (BP9): a mouse following someone leaves the circle in
+## less than a tap.
 func held(now_ms: int, tap: float) -> bool:
-	return open and (now_ms - opened_ms >= roundi(tap * 1000.0) or pick() != SPOT)
+	return open and now_ms - opened_ms >= roundi(tap * 1000.0)
 
 
 ## Closed, back in the middle.

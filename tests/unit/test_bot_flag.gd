@@ -364,7 +364,71 @@ func test_a_defender_holds_from_cover_by_its_last_point_but_only_pauses_in_cover
 	b.hold_left = 0.0
 	b.wait_for_team = false
 	b.hold_cover = true
+	b.post_cover = true
 	b.route_state = Bot.RouteState.NONE
 	BotMovement.move(b, w, cmd, DT, null)
 	assert_eq(b.hold_left, 0.0, "its post: no pause, it stays")
 	assert_ne(b.route_state, Bot.RouteState.WANTED, "and goes nowhere")
+
+
+## The Beta 1 pass: a defender dealt two lane points that stepped into cover by the first (as the real flow leaves it:
+## _next_goal has already named the second point by then) stopped there for good, one point short of its post.
+func test_a_defender_that_takes_cover_by_a_point_on_the_way_still_goes_on_to_its_post() -> void:
+	# BP9: a defender with two or more lane points that stepped into cover by a point on the way stayed there for good,
+	# one point short of its post (the lane's index already named the next point, so it read as "at my last point").
+	var found := 0
+	for seed_value in range(3, 6):
+		_start(RoundState.Mode.ATTACK_DEFEND, config, seed_value)
+		var w := bots.world
+		var size := tuning.rounds.team_size
+		var b: Bot = null
+		for id in range(size, size * 2):
+			var o := _bot(id)
+			if o != null and BotFlag.role(o, w) == BotFlag.Role.DEFEND:
+				b = o
+				break
+		if b == null:
+			continue
+		# Sure to look for cover by a point, and alone on its lane (two that play as a team hold a crossfire instead).
+		b.skill = b.skill.duplicate() as BotSkill
+		b.skill.hold_cover_chance = 1.0
+		b.skill.team_play = false
+		for lane_id in map.lanes.size():
+			var lane := map.lanes[lane_id]
+			for at in lane.size():
+				var next := at + b.lane_dir
+				if next < 0 or next >= lane.size():
+					continue
+				# Just arrived at point `at`, the walk there done, the point after it its last (its post).
+				b.mode = Bot.Mode.ADVANCE
+				b.hunting = false
+				b.lane = lane_id
+				b.lane_points = (next if b.lane_dir > 0 else lane.size() - 1 - next) + 1
+				b.lane_index = at
+				b.character.position = lane[at]
+				b.hold_left = 0.0
+				b.wait_for_team = false
+				b.hold_cover = false
+				b.post_cover = false
+				b.route_state = Bot.RouteState.NONE
+				b.route.clear()
+				b.route.append(lane[at])
+				var cmd := PlayerCommand.new()
+				BotMovement.move(b, w, cmd, DT, null)
+				if not b.hold_cover:
+					continue
+				found += 1
+				var where := "seed %d lane %d point %d" % [seed_value, lane_id, at]
+				assert_eq(b.lane_index, next, "%s: the point after is already named" % where)
+				assert_false(b.post_cover, "%s: cover on the way, not its post's" % where)
+				# In the cover it picked, the walk there done.
+				b.character.position = b.hold_spot.position
+				b.route_state = Bot.RouteState.NONE
+				b.route.clear()
+				b.route.append(b.hold_spot.position)
+				BotMovement.move(b, w, cmd, DT, null)
+				assert_false(b.hold_cover, "%s: the step into cover is over" % where)
+				assert_gt(b.hold_left, 0.0, "%s: a pause in the cover on the way" % where)
+				assert_eq(b.route_state, Bot.RouteState.WANTED, "%s: then on to its post" % where)
+				assert_eq(b.route_goal, b.lane_goal, "%s: the lane's point after it" % where)
+	assert_gt(found, 0, "a defender found cover by a lane point on some seed (else this test proves nothing)")

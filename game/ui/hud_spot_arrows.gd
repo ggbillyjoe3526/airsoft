@@ -36,9 +36,10 @@ func setup(cfg: HudConfig, sim: SimTuning, characters: Array[Character], player:
 	_alphas.resize(characters.size())
 
 
-## Each frame: the enemies `spots` marks for your team at `now` (s of match time), as `camera` sees them, on an `area`
-## the HUD's size; none when `show` is false.
-func place(camera: Camera3D, spots: Spots, now: float, show: bool, area: Vector2) -> void:
+## Each frame: the enemies `spots` marks for your team at `now` (s of match time), as `camera` sees them `fraction` of
+## the way from the last tick to this one (as their figures are drawn: an arrow placed by the tick alone shook over a
+## running head, BP9), on an `area` the HUD's size; none when `show` is false.
+func place(camera: Camera3D, spots: Spots, now: float, show: bool, area: Vector2, fraction: float = 1.0) -> void:
 	var was := _count
 	_count = 0
 	if show and spots != null and camera != null and _cfg != null:
@@ -46,7 +47,8 @@ func place(camera: Camera3D, spots: Spots, now: float, show: bool, area: Vector2
 			if c.team == _team or spots.spotted_by(c.id) != _team or not spots.is_spotted(c.id, now) \
 					or not Elimination.is_in_play(c):
 				continue
-			var head := Lean.eye(c, _sim.body, _sim.hits) + Vector3.UP * _cfg.spot_arrow_lift
+			var head := Lean.eye(c, _sim.body, _sim.hits) + Vector3.UP * _cfg.spot_arrow_lift \
+					+ (c.prev_position.lerp(c.position, fraction) - c.position)
 			if camera.is_position_behind(head):
 				continue
 			var at := camera.unproject_position(head) / hud_size

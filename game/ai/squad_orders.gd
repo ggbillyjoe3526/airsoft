@@ -26,18 +26,22 @@ static var _hit: RayHit = RayHit.new()
 
 ## The last order given (SquadOrderBook.order_outcome, one record reused): by whom, the order in force afterwards (NONE:
 ## the team plan), and its notice (NONE when an order was taken). `serial` counts every outcome, so a reader sees a new
-## one even when it reads the same.
+## one even when it reads the same. `news` marks an order that ended by itself (its giver walked away from it, nobody
+## is left to carry it, all quiet), not the answer to one just given: its giver asked nothing, so the presentation
+## tells them wherever they are looking (BP9).
 class Outcome:
 	extends RefCounted
 	var giver: int = -1
 	var order: SquadOrder.Kind = SquadOrder.Kind.NONE
 	var notice: SquadOrders.Notice = SquadOrders.Notice.NONE
+	var news: bool = false
 	var serial: int = 0
 
-	func record(giver_id: int, in_force: SquadOrder.Kind, what: SquadOrders.Notice) -> void:
+	func record(giver_id: int, in_force: SquadOrder.Kind, what: SquadOrders.Notice, unasked: bool = false) -> void:
 		giver = giver_id
 		order = in_force
 		notice = what
+		news = unasked
 		serial += 1
 
 

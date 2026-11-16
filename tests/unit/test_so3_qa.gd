@@ -54,6 +54,7 @@ func test_a_mouse_button_works_as_the_wheels_key() -> void:
 	down.pressed = true
 	Input.action_press(&"order_wheel")
 	input._unhandled_input(down)
+	input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 	assert_true(input.wheel().open, "the button opens it")
 	_move(200.0, -29.0)
 	var up := InputEventMouseButton.new()
@@ -101,6 +102,7 @@ func test_alt_tab_with_the_key_held_then_a_fresh_press_opens_it_in_the_middle() 
 func test_opening_the_wheel_while_aiming_keeps_the_sight_up_and_a_new_aim_press_waits() -> void:
 	_event(&"aim", true)
 	_event(&"order_wheel", true)
+	input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 	input.fill(cmd)
 	assert_true(cmd.aim, "aim held before the wheel stays up (the browser game)")
 	_event(&"aim", false)
@@ -130,6 +132,7 @@ func test_a_reload_pressed_before_or_during_the_wheel_still_reloads() -> void:
 
 func test_a_click_pick_with_the_key_still_down_gives_one_order_and_letting_go_adds_none() -> void:
 	_event(&"order_wheel", true)
+	input.wheel().opened_ms -= 1000 # held past a tap: the wheel is up
 	_move(200.0, -29.0)
 	_event(&"fire", true)
 	_event(&"fire", false)
