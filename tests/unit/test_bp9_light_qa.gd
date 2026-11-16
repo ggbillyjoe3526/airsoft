@@ -135,3 +135,81 @@ func test_an_all_dead_roof_takes_every_mode_and_flicker_without_error() -> void:
 	lamps.set_mode(GraphicsQuality.LampLights.NEAR, false, false)
 	assert_eq(lamps.light_count(), 0, "no lights")
 	assert_eq(lamps.key_share(GraphicsQuality.LampLights.FAR), 1.0, "the sun stays with no lamp to stand for")
+
+
+func _field(id: String) -> FieldLighting:
+	var field := MapData.load_map(id, play.map_style, SimTuning.new().rounds.team_size)
+	var lighting := FieldLighting.build(LightingConfig.for_map(play.lighting, play.night_lighting, field,
+			LightingConfig.DAY), play.look)
+	add_child_autofree(lighting)
+	lighting.add_probes(field)
+	return lighting
+
+
+func _probe_modes(lighting: FieldLighting) -> Array[int]:
+	var out: Array[int] = []
+	for p in lighting.find_children("*", "ReflectionProbe", true, false):
+		out.append((p as ReflectionProbe).ambient_mode)
+	return out
+
+
+func test_hidden_probes_still_follow_the_bounce_light_with_reflections_off() -> void:
+	# Reflections Off hides the probes; Global illumination Scene still sets their ambient, so turning Reflections
+	# back on shows them right, with no error either way.
+	var lighting := _field("depot")
+	var rs := GraphicsApply.Server.new()
+	var values := table.preset(&"ultra").copy()
+	values.reflections = GraphicsQuality.Reflections.OFF
+	GraphicsApply.apply_field(values, lighting, null, rs)
+	var probes := lighting.find_children("*", "ReflectionProbe", true, false)
+	assert_gt(probes.size(), 1)
+	assert_false((probes[0] as ReflectionProbe).is_visible_in_tree())
+	for m in _probe_modes(lighting):
+		assert_eq(m, ReflectionProbe.AMBIENT_ENVIRONMENT)
+	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, rs)
+	for m in _probe_modes(lighting):
+		assert_eq(m, ReflectionProbe.AMBIENT_ENVIRONMENT)
+
+
+func test_set_effects_without_probes_takes_the_bounce_light_without_error() -> void:
+	var field := MapData.load_map("depot", play.map_style, SimTuning.new().rounds.team_size)
+	var lighting := FieldLighting.build(LightingConfig.for_map(play.lighting, play.night_lighting, field,
+			LightingConfig.DAY), play.look)
+	add_child_autofree(lighting)
+	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, GraphicsApply.Server.new())
+	assert_eq(lighting.find_children("*", "ReflectionProbe", true, false).size(), 0)
+	assert_true(lighting.environment.sdfgi_enabled)
+
+
+func test_an_open_fields_probes_never_change_ambient_on_any_preset() -> void:
+	var lighting := _field("woodland")
+	var before := _probe_modes(lighting)
+	assert_gt(before.size(), 0)
+	var rs := GraphicsApply.Server.new()
+	for preset: StringName in [&"low", &"ultra", &"medium", &"ultra"]:
+		GraphicsApply.apply_field(table.preset(preset), lighting, null, rs)
+		assert_eq(_probe_modes(lighting), before, str(preset))
+
+
+func test_a_repeat_of_the_same_bounce_state_leaves_the_probes_alone() -> void:
+	var probes := AreaProbes.new()
+	add_child_autofree(probes)
+	probes.set_bounce(false)
+	probes.set_bounce(true)
+	probes.set_bounce(true)
+	probes.set_bounce(false)
+	assert_eq(probes.get_child_count(), 0, "no probes: nothing to set, nothing breaks")
+
+
+func test_the_probes_follow_the_lamps_flag_for_the_bounce_light() -> void:
+	# The probes' flag (FieldLighting.set_effects: gi == SCENE) and the lamps' (apply_field: gi == SCENE) are the one
+	# test on `values`: on every preset the interior probes keep their ambient exactly when the lamps take their
+	# bounce strength.
+	var lighting := _field("depot")
+	var rs := GraphicsApply.Server.new()
+	for preset: StringName in [&"low", &"medium", &"high", &"ultra"]:
+		var values := table.preset(preset)
+		GraphicsApply.apply_field(values, lighting, null, rs)
+		var scene := values.global_illumination == GraphicsQuality.GlobalIllumination.SCENE
+		for m in _probe_modes(lighting):
+			assert_eq(m == ReflectionProbe.AMBIENT_ENVIRONMENT, scene, str(preset))
