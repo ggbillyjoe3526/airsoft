@@ -9,6 +9,212 @@ Don't edit this file for a change: add a note to `changelog.d/` instead (its `RE
 
 The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 
+## 0.1 Beta 1 (2026-11-16)
+
+### Highlights
+- 0.1 Beta 1 is the first Beta build: no new systems, just fixes, balance, speed and polish from a full pass of the whole game.
+- Depot is smaller and busier, Woodland's flags and bomb sites have moved, and bots take five or six routes on every field and mix them up each round.
+- Bots notice you like a person would: a moment later at the edge of their view or far away, a flinch when a BB passes close, and a quick second peek no longer gets you hit every time.
+- Plant The Bomb has a fuse tuned for each field, so attackers and defenders each win about half their rounds.
+- A smaller order wheel with Spotted in the middle, and a new Cover Me order.
+- Menu highlights are blue, with an interface colour to pick; the AEG Rifle starts on burst indoors, and the field of view and volumes start at new values.
+- Softer shadows, Depot no longer washed out on High, volumetric haze in four levels, and no more flickering surfaces.
+- Pistols sit low on the right like the rifles, parts of the AEG Rifle and the GBB Pistol are redrawn, and metal and polymer look like what they are.
+- Depot gets varied racking and wall details, the Range gets new sandbags, and Woodland's longest stall is gone.
+
+### Depot is smaller and busier
+- The west 10 m of the hall is closed, so Depot is 98 by 72 m now.
+- Beta's start room sits where the Mid exit was and opens onto Upper mid behind a rack of crates, with stairs north to the Yard and south to the Pens.
+- Both flags and both bomb sites are 8 m nearer the middle, so defenders have ground in front of them.
+- The chrono hut with the overtime flag moved 4.5 m east to the new middle.
+- Bots take five routes: each side's corridor, each side's rooms, and the middle.
+- The Shoot House, Lounge, Offices, Pens, Huts and the containers see more fights.
+- Defending bots hold forward at the Offices door, Lower mid and the end of the Containers.
+- Fights start sooner: the first hit comes about 13 s into a round, was about 15 s.
+- Plant The Bomb's fuse on Depot is 24 s, set for the new layout.
+
+### Woodland's flags move and bots take six routes
+- Flag A now stands in Fern hollow, beside the oak just west of the Fort.
+- A low crate stands beside Flag A, so you can crouch behind it.
+- Flag B sits at Log stacks, in a pocket between three woodpiles just south of the road.
+- Plant The Bomb's Site A and Site B move with the flags.
+- Plant The Bomb's fuse on Woodland is 25 s, so attackers and defenders each win about half.
+- Bots use six routes through the wood, not three: new ones along the north edge, the Berm north of the Clearing and across the Clearing's south side.
+- Defenders meet the attack around the stream too, at the Tower, Hut row and the Culvert, as well as at the flags.
+- In Attack / Defend the first shot comes about 20 s in, down from about 24 s; half the knock-outs now happen away from the defenders' end, up from 1 in 8.
+- The map is the same size and the road stays clear; the Fort and the Sawmill stay behind the flags.
+- At night a lantern hangs by each flag.
+
+### Subway on two levels (Dev content)
+- The ticket hall now stands on the same level as the concourse. The street level and the escalators between them are gone.
+- The lifts stop at two floors, Ticket hall and Platforms, and still take 4 seconds a ride.
+- The spiral stair works. It runs from beside the ticket gates down eight flights to the south platform.
+- A rail closes the open edge at the top of the spiral stair.
+- Bots use the spiral stair too.
+- Five metal lockers are gone from the concourse passages, so you can see much further, up to about 57 m above the platforms.
+- A short pier at each passage mouth hides the passages from the ticket hall at the start.
+- Bots now use five routes instead of three.
+- In bot matches at Normal and Hard each side wins 43 to 57 % of rounds in every mode. The Plant The Bomb fuse stays at 22 seconds.
+
+### Stockade removed
+- The Stockade log fort test map is gone from the game.
+- With Dev content on, the Match page now offers Depot, Woodland, Subway and the Range.
+- A game last played on Stockade opens the Match page on Depot.
+
+### Plant The Bomb fuse set per field
+- Plant The Bomb now has a fuse for each field: 24 seconds on Depot and 25 seconds on Woodland, tuned on their new layouts (22 on Subway, in Dev content).
+- Holding the site after a plant now pays off, so attackers win about half their rounds instead of under two in five.
+- The Match page shows the fuse for the field you pick, and defusing still takes 6 seconds.
+
+### Bots notice you like a person would
+- Bots take a moment longer to notice you at the edge of their view or far away, and notice you sooner when you run.
+- Up close a bot sees you at once, on every difficulty; the level still sets how fast it reacts after that.
+- A BB that passes close to a bot makes it flinch, throwing its aim off for about half a second (least on Hard).
+- Steady fire keeps a bot flinching, so shooting back at a bot that has seen you now helps.
+
+### Bots find you again
+- A bot that lost sight of you behind cover needs a moment to find you when you peek back out.
+- Its first BBs go wide before they walk onto you. A bot's first sight of you is unchanged.
+- On Normal, a quick second peek at 10 m is now hit about 3 times in 100 (it was every time).
+- Hard still punishes peeking the same corner twice (about 1 in 4); Easy almost never does.
+
+### Bots mix up their routes
+- Bot teams still follow a plan each round, spread out, in pairs or stacked on a lane, but carry it out differently, so one route can't be learned.
+- Each round a team moves up quick, steady or slow.
+- Bots hurry through their own half and slow down past the middle.
+- Each bot walks its lane up to 2.5 m to one side, and many cut across to another lane once a round; on Woodland that's a flank through the trees.
+- In Attack / Defend and Plant The Bomb, in some rounds one defender holds further up its lane to catch attackers on their way in.
+
+### Bots in cover and in a fight
+- Defending bots that ducked into cover on the way to their post now carry on to their post, instead of stopping one stop short of the flag.
+- A bot dazzled by a flash in the middle of a burst now stops firing, instead of shooting the rest of it blind.
+- A bot that stays on its target with a nearer opponent also in view now notices that target as soon as its own distance allows, not the nearer one's.
+
+### Order wheel, Spotted and Cover Me
+- The order wheel (hold Z) is smaller: SPOTTED sits in the middle, with four same-size buttons each side, names only.
+- Right side: Watching Here, Follow Me, Cover Me, Need a Mag. Left side: Team Plan, Go There, Hold Here, Regroup.
+- Move the mouse to light a button and let go, or click it with the Click setting.
+- Spotted: tap Z, or let go in the middle, on an opponent you can see. A small yellow arrow shows over them for 10 s, through walls.
+- Only your team sees Spotted. Bot teammates near that opponent go after them or watch them.
+- Cover Me: your nearest free teammate comes to stand beside you, looking where you look, until you go more than 30 m away.
+- A middle-mouse ping on a spot now says "I'm heading there": teammates within 40 m may come along, never must.
+- Under your own order, pinged teammates only look. Go There on the wheel is still a strict order.
+
+### Spotting and squad order fixes
+- Tapping Z always spots an opponent, even while you move your mouse to follow them, so Follow Me or nothing no longer comes up instead.
+- Tapping Z while firing no longer stops your burst, and the mouse turn you make during the tap is kept.
+- An order that ends by itself now shows "Back to the team plan" in the order wheel's circle for 2 seconds, even with the wheel shut.
+- That message appears when your Cover Me helper is hit, when you walk away from Cover Me or Watching Here, or when a Go There goes quiet ("All quiet").
+- Spotted's yellow arrow now moves as smoothly as the player under it.
+- Spotted no longer makes a teammate forget an opponent it has just seen somewhere else.
+
+### Burst indoors, field of view 87, new volumes
+- On indoor fields (Depot, and Subway in Dev content) the AEG Rifle now starts each round on 3-round burst instead of single shots. Press B for full auto as before.
+- Indoors the Compact SMG, which has no burst, still starts on single shots, and the Cyber Pistol starts on single shots as it does everywhere.
+- Bots indoors fire burst after burst at a player's pace, and go full auto only now and then.
+- The field of view now starts at 87° (was 90°). A save still on 90° moves to 87°; one you set stays.
+- New starting volumes: Master 90 %, Effects 80 %, Power source 80 %, Ambience 30 %, Interface 40 %.
+- The Power source slider goes louder: 80 % is the old 100 %, so you can now turn it up to 100 %.
+- A save on the old starting volumes moves to the new ones, and a Power source you set sounds the same as before.
+
+### Pistols sit low, hands stay whole
+- Your pistols now sit low on the right of the screen, like the rifles, a little further away and turned so you see their side.
+- A pistol takes about a rifle's share of the screen.
+- Aimed, a pistol's hands are drawn whole instead of fading out.
+- On Inspect (Y) your arms reach to the replica from your shoulders, so no cut-off sleeve swings into view on the AEG or Compact SMG.
+
+### AEG Rifle looks more like a quad rail
+- The ribbed ring between the receiver and the handguard now shows all the way round.
+- The handguard has open oval gaps between its rails, one row in each corner, so you see the barrel and gas tube through them.
+- The lower gaps are shorter than the top ones, as on a real quad rail.
+- The forward assist, the round button at the back of the receiver's right side, is bigger and angled out.
+- Bots' rifles keep a solid handguard.
+
+### GBB Pistol slide back redrawn
+- The GBB Pistol's rear serrations now run cleanly to the bottom of the slide, like the front ones. The small grey squares at the bottom are gone.
+- The back of the slide is rebuilt from photos of the real thing: a bigger cover plate with a rounded top and five fine lines across it.
+- Under the cover plate is an open cut-out with a centre tab and two blocks inside.
+
+### Gun metal and polymer match
+- Slides, receivers, barrels and metal attachments are a dark satin coat with a soft shine, not a silver gleam.
+- Grips, stocks and frames are matte rather than pitch black, so a replica in one colour reads as one colour.
+- The same finish applies to every replica you hold, every attachment and accessory, and the menu pictures.
+- White paint stays a touch off-white.
+- In Tan, the rifle's magazine shows the scheme's own dark brown.
+
+### Softer light and shadows
+- Depot on High is no longer washed out. The hall is about as bright as on Low and Medium, and nothing turns white from cover.
+- Depot on Ultra looks the same as before.
+- The sun's shadows have softer edges on Medium and High, set by Settings › Graphics › Shadow softness. Medium gets a fine grain.
+- Subway on Medium and High no longer has a dark band at chest height along the walls and across the kiosk's sides.
+- Depot's Lounge on Medium and High no longer fades to black towards the top of the lockers, the tall panel and the roof trusses.
+- Woodland's spruce rows beside the thickets no longer draw their shaded sides black.
+- Depot's crates and walls are a shade paler and cooler on Medium and High.
+
+### Volumetric haze in four levels
+- Settings › Graphics › Volumetric haze now offers Off, Low, Medium and High instead of a switch.
+- Every level is the same faint haze. Higher levels reach farther into the distance (30, 50 and 80 m), draw its light shafts finer and smoother, and cost more.
+- The Medium preset now has Low haze, and High has Medium. Ultra keeps its haze as before. The Low preset still has none.
+- A Custom preset that had haze switched on now reads High.
+
+### No more flickering surfaces
+- Surfaces lying over one another no longer flicker or crawl through each other as you move.
+- Fixed on Depot's pallet racking and parts cages' roofs, the far sheds on the skyline, and door frames and doors.
+- Subway's platform edge over the track shows its dark lining steadily, instead of crawling between lining and white tile.
+- The floor inside Subway's works hoardings no longer flickers where the platform's edge strips run under it.
+- The print on Depot's signs stays steady when seen from across the hall.
+- Thin things, like a cage's wire and far rails, can still shimmer along their edges: Edge smoothing stays Off.
+
+### Woodland stalls less
+- Woodland's longest stall is gone: the game could freeze for a moment when a bot picked a spot in the stream to look for you.
+- Bots no longer pick a spot in the stream to search, by day or by night. They still cross at the Ford and the bridges.
+- Shorter hitches can still happen on Woodland on a slow processor.
+
+### Depot gets more varied racking
+- Half the racking on Depot now looks different: pallet racks with shrink-wrapped loads, drums and IBC tanks on pallets, or mesh parts cages.
+- Each kind comes in three bays that take turns, so the hall looks less copied.
+- The racks keep their size and solidity, so cover, routes and the long Chrono sight line are unchanged. No balance change.
+- High up on the walls: cable baskets, lagged pipes and the sprinkler main, with a valve, sprinkler drop and junction box every third length.
+- Fire points (a board with a red housing) sit where a wall is open, with a call point and an extinguisher on each pillar.
+- Safety signs sit at eye height, and a "Fire exit, keep clear" sign is beside each exit.
+- The new wall details are for looks only. Nothing on the walls blocks movement or shots.
+
+### Subway gets Depot's wall details (Dev content)
+- Pipework runs high along the long walls of the ticket hall and at the top of the stair, wall to wall, with a valve, sprinkler drop and junction box every third length.
+- The ticket hall's clock moves to the street-end wall to make room for the pipework.
+- Fire action notices with a fire alarm call point hang in the ticket hall, the concourse, the stair top and by the platform doors to the lower hall.
+- Fire points stand in the plant room, at the top of the stair and on the lift landing.
+- Defibrillator signs hang in the ticket hall and the lower hall, and a PPE sign in the plant room.
+- "Fire exit, keep clear" signs mark the cross passage in both running tunnels.
+- These are for looks only. Nothing blocks movement or shots, and there is no balance change.
+
+### Range and woodland props look better
+- The Range's sandbag walls are heavy filled sacks, plump in the middle with eared corners, and no two walls look alike.
+- Each Range sandbag wall mixes three sandbag sections and is closed at both ends with rounded bags.
+- The Range's site toilet has pressed scoops on its panels and door, and a moulded roof.
+- The water tote's valve sits in a recess behind its cage, and the cage's corners are bent round.
+- Woodland's woodpiles are stacked by hand from split pieces of every size, warm brown with a level top of wood and bark.
+- Only a woodpile's first and last sections show split firewood courses with a bark rim, and no seam shows between sections.
+- Nothing changes in play: cover, sizes and collisions are the same.
+
+### Blue highlights and a colour to pick
+- Highlights in the menus and HUD are now soft cornflower blue instead of cream: PLAY and RESUME, the picked field, mode and tab, focus outlines, the XP bar, the comms wheel's lit button and the Spotted circle.
+- New: Settings › Display › Interface › Colour picks the highlight from blue (the default), beige (the old colour), red, green, pink, orange or violet.
+- Each colour is a soft shade paler than the team colours, so it never looks like a team.
+- The menus change as you click; picked from the pause menu, the rest of that match's HUD changes from the next match.
+
+### Menu and colour fixes
+- The interface colour now reaches the focus ring on switches and the ring that flashes when you press a button.
+- Picking an interface colour in Settings from the Loadout or the Armory brings you back to that page, not to Match.
+- "Try my settings again" after a safe start no longer loses a Custom volumetric haze saved by an older build.
+
+### Simpler renderer and flash fixes
+- On the simpler renderer (Settings › Graphics › Renderer), Woodland no longer shows errors.
+- On the simpler renderer, props, doors and train cars keep their grime from the ground up.
+- Bots' flashes no longer blind their own teammates.
+- A bot now calls "Flash out!" in the hit feed as it throws a flash, so you can look away too.
+- A bot strafing past the edge of a doorway no longer shoots a teammate on the far side.
+
 ## 0.1 Dev 3 (2026-11-14)
 
 ### Highlights

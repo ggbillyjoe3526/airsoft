@@ -18,17 +18,17 @@ BBs), with doors and two flags; the AEG Rifle, the GBB Pistol, the Cyber Pistol,
 Variable Scopes, the Pump Shotgun and the Compact SMG, every part and power source, the Loadout, levels and the Armory; Easy, Normal and Hard bots with
 names, personalities, kits and callouts, playing as a team; Elimination with its overtime flag, Attack / Defend, Plant The Bomb and
 Custom matches with 5 to 8 a side; the practice range in Depot's site, Practice on any field and the timed challenge;
-squad orders, pings, Go there and the magazine hand-off; the minimap, the full-screen map, the hit feed, scoreboard
+squad orders, the order wheel with Spotted and Cover Me, pings, Go there and the magazine hand-off; the minimap, the full-screen map, the hit feed, scoreboard
 and match summary; smoke and flash bombs, thrown by you and the bots; detailed models of every replica, attachment,
 magazine and bomb, your own arms holding them, and figures in real gear with faces; finished models for every
 field, climbing onto ledges, wind and air temperature on the outdoor fields; recorded sounds; graphics presets,
-accessibility options, the save file screen, the crash screen and bug reports.
+accessibility options, an interface colour to pick, the save file screen, the crash screen and bug reports.
 The rest of this wiki describes all of it.
 
 ### Next
 
-- **0.1 Beta 1:** 0.1 Dev 3 was the last Dev build. The Beta builds add no new systems: they are for balance, fixes,
-  speed and polish, from the playtests, up to 0.1 and Early Access.
+- **0.1 Beta 2:** fixes, balance, speed and polish from the playtests of 0.1 Beta 1. The Beta builds add no new
+  systems; they lead up to 0.1 and Early Access.
 - **In development:** Subway, a closed metro station on two levels, from the ticket hall and concourse down
   escalators, a spiral stair, a stair and working lifts to the platforms, the trains and the tunnels, tiled,
   terrazzo-floored and lamp-lit, its shots ringing off the tiles.

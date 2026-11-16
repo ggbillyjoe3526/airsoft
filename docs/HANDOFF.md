@@ -1,13 +1,14 @@
 # Handoff
 
-What is happening now (as of 2026-11-15), for a session picking up the work. The plan is `docs/ROADMAP.md`, the
+What is happening now (as of 2026-11-16), for a session picking up the work. The plan is `docs/ROADMAP.md`, the
 rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 
 ## Now
 
-- **0.1 Dev 3 is out (2026-11-15)** (tag `0.1-dev.3`), the last Dev build. 0.1 Beta 1 is being built:
-  `config/version` reads "0.1 Beta 1". Beta is fixing, balance, performance and polish (`docs/PROCESS.md` › Placing
-  work), from the owner's playtests and `docs/KNOWN_ISSUES.md`.
+- **0.1 Beta 1 is the release being tagged (2026-11-16)** (tag `0.1-beta.1`), the first Beta build: its notes are
+  folded into `CHANGELOG.md`. The first pull request after the owner's tag sets `config/version` to "0.1 Beta 2",
+  checks the release's three downloads and runs the archive check (`docs/PROCESS.md` › Releases, steps 4 to 6).
+  0.1 Beta 2 is next: fixes and balance from the owner's Beta 1 playtest.
   The browser game is frozen at `0.1-beta.1`, removed from the repository on 2026-11-05 (owner) and read from git at
   the tag `0.1-dev.1`.
 - **Fields.** Woodland and the Depot are redesigned (WR1, DR1). The Street was removed (owner, 2026-11-09, SX1).
@@ -22,8 +23,9 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
   and sleeves are painted at 2K, and the replica has a life of its own in the hands (HandsMotion).
 - **Sound.** The owner's recordings are in (AU2 to AU8).
 - **UI.** The menus and HUD are redesigned (UR1 to UR7), with fixes after (UF1, UF2).
-- **Bug passes.** BP2 to BP8 are merged; BP8 fixed the owner's thorough Dev 2 playtest.
-- **Next.** 0.1 Beta 1. The open checks the owner hadn't played by the Dev 3 tag are carried over to his Beta 1
+- **Bug passes.** BP2 to BP9 are merged; BP8 fixed the owner's thorough Dev 2 playtest, BP9 was the full pass before
+  0.1 Beta 1.
+- **Next.** 0.1 Beta 2, from the owner's Beta 1 playtest. His open checks are on his Beta 1
   list (`/mnt/project-files/playtest/0.1-beta1-checklist.md`).
 
 ## Where to look

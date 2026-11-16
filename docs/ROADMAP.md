@@ -9,10 +9,12 @@ in `docs/PROCESS.md`.
 - **Building the game.** The game restarted on 2026-10-18 as an installable desktop game built with Godot and
   Blender. The browser game it replaces stopped at its 0.1 Beta 1; its old repository is no longer on GitHub, and its
   code was in `legacy/browser/` until 2026-11-05 (in git at the tag `0.1-dev.1`).
-- **Last tag:** `0.1-dev.3`, [0.1 Dev 3](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.3)
-  (2026-11-15), the last Dev build. The owner creates tags.
-- **Next: 0.1 Beta 1.** Fixing, balance, performance, stability, UX and polish (`docs/PROCESS.md` › Placing work), from
-  the owner's playtests and `docs/KNOWN_ISSUES.md`. Subway stays dev content until the owner makes it public.
+- **Last tag:** `0.1-beta.1`, [0.1 Beta 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-beta.1)
+  (2026-11-16), the first Beta build. The owner creates tags.
+- **0.1 Beta 1** (tagged 2026-11-16): fixing, balance, performance and polish after Dev 3, then the full pass before
+  the tag (BP9: bugs, flicker, light and Woodland's worst stall; balance all in band).
+- **Next: 0.1 Beta 2.** Fixing, balance, performance, stability, UX and polish (`docs/PROCESS.md` › Placing work), from
+  the owner's Beta 1 playtest and `docs/KNOWN_ISSUES.md`. Subway stays dev content until the owner makes it public.
   Stockade, the dev-only Plant The Bomb field, was removed (owner, 2026-11-15).
 - **0.1 Dev 2** (owner, 2026-10-30; tagged 2026-11-09): basic smoke and flash bombs, thrown by bots too (done: SF1,
   SF2), a full-screen map and a Go there ping (owner, 2026-10-31; done: FM1), then Depot and Woodland redesigned larger
@@ -166,6 +168,7 @@ at his PC to connect.
 
 | Build | Date | What it brought | Tag |
 |---|---|---|---|
+| [0.1 Beta 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-beta.1) | 2026-11-16 | The first Beta build: Depot smaller and busier, Woodland's flags moved, five or six bot routes a field mixed up each round; bots that notice you like a person and flinch at near misses; a Plant The Bomb fuse per field; the order wheel with Spotted and Cover Me; blue highlights and an interface colour; burst indoors, FOV 87 and new volumes; softer shadows, haze in four levels, no flicker; pistols low right; Stockade removed; the BP9 full pass | `0.1-beta.1` |
 | [0.1 Dev 3](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.3) | 2026-11-15 | Plant The Bomb; the Pump Shotgun and the Compact SMG, levels up to 15; climbing onto ledges; Blender models and CC0 materials for every map and the Sunlit Concrete look, with lamp light and an Ultra preset; reworked map layouts; replicas, gear and faces in real materials and rebuilt first-person hands; a physics and a balance pass; more of the owner's recorded sounds; Subway and Stockade (dev only); the Dev 3 audit's fixes | `0.1-dev.3` |
 | [0.1 Dev 2](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.2) | 2026-11-09 | Depot rebuilt as an indoor hall and Woodland as an open wood, with doors and two flags; The Street (dev only); smoke and flash bombs, thrown by bots too; the Sniper Rifle and Variable Scope; Blender models of every replica, attachment, magazine, barrel and bomb, first-person arms, and figures in gear with faces; the owner's recorded sounds; new menus and HUD; the full-screen map and Go there; teams of 5 to 8; rounds of bug fixes | `0.1-dev.2` |
 | [0.1 Dev 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.1) | 2026-10-30 | The first build: Depot, Woodland and the range; the AEG Rifle and GBB Pistol with attachments and the Armory; bots, squad orders and callouts; Elimination and Attack / Defend; settings, saves and accessibility; the Windows installer and the Linux build | `0.1-dev.1` |
