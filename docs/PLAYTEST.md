@@ -36,8 +36,8 @@ replays the same match.
 ## Play these first
 
 What to play in the build in your hands: your checklist of open checks is
-`/mnt/project-files/playtest/0.1-beta1-checklist.md` in the project's shared files (0.1 Dev 3's is
-`0.1-dev3-checklist.md`, 0.1 Dev 2's `0.1-dev2-checklist.md`, 0.1 Dev 1's `0.1-dev1-checklist.md`), and each pull
+`/mnt/project-files/playtest/0.1-beta2-checklist.md` in the project's shared files (0.1 Beta 1's is
+`0.1-beta1-checklist.md`, 0.1 Dev 3's `0.1-dev3-checklist.md`, 0.1 Dev 2's `0.1-dev2-checklist.md`, 0.1 Dev 1's `0.1-dev1-checklist.md`), and each pull
 request names its sections here. On 2026-11-15 the Beta 1 list's 120 checks were cleared without play where they
 could be and the list rewritten to the 22 that need the owner; `docs/records/BC1.md` gives each old check's outcome. For the core slice:
 [Movement](#movement), [Shooting and reloads](#shooting-and-reloads), [BBs](#bbs), [Players and replicas](#players-and-replicas), [Rounds and matches](#rounds-and-matches),
