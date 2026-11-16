@@ -2,7 +2,8 @@ extends GutTest
 ## BP9, flicker (two faces lying in one plane over one another, each showing through the other as the eye moves): the
 ## fixes outside the model files. Subway's platform edge lining stands proud of its platform's slab along both
 ## platforms (the two lay in one plane, 119 m2 of them); no level face of a prop laid in tiles lies in its backing's
-## top (Depot's parts cages' roofs did); a door frame's head stands under whatever closes its opening (a hut's roof).
+## top (Depot's parts cages' roofs did), nor in a platform strip it stands over (Subway's works hoardings' ground
+## sheets did); a door frame's head stands under whatever closes its opening (a hut's roof).
 ## The model files themselves are checked by tools/coplanar_models.py in CI's lint job, and parting their faces
 ## leaves a model the size it was built to: a section laid cell by cell is as long as its cell, so its end posts
 ## meet the next section's. And the other flicker, a texture's own: every texture a model or a field wears carries
@@ -113,6 +114,48 @@ func test_no_level_face_of_a_tiled_prop_lies_in_its_backings_top() -> void:
 	old.props = look.props.duplicate() as PropDressConfig
 	old.props.backing_top = 0.05
 	assert_gt(_tops_in_a_backing(map, old), 0, "0.05 m under the top is the cages' own roof")
+
+
+# --- props standing over a platform's strips ---
+
+## How many level faces of Subway's props lie in the plane of a platform strip they stand over, the strips drawn
+## `lift` m over their floors.
+func _tops_in_a_strip(map: MapData, look: SiteLook, lift: float) -> int:
+	var cfg := look.props
+	var boxes: Dictionary[StringName, AABB] = {}
+	for model: StringName in cfg.models:
+		var mesh := cfg.mesh_of(model)
+		if mesh != null:
+			boxes[model] = mesh.get_aabb()
+	var placed := PropLayout.layout(map, cfg, boxes)
+	var found := 0
+	for model: StringName in placed:
+		var heights := _level_tops(cfg.mesh_of(model))
+		for t in placed[model].transforms:
+			var box := t * boxes[model]
+			var ground := Rect2(box.position.x, box.position.z, box.size.x, box.size.z)
+			for strip in map.station.strips:
+				if not ground.intersects(strip.area):
+					continue
+				for h in heights:
+					if absf((t * Vector3(0.0, h, 0.0)).y - (strip.y + lift)) < NEAR:
+						found += 1
+	return found
+
+
+func test_no_level_face_of_a_prop_lies_in_a_platform_strip_it_stands_over() -> void:
+	var map := _map("subway")
+	var look := play.site_look
+	assert_gt(map.station.strips.size(), 0, "Subway's platforms carry their edge strips")
+	assert_eq(_tops_in_a_strip(map, look, play.station_look.strip_lift), 0,
+			"a works hoarding's ground sheet stands clear of the strips drawn across its compound")
+	# The check sees the fault it is for: strips drawn at the sheet's own height lie in it, as they did at 1 cm.
+	var sheet := 0.0
+	for h in _level_tops(look.props.mesh_of(&"works_hoarding")):
+		if h > 0.001 and (sheet == 0.0 or h < sheet):
+			sheet = h
+	assert_gt(sheet, play.station_look.strip_lift + NEAR, "the ground sheet's top is over a strip's")
+	assert_gt(_tops_in_a_strip(map, look, sheet), 0, "strips at the sheet's height would lie in it")
 
 
 # --- a section built to its cell ---

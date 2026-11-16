@@ -19,8 +19,10 @@ const GAP_INSET := 0.035
 const GAP_SLAB := 0.2
 const GAP_SHIFT := 0.0007
 const GAP_HAIR := 0.0015
-## How far (m) a face's back may lie in front of a face turned to the eye: parts touching, rounding in the build.
-const GAP_TOUCH := 0.003
+## How far (m) a face's back may lie in front of a face turned to the eye: parts touching, rounding in the build, and
+## a face the flicker fix sank a hair inside its own rim (BP9: the sawmill shed's posts, 0.7 mm, under their braces'
+## square-cut ends, which stood 3.8 mm off them before).
+const GAP_TOUCH := 0.004
 
 var look: SiteLook = null
 var map: MapData = null

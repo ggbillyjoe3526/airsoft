@@ -31,6 +31,8 @@ STRIP = 0.09         # a cover strip's width
 PANEL = 1.22         # a panel's width (the photos' hoardings: 1.22 m plywood sheets, a cover strip on each joint)
 CAP = 0.07           # the capping rail's height
 POST = 0.1           # a corner post's side
+FLOOR_TOP = 0.013    # the compound floor's top: 3 mm over the platform's edge strips, which are drawn 1 cm over the
+#                      floor (StationLook.strip_lift) and run under the compound: a 1 cm sheet's top lay in them
 
 
 def wall(k: wk.Kit, a0: float, a1: float, along: str, at: float, out: float, gate: bool) -> None:
@@ -92,7 +94,7 @@ def build(name: str, length: float, depth: float) -> object:
             k.sqbar((x, y_in, HIGH - 0.4), (x, y_in - sy * 0.6, 0.05), 0.06, "stud", h=0.04)
             k.blk((x - 0.15, y_in - sy * 0.75 - 0.05, 0.0), (x + 0.15, y_in - sy * 0.55 + 0.05, 0.05), "stud")
     # The compound's floor and what's left in it: a pallet of cement bags, a stack of boards against the wall.
-    k.blk((-hl + 0.1, -hd + 0.1, 0.0), (hl - 0.1, hd - 0.1, 0.01), "concrete_dark")
+    k.blk((-hl + 0.1, -hd + 0.1, 0.0), (hl - 0.1, hd - 0.1, FLOOR_TOP), "concrete_dark")
     px = -hl * 0.35
     k.blk((px - 0.5, -0.4, 0.0), (px + 0.5, 0.4, 0.14), "timber")
     for i, (bx, by, bz) in enumerate([(-0.25, -0.18, 0.14), (0.25, -0.18, 0.14), (-0.25, 0.18, 0.14),
