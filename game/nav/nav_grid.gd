@@ -177,6 +177,14 @@ func is_walkable_at(p: Vector3) -> bool:
 	return k >= 0 and walkable[k] == 1
 
 
+## True if the floor under the point is wading water (`wade`); false off the grid and on a field with no water.
+func wades_at(p: Vector3) -> bool:
+	if wade.is_empty():
+		return false
+	var k := node_at(p)
+	return k >= 0 and wade[k] == 1
+
+
 ## Node `k`'s cell centre on its floor.
 func node_position(k: int) -> Vector3:
 	var c := node_cell[k]

@@ -181,7 +181,8 @@ func trading(b: Bot) -> bool:
 ## Keeping out of the light (every level): `g` (a floor point) moved to the nearest dark spot on its own floor,
 ## within dark_spot_radius in rings dark_spot_step apart, dark_spot_directions round each; `g` itself by day, outside the
 ## light, or with no dark spot near. The nearest is at the pool's edge, so a bot that stops a little short of it may
-## stand just inside the light (the browser game's M40: a margin past the edge made defenders too strong).
+## stand just inside the light (the browser game's M40: a margin past the edge made defenders too strong). A dark spot
+## in wading water is passed over (BP9: a hunt's pick, kept out of the stream, is not moved back into it).
 func out_of_light(g: Vector3) -> Vector3:
 	if night == null or not night.in_light(g):
 		return g
@@ -193,7 +194,7 @@ func out_of_light(g: Vector3) -> Vector3:
 		for k in turns:
 			var angle := TAU * k / turns
 			var at := Vector3(g.x + cos(angle) * r, g.y, g.z + sin(angle) * r)
-			if not nav.is_walkable_at(at):
+			if not nav.is_walkable_at(at) or nav.wades_at(at):
 				continue
 			at.y = nav.floor_at(at)
 			if absf(at.y - g.y) > tuning.body.max_step or night.in_light(at):
