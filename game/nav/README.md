@@ -35,6 +35,11 @@ docs/ARCHITECTURE.md › Contracts 1).
   (`vault_region`). `find_route` refuses a goal in another region at once, before the search: a search that fails
   explores the whole grid (182–202 ms on Woodland, its hut and cabin roofs walkable but out of reach). A region joined
   only by a one-way step still gets the full search. Bots' hunt spots skip other regions (`RoundPlanner.hunt_point`).
+- **Wading water** (WS1, BP9). A node under water `NavConfig.wade_from` deep or more is priced `NavConfig.wade_cost`
+  (8) and marked (`NavGrid.wade`, a byte a node, kept only on a field with water; `wades_at` reads it for a point). A
+  search to a marked goal prices every dry way round it first (Woodland: 37.5 ms on average against 3.3 to the bank
+  beside it), so a bot's hunt spot is never one (`RoundPlanner.hunt_point`), nor is the night's move of it out of the
+  light (`BotWorld.out_of_light`).
 - **Measured** on Depot headless, 2026-10-18, 4-core container: build 205–240 ms; 42,075 nodes, 27,363 walkable
   (the browser's 27,380: the map's numbers are single precision here); 100 random cross-map `find_route` calls mean
   1.2–1.5 ms, max 6.4 ms (the search about 0.7 ms of it), 100 random pairs anywhere mean 0.7 ms.
