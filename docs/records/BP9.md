@@ -2,7 +2,7 @@
 
 **Review:**
 
-- part 1 (bugs): critic Accept 0/8 · qa Pass · performance Pass
+- part 1 (bugs): critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
 
 William's full pass before he tags 0.1 Beta 1 (owner, 2026-11-15 and 16): bugs, balance, performance, quality and
 edge cases over the whole game, with a clean-out of unused files, a hunt for flicker (faces lying over one another),
@@ -12,7 +12,8 @@ the harsh shadows and the over-bright spots under Depot's lamps. It goes out in 
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-16 | part 1: 1 | Fable 5.2 | lint, wiki, whole unit suite, smoke; CI | Accept 0/8 | – |
+| 2026-11-16 | part 1: 1 | Fable 5.2 | lint, wiki, 110 touched test files | Retry 5/8 | an order that ended by itself never showed with the wheel shut; the view's wait inside a tap; the wiki and play checks claimed a live turn |
+| 2026-11-16 | part 1: 2 | Fable 5.2 | lint, wiki, whole unit suite, smoke; CI | Accept 8/8 | – |
 
 ## Part 1: bugs
 
