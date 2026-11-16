@@ -83,3 +83,55 @@ func test_the_suns_filter_is_never_coarser_than_the_lamps_and_low_stays_hard() -
 	for i in GraphicsQuality.ShadowSoftness.size():
 		assert_lt(GraphicsApply.SOFTNESS[i], RenderingServer.SHADOW_QUALITY_MAX, "a valid filter")
 		assert_lt(GraphicsApply.LAMP_SOFTNESS[i], RenderingServer.SHADOW_QUALITY_MAX, "a valid lamp filter")
+
+
+func _spots(n: int) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	for i in n:
+		out.append(Vector3(float(i) * 4.0, 5.0, 0.0))
+	return out
+
+
+func test_a_hall_set_first_with_the_bounce_on_shines_at_the_bounce_strength() -> void:
+	var cfg := RoofConfig.new()
+	var lamps := RoofLamps.build(_spots(2), cfg)
+	add_child_autofree(lamps)
+	lamps.set_mode(GraphicsQuality.LampLights.FAR, false, true)
+	for l in lamps.lights():
+		assert_almost_eq(l.light_energy, cfg.lamp_bounce_energy, 0.0001, "first call, bounce on")
+
+
+func test_a_flicker_step_while_the_lamps_are_off_is_kept_for_the_next_strength() -> void:
+	var cfg := RoofConfig.new()
+	var states := PackedByteArray([MapData.LAMP_FLICKER, MapData.LAMP_WORKING])
+	var lamps := RoofLamps.build(_spots(2), cfg, 0.0, null, states)
+	add_child_autofree(lamps)
+	lamps.set_mode(GraphicsQuality.LampLights.OFF, false, false)
+	lamps.set_flicker(0, cfg.lamp_flicker_low)
+	lamps.set_mode(GraphicsQuality.LampLights.FAR, false, true)
+	assert_almost_eq(lamps.light_of(0).light_energy, cfg.lamp_bounce_energy * cfg.lamp_flicker_low, 0.0001)
+	assert_almost_eq(lamps.light_of(1).light_energy, cfg.lamp_bounce_energy, 0.0001)
+
+
+func test_a_plain_roofs_flicker_ignores_the_bounce_switch() -> void:
+	var cfg := RoofConfig.new()
+	var states := PackedByteArray([MapData.LAMP_FLICKER])
+	var reaches := PackedFloat32Array([6.0])
+	var lamps := RoofLamps.build(_spots(1), cfg, 0.0, null, states, reaches)
+	add_child_autofree(lamps)
+	lamps.set_mode(GraphicsQuality.LampLights.FAR, false, true)
+	lamps.set_flicker(0, 0.5)
+	lamps.set_mode(GraphicsQuality.LampLights.FAR, false, false)
+	assert_almost_eq(lamps.light_of(0).light_energy, cfg.plain_lamp_energy * 0.5, 0.0001)
+
+
+func test_an_all_dead_roof_takes_every_mode_and_flicker_without_error() -> void:
+	var cfg := RoofConfig.new()
+	var states := PackedByteArray([MapData.LAMP_DEAD, MapData.LAMP_DEAD])
+	var lamps := RoofLamps.build(_spots(2), cfg, 0.0, null, states)
+	add_child_autofree(lamps)
+	lamps.set_mode(GraphicsQuality.LampLights.FAR, true, true)
+	lamps.set_flicker(0, 0.3)
+	lamps.set_mode(GraphicsQuality.LampLights.NEAR, false, false)
+	assert_eq(lamps.light_count(), 0, "no lights")
+	assert_eq(lamps.key_share(GraphicsQuality.LampLights.FAR), 1.0, "the sun stays with no lamp to stand for")
