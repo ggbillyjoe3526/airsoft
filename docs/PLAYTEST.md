@@ -1893,13 +1893,14 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   fittings and their bounce alone (UL2), so it is much darker than on High and a wall out of a fitting's light is
   dark above knee height. Walk the concourse and a platform on High, then on Ultra.
   Pass: Ultra reads moodier but you can still see who stands by a wall; if it is too dark, say where.
-- [ ] **Woodland runs smooth.** Two rounds of Elimination on Woodland at 6v6, then at 8v8, with F3 up; stay alive
-  late into a round if you can, when the bots hunt for the last players. On a slower PC too, on Low, if one is to
-  hand.
-  Pass: no stall you can feel (Dev 3 could stop for a few frames when a bot with nobody in sight chose a spot in the
-  stream to go and look at: working out a route into the water was the dearest thing a bot did). No bot stands in
-  the stream to look round; bots still cross at the Ford and the bridges. A long route across Woodland can still
-  cost a dropped frame on a slow processor (`docs/KNOWN_ISSUES.md`, Bots). If it hitches: the team size, the preset
+- [ ] **Woodland's worst stall is gone; say what hitches are left.** Two rounds of Elimination on Woodland at 6v6,
+  then at 8v8, with F3 up; stay alive late into a round if you can, when the bots hunt for the last players. On a
+  slower PC too, on Low, if one is to hand.
+  Pass: no long stall (a bot with nobody in sight used to choose spots in the stream to go and look at, and working
+  out a route into the water was the dearest thing a bot did: up to a quarter of a second on the cloud's
+  processor). No bot stands in the stream to look round; bots still cross at the Ford and the bridges. Shorter
+  hitches are still there on a slow processor (three to four frames at worst, a few a match, mostly a bot working
+  out a long route: `docs/KNOWN_ISSUES.md`, Bots): say whether you feel any on yours, at which team size and preset,
   and about how often.
 
 ## Reporting what you find

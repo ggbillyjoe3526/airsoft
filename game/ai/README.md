@@ -21,14 +21,14 @@ fire, a miss's flight past the target included. Hit calls are the simulation's: 
 
 Each round the `RoundPlanner` gives each team a plan (split over the map's lanes, a pair on one, or all stacked) and
 each bot a lane to walk from its end, holding at its points and keeping with its team; past the lane it hunts the
-sectors its team checked longest ago, never a spot in wading water (BP9). In sight of an enemy it fights (strafing),
-or first gets behind close crouch
-cover and peeks over it, or round a tall corner by leaning; it never fires with a teammate in the line, or anywhere a
-teammate could run to before the BBs pass (a sprinting bot also round its route's corners). Seeing someone with no
-shot at them (through glass or leaves) for `no_shot_move_after`, it goes round to them as to someone out of sight
-(BQ1). Within `close_awareness` a bush hides no one and leaves stop its fire only where a BB couldn't get through
-(BU1). Shot at, reloading or empty, it takes cover. With the enemy gone it searches where it was last seen or heard,
-sometimes flanking. At night it holds its lane points, hunts and takes hold cover out of the light pools.
+sectors its team checked longest ago, never a spot in wading water (BP9). In sight of an enemy it fights (strafing), or
+first gets behind close crouch cover and peeks over it, or round a tall corner by leaning; it never fires with a
+teammate in the line, or anywhere a teammate could run to before the BBs pass (a sprinting bot also round its route's
+corners). Seeing someone with no shot at them (through glass or leaves) for `no_shot_move_after`, it goes round to them
+as to someone out of sight (BQ1). Within `close_awareness` a bush hides no one and leaves stop its fire only where a BB
+couldn't get through (BU1). Shot at, reloading or empty, it takes cover. With the enemy gone it searches where it was
+last seen or heard, sometimes flanking. At night it holds its lane points, hunts and takes hold cover out of the light
+pools.
 
 On Normal and Hard the team keeps a radio (BQ3, `BotRadio`): a bot that sees someone afresh tells its teammates within
 `BotSkill.share_radius` of them after `share_delay`, each taking it as a teammate's call heard there (not one fighting or

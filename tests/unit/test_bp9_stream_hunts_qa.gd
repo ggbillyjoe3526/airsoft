@@ -112,31 +112,3 @@ func test_a_hunting_bot_with_nowhere_dry_to_look_asks_again_without_a_goal() -> 
 	assert_false(BotMovement._next_goal(b, w), "no goal, no crash")
 	assert_true(b.hunting, "still hunting; it asks again next think")
 	assert_false(BotMovement._pick_hunt(b, w), "nothing picked")
-
-
-## Reported, not asserted: how many of Woodland's night hunt picks end in the stream after the move out of the light.
-func test_report_woodland_night_picks_in_the_stream() -> void:
-	var map := MapData.load_map("woodland", style, 6)
-	var nav := NavGrid.build(map, tuning.nav, tuning.body)
-	var camp := map.ends[0].spawns[0].position
-	var lo := Vector2(nav.min_x, nav.min_z)
-	var hi := Vector2(nav.max_x, nav.max_z)
-	var picked := 0
-	var wet := 0
-	for bot_seed in 60:
-		var f := _hunter(nav, camp, lo, hi, bot_seed + 1)
-		var b: Bot = f[0]
-		var w: BotWorld = f[1]
-		w.planner.top_y = 60.0
-		w.night = NightField.build(map, cfg, true)
-		for n in 10:
-			if w.planner.hunt_point(b, w):
-				picked += 1
-				if map.water.depth_at(b.hunt_goal) >= tuning.nav.wade_from:
-					wet += 1
-	gut.p("Woodland at night: %d of %d hunt picks in wading water (night field %s)" % [wet, picked, w_night_ok(map)])
-	assert_gt(picked, 0, "spots turn up")
-
-
-func w_night_ok(map: MapData) -> bool:
-	return NightField.build(map, cfg, true) != null

@@ -164,3 +164,27 @@ func test_woodlands_hunts_stay_out_of_its_stream() -> void:
 			picked += 1
 			assert_false(_wades(map, b.hunt_goal), "a dry spot (%s)" % b.hunt_goal)
 	assert_gt(picked, 250, "the field still gives its spots (%d of 300)" % picked)
+
+
+## QA's guard on the real field, on the grid this file already built: by night a pick is moved out of a lantern's
+## light (BotWorld.out_of_light), and still never into the stream.
+func test_woodlands_night_hunts_stay_out_of_its_stream_too() -> void:
+	var map := _woodland_map()
+	var nav := _woodland_nav
+	var night := NightField.build(map, cfg, true)
+	assert_not_null(night, "Woodland has its night")
+	var lo := Vector2(nav.min_x, nav.min_z)
+	var hi := Vector2(nav.max_x, nav.max_z)
+	var camp := map.ends[0].spawns[0].position
+	var picked := 0
+	for bot_seed in 60:
+		var f := _hunter(nav, camp, lo, hi, bot_seed + 1, WOODLAND_TOP)
+		var b: Bot = f[0]
+		var w: BotWorld = f[1]
+		w.night = night
+		for n in 10:
+			if not w.planner.hunt_point(b, w):
+				continue
+			picked += 1
+			assert_false(_wades(map, b.hunt_goal), "a dry spot by night (%s)" % b.hunt_goal)
+	assert_gt(picked, 500, "the night still gives its spots (%d of 600)" % picked)

@@ -337,7 +337,8 @@ graphics card), this head against 0.1 Dev 3 back to back:
   millisecond to a millisecond more than in Dev 3; both fields were rebuilt since (DC1, SW1), and it was not traced
   further. The 99th percentile is 15.4 ms at worst (Subway at 8v8). Peak memory 759 MiB (Dev 3: 720).
 - The worst single tick was Woodland's in every run: 85 and 91 ms at 6v6 on this head, 172 and 267 ms at 8v8 in
-  Dev 3. That is the stutter below.
+  Dev 3. None of those ticks was traced one by one; the search below is the one cause found that takes that long,
+  and Dev 3 has the same hunt and the same price of wading.
 
 **Woodland stuttered: a bot's route search into the stream.** A bot with nobody in sight picks a spot to go and look
 at (`RoundPlanner.hunt_point`), anywhere a route reaches. Of Woodland's 323,858 walkable nodes 9,157 (2.8 %) lie in
@@ -346,8 +347,8 @@ water prices every dry way round it before it steps in. Over 300 pairs of a dry 
 search took 37.5 ms on average (24.6 at the middle, 87.8 at the ninetieth percentile, 240.9 at worst; 187 of the 300
 took over 16 ms, where a tick is 16.7), against 3.3 ms to the first dry node beside the same spot (1.8, 6.4, 31.4; 14 of
 300). The performance review ran the pairs again with the machine busy: 36.6 ms against 3.3, the same eleven
-to one. One is searched a tick (BE1), so one such search is one hitch of up to fourteen frames, in Dev 3 as on this
-head.
+to one. One is searched a tick (BE1), so one such search is one hitch of up to fourteen frames on this
+processor.
 
 The grid now marks its wading nodes as it prices them (`NavGrid.wade`, a byte a node, on a field with water only:
 half a megabyte on Woodland) and a hunt never picks one; nor does the night's move of a pick out of a lamp's light
@@ -361,18 +362,24 @@ worst tick: 16 and 85.9 ms before against 13 and 44.0 after, 11 and 30.3 against
 the long ones are not (a match's picks differ once a hunt's spot does, so single seeds are not like for like). The
 performance review's minute of `tools/team_bench.gd` on the fixed code, with the machine busy: Woodland's worst tick
 and frame 50 ms at 6v6 and 34 ms at 8v8, where main's two runs gave 85 and 91 ms at 6v6 and 39 and 44 ms at 8v8:
-read as no worse, not as a measured gain. What
-is left, read from every search of three matches on the fixed code (1,588 searches): 23 still ended in wading water
-(19 to a lane's point, 2 round a flank, 1 to cover, 1 to where someone was last seen), none of them over 16 ms but
-one flank's 21.4; the slow ones are long dry routes, a hunt across the field (12 of 186 over 16 ms, 52.7 ms at
-worst) or a chase to where someone was last seen (7 of 227, 26.0 ms). Over 598 dry pairs anywhere on Woodland a
-search takes 6.1 ms on average and 14.1 at the ninetieth percentile, with 50 over 16 ms and 57.8 ms at worst;
-under 40 m none is, from 60 m one in eight. Nine tenths of a search's time is the engine's own (`AStar3D`).
+read as no worse, not as a measured gain.
+
+What is left, with every slow tick of three matches on the fixed code timed part by part (50 ticks over 16 ms): 42
+held a route search that was most of the tick (10.6 to 52.6 ms: 20 chases to where someone was last seen, 18 hunts,
+3 flanks and 1 lane's point, 24 to 95 m as the crow flies), 4 were the bots' thinking (7 to 21 ms a tick, one bot's
+14 ms at worst; not traced further) and 4 held neither (17 to 21 ms; not traced). A search need not pass 16 ms to
+make a slow tick: the rest of a tick takes 3 to 5. The worst tick of the three matches (54 ms here, 75.3 in the
+run above, the same tick of seed 3) is a hunt's search over 90 m of dry ground. Of the 1,588 searches of three
+matches 23 still ended in wading water (19 to a lane's point, 2 round a flank, 1 to cover, 1 to where someone was
+last seen), one of them over 16 ms (a flank's 21.4). Over 598 dry pairs anywhere on Woodland a search takes 6.1 ms
+on average and 14.1 at the ninetieth percentile, with 50 over 16 ms and 57.8 ms at worst; under 40 m none is, from
+60 m one in eight. Nine tenths of a slow search's time is the engine's own (`AStar3D`).
 Depot's searches take 0.6 ms on average and 8.5 at worst, Subway's 1.1 and 18.2.
 
 That is the route search AUD1 already wrote down as costing more than its aim (`docs/KNOWN_ISSUES.md`, Bots), now
 with Woodland's figures: nothing exact cuts it. Measured for whoever takes it on, and not shipped: a greedier search
-(`NavConfig.search_greed` 2 for 1.5) takes 4.1 ms on average over 600 dry pairs for 6.0, with 9 over 16 ms for 50
+(`NavConfig.search_greed` 2 for 1.5; `bush_cost` is held to it by a test and stood at 2 here, so the built change
+would reprice bushes too) takes 4.1 ms on average over 600 dry pairs for 6.0, with 9 over 16 ms for 50
 and 21.9 ms at worst for 51.6, on routes 1.8 % longer; at 3, none over 16 ms, 12.2 ms at worst, routes 2.7 % longer.
 It moves every bot's routes on every field, so every field's balance would be played again, and the other way
 (searches off the frame, a route arriving a tick or two later) needs the owner's ruling AUD1 left open. On a
@@ -397,19 +404,23 @@ Nothing was deleted or moved. `legacy/katanashotgun/` (16 files, 184 KB, the own
 
 **Got wrong on the way.** I first put the whole stutter down to hunts into the stream and expected the slow ticks
 to go; three matches showed 51 become 46, and the pairs told the two costs apart. My test's header said one pick in
-a dozen fell in the stream before anything had counted it (2.8 % of the ground is stream). And TS1's note on these
-ticks ("look like the busy cloud machine", `docs/KNOWN_ISSUES.md`) was the same reading error a pass earlier: they
-were searches.
+a dozen fell in the stream before anything had counted it (2.8 % of the ground is stream). TS1's note on these
+ticks ("look like the busy cloud machine", `docs/KNOWN_ISSUES.md`) was the same reading error a pass earlier: most
+are searches. And this record's first form said all of them were, on a tally that counted only the searches over
+16 ms (about 20 for 46 slow ticks; the critic's find): each slow tick was then timed part by part, and 42 of 50 are
+searches, 8 are not.
 
 **Changed:** `game/nav/nav_grid.gd` (`wade`, `wades_at`), `game/nav/nav_grid_builder.gd` (`_link` fills it),
 `game/ai/round_planner.gd` (`hunt_point`), `game/ai/bot_world.gd` (`out_of_light`), `docs/PLAYTEST.md` (the fuse,
 the play check), `docs/KNOWN_ISSUES.md`, `docs/DECISIONS.md`.
 
-**Tests:** `tests/unit/test_bp9_stream_hunts.gd` (6: each mark agrees with the water's depth over its node, a dry
+**Tests:** `tests/unit/test_bp9_stream_hunts.gd` (7: each mark agrees with the water's depth over its node, a dry
 field keeps none, a hunt never picks wading water, a strip that is all water gives no spot, Woodland's bed is marked
-and its Ford and North bridge are not, Woodland's hunts stay out of its stream; three fail without the planner's
-change) and QA's `tests/unit/test_bp9_stream_hunts_qa.gd` (6: ankle deep against knee deep, a deck over the water,
-a hunt on a deck, the night's move out of a lamp's light, a bot with nowhere dry to look, Woodland's night picks).
+and its Ford and North bridge are not, Woodland's hunts stay out of its stream by day and by night; three fail
+without the planner's change) and QA's `tests/unit/test_bp9_stream_hunts_qa.gd` (5: ankle deep against knee deep, a
+deck over the water, a hunt on a deck, the night's move out of a lamp's light, a bot with nowhere dry to look).
+QA's sixth, Woodland's night picks, built the field's grid a second time to print a count; it moved onto the first
+file's grid and asserts (the critic's note).
 
 ## Decisions
 
@@ -500,8 +511,9 @@ a hunt on a deck, the night's move out of a lamp's light, a bot with nowhere dry
   height. Not changed; William's to say (his checklist, N23).
 - Depot's crates and walls are a shade paler and cooler on Medium and High (part 3: its probes give reflections alone);
   William's to say (his checklist, N23).
-- Woodland's long route searches still cost a slow tick now and then (part 4): a hunt or a chase over 60 m takes
-  over 16 ms one time in eight on the cloud's processor, 58 ms at worst. Two measured ways on are in
+- Woodland still hitches now and then (part 4): 8 to 25 ticks over 16 ms in a four-minute match on the cloud's
+  processor, up to 75 ms at worst (four frames), most of them a hunt's or a chase's route search over 40 m
+  or more. Two measured ways on are in
   `docs/KNOWN_ISSUES.md` (Bots); how Woodland runs on a real processor is William's check (his checklist, N24).
 - Depot at 8v8 and Subway cost up to a millisecond more script time a frame than in Dev 3 (part 4), inside the
   frame's budget; not traced.

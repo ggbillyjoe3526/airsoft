@@ -420,12 +420,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   there; a probe whose middle is clear keeps it. A prop placed over a capture spot moves it by itself;
   `tests/unit/test_bp9_light.gd` holds every field's.
 - **A bot never picks a spot in wading water to go and look at (2026-11-16, BP9).** A route search into Woodland's
-  stream was the dearest there is: 37.5 ms on average against 3.3 to the bank beside it, as a step in wading water
-  is priced eight times a dry one (WS1), and one search stalled a tick for up to fourteen frames. The grid marks its
-  wading nodes (`NavGrid.wade`), and neither a hunt's pick (`RoundPlanner.hunt_point`) nor the night's move of one
-  out of the light (`BotWorld.out_of_light`) lands on one; the Ford and the bridges stay places to look at. The
-  price of wading is as ruled. Other goals (a lane's point, an order, where someone was last seen) may still lie in
-  the water: measured rare and cheap (`docs/records/BP9.md` › Part 4).
+  stream was the dearest there is: 37.5 ms on average against 3.3 to the bank beside it, as a step in wading water is
+  priced eight times a dry one (WS1), and one search stalled a tick for up to fourteen frames on the cloud's
+  processor. The grid marks its wading nodes (`NavGrid.wade`), and neither a hunt's pick (`RoundPlanner.hunt_point`)
+  nor the night's move of one out of the light (`BotWorld.out_of_light`) lands on one; the Ford and the bridges stay
+  places to look at. The price of wading is as ruled. Other goals (a lane's point, an order, where someone was last
+  seen) may still lie in the water: measured rare and cheap (`docs/records/BP9.md` › Part 4).
 - **Ultra pushes Godot's light as far as it goes, for the whole game (owner, 2026-11-09, UG1).** "Use all of Godot's
   graphics abilities": baked path-traced-like light on Ultra only, every effect scaling down per preset, every map
   (he said twice it is not one map). Baked path tracing comes before any live ray tracing (his card answer). Built as
