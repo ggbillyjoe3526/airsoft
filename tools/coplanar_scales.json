@@ -1,0 +1,252 @@
+{
+ "assets/models/props/birch.glb": [
+  0.706,
+  0.525,
+  0.706
+ ],
+ "assets/models/props/birch_crown.glb": [
+  0.525,
+  0.525,
+  0.525
+ ],
+ "assets/models/props/camo_net.glb": [
+  0.75,
+  1.0,
+  1.0
+ ],
+ "assets/models/props/cordwood.glb": [
+  0.833,
+  1.0,
+  1.0
+ ],
+ "assets/models/props/cordwood_b.glb": [
+  0.833,
+  0.724,
+  1.0
+ ],
+ "assets/models/props/cordwood_c.glb": [
+  0.833,
+  0.863,
+  1.0
+ ],
+ "assets/models/props/cordwood_end.glb": [
+  0.75,
+  0.673,
+  1.0
+ ],
+ "assets/models/props/cordwood_start.glb": [
+  0.75,
+  0.673,
+  1.0
+ ],
+ "assets/models/props/crate.glb": [
+  0.825,
+  0.783,
+  0.741
+ ],
+ "assets/models/props/door_frame_mid.glb": [
+  0.875,
+  1.0,
+  0.417
+ ],
+ "assets/models/props/door_leaf.glb": [
+  0.97,
+  1.0,
+  0.08
+ ],
+ "assets/models/props/door_leaf_mid.glb": [
+  0.67,
+  1.0,
+  0.08
+ ],
+ "assets/models/props/door_leaf_narrow.glb": [
+  0.43,
+  1.0,
+  0.08
+ ],
+ "assets/models/props/drum_ibc_stack.glb": [
+  0.889,
+  1.0,
+  0.999
+ ],
+ "assets/models/props/drum_ibc_stack_b.glb": [
+  0.889,
+  1.0,
+  0.999
+ ],
+ "assets/models/props/drum_ibc_stack_c.glb": [
+  0.889,
+  1.0,
+  0.555
+ ],
+ "assets/models/props/earth_bank.glb": [
+  1.0,
+  0.326,
+  0.49
+ ],
+ "assets/models/props/hall_wall.glb": [
+  0.562,
+  1.0,
+  1.0
+ ],
+ "assets/models/props/lift_leaf.glb": [
+  0.54,
+  1.0,
+  0.02
+ ],
+ "assets/models/props/log_tunnel_cap.glb": [
+  1.0,
+  0.648,
+  1.0
+ ],
+ "assets/models/props/log_tunnel_mouth.glb": [
+  1.0,
+  0.857,
+  1.0
+ ],
+ "assets/models/props/oak.glb": [
+  0.824,
+  0.846,
+  0.824
+ ],
+ "assets/models/props/oak_crown.glb": [
+  0.846,
+  0.846,
+  0.846
+ ],
+ "assets/models/props/palisade.glb": [
+  0.867,
+  0.874,
+  0.316
+ ],
+ "assets/models/props/palisade_rail.glb": [
+  0.8,
+  1.0,
+  0.516
+ ],
+ "assets/models/props/pallet_racking.glb": [
+  0.741,
+  1.0,
+  0.54
+ ],
+ "assets/models/props/pallet_racking_b.glb": [
+  0.741,
+  1.0,
+  0.54
+ ],
+ "assets/models/props/pallet_racking_c.glb": [
+  0.556,
+  1.0,
+  0.54
+ ],
+ "assets/models/props/parts_cage.glb": [
+  0.741,
+  0.999,
+  0.989
+ ],
+ "assets/models/props/parts_cage_b.glb": [
+  0.815,
+  0.999,
+  0.984
+ ],
+ "assets/models/props/parts_cage_c.glb": [
+  0.741,
+  1.0,
+  0.989
+ ],
+ "assets/models/props/pine_grown.glb": [
+  0.788,
+  0.798,
+  0.788
+ ],
+ "assets/models/props/pine_grown_crown.glb": [
+  0.798,
+  0.798,
+  0.798
+ ],
+ "assets/models/props/pine_old.glb": [
+  0.714,
+  0.854,
+  0.714
+ ],
+ "assets/models/props/pine_old_crown.glb": [
+  0.854,
+  0.854,
+  0.854
+ ],
+ "assets/models/props/pine_young.glb": [
+  0.8,
+  0.749,
+  0.8
+ ],
+ "assets/models/props/pine_young_crown.glb": [
+  0.749,
+  0.749,
+  0.749
+ ],
+ "assets/models/props/plywood.glb": [
+  0.254,
+  1.0,
+  0.417
+ ],
+ "assets/models/props/plywood_header.glb": [
+  0.534,
+  1.0,
+  1.0
+ ],
+ "assets/models/props/plywood_low.glb": [
+  0.295,
+  1.0,
+  1.0
+ ],
+ "assets/models/props/plywood_mid.glb": [
+  0.508,
+  0.811,
+  1.0
+ ],
+ "assets/models/props/plywood_short.glb": [
+  0.295,
+  0.8,
+  1.0
+ ],
+ "assets/models/props/root_plate.glb": [
+  0.567,
+  1.0,
+  0.7
+ ],
+ "assets/models/props/sandbags_end.glb": [
+  1.0,
+  1.0,
+  0.667
+ ],
+ "assets/models/props/sandbags_start.glb": [
+  1.0,
+  1.0,
+  0.667
+ ],
+ "assets/models/props/signal_cabinet.glb": [
+  0.889,
+  1.0,
+  1.0
+ ],
+ "assets/models/props/spruce.glb": [
+  0.671,
+  1.0,
+  0.685
+ ],
+ "assets/models/props/train_seat.glb": [
+  0.89,
+  0.996,
+  1.0
+ ],
+ "assets/models/props/wrapped_racking.glb": [
+  0.898,
+  1.0,
+  0.54
+ ],
+ "assets/models/props/wrapped_racking_c.glb": [
+  0.741,
+  1.0,
+  0.973
+ ]
+}

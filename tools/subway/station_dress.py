@@ -147,12 +147,14 @@ def words(L, lift: float) -> list[dict]:
 
 # The trims (m): the frieze's band under the springing (its foot clear of SM5's wide posters' tops, 3.95 m) and how
 # far it stands off its wall; the cables' heights over the track bed, each this thick, standing off the trackside wall;
-# the edge face's stand-off over the track.
+# the edge face's stand-off over the track: a centimetre proud of the platform's slab, which build_map.py grows a
+# centimetre past its room's edge (GROW), so the two faces never lie in one plane (BP9: they flickered through each
+# other along both platforms).
 FRIEZE = (0.12, 0.02)
 FRIEZE_GAP = 0.02
 CABLES = (0.45, 0.57, 0.69)
 CABLE = 0.06
-EDGE_FACE = 0.01
+EDGE_FACE = 0.02
 TRACK_AREAS = ("North track", "South track")
 
 

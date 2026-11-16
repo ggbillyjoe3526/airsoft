@@ -37,6 +37,9 @@ const WALL_PROBE := 0.05
 const WALL_REACH := 0.1
 ## A frame is at least this deep (m), whatever thin block stands at its jamb.
 const MIN_WALL := 0.1
+## A frame stands this far (m) short of its opening's top: its head's faces lie level with whatever closes the opening
+## (a hut's roof, the wall's own top), and two faces in one plane flicker through each other (BP9).
+const FRAME_HEAD_CLEAR := 0.002
 ## A frame takes the baked light this far (m) over its foot.
 const FRAME_LIGHT_LIFT := 1.0
 ## The gap left between the two leaves and at each jamb (m), so the leaves read as two.
@@ -184,8 +187,8 @@ func materials() -> Array[Material]:
 	return [_material] if _frame_material == null else [_material, _frame_material]
 
 
-## Each door's frame (DM1): the frame model stretched to the opening and its wall's thickness, in one MultiMesh;
-## none when the model won't load.
+## Each door's frame (DM1): the frame model stretched to the opening (FRAME_HEAD_CLEAR short of its top) and its
+## wall's thickness, in one MultiMesh; none when the model won't load.
 func _add_frames(map: MapData, style: MapStyle) -> void:
 	var first := map.doors[0]
 	var path := _nearest(FRAME_MODELS, Vector3(maxf(first.size.x, first.size.z), first.size.y, 0.0))
@@ -217,8 +220,8 @@ func _add_frames(map: MapData, style: MapStyle) -> void:
 		wall = opening.z if wall == INF else maxf(wall, MIN_WALL)
 		var foot := d.center - Vector3(0.0, d.size.y * 0.5, 0.0) + across * (middle - d.center.dot(across))
 		var turn := Basis(Vector3.UP, PI * 0.5) if along_z else Basis.IDENTITY
-		var at := Transform3D(turn * Basis.from_scale(Vector3(width / opening.x, d.size.y / opening.y,
-				wall / opening.z)), foot)
+		var at := Transform3D(turn * Basis.from_scale(Vector3(width / opening.x,
+				(d.size.y - FRAME_HEAD_CLEAR) / opening.y, wall / opening.z)), foot)
 		_frame_at.append(at)
 		mm.set_instance_transform(i, at)
 		mm.set_instance_color(i, Color.WHITE)

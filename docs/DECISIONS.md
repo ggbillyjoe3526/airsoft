@@ -363,6 +363,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   and the game culls those as holes. Every lathe, tube and band in `tools/blender/maps/` turns its faces out through
   `vertex_paint.py` (`lathe`, `orient_loft`), and `tests/unit/test_model_faces.gd` fails a model when more than 2 % of
   rays from all round and above first meet a face turned away. New map models follow both.
+- **No model holds faces lying over one another in one plane, and the model file is where that is fixed
+  (2026-11-16, BP9).** The owner saw "a lot of texture/model flickering": such faces are drawn through each other in
+  a pattern that crawls. After any Blender build, `python3 tools/coplanar_models.py fix <files>` sinks the lower
+  sheet of each pile a hair inside its own rim (no edge moves, no mesh's bounds change: props are sized and placed by
+  them), and CI fails a model that still holds one. The build scripts are not changed for it: the step is a fraction
+  of a millimetre no script's author would see, and one pass covers every model. What a field lays in one plane
+  (a prop on a strip, a trim on a slab) is found with `tools/coplanar_dump.gd` and judged by pictures
+  (`tools/flicker_map.py`), not by the list (docs/records/BP9.md › Part 2).
 - **Ultra pushes Godot's light as far as it goes, for the whole game (owner, 2026-11-09, UG1).** "Use all of Godot's
   graphics abilities": baked path-traced-like light on Ultra only, every effect scaling down per preset, every map
   (he said twice it is not one map). Baked path tracing comes before any live ray tracing (his card answer). Built as

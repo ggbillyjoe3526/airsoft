@@ -12,7 +12,10 @@ extends SceneTree
 ## range's card is 40); `night` the map's night preset, its lights' pools and fixtures lit (WG4); `fog=<off|low|medium|
 ## high>` that Volumetric haze level over the preset's (VF1); `measure=<frames>` prints each picture's mean render time
 ## over that many frames after it settles (the cloud's software Vulkan: a level against another, never a real card's
-## milliseconds). An argument `card`
+## milliseconds); `size=<w>x<h>` the pictures' size; `set=<config>.<value>=<number>` one of PlayTuning's configs' values
+## for this run (`set=roof.lamp_light_energy=4`: a look tried before it is written into the config); `raw` draws with
+## no edge smoothing, as the game's presets do, and writes lossless .png (two pictures a hair apart then show what
+## flickers as the eye moves, tools/flicker_map.py). An argument `card`
 ## writes a map's pictures instead: the loading screen's, drawn at 1920 x 1080
 ## (BP7 row 93: it draws it full screen), and beside it in `cards/` the Match page's and the menus' backdrop's copy at
 ## THUMB_SIZE (BP7: the page shows all four at once, so it holds the small ones), each at the map
@@ -39,6 +42,24 @@ func _initialize() -> void:
 	_run.call_deferred()
 
 
+## One `set=<config>.<value>=<number or Godot literal>` applied to `play`'s config of that name (roof, look, lighting,
+## night_lighting, site_look, ...), as its own type; "" when done, else what is wrong with it.
+static func _change(play: PlayTuning, change: String) -> String:
+	var parts := change.split("=")
+	var path := parts[0].split(".")
+	if parts.size() != 2 or path.size() != 2:
+		return "write it <config>.<value>=<number>"
+	var target: Variant = play.get(path[0])
+	if not (target is Object) or not (path[1] in (target as Object)):
+		return "PlayTuning has no %s" % parts[0]
+	var config := target as Object
+	var value: Variant = str_to_var(parts[1])
+	if value == null:
+		return "%s is not a value" % parts[1]
+	config.set(path[1], type_convert(value, typeof(config.get(path[1]))))
+	return ""
+
+
 func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var preset := &"high"
@@ -47,6 +68,10 @@ func _run() -> void:
 	var fov := FOV
 	var fog := ""
 	var measure := 0
+	var size := SIZE
+	var sets := PackedStringArray()
+	var smooth := true
+	var lossless := false
 	for a: String in args.duplicate():
 		if a.begins_with("preset="):
 			preset = StringName(a.trim_prefix("preset="))
@@ -60,8 +85,20 @@ func _run() -> void:
 		elif a.begins_with("measure="):
 			measure = a.trim_prefix("measure=").to_int()
 			args.erase(a)
+		elif a.begins_with("size="):
+			var wh := a.trim_prefix("size=").split("x")
+			if wh.size() == 2 and wh[0].to_int() > 0 and wh[1].to_int() > 0:
+				size = Vector2i(wh[0].to_int(), wh[1].to_int())
+			args.erase(a)
+		elif a.begins_with("set="):
+			sets.append(a.trim_prefix("set="))
+			args.erase(a)
 		elif a == "card":
 			card = true
+			args.erase(a)
+		elif a == "raw":
+			smooth = false
+			lossless = true
 			args.erase(a)
 		elif a == "night":
 			night = true
@@ -71,6 +108,12 @@ func _run() -> void:
 		quit(1)
 		return
 	var play := PlayTuning.load_default()
+	for change in sets:
+		var problem := _change(play, change)
+		if problem != "":
+			push_error("eye_pictures: set=%s: %s" % [change, problem])
+			quit(1)
+			return
 	var tuning := SimTuning.load_default()
 	var entry := MapCatalog.shared().find(args[0])
 	var team := MatchOptions.check_size(entry, tuning.rounds.team_size) if entry != null else tuning.rounds.team_size
@@ -81,8 +124,8 @@ func _run() -> void:
 		return
 	DirAccess.make_dir_recursive_absolute(args[1])
 	var port := SubViewport.new()
-	port.size = CARD_SIZE if card else SIZE
-	port.msaa_3d = MSAA
+	port.size = CARD_SIZE if card else size
+	port.msaa_3d = MSAA if smooth else Viewport.MSAA_DISABLED
 	port.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(port)
 	var sun := LightingConfig.for_map(play.lighting, play.night_lighting, map,
@@ -209,11 +252,12 @@ func _run() -> void:
 				cpu += RenderingServer.viewport_get_measured_render_time_cpu(port.get_viewport_rid())
 			print("[eye_pictures] %s render gpu %.2f ms cpu %.2f ms (mean of %d)" % [parts[0], gpu / measure,
 					cpu / measure, measure])
-		var path := "%s/%s.jpg" % [args[1].trim_suffix("/"), parts[0]]
+		var path := "%s/%s.%s" % [args[1].trim_suffix("/"), parts[0], "png" if lossless else "jpg"]
 		var image := port.get_texture().get_image()
 		if card:
 			image = card_cut(image)
-		if image.save_jpg(path, CARD_QUALITY if card else QUALITY) != OK:
+		var written := image.save_png(path) if lossless else image.save_jpg(path, CARD_QUALITY if card else QUALITY)
+		if written != OK:
 			push_error("eye_pictures: %s could not be written" % path)
 			failed += 1
 			continue

@@ -19,12 +19,17 @@ const GAP_INSET := 0.035
 const GAP_SLAB := 0.2
 const GAP_SHIFT := 0.0007
 const GAP_HAIR := 0.0015
-## How far (m) a face's back may lie in front of a face turned to the eye: parts touching, rounding in the build.
+## How far (m) a face's back may lie in front of a face turned to the eye: parts touching and rounding in the build.
 const GAP_TOUCH := 0.003
+## The same for one structure, where its own build needs more: the sawmill shed's braces' square-cut ends stood 3.8 mm
+## off their posts as built, and the flicker fix sank the posts' faces 0.7 mm inside their rims under them (BP9).
+const GAP_TOUCH_OF: Dictionary[StringName, float] = {&"sawmill_shed": 0.004}
 
 var look: SiteLook = null
 var map: MapData = null
 var boxes: Dictionary[StringName, AABB] = {}
+## The allowance of the structure whose lines are being tried.
+var touch := GAP_TOUCH
 
 
 func before_all() -> void:
@@ -177,6 +182,7 @@ func test_nothing_is_seen_through_a_structure_s_blocks() -> void:
 		dirs.append(d.normalized())
 	var hairs: Array[Vector2] = [Vector2(GAP_HAIR, 0), Vector2(-GAP_HAIR, 0), Vector2(0, GAP_HAIR), Vector2(0, -GAP_HAIR)]
 	for model in SETS:
+		touch = GAP_TOUCH_OF.get(model, GAP_TOUCH)
 		var t: Transform3D = placed[model].transforms[0]
 		var tris := PackedVector3Array()
 		var normals := PackedVector3Array()
@@ -337,9 +343,9 @@ func _open_lines(tris: PackedVector3Array, normals: PackedVector3Array, b: MapDa
 		# an end of the line that comes in from under the ground or out of another of the structure's blocks is hidden
 		var whole := wholes[i]
 		var low_ok := (low_prev_front[i] == 1 or _hidden(p + d * whole.x, set_blocks, b)
-				or low_front[i] <= low_back[i] + GAP_TOUCH)
+				or low_front[i] <= low_back[i] + touch)
 		var high_ok := (high_prev_front[i] == 1 or _hidden(p + d * whole.y, set_blocks, b)
-				or high_front[i] >= high_back[i] - GAP_TOUCH)
+				or high_front[i] >= high_back[i] - touch)
 		if not (inside[i] == 1 and low_ok and high_ok):
 			open[i] = 1
 	return open

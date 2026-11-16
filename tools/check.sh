@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Every local gate CI runs, quietly: lint, the changelog notes, the wiki, the unit tests (in parts, CI1, CI2), the smoke
-# test and the licence notices; with --guards, the match guards too (about two hours, Woodland most of it; CI runs them
-# as jobs of their own).
+# Every local gate CI runs, quietly: lint, the changelog notes, the wiki, the models' flat faces, the unit tests (in
+# parts, CI1, CI2), the smoke test and the licence notices; with --guards, the match guards too (about two hours,
+# Woodland most of it; CI runs them as jobs of their own).
 # Prints one line per gate and the failures; logs are in *.log. Exits non-zero if any gate failed.
 # Usage: tools/check.sh [--guards]      (GODOT=/path/to/godot to override)
 set -uo pipefail
@@ -28,6 +28,11 @@ else
 fi
 gate "changelog notes" tools/changelog.sh check
 gate "wiki" python3 tools/wiki.py check
+if python3 -c "import numpy" 2> /dev/null; then
+  gate "models' flat faces" python3 tools/coplanar_models.py check
+else
+  echo "– numpy not installed (pip install \"numpy==2.5.3\"); CI checks the models' flat faces"
+fi
 unit_logs=()
 for part in $(seq 1 "$(tools/unit_tests.sh --parts)"); do
   gate "unit tests, part $part" tools/unit_tests.sh "$part"

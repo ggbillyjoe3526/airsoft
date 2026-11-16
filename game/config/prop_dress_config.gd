@@ -383,10 +383,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## at most), on every face at least `tile_min_face` m long (a row along x runs the whole face; one along z stops
 ## short of the x rows at its ends). The box itself is drawn half a row inside each lined face, and `backing_top`
 ## under its top, in a dark backing (SiteLook's `backing` finish): the props' fronts stand proud of it and nothing is
-## seen through them that the box would stop.
+## seen through them that the box would stop. `backing_top` is no tiled model's own height: their level faces lie
+## 0.044, 0.05 (a parts cage's roof) and 0.056 m under the top, and a backing in one's plane flickers through it (BP9;
+## tests/unit/test_bp9_flicker.gd holds every tiled model 2 mm clear of it).
 @export var tile_skin: float = 0.9
 @export var tile_min_face: float = 1.5
-@export var backing_top: float = 0.05
+@export var backing_top: float = 0.053
 ## A round prop's turn about its axis is a random quarter (seeded by the map's dressing seed), and its shade varies
 ## this much either way, so a row never reads as one model repeated.
 @export var shade_jitter: float = 0.06

@@ -271,6 +271,11 @@ Every map takes the look this way (Depot did, AD1; Woodland, WA1):
 5. **Name its areas.** The reflection probes go in its named areas, so a map with them gets its probes for free.
 6. **Picture it.** `tools/eye_pictures.gd` renders it at eye height on any preset (`preset=ultra`), with the Vulkan
    renderer under xvfb (lavapipe in a cloud session: slow, but every effect draws).
+7. **No two faces in one plane** (BP9). Faces lying over one another in one plane flicker as the eye moves. In a
+   model, CI fails them and `python3 tools/coplanar_models.py fix <files>` parts them after a Blender build. Between
+   a field's pieces (a trim on a slab's face, a prop's top in its backing's), `tools/coplanar_dump.gd` lists the
+   field's faces as a match draws them, `tools/coplanar_check.py` the pairs, and `tools/flicker_map.py` pictures
+   them a hair apart to tell which show; stand the piece a few millimetres off, in its config or the map's builder.
 
 ## Arms and hands
 

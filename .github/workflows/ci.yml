@@ -297,3 +297,10 @@ jobs:
         env:
           BASE: ${{ github.base_ref }}
         run: python3 tools/wiki.py check ${BASE:+--base "origin/$BASE"}
+
+      # A model's faces lying in one plane over one another flicker (z-fighting, BP9): `fix` parts them after a build.
+      - name: Models' flat faces (tools/coplanar_models.py)
+        if: success() || failure()
+        run: |
+          pip install "numpy==2.5.3"
+          python3 tools/coplanar_models.py check
