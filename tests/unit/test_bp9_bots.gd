@@ -215,10 +215,33 @@ func test_cover_me_whose_helper_is_hit_tells_you_it_is_over() -> void:
 	assert_gt(bots.order_outcome.serial, before, "and you are told")
 	assert_eq(bots.order_outcome.giver, YOU)
 	assert_eq(bots.order_outcome.notice, SquadOrders.Notice.CANCELLED, "as when you walk away from it")
+	assert_true(bots.order_outcome.news, "unasked: the HUD shows it with the wheel shut")
 	# Told once, not every tick after.
 	var told := bots.order_outcome.serial
 	_run(0.5)
 	assert_eq(bots.order_outcome.serial, told)
+
+
+func test_walking_away_from_cover_me_is_news_and_an_orders_own_answer_is_not() -> void:
+	_squad()
+	cmd.squad_order = SquadOrder.Kind.COVER
+	_tick()
+	assert_false(bots.order_outcome.news, "the answer to an order just given")
+	cmd.squad_order = SquadOrder.Kind.NONE
+	var before := bots.order_outcome.serial
+	you.position += Vector3(config.squad.cover_leave + 5.0, 0.0, 0.0)
+	_run(0.1)
+	assert_gt(bots.order_outcome.serial, before)
+	assert_eq(bots.order_outcome.notice, SquadOrders.Notice.CANCELLED)
+	assert_true(bots.order_outcome.news, "you walked away from it: told unasked")
+	# Given again to cancel it: your own doing, so its answer is no news.
+	cmd.squad_order = SquadOrder.Kind.FOLLOW
+	_tick()
+	cmd.squad_order = SquadOrder.Kind.FOLLOW
+	_tick()
+	cmd.squad_order = SquadOrder.Kind.NONE
+	assert_eq(bots.order_outcome.notice, SquadOrders.Notice.CANCELLED, "Follow Me given twice: off again")
+	assert_false(bots.order_outcome.news)
 
 
 func test_an_order_ended_by_the_new_round_tells_nobody() -> void:

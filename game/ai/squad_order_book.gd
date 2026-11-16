@@ -406,7 +406,7 @@ func update() -> void:
 			# them; walked off, everyone is back on the team plan.
 			if _flat(giver.position, _watch_from[id]) > _world.cfg.squad.watch_leave:
 				_drop_order(giver)
-				order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED)
+				order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED, true)
 			continue
 		var carried := false
 		for b in _world.bots:
@@ -416,7 +416,7 @@ func update() -> void:
 				if b.order == SquadOrder.Kind.COVER \
 						and _flat(giver.position, b.order_goal) > _world.cfg.squad.cover_leave:
 					_drop_order(giver)
-					order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED)
+					order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED, true)
 				break
 		if not carried:
 			# Everyone who carried it is out (Cover me's one helper hit, most often): its giver is told, as when they
@@ -424,7 +424,7 @@ func update() -> void:
 			_given[id] = SquadOrder.Kind.NONE
 			_own_spot[id] = 0
 			_from_move[id] = 0
-			order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED)
+			order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED, true)
 
 
 ## Before the bots think (as the browser game's updateOrders): each bot back within regroup_arrive of whoever gave it
@@ -490,7 +490,7 @@ func quiet_holds() -> void:
 		if giver == null:
 			continue
 		_drop_order(giver)
-		order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.QUIET)
+		order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.QUIET, true)
 
 
 ## The character `id` of the field (a giver of orders), or null.

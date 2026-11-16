@@ -37,6 +37,10 @@ nothing.
   holds the spot under the map's pointer instead, your teammates side by side across the way there and looking on.
 - An order lasts until you give another, until you are hit, or until the round (or the match) ends. In Attack / Defend it overrides
   your teammates' work at the pole.
+- An order that ends by itself tells you: when the last teammate carrying it is hit, when you walk away from Cover Me
+  or Watching Here, or when a Go There has gone quiet, the wheel's circle shows alone over the crosshair
+  for <!-- wiki:config hud_config.order_notice_time --> s with "Back to the team plan" ("All quiet: back to the team
+  plan" for the Go There), whether or not the wheel is open.
 - Orders do nothing on the [Practice Range](Practice-Range), where there's nobody to order.
 
 All the keys can be rebound in Settings › Controls ([Controls](Controls)).
@@ -52,8 +56,9 @@ again starts the time over. Only your team sees it, and a soft pip says your spo
 While they are spotted, your bot teammates within <!-- wiki:config ping_config.spot_share_radius --> m of them hear
 where they are, at once and again every second. Each one goes after them or watches them from its post, the way it
 plays. Teammates further off, in a fight or with someone else in sight carry on. Nobody under your crosshair spots
-nobody. A tap never shows the wheel, and it gets in the way of nothing: your view keeps turning with the mouse, and
-the trigger, your aim and the mouse wheel stay yours, so you can spot someone while you follow them or fire at them.
+nobody. A tap never shows the wheel, and it spots however the mouse is moving: the trigger, your aim and the mouse
+wheel stay yours through it, so you can spot someone while you follow them or fire at them. Your view waits while the
+key is down and takes the whole turn as you let go.
 
 ## Pings
 
