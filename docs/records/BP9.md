@@ -321,7 +321,8 @@ their band on their first seeds, inside its noise, and were played on more seeds
 | Woodland, Elimination, Normal: the west end's share of the decided rounds | 44.4 % ±3.1 (32) | 45.7 % ±2.3 (64) | 45 to 55 % |
 
 Near an edge and left to watch, with no number changed: the first and the third above, Woodland's Attack / Defend at
-Easy (62.2 % ±4.3 in 35 to 65) and Depot's west end at Hard (41.7 % ±4.5 in 40 to 60).
+Easy (62.2 % ±4.3 in 35 to 65) and Depot's west end at Hard (41.7 % ±4.5 in 40 to 60). The third was played on to 128
+seeds with this part's change (below): 45.2 % ±1.6.
 
 **Performance: what was measured.** All of it headless on the cloud's machine (four cores of a 2.1 GHz Xeon, no
 graphics card), this head against 0.1 Dev 3 back to back:
@@ -378,7 +379,14 @@ It moves every bot's routes on every field, so every field's balance would be pl
 quicker processor every figure here shrinks in step; how Woodland runs on a real one is the owner's check (his
 checklist, N24).
 
-**Woodland's balance with the change** (Normal, seeds 1 to 32, on `b67527f`; before in brackets): {BALANCE}
+**Woodland's balance with the change** (Normal, on `b67527f`; the reports are in
+`pipeline/runs/BP9/balance/part-4-woodland/`). Attack / Defend and Plant The Bomb played out the same to the round
+on seeds 1 to 32 (the attackers 130 of 238 rounds and 123 of 244, as before): no hunt there drew a spot in the
+stream. Elimination's matches differ once a hunt's spot does. Its west end took 43.3 % ±3.2 of the decided rounds
+on seeds 1 to 32 (44.4 % before) and 42.6 % ±2.3 on 1 to 64 (200 of 469; before, 45.7 % ±2.3, 222 of 486): outside
+its band of 45 to 55 %, inside the noise, so 64 more seeds were played, as the bug pass rules. On seeds 1 to 128 it
+takes 45.2 % ±1.6 (432 of 955): in band, at its low edge, where it stood before the change. The same 64 further
+seeds were not played on main: the figure to judge was the one with the change.
 
 **Clean-out: nothing new to remove.** AUD1 cleaned the repository out two days before this pass (#350;
 `_archive/README.md` lists what it set aside). A scan for files that no code, data, tool or doc names brought up 43
@@ -497,3 +505,6 @@ a hunt on a deck, the night's move out of a lamp's light, a bot with nowhere dry
   `docs/KNOWN_ISSUES.md` (Bots); how Woodland runs on a real processor is William's check (his checklist, N24).
 - Depot at 8v8 and Subway cost up to a millisecond more script time a frame than in Dev 3 (part 4), inside the
   frame's budget; not traced.
+- Four balance figures sit near their band's edge (part 4): Woodland's west end in Elimination at Normal (45.2 % ±1.6
+  on 128 seeds), Subway's and Woodland's attackers in Attack / Defend at Easy, Depot's west end in Elimination at
+  Hard. Nothing was changed; `docs/KNOWN_ISSUES.md` (Balance) lists them.
