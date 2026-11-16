@@ -1,6 +1,6 @@
 # RD4 · The 0.1 Beta 1 release notes, ready before the tag
 
-**Review:** docs only, no review agents (CLAUDE.md §6)
+**Review:** first pull request docs only, no review agents (CLAUDE.md §6); the second (after the tag) REVIEW_LINE
 
 ## Decisions
 
@@ -26,7 +26,9 @@ The owner published `0.1-beta.1` on acfcb19 on 2026-11-16 at 21:13 UTC. This sec
 
 - **`config/version` reads "0.1 Beta 2"** (step 4), so a source run names the build being made. This touches
   `project.godot`, so the release workflow runs as a dry run on the pull request and the three review agents run.
-- **The release itself** (step 5): RELEASE_RUN_LINE
+- **The release itself** (step 5): Release run 43957824051 green; the release has `Airsoft-0.1-beta.1-Windows-Setup.exe`,
+  `-Windows-Portable.zip` and `-Linux.zip` and the full notes, as a pre-release. The run's "installed game starts,
+  plays and shows its version" and Linux build checks passed, so the title screen names 0.1 Beta 1.
 - **README and ROADMAP** already name 0.1 Beta 1 and the tag's date (the fold and the tag fell on the same day);
   HANDOFF says it is out and that Beta 2 is being built.
 - **The owner's checklist moves on:** the 47 checks still open on `0.1-beta1-checklist.md` are carried to
