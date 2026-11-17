@@ -35,7 +35,13 @@ def move_images_out(src: str, dst: str = "") -> int:
             continue
         v = views[image["bufferView"]]
         start = v.get("byteOffset", 0)
-        name = "%s_%s.%s" % (stem, image["name"], EXT[image["mimeType"]])
+        # A file read back in names its image after its uri (`<stem>_wear`): the stem is taken off again, so a
+        # script that rewrites a parts file (figure_parts.py after magazines.py) keeps `<stem>_wear.png`, not
+        # `<stem>_<stem>_wear.png`.
+        own = image["name"]
+        while own.startswith(stem + "_"):
+            own = own[len(stem) + 1:]
+        name = "%s_%s.%s" % (stem, own, EXT[image["mimeType"]])
         Path(dst).with_name(name).write_bytes(blob[start:start + v["byteLength"]])
         image_views[image["bufferView"]] = image
         del image["bufferView"]
