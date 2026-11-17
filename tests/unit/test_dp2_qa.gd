@@ -12,7 +12,7 @@ const SWITCHES := 12
 const BASE_HASHES: Dictionary[String, String] = {
 	# The hall (DR1), the palette's colours (WA1), SL1's darker grass outside, MB1's crate stacks at the flags.
 	"depot": "51ace474e71b1c14",
-	"range": "dae60d51779a9749", # SL1's darker grass outside
+	"range": "eedaa8d5861c1dd0", # SL1's darker grass outside, RQ1's benches and chrono table
 }
 
 var play: PlayTuning = PlayTuning.load_default()
