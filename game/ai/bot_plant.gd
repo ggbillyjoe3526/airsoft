@@ -390,9 +390,21 @@ static func _may_fetch(b: Bot, w: BotWorld) -> bool:
 			and b.order == SquadOrder.Kind.NONE
 
 
-## Whether `c` stands on the bomb's storey: within plant_player_level of its height.
+## Whether `c` stands on the bomb's storey: within plant_player_level of its height, or both on the field's open ground
+## (within plant_ground_reach over the terrain), which is one storey however far it climbs (LF1: on a Woodland slope a
+## fetcher's route over a rise took it above the bomb's level, a teammate down by it took the job, and the two swapped it
+## every few ticks, walking back and forth on the spot until the round ran out).
 static func on_bomb_level(c: Character, w: BotWorld) -> bool:
-	return absf(c.position.y - w.plant.position.y) <= w.cfg.plant_player_level
+	var bomb := w.plant.position
+	if absf(c.position.y - bomb.y) <= w.cfg.plant_player_level:
+		return true
+	return w.terrain != null and _on_open_ground(c.position, w) and _on_open_ground(bomb, w)
+
+
+## Whether `p` lies on the field's open ground: within plant_ground_reach over the terrain under it. Allocates nothing.
+static func _on_open_ground(p: Vector3, w: BotWorld) -> bool:
+	var ground := w.terrain.height_at(p.x, p.z)
+	return not is_nan(ground) and absf(p.y - ground) <= w.cfg.plant_ground_reach
 
 
 ## The defending bot that disarms an armed bomb, once a bot may (may_defuse): the nearest of those back at it, the one

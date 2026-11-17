@@ -1,6 +1,6 @@
 # LF1 · Bushes stop only what their leaves cover; no boxes at the thickets' feet
 
-**Review:** 2 attempts · critic Accept 8/8 (attempt 2, c244beb) · qa Pass (6074be8) · performance Pass (bc8b077)
+**Review:** 3 attempts · critic (attempt 3 below) · qa Pass (attempts 1 and 3) · performance Pass (attempts 1 and 3)
 
 The owner's playtest of 0.1 Beta 1 (2026-11-17), items 30 to 32: "i was clearly hitting an enemy bot but they seemed
 stuck and hits didn't seem to register ... it may or may not be related to the woodlands map and the foliage/trees";
@@ -13,7 +13,8 @@ spotted bot is (if they are close enough) ... check that it works in all maps".
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-17 | 1 | Opus 5.5 (build thread) | pass | Retry 6/8 | Spotted shown on Woodland A/D only, teammates told not shown, 97 misses not all explained; probe header stale; the fern height in two configs |
-| 2026-11-17 | 2 | Opus 5.5 (build thread) | pass | Accept 8/8 | – |
+| 2026-11-17 | 2 | Opus 5.5 (build thread) | pass | Accept 8/8 | CI: a Woodland Plant The Bomb bot held up (test_wb1_qa, seed 3) |
+| 2026-11-17 | 3 | Opus 5.5 (build thread) | pass | – | – |
 
 ## What was wrong
 
@@ -26,6 +27,11 @@ spotted bot is (if they are close enough) ... check that it works in all maps".
   them the drawn plants put no frond on the lines to the chest and head.
 - **The "stuck" bot:** the probe printed every bot standing still 12 s; all were defenders holding their posts (route
   goal reached), none inside a block.
+- **A bot walking back and forth on the spot (CI, attempt 2's head):** on Woodland in Plant The Bomb, the bot fetching
+  the dropped bomb took a route over a rise more than 2.5 m above it, so by `BotPlant.on_bomb_level` it was off the
+  bomb's storey; a teammate down by the bomb took the job, the first came back down, took it again, and the two swapped
+  it every few ticks until the round ran out. The fewer counted leaves (straighter routes) brought seed 3 onto that
+  rise; the swap was there before, on any slope.
 - **Boxes at the trees (item 31):** a spruce thicket's dark core box (WR3, FT1) drawn between its spruces' feet to a
   fifth of its height. The spruces, drawn 1.8 times their cell along and 1.5 across, close the thicket without it
   (pictures 1 to 3).
@@ -39,6 +45,10 @@ spotted bot is (if they are close enough) ... check that it works in all maps".
   bush angles, the minimap and BushView keep the drawn size.
 - `leaf_fern_tallest` is the one fern/shrub split: `WoodsConfig.fern_tallest` is gone and `BushView.build` takes the
   simulation's value, so what is drawn as a fern is what is counted as one.
+- `BotPlant.on_bomb_level`: open ground is one storey however it slopes. Someone, and the bomb, within
+  `BotConfig.plant_ground_reach` (0.5 m) over `MapData.terrain` (read through the new `BotWorld.terrain`) are on one
+  storey; the height test stays for everything else (huts' floors, the tower's deck, Depot and Subway, which have no
+  terrain).
 - `PropDressConfig.model_cores` is empty: no thicket core. The core box's rules stay for a prop that names one.
 - Tools: `tools/spot_probe.gd`, `tools/bush_opacity.gd` (dev only).
 
@@ -69,6 +79,8 @@ spotted bot is (if they are close enough) ... check that it works in all maps".
 - **Bushes count only the leaves their plants fill; no thicket core** (`docs/DECISIONS.md` › Maps and modes).
 - **The shares favour fewer stopped-but-unseen lines over more seen-but-shot-through ones:** a BB getting past one
   visible frond is how a fern behaves; a BB stopped by nothing you can see is the bug the owner hit.
+- **Open ground is one storey for the bomb fetcher** (attempt 3): the height band was written for Depot's and Subway's
+  floors; on a slope it cut one hillside into storeys.
 - **A lone fern no longer hides someone crouched in its middle; a bed of them still does** (counted leaves add up over
   overlapping ferns). The wiki's Maps page says so.
 
