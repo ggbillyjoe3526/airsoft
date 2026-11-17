@@ -1,6 +1,6 @@
 # TA1 · Subway's train announcements, an easter egg
 
-**Review:** QA PENDING, Performance Pass (attempt 1, `pipeline/runs/TA1/attempt-1/`), Critic PENDING
+**Review:** QA Pass, Performance Pass, Critic 8/8 Accept (attempt 1, `pipeline/runs/TA1/attempt-1/`)
 
 The owner, 2026-11-17, with two recordings (`gap.wav`, `kings_cross.wav`): "can you add these two sounds to the subway
 map. they should only play when the player is near a train and should be treated as an 'easter egg'. 'gap.wav' should
@@ -13,7 +13,7 @@ the original. i recorded them myself. it should only play if the player is stand
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-17 | 1 | Opus 5.5 (build thread) | ✓ (lint, wiki, notices, smoke, touched unit files 91/91; the rest in CI) | PENDING | – |
+| 2026-11-17 | 1 | Opus 5.5 (build thread) | ✓ (lint, wiki, notices, smoke, touched unit files 91/91, then 35/35 after QA's fix; the rest in CI) | 8/8 Accept | – |
 
 ## What changed
 
@@ -34,7 +34,10 @@ the original. i recorded them myself. it should only play if the player is stand
   `TrainAnnounceConfig`. A match on Subway lasts several minutes, so the windows fit all plays in most matches when
   someone visits a train.
 - The listener is whoever the view is through, so a spectator in a train hears them too.
-- Hidden like Dev › Lasers: not on the wiki (`docs/DECISIONS.md` › Audio).
+- Hidden like Dev › Lasers: not on the wiki or in FEATURES (`docs/DECISIONS.md` › Audio); its changelog note only
+  hints at it (`changelog.d/subway-announcements.md`).
+- "Mind the gap" and King's Cross are spoken words in his own recordings, no logo or brand mark; flagged to him with
+  the build (CLAUDE.md §4), his call.
 - Source: his own recordings (owner, 2026-11-17: "i recorded them myself"), `docs/ASSETS.md` › Made by the project.
 
 ## Known issues
