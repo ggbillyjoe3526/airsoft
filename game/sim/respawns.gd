@@ -2,9 +2,9 @@ class_name Respawns
 ## Respawns (RS1, owner 2026-11-17: "matches should let players/bots respawn ... the idea is that matches will last
 ## long"): a hit character calls its hit and walks off as ever (Elimination), and a delay after the hit comes back into
 ## the round with full magazines, at its start area or at a forward spawn of its end (MapEnd.forward) that its
-## controller picked (PlayerCommand.spawn_pick). A forward spawn with an enemy in play near it is shut, and so are
-## forward spawns for the defenders of Attack / Defend and Plant The Bomb, who start by their pole or sites anyway: those
-## picks come back at the start area. While anyone has a respawn coming, its team is not wiped out (Round.step). Plant
+## controller picked (PlayerCommand.spawn_pick). A forward spawn with an enemy in play near it is shut, and so are the
+## defenders' where RoundConfig.defender_forward_spawns is off: those picks come back at the start area. With respawns
+## an untended flag slips back down (slip_time). While anyone has a respawn coming, its team is not wiped out (Round.step). Plant
 ## The Bomb's respawns end as the bomb is armed: whoever is out then stays out. Pure; allocates nothing.
 
 
@@ -25,15 +25,26 @@ static func open(rs: RoundState) -> bool:
 	return rs.respawns and not rs.practice and not (rs.mode == RoundState.Mode.PLANT_THE_BOMB and rs.plant.planted())
 
 
+## The seconds an untended flag takes to slip from the top to the bottom in `rs`'s round (FlagConfig): with respawns,
+## else 0 (it stays).
+static func slip_time(rs: RoundState, flag: FlagConfig) -> float:
+	return maxf(0.0, flag.respawn_slip_time) if rs.respawns and not rs.practice else 0.0
+
+
 ## Whether `c` is out of play with a respawn coming.
 static func waiting(c: Character) -> bool:
 	return c.respawn_left >= 0.0 and not Elimination.is_in_play(c)
 
 
-## Whether `team` may come back at its end's forward spawns in `rs`'s round: either team in Elimination; with sides, only
-## the attackers (the defenders start by what they defend).
-static func forward_allowed(rs: RoundState, team: int) -> bool:
-	return not rs.sided() or team == rs.attackers
+## Whether `team` may come back at its end's forward spawns in `rs`'s round: either team in Elimination; with sides, the
+## attackers, and the defenders too where `rounds` lets them (RoundConfig.defender_forward_spawns).
+static func forward_allowed(rs: RoundState, team: int, rounds: RoundConfig) -> bool:
+	return forward_for(rs.sided(), rs.attackers, team, rounds)
+
+
+## forward_allowed from its parts, for a controller that keeps the mode and the attackers on its own (BotRespawn).
+static func forward_for(sided: bool, attackers: int, team: int, rounds: RoundConfig) -> bool:
+	return not sided or team == attackers or rounds.defender_forward_spawns
 
 
 ## The seconds a hit on `team` waits before coming back in `rs`'s round (RoundConfig): the defenders' with sides,
@@ -58,7 +69,7 @@ static func shut(f: ForwardSpawn, team: int, characters: Array[Character], radiu
 static func resolve(c: Character, rs: RoundState, ends: Array[MapEnd], characters: Array[Character],
 		rounds: RoundConfig) -> int:
 	var k := c.spawn_pick
-	if k <= 0 or not forward_allowed(rs, c.team) or c.end < 0 or c.end >= ends.size() or ends[c.end] == null:
+	if k <= 0 or not forward_allowed(rs, c.team, rounds) or c.end < 0 or c.end >= ends.size() or ends[c.end] == null:
 		return 0
 	var forward := ends[c.end].forward
 	if k > forward.size() or shut(forward[k - 1], c.team, characters, rounds.forward_block_radius):

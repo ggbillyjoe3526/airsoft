@@ -93,20 +93,25 @@ A map needs bomb sites for Plant The Bomb; the Match screen says when one hasn't
 ## Respawns
 
 In **Attack / Defend** and **Plant The Bomb** a hit doesn't end your round. You call your hit and walk off as usual,
-and <!-- wiki:config round_config.respawn_delay --> seconds after the hit you come back into the round with full
-magazines, so a round runs its clock unless a flag goes up or the bomb is planted. **Elimination** keeps one life a
-round. The Custom rule **Respawns** can turn them on in every mode, or off in all of them.
+and a few seconds after the hit you come back into the round with full magazines, so a round runs its clock unless a
+flag goes up or the bomb is planted. **Elimination** keeps one life a round. The Custom rule **Respawns** can turn them
+on in every mode, or off in all of them.
 
+- **How long you wait.** The attackers wait <!-- wiki:config round_config.respawn_delay --> seconds. The defenders'
+  wait is set for each field so both sides win about as often: 15 s on **Depot**, whose poles are close to the
+  defenders' start, and 5 s on **Woodland**, whose two poles are far apart.
 - **Where you come back.** While you wait, a **RESPAWN IN** panel at the bottom of the screen lists your **start
   area** and your end's two **forward spawns**, nearer the fight. Pick one with **1**, **2** or **3** (the first two
   replica slots and Holster) or the mouse wheel. Your pick is kept for next time.
-- **Forward spawns are the attackers'.** In Attack / Defend and Plant The Bomb the defenders start by their pole or
-  sites already, so they always come back at their start area. In Elimination with respawns on, both ends have them.
 - **An enemy near shuts a forward spawn.** With an enemy within <!-- wiki:config round_config.forward_block_radius -->
-  m of it, the panel marks it **ENEMY NEAR** and a pick of it brings you back at your start area instead.
+  m of it, the panel greys it out and a pick of it brings you back at your start area instead.
+- **A flag left alone slips back down.** With respawns, a part-raised flag nobody is working slides to the bottom in
+  <!-- wiki:config flag_config.respawn_slip_time -->
+  seconds, so a raise has to be finished, not built up a hit at a time.
 - **Plant The Bomb stops respawns once the bomb is armed.** Whoever is out then stays out, and the round is played out
   by whoever is left.
-- **Bots** respawn on the same rules and pick their own spawn.
+- **Bots** respawn on the same rules and pick their own spawn. With respawns more of the defending bots go to pull a
+  flag down.
 
 Each field's forward spawns: **Depot** Upper mid and Huts (west), A short and B alley (east); **Woodland** Pine slope
 and Road west (west camp), Fort gate and Back track (east camp).

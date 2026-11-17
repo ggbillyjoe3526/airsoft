@@ -174,6 +174,15 @@ static func figures(map_name: String, ends: Array[String], matches: Array[MatchR
 	return out
 
 
+## The band's top for rounds that run out the clock in `matches`: ON_TIME_MAX, or none (measured only) once anyone
+## respawned (RS1): with hits coming back the clock is how the defenders win, so it is no longer a stand-off.
+static func clock_max(matches: Array[MatchRunner.MatchTally]) -> float:
+	for m in matches:
+		if m.respawns > 0:
+			return INF
+	return ON_TIME_MAX
+
+
 ## A map's Attack / Defend figures over its matches at `level`: the attackers' share of all rounds (its band, by map at
 ## Normal), rounds that run out the clock, and the share won by raising the flag (measured).
 static func flag_figures(map_id: String, map_name: String, matches: Array[MatchRunner.MatchTally],
@@ -199,7 +208,7 @@ static func flag_figures(map_id: String, map_name: String, matches: Array[MatchR
 	var out: Array[Figure] = []
 	out.append(share("%s: the attackers' share of rounds" % at, attack_wins, rounds, band.x, band.y,
 			"%d of %d rounds" % [attack_wins, rounds]))
-	out.append(share("%s: rounds that run out the clock" % at, on_time, rounds, -INF, ON_TIME_MAX,
+	out.append(share("%s: rounds that run out the clock" % at, on_time, rounds, -INF, clock_max(matches),
 			"%d of %d rounds" % [on_time, rounds]))
 	out.append(share("%s: rounds won by raising the flag" % at, captures, rounds, -INF, INF,
 			"%d of %d rounds" % [captures, rounds]))
@@ -237,7 +246,7 @@ static func plant_figures(map_name: String, matches: Array[MatchRunner.MatchTall
 	var out: Array[Figure] = []
 	out.append(share("%s: the attackers' share of rounds" % at, attack_wins, rounds, band.x, band.y,
 			"%d of %d rounds" % [attack_wins, rounds]))
-	out.append(share("%s: rounds that run out the clock" % at, on_time, rounds, -INF, ON_TIME_MAX,
+	out.append(share("%s: rounds that run out the clock" % at, on_time, rounds, -INF, clock_max(matches),
 			"%d of %d rounds" % [on_time, rounds]))
 	out.append(share("%s: rounds the bomb is armed in" % at, armed, rounds, -INF, INF,
 			"%d of %d rounds" % [armed, rounds]))

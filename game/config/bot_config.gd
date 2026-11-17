@@ -423,6 +423,8 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var defend_search_radius: float = 12.0
 ## Once the flag is off the bottom, this many defending bots in play nearest the pole go to pull it down; the rest hold.
 @export var retakers: int = 2
+## ... with respawns (RS1): the attackers keep coming back to the pole, so more go to pull it down.
+@export var respawn_retakers: int = 6
 ## The attacker raising the flag keeps the rope unless another in flag mode is this much nearer the pole (m).
 @export var raiser_switch_margin: float = 3.0
 ## The raiser stands within this of the pole (m, inside the flag's reach), and counts as there within flag_arrive.

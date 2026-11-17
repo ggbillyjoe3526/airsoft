@@ -33,6 +33,10 @@ const RAISE_RANGE := Vector2(3.0, 20.0)
 ## (PlantConfig.fuse_time). Blank keeps the bomb tuning's. Never under the defuse plus a walk to the bomb.
 const FUSE_COLUMN := "Fuse (s)"
 const FUSE_RANGE := Vector2(15.0, 60.0)
+## The defenders' respawn column, optional (RS1): the seconds from a hit to a defender coming back there in Attack /
+## Defend and Plant The Bomb (RoundConfig.defender_respawn_delay). Blank keeps the round tuning's.
+const DEFENDER_RESPAWN_COLUMN := "Defender respawn (s)"
+const DEFENDER_RESPAWN_RANGE := Vector2(2.0, 30.0)
 const START_MODES: Dictionary[String, ReplicaConfig.FireMode] = {
 	"": ReplicaConfig.FireMode.AUTO,
 	"auto": ReplicaConfig.FireMode.AUTO,
@@ -71,6 +75,9 @@ class Entry:
 	## to a site is short gives them less), 0 for the bomb tuning's own (PlantConfig.fuse_time). Skirmish and Custom
 	## both play it: Custom has no switch for it.
 	var fuse_time: float = 0.0
+	## The seconds a defender hit here waits to come back (RS1: a field whose poles are far apart gives them less), 0
+	## for the round tuning's own (RoundConfig.defender_respawn_delay). Skirmish and Custom both play it.
+	var defender_respawn: float = 0.0
 
 	## The field's air (°C) by day: its own, else `rated`.
 	func air_or(rated: float) -> float:
@@ -146,6 +153,8 @@ static func parse(text: String) -> MapCatalog:
 			e.air = _read_number(row, AIR_COLUMN, AIR_RANGE, e.air, at, m.problems, table)
 			e.raise_time = _read_number(row, RAISE_COLUMN, RAISE_RANGE, e.raise_time, at, m.problems, table)
 			e.fuse_time = _read_number(row, FUSE_COLUMN, FUSE_RANGE, e.fuse_time, at, m.problems, table)
+			e.defender_respawn = _read_number(row, DEFENDER_RESPAWN_COLUMN, DEFENDER_RESPAWN_RANGE, e.defender_respawn, at,
+					m.problems, table)
 			m.entries.append(e)
 	for column in SIZE_COLUMNS:
 		if not table.has_column(column):

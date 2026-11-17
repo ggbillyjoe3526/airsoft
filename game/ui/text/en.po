@@ -2355,8 +2355,6 @@ msgstr "RESPAWN IN %d"
 msgid "HUD_RESPAWN_START"
 msgstr "Start area"
 
-msgid "HUD_RESPAWN_SHUT"
-msgstr "ENEMY NEAR"
 
 msgid "HUD_GRAPHICS_KICKER"
 msgstr "Graphics"

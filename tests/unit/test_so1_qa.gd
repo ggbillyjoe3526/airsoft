@@ -14,7 +14,8 @@ const YOU := 0
 const SPOTS: Array[Vector3] = [Vector3(-30.0, 0.0, 20.0), Vector3(-32.0, 0.0, 23.0), Vector3(-28.0, 0.0, 23.0),
 		Vector3(40.0, 0.0, -40.0)]
 
-var tuning: SimTuning = SimTuning.load_default()
+## One life a round (RS1): the rules here as they play without respawns.
+var tuning: SimTuning = MatchGuard.one_life(SimTuning.load_default())
 var config: BotConfig = BotConfig.load_default()
 var squad: SquadConfig = config.squad
 

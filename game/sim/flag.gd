@@ -11,10 +11,10 @@ const HOLD_SLACK := 1e-6
 
 ## One tick of every pole (`step` on each); true once any is raised and held (FlagConfig.hold_time).
 static func step_all(flags: Array[FlagState], characters: Array[Character], attackers: int, cfg: FlagConfig,
-		events: SimEvents, dt: float) -> bool:
+		events: SimEvents, dt: float, slip_time: float = 0.0) -> bool:
 	var raised := false
 	for f in flags:
-		raised = step(f, characters, attackers, cfg, events, dt) or raised
+		raised = step(f, characters, attackers, cfg, events, dt, slip_time) or raised
 	return raised
 
 
@@ -82,7 +82,7 @@ static func nearest(flags: Array[FlagState], at: Vector3) -> int:
 ## lowering). Fully raised, it is held while no defender pulls it down alone (both at once pause the hold); true once
 ## it has been held FlagConfig.hold_time.
 static func step(flag: FlagState, characters: Array[Character], attackers: int, cfg: FlagConfig, events: SimEvents,
-		dt: float) -> bool:
+		dt: float, slip_time: float = 0.0) -> bool:
 	var raising := false
 	var lowering := false
 	for c in characters:
@@ -104,6 +104,8 @@ static func step(flag: FlagState, characters: Array[Character], attackers: int, 
 		flag.progress = maxf(0.0, flag.progress - dt / cfg.lower_time)
 	else:
 		flag.status = FlagState.Status.IDLE
+		if slip_time > 0.0:
+			flag.progress = maxf(0.0, flag.progress - dt / slip_time)
 	if floori(flag.progress / cfg.rope_step) != floori(before / cfg.rope_step):
 		var rope := events.add(GameEvent.Kind.FLAG_ROPE)
 		rope.position = flag.position

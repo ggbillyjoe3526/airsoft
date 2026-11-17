@@ -90,7 +90,7 @@ static func step(rs: RoundState, characters: Array[Character], ends: Array[MapEn
 ## plays on until they stop or max_overtime has run.
 static func _step_flag_clock(rs: RoundState, characters: Array[Character], tuning: SimTuning, events: SimEvents,
 		dt: float) -> void:
-	if Flag.step_all(rs.flags, characters, rs.attackers, tuning.flag, events, dt):
+	if Flag.step_all(rs.flags, characters, rs.attackers, tuning.flag, events, dt, Respawns.slip_time(rs, tuning.flag)):
 		_end_round(rs, rs.attackers, GameEvent.RoundEnd.CAPTURED, tuning.rounds, events)
 		return
 	if rs.clock > 0.0:

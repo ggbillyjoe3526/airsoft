@@ -2,7 +2,8 @@ extends GutTest
 ## RS1: respawns (owner 2026-11-17, playtest item 28). A hit character calls it and walks off, then comes back a delay
 ## after the hit at its start area or a forward spawn of its end it picked; a team with a respawn coming is not wiped
 ## out; Elimination plays one life unless the Custom rule turns respawns on; Plant The Bomb's stop as the bomb is
-## armed; forward spawns are the attackers' only with sides, and shut with an enemy near. The bots pick and rejoin, the
+## armed; forward spawns are either side's (the defenders' by a rule), shut with an enemy near; an untended flag slips
+## and a field sets its defenders' wait. The bots pick and rejoin, the
 ## maps carry their forward spawns, the Custom rule saves, and the panel and keys pick where you come back.
 
 const DT := 1.0 / 60.0
@@ -173,18 +174,21 @@ func test_an_attacker_comes_back_at_the_forward_spawn_it_picked() -> void:
 	assert_almost_eq(attacker.yaw, spot.yaw, 1e-6, "facing the way the spot faces")
 
 
-func test_a_defender_s_forward_pick_comes_back_at_its_start() -> void:
-	var m := _match(RoundState.Mode.ATTACK_DEFEND)
-	var sim: Simulation = m[0]
-	var state: GameState = m[1]
-	var cmds := _cmds()
-	var defender := state.characters[1 - state.round_state.attackers]
-	assert_false(Respawns.forward_allowed(state.round_state, defender.team))
-	_hit(sim, state, defender)
-	cmds[defender.id].spawn_pick = 1
-	var back := _until_back(sim, state, cmds, defender, WAIT_TICKS)
-	assert_not_null(back)
-	assert_eq(back.value, 0, "the defenders start by their pole: no forward spawn")
+func test_a_defender_comes_back_forward_unless_the_rule_keeps_it_at_its_start() -> void:
+	for allowed: bool in [true, false]:
+		var r := RoundConfig.new()
+		r.defender_forward_spawns = allowed
+		var m := _match(RoundState.Mode.ATTACK_DEFEND, r)
+		var sim: Simulation = m[0]
+		var state: GameState = m[1]
+		var cmds := _cmds()
+		var defender := state.characters[1 - state.round_state.attackers]
+		assert_eq(Respawns.forward_allowed(state.round_state, defender.team, r), allowed)
+		_hit(sim, state, defender)
+		cmds[defender.id].spawn_pick = 1
+		var back := _until_back(sim, state, cmds, defender, WAIT_TICKS)
+		assert_not_null(back)
+		assert_eq(back.value, 1 if allowed else 0, "a defender's forward pick, where the rule allows it")
 
 
 func test_an_enemy_near_a_forward_spawn_shuts_it() -> void:
@@ -292,18 +296,22 @@ func test_the_defenders_wait_their_own_delay() -> void:
 func _bot_world(mode: RoundState.Mode, attackers: int) -> BotWorld:
 	var w := BotWorld.new()
 	w.cfg = BotConfig.new()
+	w.tuning = SimTuning.new()
 	w.mode = mode
 	w.attackers = attackers
 	w.ends = _ends()
 	return w
 
 
-func test_a_bot_on_defence_comes_back_at_its_start() -> void:
+func test_a_bot_on_defence_picks_forward_only_where_the_rule_lets_it() -> void:
 	var w := _bot_world(RoundState.Mode.ATTACK_DEFEND, 0)
 	var c := Character.new(1, 1, Vector3.ZERO, 0.0, loadout)
 	c.end = 1
 	var b := Bot.new(c, 7, BotSkill.new(), 2)
 	w.cfg.forward_spawn_chance = 1.0
+	assert_between(BotRespawn.pick(b, w), 1, w.ends[1].forward.size())
+	b.reset(-1, 0, 0.0, w.cfg)
+	w.tuning.rounds.defender_forward_spawns = false
 	assert_eq(BotRespawn.pick(b, w), 0)
 
 
@@ -437,4 +445,92 @@ func test_the_panel_shows_the_wait_and_the_places_while_you_wait() -> void:
 	_hit(sim, state, defender)
 	sim.step(state, _cmds(), DT)
 	panel.show_for(defender, state.round_state, sim.ends, state.characters, tuning.rounds)
-	assert_eq(panel.place_names(), PackedStringArray([tr("HUD_RESPAWN_START")]), "defending: the start area only")
+	assert_eq(panel.place_names(), PackedStringArray([tr("HUD_RESPAWN_START"), "Forward %d" % defender.end]),
+			"defending: its own end's forward spawns too")
+	var off := RoundConfig.new()
+	off.defender_forward_spawns = false
+	panel.show_for(defender, state.round_state, sim.ends, state.characters, off)
+	assert_eq(panel.place_names(), PackedStringArray([tr("HUD_RESPAWN_START")]), "the rule off: the start area only")
+
+
+func test_the_balance_report_judges_the_clock_only_in_one_life_matches() -> void:
+	var m := MatchRunner.MatchTally.new()
+	var r := MatchRunner.RoundTally.new()
+	r.winner = 1
+	r.attackers = 0
+	r.reason = GameEvent.RoundEnd.TIME
+	m.rounds.append(r)
+	var matches: Array[MatchRunner.MatchTally] = [m]
+	assert_eq(BalanceReport.flag_figures("depot", "Depot", matches)[1].band_max, BalanceReport.ON_TIME_MAX)
+	m.respawns = 3
+	assert_eq(BalanceReport.flag_figures("depot", "Depot", matches)[1].band_max, INF,
+			"with respawns the clock is the defenders' win, measured only")
+	assert_eq(BalanceReport.plant_figures("Depot", matches)[1].band_max, INF)
+
+
+func test_with_respawns_an_untended_flag_slips_back_down() -> void:
+	var cfg := FlagConfig.new()
+	var flag := FlagState.new()
+	var nobody: Array[Character] = []
+	var events := SimEvents.new()
+	flag.progress = 0.5
+	Flag.step(flag, nobody, 0, cfg, events, 1.0)
+	assert_eq(flag.progress, 0.5, "one life: a part-raise stays")
+	Flag.step(flag, nobody, 0, cfg, events, 1.0, cfg.respawn_slip_time)
+	assert_almost_eq(flag.progress, 0.5 - 1.0 / cfg.respawn_slip_time, 1e-5, "with respawns it slips")
+	Flag.step(flag, nobody, 0, cfg, events, cfg.respawn_slip_time, cfg.respawn_slip_time)
+	assert_eq(flag.progress, 0.0, "never below the bottom")
+	var rs := RoundState.new()
+	assert_eq(Respawns.slip_time(rs, cfg), 0.0)
+	rs.respawns = true
+	assert_eq(Respawns.slip_time(rs, cfg), cfg.respawn_slip_time)
+
+
+func test_enemy_near_coming_and_going_moves_and_resizes_nothing() -> void:
+	var m := _match(RoundState.Mode.ATTACK_DEFEND)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var panel := HudRespawn.new()
+	add_child_autofree(panel)
+	var rs := state.round_state
+	var you := state.characters[rs.attackers]
+	var enemy := state.characters[1 - rs.attackers]
+	_hit(sim, state, you)
+	sim.step(state, _cmds(), DT)
+	var f := sim.ends[you.end].forward[0]
+	enemy.position = f.centre + Vector3(tuning.rounds.forward_block_radius + 5.0, 0.0, 0.0)
+	panel.show_for(you, rs, sim.ends, state.characters, tuning.rounds)
+	var open_size := panel.get_combined_minimum_size()
+	var open_chips := panel.chip_sizes()
+	enemy.position = f.centre
+	panel.show_for(you, rs, sim.ends, state.characters, tuning.rounds)
+	assert_true(panel.shut_places() & 2 == 2, "the first forward spawn reads shut")
+	assert_eq(panel.get_combined_minimum_size(), open_size, "the panel keeps its size")
+	assert_eq(panel.chip_sizes(), open_chips, "every chip keeps its size")
+
+
+func test_a_field_s_defender_respawn_is_read_and_played_and_blank_keeps_the_games() -> void:
+	var head := "# Maps\n\n## Maps\n\n| Id | Name | Kind | Tag | Min | Standard | Max | Defender respawn (s) | Blurb |\n" \
+			+ "|---|---|---|---|---|---|---|---|---|\n"
+	var row := "| %s | %s | field | public | 5 | 6 | 8 | %s | A field. |\n"
+	var m := MapCatalog.parse(head + row % ["near", "Near", ""] + row % ["far", "Far", "5"])
+	assert_eq(m.problems, [] as Array[String])
+	assert_eq(m.find("near").defender_respawn, 0.0, "blank: the round tuning's")
+	assert_eq(m.find("far").defender_respawn, 5.0)
+	var bad := MapCatalog.parse(head + row % ["far", "Far", "1"])
+	assert_eq(bad.find("far").defender_respawn, 0.0, "under 2 s keeps the game's")
+	assert_eq(bad.problems.size(), 1)
+	var base := SimTuning.load_default()
+	var games := base.rounds.defender_respawn_delay
+	var own := 0
+	for e in MapCatalog.shared().entries:
+		if e.kind != &"field":
+			continue
+		var back := e.defender_respawn if e.defender_respawn > 0.0 else games
+		own += 1 if e.defender_respawn > 0.0 else 0
+		assert_eq(MatchOptions.match_tuning(base, e, null).rounds.defender_respawn_delay, back, "%s, Skirmish" % e.id)
+		assert_eq(MatchOptions.match_tuning(base, e, CustomRules.new()).rounds.defender_respawn_delay, back,
+				"%s, Custom" % e.id)
+		assert_eq(MatchRunner.sized_for(e.id).rounds.defender_respawn_delay, back, "%s: the measures play it" % e.id)
+	assert_gt(own, 0, "a field has its own, or this test proves nothing")
+	assert_eq(base.rounds.defender_respawn_delay, games, "the loaded tuning is never written")

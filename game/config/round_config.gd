@@ -34,9 +34,13 @@ extends Resource
 enum RespawnRule { BY_MODE, ALWAYS, NEVER }
 @export var respawns: RespawnRule = RespawnRule.BY_MODE
 ## Seconds from a hit to coming back: the attackers' (and either team's in Elimination), and the defenders' in Attack /
-## Defend and Plant The Bomb, who come back beside their pole or sites.
+## Defend and Plant The Bomb, where a field may set its own (data/maps.md Defender respawn: bot matches put the
+## attackers near half the rounds with Depot 15, Woodland 5, Subway 7).
 @export var respawn_delay: float = 10.0
 @export var defender_respawn_delay: float = 10.0
+## Whether the defenders in Attack / Defend and Plant The Bomb may come back at their end's forward spawns too (the
+## attackers and either team in Elimination always may).
+@export var defender_forward_spawns: bool = true
 ## A forward spawn with an enemy in play within this many metres of its middle is shut: a pick of it comes back at the
 ## start area instead (no coming back in someone's sights).
 @export var forward_block_radius: float = 15.0

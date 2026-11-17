@@ -1921,7 +1921,8 @@ func can_skip() -> bool:
 ## spawns (Respawns.forward_allowed), at most the respawn panel's keys.
 func _spawn_places() -> int:
 	var forward := 0
-	if player.end >= 0 and player.end < _sim.ends.size() and Respawns.forward_allowed(state.round_state, player.team):
+	if player.end >= 0 and player.end < _sim.ends.size() and Respawns.forward_allowed(state.round_state, player.team,
+			_sim.tuning.rounds):
 		forward = _sim.ends[player.end].forward.size()
 	return mini(HudRespawn.KEYS.size(), 1 + forward)
 

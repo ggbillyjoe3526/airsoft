@@ -354,6 +354,7 @@ func _sync_round(state: GameState) -> void:
 	var rs := state.round_state
 	world.mode = rs.mode
 	world.attackers = rs.attackers
+	world.respawns = rs.respawns
 	if rs.mode == RoundState.Mode.PLANT_THE_BOMB:
 		BotPlant.sync(world, rs)
 	else:

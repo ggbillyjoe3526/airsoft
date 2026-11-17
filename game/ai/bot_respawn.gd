@@ -5,7 +5,7 @@ class_name BotRespawn
 
 ## The spawn `b` picks (PlayerCommand.spawn_pick), out with a respawn coming: decided the first time it is asked this
 ## time out (b.spawn_picked; Bot.reset clears it as it comes back). With its team free to use its end's forward spawns
-## (either team in Elimination, only the attackers with sides), one of them at random with
+## (Respawns.forward_for), one of them at random with
 ## BotConfig.forward_spawn_chance; otherwise, and on an end with none, 0: the start area.
 static func pick(b: Bot, w: BotWorld) -> int:
 	if b.spawn_picked:
@@ -16,8 +16,8 @@ static func pick(b: Bot, w: BotWorld) -> int:
 	if c.end < 0 or c.end >= w.ends.size() or w.ends[c.end] == null:
 		return 0
 	var count := w.ends[c.end].forward.size()
-	var defending := RoundState.has_sides(w.mode) and w.attackers >= 0 and c.team != w.attackers
-	if count == 0 or defending:
+	var allowed := Respawns.forward_for(RoundState.has_sides(w.mode), w.attackers, c.team, w.tuning.rounds)
+	if count == 0 or not allowed:
 		return 0
 	if b.rng.randf() < w.cfg.forward_spawn_chance:
 		b.spawn_pick = 1 + b.rng.randi_range(0, count - 1)

@@ -29,6 +29,8 @@ var round_clock: float = INF
 ## (RoundState's, read each tick) and the one in play (BotFlag.in_play: the one going for, or to pull down).
 var mode: RoundState.Mode = RoundState.Mode.ELIMINATION
 var attackers: int = -1
+## Whether hit characters come back this match (RoundState.respawns, RS1).
+var respawns: bool = false
 var flags: Array[FlagState] = [FlagState.new()]
 var flag: FlagState = flags[0]
 var flag_index: int = 0

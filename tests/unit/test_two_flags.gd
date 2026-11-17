@@ -18,6 +18,8 @@ var ends: Array[MapEnd] = []
 
 func before_each() -> void:
 	tuning = SimTuning.new()
+	# One life a round (RS1): this checks the flag and its retakers as they play without respawns.
+	tuning.rounds.respawns = RoundConfig.RespawnRule.NEVER
 	tuning.rounds.round_time = 10.0
 	# The raise wins at once here; the hold after it (BP8) is test_bp8_match.gd's.
 	tuning.flag.hold_time = 0.0

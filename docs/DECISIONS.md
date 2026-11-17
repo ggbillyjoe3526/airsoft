@@ -730,12 +730,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 - **Respawns (owner, 2026-11-17, RS1: "matches should let players/bots respawn ... the idea is that matches will last
   long").** A hit character calls it and walks off as ever, then comes back with full magazines a delay after the hit
-  (RoundConfig.respawn_delay, the defenders' its own) at its start area or a forward spawn of its end it picked. Defaults
-  taken (pictures sent, his reply may move them): on in Attack / Defend; in Plant The Bomb until the bomb is armed;
-  never in Elimination (one life is the mode). Custom's Respawns row: by mode, On or Off. Two forward spawns an end on
-  every field (map data `forwardSpawns`), shut with an enemy in play within 15 m; with sides only the attackers use
-  them (the defenders start by what they defend). A team with a respawn coming is not wiped out. The match guards play
-  one life a round (as measured); respawns have their own guard and the balance report plays them as the game does.
+  at its start area or a forward spawn of its end it picked. Defaults taken (pictures sent, his reply may move them):
+  on in Attack / Defend; in Plant The Bomb until the bomb is armed; never in Elimination (one life is the mode).
+  Custom's Respawns row: by mode, On or Off. Two forward spawns an end on every field (map data `forwardSpawns`), for
+  both sides, shut with an enemy in play within 15 m: the panel greys a shut one out and nothing else on it moves
+  (owner, 2026-11-17). A team with a respawn coming is not wiped out. Balance (bot matches): the attackers wait 10 s,
+  the defenders a time set per field (data/maps.md Defender respawn: Depot 15, Woodland 5, Subway 7); with respawns
+  an untended flag slips back down (15 s top to bottom) and up to six defending bots go to pull a flag down. The
+  match guards play one life a round (as measured); respawns have their own guard and the balance report plays them
+  as the game does, with the clock (the defenders' way to win) measured only.
 - **Models keep the play boxes they dress (owner, 2026-11-09, WG3).** Woodland's structures are modelled inside the
   blocks as they are: no pitched roofs in taller roof boxes, no open bridge rails, no low lattice on the tower's legs.
   A shape the photos have that needs a bigger or opener box is a play change, and his call.
