@@ -6,7 +6,8 @@ extends Control
 ## `level_picked`, so the cards under it can show that level, and marks that dot picked: a white ring round it and its
 ## label in accent under an accent bar (owner, 2026-11-03), until another dot is clicked. It takes keyboard and controller
 ## focus too (BP6): left and right (ui_left, ui_right) pick the dot beside the picked one (the next level's first), and
-## the theme's focus ring shows round the track while it has focus.
+## the theme's focus ring shows round the track while it has the keyboard's focus (a click gives it focus unshown:
+## owner, 2026-11-17, no blue edge round the line after clicking a level).
 ## It shows ten levels at a time (owner, 2026-11-10; LV15): the starting kit and levels 1 to 10, then 11 to 20 and so
 ## on, each page's line starting from the page before's last level. `show_page` turns the page (the summary's arrows);
 ## the keys turn it on past either end of a page, and the track opens on the page with the next level.
@@ -175,7 +176,7 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	if has_focus():
+	if has_focus(true):
 		draw_style_box(_focus_ring, Rect2(Vector2.ZERO, size))
 	# a later page's line starts where the page before ended, at its last level (no dot there)
 	var start := _page * PER_PAGE

@@ -274,6 +274,11 @@ func test_opening_and_closing_quit_game_the_settings_and_the_tabs_again_leaves_n
 	await wait_process_frames(3)
 	main._settings_screen.close()
 	await wait_process_frames(3)
+	# the Armory once, kept from then on like the settings (UB2): the count after it holds
+	bar.tab_button(NavRail.Tab.ARMORY).pressed.emit()
+	await wait_process_frames(2)
+	bar.tab_button(NavRail.Tab.MATCH).pressed.emit()
+	await wait_process_frames(3)
 	var nodes := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 	var orphans := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
 	for i in 6:

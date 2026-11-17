@@ -481,6 +481,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## above or below it (Subway's are 9 m apart) they are no nearer than the stairs, and the bots don't wait for them.
 ## The same for the bots: one on the bomb's storey fetches it before one that is not (BotPlant.on_bomb_level).
 @export var plant_player_level: float = 2.5
+## Open ground is one storey however it slopes (BotPlant.on_bomb_level, LF1): someone, or the bomb, within this (m) over
+## the terrain under them stands on it; a hut's floor, a tower's deck or a log's top is not open ground.
+@export var plant_ground_reach: float = 0.5
 ## The bot disarming keeps its hands on it whoever it sees once the fuse leaves only the defuse plus this (s).
 @export var plant_no_time: float = 1.5
 ## While the player carries the bomb, the bots make for the site the player is within this of (m) and nearer to than

@@ -25,13 +25,14 @@ func test_subway_loads_without_problems_or_warnings() -> void:
 	assert_gt(m.storeys.size(), 1)
 
 
-func test_subway_is_dev_only() -> void:
+func test_subway_is_public() -> void:
+	# The owner, 2026-11-17: "Subway map no longer behind dev setting."
 	var cat := MapCatalog.shared()
-	assert_true(cat.is_dev("subway"))
+	assert_false(cat.is_dev("subway"))
 	var public_ids: Array[String] = []
 	for e in cat.fields(false):
 		public_ids.append(e.id)
-	assert_false("subway" in public_ids)
+	assert_true("subway" in public_ids)
 	var dev_ids: Array[String] = []
 	for e in cat.fields(true):
 		dev_ids.append(e.id)

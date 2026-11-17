@@ -37,6 +37,16 @@ func before_all() -> void:
 	for id: String in MAPS:
 		maps[id] = MapData.load_map(id, style, SIDE)
 		navs[id] = NavGrid.build(maps[id], tuning.nav, tuning.body)
+		# Subway's climbs, as a bot takes them (SW2: its platforms run level to their ends, so the east end's way up
+		# out of the tunnels is a climb over a platform's edge). The other fields stay on foot alone, so a lost stair
+		# there still shows.
+		if id != "subway":
+			continue
+		var level := MapLevel.new()
+		add_child(level)
+		level.build(maps[id], style, tuning.body)
+		NavVaults.link(navs[id], level.query(), tuning.vault, tuning.body, BotConfig.load_default().vault_price)
+		level.free()
 
 
 ## The point's floor, found from just above the point's own height (Subway stacks three storeys).

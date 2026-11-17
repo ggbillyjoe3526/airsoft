@@ -12,7 +12,8 @@ at 0.
 ROOMS are walkable volumes: a box of air from its floor up `h` m (a ramp room's floor runs from `ya` at x0 to `yb` at
 x1). Rooms that touch along an edge, with their air overlapping at least OPEN m, open into each other there; every
 other edge of a room gets a wall, and every room a floor and a ceiling. A sealed edge (a train's side, the spiral
-stair's well) is walled from the inside but for its `gaps`. BLOCKS are the cover, `h` m over the floor they stand on.
+stair's well) is walled from the inside but for its `gaps` (from, to; or from, to, height: a doorway walled over).
+BLOCKS are the cover, `h` m over the floor they stand on.
 The links between the two levels: two escalators (-10 to -18), one spiral stair and one ordinary stair (a half
 landing on the way), and two lifts (LIFTS) in a pair of shafts in the ticket hall.
 
@@ -67,6 +68,12 @@ block("wall", C, -55, -49, -10, -6.5, 3.0, dress="ticket_office")  # closed tick
 block("container", C, -49, -46, 7.4, 10, 2.5, 0x8a8478, dress="kiosk")  # shuttered kiosk
 block("cabinet", C, -55.0, -54.4, 2.5, 8.0, 2.0, dress="ticket_machine")
 block("furniture", C, -48.5, -42.5, -10, -9.1, 1.1, dress="booking_counter")  # the old ticket counter, waist high
+# Benches along the hall's walls, backs to the wall, out of the lanes (the owner, 2026-11-17: "add some more benches"):
+# one by the spawn, one each side of the gate line's south end, one on the north wall past the gates.
+HALL_BENCHES = [((-55.0, -54.4), (-6.3, -3.3), "+x"), ((-43.1, -40.1), (9.4, 10.0), "-z"),
+                ((-37.4, -34.4), (9.4, 10.0), "-z"), ((-36.5, -33.5), (-10.0, -9.4), "+z")]
+for (bx0, bx1), (bz0, bz1), bface in HALL_BENCHES:
+    block("furniture", C, bx0, bx1, bz0, bz1, 0.8, dress="station_bench_long", facing=bface)
 # Cable drums left from the works where the west passage was: cover along the hall's north wall (the concourse's
 # pier and the north passage's mouth pier keep the line down it out of the passage).
 block("crate", C, -31, -29, -10, -8.6, 1.8, dress="cable_drum")
@@ -91,8 +98,13 @@ block("pillar", C, -39.2, -38.2, -0.5, 0.5, HALL_H)        # hall column in the 
 SPIRAL = dict(x0=-33.0, x1=-28.0, z0=0.5, z1=5.5, flight=1.3, y0=P, y1=C, sides=8, top=HALL_H,
               dress="spiral_stair")  # the model over its flights and landings, not the core (SM2)
 SPIRAL_WAY = (-29.4, -28.0)   # the gap at its foot onto the platform, and in the rail at its top (both south)
+# The gap at its foot is a doorway as high as the platform's back wall (TUNNEL_H, under the vault's springing), the
+# well's wall going on over it (the owner, 2026-11-17: "wall is glitched showing the below platform").
 room("spiral", "Spiral stair", -33, -28, 0.5, 5.5, P, h=C - P + 0.01, ceil=False,
-     seal={"n": [], "e": [], "w": [], "s": [SPIRAL_WAY]})
+     seal={"n": [], "e": [], "w": [], "s": [(*SPIRAL_WAY, TUNNEL_H)]})
+# Its foot walled off from the space under its flights (the owner, 2026-11-17: "at the bottom level there is an open
+# space under the stairs, block this off"): a wall across the east side under the last flight, up to its underside.
+block("wall", P, -29.45, -28.15, 3.9, 4.05, 3.0)
 block("railing", C, -33.12, -27.88, 0.38, 0.5, 1.1)
 block("railing", C, -33.12, -33.0, 0.5, 5.62, 1.1)
 block("railing", C, -28.0, -27.88, 0.5, 5.62, 1.1)
@@ -157,10 +169,10 @@ VAULTS = [dict(name="north", x0=-52, x1=50, z0=-12.5, z1=-5.5, y=P + TUNNEL_H, l
                style="track"),
           dict(name="south", x0=-52, x1=50, z0=5.5, z1=12.5, y=P + TUNNEL_H, low=P + TRAIN_IN, rise=VAULT_RISE,
                style="track")]
-room("plat_n", "North platform", -52, 47, -9, -5.5, P, h=TUNNEL_H, vault=True)
-room("plat_n_end", "North platform", 47, 50, -7.5, -5.5, P, h=TUNNEL_H, vault=True)
-room("endramp_n", "North platform", 47, 50, -9, -7.5, P, T, h=TUNNEL_H, flat=True, vault=True)
-room("ramp_foot", "North tunnel", 50, 52, -9, -7.5, T, h=RUN_SPRING)
+# Both platforms level all the way to their tunnel's end (the owner, 2026-11-17: "Platforms have ramps. remove them";
+# the north one ran down a ramp to the track at its east end): onto the track a body drops over the edge and climbs
+# back up, as anywhere along it.
+room("plat_n", "North platform", -52, 50, -9, -5.5, P, h=TUNNEL_H, vault=True)
 room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H, vault=True)
 # The track pits, 0.9 m under the platforms: no steps up (owner, 2026-11-10, CL1: "remove the trackside stairs"), a
 # body climbs out over a platform's edge (VaultConfig climb_depth) and drops back down; bots take the same links.
@@ -353,16 +365,30 @@ block("barrier", T, -52, -51.5, TRACK_Z - 1.15, TRACK_Z + 1.15, 1.2, dress="buff
 # shape of the trains"): straight sides to RUN_SPRING over the track bed, 1.8 m over a car's floor where its sides
 # lean in, then an arch to the old roof, 0.5 m over a car's crown and about 0.15 m clear of its shoulders (SM1's car:
 # 1.55 m from its middle at 1.95 m over its floor, 1.3 m at 2.4 m). Its west end opens onto its platform tunnel.
-RUN_VAULTS = [dict(name="north_run", x0=50, x1=82, z0=-12.6, z1=-9, y=T + RUN_SPRING, low=P + TRAIN_IN,
-                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west"),
-              dict(name="south_run", x0=50, x1=82, z0=9, z1=12.6, y=T + RUN_SPRING, low=P + TRAIN_IN,
-                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west")]
+# Past their east ends both run on round a curve out of sight, away from each other (the owner, 2026-11-17: "create a
+# tunnel that curves into the distance and continues the train tunnels instead of having just a wall"), look only: a
+# steel grille shuts each where its wall stood (StationDressing.TunnelBend, fixtures.bend_ends).
+BEND = dict(radius=40.0, angle=60.0)
+# Each running tunnel's sides (z, the south one's; the north one's mirrored): 3.9 m across, centred on its track, so a
+# car (1.72 m a side) has about 0.23 m clear each side through the mouth and along it (the owner, 2026-11-17: "the
+# tunnel mouth needs to have slightly more gap on the sides between it and the train"; it was 3.6 m, 5 cm on the
+# platform side).
+RUN_Z0, RUN_Z1 = TRACK_Z - 1.95, TRACK_Z + 1.95
+RUN_VAULTS = [dict(name="north_run", x0=50, x1=82, z0=-RUN_Z1, z1=-RUN_Z0, y=T + RUN_SPRING, low=P + TRAIN_IN,
+                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west",
+                   bend=dict(BEND, turn=-1)),
+              dict(name="south_run", x0=50, x1=82, z0=RUN_Z0, z1=RUN_Z1, y=T + RUN_SPRING, low=P + TRAIN_IN,
+                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west",
+                   bend=dict(BEND, turn=1))]
 VAULTS += RUN_VAULTS
-room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=RUN_SPRING, vault=True)
+room("run_n", "North tunnel", 50, 82, -RUN_Z1, -RUN_Z0, T, h=RUN_SPRING, vault=True)
 # The south train's open cab door stands 0.9 m over the track: no steps, a body climbs up into it from the track
 # (VaultConfig climb_depth: the car's floor runs on behind the doorway) and drops back down (owner, 2026-11-12).
-room("run_s", "South tunnel", 60, 82, 9, 12.6, T, h=RUN_SPRING, vault=True)
-room("xpass", "Cross passage", 74, 77, -9, 9, T, h=2.6)
+room("run_s", "South tunnel", 60, 82, RUN_Z0, RUN_Z1, T, h=RUN_SPRING, vault=True)
+# Where the south train stands half in its tunnel, the tunnel's sides clear of the car's: a slot each side of it.
+room("run_s_in", "South tunnel", 50, 60, RUN_Z0, 9, T, h=RUN_SPRING, vault=True)
+room("run_s_out", "South tunnel", 50, 60, 12.5, RUN_Z1, T, h=RUN_SPRING, vault=True)
+room("xpass", "Cross passage", 74, 77, -RUN_Z0, RUN_Z0, T, h=2.6)
 block("cabinet", T, 60.5, 61.8, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley_short",
       squeeze=True)  # trolley
 block("crate", T, 69.5, 70.9, -TRACK_Z - 0.7, -TRACK_Z + 0.7, 1.4, dress="cable_drum_small")  # between the rails
@@ -412,6 +438,8 @@ OT_FLAG = (12.0, 2.4, P)                              # the lower hall's west en
 # Bots' lanes, Street end to Tunnel end: (x, z, y) points on the floor. Each ends by the flags, not in the tunnel: a
 # defender (Attack / Defend, the Tunnel team) holds its lane's last point or the one before (RoundPlanner), so the last
 # two are its posts. The Tunnel team walks out of the tunnel to its lanes' ends.
+# A point on a flight's ramp stands on a cell's centre of the bots' grid (x on an odd tenth: the grid's 0.2 m cells sit
+# on whole cells), or the field's on-floor check reads the ramp's height a tenth of a metre along.
 # MB1: n takes the lifts to the lift landing and the north platform's whole length past the north train to flag B
 # (posts: the lower hall's north doors and B's east side); m the lower escalators, the lower hall and the south
 # platform to train A's doors (its posts); s the south passage and the stair (posts: the half landing and the stair's
@@ -424,12 +452,12 @@ LANES = {
     "n": [(-50, -3, C), (-44.85, -2.6, C), (-44.85, -2.8, P), (-44, -5.25, P), (-44, -7.3, P), (-20.5, -7.0, P),
           (-7, -6.3, P), (7.5, -7.0, P), (16.4, -7.3, P), (26, -6.8, P), (37, -8.3, P)],
     "m": [(-50, 0, C), (-44, 2.5, C), (-38.7, 1.49, C), (-24, 1.2, C), (-19, 1.2, C), (-10, 0, C), (-5, 1.2, C),
-          (2, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P), (46.5, 7.0, P)],
+          (1.9, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P), (46.5, 7.0, P)],
     "s": [(-50, 3, C), (-44, 4.5, C), (-38.7, 4.47, C), (-30, 7.5, C), (-10, 6, C), (-5, 8, C), (4, 7.2, C),
-          (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (31, -0.5, -12.0), (36.2, -1.0, LANDING),
+          (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (30.9, -0.5, -12.0), (36.2, -1.0, LANDING),
           (41.5, 0, -16.0)],
     "np": [(-50, -4.5, C), (-38.7, -4.47, C), (-24, -6.0, C), (-14, -8.0, C), (-4, -7.2, C), (4.5, -7.2, C),
-           (10, -8.5, C), (16, -8.0, C), (23.5, -6.5, C), (26, 0.5, C), (31, -0.5, -12.0), (36.2, -1.0, LANDING),
+           (10, -8.5, C), (16, -8.0, C), (23.5, -6.5, C), (26, 0.5, C), (30.9, -0.5, -12.0), (36.2, -1.0, LANDING),
            (41.5, 0, -16.0), (46.5, -4.0, P)],
     "sp": [(-50, 1.5, C), (-38.7, 2.98, C), (-28.7, 6.6, C), (-28.7, 6.6, P), (-21, 7.2, P), (-20.5, 0, P),
            (-20.5, -6.8, P), (-8, -6.5, P), (7.5, -6.8, P), (16.4, -3.0, P), (20, -1.0, P), (26, -6.8, P),

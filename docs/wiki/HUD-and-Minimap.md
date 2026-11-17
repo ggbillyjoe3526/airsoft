@@ -7,13 +7,14 @@ where your team is. It always reflects the real state of the match. Much of it c
 ## The top bar
 
 One rounded bar: each team's score in its colour with pips filling toward the win, the round clock, the round number
-and the target ("FIRST TO 5").
+and the target ("FIRST TO 5"). Once a round is over the clock reads 0:00 until the next one starts.
 Your team is always on the left in its own colour (Alpha blue, Beta orange), even after the ends swap at half time.
 In Attack / Defend it adds **ATK** and **DEF** tags and the **FLAG** gauge, and "OT" on the clock in overtime. In
 Plant The Bomb it has the same tags; once the bomb is armed the clock turns to the interface colour and counts the fuse,
 and a gauge under it reads **BOMB ARMED**, whichever team armed it, and fills as someone defuses it (**DEFUSING**).
-While you key the bomb in, the gauge reads **PLANTING**. A prompt under the crosshair says when holding Use picks the bomb up, plants it or defuses it, and a
-marker points to the site your team is making for, or to the bomb once it is down or armed. Big
+While you key the bomb in, the gauge reads **PLANTING**. A prompt under the crosshair says when holding Use picks the bomb up, plants it or defuses it;
+**YOU HAVE THE BOMB** shows under it for <!-- wiki:config hud_config.bomb_carry_notice_time --> s as you pick the bomb
+up, then goes. A marker points to the site your team is making for, or to the bomb once it is down or armed. Big
 slanted banners call the round start, half time with the ends swapped, and who took the round or the match.
 
 ## The replica panel

@@ -2,15 +2,16 @@ class_name Lifts
 extends RefCounted
 ## Lifts (MT2): a car in a shaft, stopping at each of its stops. A Use press at a landing's door calls the car there;
 ## inside the car, a press takes the panel's button nearest the view's line (LiftSpec.panel_button), each a stop. The
-## car stands at a stop with its doors open; called elsewhere it waits LiftConfig.dwell after opening, shuts its doors
-## (door_time), rides to the nearest called stop ahead of the way it last went (floor_time a stop), stopping on the way
-## at any stop called meanwhile, and opens them. Its doors never shut on a body in the doorway, nor with anyone hit
-## aboard (they walk off), nor with more than `capacity` aboard (it buzzes). Its riders rise and fall with its floor
-## (carry). A doorway is a solid steel leaf to bombs, sight and bodies but while the car stands open at it, and to BBs
-## where its two leaves stand at that tick while they shut or open (WorldQuery.set_lift_ajar, bb_ray). Each
-## press, chime, door and ride is a LIFT event, heard out to LiftConfig.heard through walls. Each match and each round
-## starts with every car at its start stop, open, nothing called. Pure rules on GameState.lifts; the level is told each
-## move through WorldQuery.set_lift_car and set_lift_door. Allocates nothing a tick.
+## car stands at a stop with its doors open; called elsewhere it waits LiftConfig.dwell after opening (panel_dwell
+## once its own panel is pressed), shuts its doors (door_time), rides to the nearest called stop ahead of the way it
+## last went (floor_time a stop), stopping on the way at any stop called meanwhile, and opens them. Its doors never
+## shut on a body in the doorway, nor with anyone hit aboard (they walk off), nor with more than `capacity` aboard (it
+## buzzes). Its riders rise and fall with its floor (carry). A doorway is a solid steel leaf to bombs, sight and bodies
+## but while the car stands open at it, and to BBs where its two leaves stand at that tick while they shut or open
+## (WorldQuery.set_lift_ajar, bb_ray). Each press, chime, door and ride is a LIFT event, heard out to LiftConfig.heard
+## through walls. Each match and each round starts with every car at its start stop, open, nothing called. Pure rules
+## on GameState.lifts; the level is told each move through WorldQuery.set_lift_car and set_lift_door. Allocates nothing
+## a tick.
 
 ## What a LIFT event says (its value).
 enum Cue { BUTTON, OPENING, SHUTTING, DEPART, ARRIVE, BUZZ }
@@ -259,6 +260,9 @@ func _press_button(i: int, k: int, c: Character, state: GameState) -> void:
 	var here := lifts.stop[i] == k and lifts.phase[i] != LiftState.Phase.MOVING
 	if not here:
 		lifts.calls[i] |= 1 << k
+		# From inside, standing open: the doors shut now (LiftConfig.panel_dwell), not after the wait for walkers-out.
+		if inside and lifts.phase[i] == LiftState.Phase.OPEN:
+			lifts.left[i] = minf(lifts.left[i], _cfg.panel_dwell)
 		return
 	match lifts.phase[i]:
 		LiftState.Phase.OPEN:

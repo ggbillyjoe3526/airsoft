@@ -966,6 +966,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   block's box and its crown starts over `WoodsConfig.crown_clear` (2.6 m); a thicket's spruces stay inside its box.
   Asked whether young pines and spruces should match his photos instead (branches to the ground, spruces spilling past
   the thicket's edge), he kept the boxes: what you see is what stops BBs and sight.
+- **A bush counts only the leaves its plant fills (LF1, from the owner's playtest 2026-11-17: hits on a bot in
+  Woodland's ferns didn't land, Spotted missed it).** Since WG2 drew the ferns and shrubs as airy models, the
+  simulation still counted each as a solid ellipsoid of its whole reach, so about half the BBs and looks it stopped met
+  no drawn leaf. Now the leaves counted for BBs, sight, Spotted and bots' routes are an ellipsoid of shares of the
+  drawn size on its foot (`BallisticsConfig.leaf_fern_shares` 0.6 across and 0.8 up, `leaf_bush_shares` 0.8 and 0.8,
+  `Foliage.count_leaves`), measured against the models with `tools/bush_opacity.gd`; walking through and drawing keep
+  the whole size. A new fern or bush model re-measures its shares. A thicket draws no core box at its spruces' feet
+  (`PropDressConfig.model_cores` empty): the owner asked why the trees had boxes, and the spruces close it alone.
 - **Plant The Bomb is the third mode (owner, 2026-11-12, PB1).** His rules: the attackers plant a bomb at Site A or
   Site B on the defenders' side; the defenders keep it from being planted or make it safe. The attackers win when it
   goes off or the defenders are all out; the defenders win by making it safe or by getting every attacker out before
@@ -1455,6 +1463,16 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The tutorial teaches leaning, and its read cards last 10 s (owner, 2026-10-17, Beta 1 playtest item 33; TT2; the
   tutorial dropped, owner 2026-10-25).** The lean step comes after Crouch: hold Q and E to peek either way, ticked
   once both sides are done. It teaches peeking, not resting on cover.
+- **Beta 2 playtest, menus and HUD (owner, 2026-11-17, Beta 1 playtest items 1 to 33; UB2).** Gauge patterns start
+  off and HUD opacity at 60 % (a save still on the old defaults moves to the new ones, settings version 6). The
+  frame-rate limit is a slider from 30 to 360 with Off beside it (Off stays the default). A Tooltips switch sits under
+  the interface colour, on by default. The loadouts' Rename, Duplicate, Replace and Remove sit in a right-click menu,
+  not on the strip. Customise's 3/4 view has no ring under the replica. The team cards show their team colour only as
+  the picked card's edge, with no bar down the left. The vault and climb prompt is the Jump key alone in capitals
+  ("SPACE"). An order that ends by itself shows no notice ("Back to the team plan" is gone). YOU HAVE THE BOMB shows
+  only briefly on the pick-up. Defaults taken: the Graphics tab fits one page with no scrolling (option A; his
+  pictures of a single scrolling column are in the project's `playtest/ui-b2/`), and a round no longer live reads
+  0:00 on the clock.
 - **A UI redesign, a Visual redesign, an Audio redesign and a Performance update are planned for later, their versions
   not set (owner, 2026-10-13 and 2026-10-16).** Parked in `docs/IDEAS.md` until he places them, with no work before.
 

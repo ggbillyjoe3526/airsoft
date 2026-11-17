@@ -99,11 +99,15 @@ static func mesh(m: MapData, style: MapStyle, look: StationLook, props: PropDres
 			add_face(st, look, l.face(), l.finish, look.tint_of(l.finish, null), l.floor_y)
 	for v in dress.vaults:
 		add_vault(st, look, v)
+		if v.bend != null:
+			add_bend(st, look, v)
 		if v.open_west:
 			# The wider tunnel's end round the arch, in that tunnel's walls.
 			var c := v.circle()
 			var wider := dress.style_at(Vector3(v.area.position.x - 0.5, v.y + v.rise * 0.5, c.x))
-			_add_mouth(st, look, v, look.style_walls.get(wider, look.outside))
+			_add_mouth(st, look, v, look.style_walls.get(wider, look.mouth_walls))
+			_add_mouth_ring(st, look, dress, v)
+		_add_backing(st, look, dress, v)
 	st.generate_tangents()
 	return st.commit()
 
@@ -394,7 +398,10 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 			st.set_uv(uvs[i] / size)
 			st.add_vertex(quad[i])
 	_add_ribs(st, look, v)
-	var ends: Array[float] = [x1 - look.vault_proud]
+	# A bent tunnel's east end goes on round its bend (add_bend): no end drawn there.
+	var ends: Array[float] = []
+	if v.bend == null:
+		ends.append(x1 - look.vault_proud)
 	if not v.open_west:
 		ends.append(x0 + look.vault_proud)
 	for end: float in ends:
@@ -406,6 +413,112 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 		if (GreyboxFaces.face_normal(cap).x > 0.0) != (end < v.area.get_center().x):
 			cap.reverse()
 		add_face(st, look, cap, finish, tint, NO_FLOOR)
+
+
+## Bent vault `v`'s way on past its east end (StationDressing.TunnelBend): its walls and arch (the vault's finish) and
+## its floor (a tunnel's) swept round the bend from the vault's end in pieces about `bend_step` m long, the arch's
+## normals smooth as the vault's, its track's rails along it in short straight lengths, and its far end shut, out of
+## sight round the curve. The texture runs on from the straight tunnel's.
+static func add_bend(st: SurfaceTool, look: StationLook, v: StationDressing.TunnelVault) -> void:
+	var b := v.bend
+	var steps := maxi(look.vault_steps, 2)
+	var half := v.half_angle()
+	var hw := v.area.size.y * 0.5
+	var finish := v.finish if v.finish != &"" else look.vault_finish
+	var floor_finish: StringName = look.style_floors.get(&"tunnel", look.outside)
+	var size := look.scale_of(finish)
+	var pieces := maxi(1, ceili(b.radius * b.angle / maxf(look.bend_step, 0.1)))
+	# The profile from the left wall's foot round to the right's (across, up), with each point's normal: the walls
+	# flat, the arch smooth (each run drawn on its own, so the springing keeps both normals).
+	var runs: Array[PackedVector2Array] = [PackedVector2Array([Vector2(-hw, b.floor_y), Vector2(-hw, v.y)]),
+			PackedVector2Array(), PackedVector2Array([Vector2(hw, v.y), Vector2(hw, b.floor_y)])]
+	var run_normals: Array[PackedVector2Array] = [PackedVector2Array([Vector2.RIGHT, Vector2.RIGHT]),
+			PackedVector2Array(), PackedVector2Array([Vector2.LEFT, Vector2.LEFT])]
+	var mid := v.area.get_center().y
+	for k in steps + 1:
+		var a := -half + 2.0 * half * float(k) / float(steps)
+		var p := v.point(a)
+		runs[1].append(Vector2(p.x - mid, p.y))
+		run_normals[1].append(Vector2(-sin(a), -cos(a)))
+	var colour := look.tint_of(finish, null).srgb_to_linear()
+	var pbr := look.pbr_of(finish)
+	for r in runs.size():
+		var arch := r == 1
+		var c := colour
+		c.a = (0.0 if look.arch_fill_finishes.has(finish) else 1.0) if arch else 1.0
+		st.set_color(c)
+		st.set_custom(0, Color(float(look.layer_of(finish)), pbr.y, pbr.x, NO_FLOOR if arch else b.floor_y))
+		for i in pieces:
+			var t0 := b.angle * float(i) / float(pieces)
+			var t1 := b.angle * float(i + 1) / float(pieces)
+			for k in runs[r].size() - 1:
+				var q: Array[Vector3] = [_bent(v, t0, runs[r][k]), _bent(v, t0, runs[r][k + 1]),
+						_bent(v, t1, runs[r][k + 1]), _bent(v, t1, runs[r][k])]
+				var n: Array[Vector3] = [_bent_dir(v, t0, run_normals[r][k]), _bent_dir(v, t0, run_normals[r][k + 1]),
+						_bent_dir(v, t1, run_normals[r][k + 1]), _bent_dir(v, t1, run_normals[r][k])]
+				var s0 := v.area.end.x + b.radius * t0
+				var s1 := v.area.end.x + b.radius * t1
+				var uv: Array[Vector2]
+				if arch:
+					var c3 := v.circle()
+					var ra := c3.z * (-half + 2.0 * half * float(k) / float(steps))
+					var rb := c3.z * (-half + 2.0 * half * float(k + 1) / float(steps))
+					uv = [Vector2(s0, ra), Vector2(s0, rb), Vector2(s1, rb), Vector2(s1, ra)]
+				else:
+					# as the straight walls read (plane_uv): along x facing +z, against it facing -z; up the texture's up
+					var w := 1.0 if r == 0 else -1.0
+					uv = [Vector2(w * s0, -runs[r][k].y), Vector2(w * s0, -runs[r][k + 1].y),
+							Vector2(w * s1, -runs[r][k + 1].y), Vector2(w * s1, -runs[r][k].y)]
+				_add_smooth(st, q, n, uv, size)
+	# The floor, its texture laid in the world's x and z as every floor's.
+	for i in pieces:
+		var t0 := b.angle * float(i) / float(pieces)
+		var t1 := b.angle * float(i + 1) / float(pieces)
+		var f := PackedVector3Array([_bent(v, t0, Vector2(-hw, b.floor_y)), _bent(v, t1, Vector2(-hw, b.floor_y)),
+				_bent(v, t1, Vector2(hw, b.floor_y)), _bent(v, t0, Vector2(hw, b.floor_y))])
+		if GreyboxFaces.face_normal(f).y < 0.0:
+			f.reverse()
+		add_face(st, look, f, floor_finish, look.tint_of(floor_finish, null), b.floor_y)
+		var track := StationDressing.Track.new()
+		var from := _bent(v, t0, Vector2(b.track, b.floor_y))
+		var to := _bent(v, t1, Vector2(b.track, b.floor_y))
+		track.from = Vector2(from.x, from.z)
+		track.to = Vector2(to.x, to.z)
+		track.y = b.floor_y
+		_add_track(st, look, track)
+	# Its far end, round the curve: the profile shut, facing back down the tunnel.
+	var cap := PackedVector3Array()
+	for r in runs.size():
+		for k in runs[r].size():
+			if r > 0 and k == 0:
+				continue
+			cap.append(_bent(v, b.angle, runs[r][k]))
+	var back := -Vector3(cos(b.angle), 0.0, b.turn * sin(b.angle))
+	if GreyboxFaces.face_normal(cap).dot(back) < 0.0:
+		cap.reverse()
+	add_face(st, look, cap, finish, look.tint_of(finish, null), b.floor_y)
+
+
+## The point `at` (across the tunnel from its middle, up) of bent vault `v`'s profile `t` radians round its bend.
+static func _bent(v: StationDressing.TunnelVault, t: float, at: Vector2) -> Vector3:
+	var b := v.bend
+	var across := _bent_dir(v, t, Vector2(1.0, 0.0))
+	return Vector3(v.area.end.x + b.radius * sin(t), at.y, v.area.get_center().y + b.turn * b.radius * (1.0 - cos(t))) \
+			+ across * at.x
+
+
+## The direction `d` (across, up) of bent vault `v`'s profile `t` radians round its bend, in the world.
+static func _bent_dir(v: StationDressing.TunnelVault, t: float, d: Vector2) -> Vector3:
+	return Vector3(-v.bend.turn * sin(t) * d.x, d.y, cos(t) * d.x)
+
+
+## Appends quad `q` with its corners' normals `n` and texture places `uv` (m, over `size`), facing its normals.
+static func _add_smooth(st: SurfaceTool, q: Array[Vector3], n: Array[Vector3], uv: Array[Vector2], size: float) -> void:
+	var facing := GreyboxFaces.face_normal(PackedVector3Array(q)).dot(n[0] + n[2]) > 0.0
+	for i: int in [0, 2, 1, 0, 3, 2] if facing else [0, 1, 2, 0, 2, 3]:
+		st.set_normal(n[i])
+		st.set_uv(uv[i] / size)
+		st.add_vertex(q[i])
 
 
 ## Open vault `v`'s mouth: the wider tunnel's end round its arch, the two corners between the arc and its crown's
@@ -427,6 +540,110 @@ static func _add_mouth(st: SurfaceTool, look: StationLook, v: StationDressing.Tu
 		if GreyboxFaces.face_normal(corner + arc).x > 0.0:
 			arc.reverse()
 		add_face(st, look, corner + arc, finish, tint, NO_FLOOR)
+
+
+## Open vault `v`'s mouth ring (StationLook.mouth_ring_width): a band round its arch on the wider tunnel's end, and
+## down each side to the floor in front where that tunnel's air reaches (a platform's end; not behind a trackside
+## wall), standing `mouth_ring_proud` m off the wall with its edges drawn back to it.
+static func _add_mouth_ring(st: SurfaceTool, look: StationLook, dress: StationDressing,
+		v: StationDressing.TunnelVault) -> void:
+	var w := look.mouth_ring_width
+	var proud := look.mouth_ring_proud
+	if w <= 0.0 or proud <= 0.0:
+		return
+	var finish := look.mouth_ring_finish
+	var tint := look.tint_of(finish, null)
+	var back := v.area.position.x
+	var x := back - look.vault_proud - proud
+	var c := v.circle()
+	var steps := maxi(look.vault_steps, 2)
+	var half := v.half_angle()
+	var z0 := v.area.position.y
+	var z1 := v.area.end.y
+	# The band's inner and outer edges (z, y), from the -z foot of the arch over to the +z one; its ends at the
+	# springings square, on the sides' bands.
+	var inner: Array[Vector2] = []
+	var outer: Array[Vector2] = []
+	for k in steps + 1:
+		var a := -half + 2.0 * half * float(k) / float(steps)
+		inner.append(v.point(a))
+		outer.append(Vector2(c.x + (c.z + w) * sin(a), c.y + (c.z + w) * cos(a)))
+	outer[0] = Vector2(z0 - w, v.y)
+	outer[steps] = Vector2(z1 + w, v.y)
+	var floor_y := NO_FLOOR
+	for side: float in [-1.0, 1.0]:
+		var edge := z0 if side < 0.0 else z1
+		var zone := dress.zone_at(Vector3(back - 0.5, v.y - 0.5, edge + side * w * 0.5))
+		if zone == null:
+			continue
+		floor_y = zone.box.position.y
+		var foot := floor_y
+		var lo := Vector2(minf(edge, edge + side * w), foot)
+		var hi := Vector2(maxf(edge, edge + side * w), v.y)
+		_ring_quad(st, look, [Vector3(x, lo.y, lo.x), Vector3(x, lo.y, hi.x), Vector3(x, hi.y, hi.x),
+				Vector3(x, hi.y, lo.x)], Vector3(-1.0, 0.0, 0.0), finish, tint, floor_y)
+		for e: float in [edge, edge + side * w]:
+			# its edges back to the wall: the inner one facing into the opening, the outer one away from it
+			var out := -side if is_equal_approx(e, edge) else side
+			_ring_quad(st, look, [Vector3(x, foot, e), Vector3(back, foot, e), Vector3(back, v.y, e),
+					Vector3(x, v.y, e)], Vector3(0.0, 0.0, out), finish, tint, floor_y)
+	for k in steps:
+		var ia := inner[k]
+		var ib := inner[k + 1]
+		var oa := outer[k]
+		var ob := outer[k + 1]
+		_ring_quad(st, look, [Vector3(x, ia.y, ia.x), Vector3(x, ib.y, ib.x), Vector3(x, ob.y, ob.x),
+				Vector3(x, oa.y, oa.x)], Vector3(-1.0, 0.0, 0.0), finish, tint, floor_y)
+		# the arch's inner edge back to the wall, facing in under the arch, and its outer edge, facing out
+		var down := Vector3(0.0, c.y - (ia.y + ib.y) * 0.5, c.x - (ia.x + ib.x) * 0.5)
+		_ring_quad(st, look, [Vector3(x, ia.y, ia.x), Vector3(back, ia.y, ia.x), Vector3(back, ib.y, ib.x),
+				Vector3(x, ib.y, ib.x)], down, finish, tint, floor_y)
+		_ring_quad(st, look, [Vector3(x, oa.y, oa.x), Vector3(back, oa.y, oa.x), Vector3(back, ob.y, ob.x),
+				Vector3(x, ob.y, ob.x)], -down, finish, tint, floor_y)
+
+
+## A mouth ring's quad, turned to face along `facing`.
+static func _ring_quad(st: SurfaceTool, look: StationLook, q: Array, facing: Vector3, finish: StringName,
+		tint: Color, floor_y: float) -> void:
+	var quad := PackedVector3Array(q)
+	if GreyboxFaces.face_normal(quad).dot(facing) < 0.0:
+		quad.reverse()
+	add_face(st, look, quad, finish, tint, floor_y)
+
+
+## Vault `v`'s backing (StationLook.vault_backing): in the shell's plane at each end it is drawn `vault_proud` m in
+## front of, a strip in that wall's finish over the edge where the wall below stops (an end's springing; a mouth's two
+## sides), facing into the station, so a look past the proud face's edge meets the wall's tiles, not the background.
+static func _add_backing(st: SurfaceTool, look: StationLook, dress: StationDressing, v: StationDressing.TunnelVault) \
+		-> void:
+	var w := look.vault_backing
+	if w <= 0.0:
+		return
+	var z0 := v.area.position.y
+	var z1 := v.area.end.y
+	# Each: the plane (x), the way it faces (towards whoever looks at it), the height its wall's finish is read at,
+	# its strips (z0, z1, y0, y1). A mouth is seen from the wider tunnel west of it; an end from inside its tunnel.
+	var spans: Array[Array] = []
+	if v.open_west:
+		spans.append([v.area.position.x, -1.0, v.y + v.rise * 0.5,
+				[Vector4(z0, z0 + w, v.y, v.y + v.rise), Vector4(z1 - w, z1, v.y, v.y + v.rise)]])
+	else:
+		spans.append([v.area.position.x, 1.0, v.y - 0.5, [Vector4(z0, z1, v.y, v.y + w)]])
+	if v.bend == null:
+		spans.append([v.area.end.x, -1.0, v.y - 0.5, [Vector4(z0, z1, v.y, v.y + w)]])
+	for span: Array in spans:
+		var x: float = span[0]
+		var facing: float = span[1]
+		var zone := dress.zone_at(Vector3(x + facing * 0.5, span[2], v.area.get_center().y))
+		var finish: StringName = look.style_walls.get(zone.style if zone != null else &"", look.mouth_walls)
+		var floor_y := zone.box.position.y if zone != null else NO_FLOOR
+		var tint := look.tint_of(finish, null)
+		for r: Vector4 in span[3]:
+			var quad := PackedVector3Array([Vector3(x, r.z, r.x), Vector3(x, r.z, r.y), Vector3(x, r.w, r.y),
+					Vector3(x, r.w, r.x)])
+			if GreyboxFaces.face_normal(quad).x * facing < 0.0:
+				quad.reverse()
+			add_face(st, look, quad, finish, tint, floor_y)
 
 
 ## Vault `v`'s ribs: a band `vault_rib_width` m wide round the arc every `vault_rib_every` m along it, standing

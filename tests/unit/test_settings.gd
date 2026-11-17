@@ -382,7 +382,7 @@ func test_a_file_from_before_the_graphics_fields_loads_unchanged() -> void:
 		"show_fps": true, "volumes": {"Master": 0.7},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 5, "5 since FV1 moved the field of view's and volumes' defaults; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 6, "6 since the gauge patterns and the HUD opacity moved; adding fields does not bump it")
 	assert_eq(t.load_message, "", "an older file is not a damaged one")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_eq(t.window_mode, Settings.WindowMode.BORDERLESS)
@@ -423,14 +423,18 @@ func test_each_bad_graphics_or_window_value_keeps_its_own_default() -> void:
 	assert_eq(t.graphics_custom, {} as Dictionary[String, Variant])
 
 
-func test_a_frame_limit_reads_as_the_nearest_the_higher_on_a_tie() -> void:
-	var cases: Array[Vector2] = [Vector2(0, 0), Vector2(30, 30), Vector2(10, 30), Vector2(45, 60), Vector2(50, 60),
-			Vector2(90, 120), Vector2(100, 120), Vector2(152, 144), Vector2(154.5, 165), Vector2(200, 165), Vector2(202.5, 240),
-			Vector2(300, 360), Vector2(1000, 360), Vector2(-1, 0)]
+func test_a_frame_limit_reads_as_a_whole_number_from_30_to_360() -> void:
+	var cases: Array[Vector2] = [Vector2(0, 0), Vector2(30, 30), Vector2(10, 30), Vector2(45, 45), Vector2(50, 50),
+			Vector2(90, 90), Vector2(152.4, 152), Vector2(154.5, 155), Vector2(300, 300), Vector2(1000, 360), Vector2(-1, 0)]
 	for c in cases:
 		assert_eq(Settings.nearest_frame_limit(c.x), int(c.y), "%s, given %s" % [c.y, c.x])
 	SaveFile.write(path, Settings.KIND, Settings.VERSION, {"frame_limit": 75})
-	assert_eq(_again().frame_limit, 60, "a saved 75 (katanashotgun's) reads as 60")
+	assert_eq(_again().frame_limit, 75, "a saved 75 reads as 75: the slider has every number (owner, 2026-11-17)")
+	assert_eq(_again().frame_limit_pick, 75, "and the slider shows it")
+	SaveFile.write(path, Settings.KIND, Settings.VERSION, {"frame_limit": 0})
+	assert_eq(_again().frame_limit_pick, Settings.FRAME_LIMIT_PICK_DEFAULT, "Off: the slider waits on 240")
+	SaveFile.write(path, Settings.KIND, Settings.VERSION, {"frame_limit": 0, "frame_limit_pick": 500})
+	assert_eq(_again().frame_limit_pick, Settings.FRAME_LIMIT_PICK_DEFAULT, "a slider number past the end keeps the default")
 
 
 func test_a_changed_row_makes_custom_from_the_preset_you_were_on() -> void:
@@ -496,7 +500,7 @@ func test_picking_a_preset_drops_customs_rows() -> void:
 
 func test_the_accessibility_fields_start_at_their_defaults() -> void:
 	assert_eq(s.team_colours, TeamColours.Set.STANDARD)
-	assert_true(s.gauge_patterns, "patterns on")
+	assert_false(s.gauge_patterns, "patterns off (owner, 2026-11-17)")
 	assert_false(s.sound_cues, "cues off: playing by ear stays the norm")
 	assert_eq(s.sound_cue_size, 1.0)
 	assert_eq(HudPrefs.COLOURS[s.sound_cue_colour], Color("ff3b30"), "red")
@@ -554,7 +558,7 @@ func test_a_file_from_before_the_accessibility_fields_loads_unchanged() -> void:
 		"sensitivity": 1.5, "fov": 95.0, "realistic_colours": true, "hud": {"colour": 2},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 5, "5 since FV1 moved the field of view's and volumes' defaults; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 6, "6 since the gauge patterns and the HUD opacity moved; adding fields does not bump it")
 	assert_eq(t.load_message, "")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_almost_eq(t.fov, 95.0, 1e-6)
@@ -574,7 +578,7 @@ func test_each_bad_accessibility_value_keeps_its_own_default() -> void:
 	var t := _again()
 	assert_eq(t.load_message, "", "a good file with bad values is not a damaged file")
 	assert_eq(t.team_colours, TeamColours.Set.STANDARD, "no third set")
-	assert_true(t.gauge_patterns, "not a bool")
+	assert_false(t.gauge_patterns, "not a bool: the default, off")
 	assert_true(t.sound_cues, "a good value beside them is kept")
 	assert_eq(t.sound_cue_size, 1.0, "over the slider's range")
 	assert_eq(t.sound_cue_colour, AccessibilityConfig.CUE_COLOUR_DEFAULT, "no seventh colour")

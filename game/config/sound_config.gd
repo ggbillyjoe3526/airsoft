@@ -77,6 +77,11 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## heard out to the event's reach (LiftConfig.heard); a button's beep from the button, quieter.
 @export var lift_gain: float = 0.7
 @export var lift_button_gain: float = 0.4
+## The car setting off (DEPART): its motor at this level, from this far over the car's floor, carried with the car as it
+## rides so a rider hears it all the way (the owner, 2026-11-17: "make the elevator sound of it moving louder. I can't
+## hear it"; it was played at lift_gain from the floor it left, and a rider rode away from it, under the car's roof).
+@export var lift_motor_gain: float = 1.4
+@export var lift_motor_rise: float = 1.2
 ## Plant The Bomb's prop (BOMB, PB1), from where it is, yours too, muffled by the walls between: taken up and put down
 ## (plant_handle_gain, heard out to prop_reach), the code keyed in and the defusal kit at work (plant_work_gain, out to
 ## plant_work_reach m: BotConfig.plant_heard, the furthest a defender bot hears the keys), the armed tone, the fuse's

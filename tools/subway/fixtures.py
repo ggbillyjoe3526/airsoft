@@ -18,6 +18,7 @@ import math
 # on the floor (its foot y 0).
 MODELS = {
     "tunnel_lamp": ((-0.083, 0.083, -0.163, 0.163, 0.0, 0.102), "wall"),
+    "tunnel_grille": ((-1.790, 1.790, 0.0, 4.090, 0.0, 0.120), "wall"),
     "cctv_camera": ((-0.057, 0.057, -0.144, 0.078, 0.0, 0.307), "wall"),
     "way_sign": ((-0.640, 0.640, -0.599, 0.0, -0.035, 0.035), "hung"),
     "fire_extinguisher": ((-0.163, 0.084, 0.0, 0.655, 0.0, 0.220), "wall"),
@@ -161,7 +162,7 @@ WALL = [
     ("poster_m", "midp", "e", -3.0, POSTER_Y), ("poster_a", "midp", "e", 3.0, POSTER_Y),
     ("poster_b", "ecross", "w", -3.6, POSTER_Y), ("poster_c", "ecross", "w", 3.6, POSTER_Y),
     ("poster_d", "ecross", "e", -3.0, POSTER_Y), ("poster_e", "ecross", "e", 3.0, POSTER_Y),
-    ("poster_f", "liftp", "s", -41.5, POSTER_Y),
+    ("poster_f", "liftp", "s", -39.0, POSTER_Y),  # east of the east lift's door and button (it was over the door)
     # The running tunnels' bulkhead lamps, staggered wall to wall, clear of the cross passage.
     ("tunnel_lamp", "run_n", "n", 54.0, LAMP_Y), ("tunnel_lamp", "run_n", "n", 62.0, LAMP_Y),
     ("tunnel_lamp", "run_n", "n", 70.0, LAMP_Y), ("tunnel_lamp", "run_n", "n", 78.0, LAMP_Y),
@@ -400,4 +401,33 @@ def place(L, floor_at, ceil_at, air_boxes, lift: float, holes: list) -> list[dic
             if clear("edge_sign", world_box("edge_sign", x, y + STRIP_LIFT, z, yaw), "on %s's edge at %.1f" % (name,
                                                                                                          x)):
                 add("edge_sign", x, y + STRIP_LIFT, z, yaw)
+    return out
+
+
+# The running tunnels' ends (SW2): each tunnel runs on round its bend (layout.BEND, drawn by StationSurface.add_bend),
+# shut by a steel grille where its end wall stood, and lamps on the bend's outer wall light the curve away out of
+# sight. Neither stands in a room's air (the bend has none, and the grille fills the arch over a room's height), so
+# they skip place()'s checks: the spots follow from the vault alone.
+BEND_LAMPS = (8.0, 18.0)   # each bend's lamps, metres round it from the grille
+
+
+def bend_ends(vaults: list[dict], floor: float, lift: float) -> list[dict]:
+    """The grille at each bent vault's end and its bend's lamps; `floor` is the tunnels' floor (layout y)."""
+    out: list[dict] = []
+    for v in vaults:
+        if "bend" not in v:
+            continue
+        mid, half = (v["z0"] + v["z1"]) * 0.5, (v["z1"] - v["z0"]) * 0.5
+        radius, turn = v["bend"]["radius"], v["bend"]["turn"]
+        out.append({"model": "tunnel_grille", "x": round(v["x1"], 3), "y": round(floor + lift, 3), "z": round(mid, 3),
+                    "yaw": WALL_YAW["e"]})
+        side = -turn  # the outer wall: away from the bend's middle
+        for s in BEND_LAMPS:
+            t = s / radius
+            across = (-turn * math.sin(t), math.cos(t))  # +z at the bend's start, turning with it (x, z)
+            x = v["x1"] + radius * math.sin(t) + across[0] * side * half
+            z = mid + turn * radius * (1.0 - math.cos(t)) + across[1] * side * half
+            yaw = math.degrees(math.atan2(-across[0] * side, -across[1] * side))
+            out.append({"model": "tunnel_lamp", "x": round(x, 3), "y": round(floor + LAMP_Y + lift, 3),
+                        "z": round(z, 3), "yaw": round(yaw, 1)})
     return out

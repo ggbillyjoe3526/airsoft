@@ -4,9 +4,12 @@ extends RefCounted
 ## ground, `radius` across and `height` tall from the foot. No collider, no level-ray surface and no nav obstacle:
 ## people walk straight through them. What they do is count leaves along a line: bots see no one through more than
 ## BotConfig.foliage_see_through of them, and a BB stops once it has crossed BallisticsConfig.leaf_stop_depth (BBStep,
-## Leaves). The simulation gets them through WorldQuery.foliage (Contracts 4); MapData reads them from the map's
-## `foliage` list; BushView draws them and the minimap marks them. Queries allocate nothing: bushes are filed in a grid
-## of INDEX_CELL squares by their middles, built once on the first query after the last `add`.
+## Leaves). The leaves counted fill a smaller ellipsoid on the same foot (count_leaves, LF1): the drawn plant's fronds
+## and leaf clusters, not its whole reach, so nothing stops a BB or a look where the drawn plant shows a gap. Walking
+## through a bush (holds) and drawing it keep its whole size. The simulation gets them through WorldQuery.foliage
+## (Contracts 4); MapData reads them from the map's `foliage` list; BushView draws them and the minimap marks them.
+## Queries allocate nothing: bushes are filed in a grid of INDEX_CELL squares by their middles, built once on the first
+## query after the last `add`.
 
 ## Leaves crossed for less than this (m) count as none (first_leaves): a BB that came out of a bush on its surface last
 ## tick, or one grazing a rim, would otherwise "cross" a sliver of leaf again and again.
@@ -29,10 +32,14 @@ class Crossing:
 	var through: bool = false
 
 
-## Each bush's foot (the middle of its base, on the ground), radius across and height, parallel lists in the map's order.
+## Each bush's foot (the middle of its base, on the ground), radius across and height as drawn, parallel lists in the
+## map's order.
 var feet: PackedVector3Array = PackedVector3Array()
 var radii: PackedFloat32Array = PackedFloat32Array()
 var heights: PackedFloat32Array = PackedFloat32Array()
+## Each bush's counted leaves (count_leaves): their radius across and half their height, on the same foot.
+var _leaf_r: PackedFloat32Array = PackedFloat32Array()
+var _leaf_half: PackedFloat32Array = PackedFloat32Array()
 
 var _indexed: bool = false
 ## The index: the plan corner of square (0, 0), its columns and rows, and each square's bushes as one list
@@ -64,8 +71,19 @@ func add(foot: Vector3, radius: float, height: float) -> void:
 	feet.append(foot)
 	radii.append(radius)
 	heights.append(height)
+	_leaf_r.append(radius)
+	_leaf_half.append(height * 0.5)
 	_indexed = false
 
+
+## The leaves counted along a line (depth, first_leaves): each bush up to `low_tallest` m tall (a fern) as `low`'s
+## shares of its drawn radius (x) and height (y), a taller one (a shrub) as `tall`'s, each on its own foot
+## (BallisticsConfig's leaf shares). Again with other shares starts from the drawn sizes, never the last call's.
+func count_leaves(low_tallest: float, low: Vector2, tall: Vector2) -> void:
+	for i in feet.size():
+		var share := low if heights[i] <= low_tallest else tall
+		_leaf_r[i] = radii[i] * share.x
+		_leaf_half[i] = heights[i] * share.y * 0.5
 
 func size() -> int:
 	return feet.size()
@@ -160,7 +178,7 @@ func holds(at: Vector3) -> bool:
 	return false
 
 
-## Whether `at` is inside bush `i`'s ellipsoid.
+## Whether `at` is inside bush `i`'s ellipsoid as drawn.
 func _inside(i: int, at: Vector3) -> bool:
 	var f := feet[i]
 	var r := radii[i]
@@ -204,8 +222,8 @@ func _nearer(i: int, origin: Vector3, d: Vector3, lo: Vector3, hi: Vector3, leng
 ## own space it is a unit sphere: solve |p + t q|² = 1.
 func _span(i: int, a: Vector3, d: Vector3) -> bool:
 	var f := feet[i]
-	var r := radii[i]
-	var half := heights[i] * 0.5
+	var r := _leaf_r[i]
+	var half := _leaf_half[i]
 	var p := Vector3((a.x - f.x) / r, (a.y - f.y - half) / half, (a.z - f.z) / r)
 	var q := Vector3(d.x / r, d.y / half, d.z / r)
 	var qq := q.dot(q)
@@ -221,11 +239,11 @@ func _span(i: int, a: Vector3, d: Vector3) -> bool:
 	return _t1 > _t0
 
 
-## True if bush `i`'s box misses the box from `lo` to `hi`.
+## True if bush `i`'s counted leaves' box misses the box from `lo` to `hi`.
 func _outside(i: int, lo: Vector3, hi: Vector3) -> bool:
 	var f := feet[i]
-	var r := radii[i]
-	return f.x + r < lo.x or f.x - r > hi.x or f.z + r < lo.z or f.z - r > hi.z or f.y + heights[i] < lo.y \
+	var r := _leaf_r[i]
+	return f.x + r < lo.x or f.x - r > hi.x or f.z + r < lo.z or f.z - r > hi.z or f.y + _leaf_half[i] * 2.0 < lo.y \
 			or f.y > hi.y
 
 

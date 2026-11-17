@@ -58,7 +58,7 @@ func _watch() -> WindowWatch:
 # --- the frame rate ---
 
 func test_the_limit_is_engine_max_fps_and_unlimited_is_none() -> void:
-	for limit in Settings.FRAME_LIMITS:
+	for limit: int in [Settings.FRAME_LIMIT_RANGE.x, 75, 144, 239, Settings.FRAME_LIMIT_RANGE.y]:
 		s.frame_limit = limit
 		SettingsApply.apply_display(s)
 		assert_eq(Engine.max_fps, limit)

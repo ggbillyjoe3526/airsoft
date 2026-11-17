@@ -77,11 +77,14 @@ func _hold(b: Button) -> void:
 	b.visibility_changed.connect(refresh)
 
 
-## The width `b` needs on its own: its words and padding, and an overlay's room.
+## The width `b` needs on its own: its words and padding, and an overlay's room; words set in the middle need that room
+## on both sides, or they run under the overlay (the pause menu's TIMED CHALLENGE under its ON and OFF, owner
+## 2026-11-17).
 static func _natural(b: Button) -> float:
 	var width := b.get_minimum_size().x
 	if b.has_meta(OVERLAY_META):
 		var over := b.get_meta(OVERLAY_META) as Control
 		if over != null and is_instance_valid(over):
-			width += OVERLAY_GAP + over.get_combined_minimum_size().x
+			var room := OVERLAY_GAP + over.get_combined_minimum_size().x
+			width += room * 2.0 if b.alignment == HORIZONTAL_ALIGNMENT_CENTER else room
 	return width

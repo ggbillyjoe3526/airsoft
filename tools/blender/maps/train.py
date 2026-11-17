@@ -17,8 +17,8 @@ gets (x, -z, y), so the glTF export gives the game's axes back.
     train_lights.glb      half its ceiling's two lamp strips (x 0 to its end), glowing cool white, laid twice a car
     train_cab_leds.glb    a cab front's white LED lamps (headlamps, side strips, marker lamps), drawn glowing over it
     train_end_leds.glb    the uncoupled end's white LED lamps, drawn glowing over train_end_outer
-    train_body.glb        a car's sides, floor, ceiling and fittings, every door hole open (x +-7.35, z +-1.75)
-    train_door.glb        a shut pair of door leaves, filling a door hole (x +-0.7, z 1.6..1.75)
+    train_body.glb        a car's sides, floor, ceiling and fittings, every door hole open (x +-7.35, z +-1.72)
+    train_door.glb        a shut pair of door leaves, filling a door hole (x +-0.8, z 1.36..1.705)
     train_gangway.glb     the joint between two coupled cars, an open gangway through it (x +-0.15)
     train_end.glb         a car's blank end with its shut end door (x 0..0.15, the car's inside at x 0)
     train_end_outer.glb   the same at the uncoupled end of a train, its outside face and underframe drawn
@@ -53,7 +53,8 @@ hs = mk.hs
 HALF = 7.5            # half a car's length, joint to joint
 END = 0.15            # a car end's thickness (half the joint's 0.3 m block; a cab end's sealed wall)
 IN_X = HALF - END     # the inside's half length
-OUT_Z = 1.75          # the sides' outer faces (the room's edge)
+OUT_Z = 1.72          # the sides' outer faces: 30 mm in from the room's edge (1.75), clear of the tunnel and platform walls
+                      # flush with it (the owner's playtest, 2026-11-17: "tunnel wall is glitching around the train")
 IN_Z = 1.60           # their inner faces
 TOP = 2.40            # the ceiling (the car's air is 2.4 m tall)
 UNDER = -0.9          # the track bed under the car's floor (the platform's height over it)
@@ -97,12 +98,17 @@ RAIL_Y = 1.98
 GANG_HW = 0.6         # the gangway's half width (layout.py's car ends leave 1.2 m between them)
 CAB_DOOR_HW = 0.6     # the cab's door (the south train's way out: 1.2 m)
 END_DOOR_HW = 0.4
+OUTER_RIM = 0.08      # an uncoupled end's rim: its sides and roof round over onto its end sheet this much
+BELLOWS = (1.15, 0.1, 2.35, 0.5)  # the folded bellows round the end door: half width, foot, head, its head's corners'
+                                  # radius (the reference's gangway, 03-car-end-gangway: about 0.7 of the end, round-headed)
+BELLOWS_IN = 0.055    # its pleats' roots set back into the end sheet (their crests just under its face)
+DOOR_IN = 0.03        # the end door set back into it again
 FLECKS = 10.0         # the floor's flecks a square metre
 
 # A car is 22k (the list: 12k outside, 10k inside): its body, its eight door pairs and its seats (up to 1.6k a car).
 # A car end is 1.5k, a gangway two of them; the uncoupled end adds its underframe's end (1k, the slack in its car).
-BUDGET = {"train_body": 16400, "train_door": 640, "train_door_glazed": 640, "train_windows": 240, "train_door_glass": 60, "train_gangway": 3000, "train_end": 1500, "train_end_outer": 2600,
-          "train_cab": 4000, "train_cab_open": 4000, "train_seat": 700, "train_seat_short": 500, "train_lights": 100,
+BUDGET = {"train_body": 16400, "train_door": 640, "train_door_glazed": 640, "train_windows": 240, "train_door_glass": 60, "train_gangway": 3000, "train_end": 1500, "train_end_outer": 3700,
+          "train_cab": 4200, "train_cab_open": 4200, "train_seat": 700, "train_seat_short": 500, "train_lights": 100,
           "tool_cart": 1500, "train_bogie": 3000, "train_cab_leds": 270, "train_end_leds": 180}
 
 # Colours (sRGB): clean white paint (the owner, 2026-11-12: "more clean white than the grey"), black rubber, dark glass
@@ -116,7 +122,7 @@ COLOURS = {
     "inner": 0xDAD6CE, "fleck": 0x9C9A96, "fleck_lo": 0x67666A, "poster_b": 0xB3B891, "poster_c": 0x9A968C,
     "inner_lo": 0xBDB9B1, "trim": 0x9E9B95, "floor": 0x3E3D40, "light": 0xF4ECDA,
     "vent": 0x77756F, "poster": 0xC9C3B6, "frame": 0x5B5A5C, "seat": 0x535661, "seat_dot": 0x7A7D88,
-    "seat_ring": 0x8F8E8A, "plinth": 0x2F2E31, "bellows": 0x262527, "gang_in": 0x9C9A95, "lamp": 0xE8E2D2,
+    "seat_ring": 0x8F8E8A, "plinth": 0x2F2E31, "bellows": 0x262527, "fold_hi": 0x5B5A5C, "gang_in": 0x9C9A95, "lamp": 0xE8E2D2,
     "mask": 0x1E2022, "yellow": 0xB8A858, "stripe": 0xC0652F, "led": 0xFFFFFF, "pane": 0x58656B,
     "cart": 0x6F7174, "cart_lo": 0x5C5E61, "peg": 0x8A877E, "wood": 0x7E776E, "castor": 0x2E2D2F,
     "tool": 0x7D8084, "tape": 0xB8A858, "cable": 0x34363A,
@@ -418,13 +424,65 @@ def roof_outline(inset: float = 0.0) -> list:
     return [(-foot, SLAB), (foot, SLAB)] + right + [(-z, y) for z, y in reversed(right[:-1])]
 
 
-def face_x(m: "Model", z0: float, z1: float, y0: float, y1: float, x: float, f: float, paint: str,
-           inset: float = 0.0, ring: list | None = None) -> None:
-    """A rectangle across the car at depth x facing f * x, cut to the car's outline (an end face under the roof; a
-    cab's face inside its rounded corners, the outline drawn in by `inset`), or to `ring` (an inside wall)."""
-    pts = [(z0, y0), (z1, y0), (z1, y1), (z0, y1)]
-    ring = ring or roof_outline(inset)
+def rim_half() -> list:
+    """The car's outline up one side from its floor to the crown, (z, y, nz, ny): each point with its inward normal,
+    level up the side (as the side's corners have always been drawn in) and square to the roof's curve over it."""
+    out = [(z_at(y), y, -1.0, 0.0) for y in side_rows()[:-1]]
+    prof = cant_profile()
+    for i, (z, y) in enumerate(prof):
+        a, b = prof[max(i - 1, 0)], prof[min(i + 1, len(prof) - 1)]
+        tz, ty = b[0] - a[0], b[1] - a[1]
+        ln = math.hypot(tz, ty)
+        nz, ny = (-1.0, 0.0) if i == 0 else (-ty / ln, tz / ln)
+        out.append((z, y, nz, ny))
+    return out
+
+
+def rim_ring(inset: float) -> list:
+    """The car's outline across, (z, y), anticlockwise, drawn in by `inset` all round its sides and roof (a rounded
+    end's face, inside its rim), down to the slab under its floor."""
+    right = [(z + nz * inset, y + ny * inset) for z, y, nz, ny in rim_half()]
+    right[-1] = (0.0, right[-1][1])
+    foot = right[0][0]
+    return [(-foot, SLAB), (foot, SLAB)] + right + [(-z, y) for z, y in reversed(right[:-1])]
+
+
+def rim(m: "Model", corner: float, paint) -> None:
+    """A car end's rounded rim (its face at x = END): the sides and the roof carried on to END - corner, then rounding
+    over a quarter round to the face, `corner` in all round (the face is cut to rim_ring(corner)); `paint(y)` names a
+    side row's paint (the roof's is the body's)."""
+    half = rim_half()
+    plan = [(0.0, 0.0)] + [(END - corner + corner * math.sin(a), corner * (1.0 - math.cos(a)))
+                           for a in (0.5 * math.pi * k / 4 for k in range(5))]
+    for s in (-1, 1):
+        for (za, ya, nza, nya), (zb, yb, nzb, nyb) in zip(half, half[1:]):
+            row = paint((ya + yb) * 0.5) if ya < CANT - 1e-6 else "body"
+            for (xa, oa), (xb, ob) in zip(plan, plan[1:]):
+                pts = [(xa, ya + nya * oa, s * (za + nza * oa)), (xb, ya + nya * ob, s * (za + nza * ob)),
+                       (xb, yb + nyb * ob, s * (zb + nzb * ob)), (xa, yb + nyb * oa, s * (zb + nzb * oa))]
+                hx = (xa + xb) * 0.5 - (END - corner) + 1e-4
+                m.poly(pts, (hx, -(nya + nyb) * 0.25, -s * (nza + nzb) * 0.25), row)
+
+
+def clip(pts: list, ring: list) -> list:
+    """Polygon `pts` (z, y) cut to the anticlockwise `ring` (Sutherland-Hodgman); fewer than 3 points: gone. Only the
+    ring's edges beside `pts` (their heights overlapping its own) cut it: for a convex ring that is the same cut, and
+    a car's outline is convex only band by band (its side's lean meets the roof's round at a step in at CANT, and the
+    foot stands inside the bilge's bulge): a whole edge's line would cut away cells far up or down the side."""
+    lo, hi = min(p[1] for p in pts), max(p[1] for p in pts)
+    if hi <= min(p[1] for p in ring) + 1e-9 or lo >= max(p[1] for p in ring) - 1e-9:
+        return []
+    for i, (z, y) in enumerate(ring):
+        pz, py = ring[i - 1]
+        nz, ny = ring[(i + 1) % len(ring)]
+        if lo + 1e-6 < y < hi - 1e-6 and (z - pz) * (ny - y) - (y - py) * (nz - z) < -1e-12:
+            # a step in (a right turn on the anticlockwise ring) at this height: cut there and join the halves, each
+            # cut to the edges beside it (one line's cut would take a wedge out of the corner, a crack along the rim)
+            return _join(clip(_cut(pts, y, False), ring), clip(_cut(pts, y, True), ring), y)
     for (az, ay), (bz, by) in zip(ring, ring[1:] + ring[:1]):
+        if min(ay, by) >= hi - 1e-9 or max(ay, by) <= lo + 1e-9:
+            if not (abs(ay - by) < 1e-9 and lo < ay < hi):
+                continue
         def side(p: tuple) -> float:
             return (bz - az) * (p[1] - ay) - (by - ay) * (p[0] - az)
         out = []
@@ -438,7 +496,58 @@ def face_x(m: "Model", z0: float, z1: float, y0: float, y1: float, x: float, f: 
                 out.append((p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t))
         pts = out
         if len(pts) < 3:
-            return
+            return []
+    return pts
+
+
+def _cut(pts: list, y: float, above: bool) -> list:
+    """Polygon `pts` (z, y) cut to the part over (or under) height y; fewer than 3 points: gone."""
+    out = []
+    for i, p in enumerate(pts):
+        q = pts[(i + 1) % len(pts)]
+        sp, sq = (p[1] - y, q[1] - y) if above else (y - p[1], y - q[1])
+        if sp >= -1e-12:
+            out.append(p)
+        if (sp >= -1e-12) != (sq >= -1e-12):
+            t = sp / (sp - sq)
+            out.append((p[0] + (q[0] - p[0]) * t, y))
+    return out if len(out) >= 3 else []
+
+
+def _join(below: list, above: list, y: float) -> list:
+    """Two polygons cut from one at height y, joined again along it (in the first's turning)."""
+    if not below or not above:
+        return below or above
+
+    def area(pts: list) -> float:
+        return sum(p[0] * q[1] - q[0] * p[1] for p, q in zip(pts, pts[1:] + pts[:1]))
+
+    turn = area(below) + area(above)
+    a = below if area(below) > 0 else below[::-1]
+    b = above if area(above) > 0 else above[::-1]
+    on_a = [i for i, p in enumerate(a) if abs(p[1] - y) < 1e-9]
+    on_b = [i for i, p in enumerate(b) if abs(p[1] - y) < 1e-9]
+    if len(on_a) < 2 or len(on_b) < 2:
+        return below if abs(area(below)) >= abs(area(above)) else above
+    # anticlockwise: the lower part from its seam's left end round to its right, the upper from its right round
+    a0, a1 = min(on_a, key=lambda i: a[i][0]), max(on_a, key=lambda i: a[i][0])
+    b0, b1 = max(on_b, key=lambda i: b[i][0]), min(on_b, key=lambda i: b[i][0])
+    out = [a[(a0 + k) % len(a)] for k in range((a1 - a0) % len(a) + 1)]
+    for k in range((b1 - b0) % len(b) + 1):
+        p = b[(b0 + k) % len(b)]
+        if all(abs(p[0] - q[0]) + abs(p[1] - q[1]) > 1e-9 for q in (out[0], out[-1])):
+            out.append(p)
+    return out if turn > 0 else out[::-1]
+
+
+def face_x(m: "Model", z0: float, z1: float, y0: float, y1: float, x: float, f: float, paint: str,
+           inset: float = 0.0, ring: list | None = None) -> None:
+    """A rectangle across the car at depth x facing f * x, cut to the car's outline (an end face under the roof; a
+    cab's face inside its rounded corners, the outline drawn in by `inset`), or to `ring` (an inside wall, a rounded
+    end's face)."""
+    pts = clip([(z0, y0), (z1, y0), (z1, y1), (z0, y1)], ring or roof_outline(inset))
+    if len(pts) < 3:
+        return
     area = sum(p[0] * q[1] - q[0] * p[1] for p, q in zip(pts, pts[1:] + pts[:1])) * 0.5
     if abs(area) < 1e-6:
         return
@@ -1044,43 +1153,96 @@ def end_piece(outer: bool) -> None:
     name = "train_end_outer" if outer else "train_end"
     m = Model(name)
     end_wall(m)
-    for s in (-1, 1):
-        # the side's last 15 cm, outside, on its curve: grey, rounding in to a dark seam at the very end
-        rows = side_rows()
-        side_strip(m, 0.0, END - 0.025, s, rows, lambda y: row_paint(y, "body"))
-        side_strip(m, END - 0.025, END, s, [0.0, SKIRT, 0.19, BILGE, SPRING, 1.25, CANT],
-                   lambda y: "skirt" if y < SKIRT else "rubber")
-        prof = cant_profile()
-        for (za, ya), (zb, yb) in zip(prof, prof[1:]):
-            m.poly([(0.0, ya, s * za), (END, ya, s * za), (END, yb, s * zb), (0.0, yb, s * zb)], (0, 0.5, s), "body")
+    if not outer:
+        for s in (-1, 1):
+            # the side's last 15 cm, outside, on its curve: grey, rounding in to a dark seam at the very end (against
+            # the gangway's)
+            rows = side_rows()
+            side_strip(m, 0.0, END - 0.025, s, rows, lambda y: row_paint(y, "body"))
+            side_strip(m, END - 0.025, END, s, [0.0, SKIRT, 0.19, BILGE, SPRING, 1.25, CANT],
+                       lambda y: "skirt" if y < SKIRT else "rubber")
+            prof = cant_profile()
+            for (za, ya), (zb, yb) in zip(prof, prof[1:]):
+                m.poly([(0.0, ya, s * za), (END, ya, s * za), (END, yb, s * zb), (0.0, yb, s * zb)], (0, 0.5, s),
+                       "body")
     if outer:
         x = END
-        # the outside face: grey end sheet, the bellows' frame folded flat round the end door, tail lamps low
-        zs = [-OUT_Z, -1.0, -0.94, -END_DOOR_HW, END_DOOR_HW, 0.94, 1.0, OUT_Z]
-        ys = [0.0, 0.1, 0.2, *STRIPE, END_DOOR_H, 2.05, TOP, ROOF_TOP]
-        lamps = [tuple(sorted((s * 1.17, s * 1.53))) + (0.29, 0.52) for s in (-1, 1)]
-        for za, zb in zip(zs, zs[1:]):
-            for ya, yb in zip(ys, ys[1:]):
-                mz, my = (za + zb) * 0.5, (ya + yb) * 0.5
-                if abs(mz) < END_DOOR_HW and my < END_DOOR_H:
-                    paint = "inner_lo" if 0.95 < my < 1.8 else "body_lo"
-                elif abs(mz) < 1.0 and 0.1 < my < 2.05 and (abs(mz) > 0.94 or my > END_DOOR_H or my < 0.2):
-                    paint = "bellows"
-                elif my < 0.1:
-                    paint = "skirt"
-                else:
-                    paint = "body"
-                if paint in ("body", "body_lo") and STRIPE[0] <= my <= STRIPE[1]:
-                    paint = "stripe"
-                lamp = [h for h in lamps if za <= h[0] and h[1] <= zb and ya <= h[2] and h[3] <= yb]
-                if lamp:
-                    # round the lamp's hole in the end sheet
-                    z0, z1, y0, y1 = lamp[0]
-                    for c in ((za, z0, ya, yb), (z1, zb, ya, yb), (z0, z1, ya, y0), (z0, z1, y1, yb)):
-                        face_x(m, *c, x, 1, paint)
-                else:
-                    face_x(m, za, zb, ya, yb, x, 1, paint)
-        m.rect_x(-END_DOOR_HW + 0.1, END_DOOR_HW - 0.1, 0.95, 1.8, x - 0.004, 1, "glass")
+        # The outside: the sides and roof rounding over onto the end sheet (rim, as the cab's front), the sheet white
+        # with the orange band across it and tail lamps low; the bellows' frame folded flat round the end door, set
+        # back into the sheet, its folds in dark lines; the door set back again, a rounded window in its rubber seal,
+        # a kick plate and a grab handle.
+        rim(m, OUTER_RIM, lambda y: row_paint(y, "body"))
+        a = ClipAcross(m, ring=rim_ring(OUTER_RIM))
+        bz, by0, by1, br = BELLOWS
+        dz, dy = END_DOOR_HW, END_DOOR_H
+        lamps = [tuple(sorted((s * 1.24, s * 1.54))) + (0.29, 0.52) for s in (-1, 1)]
+        zs = breaks([-bz, bz] + [e for h in lamps for e in h[:2]], -OUT_Z, OUT_Z, 0.3)
+        ys = breaks([0.1, by0, by1, *STRIPE] + [e for h in lamps for e in h[2:]], 0.0, ROOF_TOP, 0.3)
+        grid_face(a, zs, ys, x, 1, [(-bz, bz, by0, by1)] + lamps,
+                  lambda z, y: "skirt" if y < 0.1 else ("stripe" if STRIPE[0] <= y <= STRIPE[1] else "body"))
+        ring = rim_ring(OUTER_RIM)
+        # the sheet's corners over the bellows' round head: from the hole's square corner to its arc (on the reveal's
+        # own points, pleat_line(0)'s four segments, so no crack opens between the two)
+        for sz in (-1, 1):
+            cx, cy = sz * (bz - br), by1 - br
+            arc = [(cx + sz * br * math.cos(t), cy + br * math.sin(t))
+                   for t in (0.5 * math.pi * k / 4 for k in range(5))]
+            cell = clip([(sz * bz, by1)] + (arc if sz < 0 else arc[::-1]), ring)
+            if len(cell) >= 3:
+                m.poly([(x, y, z) for z, y in cell], (1, 0, 0), "body")
+        # the bellows round the door, set back into the sheet: a rubber reveal round its frame, then seven pleats
+        # stepping in from the frame to the doorway, each rising to a crest just under the sheet's face and falling
+        # back, round-headed as the reference's gangway; each pleat's outer slope catching the light, its inner one in
+        # shade
+        xb = x - BELLOWS_IN
+        m.rect_y(xb, x, -bz, bz, by0, 1, "skirt")
+        folds = 7
+        fw, fh = (bz - dz) / folds, (by1 - dy) / folds
+
+        def pleat_line(t: float) -> list:
+            # the U round the doorway t folds in from the frame: up its left side, round over its head, down its right
+            zh, yt = bz - t * fw, by1 - t * fh
+            r = max(0.04, min(br - t * fw, zh - 0.01, yt - by0 - 0.01))
+            pts = [(-zh, by0)]
+            for cx, a0 in ((-zh + r, math.pi), (zh - r, 0.5 * math.pi)):
+                pts += [(cx + r * math.cos(a0 - 0.5 * math.pi * k / 4), yt - r + r * math.sin(a0 - 0.5 * math.pi * k / 4))
+                        for k in range(5)]
+            return pts + [(zh, by0)]
+        lines = [(pleat_line(0), x, "rubber")]
+        for k in range(folds):
+            lines += [(pleat_line(k), xb, "fold_hi"), (pleat_line(k + 0.5), x - 0.004, "bellows")]
+        lines.append((pleat_line(folds), xb, ""))
+        for j, ((pa, xa, paint), (pb, xc, _)) in enumerate(zip(lines, lines[1:])):
+            for i in range(len(pa) - 1):
+                (za, ya), (zb, yb) = pa[i], pa[i + 1]
+                (zc, yc), (zd, yd) = pb[i], pb[i + 1]
+                # the slopes face out of the end; the reveal (the first) in towards the doorway
+                hint = (1, 0, 0) if j else (0, 1.0 - (ya + yb) * 0.5, -(za + zb) * 0.5)
+                m.poly([(xa, ya, za), (xa, yb, zb), (xc, yd, zd), (xc, yc, zc)], hint, paint)
+        # a seam across the sheet over the bellows, and a marker lamp high in each corner (dark, unlit: the tail lamps
+        # low are the end's lights)
+        for sz in (-1, 1):
+            for r, d, paint in ((0.036, 0.001, "rubber"), (0.028, 0.002, "steel"), (0.021, 0.003, "mask")):
+                disc(m, (x + d, 2.05, sz * 1.3), r, (1, 0, 0), paint, 12)
+        m.rect_x(-1.0, 1.0, 2.476, 2.484, x + 0.001, 1, "skirt")
+        # the door, set back again: its reveals, its sill, its leaf round the window, the window, the handle
+        xd = xb - DOOR_IN
+        for z, f in ((-dz, 1), (dz, -1)):
+            m.rect_z(xd, xb, by0, dy, z, f, "body_lo")
+        m.rect_y(xd, xb, -dz, dz, dy, -1, "body_lo")
+        m.rect_y(xd, xb, -dz, dz, by0, 1, "steel")
+        win = (-dz + 0.1, dz - 0.1, 0.95, 1.8)
+        door = Across(m)
+        zd = breaks([win[0], win[1]], -dz, dz, 0.2)
+        yd = breaks([0.3, *STRIPE, win[2], win[3]], by0, dy, 0.3)
+        grid_face(door, zd, yd, xd, 1, [win], lambda z, y: "steel" if y < 0.3 else (
+            "stripe" if STRIPE[0] <= y <= STRIPE[1] else "body_lo"))
+        framed(door, *win, xd, 1, [(0, 0, "body_lo"), (0.0, -0.004, "body_lo"), (0.03, 0.006, "rubber")], "glass",
+               r=0.07, seg=8)
+        zh = dz - 0.09
+        m.bar((xd + 0.035, 0.95, zh), (xd + 0.035, 1.3, zh), 0.013, "pole", sides=8)
+        for y in (0.95, 1.3):
+            m.bar((xd, y, zh), (xd + 0.035, y, zh), 0.009, "pole", sides=6)
         # the end's white LED lamps low either side, set into the end sheet (its box ends at the sheet): a chrome-lined
         # recess, a thin running-light strip over two round lamps on its dark back
         led = Glow("train_end_leds")
@@ -1188,25 +1350,65 @@ def cab(open_door: bool) -> None:
     led = Glow("train_cab_leds")
     x = END
     hw = CAB_DOOR_HW if open_door else 0.42
-    corner = 0.12    # the front's corners round back into the sides over this much
-    # the face round the mask: grey body
-    mz, my0, my1, mr = 1.45, 0.22, 2.28, 0.32
-    outline = rounded(-mz, mz, my0, my1, mr, 12)
-    sq = squared(outline, mr)
+    corner = 0.12    # the front's rim rounds back into the sides and the roof over this much (rim)
+    # the face round the mask: white body, the mask well inside the rim all round (the face narrows as the sides lean
+    # in and the roof rounds over)
+    # the mask: from just over the step to high in the roof's round, as the reference fronts' glass sweeps up
+    mz, my0, my1, mr = 1.36, 0.14, 2.54, 0.36
+    margin = 0.03    # the white body showing between the mask's sides and the rim: thin, as on the reference fronts
+    edge = [(z + nz * (corner + margin), y + ny * (corner + margin)) for z, y, nz, ny in rim_half()]
+
+    def wide(y: float) -> float:
+        # the mask's half width at height y: its sides follow the body's lean in and the roof's round over, `margin`
+        # inside the rim
+        for (za, ya), (zb, yb) in zip(edge, edge[1:]):
+            if ya <= y <= yb and yb > ya:
+                return za + (zb - za) * (y - ya) / (yb - ya)
+        return edge[0][0] if y < edge[0][1] else 0.0
+
+    def lean(pts: list, dz: float = 0.0) -> list:
+        # a rounded outline drawn on the mask's half width `mz` (less dz) widened at each height to `wide` (less dz)
+        return [(z * (wide(y) - dz) / (mz - dz), y) for z, y in pts]
+
+    def sc(z: float, y: float) -> float:
+        # a point across the mask, placed on the half width mz, where it lies on the widened mask
+        return z * wide(y) / mz
+
+    # the heights the mask's straight sides are cut at: the face's rows and every kink of `wide`, so the leaned
+    # outline and the white face's cells beside it share every point (a chord between two far-apart points left
+    # slivers of the rim showing through, or the face over the glass)
+    side_ys = breaks([*STRIPE, BILGE, SPRING, CANT] + [y for _, y in edge], my0 + mr, my1 - mr, 0.5)[1:-1]
+
+    def dense(pts: list) -> list:
+        # a 12-segment rounded outline with points added up its two straight sides at side_ys (its arcs keep theirs)
+        right = [(pts[12][0], y) for y in side_ys]
+        left = [(pts[39][0], y) for y in reversed(side_ys)]
+        return pts[:13] + right + pts[13:39] + left + pts[39:]
+
+    base = rounded(-mz, mz, my0, my1, mr, 12)
+    sq = lean(dense(squared(base, mr)))
+    outline = lean(dense([q for q, _ in base]))
     # outer frame: from the face's rectangle in to the mask's squared outline, in small cells for the grime
     face_z = OUT_Z - corner
-    a = ClipAcross(m, corner)
-    horns = [(s * 0.95 - 0.12, s * 0.95 + 0.12, 0.06, 0.16) for s in (-1, 1)]
+    ring = rim_ring(corner)
+    a = ClipAcross(m, ring=ring)
+    horns = [(s * 0.95 - 0.12, s * 0.95 + 0.12, 0.03, 0.12) for s in (-1, 1)]
     # under a shut door its recessed step; under an open one the doorway runs down to the floor
     step = (-0.36, 0.36, 0.02, 0.14) if not open_door else (-hw, hw, 0.0, my0)
     zf = breaks([-mz, mz] + [e for h in horns + [step] for e in h[:2]], -face_z, face_z, 0.15)
-    grid_face(a, zf, breaks([0.06, 0.16, 0.02, 0.14, SKIRT], 0.0, my0, 0.08), x, 1, horns + [step],
+    grid_face(a, zf, breaks([0.03, 0.12, 0.02, 0.14, SKIRT], 0.0, my0, 0.08), x, 1, horns + [step],
               lambda z, y: "body_lo")
-    grid_face(a, zf, [my1, TOP, ROOF_TOP], x, 1, [], lambda z, y: "body")
+    grid_face(a, zf, [my1, ROOF_TOP], x, 1, [], lambda z, y: "body")
     for s in (-1, 1):
-        grid_face(a, [s * mz, s * face_z] if s > 0 else [-face_z, -mz],
-                  breaks([*STRIPE, BILGE, SPRING, CANT], my0, my1, 0.22), x, 1, [],
-                  lambda z, y: "stripe" if STRIPE[0] <= y <= STRIPE[1] else "body")
+        # between the mask's leaning side (its squared outline's own points, so the two share every edge) and the rim,
+        # cut to the face's outline
+        side = sorted({(round(z, 6), round(y, 6)) for z, y in sq if s * z > 0.0 and abs(abs(z) - wide(y)) < 1e-6},
+                      key=lambda q: q[1])
+        for (za, ya), (zb, yb) in zip(side, side[1:]):
+            cell = clip([(za, ya), (s * OUT_Z, ya), (s * OUT_Z, yb), (zb, yb)], ring)
+            if len(cell) >= 3:
+                paint = "stripe" if STRIPE[0] <= (ya + yb) * 0.5 <= STRIPE[1] else "body"
+                m.poly([(x, y, z) for z, y in cell], (1, 0, 0), paint)
     # the horns' grilles under the mask, and the step's tread plate under the door, each set back a little
     for z0, z1, y0, y1 in horns:
         m.rect_x(z0, z1, y0, y1, x - 0.02, 1, "under")
@@ -1229,23 +1431,25 @@ def cab(open_door: bool) -> None:
             m.rect_y(x - 0.055, x - 0.005, zz - 0.008, zz + 0.008, y0 + 0.003, 1, "yellow")
 
     # the corners of the mask's square: grey to the round
-    rings_sq = [(z, y) for (z, y) in sq]
-    rings_rd = [p for p, _ in outline]
+    rings_sq = list(sq)
+    rings_rd = outline
     n = len(rings_sq)
     for i in range(n):
         j = (i + 1) % n
         a, b, c, d = rings_sq[i], rings_sq[j], rings_rd[j], rings_rd[i]
         if abs(a[0] - d[0]) + abs(a[1] - d[1]) + abs(b[0] - c[0]) + abs(b[1] - c[1]) < 1e-6:
             continue
-        m.poly([(x, a[1], a[0]), (x, b[1], b[0]), (x, c[1], c[0]), (x, d[1], d[0])], (1, 0, 0), "body")
+        cell = clip([a, b, c, d], ring)  # never past the rim (the old square corners stood out over its round)
+        if len(cell) >= 3:
+            m.poly([(x, y, z) for z, y in cell], (1, 0, 0), "body")
     # the mask: a rubber lip, then the dark glass set back, the door's frame in it
-    mid = [p for p, _ in rounded(-mz + 0.02, mz - 0.02, my0 + 0.02, my1 - 0.02, mr - 0.02, 12)]
-    inset = rounded(-mz + 0.04, mz - 0.04, my0 + 0.04, my1 - 0.04, mr - 0.04, 12)
+    mid = lean(dense([p for p, _ in rounded(-mz + 0.02, mz - 0.02, my0 + 0.02, my1 - 0.02, mr - 0.02, 12)]), 0.02)
+    inner = lean(dense([q for q, _ in rounded(-mz + 0.04, mz - 0.04, my0 + 0.04, my1 - 0.04, mr - 0.04, 12)]), 0.04)
     for i in range(n):
         j = (i + 1) % n
         for (pa, pb, xa), (qa, qb, xb), paint in (((rings_rd[i], rings_rd[j], x), (mid[i], mid[j], x - 0.008), "body"),
                                                   ((mid[i], mid[j], x - 0.008),
-                                                   (inset[i][0], inset[j][0], x - 0.03), "rubber")):
+                                                   (inner[i], inner[j], x - 0.03), "rubber")):
             spans = [(pa, pb, qa, qb)]
             if open_door and pa[1] < my0 + 0.05 and pb[1] < my0 + 0.05 and pa[0] * pb[0] < 0.0:
                 # the lip's foot runs across the open doorway: only its two ends, either side of it
@@ -1256,24 +1460,24 @@ def cab(open_door: bool) -> None:
             for p0, p1, q0, q1 in spans:
                 m.poly([(xa, p0[1], p0[0]), (xa, p1[1], p1[0]), (xb, q1[1], q1[0]), (xb, q0[1], q0[0])], (1, 0, 0),
                        paint)
-    inner = [p for p, _ in inset]
     xg = x - 0.03
     if not open_door:
         m.poly([(xg, y, z) for z, y in inner], (1, 0, 0), "mask")
     else:
         # the glass either side of the doorway, the doorway itself open
         for s in (-1, 1):
-            pts = [(z, y) for z, y in inner if s * z >= hw - 1e-6]
-            pts = sorted(pts, key=lambda q: math.atan2(q[1] - (my0 + my1) / 2, s * (q[0] - s * hw)))
-            side_pts = [(s * hw, my0 + 0.04)] + [q for q in inner if s * q[0] > hw] + [(s * hw, my1 - 0.04)]
+            # the outline's own points beyond the doorway's edge, in its order (anticlockwise: up the right side, down
+            # the left), closed along the edge (the left's from its head down, or the pane crossed itself)
+            ends = [(s * hw, my0 + 0.04), (s * hw, my1 - 0.04)]
+            side_pts = [ends[0]] + [q for q in inner if s * q[0] > hw] + [ends[1]]
+            if s < 0:
+                side_pts = [ends[1]] + side_pts[1:-1] + [ends[0]]
             m.poly([(xg, y, z) for z, y in side_pts], (1, 0, 0), "mask")
-        m.rect_x(-hw, hw, my1 - 0.04, TOP, x, 1, "body")
+        m.rect_x(-hw, hw, TOP, my1 - 0.04, xg, 1, "mask")  # the glass over the doorway, up to the mask's head
     # the windscreen's frames in the mask: the door's edges and its window's head, dull black on the glass
     for s in (-1, 1):
         m.rect_x(s * hw, s * (hw + 0.05), my0 + 0.04, my1 - 0.04, xg + 0.003, 1, "rubber")
     if not open_door:
-        m.rect_x(-hw, hw, 1.05, 1.1, xg + 0.003, 1, "rubber")
-        m.rect_x(-hw + 0.1, hw - 0.1, 0.25, 1.0, xg + 0.002, 1, "glass")
         # the door's handle in its dished plate, its lock, and the hinges down its far edge
         m.rect_x(hw - 0.16, hw - 0.06, 0.82, 1.22, xg + 0.004, 1, "skirt")
         m.bar((xg + 0.017, 0.88, hw - 0.11), (xg + 0.017, 1.16, hw - 0.11), 0.01, "steel", sides=8)
@@ -1282,11 +1486,12 @@ def cab(open_door: bool) -> None:
         disc(m, (xg + 0.006, 1.3, hw - 0.11), 0.02, (1, 0, 0), "steel", 10)
         for y in (0.4, 1.0, 1.7):
             m.box((xg + 0.003, y, -hw + 0.005), (xg + 0.015, y + 0.12, -hw + 0.04), "rubber", skip="-x")
-        # the door's window: a paler pane where the cab's back wall shows dimly through it
-        m.rect_x(-hw + 0.08, hw - 0.08, 1.16, 1.98, xg + 0.002, 1, "glass_hi")
+        # the door's window, a glass leaf near its full height as the reference's: a shade off the mask's glass, so
+        # the front reads as one sweep of glass with the door's frame lines in it
+        m.rect_x(-hw + 0.08, hw - 0.08, 0.42, 1.94, xg + 0.002, 1, "glass")
     # the destination screen over the door (dark, off), in its frame
-    m.rect_x(-0.38, 0.38, 2.02, 2.2, xg + 0.004, 1, "rubber")
-    m.rect_x(-0.34, 0.34, 2.05, 2.17, xg + 0.006, 1, "glass")
+    m.rect_x(-0.38, 0.38, 2.18, 2.34, xg + 0.004, 1, "rubber")
+    m.rect_x(-0.34, 0.34, 2.21, 2.31, xg + 0.006, 1, "glass")
     # wipers parked across the windscreens either side of the door, a reflection's pale band slanting over each
     for s in (-1, 1):
         root = (xg + 0.008, 0.62, s * (hw + 0.18))
@@ -1302,23 +1507,23 @@ def cab(open_door: bool) -> None:
         m.box((xg + 0.003, root[1] - 0.035, root[2] - 0.035), (xg + 0.02, root[1] + 0.035, root[2] + 0.035), "rubber",
               skip="-x")
         disc(m, (xg + 0.021, root[1], root[2]), 0.022, (1, 0, 0), "steel", 10)
-        m.poly([(xg + 0.002, 1.25, s * (hw + 0.1)), (xg + 0.002, 1.55, s * (hw + 0.1)),
-                (xg + 0.002, 2.05, s * (mz - 0.25)), (xg + 0.002, 1.75, s * (mz - 0.25))], (1, 0, 0), "glass_hi")
+        m.poly([(xg + 0.002, 1.3, s * (hw + 0.1)), (xg + 0.002, 1.44, s * (hw + 0.1)),
+                (xg + 0.002, 1.98, sc(s * (mz - 0.3), 1.98)), (xg + 0.002, 1.84, sc(s * (mz - 0.3), 1.84))], (1, 0, 0),
+               "glass_hi")
     # the lamp strips: long and narrow, curving in at the top, down each side of the mask; headlamps low; marker
     # lamps behind the glass in its top corners, white and red
     for s in (-1, 1):
         for k in range(2):
-            zc = s * (1.06 - 0.08 * k)
-            disc(m, (xg + 0.003, 2.12, zc), 0.028, (1, 0, 0), "rubber", 12)
-            disc(m, (xg + 0.005, 2.12, zc), 0.02, (1, 0, 0), "steel", 12)
-            disc(led, (xg + 0.006, 2.12, zc), 0.016, (1, 0, 0), "led", 12)
-        zz = s * (mz - 0.13)
+            zc = sc(s * (0.98 - 0.08 * k), 2.26)
+            disc(m, (xg + 0.003, 2.26, zc), 0.028, (1, 0, 0), "rubber", 12)
+            disc(m, (xg + 0.005, 2.26, zc), 0.02, (1, 0, 0), "steel", 12)
+            disc(led, (xg + 0.006, 2.26, zc), 0.016, (1, 0, 0), "led", 12)
         pts = []
         for k in range(13):
             t = k / 12
-            y = 0.42 + (1.95 - 0.42) * t
+            y = 0.4 + (2.12 - 0.4) * t
             dz = -s * 0.10 * (t ** 3)
-            pts.append((zz + dz, y))
+            pts.append((sc(s * (mz - 0.13), y) + dz, y))
         for (za, ya), (zb, yb) in zip(pts, pts[1:]):
             # the strip in its housing: a dark surround, a chrome edge, the glowing lens
             for w, d, paint in ((0.05, 0.002, "rubber"), (0.037, 0.003, "steel"), (0.03, 0.004, "led")):
@@ -1326,32 +1531,14 @@ def cab(open_door: bool) -> None:
                                                      (xg + d, yb, zb - w)], (1, 0, 0), paint)
         # the headlamps: two round LED lamps in a dark housing, each a chrome ring, a reflector, its black face and its
         # seven white emitters
-        m.rect_x(s * (mz - 0.6), s * (mz - 0.24), 0.26, 0.40, xg + 0.003, 1, "rubber")
+        m.rect_x(*sorted((sc(s * (mz - 0.66), 0.35), sc(s * (mz - 0.3), 0.35))), 0.28, 0.42, xg + 0.003, 1, "rubber")
         for k in range(2):
-            zc = s * (mz - 0.33 - 0.17 * k)
+            zc = sc(s * (mz - 0.39 - 0.17 * k), 0.35)
             for r, d, paint in ((0.062, 0.004, "steel"), (0.052, 0.005, "trim"), (0.044, 0.006, "mask")):
-                disc(m, (xg + d, 0.33, zc), r, (1, 0, 0), paint, 16)
-            led_cluster(led, (xg + 0.007, 0.33, zc))
-    # the corners: the side's last 15 cm, on its curve, rounding back to the front face
-    rows = side_rows()
-    for s in (-1, 1):
-        plan = [(0.0, 0.0)]    # (x, how far in from the side's face)
-        for k in range(5):
-            a = 0.5 * math.pi * k / 4
-            plan.append((END - corner + corner * math.sin(a), corner - corner * math.cos(a)))
-        for (xa, ia), (xb, ib) in zip(plan, plan[1:]):
-            for ya, yb in zip(rows, rows[1:]):
-                oa, ob = z_at(ya), z_at(yb)
-                m.poly([(xa, ya, s * (oa - ia)), (xb, ya, s * (oa - ib)), (xb, yb, s * (ob - ib)),
-                        (xa, yb, s * (ob - ia))], ((xa + xb) * 0.5 - (END - corner) + 0.0001, 0, s * 0.5),
-                       row_paint((ya + yb) * 0.5, "body"))
-        top = z_at(CANT) - corner
-        for (za, ya), (zb, yb) in zip(cant_profile(), cant_profile()[1:]):
-            zc_a, zc_b = min(za, top), min(zb, top)
-            m.poly([(0.0, ya, s * za), (END - corner, ya, s * za), (END - corner, yb, s * zb), (0.0, yb, s * zb)],
-                   (0, 0.5, s), "body")
-            m.poly([(END - corner, ya, s * za), (END, ya, s * zc_a), (END, yb, s * zc_b), (END - corner, yb, s * zb)],
-                   (0.5, 0.5, s), "body")
+                disc(m, (xg + d, 0.35, zc), r, (1, 0, 0), paint, 16)
+            led_cluster(led, (xg + 0.007, 0.35, zc))
+    # the rim: the sides and the roof rounding over onto the face, one quarter round all the way up and over
+    rim(m, corner, lambda y: row_paint(y, "body"))
     under_end(m, x)
     # inside: the cab's back wall and its door (or the open doorway)
     if open_door:

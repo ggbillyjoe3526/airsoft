@@ -82,6 +82,10 @@ func _init(sim_tuning: SimTuning, world: WorldQuery, character_mover: CharacterM
 	grenades = Grenades.new(sim_tuning, world)
 	doors = Doors.new(sim_tuning, world)
 	lifts = Lifts.new(sim_tuning, world)
+	# The bushes' leaves as their drawn plants fill them (LF1): the same Foliage the bots' senses and routes read.
+	if world.foliage != null:
+		var b := sim_tuning.ballistics
+		world.foliage.count_leaves(b.leaf_fern_tallest, b.leaf_fern_shares, b.leaf_bush_shares)
 	# The fitted hit volume's tables, made before the match (BP6): a pose first met mid-match makes none.
 	if sim_tuning.hits.fit != null:
 		sim_tuning.hits.fit.prepare()

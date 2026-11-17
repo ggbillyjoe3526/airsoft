@@ -149,7 +149,7 @@ func test_there_are_three_levels_and_a_new_player_starts_on_normal() -> void:
 
 func test_the_public_maps_are_listed_and_a_dev_one_is_tagged() -> void:
 	var page := _page(false)
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "range"]),
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "subway", "range"]),
 			"every shipped map is public")
 	for id: String in page.map_ids():
 		assert_false(_labels(page.map_card(id)).has("DEV"), id)
@@ -191,7 +191,7 @@ func test_no_dev_maps_listed_with_dev_content_off() -> void:
 	var was := DevContent.use_map()
 	var page := _page(false)
 	DevContent.restore_map(was)
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "range"]),
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "subway", "range"]),
 			"Woodland tagged dev here")
 	assert_true(page.map_card("depot").is_picked())
 

@@ -66,6 +66,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	w.cfg = config
 	w.nav = nav
 	w.query = query
+	w.terrain = map.terrain
 	if options.groundwork:
 		NavVaults.link(nav, query, tuning.vault, tuning.body, config.vault_price)
 	NavLifts.link(nav, query, tuning.lifts, tuning.movement.run_speed, config.lift_wait)

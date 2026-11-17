@@ -261,7 +261,9 @@ func test_the_pause_menus_buttons_are_one_width_and_the_panel_fits_them() -> voi
 	var settings_button := pause.find_children("*", "Button", true, false).filter(
 			func(b: Node) -> bool: return (b as Button).text == "SETTINGS")[0] as Button
 	assert_almost_eq(resume.size.x, settings_button.size.x, 0.5)
-	assert_lt(panel.size.x, 560.0, "the panel is no wider than its words and buttons need")
+	# its sides' padding round the widest button (the Timed challenge row's words with room for its switch, UB2)
+	assert_lte(panel.size.x, resume.size.x + 2.0 * PauseMenu.PANEL_SIDE + 2.0,
+			"the panel is no wider than its words and buttons need")
 	assert_lt(resume.size.x, panel.size.x, "the buttons hug the left, a button no wider than the widest")
 
 

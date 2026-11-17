@@ -113,16 +113,36 @@ func test_a_bad_saved_colour_is_clamped_or_defaulted() -> void:
 	assert_eq(s.ui_colour, UiColours.DEFAULT, "an older file without it falls back")
 
 
-func test_use_colour_restyles_the_shared_theme_in_place() -> void:
+func test_use_colour_makes_a_new_shared_theme_and_leaves_the_old_one_alone() -> void:
 	var theme := GameTheme.get_theme()
 	var before := theme.get_stylebox("normal", GameTheme.MAIN_BUTTON)
 	assert_eq((before as StyleBoxFlat).bg_color, UiColours.ACCENTS[UiColours.Pick.BLUE])
 	assert_true(GameTheme.use_colour(UiColours.Pick.GREEN), "a change reports true")
-	assert_same(GameTheme.get_theme(), theme, "the same Theme object")
+	var old_after := theme.get_stylebox("normal", GameTheme.MAIN_BUTTON) as StyleBoxFlat
+	assert_eq(old_after.bg_color, UiColours.ACCENTS[UiColours.Pick.BLUE],
+			"the old Theme is not redone, so the screens in it are not laid out again one by one (owner, 2026-11-17)")
+	assert_ne(GameTheme.get_theme(), theme, "a new Theme")
+	theme = GameTheme.get_theme()
 	var after := theme.get_stylebox("normal", GameTheme.MAIN_BUTTON) as StyleBoxFlat
 	assert_eq(after.bg_color, UiColours.ACCENTS[UiColours.Pick.GREEN])
 	assert_eq(theme.get_color("font_color", GameTheme.MAIN_BUTTON), UiColours.INKS[UiColours.Pick.GREEN])
 	assert_false(GameTheme.use_colour(UiColours.Pick.GREEN), "the same pick reports false")
+
+
+func test_retheme_gives_the_new_theme_to_controls_in_an_old_shared_one_only() -> void:
+	var host := Control.new()
+	host.theme = GameTheme.get_theme()
+	var own := Control.new()
+	own.theme = Theme.new()
+	host.add_child(own)
+	var inner := Label.new()
+	host.add_child(inner)
+	add_child_autofree(host)
+	GameTheme.use_colour(UiColours.Pick.GREEN)
+	GameTheme.retheme(host)
+	assert_eq(host.theme, GameTheme.get_theme(), "the old shared Theme swapped for the new one")
+	assert_false(own.theme.has_meta(GameTheme.THEME_MARK), "a theme of its own is kept")
+	assert_null(inner.theme, "a Control without one still inherits")
 
 
 func test_use_colour_clamps_an_out_of_range_pick() -> void:

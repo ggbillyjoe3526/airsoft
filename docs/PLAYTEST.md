@@ -1809,10 +1809,18 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 - [ ] **A pistol takes about a rifle's share of the screen.** Switch between the AEG and the GBB Pistol, then the
   Cyber Pistol, standing still, walking and after a shot.
   Pass: the pistol sits low on the right at about the rifle's angle, both hands on it and no forearm showing; it
-  comes up to the sight smoothly and squares up as it does, the hands whole and never fading.
+  comes up to the sight smoothly, the hands whole and never fading.
 - [ ] **No arm ends on Inspect.** Press Y with each replica, at your field of view and at 110, on a wide screen if you
   have one. Pass: both sleeves run off the edge of the screen all through the turn; no green end or blob comes up in
   front of you; both hands stay on the replica.
+
+## One BB on a magazine, the pistols square at the hip (OB1)
+
+- [ ] **A magazine shows one BB.** Open the Armory or a Loadout and look at each replica's magazine, the Hi-Cap,
+  Low-Cap and Extended magazines and the Pump Shotgun's shell; then reload each in a match and watch the new
+  magazine come up. Pass: one BB sits at the top of each, never a row of them.
+- [ ] **A pistol points where the rifle points.** Switch between the AEG and the GBB Pistol, then the Cyber Pistol,
+  at the hip. Pass: both lie at the same angle, the pistol's muzzle toward the crosshair, not off to its left.
 
 ## Volumetric haze in four levels (VF1)
 

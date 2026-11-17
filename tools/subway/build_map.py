@@ -36,6 +36,10 @@ EYE_FACING_WEST = math.pi / 2
 
 FORWARD_SPOTS = [(-0.5, -0.5), (0.5, -0.5), (-0.5, 0.5), (0.5, 0.5)]   # a forward spawn's four spots, 1 m apart (RS1)
 SHAFT_COLOUR = 0x9c978d   # the shafts' walls, as MT1's shut shaft
+# Nothing hung on a shaft's face this near a lift's door (m beside each jamb: its call button 0.3 m out, LiftConfig
+# .call_beside, and its plate), nor this far out from the face (the owner, 2026-11-17: a poster over a lift door).
+LIFT_DOOR_CLEAR = 0.45
+LIFT_DOOR_FRONT = 0.1
 HEMI_SKY = 0xdfe6ec       # the fill's colours (sRGB, LightingConfig.override_fill_*): a cool white, no warm bounce
 HEMI_GROUND = 0xc9cdd0
 
@@ -133,6 +137,67 @@ def cut(boxes: list[list[float]], holes: list[list[float]]) -> list[list[float]]
     return boxes
 
 
+def at_mouths(boxes: list[list[float]]) -> list[list[float]]:
+    """`boxes` split where they cross a running tunnel's sides (z0, z1) or springing over its lid (its end walls, its
+    mouth's): the steps cut round its arch then lie whole under the lid, which the game leaves undrawn, and the smooth
+    mouth and arch show instead of a stair poking past them (the owner's playtest, 2026-11-17: "tunnel wall is
+    glitching around the train")."""
+    for v in L.RUN_VAULTS:
+        nxt = []
+        for bx in boxes:
+            if bx[1] <= v["x0"] - FT + EPS or bx[0] >= v["x1"] + FT - EPS or bx[3] <= v["y"] + EPS:
+                nxt.append(bx)
+                continue
+            pieces = [bx]
+            for axis, at in ((4, v["z0"]), (4, v["z1"]), (2, v["y"])):
+                split = []
+                for q in pieces:
+                    inside = q[4] >= v["z0"] - EPS and q[5] <= v["z1"] + EPS
+                    if q[axis] + EPS < at < q[axis + 1] - EPS and (axis == 4 or inside):
+                        lo, hi = list(q), list(q)
+                        lo[axis + 1], hi[axis] = at, at
+                        split += [lo, hi]
+                    else:
+                        split.append(q)
+                pieces = split
+            nxt += pieces
+        boxes = nxt
+    return boxes
+
+
+def joined(boxes: list[list[float]]) -> list[list[float]]:
+    """`boxes` (the pieces of one box, cut round others) with each two that meet face to face, the same on their other
+    two axes, made one again, where that would not cross a mouth's split (at_mouths): fewer pieces, so fewer seams on
+    a wall's face (the owner's playtest, 2026-11-17: "tunnel wall is glitching around the train")."""
+    out = [list(b) for b in boxes]
+    again = True
+    while again:
+        again = False
+        for i in range(len(out)):
+            for j in range(i + 1, len(out)):
+                a, b = out[i], out[j]
+                for k in range(3):
+                    lo, hi = 2 * k, 2 * k + 1
+                    if any(abs(a[2 * o] - b[2 * o]) > EPS or abs(a[2 * o + 1] - b[2 * o + 1]) > EPS
+                           for o in range(3) if o != k):
+                        continue
+                    if abs(a[hi] - b[lo]) > EPS and abs(b[hi] - a[lo]) > EPS:
+                        continue
+                    m = list(a)
+                    m[lo], m[hi] = min(a[lo], b[lo]), max(a[hi], b[hi])
+                    if len(at_mouths([m])) != 1:
+                        continue
+                    out[i] = m
+                    del out[j]
+                    again = True
+                    break
+                if again:
+                    break
+            if again:
+                break
+    return out
+
+
 # ---------------- The shell ----------------
 
 def edge_line(rm: dict, edge: str) -> tuple[str, float, float, float]:
@@ -171,8 +236,13 @@ def pieces_of(a: float, b: float, cuts: list[float]) -> list[tuple[float, float]
     return [(pts[k], pts[k + 1]) for k in range(len(pts) - 1)]
 
 
-def in_gap(gaps: list[tuple[float, float]], a: float, b: float) -> bool:
-    return any(g0 - EPS <= a and b <= g1 + EPS for g0, g1 in gaps)
+def in_gap(gaps: list[tuple], a: float, b: float) -> bool:
+    return gap_of(gaps, a, b) is not None
+
+
+def gap_of(gaps: list[tuple], a: float, b: float) -> tuple | None:
+    """The gap of a sealed edge's `gaps` that a..b lies in, or None."""
+    return next((g for g in gaps if g[0] - EPS <= a and b <= g[1] + EPS), None)
 
 
 def wall_box(rm: dict, edge: str, a: float, b: float, y0: float, y1: float, inside: bool,
@@ -270,7 +340,7 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
             gaps = rm["seal"].get(edge)
             sealed = gaps is not None
             if sealed:
-                cuts += [c for g in gaps for c in g]
+                cuts += [c for g in gaps for c in g[:2]]
             if axis == "x" and is_ramp(rm):
                 n = max(1, round((b - a) / 1.0))
                 cuts += [a + (b - a) * k / n for k in range(1, n)]
@@ -290,6 +360,11 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
                 if sealed and not in_gap(gaps, pa, pb):
                     boxes.append((wall_box(rm, edge, pa, pb, bottom, top, True, SEAL_T), i, "wall"))
                     continue
+                gap = gap_of(gaps, pa, pb) if sealed else None
+                if gap is not None and len(gap) > 2:
+                    # A doorway gap[2] m high: the seal's wall goes on over it (the spiral stair's foot: open to the
+                    # top, it showed the void behind the platform's vault, the owner 2026-11-17).
+                    boxes.append((wall_box(rm, edge, pa, pb, f_lo + gap[2], top, True, SEAL_T), i, "wall"))
                 if nb is None:
                     if not sealed:
                         boxes.append((wall_box(rm, edge, ea, eb, bottom, top, False), -1, "wall"))
@@ -565,6 +640,19 @@ def shaft_hole() -> list[float]:
     return [s["x0"], s["x1"], L.P - s["pit"] - FT, s["top"], s["z0"], s["z1"]]
 
 
+def lift_door_fronts() -> list[list[float]]:
+    """Each car's doorway at every stop, its button beside it, and a little air in front of it on the shaft's face:
+    no fixture stands there (a poster on the landing's wall over a door)."""
+    s = L.SHAFT
+    out = []
+    for lf in L.LIFTS:
+        mid = (lf["x0"] + lf["x1"]) / 2
+        half = L.LIFT_DOOR_W / 2 + LIFT_DOOR_CLEAR
+        for y in L.LIFT_STOPS:
+            out.append([mid - half, mid + half, y, y + L.LIFT_DOOR_H, s["z0"] - LIFT_DOOR_FRONT, s["z0"]])
+    return out
+
+
 def shaft_boxes() -> list[tuple[list[float], str]]:
     """The shafts' walls (north, south, west, east and a partition between each two wells), each car's door cut out of
     the north wall at every stop, and the pit's floor under the lowest stop (a wall's kind: the bots' grid walks no
@@ -604,6 +692,14 @@ def lifts() -> list[dict]:
 
 # ---------------- Writing ----------------
 
+def span(lo: float, hi: float) -> tuple[float, float]:
+    """A box's centre and size along one axis from its two faces, each face on the millimetre: two boxes that meet
+    meet exactly, where rounding the centre and the size each to the millimetre left a hairline between them (the
+    dotted seams on the walls round the tunnels' mouths)."""
+    a, b = r(lo), r(hi)
+    return round((a + b) / 2 + 0.0, 4), r(b - a)
+
+
 def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "", facing: str = "",
              squeeze: bool = False, noise: str = "") -> dict:
     x0, x1, y0, y1, z0, z1 = bx
@@ -611,8 +707,8 @@ def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress:
         # Floors drawn edge to edge are grown a centimetre a side to meet (as Depot's): an edge on a grid cell's middle
         # never leaves the bots' grid a row of cells with no floor.
         x0, x1, z0, z1 = x0 - GROW, x1 + GROW, z0 - GROW, z1 + GROW
-    b = {"kind": kind, "center": {"x": r((x0 + x1) / 2), "y": r((y0 + y1) / 2 + LIFT), "z": r((z0 + z1) / 2)},
-         "size": {"x": r(x1 - x0), "y": r(y1 - y0), "z": r(z1 - z0)}}
+    (cx, sx), (cy, sy), (cz, sz) = span(x0, x1), span(y0 + LIFT, y1 + LIFT), span(z0, z1)
+    b = {"kind": kind, "center": {"x": cx, "y": cy, "z": cz}, "size": {"x": sx, "y": sy, "z": sz}}
     if rise:
         b["rise"] = rise
     if colour:
@@ -628,14 +724,21 @@ def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress:
     return b
 
 
+def beside_slot(x0: float, x1: float, z: float, side: float) -> bool:
+    """Whether a running tunnel's slot (run_s_out, past the south train's end) runs beside a floor's edge at z,
+    where the tunnel wall would be: no wall to run in under there, and the two floors overlap by their growth only."""
+    return any(rm["name"].startswith("run_") and abs((rm["z0"] if side > 0 else rm["z1"]) - z) < EPS
+               and rm["x0"] - EPS <= x0 and x1 <= rm["x1"] + EPS for rm in L.rooms)
+
+
 def under_wall(bx: list[float]) -> list[float]:
     """A track bed's floor run on L.UNDER_WALL in under its tunnel wall (AUD2); any other floor as it is."""
     x0, x1, y0, y1, z0, z1 = bx
     if abs(y1 - L.T) > EPS:
         return bx
-    if abs(z0 + L.TRACK_WALL_Z) < EPS:
+    if abs(z0 + L.TRACK_WALL_Z) < EPS and not beside_slot(x0, x1, z0, -1.0):
         z0 -= L.UNDER_WALL
-    if abs(z1 - L.TRACK_WALL_Z) < EPS:
+    if abs(z1 - L.TRACK_WALL_Z) < EPS and not beside_slot(x0, x1, z1, 1.0):
         z1 += L.UNDER_WALL
     return [x0, x1, y0, y1, z0, z1]
 
@@ -713,7 +816,7 @@ def build() -> dict:
         car = in_car(bx)
         holes = [a for i, a in air if i != owner] + [shaft] + vaults + ([] if car else inner)
         parts = cut(under_arch(bx) if car else [bx], holes)
-        parts = cut(parts, [s for s in solid if overlap(s, bx)])
+        parts = joined(at_mouths(cut(parts, [s for s in solid if overlap(s, bx)])))
         for p in parts:
             blocks.append(as_block(kind, under_wall(p) if kind == "floor" else p))
             solid.append(p)
@@ -722,7 +825,7 @@ def build() -> dict:
     for v in L.VAULTS:
         others = [bx for o in L.VAULTS if o is not v for bx in vault_inner(o)]
         for bx in vault_boxes(v):
-            parts = cut(cut(cut([bx], [a for _, a in air]), others), [s for s in solid if overlap(s, bx)])
+            parts = joined(at_mouths(cut(cut(cut([bx], [a for _, a in air]), others), [s for s in solid if overlap(s, bx)])))
             for p in parts:
                 blocks.append(as_block("wall", p))
                 solid.append(p)
@@ -761,9 +864,12 @@ def build() -> dict:
         "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT), "trains": trains(),
                      "kickedDust": {"tint": 0xB0AEA8, "scale": 0.9}},
     }
-    # nothing in the shafts, nor in a balustrade down an escalator (its pieces' whole boxes, as the game's tests take them)
-    holes = [shaft_hole()] + [box for bl in L.blocks if bl["y"] is None for box, _ in ramp_barrier(bl)]
+    # nothing in the shafts or over their doors, nor in a balustrade down an escalator (its pieces' whole boxes, as the
+    # game's tests take them)
+    holes = [shaft_hole()] + lift_door_fronts() + [box for bl in L.blocks if bl["y"] is None
+                                                   for box, _ in ramp_barrier(bl)]
     m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, holes)
+    m["dressing"]["station"]["fixtures"] += fixtures.bend_ends(L.RUN_VAULTS, L.T, LIFT)
     m["dressing"]["station"]["trims"] += drop_rods(m["dressing"]["station"]["fixtures"])
     del sx
     return m

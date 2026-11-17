@@ -54,7 +54,7 @@ func _item(id: String) -> Pool.Item:
 
 # --- what it lists ---
 
-func test_the_armory_tab_is_on_and_opens_the_page_it_frees_when_left() -> void:
+func test_the_armory_tab_is_on_and_opens_the_page_it_keeps_hidden_when_left() -> void:
 	var menus := MenuScreen.new(MatchPicks.new(), settings)
 	add_child_autofree(menus)
 	assert_false(menus.nav_rail().tab_button(NavRail.Tab.ARMORY).disabled)
@@ -69,9 +69,14 @@ func test_the_armory_tab_is_on_and_opens_the_page_it_frees_when_left() -> void:
 	menus.show_match()
 	await wait_process_frames(2)
 	assert_null(menus.armory_page())
-	assert_false(is_instance_valid(page), "the page is freed")
-	assert_false(is_instance_valid(pictures), "and the pictures it drew")
+	assert_same(menus.kept_armory(), page, "kept hidden with its pictures, so the tab opens at once (owner, 2026-11-17)")
+	assert_false(page.visible)
+	assert_true(is_instance_valid(pictures))
 	assert_true(menus.match_page().visible)
+	menus.leave_armory()
+	await wait_process_frames(2)
+	assert_false(is_instance_valid(page), "leave_armory frees the page")
+	assert_false(is_instance_valid(pictures), "and the pictures it drew")
 
 
 func test_level_3_lists_ten_of_twenty_with_the_silencer_next() -> void:
@@ -284,7 +289,7 @@ func test_a_changed_level_builds_the_open_page_again() -> void:
 	assert_ne(menus.armory_page(), first)
 	assert_true(menus.armory_page().facts().levelling_off)
 	menus.show_loadout()
-	assert_null(menus.armory_page(), "the Loadout tab frees it")
+	assert_null(menus.armory_page(), "the Loadout tab leaves it")
 	settings.dev.disable_levelling = false
 
 

@@ -214,6 +214,11 @@ func _keyless_note(bindings: KeyBindings) -> String:
 	return tr("KEYS_KEYLESS") % ", ".join(names) if not names.is_empty() else ""
 
 
+## Shows the first tab, Controls (a kept screen opened again starts where a new one would).
+func show_first_tab() -> void:
+	_tabs.current_tab = 0
+
+
 ## Shows the Graphics tab (the first start's notice's Graphics settings).
 func show_graphics() -> void:
 	# the page sits in its tab's scroll box

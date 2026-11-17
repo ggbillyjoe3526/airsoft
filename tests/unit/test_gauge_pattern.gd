@@ -180,10 +180,11 @@ func test_the_switch_reaches_the_hud_in_play_and_follows_the_attackers() -> void
 	session.mode = MatchOptions.MODE_ATTACK_DEFEND
 	session.bots_active = false
 	session.settings = Settings.new(PlayTuning.new())
+	assert_false(session.settings.gauge_patterns, "off by default (owner, 2026-11-17)")
+	session.settings.gauge_patterns = true
 	add_child_autofree(session)
 	await wait_physics_frames(2)
 	var hud := session.hud()
-	assert_true(session.settings.gauge_patterns, "on by default")
 	assert_true(hud.score().striped(1))
 	var rs := session.state.round_state
 	rs.flag.progress = 0.5
@@ -206,6 +207,7 @@ func test_the_switch_reaches_the_hud_in_play_and_follows_the_attackers() -> void
 
 func test_the_patterns_row_is_live_and_its_sample_follows_the_switch_and_the_set() -> void:
 	var s := Settings.new(PlayTuning.new())
+	s.gauge_patterns = true
 	var screen := SettingsScreen.new()
 	screen.settings = s
 	screen.save_path = "user://test-gauge-pattern/settings.save"

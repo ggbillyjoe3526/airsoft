@@ -1,8 +1,8 @@
 class_name BushView
 extends Node3D
-## A map's bushes (MapData.foliage, WL5) drawn on every preset: the low ones (up to WoodsConfig.fern_tallest m) as the
-## fern clump model, the rest as the bush model (WG2, tools/blender/maps/), each kind an instanced draw a square of the
-## field (WoodsConfig.bush_chunk), every plant
+## A map's bushes (MapData.foliage, WL5) drawn on every preset: the low ones (up to `fern_tallest` m,
+## BallisticsConfig.leaf_fern_tallest) as the fern clump model, the rest as the bush model (WG2, tools/blender/maps/),
+## each kind an instanced draw a square of the field (WoodsConfig.bush_chunk), every plant
 ## stretched to its foliage's radius and height on its foot, turned at random and a seeded shade lighter or darker.
 ## Without the models (a missing file) they fall back to placeholder ellipsoids in a seeded pick of WoodsConfig's
 ## bush greens. Look only: the simulation reads the same bushes through WorldQuery.foliage, never this node.
@@ -14,7 +14,7 @@ var _materials: Array[Material] = []
 
 
 ## `map`'s bushes drawn with `cfg`, or null on a map with none.
-static func build(map: MapData, cfg: WoodsConfig) -> BushView:
+static func build(map: MapData, cfg: WoodsConfig, fern_tallest: float) -> BushView:
 	var f := map.foliage
 	if f.is_empty():
 		return null
@@ -37,7 +37,7 @@ static func build(map: MapData, cfg: WoodsConfig) -> BushView:
 		# the kind's plants by the field's square they stand in, so each square is a draw of its own, culled out of view
 		var cells: Dictionary[Vector2i, PackedInt32Array] = {}
 		for i in f.size():
-			if (f.heights[i] <= cfg.fern_tallest) != (kind == 0):
+			if (f.heights[i] <= fern_tallest) != (kind == 0):
 				continue
 			var cell := Vector2i(floori(f.feet[i].x / chunk), floori(f.feet[i].z / chunk))
 			if not cells.has(cell):

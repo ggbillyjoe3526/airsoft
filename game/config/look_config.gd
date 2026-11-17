@@ -83,6 +83,10 @@ const GLOBAL_DUST := &"look_dust"
 ## so the lamps' bounce alone lights the ceilings and the shade; more of it, fed on further, keeps them from black.
 @export var sdfgi_energy_underground: float = 1.5
 @export var sdfgi_bounce_underground: float = 1.0
+## What an underground field shows where nothing is drawn (FieldLighting.set_underground; SW2): near black, never the
+## sky's blue, so a hairline where two of the station's faces meet reads as a shadow, not a bright crack (the owner's
+## playtest, 2026-11-17: "tunnel wall is glitching around the train"). No sky reaches a field underground to be seen.
+@export var underground_background: Color = Color(0.012, 0.012, 0.014)
 @export var sdfgi_rays: RenderingServer.EnvironmentSDFGIRayCount = RenderingServer.ENV_SDFGI_RAY_COUNT_128
 @export var sdfgi_converge: RenderingServer.EnvironmentSDFGIFramesToConverge = \
 		RenderingServer.ENV_SDFGI_CONVERGE_IN_30_FRAMES
