@@ -955,6 +955,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   block's box and its crown starts over `WoodsConfig.crown_clear` (2.6 m); a thicket's spruces stay inside its box.
   Asked whether young pines and spruces should match his photos instead (branches to the ground, spruces spilling past
   the thicket's edge), he kept the boxes: what you see is what stops BBs and sight.
+- **A bush counts only the leaves its plant fills (LF1, from the owner's playtest 2026-11-17: hits on a bot in
+  Woodland's ferns didn't land, Spotted missed it).** Since WG2 drew the ferns and shrubs as airy models, the
+  simulation still counted each as a solid ellipsoid of its whole reach, so about half the BBs and looks it stopped met
+  no drawn leaf. Now the leaves counted for BBs, sight, Spotted and bots' routes are an ellipsoid of shares of the
+  drawn size on its foot (`BallisticsConfig.leaf_fern_shares` 0.6 across and 0.8 up, `leaf_bush_shares` 0.8 and 0.8,
+  `Foliage.count_leaves`), measured against the models with `tools/bush_opacity.gd`; walking through and drawing keep
+  the whole size. A new fern or bush model re-measures its shares. A thicket draws no core box at its spruces' feet
+  (`PropDressConfig.model_cores` empty): the owner asked why the trees had boxes, and the spruces close it alone.
 - **Plant The Bomb is the third mode (owner, 2026-11-12, PB1).** His rules: the attackers plant a bomb at Site A or
   Site B on the defenders' side; the defenders keep it from being planted or make it safe. The attackers win when it
   goes off or the defenders are all out; the defenders win by making it safe or by getting every attacker out before

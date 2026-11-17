@@ -503,7 +503,7 @@ func _dress_part(part: int) -> void:
 				if _woods != null:
 					add_child(_woods)
 		7:
-			_bushes = BushView.build(_map, _play.woods)
+			_bushes = BushView.build(_map, _play.woods, _tuning.ballistics.leaf_fern_tallest)
 			if _bushes != null:
 				add_child(_bushes)
 			_water = WaterView.build(_map, _play.woods)

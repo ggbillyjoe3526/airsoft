@@ -332,11 +332,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 @export var stake_vary: float = 0.15
 @export var stake_rail_heights: Vector2 = Vector2(0.8, 0.7)
 ## A named prop whose box is still drawn behind it, cut down to a share (y) of its height and inset (x, m, at most
-## MapLevel.CORE_SHARE of the box's width) on each side with no other such box against it, rather than not at all: a thicket's dark
-## core between its spruces' feet, unbroken across touching thickets, so nothing is seen through a thicket that stops
-## BBs under its boughs. A spruce core reaches 0.2 of the thicket's height, under the spruces' widest boughs (FT1: at
-## 0.6 it stood past their narrowing tops and read as a plain block).
-@export var model_cores: Dictionary[StringName, Vector2] = {&"spruce": Vector2(0.7, 0.2)}
+## MapLevel.CORE_SHARE of the box's width) on each side with no other such box against it, rather than not at all
+## (unbroken across touching boxes). None now: a thicket's spruces had a dark core box between their feet (WR3, FT1)
+## until the owner's playtest (2026-11-17, "trees have boxes at the bottom of them"); its spruces drawn wider than
+## their cells (grid_spread) already close the thicket, so LF1 took the core away.
+@export var model_cores: Dictionary[StringName, Vector2] = {}
 ## TREE's models: each one's trunk's widest reach (m) round its origin at the ground and under it (an oak's buttress
 ## roots), which the box's half-width is; as each build script prints it (tools/blender/maps/pine.py, oak.py,
 ## birch.py). A tree model not listed keeps its box.

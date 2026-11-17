@@ -8,6 +8,8 @@ var tuning: SimTuning = null
 var cfg: BotConfig = null
 var nav: NavGrid = null
 var query: WorldQuery = null
+## The field's open ground (MapData.terrain), null on a field without: one storey however it slopes (BotPlant).
+var terrain: TerrainGrid = null
 var characters: Array[Character] = []
 var bots: Array[Bot] = []
 ## The map's lanes (walkable points from end 0 to end 1) and its cover blocks (BotCover).

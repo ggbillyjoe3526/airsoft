@@ -424,7 +424,10 @@ func test_a_grid_lays_a_block_s_props_in_cells_and_a_round_count_a_side() -> voi
 	assert_eq(placed[&"crate"].transforms.size(), want, "a crate a cell")
 
 
-func test_a_dressed_block_draws_no_box_and_a_thicket_only_its_core() -> void:
+## A dressed block draws no box, a thicket included (LF1 took its core away, owner's playtest 2026-11-17); a prop that
+## names a core (PropDressConfig.model_cores) still gets one by the old rules, checked here on the thickets with the
+## spruce's old core (0.7 m in, a fifth of the height).
+func test_a_dressed_block_draws_no_box_and_a_named_core_by_its_rules() -> void:
 	var m := _map("woodland")
 	var plain := MapLevel._greybox_mesh(m, play.map_style)
 	var dressed := MapLevel._greybox_mesh(m, play.map_style, null, look.props)
@@ -438,8 +441,8 @@ func test_a_dressed_block_draws_no_box_and_a_thicket_only_its_core() -> void:
 	var verts := func(mesh: ArrayMesh) -> int: return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 			as PackedVector3Array).size()
 	assert_lt(verts.call(dressed), verts.call(plain), "the dressed blocks' boxes are left out")
-	assert_eq(look.props.core_of(thicket), look.props.model_cores[&"spruce"])
-	var inset: Vector2 = look.props.model_cores[&"spruce"]
+	assert_eq(look.props.core_of(thicket), Vector2.ZERO, "a thicket draws no core (LF1)")
+	var inset := Vector2(0.7, 0.2)
 	var cored: Array[MapData.Block] = []
 	for b in m.blocks:
 		if b.dress == &"spruce":
