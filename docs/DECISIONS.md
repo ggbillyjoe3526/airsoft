@@ -1523,6 +1523,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   about a second of tail, kept light); every other map plays shots dry at their old level. The recordings are untouched.
   Heard, "a bit too much. Decrease reverb a little", then of room 0.62 and wet 0.2 "still too much reverb. Decrease a
   little more" (owner, 2026-11-12, EC2): room 0.5, wet 0.14, a tail of about half a second; the 2 dB stays.
+- **Subway's train announcements, an easter egg (owner, 2026-11-17, TA1).** His own two recordings, as he recorded them
+  ("stick with the original"; "i recorded them myself"). The gap plays 2 or 3 times a match, randomly apart, only to
+  someone near a train or inside one; King's Cross plays once a match, only to someone standing inside a train ("only
+  'kings_cross.wav' should play inside a train. 'gap.wav' should play if the player is near (or inside a train)"). One
+  never plays over the other. Timings and "near" (5 m) are defaults in `TrainAnnounceConfig`. Hidden like Dev ›
+  Lasers: not on the wiki.
 
 ## Save and settings storage
 

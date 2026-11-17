@@ -21,7 +21,9 @@ extends Node
 ## a landing thuds louder and lower the harder it comes down, with a rustle under a hard one. The referee's whistle
 ## (WhistleQueue) on the Interface bus: two short blasts start a round, three quick short ones put Elimination's
 ## overtime flag up, one long ends a round, three more end the match, and the range's Time is one long. The map's ambience: its beds by day or night on the Ambience bus and its calls round
-## the listener (AmbientCalls), positional, at the pool's lowest priority. Your own sounds play plain; everyone else's
+## the listener (AmbientCalls), positional, at the pool's lowest priority. Subway's easter egg (TA1): the owner's train
+## announcements from the train on their own voice, the gap near a train, King's Cross inside one (TrainAnnouncements).
+## Your own sounds play plain; everyone else's
 ## from where they happen, and only within reach of the ears the view is through (the listener): others' steps
 ## step_reach and at most step_limit per step_window, their rustle foley_reach and at most foley_limit per foley_window,
 ## BB impacts at most impact_limit per impact_window, the range's targets target_reach, shots and their power parts
@@ -164,6 +166,11 @@ var _beds: Array[AudioStreamPlayer] = []
 var _bed_from := PackedFloat32Array()
 var _calls: AmbientCalls = null
 var _calls_match: int = -1
+## Subway's easter egg (TA1): the announcements heard inside a train (null on a map without trains), their own voice,
+## and the match they were last timed for.
+var _announce: TrainAnnouncements = null
+var _announcer: AudioStreamPlayer3D = null
+var _announce_match: int = -1
 ## The squad order outcome last heard (SquadOrders.Outcome.serial).
 var _order_serial: int = 0
 ## Your ping heard (on_ping): the ping book's serial read up to, and when your last ping that piped was placed.
@@ -260,6 +267,8 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 	_whistle.volume_db = linear_to_db(cfg.whistle_gain)
 	add_child(_whistle)
 	_start_ambience(map.ambience if map != null else AmbienceConfig.DEFAULT_ID)
+	if map != null and not map.trains.is_empty():
+		_set_up_announcements(cfg.train_announcements, map.trains)
 
 
 ## Plays the tick's events in `state`; `player_id` is the one heard as yourself, `listener` the character the view is
@@ -458,6 +467,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 	_blow_due(now)
 	_rustle(state, player_id, now)
 	_call(state, now)
+	_announcement(state, now)
 
 
 ## The radio click, in your ear only, when the squad order last recorded in `outcome` (since the last call) is one of
@@ -564,6 +574,8 @@ func _exit_tree() -> void:
 		v.stop()
 	if _whistle != null:
 		_whistle.stop()
+	if _announcer != null:
+		_announcer.stop()
 	# Only the match that last set the echo puts it back, so an old match freed after a new one's setup leaves it be.
 	if _echo_set_by == get_instance_id():
 		set_echo(null)
@@ -630,6 +642,39 @@ func _kit(cue: StringName, c: Character, own: bool, now: float) -> void:
 	var at := c.eye(_body)
 	if _in_reach(at, _cfg.foley_reach) and _foleys.take(now):
 		_play(cue, at, false, _cfg.foley_gain, Kind.FOLEY, BUS_FOOTSTEPS, 1.0, _cfg.foley_reach, c)
+
+
+## Subway's easter egg (TA1): `cfg`'s announcements timed for `trains`, their recordings and their one voice.
+func _set_up_announcements(cfg: TrainAnnounceConfig, trains: Array[TrainDressing]) -> void:
+	_announce = TrainAnnouncements.new(cfg, trains)
+	_load(String(cfg.gap_cue))
+	_load(String(cfg.once_cue))
+	_announcer = AudioStreamPlayer3D.new()
+	_announcer.bus = BUS_EFFECTS
+	_announcer.volume_db = linear_to_db(cfg.gain)
+	_announcer.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+	_announcer.unit_size = cfg.unit_size
+	_announcer.max_distance = cfg.near + cfg.reach
+	add_child(_announcer)
+
+
+## The train announcement due at `now` (s) where the listener stands (TA1: the gap near a train or in one, King's Cross
+## inside one), from the nearest point of the train's inside on its own voice, timed afresh for each match from its
+## seed. None without a listener or trains, nor over one still playing.
+func _announcement(state: GameState, now: float) -> void:
+	if _announce == null:
+		return
+	if state.match_number != _announce_match:
+		_announce_match = state.match_number
+		_announce.begin(state.match_seed, state.match_number, now)
+	if _listener == null:
+		return
+	var cue := _announce.due(now, _listener.position, _announcer.playing)
+	if cue == &"" or not _streams.has(cue) or _streams[cue].is_empty():
+		return
+	_announcer.stream = _streams[cue][0]
+	_announcer.global_position = _announce.at
+	_announcer.play()
 
 
 ## The ambience's calls due at `now` (s), round the listener's ears at each call's level and pitch spread, timed afresh
