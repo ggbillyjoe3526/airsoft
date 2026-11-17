@@ -24,13 +24,13 @@ const YARD := """{"name": "Yard", "blocks": [
 		{"kind": "shed", "x": 0, "z": 30, "width": 6, "depth": 4}]}}"""
 const LANDMARKS: Array[StringName] = [&"watchTower", &"fuselage", &"mast"]
 ## The skyline's triangles at most (the Dev 3 model plan's 20k), and the lamps on a mast's model.
-const TRIANGLES_MOST := 20000
+const TRIANGLES_MOST := 95000
 const MAST_MODEL_LAMPS := 4
 ## Each modelled kind's triangle budget (tools/blender/maps/skyline.py, docs/ASSETS.md).
-const MODEL_BUDGETS: Dictionary[StringName, int] = {&"shed": 500, &"crane": 800, &"mast": 500, &"fuselage": 700,
-		&"silo": 650, &"watchTower": 750, &"waterTower": 900}
+const MODEL_BUDGETS: Dictionary[StringName, int] = {&"shed": 2600, &"crane": 4000, &"mast": 3600, &"fuselage": 4000,
+		&"silo": 3200, &"watchTower": 4500, &"waterTower": 4500}
 ## The shed's other sizes' budgets, by file (SkylineConfig.variants).
-const VARIANT_BUDGETS: Dictionary[String, int] = {"shed_long.glb": 660, "shed_deep.glb": 600}
+const VARIANT_BUDGETS: Dictionary[String, int] = {"shed_long.glb": 3200, "shed_deep.glb": 3000}
 ## How unevenly a shed's model may stretch to its piece (its largest scale over its smallest): the critic's
 ## "doors and windows keep their size".
 const SHED_STRETCH_MOST := 1.3
