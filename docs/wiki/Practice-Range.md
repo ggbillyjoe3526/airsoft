@@ -7,6 +7,12 @@ practise on a field: see [Practice on a field](#practice-on-a-field).
 
 ![The range in Depot's site: three lanes of targets, with Depot's water tower and buildings beyond the walls](images/range-in-depot.jpg)
 
+You start at the firing point, under a steel shelter that runs wall to wall: four timber shooting benches stand on
+the firing line, each numbered on a board under the shelter's front, with a rest bag, an ammo can and a bottle of
+BBs on top. The red flag beside it says the range is hot. Behind the benches are the chrono table, where every
+replica gets checked, the range rules board and the safe zone sign. Downrange the targets stand on gravel, and the
+walls' timber boards have weathered unevenly in the sun.
+
 Beside the firing point stands the range's kit rack: a bay of warehouse racking with empty rifle and pistol stands,
 BB bottles and cans, and a stack of hard cases.
 

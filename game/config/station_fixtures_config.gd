@@ -18,6 +18,8 @@ extends Resource
 	"fire_point", "call_point", "pipe_run", "pipe_run_b", "pipe_run_2", "pipe_run_1",
 	"depot_sign_assembly", "depot_sign_fire_action",
 	"depot_sign_defib", "depot_sign_no_riding", "depot_sign_ppe", "depot_sign_pallet_storage", "depot_sign_fire_exit",
+	# The Range's firing point (RQ1, tools/blender/maps/range_extras.py)
+	"range_canopy", "range_flag", "range_sign_rules", "range_sign_chrono", "range_sign_eye_pro", "range_sign_safe_zone",
 ])
 ## Every printed face's picture (tools/blender/maps/station_signs.py: an invented station name, the way-out signs,
 ## the posters, the clock face, the edge warning).
@@ -37,7 +39,18 @@ extends Resource
 	&"depot_sign_ppe": "res://assets/textures/depot/signs.png",
 	&"depot_sign_pallet_storage": "res://assets/textures/depot/signs.png",
 	&"depot_sign_fire_exit": "res://assets/textures/depot/signs.png",
+	# the Range's (RQ1, tools/blender/maps/range_signs.py: its rules, chrono, eye protection, safe zone and lane
+	# numbers, and the red flag's notice)
+	&"range_canopy": "res://assets/textures/range/signs.png",
+	&"range_flag": "res://assets/textures/range/signs.png",
+	&"range_sign_rules": "res://assets/textures/range/signs.png",
+	&"range_sign_chrono": "res://assets/textures/range/signs.png",
+	&"range_sign_eye_pro": "res://assets/textures/range/signs.png",
+	&"range_sign_safe_zone": "res://assets/textures/range/signs.png",
 }
+## The models that cast shadows (RQ1: the Range's firing point shelter and its flag, out under the sun, which would
+## float without them); every other one is flat on a wall or under a roof and casts none.
+@export var shadow_models: PackedStringArray = PackedStringArray(["range_canopy", "range_flag"])
 @export_range(0.0, 1.0) var roughness: float = 0.7
 @export_range(0.0, 1.0) var metallic: float = 0.0
 @export_range(0.0, 1.0) var sign_roughness: float = 0.6

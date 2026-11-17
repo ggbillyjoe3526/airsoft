@@ -7,12 +7,26 @@
    "center": {
     "x": 0,
     "y": -0.25,
-    "z": -30
+    "z": 2.4
    },
    "size": {
     "x": 22.8,
     "y": 0.5,
-    "z": 72.8
+    "z": 8.0
+   }
+  },
+  {
+   "kind": "floor",
+   "surface": "gravel",
+   "center": {
+    "x": 0,
+    "y": -0.045,
+    "z": -34.0
+   },
+   "size": {
+    "x": 22.8,
+    "y": 0.09,
+    "z": 64.8
    }
   },
   {
@@ -138,7 +152,8 @@
     "x": 2.4,
     "y": 0.9,
     "z": 1.2
-   }
+   },
+   "dress": "crate"
   },
   {
    "kind": "sandbags",
@@ -166,6 +181,76 @@
     "x": 2.4,
     "y": 0.9,
     "z": 0.4
+   }
+  },
+  {
+   "kind": "furniture",
+   "dress": "shooting_bench",
+   "center": {
+    "x": -7.5,
+    "y": 0.45,
+    "z": 0.5
+   },
+   "size": {
+    "x": 1.8,
+    "y": 0.9,
+    "z": 0.8
+   }
+  },
+  {
+   "kind": "furniture",
+   "dress": "shooting_bench",
+   "center": {
+    "x": -2.5,
+    "y": 0.45,
+    "z": 0.5
+   },
+   "size": {
+    "x": 1.8,
+    "y": 0.9,
+    "z": 0.8
+   }
+  },
+  {
+   "kind": "furniture",
+   "dress": "shooting_bench",
+   "center": {
+    "x": 2.5,
+    "y": 0.45,
+    "z": 0.5
+   },
+   "size": {
+    "x": 1.8,
+    "y": 0.9,
+    "z": 0.8
+   }
+  },
+  {
+   "kind": "furniture",
+   "dress": "shooting_bench",
+   "center": {
+    "x": 7.5,
+    "y": 0.45,
+    "z": 0.5
+   },
+   "size": {
+    "x": 1.8,
+    "y": 0.9,
+    "z": 0.8
+   }
+  },
+  {
+   "kind": "furniture",
+   "dress": "chrono_table",
+   "center": {
+    "x": -4.0,
+    "y": 0.475,
+    "z": 5.6
+   },
+   "size": {
+    "x": 1.8,
+    "y": 0.95,
+    "z": 0.75
    }
   }
  ],
@@ -961,7 +1046,67 @@
    "tint": 12171184,
    "scale": 1
   },
-  "site": {}
+  "site": {
+   "lines": [
+    {
+     "x": 0.0,
+     "z": 0.0,
+     "w": 22.0,
+     "d": 0.1
+    }
+   ]
+  },
+  "fixtures": [
+   {
+    "model": "range_canopy",
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "yaw": 0.0
+   },
+   {
+    "model": "range_flag",
+    "x": -10.3,
+    "y": 0.0,
+    "z": -2.3,
+    "yaw": 0.0
+   },
+   {
+    "model": "range_sign_rules",
+    "x": 1.0,
+    "y": 1.55,
+    "z": 6.0,
+    "yaw": 180.0
+   },
+   {
+    "model": "range_sign_chrono",
+    "x": -4.0,
+    "y": 1.75,
+    "z": 6.0,
+    "yaw": 180.0
+   },
+   {
+    "model": "range_sign_safe_zone",
+    "x": 4.4,
+    "y": 2.05,
+    "z": 6.0,
+    "yaw": 180.0
+   },
+   {
+    "model": "range_sign_eye_pro",
+    "x": -11.0,
+    "y": 1.8,
+    "z": -2.0,
+    "yaw": 90.0
+   },
+   {
+    "model": "range_sign_eye_pro",
+    "x": 11.0,
+    "y": 1.8,
+    "z": -2.0,
+    "yaw": -90.0
+   }
+  ]
  },
  "keepClear": [
   {

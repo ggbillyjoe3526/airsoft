@@ -3,9 +3,10 @@ extends Node3D
 ## A station's lamps and extras (SM5, Subway: MapData.station's fixtures): the running tunnels' bulkhead lamps, the
 ## station's name boards, way-out signs, posters, clocks, CCTV cameras, fire extinguishers, litter bins and the
 ## platform edges' warnings; and a hall's wall extras (DX1, Depot: MapData.fixtures, its fire points, call points,
-## pipework and safety signs). One MultiMesh a model (StationFixturesConfig). A lamp's glass glows (no
-## real light: the ceilings' strip lamps light the station, RoofView), a printed face shows its sign sheet. Look only:
-## no collider, no shadow, nothing the simulation reads. Built once; nothing runs a frame.
+## pipework and safety signs; RQ1, the Range: its firing point's shelter, red flag and signs). One MultiMesh a model
+## (StationFixturesConfig). A lamp's glass glows (no real light: the ceilings' strip lamps light the station, RoofView),
+## a printed face shows its sign sheet. Look only: no collider, nothing the simulation reads; no shadow but from
+## StationFixturesConfig.shadow_models. Built once; nothing runs a frame.
 
 const PROP_SURFACE := &"Prop"
 const LENS_SURFACE := &"Lens"
@@ -67,6 +68,10 @@ static func build(map: MapData, cfg: StationFixturesConfig) -> StationFixtures:
 				view._add(model, mesh, groups[i], i)
 		else:
 			view._add(model, mesh, placed[model])
+		if cfg.shadow_models.has(String(model)):
+			for inst in view._views:
+				if inst.multimesh.mesh == mesh:
+					inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		if cfg.lit_models.has(String(model)):
 			for t: Transform3D in placed[model]:
 				view._add_lamp(t * Vector3(0.0, 0.0, cfg.lamp_out), cfg)

@@ -9,12 +9,13 @@ light through, and a capping board over the top. PropLayout lays the bay along e
 (PropDressConfig.grid_cells), each stretched to its cell; half a post at each end meets the next bay's half. Either
 face can face the range (a cell is turned at random), so both are the same.
 
-Writes assets/models/props/range_wall.glb (3 m) and range_backstop.glb (5 m), each one vertex-coloured mesh filling
+Writes assets/models/props/range_wall.glb (3 m) and range_backstop.glb (5 m), and two shuffles of each (_b, _c, RQ1), each one vertex-coloured mesh filling
 x -1.2..1.2, y -0.2..0.2, z 0..height exactly (Godot: x along, y up, z across).
 
 Usage: python3 tools/blender/maps/range_wall_bay.py [--render <sheet.jpg>]
 """
 
+import math
 import os
 import random
 import sys
@@ -24,8 +25,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import range_kit as rk  # noqa: E402
 from range_kit import Vector  # noqa: E402
 
-BUDGET = 900  # a 2.4 m bay, 3 m high
-BACKSTOP_BUDGET = 1300  # the same bay 5 m high
+BUDGET = 850  # ~95% of the bay's 804 tris
+BACKSTOP_BUDGET = 1150  # ~95% of the backstop's 1,088 tris
 LONG = 2.4
 DEEP = 0.4
 POST = 0.09  # a post's width (half of it at each end of the bay)
@@ -37,9 +38,15 @@ COURSE = 0.2
 BLOCK = 0.4
 JOINT = 0.012
 CAP = 0.03
-
-rk.check_colours(["board", "board_dark", "board_light", "rail_timber", "block", "block_dark", "mortar", "fence_core"],
-                 shade=0.1)
+BATTEN = 0.07  # RQ1: the cover batten up each face's middle, over the boards (flush with the posts' faces)
+SCREW = 0.006  # a screw head's half width
+rk.PAINT.update({
+    # RQ1: a weathered board gone silver-grey in the sun, and the screw heads' dark galvanising
+    "board_grey": 0x9c9888,
+    "screw": 0x4a4a4c,
+})
+rk.check_colours(["board", "board_dark", "board_light", "board_grey", "rail_timber", "block", "block_dark", "mortar",
+                  "fence_core", "screw"], shade=0.12)
 
 
 def _slab(k: rk.Kit, lo: tuple, hi: tuple, mat: str, side: float, skip_ends: bool = True) -> None:
@@ -65,6 +72,34 @@ def _slab(k: rk.Kit, lo: tuple, hi: tuple, mat: str, side: float, skip_ends: boo
             q = q[::-1]
         faces.append(bm.faces.new([v(*p) for p in q]))
     k._faces(faces, mat)
+
+
+def _head(k: rk.Kit, x: float, y: float, z: float, side: float) -> None:
+    """A screw head: one small dark square on the face at y, seen from side `side`."""
+    bm = k.bm
+    q = [(x - SCREW, y, z - SCREW), (x + SCREW, y, z - SCREW), (x + SCREW, y, z + SCREW), (x - SCREW, y, z + SCREW)]
+    if side > 0:
+        q = q[::-1]
+    k._faces([bm.faces.new([bm.verts.new(Vector(p)) for p in q])], "screw")
+
+
+def _grime(ob: object, seed: int) -> None:
+    """RQ1: the weather on the corner colours: the boards' feet darkened by splash-back over the plinth, the plinth's
+    foot by the yard's dirt, and every corner mottled a little (a board is never one flat tone end to end)."""
+    me = ob.data
+    col = me.color_attributes["Color"]
+    rng = random.Random(seed)
+    for loop in me.loops:
+        co = me.vertices[loop.vertex_index].co
+        k = 1.0
+        if co.z < PLINTH + 0.6:
+            k *= 0.8 + 0.2 * min(1.0, max(0.0, (co.z - PLINTH + 0.1) / 0.7))
+        if co.z < 0.18:
+            k *= 0.78 + 0.22 * co.z / 0.18
+        k *= 1.0 + 0.05 * math.sin(co.x * 7.3 + co.z * 3.1 + seed) * math.sin(co.x * 2.1 - co.z * 5.7) \
+            + rng.uniform(-0.02, 0.02)
+        c = col.data[loop.index].color
+        col.data[loop.index].color = (c[0] * k, c[1] * k, c[2] * k, 1.0)
 
 
 def bay(name: str, height: float, seed: int) -> object:
@@ -97,35 +132,56 @@ def bay(name: str, height: float, seed: int) -> object:
         while z < top - 1e-6:
             z1 = min(z + BOARD, top)
             pick = rng.random()
-            mat = "board" if pick < 0.5 else ("board_light" if pick < 0.75 else "board_dark")
+            mat = "board" if pick < 0.44 else ("board_light" if pick < 0.68 else (
+                "board_dark" if pick < 0.92 else "board_grey"))
             y = (-face, -face + 0.02) if side < 0 else (face - 0.02, face)
             _slab(k, (-hl + POST * 0.5, y[0], z), (hl - POST * 0.5, y[1], z1), mat, side)
+            # each board screwed at both ends into the posts (RQ1): a dark head on its face
+            yf = y[0] - 0.0008 if side < 0 else y[1] + 0.0008
+            zc = (z + z1) * 0.5
+            for x in (-hl + POST * 0.5 + 0.03, hl - POST * 0.5 - 0.03):
+                _head(k, x, yf, zc, side)
             z = z1 + SHADOW_GAP
+        # the cover batten up the middle, just inside the posts' faces, screwed at every second board
+        yb = (-hd + 0.0015, -face) if side < 0 else (face, hd - 0.0015)
+        _slab(k, (-BATTEN * 0.5, yb[0], PLINTH + 0.01), (BATTEN * 0.5, yb[1], top), "rail_timber", side)
+        zc = PLINTH + 0.01 + BOARD * 0.5
+        while zc < top:
+            _head(k, 0.0, (-hd + 0.0007) if side < 0 else (hd - 0.0007), zc, side)
+            zc += 2 * (BOARD + SHADOW_GAP)
     # Half a post at each end, full depth and height; the capping board over the top, overhanging the boards.
     for sx in (-1.0, 1.0):
         x0, x1 = (-hl, -hl + POST * 0.5) if sx < 0 else (hl - POST * 0.5, hl)
         k.blk((x0, -hd, PLINTH), (x1, hd, height - CAP), "rail_timber")
     k.blk((-hl, -hd, height - CAP), (hl, hd, height), "rail_timber")
     ob = k.build()
+    # no bevel: a chamfer at the bay's ends would open a slit where two bays meet (test_bp9_flicker_qa2)
     rk.finish(ob, angle=rk.math.radians(30.0))
-    rk.bake(ob, jitter={"board": 0.05, "board_light": 0.05, "board_dark": 0.05, "block": 0.04}, seed=seed)
+    rk.bake(ob, jitter={"board": 0.07, "board_light": 0.06, "board_dark": 0.06, "board_grey": 0.05, "block": 0.05},
+            seed=seed)
+    _grime(ob, seed)
     rk.fit_box(ob, (-hl, -hd, 0.0), (hl, hd, height))
     return ob
 
 
 def main() -> None:
     rk.reset()
-    wall = bay("RangeWall", 3.0, 11)
-    back = bay("RangeBackstop", 5.0, 12)
-    print("range wall bay (budget %d):" % BUDGET)
-    n = rk.report([wall])
-    print("backstop bay (budget %d):" % BACKSTOP_BUDGET)
-    m = rk.report([back])
-    if n > BUDGET or m > BACKSTOP_BUDGET:
-        raise SystemExit("over budget")
-    for ob, f in ((wall, "range_wall.glb"), (back, "range_backstop.glb")):
+    # RQ1: three bays of each, their boards' tones and screws shuffled (PropDressConfig.variants), so a run of wall
+    # never reads as one bay repeated
+    built = []
+    for suffix, seed in (("", 11), ("_b", 21), ("_c", 31)):
+        built.append((bay("RangeWall" + suffix, 3.0, seed), "range_wall%s.glb" % suffix, BUDGET))
+        built.append((bay("RangeBackstop" + suffix, 5.0, seed + 1), "range_backstop%s.glb" % suffix, BACKSTOP_BUDGET))
+    for ob, f, budget in built:
+        print("%s (budget %d):" % (f, budget))
+        if rk.report([ob]) > budget:
+            raise SystemExit("over budget")
+    for ob, f, _budget in built:
         rk.export(os.path.join(rk.PROPS, f), [ob])
         print("wrote", f)
+    wall, back = built[0][0], built[1][0]
+    for ob, _f, _budget in built[2:]:
+        ob.hide_render = True
     if "--render" in sys.argv:
         _render(wall, back, sys.argv[sys.argv.index("--render") + 1])
 

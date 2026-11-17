@@ -3,8 +3,9 @@ extends GutTest
 ## map names them (dressing.station.fixtures) and each stands in its room's air, a wall model's back on a wall, a
 ## hanging sign's top at its ceiling and well over the floor, a bin and an edge warning on the floor, none inside a
 ## block; StationFixtures draws one MultiMesh a model with no shadow, glowing lenses and the printed sheet, and nothing
-## on the other maps but Depot's wall extras (DX1), some of which Subway carries too (DX2); the ceilings' strip lamps are the model, turned along rooms running along z; no colour reads as
-## a team; a malformed or unknown fixture is warned about and left out.
+## on the other maps but Depot's wall extras (DX1), some of which Subway carries too (DX2), and the Range's firing point
+## (RQ1: its shelter and flag cast shadows); the ceilings' strip lamps are the model, turned along rooms running along
+## z; no colour reads as a team; a malformed or unknown fixture is warned about and left out.
 
 const BUDGETS: Dictionary[StringName, int] = {
 	&"strip_lamp": 200, &"tunnel_lamp": 150, &"cctv_camera": 320, &"way_sign": 90, &"fire_extinguisher": 480,
@@ -17,7 +18,13 @@ const BUDGETS: Dictionary[StringName, int] = {
 	&"fire_point": 425, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500, &"pipe_run_1": 360,
 	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
 	&"depot_sign_ppe": 52, &"depot_sign_pallet_storage": 52, &"depot_sign_fire_exit": 52,
+	# the Range's firing point (RQ1, tests/unit/test_rq1_range.gd checks where they stand)
+	&"range_canopy": 3300, &"range_flag": 280, &"range_sign_rules": 66, &"range_sign_chrono": 52,
+	&"range_sign_eye_pro": 52, &"range_sign_safe_zone": 52,
 }
+## The Range's models (RQ1: MapData.fixtures), none in Subway's station; every one prints the Range's own sheet.
+const RANGE: Array[StringName] = [&"range_canopy", &"range_flag", &"range_sign_rules", &"range_sign_chrono",
+		&"range_sign_eye_pro", &"range_sign_safe_zone"]
 ## The models only Depot's walls carry (DX1: MapData.fixtures), not Subway's station: a warehouse's signs.
 const DEPOT: Array[StringName] = [&"depot_sign_assembly", &"depot_sign_no_riding", &"depot_sign_pallet_storage"]
 ## Depot's wall extras Subway's station carries too that print Depot's sheet (DX2).
@@ -28,7 +35,7 @@ const DEPOT_PRINTED: Array[StringName] = [&"fire_point", &"depot_sign_assembly",
 		&"depot_sign_defib", &"depot_sign_no_riding", &"depot_sign_ppe", &"depot_sign_pallet_storage",
 		&"depot_sign_fire_exit"]
 const HUNG: Array[StringName] = [&"way_sign", &"departures_n", &"departures_s"]
-const LENSED: Array[StringName] = [&"strip_lamp", &"tunnel_lamp"]
+const LENSED: Array[StringName] = [&"strip_lamp", &"tunnel_lamp", &"range_canopy"]
 const PRINTED: Array[StringName] = [&"way_sign", &"edge_sign", &"platform_clock", &"poster_a", &"poster_b",
 		&"poster_c", &"poster_d", &"poster_e", &"poster_f", &"poster_g", &"poster_h", &"poster_i", &"poster_j", &"poster_k",
 		&"poster_l", &"poster_m", &"poster_wide_a", &"poster_wide_b", &"poster_wide_c", &"name_board", &"departures_n",
@@ -105,10 +112,12 @@ func test_every_model_loads_within_its_budget_with_its_glass_or_print() -> void:
 		assert_between(_tris(mesh), int(BUDGETS[model] * 0.8), BUDGETS[model], "%s uses its budget, within it" % model)
 		var surfaces := _surfaces(mesh)
 		assert_eq(surfaces.has(StationFixtures.LENS_SURFACE), LENSED.has(model), "%s's glass: %s" % [model, surfaces])
-		assert_eq(surfaces.has(StationFixtures.SIGN_SURFACE), PRINTED.has(model) or DEPOT_PRINTED.has(model),
-				"%s's print: %s" % [model, surfaces])
+		assert_eq(surfaces.has(StationFixtures.SIGN_SURFACE), PRINTED.has(model) or DEPOT_PRINTED.has(model) \
+				or RANGE.has(model), "%s's print: %s" % [model, surfaces])
 		if DEPOT_PRINTED.has(model):
 			assert_eq(cfg.sheet_of(model), "res://assets/textures/depot/signs.png", "%s prints Depot's sheet" % model)
+		if RANGE.has(model):
+			assert_eq(cfg.sheet_of(model), "res://assets/textures/range/signs.png", "%s prints the Range's" % model)
 	for model in cfg.models:
 		assert_true(BUDGETS.has(StringName(model)), "%s has a budget here" % model)
 
@@ -116,7 +125,7 @@ func test_every_model_loads_within_its_budget_with_its_glass_or_print() -> void:
 func test_every_printed_face_keeps_its_cell_s_shape() -> void:
 	# Each printed triangle's world edges over its edges on the 2048 px sheet: one ratio a triangle, so no face
 	# stretches its cell's drawing (within 2%).
-	for model: StringName in PRINTED:
+	for model: StringName in PRINTED + RANGE:
 		var mesh := _mesh(model)
 		for s in mesh.get_surface_count():
 			var mat := mesh.surface_get_material(s)
@@ -146,7 +155,7 @@ func test_subway_names_every_model_and_the_tunnels_their_lamps() -> void:
 	for f in m.station.fixtures:
 		counts[f.model] = counts.get(f.model, 0) + 1
 	for model in cfg.models:
-		if not DEPOT.has(StringName(model)):
+		if not DEPOT.has(StringName(model)) and not RANGE.has(StringName(model)):
 			assert_gt(counts.get(StringName(model), 0), 0, "%s placed" % model)
 	assert_between(counts.get(&"tunnel_lamp", 0), 10, 14, "about 12 tunnel lamps (the model list)")
 	assert_gte(counts.get(&"name_board", 0), 8, "the station's name along both platforms")
@@ -212,7 +221,8 @@ func test_the_view_draws_one_multimesh_a_model_glowing_and_printed_with_no_shado
 	for model: StringName in view.placed():
 		var chunk: float = cfg.chunks.get(model, 0.0)
 		views += StationFixtures.chunked(view.placed()[model], chunk).size() if chunk > 0.0 else 1
-	assert_eq(view.placed().size(), cfg.models.size() - DEPOT.size(), "every model but a warehouse's sign")
+	assert_eq(view.placed().size(), cfg.models.size() - DEPOT.size() - RANGE.size(),
+			"every model but a warehouse's sign and the Range's")
 	assert_eq(view.views().size(), views, "one MultiMesh a model (the pipework's a chunk, DX2)")
 	assert_eq(total, m.station.fixtures.size(), "every fixture drawn")
 	assert_eq(glow, 1, "the tunnel lamp's glass glows")
@@ -250,17 +260,30 @@ func test_each_tunnel_lamp_lights_its_running_tunnel_s_arch_from_its_glass() -> 
 
 
 func test_no_other_map_has_fixtures_and_freeing_leaves_no_orphans() -> void:
-	for id: String in ["woodland", "range"]:
-		assert_null(StationFixtures.build(_map(id), cfg), "%s has none" % id)
+	assert_null(StationFixtures.build(_map("woodland"), cfg), "woodland has none")
 	assert_null(StationFixtures.build(null, cfg))
-	for id: String in ["subway", "depot"]:
+	for id: String in ["subway", "depot", "range"]:
 		var view := StationFixtures.build(_map(id), cfg)
-		assert_not_null(view, "%s's fixtures drawn (Depot's: its wall extras, DX1)" % id)
+		assert_not_null(view, "%s's fixtures drawn (Depot's: its wall extras, DX1; the Range's firing point, RQ1)" % id)
 		if view == null:
 			continue
 		add_child(view)
 		view.free()
 	assert_no_new_orphans()
+
+
+func test_the_range_s_shelter_and_flag_cast_shadows_and_its_signs_none() -> void:
+	var view := StationFixtures.build(_map("range"), cfg)
+	assert_not_null(view, "the Range's firing point drawn")
+	if view == null:
+		return
+	add_child_autofree(view)
+	assert_eq(view.placed().keys().size(), RANGE.size(), "every one of the Range's models, nothing else")
+	for v in view.views():
+		var shadow := cfg.shadow_models.has(String(v.name).to_snake_case())
+		assert_eq(v.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON, shadow,
+				"%s %s" % [v.name, "casts a shadow" if shadow else "casts none"])
+	assert_eq(view.lamps().size(), 0, "no light of its own (its battens only glow)")
 
 
 func test_subway_s_ceiling_lamps_are_the_strip_model_turned_along_their_rooms() -> void:
