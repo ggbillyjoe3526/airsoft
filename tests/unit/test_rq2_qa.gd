@@ -62,3 +62,26 @@ func test_no_model_has_a_nan_vertex_or_normal() -> void:
 			assert_true(n.is_finite(), "%s normal" % model)
 			if not n.is_finite():
 				break
+
+
+## The owner's "more colour, more green on the shed and yellow on the crane": every modelled piece keeps all its colour
+## against the look's pull toward grey and takes under half the greybox's fade, and most of the Range's sheds are green.
+func test_models_keep_their_colour_and_most_range_sheds_are_green() -> void:
+	var play := PlayTuning.load_default()
+	var cfg := play.skyline
+	var m := MapData.load_map("range", play.map_style, 1)
+	var middle := SkylineView.middle_of(m)
+	var sheds := 0
+	var green := 0
+	for p: SkylinePiece in m.skyline:
+		for placed: SkylineModels.Placed in SkylineModels.placed_of(p, cfg, middle):
+			assert_eq(placed.keep, 1.0, "%s keeps all its colour" % p.kind)
+			assert_lt(placed.haze, 0.5, "%s fades under half the greybox's" % p.kind)
+		if p.kind == &"shed":
+			sheds += 1
+			var c := SkylineModels.body_of(p, cfg)
+			if c.g > c.r and c.g > c.b:
+				green += 1
+	assert_gte(green * 4, sheds * 3, "%d of %d sheds green" % [green, sheds])
+	var crane := cfg.crane_colour
+	assert_gt(crane.s, 0.9, "the crane a full yellow")

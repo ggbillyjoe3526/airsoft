@@ -80,7 +80,7 @@ extends Resource
 @export_group("Crane")
 ## A mast `crane_mast` m square, a jib `crane_jib` m thick along the long side reaching `crane_reach` of it toward the
 ## field, a counterweight `crane_weight` m on the back end and a hook line `crane_line` m long near the jib's tip.
-@export var crane_colour: Color = Color("cdb338")
+@export var crane_colour: Color = Color("f0c800")
 @export var crane_weight_colour: Color = Color("6f7378")
 @export var crane_mast: float = 1.4
 @export var crane_jib: float = 0.9
@@ -153,9 +153,16 @@ extends Resource
 @export var treeline_sides: int = 6
 @export var treeline_sink: float = 1.0
 ## How much of its own colour a treeline keeps against the look's pull toward grey (LookConfig.paint_saturation; FT1):
-## all of it. Pulled to the look's share, its greens lit by the warm sun read olive-grey from the fence. Every other
-## piece takes the look's pull.
+## all of it. Pulled to the look's share, its greens lit by the warm sun read olive-grey from the fence. The greybox
+## pieces take the look's pull.
 @export_range(0.0, 1.0) var treeline_keep: float = 1.0
+## How much of its own colour a modelled piece keeps against the same pull (RQ2, the owner: "more colour, more green on
+## the shed and yellow on the crane"): all of it, as the treelines', so a shed's green and a crane's yellow read past
+## the distance fade.
+@export_range(0.0, 1.0) var model_keep: float = 1.0
+## A modelled piece's share of the fade toward the horizon (`fade_most`; RQ2, the owner's "more colour"): under half
+## the greybox's, as a treeline's is under it (`treeline_fade`), so a crane's yellow 60 m out stays yellow, not tan.
+@export_range(0.0, 1.0) var model_fade: float = 0.4
 ## The band drawn from a model (Dev 3, WT1, tools/blender/maps/far_tree.py) in place of the cones: a section of two
 ## rows of stepped spruces `treeline_section` m long (x) and deep (y), its top the tallest spire, laid end to end along
 ## each run of the line (whole sections, each stretched to an even share), every other one mirrored, each in one of

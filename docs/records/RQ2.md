@@ -1,6 +1,6 @@
 # RQ2 · The Range's skyline models rebuilt in detail
 
-**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
+**Review:** pending (colour pass)
 
 ## Attempts
 
@@ -9,6 +9,7 @@
 | 2026-11-17 | 1 | build thread (three workers, one per group) | ✓ touched tests (CI runs the rest) | 6/8 Retry | check 1: mast head flat, crane gusset/hook, fuselage nose and closed tear, water tower legs and bowl; check 4: no test fails on the old models |
 | 2026-11-17 | 2 | build thread (two workers) | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the water tower's top-bay tie rods ran through the bowl |
 | 2026-11-17 | 3 | build thread | ✓ touched tests (CI runs the rest) | 8/8 Accept | |
+| 2026-11-17 | 4 | build thread (owner's colour note) | ✓ touched tests (CI runs the rest) | | |
 
 ## Decisions
 
@@ -32,6 +33,13 @@
   as before and `keep_depth` (the crane) behaves the same.
 - **Reds kept off the team hues.** The crane's hook, isolator and pendant stop are raspberry #a82c68; the fuselage's
   cheat line wine #7e2046 over plum #4a2f55 (a plain red reads near High contrast's Beta orange in linear hue).
+- **More colour (the owner, on the pictures: "there needs to be more colour. more green on the shed and yellow on the
+  crane").** The skyline's models took the look's pull toward grey (LookConfig paint saturation) and the full distance
+  fade, so the sheds' green read grey-olive and the cranes' yellow tan. Now every model keeps all its colour
+  (`SkylineConfig.model_keep` 1.0, as the treelines do) and takes 0.4 of the fade (`model_fade`); the cranes' yellow
+  is brighter (#f0c800, was #cdb338: under the Ultra haze a darker yellow still read tan; linear hue 40°, clear of
+  Beta's orange); and six of the Range's pale sheds are now greens in five shades (10 of 12 green, a grey and a cream
+  left for variety). The greybox pieces (containers, chimneys) keep the look's pull.
 - **Only the masts' floodlights glow at night.** The sheds' bulkhead lamps are painted, not night-lit, so the night
   surface keeps four masts × four lamps (`test_skyline`) and Woodland's night look is unchanged.
 - **Three modules** (`skyline_sheds.py`, `skyline_towers.py`, `skyline_hulls.py`) hold the builders; `skyline.py`
