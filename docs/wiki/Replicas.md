@@ -8,8 +8,8 @@ You carry two at once, a primary and a sidearm, picked in your [Loadout](Loadout
 dark olive gloves and sleeves, holding the one in your hands. A rifle sits low and near at the hip, so you see your
 left hand under the handguard just ahead of the magazine, its thumb along the near side and its forearm running
 up beside the rifle, and your right hand stays below the screen. A pistol
-is held tight in both hands, the left wrapped round the right, low on the right of the screen as a rifle is, turned a
-little so you see its side. Raise the
+is held tight in both hands, the left wrapped round the right, low on the right of the screen as a rifle is and at its
+angle, the muzzle pointing at the crosshair. Raise the
 sight and a rifle hides your hands behind itself; a pistol comes up to the middle in both hands, held whole under
 its slide. With a grip fitted your left hand closes round the grip, high under the handguard.
 

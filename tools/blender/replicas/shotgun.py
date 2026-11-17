@@ -632,7 +632,7 @@ def mag_release() -> object:
 
 def magazine() -> object:
     """The 30 BB shell: a box magazine, its foot slanting down to the back, two grooves down each side toward each
-    end, an oval grip pad each side, a floor plate's lip, and at its top the feed lips with the next three BBs."""
+    end, an oval grip pad each side, a floor plate's lip, and at its top the feed lips with one BB."""
     b = hs.Builder("Magazine", ["Detail", "Rubber", "BB"])
     side_prism(b, [(MAG_PX[0], MAG_TOP_PY, 2), (MAG_PX[1], MAG_TOP_PY, 2), (MAG_PX[1], MAG_FOOT_PY[1] - 4),
                    (MAG_PX[0], MAG_FOOT_PY[0] - 4)], MAG_HW, "Detail", 2)
@@ -656,12 +656,11 @@ def magazine() -> object:
             px = 636.0 + 7.4 * k
             d.prism([(Y(px) + y, Z(170.0) + z) for y, z in hs.rounded_rect(0.0012, 0.0036 if 0 < k < 5 else 0.0026,
                                                                          0.0011, 2)], "x", x0, x1, "Rubber")
-    # The feed lips and the next three BBs, side by side (one for each barrel).
+    # The feed lips and one BB in their middle (the owner, 0.1 Beta 2: "There should only be 1 visible bb"; there
+    # were three side by side, one for each barrel).
     d.box((-0.0105, Y(MAG_PX[0] + 34), Z(MAG_TOP_PY)), (0.0105, Y(MAG_PX[0] + 8), Z(MAG_TOP_PY) + 0.0030), "Rubber")
-    for i in (-1, 0, 1):
-        d.lathe([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026),
-                 (0.0026, 0.0015), (0.003, 0.0)], "BB", 12,
-                centre=(i * 0.0064, Y(MAG_PX[0] + 21), Z(MAG_TOP_PY) + 0.0036), axis="z")
+    d.lathe(hs.ball(aeg.BB_R, aeg.REPLICA_BB_ROUND // 2), "BB", aeg.REPLICA_BB_ROUND,
+            centre=(0.0, Y(MAG_PX[0] + 21), Z(MAG_TOP_PY) + 0.0036), axis="z")
     bits = hs.finish(d.build(), 0.0004, 1)
     return hs.join("Magazine", [ob, bits])
 

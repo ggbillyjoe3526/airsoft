@@ -4,12 +4,14 @@ extends Resource
 ## camera's space (x right, y up, -z forward), seconds, radians. Read by ReplicaView.
 
 ## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The pistols
-## sit low on the right as the rifles do, 35 cm from the eye and turned a little in (`hip_turn`), so they take about the
-## rifles' share of the screen at about their angle, both hands and no forearm in view (HA2, the owner: "make the pistol
-## take up less space on screen. it should roughly be same scale/angle as rifle"; it was 25 cm out, centred and square
-## on, HA1); the rifles sit near and low, so the left hand on the handguard shows and the right hand lies under the
-## view's bottom edge (HA1, the owner); the Compact SMG, a shorter replica, sits lower and further off than they do,
-## which draws it at their size and angle (the owner: "too high. It should be a similar angle and scale to the rifles").
+## sit low on the right as the rifles do, 35 cm from the eye and square to it as the rifles are, so they take about the
+## rifles' share of the screen at their angle, the muzzle on the crosshair as a rifle's is, both hands and no forearm in
+## view (HA2, the owner: "make the pistol take up less space on screen. it should roughly be same scale/angle as rifle";
+## it was 25 cm out, centred, HA1; then 0.1 Beta 2, the owner: "pistol angle at hip is slightly too far left. move it
+## slightly to the right to better match the same angle as the rifle": HA2's 0.15 rad turn in is gone); the rifles sit
+## near and low, so the left hand on the handguard shows and the right hand lies under the view's bottom edge (HA1, the
+## owner); the Compact SMG, a shorter replica, sits lower and further off than they do, which draws it at their size and
+## angle (the owner: "too high. It should be a similar angle and scale to the rifles").
 ## The Pump Shotgun has its own place, the hand out on its pump showing no more forearm than the rifles' (SH2). The arms
 ## model's holds (tools/blender/arms/hold_tables.py HOLDS) are solved for the Pump Shotgun's place and for the rifles'
 ## and the pistols' earlier ones (RIFLE_HIP, PISTOL_HIP); the arms ride the replica, so each hold is drawn where its
@@ -24,9 +26,9 @@ extends Resource
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
 ## How a replica is turned at the hip (rad, as the replica's rotation: x tilts the muzzle up, y turns it left, z rolls
-## the right side up), by replica id; none for others. Gone as the sight comes up.
-@export var hip_turn: Dictionary[StringName, Vector3] = {&"pistol": Vector3(0.0, 0.15, 0.0),
-		&"cyber": Vector3(0.0, 0.15, 0.0)}
+## the right side up), by replica id; none for others. Gone as the sight comes up. None today: every replica at the hip
+## lies square to the eye, its muzzle on the crosshair (0.1 Beta 2: the pistols' turn in read "too far left").
+@export var hip_turn: Dictionary[StringName, Vector3] = {}
 ## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it (the
 ## pistols near enough that the forearm drops out of view under the hand; the Pump Shotgun, which has no sights and is
 ## aimed along its top rail, near enough that its stock is behind the eye and you look over the receiver's back end:
