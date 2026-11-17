@@ -23,12 +23,16 @@ const ALL_STEPS := 255
 ## Half a diagonal's share of each axis: the diagonal probes' reach along x and z.
 const DIAGONAL := 0.70710678
 
-## The frame: cell size (m), cells across x and z, and the floor's bounds (cells past max_x or max_z overhang it).
+## The frame: cell size (m), cells across x and z, the grid's origin (min_x, min_z: on whole cells, at or just
+## below the floor's own corner) and the floor's bounds (floor_min_x .. max_x, floor_min_z .. max_z; cells past them
+## overhang it).
 var cell: float = 0.0
 var cols: int = 0
 var rows: int = 0
 var min_x: float = 0.0
 var min_z: float = 0.0
+var floor_min_x: float = 0.0
+var floor_min_z: float = 0.0
 var max_x: float = 0.0
 var max_z: float = 0.0
 ## Cell c's floors are nodes cell_start[c] .. cell_start[c + 1] - 1, lowest first; c = row * cols + col.

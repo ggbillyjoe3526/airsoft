@@ -1,7 +1,7 @@
 # SW2 · Subway from the 0.1 Beta 2 playtest
 
 **Review:** QA Pass, Performance Pass (attempt 1, `pipeline/runs/SW2/attempt-1/`), Critic 8/8 Accept (attempt 4,
-`pipeline/runs/SW2/attempt-4/critic-report.md`)
+`pipeline/runs/SW2/attempt-4/critic-report.md`); the grid follow-up: QA Pass, Performance Pass, Critic 7/8 Accept
 
 The owner's 0.1 Beta 1 playtest (2026-11-17, notes and screenshots for 0.1 Beta 2): Subway's items 2 ("make Subway
 public"), 18 ("make the elevator sound of it moving louder. I can't hear it"), 19 ("doors closing should play when the
@@ -19,6 +19,7 @@ around the train", his 6.png) and 27 (the trains' front and end models need refi
 | 2026-11-17 | 2 | Opus 5.5 (build thread) | ✓ (lint, wiki, flat faces, touched unit files 105/105 and the 150-test map batch; the rest in CI) | 7/8 Retry | check 1: a thin line round the south mouth; the cab's mask short of the photo's, its door window small; the end's bellows narrow and square |
 | 2026-11-17 | 3 | Opus 5.5 (build thread) | ✓ (lint, wiki, flat faces, touched unit files 80/80) | 7/8 Retry | check 1: ragged slivers where the cab's mask meets the rim's round; the door's glass a pale slab in the mask |
 | 2026-11-17 | 4 | Opus 5.5 (build thread) | ✓ (lint, flat faces, touched unit files 75/75 with the new hole test; the rest in CI) | 8/8 Accept | – |
+| 2026-11-17 | 4, follow-up | Opus 5.5 (build thread) | ✓ (CI's part 1 and part 3 failures fixed; 50 route, map and old-Depot test files pass; the rest in CI) | 7/8 Accept | check 7 (advisory, fixed): the old Depot's walkable-area test kept the browser's name after its figure moved |
 
 ## What changed
 
@@ -89,6 +90,17 @@ around the train", his 6.png) and 27 (the trains' front and end models need refi
   a few shades lighter (`mouth_ring`, green-grey #7a8983), runs round each mouth's arch and down its platform side,
   2 cm off the wall with its edges drawn back (`StationSurface._add_mouth_ring`, `StationLook.mouth_ring_*`). Pictures
   `09` to `09e` and `13-mouths-overview.jpg`.
+- **The bots' route grid stays put** (`NavGridBuilder._frame`): the wider tunnels moved the map's outermost floors, and
+  the grid's origin (the floors' corner) moved with them: every cell shifted 0.1 m (half a cell), which shut the 0.75 m
+  way past the south track's skip wagons on the wall side (CI's
+  `test_bots_walk_past_subways_works_wagons_on_the_track_without_snagging`): the bots climbed onto the platform round
+  them again. The origin now sits on a whole number of cells (0.2 m), so moving a floor at one end never moves the cells
+  elsewhere. Depot's, Woodland's and the Range's corners are on whole cells already, so their grids are the same cell
+  for cell; Subway's is the same as before the wider tunnels to a centimetre. Two of Subway's lane points on the
+  flights' ramps (x 31 and 2) moved a tenth onto cells' centres (x 30.9 and 1.9), where the field's on-floor check
+  reads the ramp's height.
+- **The track bed past the south train's end** stops at the tunnel wall's line (`build_map.py beside_slot`): the slot
+  beside it has no wall to run in under, and the two floors overlapped 3 cm (CI's field rule allows 2.5).
 
 ## The models against their references
 
@@ -116,18 +128,21 @@ object model"); it is sized from the running tunnel's arch.
 ## What the bots showed
 
 Bot matches, 6v6 (`tools/balance.sh subway`, Normal, seeds 1 to 16, every mode, the field's 22 s fuse), on this
-layout (the east team climbing out of the tunnels):
+layout (the east team climbing out of the tunnels). The first run was on the 3.6 m tunnels; the second on the final
+layout, the 3.9 m tunnels and the grid on whole cells, with the bots back on the track past the skips:
 
-| Figure | Before (SW1, Normal 32 seeds) | SW2 (Normal 16 seeds) |
-|---|---|---|
-| Elimination: the west end's share | 48.5 % ±3.2 | 46.1 % ±4.6 (53 of 115) |
-| Attack / Defend: the attackers' share | 57.3 % ±3.2 | 47.9 % ±4.6 (56 of 117) |
-| Plant The Bomb: the attackers' share | 49.3 % ±3.3 | 47.5 % ±4.6 (56 of 118) |
-| Plant The Bomb: armed / armed gone off | 72 % / 10 of 161 | 65 % / 4 of 77 |
-| Rounds that run out the clock | 0 | 0 in every mode |
+| Figure | Before (SW1, Normal 32 seeds) | SW2, 3.6 m tunnels (16 seeds) | SW2 final (16 seeds) |
+|---|---|---|---|
+| Elimination: the west end's share | 48.5 % ±3.2 | 46.1 % ±4.6 (53 of 115) | 39.8 % ±4.4 (49 of 123) |
+| Attack / Defend: the attackers' share | 57.3 % ±3.2 | 47.9 % ±4.6 (56 of 117) | 60.2 % ±4.6 (68 of 113) |
+| Plant The Bomb: the attackers' share | 49.3 % ±3.3 | 47.5 % ±4.6 (56 of 118) | 47.6 % ±4.5 (59 of 124) |
+| Plant The Bomb: armed / armed gone off | 72 % / 10 of 161 | 65 % / 4 of 77 | 65 % / 1 of 81 |
+| Rounds that run out the clock | 0 | 0 in every mode | 0, 1 of 113, 0 |
 
-Every figure is in its band (Elimination's "near an edge" is the 16 seeds' wide error, not its value), so nothing was
-tuned: the fuse stays 22 s. Reports: the shared files' `pipeline/runs/SW2/attempt-1/`.
+Attack / Defend and Plant The Bomb are in band, so the fuse stays 22 s. Elimination's west share is outside its
+45–55 % band but within noise (1.2 standard errors under 45 %), which the bug pass re-measures on more seeds before
+anyone tunes (`docs/PROCESS.md` › Bug pass); a 32-seed run follows this PR, and the 0.1 Beta 2 pass measures every
+field. Reports: the shared files' `pipeline/runs/SW2/attempt-1/` and `attempt-4-followup/`.
 
 ## Decisions
 
@@ -141,6 +156,9 @@ tuned: the fuse stays 22 s. Reports: the shared files' `pipeline/runs/SW2/attemp
 - **The running tunnels widen, not the cars narrow:** the cars stay 1.72 m a side (their platform doors meet the
   platforms' edges); the tunnels past the mouths are look and cover only for the east team's start, so 0.3 m more
   width there changes no lane.
+- **The grid's origin snaps to whole cells, not the skips narrow:** the skips stand centred on their rails at their
+  size (owner, 2026-11-12), and the cause was the grid moving, not the gap; a grid that moves with a far floor would
+  open or shut tight ways past again on the next layout change.
 - **Only the cars' sides moved in** (1.75 to 1.72 m): the tunnel's lining stays where the platform edges and the
   trains' doors meet it.
 

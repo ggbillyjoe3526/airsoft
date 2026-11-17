@@ -312,15 +312,44 @@ func test_walks_off_the_depot_dock_by_a_ramp_never_its_lip() -> void:
 	assert_gt(_route_length(dock, path), 9.0, "round by a ramp")
 
 
-func test_depot_has_one_floor_a_cell_and_the_browsers_walkable_area() -> void:
+func test_depot_has_one_floor_a_cell_and_its_walkable_area_on_whole_cells() -> void:
 	assert_eq(depot.layers, 1)
 	assert_eq(depot.node_count(), 42075, "255 x 165 cells, one floor each")
 	var walk := 0
 	for k in depot.node_count():
 		walk += depot.walkable[k]
 	# The browser's grid had 27,380; the map's numbers are single precision here, which moves a few edge cells. DP1 adds
-	# the Box's inside and the port walls, thinner than the gabions and walls they replaced: 27,363 became 27,593.
-	assert_almost_eq(walk, 27593, 50)
+	# the Box's inside and the port walls, thinner than the gabions and walls they replaced: 27,363 became 27,593. SW2's
+	# grid origin on whole cells moved this old Depot's cells half a cell (its corner is at -25.5 m), so the cells
+	# beside its walls line up with them differently: 25,935, no longer the browser's figure (its cells started at the
+	# corner). The shipped fields' corners are on whole cells, so their grids did not move.
+	assert_almost_eq(walk, 25935, 50)
+
+
+func test_the_grids_origin_sits_on_whole_cells_so_a_floor_moved_at_one_edge_never_shifts_the_rest() -> void:
+	# SW2: Subway's wider running tunnels moved its outermost floor and every cell with it, which shut the way past
+	# the works wagons at the other end of the field. A step 0.3 m out past the yard's north edge (to z -15.7).
+	var step := _block(&"floor", Vector3(0.0, -0.25, -YARD_HALF - WALL - 0.15), Vector3(4.0, 0.5, 0.3))
+	var g := NavGrid.build(_yard([step]), cfg, body)
+	assert_almost_eq(yard.min_z, -YARD_HALF - WALL, 1e-6, "a corner on a whole cell is the origin")
+	assert_almost_eq(g.min_z, -15.8, 1e-6, "the next whole cell below the step's edge, not the edge")
+	assert_almost_eq(g.floor_min_z, -YARD_HALF - WALL - 0.3, 1e-6, "the floor's own corner kept")
+	assert_eq(g.min_x, yard.min_x)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	for k in 300:
+		var p := Vector3(rng.randf_range(-YARD_HALF, YARD_HALF), 0.0, rng.randf_range(-YARD_HALF + 1.0, YARD_HALF))
+		assert_eq(g.is_walkable_at(p), yard.is_walkable_at(p), "the same cells at %s" % p)
+
+
+func test_a_corner_a_hair_off_a_whole_cell_keeps_its_own_value_as_the_origin() -> void:
+	var on := -66.4
+	var noisy := -66.400002 # the Range's corner as the map's single-precision numbers give it
+	assert_eq(NavGridBuilder._on_cells(noisy, 0.2), noisy, "single-precision noise: still on its cell")
+	assert_eq(NavGridBuilder._on_cells(on, 0.2), on)
+	assert_eq(NavGridBuilder._on_cells(-44.0, 0.2), -44.0)
+	assert_almost_eq(NavGridBuilder._on_cells(-25.5, 0.2), -25.6, 1e-9, "off the lattice: the next whole cell below")
+	assert_almost_eq(NavGridBuilder._on_cells(3.05, 0.2), 3.0, 1e-9, "a positive corner snaps down too")
 
 
 func test_every_depot_spawn_reaches_every_dead_zone_spot_and_the_other_ends_spawns() -> void:

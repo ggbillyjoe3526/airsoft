@@ -722,14 +722,21 @@ def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress:
     return b
 
 
+def beside_slot(x0: float, x1: float, z: float, side: float) -> bool:
+    """Whether a running tunnel's slot (run_s_out, past the south train's end) runs beside a floor's edge at z,
+    where the tunnel wall would be: no wall to run in under there, and the two floors overlap by their growth only."""
+    return any(rm["name"].startswith("run_") and abs((rm["z0"] if side > 0 else rm["z1"]) - z) < EPS
+               and rm["x0"] - EPS <= x0 and x1 <= rm["x1"] + EPS for rm in L.rooms)
+
+
 def under_wall(bx: list[float]) -> list[float]:
     """A track bed's floor run on L.UNDER_WALL in under its tunnel wall (AUD2); any other floor as it is."""
     x0, x1, y0, y1, z0, z1 = bx
     if abs(y1 - L.T) > EPS:
         return bx
-    if abs(z0 + L.TRACK_WALL_Z) < EPS:
+    if abs(z0 + L.TRACK_WALL_Z) < EPS and not beside_slot(x0, x1, z0, -1.0):
         z0 -= L.UNDER_WALL
-    if abs(z1 - L.TRACK_WALL_Z) < EPS:
+    if abs(z1 - L.TRACK_WALL_Z) < EPS and not beside_slot(x0, x1, z1, 1.0):
         z1 += L.UNDER_WALL
     return [x0, x1, y0, y1, z0, z1]
 

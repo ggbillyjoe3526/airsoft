@@ -433,6 +433,8 @@ OT_FLAG = (12.0, 2.4, P)                              # the lower hall's west en
 # Bots' lanes, Street end to Tunnel end: (x, z, y) points on the floor. Each ends by the flags, not in the tunnel: a
 # defender (Attack / Defend, the Tunnel team) holds its lane's last point or the one before (RoundPlanner), so the last
 # two are its posts. The Tunnel team walks out of the tunnel to its lanes' ends.
+# A point on a flight's ramp stands on a cell's centre of the bots' grid (x on an odd tenth: the grid's 0.2 m cells sit
+# on whole cells), or the field's on-floor check reads the ramp's height a tenth of a metre along.
 # MB1: n takes the lifts to the lift landing and the north platform's whole length past the north train to flag B
 # (posts: the lower hall's north doors and B's east side); m the lower escalators, the lower hall and the south
 # platform to train A's doors (its posts); s the south passage and the stair (posts: the half landing and the stair's
@@ -445,12 +447,12 @@ LANES = {
     "n": [(-50, -3, C), (-44.85, -2.6, C), (-44.85, -2.8, P), (-44, -5.25, P), (-44, -7.3, P), (-20.5, -7.0, P),
           (-7, -6.3, P), (7.5, -7.0, P), (16.4, -7.3, P), (26, -6.8, P), (37, -8.3, P)],
     "m": [(-50, 0, C), (-44, 2.5, C), (-38.7, 1.49, C), (-24, 1.2, C), (-19, 1.2, C), (-10, 0, C), (-5, 1.2, C),
-          (2, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P), (46.5, 7.0, P)],
+          (1.9, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P), (46.5, 7.0, P)],
     "s": [(-50, 3, C), (-44, 4.5, C), (-38.7, 4.47, C), (-30, 7.5, C), (-10, 6, C), (-5, 8, C), (4, 7.2, C),
-          (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (31, -0.5, -12.0), (36.2, -1.0, LANDING),
+          (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (30.9, -0.5, -12.0), (36.2, -1.0, LANDING),
           (41.5, 0, -16.0)],
     "np": [(-50, -4.5, C), (-38.7, -4.47, C), (-24, -6.0, C), (-14, -8.0, C), (-4, -7.2, C), (4.5, -7.2, C),
-           (10, -8.5, C), (16, -8.0, C), (23.5, -6.5, C), (26, 0.5, C), (31, -0.5, -12.0), (36.2, -1.0, LANDING),
+           (10, -8.5, C), (16, -8.0, C), (23.5, -6.5, C), (26, 0.5, C), (30.9, -0.5, -12.0), (36.2, -1.0, LANDING),
            (41.5, 0, -16.0), (46.5, -4.0, P)],
     "sp": [(-50, 1.5, C), (-38.7, 2.98, C), (-28.7, 6.6, C), (-28.7, 6.6, P), (-21, 7.2, P), (-20.5, 0, P),
            (-20.5, -6.8, P), (-8, -6.5, P), (7.5, -6.8, P), (16.4, -3.0, P), (20, -1.0, P), (26, -6.8, P),
