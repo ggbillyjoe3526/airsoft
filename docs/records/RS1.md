@@ -1,6 +1,6 @@
 # RS1 · Respawns, so a round runs its clock
 
-**Review:** 2 attempts · critic PENDING · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner's ask (playtest item 28, 2026-11-17): "matches should let players/bots respawn. i feel matches are over too
 quickly because players get knocked out too fast. the player or bot can respawn after so many seconds. the idea is
@@ -14,7 +14,7 @@ the panel moves when it is.
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-17 | 1 | Opus 5.5 (build thread) | ✓ (gdlint, wiki, changelog, touched tests; the rest in CI) | 6/8 Retry | No cue on coming back; Plant The Bomb unmeasured; no changelog note or README rows |
-| 2026-11-17 | 2 | Opus 5.5 (build thread) | ✓ (as above) | PENDING | – |
+| 2026-11-17 | 2 | Opus 5.5 (build thread) | ✓ (as above) | 8/8 Accept | – |
 
 ## What the bots showed
 
