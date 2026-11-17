@@ -183,10 +183,13 @@ func test_an_old_save_loads_unchanged() -> void:
 	assert_true(SaveFile.write(SAVE, Settings.KIND, Settings.VERSION, {"custom_rules": old}))
 	var settings := Settings.new()
 	settings.load_file(SAVE)
-	assert_eq(settings.custom_rules.to_dict(), old)
+	# A rule added since (RS1's respawns) reads as its default; everything saved stays as it was.
+	var loaded := old.duplicate()
+	loaded["respawns"] = RoundConfig.RespawnRule.BY_MODE
+	assert_eq(settings.custom_rules.to_dict(), loaded)
 	var page := _page(MatchOptions.RULES_CUSTOM, settings)
 	assert_eq(page.map_check_size(), 6, "2 is not Depot's: its standard")
-	assert_eq(settings.custom_rules.to_dict(), old, "opening the page writes nothing over it")
+	assert_eq(settings.custom_rules.to_dict(), loaded, "opening the page writes nothing over it")
 
 
 # --- 8v8 on Woodland (the largest, TS1) ---

@@ -1,9 +1,9 @@
 class_name CustomRules
 extends RefCounted
 ## The Custom rule set's switches (concept `rules-custom.png`; the browser game's config/matchRules.ts MatchRules):
-## players per team, rounds to win, the round's length, friendly fire, whether ricochets count and respawns (RS1). Saved with the
-## settings under "custom_rules", each value checked on its own; they start as Skirmish's, the match the game always
-## had. A Custom match plays them (applied_to), stays out of the records and gives XP at no more than the Custom
+## players per team, rounds to win, the round's length, friendly fire, whether ricochets count and respawns (RS1). Saved
+## with the settings under "custom_rules", each value checked on its own; they start as Skirmish's, the match the game
+## always had. A Custom match plays them (applied_to), stays out of the records and gives XP at no more than the Custom
 ## multiplier (data/levels.md).
 
 ## The Match screen's choices: players per team (each map offers its own run of them, data/maps.md: every field 5v5 to
