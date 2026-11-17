@@ -2,11 +2,12 @@ extends GutTest
 ## RQ2 (QA): the rebuilt skyline models keep their bounds, only the mast has lamp glass, every model keeps
 ## piece-coloured (BODY) faces, and no vertex is degenerate.
 
-## Each model's size (m) at the commit before RQ2; shed models were a little wider than their box (eaves), now exact.
+## Each model's size (m) at the commit before RQ2; shed models were a little wider than their box (eaves), now exact;
+## the mast's box grew 0.5 -> 2.4 m deep for its three-sector head (RQ2 attempt 2).
 const OLD_SIZES: Dictionary[String, Vector3] = {
 	"shed": Vector3(26.265, 8.201, 14.05), "shed_long": Vector3(50.265, 12.401, 22.05),
 	"shed_deep": Vector3(40.265, 12.001, 26.05), "crane": Vector3(24.8, 17.985, 4.8),
-	"mast": Vector3(2.4, 14.0, 0.5), "fuselage": Vector3(24.0, 9.0, 4.45), "silo": Vector3(5.96, 15.0, 5.96),
+	"mast": Vector3(2.4, 14.0, 2.4), "fuselage": Vector3(24.0, 9.0, 4.45), "silo": Vector3(5.96, 15.0, 5.96),
 	"watch_tower": Vector3(5.2, 12.4, 5.2), "water_tower": Vector3(6.452, 22.0, 6.445)}
 const MAST_LAMP_TRIANGLES := 8
 
@@ -24,8 +25,8 @@ func test_each_model_keeps_the_bounds_it_had() -> void:
 		for v in verts:
 			box = box.expand(v)
 		var want := OLD_SIZES[model]
-		assert_true((box.size - want).abs().max_axis_index() >= 0 and absf((box.size - want)[(box.size - want).abs().max_axis_index()]) < 0.3,
-				"%s is %s, was %s" % [model, box.size, want])
+		var off := (box.size - want).abs()
+		assert_lt(maxf(off.x, maxf(off.y, off.z)), 0.3, "%s is %s, was %s" % [model, box.size, want])
 		assert_lt(absf(box.position.y), 0.01, "%s stands on the ground" % model)
 
 

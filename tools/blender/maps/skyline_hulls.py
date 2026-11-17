@@ -31,9 +31,9 @@ def _turn(faces: list, wants: list, smooth: bool) -> None:
         f.smooth = smooth
 
 
-def _sheet(m: sk.Model, rows: list, mats, wants, smooth: bool = True, closed: bool = False) -> None:
+def _sheet(m: sk.Model, rows: list, mats, wants, smooth: bool = True, closed: bool = False) -> list:
     """Quads between rows of Godot points (each row the same count) sharing their corners, so a curve shades round.
-    `mats(span, k)` names a quad's colour, `wants(span, k)` the Godot direction it faces."""
+    `mats(span, k)` names a quad's colour, `wants(span, k)` the Godot direction it faces. Returns its corners."""
     bm = m.b.bm
     vs = [[bm.verts.new(m.g(p)) for p in row] for row in rows]
     n = len(rows[0])
@@ -46,6 +46,7 @@ def _sheet(m: sk.Model, rows: list, mats, wants, smooth: bool = True, closed: bo
             faces.append(f)
             turns.append(m.g(wants(s, i)))
     _turn(faces, turns, smooth)
+    return vs
 
 
 def _lathe(m: sk.Model, profile: list, mat: str, sides: int, centre=(0.0, 0.0, 0.0), cap: bool = True) -> None:
@@ -315,10 +316,7 @@ class Hull:
         for i, x in enumerate(xs):
             ring = []
             for k in range(self.sides):
-                p = self.corner(x, k)
-                if i == 0 and jag is not None:
-                    p.x += jag(k)
-                ring.append(self.put(p))
+                ring.append(self.put(self.corner(x + (jag(k) if i == 0 and jag is not None else 0.0), k)))
             rows.append(ring)
 
         def wants(s, k):
@@ -327,10 +325,10 @@ class Hull:
             mid = (self.corner(x, k) + self.corner(x, k + 1)) * 0.5
             return self.turn((0.0, mid.y - self.cy - dy, mid.z))
 
-        _sheet(m, rows, mats, wants, smooth=True, closed=True)
+        vs = _sheet(m, rows, mats, wants, smooth=True, closed=True)
         if tip is not None:
             bm = m.b.bm
-            last = [bm.verts.new(m.g(p)) for p in rows[-1]]
+            last = vs[-1]   # shared with the skin, so the tip shades on round without a crease
             apex = bm.verts.new(m.g(self.put(tip)))
             faces, turns = [], []
             for k in range(self.sides):
@@ -348,21 +346,14 @@ class Hull:
         sgn = 1.0 if depth > 0.0 else -1.0
         for k in range(n):
             j = (k + 1) % n
-            a, b = self.corner(x, k), self.corner(x, j)
-            a.x += jag(k)
-            b.x += jag(j)
-            ai, bi = self.corner(x, k, inner), self.corner(x, j, inner)
-            ai.x += jag(k)
-            bi.x += jag(j)
+            a, b = self.corner(x + jag(k), k), self.corner(x + jag(j), j)
+            ai, bi = self.corner(x + jag(k), k, inner), self.corner(x + jag(j), j, inner)
             m.face([self.put(a), self.put(b), self.put(bi), self.put(ai)], rim, self.turn((-sgn, 0.0, 0.0)))
         rows = []
         for i, xx in enumerate((x, x + depth)):
             ring = []
             for k in range(n):
-                p = self.corner(xx, k, inner)
-                if i == 0:
-                    p.x += jag(k)
-                ring.append(self.put(p))
+                ring.append(self.put(self.corner(xx + (jag(k) if i == 0 else 0.0), k, inner)))
             rows.append(ring)
 
         def wants(s, k):
@@ -388,6 +379,31 @@ class Hull:
 
         _sheet(self.m, rows, lambda s, k: mat, wants, smooth=True)
 
+    def t_at(self, x: float, y: float) -> float:
+        """The angle (degrees, on the +Z side) at which the skin at x stands `y` m over the hull's axis line."""
+        ry, _, dy = self.section(x)
+        return math.degrees(math.asin(max(-1.0, min(1.0, (y - dy) / ry))))
+
+    def quad(self, corners: list, mat: str, lift: float, nx: int = 3) -> None:
+        """A patch over the skin between four (x, t degrees) corners (aft-low, fore-low, fore-high, aft-high), a grid
+        laid on the facets `lift` m proud, its corners shared."""
+        span = max(abs(corners[3][1] - corners[0][1]), abs(corners[2][1] - corners[1][1]))
+        nt = max(2, math.ceil(span / 6.0))
+
+        def at(a, b):
+            lo = [corners[0][i] + (corners[1][i] - corners[0][i]) * a for i in (0, 1)]
+            hi = [corners[3][i] + (corners[2][i] - corners[3][i]) * a for i in (0, 1)]
+            return lo[0] + (hi[0] - lo[0]) * b, lo[1] + (hi[1] - lo[1]) * b
+
+        grid = [[at(i / nx, j / nt) for j in range(nt + 1)] for i in range(nx + 1)]
+        rows = [[self.put(self.surf(x, t) + self.normal(x, t) * lift) for x, t in row] for row in grid]
+
+        def wants(s, k):
+            x, t = at((s + 0.5) / nx, (k + 0.5) / nt)
+            return self.turn(self.normal(x, t))
+
+        _sheet(self.m, rows, lambda s, k: mat, wants, smooth=True)
+
     def pane(self, x: float, t: float, w: float, h: float, mat: str, lift: float) -> None:
         """A small rounded window (an octagon) centred at x, t (degrees), `w` m along and `h` m round."""
         ry, rz, _ = self.section(x)
@@ -403,13 +419,27 @@ class Hull:
 
 # How far each kind of patch stands off the skin, m: each its own plane, the later over the earlier.
 GRIME, DOOR_SKIN, STRIPE, GLASS_LIFT, FRAME, VOID = 0.008, 0.013, 0.018, 0.023, 0.028, 0.033
+# The nose: its length from the full section to the radome's tip (0.8 of the diameter, photo 103958), the tip's
+# height off the axis (the droop), and the stations along it (shares of its length; closer toward the round tip).
+NOSE_LONG, NOSE_TIP = 3.6, -0.6
+NOSE_STEPS = (0.0, 0.12, 0.24, 0.36, 0.48, 0.6, 0.7, 0.79, 0.87, 0.94, 0.99)
+
+
+def _nose_station(x0: float, length: float, r: float, u: float) -> tuple:
+    """A nose station (x, half-height, half-width, axis drop) `u` of the way along it: the crown falls steadily over
+    the windscreen to the tip, the keel runs on nearly level and turns up under it, the sides close in round."""
+    top = NOSE_TIP + (r - NOSE_TIP) * (1.0 - u ** 1.7) ** 0.62
+    bot = NOSE_TIP - (r + NOSE_TIP) * (1.0 - u ** 2.6) ** 0.5
+    return (x0 + length * u, (top - bot) * 0.5, r * (1.0 - u ** 2.0) ** 0.55, (top + bot) * 0.5)
+
+
 # How far the broken-off tail lies turned off the body's line, degrees.
 TAIL_YAW = 6.0
 
 
 def fuselage() -> sk.Model:
     """A derelict airliner fuselage (photos 103958, 104010, 104028, 104040): off-white, weathered, lying low on
-    sleeper cribs; a drooped cockpit nose with its windscreen and side panes and a darker radome, a long row of
+    sleeper cribs; a tapered, drooped radome nose with a low band of cockpit panes, a long row of
     rounded windows over a two-stripe cheat line, the lower body a shade greyer, panel seams, closed doors and
     overwing exits outlined, the forward port door gone dark with a ladder up to it, the wing roots cut off short on
     their belly fairing; the rear section torn open (the cabin's seats and floor inside, bare frames past the skin)
@@ -417,7 +447,7 @@ def fuselage() -> sk.Model:
     +X), 4.45 m across, the fin's top 9 m up; the port side (-Z, the doors and the ladder) faces the field."""
     m = sk.Model("fuselage", {
         "skin": (1.0, vp.BODY), "skin_b": (0.94, vp.BODY), "grime": (0.86, vp.BODY), "belly": (0.87, vp.BODY),
-        "radome": (0.72, vp.BODY), "seam": (0.66, vp.BODY),
+        "seam": (0.66, vp.BODY),
         "glass": (0x2A2D30, vp.FIXED), "void": (0x17191A, vp.FIXED), "frame": (0x45484B, vp.FIXED),
         "lining": (0x4E504B, vp.FIXED), "floor": (0x5B5A52, vp.FIXED), "seat": (0x5A555B, vp.FIXED),
         "stripe": (0x7E2046, vp.FIXED), "stripe2": (0x4A2F55, vp.FIXED), "dirt": (0x6B665A, vp.FIXED),
@@ -430,10 +460,8 @@ def fuselage() -> sk.Model:
     t0 = 90.0 - 15 * 360.0 / sides * 0.5     # corners symmetric about the top; the window band one facet
     win_lo, win_hi = t0, t0 + 360.0 / sides  # 5.6 to 16.9 degrees: the window facet
     nose_x = 8.4
-    body = Hull(m, cy, [(-8.0, R, R, 0.0), (nose_x, R, R, 0.0), (9.4, R * 0.98, R * 0.98, -0.03),
-                        (10.3, R * 0.9, R * 0.9, -0.12), (11.0, R * 0.74, R * 0.75, -0.25),
-                        (11.5, R * 0.55, R * 0.56, -0.38), (11.82, R * 0.33, R * 0.34, -0.48),
-                        (11.96, R * 0.14, R * 0.15, -0.55)], sides, t0)
+    nose = [_nose_station(nose_x, NOSE_LONG, R, u) for u in NOSE_STEPS]
+    body = Hull(m, cy, [(-8.0, R, R, 0.0)] + nose, sides, t0)
     cut_x = -4.6
 
     def jag(k):
@@ -444,11 +472,9 @@ def fuselage() -> sk.Model:
     upper = set(range(16)) | {sides - 1}   # from the cheat line's facet over the top to the other's
 
     def mats(s, k):
-        if s >= 5:
-            return "radome"
         return "skin" if k in upper else "belly"
 
-    body.skin([cut_x, nose_x, 9.4, 10.3, 11.0, 11.5, 11.82, 11.96], mats, tip=(12.0, cy - 0.57, 0.0), jag=jag)
+    body.skin([cut_x] + [st[0] for st in nose], mats, tip=(nose_x + NOSE_LONG, cy + NOSE_TIP, 0.0), jag=jag)
     body.cut(cut_x, jag, 0.07, 3.6, "skin_b", "lining", "void")
     # the cabin seen through the tear: its floor running out past the skin, three rows of seats a side
     fy = cy - 0.75
@@ -514,10 +540,10 @@ def fuselage() -> sk.Model:
 
 
 def _frame_want(arc: list, s: int, k: int) -> tuple:
-    """A bare frame's quad faces: out (k 1), in (k 3), fore and aft (k 0, 2) of its arc at span s."""
+    """A bare frame's quad faces at span s of its arc (degrees): out (k 0), aft (k 1, +X), in (k 2), fore (k 3)."""
     t = math.radians((arc[s] + arc[s + 1]) * 0.5)
     radial = (0.0, math.sin(t), math.cos(t))
-    return [(-1.0, 0.0, 0.0), radial, (1.0, 0.0, 0.0), tuple(-c for c in radial)][k]
+    return [radial, (1.0, 0.0, 0.0), tuple(-c for c in radial), (-1.0, 0.0, 0.0)][k]
 
 
 def _fuselage_livery(m: sk.Model, body: Hull, cut_x: float, nose_x: float, win_lo: float, win_hi: float) -> None:
@@ -531,8 +557,8 @@ def _fuselage_livery(m: sk.Model, body: Hull, cut_x: float, nose_x: float, win_l
             body.patch(x0, x1, a, b, mat, lift)
 
         # the two-stripe cheat line under the windows, sweeping on round the nose under the cockpit
-        band(cut_x + 0.35, 11.2, -0.8, 4.8, "stripe", STRIPE)
-        band(cut_x + 0.35, 11.2, -4.9, -2.4, "stripe2", STRIPE)
+        band(cut_x + 0.35, 10.9, -0.8, 4.8, "stripe", STRIPE)
+        band(cut_x + 0.35, 10.9, -4.9, -2.4, "stripe2", STRIPE)
         # the doors: forward and aft each side, the forward port one gone (a dark opening, framed)
         fwd, aft = (7.15, 8.05), (-3.9, -3.05)
         for (x0, x1), gone in ((fwd, side < 0.0), (aft, False)):
@@ -573,8 +599,8 @@ def _fuselage_livery(m: sk.Model, body: Hull, cut_x: float, nose_x: float, win_l
                                     (-3.8, -1.5, -62.0, -52.0, "moss"), (4.5, 9.0, -64.0, -55.0, "moss")):
             band(x0, x1, ta, tb, mat, GRIME)
         # lap seams along the body
-        band(cut_x + 0.45, nose_x + 0.6, 33.25, 34.25, "seam", FRAME)
-        for x0, x1 in ((-2.95, 7.05), (8.15, nose_x + 0.6)):
+        band(cut_x + 0.45, nose_x - 0.3, 33.25, 34.25, "seam", FRAME)
+        for x0, x1 in ((-2.95, 7.05), (8.15, nose_x + 1.2)):
             band(x0, x1, -17.4, -16.4, "seam", FRAME)
         # the forward hold's door, outlined low under the cheat line
         x0, x1, ta, tb = 4.4, 5.9, -46.0, -25.0
@@ -593,19 +619,21 @@ def _fuselage_livery(m: sk.Model, body: Hull, cut_x: float, nose_x: float, win_l
 
 
 def _fuselage_nose(m: sk.Model, body: Hull, win_lo: float) -> None:
-    """The cockpit: two windscreen panes over the nose and two side panes a side, framed by the skin between them;
-    the nose gear bay under it."""
+    """The cockpit (photo 103958): a band of panes 3 m long, 0.7 of the diameter, set low on the nose just over the
+    window row: two side windows and the windscreen's side pane, then its front pane over the nose to the centre
+    post, the skin between them their frames; the radome's seam ahead of them, the nose gear bay under it."""
+    # side panes by (x, height over the axis) corners: aft-low, fore-low, fore-high, aft-high
+    sides_ = (((8.3, 0.66), (8.85, 0.62), (8.9, 1.22), (8.36, 1.26)),
+              ((9.0, 0.6), (9.75, 0.56), (9.72, 1.2), (9.05, 1.22)),
+              ((9.9, 0.55), (10.78, 0.5), (10.7, 1.02), (9.95, 1.2)))
     for side in (1.0, -1.0):
         def ang(t, side=side):
             return t if side > 0.0 else 180.0 - t
 
-        def band(x0, x1, ta, tb, mat, lift, ang=ang):
-            a, b = sorted((ang(ta), ang(tb)))
-            body.patch(x0, x1, a, b, mat, lift)
-
-        band(10.08, 10.62, 62.0, 87.5, "glass", GLASS_LIFT)      # a windscreen pane
-        band(9.55, 10.0, 34.0, 60.0, "glass", GLASS_LIFT)        # the first side pane
-        band(8.95, 9.4, 30.0, 52.0, "glass", GLASS_LIFT)         # the second
+        for pane in sides_:
+            body.quad([(x, ang(body.t_at(x, y))) for x, y in pane], "glass", GLASS_LIFT)
+        front = [(10.85, body.t_at(10.85, 0.5)), (11.3, body.t_at(11.3, 0.42)), (11.08, 87.5), (10.82, 87.5)]
+        body.quad([(x, ang(t)) for x, t in front], "glass", GLASS_LIFT)
     body.patch(9.2, 10.4, 262.0, 278.0, "void", VOID)
 
 
@@ -647,20 +675,51 @@ def _ring_out(ring: list, k: int) -> tuple:
 
 def _fuselage_tail(m: sk.Model, cy: float, R: float, sides: int, t0: float, win_lo: float) -> None:
     """The broken-off tail: its cone lying askew behind the torn body, open at the front onto a dark bulkhead, the
-    swept fin with its rudder and two-stripe livery, the dorsal fillet, stub tailplanes torn off short."""
+    swept fin with its rudder and two-stripe livery, the dorsal fillet, stub tailplanes torn off short. Its tear
+    runs back over the top and down the port side (toward the field), so the skin's thickness, the bare frames and
+    stringers and the dark inside show from the side and above, as the body's own tear does."""
     front = -6.7
-    tail = Hull(m, cy, [(front, R, R, 0.0), (-7.6, R * 0.98, R * 0.95, 0.05), (-8.6, R * 0.88, R * 0.86, 0.25),
+    tail = Hull(m, cy, [(front, R, R, 0.0), (-8.6, R * 0.88, R * 0.86, 0.25),
                         (-9.6, R * 0.72, R * 0.68, 0.55), (-10.5, R * 0.54, R * 0.5, 0.85),
                         (-11.3, R * 0.36, R * 0.33, 1.1), (-11.75, R * 0.24, R * 0.22, 1.24),
                         (-11.93, R * 0.15, R * 0.14, 1.3)],
                 sides, t0, yaw=TAIL_YAW, pivot=(front, 0.0))
 
+    def torn(t):
+        """How far back the tear runs at angle t (degrees): deepest over the top and down the port side."""
+        a = math.radians(t)
+        return -(0.45 * (1.0 + math.sin(a)) - 0.75 * math.cos(a))
+
     def jag(k):
-        return (0.12, -0.1, 0.06, -0.05, 0.14, 0.0)[k % 6]
+        return torn(t0 + k * tail.step) + (0.12, -0.13, 0.06, -0.08, 0.15, 0.0, -0.1)[k % 7]
 
     upper = set(range(16)) | {sides - 1}
     tail.skin([s[0] for s in reversed(tail.st)], lambda s, k: "skin" if k in upper else "belly", jag=jag)
-    tail.cut(front, jag, 0.07, -0.7, "skin_b", "lining", "void")
+    tail.cut(front, jag, 0.07, -1.85, "skin_b", "lining", "void")
+    # bare frames where the skin has gone, stringers running out past the tear, broken off at different lengths
+    for fx in (-7.2, -7.7):
+        ts = [t0 + k * tail.step for k in range(sides + 1)]
+        bare = [t for t in ts if front + torn(t) < fx - 0.1]
+        if len(bare) < 2:
+            continue
+        ry, rz, dy = tail.section(fx)
+        rows = []
+        for t in bare:
+            c, sn = math.cos(math.radians(t)), math.sin(math.radians(t))
+            rows.append([tail.put((fx + dx, cy + dy + (ry - 0.04 - dr) * sn, (rz - 0.04 - dr) * c))
+                         for dr, dx in ((0.0, -0.04), (0.0, 0.04), (0.12, 0.04), (0.12, -0.04))])
+
+        def frame_want(s_, k, bare=bare):
+            return tail.turn(_frame_want(bare, s_, k))
+
+        _sheet(m, rows, lambda s_, k: "frame", frame_want, smooth=False, closed=True)
+        m.face(rows[0], "frame", tail.turn((0.0, -0.3, 1.0)))
+        m.face(rows[-1], "frame", tail.turn((0.0, -0.3, -1.0)))
+    for t, reach in ((50.0, 0.25), (78.0, 0.55), (101.0, 0.35), (124.0, 0.6), (147.0, 0.3), (172.0, 0.5)):
+        ry, rz, dy = tail.section(-7.9)
+        c, sn = math.cos(math.radians(t)), math.sin(math.radians(t))
+        y, z = cy + dy + (ry - 0.06) * sn, (rz - 0.06) * c
+        m.tube(tail.put((-8.4, y, z)), tail.put((front + torn(t) + reach, y, z)), 0.035, 0.035, 4, "frame")
     # the APU exhaust closing the cone
     end = tail.st[0]
     m.face([tail.put(tail.corner(end[0], k)) for k in range(sides)], "frame", tail.turn((-1.0, 0.0, 0.0)))
@@ -670,9 +729,9 @@ def _fuselage_tail(m: sk.Model, cy: float, R: float, sides: int, t0: float, win_
            caps=(False, True))
     for side in (1.0, -1.0):
         ta, tb = (-0.8, 4.8) if side > 0 else (175.2, 180.8)
-        tail.patch(-9.2, front + 0.2, ta, tb, "stripe", STRIPE)
+        tail.patch(-9.2, -6.75 if side > 0 else -8.15, ta, tb, "stripe", STRIPE)
         ta, tb = (-4.9, -2.4) if side > 0 else (182.4, 184.9)
-        tail.patch(-9.2, front + 0.2, ta, tb, "stripe2", STRIPE)
+        tail.patch(-9.2, -6.75 if side > 0 else -8.15, ta, tb, "stripe2", STRIPE)
     # the fin: a swept airfoil from the cone's top to 9 m, the rudder behind its hinge
     root_y, top = cy + 1.7, 9.0
     root = (-8.0, -11.6, 0.2)     # leading edge, trailing edge, half-thickness
@@ -702,8 +761,8 @@ def _fuselage_tail(m: sk.Model, cy: float, R: float, sides: int, t0: float, win_
                 m.face(pts, mat, tail.turn((0.0, 0.0, side)))
     # the dorsal fillet running into the fin's root
     for sgn in (1.0, -1.0):
-        ridge = [tail.put((-6.9, cy + 2.21, 0.0)), tail.put((-8.6, cy + 2.8, 0.0))]
-        foot = [tail.put((-6.9, cy + 2.17, sgn * 0.05)), tail.put((-8.6, cy + 2.05, sgn * 0.2))]
+        ridge = [tail.put((-7.95, cy + 2.2, 0.0)), tail.put((-8.6, cy + 2.8, 0.0))]
+        foot = [tail.put((-7.95, cy + 2.16, sgn * 0.05)), tail.put((-8.6, cy + 2.05, sgn * 0.2))]
         m.face([ridge[0], ridge[1], foot[1], foot[0]], "skin", tail.turn((0.0, 0.4, sgn)))
     # stub tailplanes, torn off short
     for sgn in (1.0, -1.0):

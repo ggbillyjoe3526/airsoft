@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-17 | 1 | build thread (three workers, one per group) | ✓ touched tests (CI runs the rest) | | |
+| 2026-11-17 | 1 | build thread (three workers, one per group) | ✓ touched tests (CI runs the rest) | 6/8 Retry | check 1: mast head flat, crane gusset/hook, fuselage nose and closed tear, water tower legs and bowl; check 4: no test fails on the old models |
+| 2026-11-17 | 2 | build thread (two workers) | ✓ touched tests (CI runs the rest) | | |
 
 ## Decisions
 
@@ -20,10 +21,13 @@
   windows, doors, torn rear and broken tail.
 - **Budgets raised about six times** (`skyline.py` BUDGETS, `test_skyline.gd` MODEL_BUDGETS): shed 2,600, long shed
   3,200, deep shed 3,000, crane 4,000, mast 3,600, fuselage 4,000, silo 3,200, watch tower 4,500, water tower 4,500
-  (were 500 to 900). Each model uses 80 to 99 % (the fuselage 80 %: it read finished).
+  (were 500 to 900). Each model uses 92 to 99 %; `test_skyline` now wants at least three quarters of each budget, so
+  the old low models would fail it.
 - **The skyline's cap 20k → 95k** (`TRIANGLES_MOST`). The Range's skyline mesh is about 89k triangles (was 10.1k), still
   one mesh and one draw call; Woodland's band is unchanged. A small cost on Low against what the owner asked for.
-- **Bounds kept.** Every model keeps its old box (the water tower now exactly symmetric, 1 cm), so each piece stretches
+- **The mast's box grows to 2.4 m deep** (was 0.5; range.json's four masts and the model): a phone mast's head is a
+  three-sector frame as deep as it is wide, which a 0.5 m slab flattened to one face (critic, attempt 1).
+- **Bounds kept otherwise.** Every other model keeps its old box (the water tower now exactly symmetric, 1 cm), so each piece stretches
   as before and `keep_depth` (the crane) behaves the same.
 - **Reds kept off the team hues.** The crane's hook, isolator and pendant stop are raspberry #a82c68; the fuselage's
   cheat line wine #7e2046 over plum #4a2f55 (a plain red reads near High contrast's Beta orange in linear hue).
@@ -31,7 +35,7 @@
   surface keeps four masts × four lamps (`test_skyline`) and Woodland's night look is unchanged.
 - **Three modules** (`skyline_sheds.py`, `skyline_towers.py`, `skyline_hulls.py`) hold the builders; `skyline.py`
   keeps the entry point, budgets and shared colours.
-- **Pictures:** `tools/range_pictures.gd` gains four views over the walls at the skyline (`sky_east`, `sky_west`,
+- **Pictures:** `tools/range_pictures.gd` gains five views over the walls at the skyline (`sky_mast`, `sky_east`, `sky_west`,
   `sky_north_east`, `sky_south_east`).
 
 ## Known issues

@@ -407,7 +407,7 @@ func test_every_skyline_model_is_inside_its_budget() -> void:
 		var mesh := play.skyline.model_of(kind)
 		assert_not_null(mesh, "%s's model loads" % kind)
 		var tris := (mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
-		assert_between(tris, 1, MODEL_BUDGETS[kind], "%s: %d triangles" % [kind, tris])
+		assert_between(tris, MODEL_BUDGETS[kind] * 3 / 4, MODEL_BUDGETS[kind], "%s: %d triangles, most of its budget (RQ2)" % [kind, tris])
 
 
 func test_every_shed_size_is_inside_its_budget_and_each_range_shed_stretches_evenly() -> void:
@@ -416,7 +416,8 @@ func test_every_shed_size_is_inside_its_budget_and_each_range_shed_stretches_eve
 		var mesh := PropDressConfig.load_mesh(path)
 		assert_not_null(mesh, "%s loads" % path)
 		var tris := (mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
-		assert_between(tris, 1, VARIANT_BUDGETS[path.get_file()], "%s: %d triangles" % [path.get_file(), tris])
+		var most := VARIANT_BUDGETS[path.get_file()]
+		assert_between(tris, most * 3 / 4, most, "%s: %d triangles, most of its budget (RQ2)" % [path.get_file(), tris])
 	assert_eq(cfg.models_of(&"shed").size(), 3, "the shed in three sizes")
 	var m := _range()
 	var middle := SkylineView.middle_of(m)

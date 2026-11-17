@@ -151,7 +151,7 @@ def chain(m: sk.Model, top, bottom, link: float, width: float, mat: str) -> None
 
 def crane() -> sk.Model:
     """A pillar jib crane (photos 103403-103446: bright yellow; a built-up box pillar on a flared foot with gussets
-    on an octagonal base plate, a slewing head, a solid knee-brace plate with its flange from the pillar to the jib,
+    on an octagonal base plate, a slewing head with a short gusset bracket under the jib's root,
     a tapered I-beam jib with a splice and an end stop, a festoon rail on T brackets along the top with the cable
     sagging in loops in front of the web, a blue-grey electric chain hoist on a four-wheeled trolley with its chain
     bag, a red hook block and a yellow pendant on its cable, an isolator and conduit down the pillar). 24.8 m along X
@@ -194,7 +194,7 @@ def crane() -> sk.Model:
         outer = d * 1.7
         plate(m, [(px + inner.x, 0.49, inner.z), (px + outer.x, 0.49, outer.z), (px + outer.x, 0.62, outer.z),
                   (px + inner.x, 2.4, inner.z)], (-d.z, 0.0, d.x), 0.09, "steel")
-    # the pillar: a built-up box with a proud seam down its front and back, a collar where the brace meets it
+    # the pillar: a built-up box with a proud seam down its front and back, a collar two thirds up
     m.box((px - cw, 1.0, -cd), (px + cw, 13.6, cd), "steel")
     for s in (-1.0, 1.0):
         m.box((px - 0.05, 1.1, s * cd - 0.02), (px + 0.05, 13.5, s * (cd + 0.035)), "steel_dark")
@@ -245,17 +245,14 @@ def crane() -> sk.Model:
                "rubber", caps=(False, True))
         m.tube((px + cw + 0.12, yb(px + cw) + 0.08, s * 0.32), (px + cw + 0.4, yb(px + cw) + 0.08, s * 0.32),
                0.1, 0.1, 10, "rubber", caps=(False, True))
-    # the knee brace: a solid triangular plate from the pillar to the jib, its flange along the slope, two ribs
-    bx = px + 5.6
-    plate(m, [(px + cw - 0.04, 10.35, 0.0), (bx, yb(bx) + 0.04, 0.0), (px + cw - 0.04, yb(px + cw) + 0.04, 0.0)],
-          (0.0, 0.0, 1.0), 0.12, "steel_shade")
-    beam(m, (px + cw - 0.05, 10.3, 0.0), (bx + 0.12, yb(bx + 0.12) + 0.08, 0.0), 0.62, 0.14, "steel",
+    # the head bracket: a short gusset under the jib's root either side of the web, its sloping flange
+    bx, by = px + cw + 2.1, yb(px + cw) - 2.1
+    for z in (-0.3, 0.3):
+        plate(m, [(px + cw - 0.04, by, z), (bx, yb(bx) + 0.04, z), (px + cw - 0.04, yb(px + cw) + 0.04, z)],
+              (0.0, 0.0, 1.0), 0.08, "steel_shade")
+    beam(m, (px + cw - 0.05, by - 0.06, 0.0), (bx + 0.1, yb(bx + 0.1) + 0.06, 0.0), 0.76, 0.12, "steel",
          up=(1.0, 1.0, 0.0))
-    for f in (0.35, 0.7):
-        xr = px + cw + (bx - px - cw) * f
-        ylo = 10.35 + (yb(bx) - 10.35) * f
-        for s in (-1.0, 1.0):
-            m.box((xr - 0.05, ylo, s * 0.05), (xr + 0.05, yb(xr) + 0.02, s * 0.2), "steel_dark")
+    m.box((px + cw - 0.02, by - 0.25, -0.4), (px + cw + 0.12, by + 0.05, 0.4), "steel_dark")
     # a junction box on the web by the head
     m.box((px + 1.6, 16.3, 0.05), (px + 2.1, 16.95, 0.3), "panel")
 
@@ -293,7 +290,7 @@ def crane() -> sk.Model:
     # the chain bag, the chain, the hook block and hook, the pendant on its cable (q: the hoist's scale, as big
     # against the jib as in the photos)
     yh = yb(hx)
-    q = 1.45
+    q = 1.96
 
     def at(dx: float, dy: float, dz: float) -> tuple:
         return (hx + dx * q, yh + dy * q, dz * q)
@@ -319,7 +316,7 @@ def crane() -> sk.Model:
     sweep(m, [(xb, 17.68, cz), (xb + 0.3, 17.05, 0.9), (xb + 0.3, yh - 0.25, 0.97), at(-0.25, -0.62, 0.52)],
           0.055, 6, "cable")
     m.box((xb - 0.04, yh + 0.3, rz0), (xb + 0.04, 17.7, rz0 + 0.08), "hoist_dark")
-    hook_y = 7.4
+    hook_y = 5.0
     hxc = hx - 0.05 * q
     chain(m, (hxc, yh - 1.55 * q, 0.0), (hxc, hook_y + 0.62 * q, 0.0), 0.42, 0.18, "chain")
     zlathe(m, [(-0.17 * q, 0.33 * q), (0.17 * q, 0.33 * q)], "hook", 16, hxc, hook_y + 0.3 * q, cap=True)
@@ -336,12 +333,13 @@ def crane() -> sk.Model:
     beam(m, pts[-1], (hxc + 0.03, hook_y - 0.45 * q, 0.0), 0.06, 0.04, "rail", up=(0.0, 0.0, 1.0))
     # the pendant: its cable from the panel, the yellow box with its buttons and red stop
     px_ = hx - 0.42 * q
-    m.tube((px_, yh - 1.3 * q, 0.75), (px_, 2.72, 0.75), 0.035, 0.035, 4, "cable")
-    m.box((px_ - 0.15, 1.75, 0.63), (px_ + 0.15, 2.72, 0.87), "steel")
-    m.box((px_ - 0.11, 2.72, 0.67), (px_ + 0.11, 2.84, 0.83), "rubber")
-    for y in (1.92, 2.1, 2.28):
-        m.box((px_ - 0.07, y, 0.85), (px_ + 0.07, y + 0.1, 0.91), "rubber")
-    m.box((px_ - 0.07, 2.46, 0.85), (px_ + 0.07, 2.6, 0.95), "hook")
+    pb = 0.35                       # the pendant's foot: it hangs to about knee height
+    m.tube((px_, yh - 1.3 * q, 0.75), (px_, pb + 0.97, 0.75), 0.035, 0.035, 4, "cable")
+    m.box((px_ - 0.15, pb, 0.63), (px_ + 0.15, pb + 0.97, 0.87), "steel")
+    m.box((px_ - 0.11, pb + 0.97, 0.67), (px_ + 0.11, pb + 1.09, 0.83), "rubber")
+    for y in (0.17, 0.35, 0.53):
+        m.box((px_ - 0.07, pb + y, 0.85), (px_ + 0.07, pb + y + 0.1, 0.91), "rubber")
+    m.box((px_ - 0.07, pb + 0.71, 0.85), (px_ + 0.07, pb + 0.85, 0.95), "hook")
     return m
 
 
@@ -366,25 +364,26 @@ def _panel(m: sk.Model, cx: float, cz: float, normal: tuple, y0: float, y1: floa
 
 
 def mast() -> sk.Model:
-    """A phone mast with the field's floodlights (photos 103509-103605: a pale tapered monopole in sections with
-    slip-joint collars and step bolts up it, a cable tray up its back, a head frame of tall rounded antenna panels in
-    three sectors (front, back and either side) on mounting pipes that stand above them, radio units clamped under
-    the head with their jumper cables, two radome dishes on side arms, a lightning rod; the floodlight bar the
-    Range's yard is lit by stays on it under the dishes, four lamps on yokes tilted to the field, their glass the
-    model's only LAMP faces; an equipment cabinet at its foot). 2.4 m across (X) x 0.5 m deep x 14 m tall, the
-    antennas' front sector and the lamps facing +Z."""
+    """A phone mast with the field's floodlights (photos 103509-103605, after 103509 most: a pale tapered monopole in
+    sections with slip-joint collars and small step bolts up it, a cable tray up its back; a three-sector head, a
+    triangular frame as deep as it is wide, booms past its front corners, spokes and struts back to the pole, two
+    rounded antenna panels on mounting pipes on each face, a radio unit under each, their jumpers, a lower frame
+    under the units; two radome dishes on side arms, a lightning rod; the floodlight bar the Range's yard is lit by
+    stands out on arms to the front under the head, four lamps on yokes tilted to the field, their glass the model's
+    only LAMP faces; an equipment cabinet at its foot). 2.4 m across (X) x 2.4 m deep x 14 m tall, centred on the
+    pole, the front sector and the lamps facing +Z."""
     m = sk.Model("mast", {
         "pole": (1.0, vp.BODY), "pole_shade": (0.84, vp.BODY), "pole_dark": (0.66, vp.BODY),
-        "antenna": (0xE2E4E0, vp.FIXED), "antenna_shade": (0xC2C6C4, vp.FIXED), "cap": (0x8F9496, vp.FIXED),
+        "antenna": (0xE2E4E0, vp.FIXED), "antenna_shade": (0xC8CCCA, vp.FIXED), "cap": (0x8F9496, vp.FIXED),
         "unit": (0x9AA0A4, vp.FIXED), "unit_dark": (0x6A7075, vp.FIXED), "frame": (0x70767B, vp.FIXED),
         "plinth": (sk.CONCRETE, vp.FIXED), "cable": (0x2E3134, vp.FIXED), "housing": (0x3A3E46, vp.FIXED),
         "glass": (0xD6D6D0, vp.LAMP), "cabinet": (0xB4B8B4, vp.FIXED), "galv": (sk.GALV, vp.FIXED),
     })
-    W, D, H = 2.4, 0.5, 14.0
+    W, D, H = 2.4, 2.4, 14.0
     sides = 16
-    # the plinth (it sets the depth) and the base flange with its gussets and nuts
-    block(m, [(-0.45, 0.0, -D / 2), (0.45, 0.0, -D / 2), (0.45, 0.0, D / 2), (-0.45, 0.0, D / 2),
-              (-0.42, 0.3, -0.22), (0.42, 0.3, -0.22), (0.42, 0.3, 0.22), (-0.42, 0.3, 0.22)], "plinth")
+    # the plinth and the base flange with its gussets and nuts
+    block(m, [(-0.5, 0.0, -0.5), (0.5, 0.0, -0.5), (0.5, 0.0, 0.5), (-0.5, 0.0, 0.5),
+              (-0.44, 0.3, -0.44), (0.44, 0.3, -0.44), (0.44, 0.3, 0.44), (-0.44, 0.3, 0.44)], "plinth")
     lathe(m, [(0.29, 0.21), (0.36, 0.21)], "pole_dark", sides, cap=True)
     for k in range(8):
         a = math.pi / 8 + 2.0 * math.pi * k / 8
@@ -401,46 +400,47 @@ def mast() -> sk.Model:
     lathe(m, [(4.98, 0.152), (9.3, 0.133)], "pole", sides)
     lathe(m, [(9.2, 0.134), (9.3, 0.15), (9.5, 0.146), (9.58, 0.128)], "pole_shade", sides)
     lathe(m, [(9.56, 0.129), (13.62, 0.11), (13.68, 0.125), (13.76, 0.06)], "pole", sides)
-    # step bolts up both sides, staggered
-    for k in range(25):
-        y = 2.3 + 0.38 * k
-        if 10.15 < y < 10.75:       # the lamp bar's arm
-            continue
+    # small step bolts up both sides, staggered
+    for k in range(14):
+        y = 2.4 + 0.55 * k
         s = 1.0 if k % 2 == 0 else -1.0
         r = 0.17 - 0.06 * (y / 13.6)
-        m.tube((s * (r - 0.02), y, 0.0), (s * (r + 0.16), y + 0.015, 0.0), 0.016, 0.016, 4, "galv",
+        m.tube((s * (r - 0.02), y, 0.0), (s * (r + 0.09), y + 0.01, 0.0), 0.011, 0.011, 4, "galv",
                caps=(False, True))
     # the cable tray up the back, its clamps, and the cables out of it into the cabinet
-    m.box((-0.08, 0.6, -0.235), (0.08, 11.2, -0.205), "frame")
+    m.box((-0.08, 0.6, -0.235), (0.08, 11.3, -0.205), "frame")
     for s in (-1.0, 1.0):
-        m.box((s * 0.08 - 0.012, 0.6, -0.235), (s * 0.08 + 0.012, 11.2, -0.17), "frame")
-    m.box((-0.05, 0.6, -0.208), (0.05, 11.15, -0.17), "cable")
+        m.box((s * 0.08 - 0.012, 0.6, -0.235), (s * 0.08 + 0.012, 11.3, -0.17), "frame")
+    m.box((-0.05, 0.6, -0.208), (0.05, 11.25, -0.17), "cable")
     for k in range(9):
         y = 1.4 + 1.15 * k
         m.box((-0.1, y, -0.245), (0.1, y + 0.06, -0.14), "galv")
-    sweep(m, [(0.0, 0.65, -0.19), (0.12, 0.45, -0.17), (0.45, 0.4, -0.12), (0.62, 0.62, -0.1)], 0.045, 6, "cable")
+    sweep(m, [(0.0, 0.65, -0.19), (0.25, 0.45, -0.3), (0.5, 0.4, -0.25), (0.66, 0.62, -0.2)], 0.045, 6, "cable")
     # the equipment cabinet at the foot: on its own slab, a door seam, louvres, an overhanging lid
-    m.box((0.48, 0.0, -0.24), (1.15, 0.16, 0.24), "plinth")
-    m.box((0.53, 0.16, -0.19), (1.1, 1.45, 0.19), "cabinet")
-    m.box((0.5, 1.45, -0.22), (1.13, 1.52, 0.22), "unit_dark")
-    m.box((0.81, 0.24, 0.185), (0.825, 1.38, 0.2), "unit_dark")
+    m.box((0.58, 0.0, -0.36), (1.18, 0.16, 0.36), "plinth")
+    m.box((0.63, 0.16, -0.3), (1.13, 1.45, 0.3), "cabinet")
+    m.box((0.6, 1.45, -0.33), (1.16, 1.52, 0.33), "unit_dark")
+    m.box((0.63, 0.24, -0.015), (1.13, 1.38, 0.015), "cabinet")
+    m.box((0.875, 0.24, 0.295), (0.885, 1.38, 0.31), "unit_dark")
     for y in (0.4, 0.5, 0.6, 1.1, 1.2):
-        m.box((0.6, y, 0.185), (0.77, y + 0.04, 0.2), "unit_dark")
-    m.box((0.86, 0.75, 0.185), (0.9, 0.92, 0.215), "frame")
+        m.box((0.68, y, 0.295), (0.84, y + 0.04, 0.31), "unit_dark")
+    m.box((0.92, 0.75, 0.295), (0.96, 0.92, 0.325), "frame")
 
-    # the floodlight bar: an arm on struts, four lamps on yokes tilted down to the field, glass a hair proud
-    ly = 10.4
-    m.box((-1.12, ly - 0.42, -0.05), (1.12, ly - 0.32, 0.05), "frame")
-    for s in (-1.0, 1.0):
-        beam(m, (s * 0.12, 9.75, 0.0), (s * 0.85, ly - 0.36, 0.0), 0.06, 0.06, "frame")
-    m.box((-0.16, ly - 0.55, 0.1), (0.16, ly - 0.25, 0.22), "housing")
+    # the floodlight bar out on arms to the front, four lamps on yokes tilted down to the field, glass a hair proud
+    ly = 10.2
     tilt = math.radians(12.0)
     f = Vector((0.0, -math.sin(tilt), math.cos(tilt)))     # the lamps' facing
     up = Vector((0.0, math.cos(tilt), math.sin(tilt)))
     ex = Vector((1.0, 0.0, 0.0))
+    zl = D / 2 - (0.135 * f.z + 0.1775 * up.z)             # the housings' middle: their visors' lips reach the front
+    m.box((-1.12, ly - 0.42, zl - 0.105), (1.12, ly - 0.32, zl - 0.005), "frame")
+    for s in (-1.0, 1.0):
+        m.box((s * 0.45 - 0.04, ly - 0.42, 0.08), (s * 0.45 + 0.04, ly - 0.34, zl - 0.06), "frame")
+        beam(m, (s * 0.12, ly - 1.1, 0.06), (s * 0.45, ly - 0.42, zl - 0.12), 0.06, 0.06, "frame")
+    m.box((-0.16, ly - 0.6, zl - 0.22), (0.16, ly - 0.3, zl - 0.1), "housing")
     for k in range(4):
         x = -0.9 + 0.6 * k
-        c = Vector((x, ly, 0.055))
+        c = Vector((x, ly, zl))
         fr, bk = c + f * 0.1, c - f * 0.13
         ring_f = [fr - ex * 0.25 - up * 0.2, fr + ex * 0.25 - up * 0.2, fr + ex * 0.25 + up * 0.2,
                   fr - ex * 0.25 + up * 0.2]
@@ -454,66 +454,73 @@ def mast() -> sk.Model:
         plate(m, [tuple(fr + up * 0.21 - ex * 0.26), tuple(fr + up * 0.21 + ex * 0.26),
                   tuple(fr + up * 0.17 + ex * 0.26 + f * 0.035), tuple(fr + up * 0.17 - ex * 0.26 + f * 0.035)],
               up, 0.015, "housing")
-        # the yoke from the arm, its pivots either side
+        # the yoke from the bar, its pivots either side
         for s in (-1.0, 1.0):
-            m.box((x + s * 0.27 - 0.015, ly - 0.33, 0.0), (x + s * 0.27 + 0.015, ly + 0.02, 0.07), "frame")
-            m.tube((x + s * 0.26, ly - 0.02, 0.035), (x + s * 0.3, ly - 0.02, 0.035), 0.035, 0.035, 8, "frame",
-                   caps=(False, True))
-        m.box((x - 0.27, ly - 0.35, 0.0), (x + 0.27, ly - 0.31, 0.07), "frame")
-        sweep(m, [(x, ly - 0.08, -0.07), (x * 0.9, ly - 0.3, -0.08), (x * 0.5, ly - 0.45, -0.1),
-                  (0.0, ly - 0.6, -0.16)], 0.018, 4, "cable")
+            m.box((x + s * 0.27 - 0.015, ly - 0.33, zl - 0.055), (x + s * 0.27 + 0.015, ly + 0.02, zl + 0.015),
+                  "frame")
+            m.tube((x + s * 0.26, ly - 0.02, zl - 0.02), (x + s * 0.3, ly - 0.02, zl - 0.02), 0.035, 0.035, 8,
+                   "frame", caps=(False, True))
+        m.box((x - 0.27, ly - 0.35, zl - 0.055), (x + 0.27, ly - 0.31, zl + 0.015), "frame")
+        sweep(m, [(x, ly - 0.08, zl - 0.12), (x * 0.9, ly - 0.3, zl - 0.14), (x * 0.5, ly - 0.42, zl - 0.17),
+                  (0.0, ly - 0.5, zl - 0.2)], 0.018, 4, "cable")
+    # the lamps' conduit from their junction box back along an arm and down the pole's front to the cabinet
+    sweep(m, [(0.05, ly - 0.6, zl - 0.18), (0.08, ly - 0.75, 0.5), (0.09, ly - 1.0, 0.2), (0.09, ly - 1.3, 0.14),
+              (0.09, 1.55, 0.177), (0.13, 1.2, 0.18), (0.4, 1.0, 0.2), (0.65, 0.98, 0.2)], 0.03, 6, "galv")
+    for y in (2.6, 4.3, 6.4, 8.2):
+        m.box((0.03, y, 0.1), (0.15, y + 0.05, 0.21), "frame")
 
     # the dishes on side arms above the lamps, facing out to either side: a radome, its shroud, the back can
-    for s, y, r in ((-1.0, 11.15, 0.22), (1.0, 10.95, 0.17)):
+    for s, y, r in ((-1.0, 11.0, 0.24), (1.0, 10.85, 0.19)):
         m.tube((0.0, y, 0.0), (s * 0.62, y, 0.0), 0.03, 0.03, 6, "frame")
         m.box((s * 0.2 - 0.03, y - 0.25, -0.03), (s * 0.2 + 0.03, y + 0.25, 0.03), "frame")
         xb = s * 0.6
-        prof = [(xb, 0.05), (xb + s * 0.06, r * 0.55), (xb + s * 0.11, r * 0.95), (xb + s * 0.13, r),
-                (xb + s * 0.24, r), (xb + s * 0.26, r * 0.85), (xb + s * 0.275, r * 0.5), (xb + s * 0.28, r * 0.1)]
-        xlathe(m, prof, "antenna", sides, y, 0.0, cap=True)
-        xlathe(m, [(xb + s * 0.125, r + 0.012), (xb + s * 0.16, r + 0.012)], "antenna_shade", sides, y, 0.0)
-        xlathe(m, [(xb + s * 0.16, r + 0.012), (xb + s * 0.125, r + 0.012)], "antenna_shade", sides, y, 0.0)
+        prof = [(xb, 0.05), (xb + s * 0.07, r * 0.7), (xb + s * 0.13, r), (xb + s * 0.24, r),
+                (xb + s * 0.27, r * 0.7), (xb + s * 0.28, r * 0.15)]
+        xlathe(m, prof, "antenna", 12, y, 0.0, cap=True)
+        xlathe(m, [(xb + s * 0.125, r + 0.012), (xb + s * 0.16, r + 0.012)], "antenna_shade", 12, y, 0.0)
+        xlathe(m, [(xb + s * 0.16, r + 0.012), (xb + s * 0.125, r + 0.012)], "antenna_shade", 12, y, 0.0)
 
-    # radio units clamped round the pole under the head, front and back, each with a darker finned face
-    for z, s in ((0.13, 1.0), (-0.13, -1.0)):
-        for x in (-0.33, 0.33):
-            m.box((x - 0.15, 11.15, z - 0.07), (x + 0.15, 11.68, z + 0.07), "unit")
-            m.box((x - 0.12, 11.2, s * 0.199), (x + 0.12, 11.63, s * 0.215), "unit_dark")
-            m.box((x * 0.2 - 0.02, 11.25, z - 0.08), (x * 1.0 - s * 0.0, 11.32, z - 0.06), "frame")
-    m.box((-0.5, 11.3, -0.02), (0.5, 11.36, 0.02), "frame")
-    # the head frame: two cross arms with stand-offs, mounting pipes standing above the panels
-    for y in (11.86, 13.5):
-        m.box((-1.1, y - 0.04, -0.035), (1.1, y + 0.04, 0.035), "frame")
-        for x in (-0.36, 0.36):
-            m.box((x - 0.03, y - 0.035, -0.2), (x + 0.03, y + 0.035, 0.2), "frame")
-    for x in (-0.36, 0.36):
-        for z in (-0.11, 0.11):
-            m.tube((x, 11.7, z), (x, 13.98, z), 0.024, 0.024, 6, "galv", caps=(False, True))
-    for s in (-1.0, 1.0):
-        m.tube((s * 0.98, 11.7, 0.0), (s * 0.98, 13.98, 0.0), 0.024, 0.024, 6, "galv", caps=(False, True))
-    # the panels: two to the front, two to the back, one either side
-    for x in (-0.36, 0.36):
-        _panel(m, x, 0.16, (0.0, 0.0, 1.0), 11.72, 13.9, 0.3, 0.1, "antenna", "cap")
-        _panel(m, x, -0.16, (0.0, 0.0, -1.0), 11.72, 13.9, 0.3, 0.1, "antenna_shade", "cap")
-    for s in (-1.0, 1.0):
-        _panel(m, s * (W / 2 - 0.053), 0.0, (s, 0.0, 0.0), 11.82, 13.82, 0.3, 0.1, "antenna", "cap")
-        m.box((s * 0.98 - 0.03, 12.2, -0.03), (s * (W / 2 - 0.1), 12.26, 0.03), "frame")
-        m.box((s * 0.98 - 0.03, 13.3, -0.03), (s * (W / 2 - 0.1), 13.36, 0.03), "frame")
-    # the jumpers: from each panel's foot down to its radio unit
-    for x in (-0.36, 0.36):
-        for z in (0.16, -0.16):
-            for dx in (-0.06, 0.06):
-                sweep(m, [(x + dx, 11.7, z), (x + dx * 1.6, 11.55, z * 1.25), (x * 0.9 + dx, 11.7, z * 0.7)],
-                      0.016, 4, "cable")
-    for s in (-1.0, 1.0):
-        sweep(m, [(s * 1.147, 11.8, 0.0), (s * 1.0, 11.5, 0.05), (s * 0.6, 11.45, 0.1), (s * 0.46, 11.5, 0.06)],
-              0.02, 4, "cable")
-    # the lamps' conduit down the pole's front from their junction box to the cabinet, strapped at each section
-    sweep(m, [(0.09, ly - 0.55, 0.128), (0.09, 1.55, 0.177), (0.13, 1.2, 0.18), (0.3, 1.0, 0.16), (0.55, 0.98, 0.1)],
-          0.03, 6, "galv")
-    for y in (2.6, 4.3, 6.4, 8.2):
-        t = (y - 1.55) / (ly - 0.55 - 1.55)
-        m.box((0.03, y, 0.1), (0.15, y + 0.05, 0.215 - 0.05 * t), "frame")
+    # the head: a triangular frame (its back corner post sets the depth), a face toward +Z and two behind
+    post = 0.04
+    d = (D / 2 - post) / 2.0                     # the faces' distance from the pole
+    yb_, yt = 12.32, 13.58                       # the frame's two levels
+    ylo = 11.5                                   # the lower frame under the radio units
+    corners = [Vector((2 * d * math.sin(a), 0.0, 2 * d * math.cos(a))) for a in (math.radians(60), math.pi,
+                                                                                 math.radians(300))]
+    for c in corners:
+        m.box((c.x - post, ylo - 0.05, c.z - post), (c.x + post, yt + 0.08, c.z + post), "frame")
+    for y in (ylo, yb_, yt):
+        for i in range(3):
+            a, b = corners[i], corners[(i + 1) % 3]
+            if abs(a.z - b.z) < 1e-6:              # the front edge: a boom out past both corners to the box's sides
+                a, b = Vector((-W / 2, 0.0, a.z)), Vector((W / 2, 0.0, a.z))
+            m.tube((a.x, y, a.z), (b.x, y, b.z), 0.035, 0.035, 6, "frame", caps=(a.x < -1.1, b.x > 1.1))
+        if y != ylo:
+            for c in corners:                       # spokes back to the pole's clamp
+                m.tube((c.x * 0.08, y, c.z * 0.08), (c.x * 0.96, y, c.z * 0.96), 0.03, 0.03, 6, "frame")
+    for c in corners:                               # struts from a collar on the pole up to the lower frame
+        m.tube((c.x * 0.1, 10.75, c.z * 0.1), (c.x * 0.95, ylo, c.z * 0.95), 0.035, 0.035, 6, "frame")
+    for y in (10.7, yt - 0.05):
+        lathe(m, [(y, 0.15), (y + 0.12, 0.15)], "frame", 12, cap=True)
+    # each face: two mounting pipes standing above the panels, a panel on each, a radio unit under it, jumpers
+    for k, a in enumerate((0.0, 2.0 * math.pi / 3.0, 4.0 * math.pi / 3.0)):
+        n = Vector((math.sin(a), 0.0, math.cos(a)))
+        t = Vector((math.cos(a), 0.0, -math.sin(a)))
+        for o in (-0.45, 0.45):
+            pp = n * (d + 0.04) + t * o
+            m.tube((pp.x, ylo - 0.1, pp.z), (pp.x, yt + 0.3, pp.z), 0.026, 0.026, 6, "galv", caps=(False, True))
+            pc = n * (d + 0.14) + t * o
+            _panel(m, pc.x, pc.z, tuple(n), yb_ + 0.04, yt + 0.06, 0.3, 0.12, "antenna" if k == 0 else
+                   "antenna_shade", "cap")
+            uc = n * (d + 0.13) + t * o
+            obox(m, (uc.x, 11.95, uc.z), t * 0.13, Vector((0.0, 0.25, 0.0)), n * 0.07, "unit")
+            fc = n * (d + 0.205) + t * o
+            obox(m, (fc.x, 11.95, fc.z), t * 0.1, Vector((0.0, 0.21, 0.0)), n * 0.012, "unit_dark")
+            q1 = uc + n * 0.1
+            sweep(m, [(pc.x, yb_ + 0.04, pc.z), (q1.x, yb_ - 0.05, q1.z), (q1.x, 12.22, q1.z)], 0.02, 4, "cable")
+            # the unit's feeder back to the pole and down into the tray
+            q = uc - n * 0.06
+            sweep(m, [(q.x, 11.72, q.z), (q.x * 0.45, 11.42, q.z * 0.45), (0.0, 11.2, -0.19)], 0.022, 4, "cable")
     # the lightning rod
     m.tube((0.0, 13.74, 0.0), (0.0, H, 0.0), 0.022, 0.008, 5, "galv")
     return m
@@ -535,11 +542,12 @@ def _hoop(m: sk.Model, radius: float, y: float, r: float, sides: int, segments: 
 
 def water_tower() -> sk.Model:
     """A water tower (photos 103841-103911, after 103841 most: a drum tank with welded seams under a low conical roof
-    overhanging it, a vent finial with its rod, a deep rounded bowl under it; a balcony walkway round the drum's foot
-    on brackets, its railing of posts, two rails and a toe board; four tall laced lattice legs leaning in from a wide
-    stance on concrete piers, laced struts between them at three levels and crossed tie rods in every bay; a big
-    riser pipe with flanged joints up the middle into the bowl; a caged ladder up the front to the balcony, on up the
-    drum and over the eave, a short ladder up the roof to a hatch). 6.45 m across, 22 m tall."""
+    overhanging it, a vent finial with its rod, a smooth elliptical bowl under it; a balcony walkway round the drum's
+    foot on brackets, its railing of posts, two rails and a toe board; four tall laced lattice legs (corner angles, flat
+    bars zigzagging across both ways) leaning in from a wide stance on concrete piers, laced struts between them at
+    three levels and crossed tie rods in every bay; a big riser pipe with a flanged joint up the middle into the bowl;
+    a caged ladder up the front to the balcony, on up the drum, its handrails over the eave by a roof hatch). 6.45 m
+    across, 22 m tall."""
     m = sk.Model("water_tower", {
         "tank": (1.0, vp.BODY), "tank_shade": (0.86, vp.BODY), "tank_dark": (0.72, vp.BODY),
         "legs": (0xA5AAAE, vp.FIXED), "legs_dark": (0x80868B, vp.FIXED), "rods": (0x8E949A, vp.FIXED),
@@ -548,7 +556,7 @@ def water_tower() -> sk.Model:
     })
     H, R = 22.0, 2.6
     sides = 24
-    bowl = 3.9                  # the bowl's depth, about three quarters of the tank's width
+    bowl = 0.7 * 2.0 * R        # the bowl's depth: an ellipsoid 0.7 as deep as the tank is wide (103841)
     bal_y = 16.6                # the balcony's floor: the bowl's rim and the drum's foot
     tank_top = bal_y + 3.5      # the drum, about two thirds of its width tall
     eave = R + 0.4              # the roof's overhang
@@ -556,8 +564,8 @@ def water_tower() -> sk.Model:
     rail_r = 3.2                # the balcony's top rail (with its bar, the model's half width, 3.225 m)
     # the bowl: half an ellipse into the riser, the drum with two welded seams, the roof with its drip skirt
     prof = []
-    for k in range(6):
-        t = math.pi * 0.5 * k / 5
+    for k in range(11):           # enough rings for the bowl to shade round, with no creases
+        t = math.pi * 0.5 * k / 10
         prof.append((bal_y - bowl * math.cos(t), max(0.36, R * math.sin(t))))
     lathe(m, prof, "tank_shade", sides, cap=True)
     lathe(m, [(bal_y, R), (bal_y + 1.72, R), (bal_y + 1.72, R + 0.025), (bal_y + 1.8, R + 0.025), (bal_y + 1.8, R),
@@ -601,14 +609,15 @@ def water_tower() -> sk.Model:
             continue
         m.tube((fo * c, bal_y + 0.1, fo * s), ((rail_r - 0.01) * c, bal_y + 1.05, (rail_r - 0.01) * s), 0.025, 0.025,
                3, "rail")
-    for i in range(0, seg, 2):
-        a = 2.0 * math.pi * (i + 0.5) / seg
+    for i in range(0, seg, 4):
+        a = 2.0 * math.pi * (i + 1.0) / seg
         c, s = math.cos(a), math.sin(a)
-        rb = R * math.sin(math.acos(1.1 / bowl))
-        m.tube((rb * c, bal_y - 1.1, rb * s), ((fo - 0.1) * c, bal_y - 0.1, (fo - 0.1) * s), 0.05, 0.05, 4,
+        rb = R * math.sin(math.acos(0.7 / bowl)) - 0.02
+        m.tube((rb * c, bal_y - 0.7, rb * s), ((fo - 0.1) * c, bal_y - 0.1, (fo - 0.1) * s), 0.05, 0.05, 4,
                "legs_dark")
 
-    # the legs: four laced lattice columns, two channels each with a zigzag of bars between, on concrete piers
+    # the legs: four laced lattice columns on concrete piers, each four corner angles with a zigzag of flat bars
+    # across it both ways (seen face on from the front and from the side, as 103841's legs are)
     foot_r, head_r = 3.8, R + 0.06
     angles = [math.pi * 0.25 + k * math.pi * 0.5 for k in range(4)]
     leg_y0 = 0.55
@@ -628,17 +637,21 @@ def water_tower() -> sk.Model:
                                                                 (-0.38, 0.38))], "pad")
         m.box(tuple(f + Vector((-0.34, 0.43, -0.34))), tuple(f + Vector((0.34, 0.55, 0.34))), "legs_dark")
         p0, p1 = leg_at(i, leg_y0), leg_at(i, bal_y + 0.05)
-        for s in (-1.0, 1.0):
-            beam(m, p0 + tan * s * 0.17, p1 + tan * s * 0.17, 0.08, 0.34, "legs")
-        n = 34                      # the lacing: flat bars zigzagging between the channels, seen from either side
+        hw = 0.19                   # the column's half width
+        for cx, cz in ((-hw, -hw), (hw, -hw), (hw, hw), (-hw, hw)):
+            o = Vector((cx, 0.0, cz))
+            m.tube(tuple(p0 + o), tuple(p1 + o), 0.05, 0.05, 4, "legs")
+        n = 20
         ax = p1 - p0
-        along = ax.normalized() * 0.035
-        for k in range(n):
-            qa = p0 + ax * (k / n) + tan * (0.15 if k % 2 == 0 else -0.15)
-            qb = p0 + ax * ((k + 1) / n) + tan * (-0.15 if k % 2 == 0 else 0.15)
-            strip = [qa - along, qb - along, qb + along, qa + along]
-            for side in (-1.0, 1.0):
-                m.face([tuple(p + rad * side * 0.012) for p in strip], "legs_dark", tuple(rad * side))
+        along = ax.normalized() * 0.04
+        for across, normal in (((0.0, 0.0, 1.0), (1.0, 0.0, 0.0)), ((1.0, 0.0, 0.0), (0.0, 0.0, 1.0))):
+            acr, nor = Vector(across) * (hw - 0.03), Vector(normal)
+            for k in range(n):
+                qa = p0 + ax * (k / n) + acr * (1.0 if k % 2 == 0 else -1.0)
+                qb = p0 + ax * ((k + 1) / n) - acr * (1.0 if k % 2 == 0 else -1.0)
+                strip = [qa - along, qb - along, qb + along, qa + along]
+                for side in (-1.0, 1.0):
+                    m.face([tuple(p + nor * side * 0.012) for p in strip], "legs_dark", tuple(nor * side))
     # the struts: laced girders between the legs at three levels, and crossed tie rods in every bay
     levels = [leg_y0, 4.8, 8.9, 12.8, bal_y - 1.0]
     for y in levels[1:4]:
@@ -648,7 +661,7 @@ def water_tower() -> sk.Model:
             a, b = a + d * 0.22, b - d * 0.22
             for dy in (-0.2, 0.2):
                 m.tube(tuple(a + Vector((0, dy, 0))), tuple(b + Vector((0, dy, 0))), 0.06, 0.06, 4, "legs")
-            n = 5
+            n = 4
             for k in range(n):
                 qa = a + (b - a) * (k / n) + Vector((0, 0.17 if k % 2 == 0 else -0.17, 0))
                 qb = a + (b - a) * ((k + 1) / n) + Vector((0, -0.17 if k % 2 == 0 else 0.17, 0))
@@ -662,7 +675,7 @@ def water_tower() -> sk.Model:
     # the riser: up the middle into the bowl, flanged joints, a footing
     rr = 0.36
     prof = [(0.0, rr)]
-    for y in (4.2, 9.0):
+    for y in (6.0,):
         prof += [(y - 0.08, rr), (y - 0.08, rr + 0.07), (y + 0.08, rr + 0.07), (y + 0.08, rr)]
     prof.append((bal_y - bowl + 0.25, rr))
     lathe(m, prof, "riser", 12)
@@ -683,7 +696,7 @@ def water_tower() -> sk.Model:
         while y < y1:
             m.tube((-0.2, y, z), (0.2, y, z), 0.02, 0.02, 3, "rods")
             k += 1
-            y = y0 + 0.4 * k
+            y = y0 + 0.5 * k
     for y in levels[1:4]:                # stand-offs to the front struts
         z0 = leg_at(0, y).z
         for dx in (-0.25, 0.2):
@@ -702,6 +715,6 @@ def water_tower() -> sk.Model:
             x, dz = r * math.cos(a), r * math.sin(a) * 0.95
             m.box((x - 0.025, y0, z + dz - 0.012), (x + 0.025, y1, z + dz + 0.012), "rail")
 
-    cage(zl, 2.6, bal_y - 0.3, 0.34, 1.4)
+    cage(zl, 2.6, bal_y - 0.3, 0.34, 1.8)
     cage(zu, bal_y + 2.3, tank_top - 0.15, 0.3, 0.9)
     return m
