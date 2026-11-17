@@ -19,17 +19,28 @@ class Placed:
 	var mesh: Mesh = null
 	var at: Transform3D = Transform3D.IDENTITY
 	var body: Color = Color.WHITE
-	## Its share of the skyline's fade toward the horizon (a treeline's SkylineConfig.treeline_fade).
+	## Its share of the skyline's fade toward the horizon (a treeline's SkylineConfig.treeline_fade, a model's model_fade).
 	var haze: float = 1.0
-	## How much of its colour it keeps against the look's pull toward grey (a treeline's SkylineConfig.treeline_keep).
+	## How much of its colour it keeps against the look's pull toward grey (a treeline's SkylineConfig.treeline_keep, a
+	## model's model_keep).
 	var keep: float = 0.0
 
 
-## The models `p` stands, the field's middle at `middle`; none when its kind has no model (it keeps its greybox).
+## The models `p` stands, the field's middle at `middle`; none when its kind has no model (it keeps its greybox). A
+## treeline's band keeps its own colour and fade; every other model keeps `model_keep` of its colour and takes
+## `model_fade` of the fade (RQ2).
 static func placed_of(p: SkylinePiece, cfg: SkylineConfig, middle: Vector2) -> Array[Placed]:
-	var out: Array[Placed] = []
 	if p.kind == &"treeline":
 		return _band(p, cfg)
+	var out := _models_of(p, cfg, middle)
+	for placed in out:
+		placed.keep = cfg.model_keep
+		placed.haze = cfg.model_fade
+	return out
+
+
+static func _models_of(p: SkylinePiece, cfg: SkylineConfig, middle: Vector2) -> Array[Placed]:
+	var out: Array[Placed] = []
 	var mesh := cfg.model_of(p.kind)
 	if mesh == null:
 		return out

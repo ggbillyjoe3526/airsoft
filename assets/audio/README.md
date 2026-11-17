@@ -117,3 +117,8 @@ seeds the browser game used, so they sound as they did.
 Made by the project, so no external licence (`docs/ASSETS.md` › Made by the project). To change a sound, change its
 recipe and re-render; until a Godot renderer exists, the browser game's renderer runs under Node (the 2026-10-18
 salvage record says how). The recorded cues are re-cut from the recordings (above).
+
+**Subway's easter egg** (TA1, 2026-11-17): `announce_gap_1.wav` and `announce_kings_cross_1.wav` are the owner's own
+two train announcements (`audio/william/raw/subway-easter-egg/` in the shared project files) as he recorded them: his
+two identical channels as one and the silence before and after cut (`python3 tools/announce_sound.py <raw folder>`; no
+filtering, no level change: owner, 2026-11-17, "stick with the original"). TrainAnnounceConfig says when they play.

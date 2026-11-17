@@ -765,7 +765,7 @@
     "width": 22,
     "depth": 14,
     "height": 5,
-    "colour": 14141864
+    "colour": 5926984
    },
    {
     "kind": "crane",
@@ -815,7 +815,7 @@
     "width": 20,
     "depth": 12,
     "height": 6,
-    "colour": 12175311
+    "colour": 4612679
    },
    {
     "kind": "shed",
@@ -824,7 +824,7 @@
     "width": 14,
     "depth": 34,
     "height": 7,
-    "colour": 14275782
+    "colour": 5204549
    },
    {
     "kind": "shed",
@@ -833,7 +833,7 @@
     "width": 54,
     "depth": 22,
     "height": 10,
-    "colour": 13094096
+    "colour": 6453836
    },
    {
     "kind": "shed",
@@ -851,7 +851,7 @@
     "width": 26,
     "depth": 40,
     "height": 8,
-    "colour": 13226966
+    "colour": 4152389
    },
    {
     "kind": "shed",
@@ -868,7 +868,7 @@
     "width": 46,
     "depth": 20,
     "height": 8.5,
-    "colour": 14141864
+    "colour": 5664842
    },
    {
     "kind": "silo",
@@ -989,7 +989,7 @@
     "x": 14.5,
     "z": -12.5,
     "width": 2.4,
-    "depth": 0.5,
+    "depth": 2.4,
     "height": 14
    },
    {
@@ -997,7 +997,7 @@
     "x": 14.5,
     "z": 24.5,
     "width": 2.4,
-    "depth": 0.5,
+    "depth": 2.4,
     "height": 14
    },
    {
@@ -1005,7 +1005,7 @@
     "x": 69.5,
     "z": -12.5,
     "width": 2.4,
-    "depth": 0.5,
+    "depth": 2.4,
     "height": 14
    },
    {
@@ -1013,7 +1013,7 @@
     "x": 69.5,
     "z": 24.5,
     "width": 2.4,
-    "depth": 0.5,
+    "depth": 2.4,
     "height": 14
    },
    {

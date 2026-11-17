@@ -1,0 +1,53 @@
+# RQ2 · The Range's skyline models rebuilt in detail
+
+**Review:** 4 attempts · critic Accept 8/8 · qa Pass · performance Pass
+
+## Attempts
+
+| Date | Attempt | Worker model | checks | Critic | Retry reason |
+|---|---|---|---|---|---|
+| 2026-11-17 | 1 | build thread (three workers, one per group) | ✓ touched tests (CI runs the rest) | 6/8 Retry | check 1: mast head flat, crane gusset/hook, fuselage nose and closed tear, water tower legs and bowl; check 4: no test fails on the old models |
+| 2026-11-17 | 2 | build thread (two workers) | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the water tower's top-bay tie rods ran through the bowl |
+| 2026-11-17 | 3 | build thread | ✓ touched tests (CI runs the rest) | 8/8 Accept | |
+| 2026-11-17 | 4 | build thread (owner's colour note) | ✓ touched tests (CI runs the rest) | 8/8 Accept | |
+
+## Decisions
+
+- **Asked for by the owner.** William, after RQ1's pictures (2026-11-17): "keep that, but i meant more detailed models
+  in the background like the sheds/crane/water tower/ mast, etc." RQ1 (the firing point) stays; this rebuilds the nine
+  skyline models the Range's background is made of.
+- **From his photos.** Each model follows `art/references/maps/william-2026-11-09/skyline_buildings/<kind>/` closely:
+  the sheds' doors, shutters, rooflights, gutters and downpipes; the jib crane's foot, I-beam jib, festoon cable and
+  hoist; the phone mast's sections, step bolts, antennas, dishes and floodlights; the water tower's laced lattice legs,
+  balcony and caged ladder; the silo's braced stand, hopper and pipes; the watch tower's stairs and cab; the fuselage's
+  windows, doors, torn rear and broken tail.
+- **Budgets raised about six times** (`skyline.py` BUDGETS, `test_skyline.gd` MODEL_BUDGETS): shed 2,600, long shed
+  3,200, deep shed 3,000, crane 4,000, mast 3,600, fuselage 4,000, silo 3,200, watch tower 4,500, water tower 4,500
+  (were 500 to 900). Each model uses 92 to 99 %; `test_skyline` now wants at least three quarters of each budget, so
+  the old low models would fail it.
+- **The skyline's cap 20k → 95k** (`TRIANGLES_MOST`). The Range's skyline mesh is about 89k triangles (was 10.1k), still
+  one mesh and one draw call; Woodland's band is unchanged. A small cost on Low against what the owner asked for.
+- **The mast's box grows to 2.4 m deep** (was 0.5; range.json's four masts and the model): a phone mast's head is a
+  three-sector frame as deep as it is wide, which a 0.5 m slab flattened to one face (critic, attempt 1).
+- **Bounds kept otherwise.** Every other model keeps its old box (the water tower now exactly symmetric, 1 cm), so each piece stretches
+  as before and `keep_depth` (the crane) behaves the same.
+- **Reds kept off the team hues.** The crane's hook, isolator and pendant stop are raspberry #a82c68; the fuselage's
+  cheat line wine #7e2046 over plum #4a2f55 (a plain red reads near High contrast's Beta orange in linear hue).
+- **More colour (the owner, on the pictures: "there needs to be more colour. more green on the shed and yellow on the
+  crane").** The skyline's models took the look's pull toward grey (LookConfig paint saturation) and the full distance
+  fade, so the sheds' green read grey-olive and the cranes' yellow tan. Now every model keeps all its colour
+  (`SkylineConfig.model_keep` 1.0, as the treelines do) and takes 0.4 of the fade (`model_fade`); the cranes' yellow
+  is brighter (#f0c800, was #cdb338: under the Ultra haze a darker yellow still read tan; linear hue 40°, clear of
+  Beta's orange); and six of the Range's pale sheds are now greens in five shades (10 of 12 green, a grey and a cream
+  left for variety). The greybox pieces (containers, chimneys) keep the look's pull.
+- **Only the masts' floodlights glow at night.** The sheds' bulkhead lamps are painted, not night-lit, so the night
+  surface keeps four masts × four lamps (`test_skyline`) and Woodland's night look is unchanged.
+- **Three modules** (`skyline_sheds.py`, `skyline_towers.py`, `skyline_hulls.py`) hold the builders; `skyline.py`
+  keeps the entry point, budgets and shared colours.
+- **Pictures:** `tools/range_pictures.gd` gains five views over the walls at the skyline (`sky_mast`, `sky_east`, `sky_west`,
+  `sky_north_east`, `sky_south_east`).
+
+## Known issues
+
+- At 60 m and more the pieces take their own flat colour and the distance fade, so fine parts (chain, step bolts) read
+  only as silhouette; the closer sheds, water tower and watch tower show the most.
