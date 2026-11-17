@@ -31,7 +31,8 @@ extends Resource
 	&"boards": &"Planks008", &"quarry": &"Tiles017", &"painted": &"Concrete029", &"car": &"PaintedMetal012",
 	&"coping": &"Concrete035", &"soot": &"Concrete029", &"rail": &"PaintedMetal012", &"sleeper": &"Concrete035",
 	&"gap_line": &"PaintedMetal012", &"paint": &"PaintedMetal012", &"vault_tile": &"Tiles136B",
-	&"platform_floor": &"Concrete034", &"vault_rib": &"Concrete034", &"frieze": &"Tiles136B", &"cable": &"Rubber004",
+	&"platform_floor": &"Concrete034", &"vault_rib": &"Concrete034", &"frieze": &"Tiles136B", &"mouth_ring": &"Tiles136B",
+	&"cable": &"Rubber004",
 }
 @export var finish_scales: Dictionary[StringName, float] = {
 	&"wall_tile": 0.6, &"terrazzo": 2.0, &"hall_floor": 4.0, &"plaster": 2.5, &"concrete": 3.0, &"platform": 2.5,
@@ -39,7 +40,7 @@ extends Resource
 	&"tread": 0.8, &"steel": 1.5, &"rust": 2.0, &"shutter": 1.6, &"planks": 1.5, &"plant": 2.5, &"rubber": 1.5,
 	&"tactile": 0.8, &"lining": 2.4, &"boards": 1.8, &"quarry": 1.2, &"painted": 2.5, &"car": 1.5, &"coping": 1.0,
 	&"soot": 3.0, &"rail": 0.5, &"sleeper": 1.0, &"gap_line": 2.0, &"paint": 2.0,
-	&"vault_tile": 0.6, &"platform_floor": 4.0, &"vault_rib": 2.0, &"frieze": 0.6, &"cable": 1.0,
+	&"vault_tile": 0.6, &"platform_floor": 4.0, &"vault_rib": 2.0, &"frieze": 0.6, &"mouth_ring": 0.6, &"cable": 1.0,
 }
 @export var finish_tints: Dictionary[StringName, Color] = {
 	# TB1 (owner, 2026-11-12: "a more white/grey look"): white glazed tiles, faintly cool.
@@ -55,7 +56,10 @@ extends Resource
 	&"platform_floor": Color8(0xb8, 0xb8, 0xb6),
 	# TB1's trims: the vault's ribs in pale grey concrete, which, facing down away from the lamps, reads darker than the
 	# tiles beside it (rings); the frieze in dark green-grey tiles (a band of colour off both team hues); the cables black.
-	&"vault_rib": Color8(0xc8, 0xcb, 0xcc), &"frieze": Color8(0x3c, 0x48, 0x44), &"cable": Color8(0x60, 0x60, 0x60),
+	&"vault_rib": Color8(0xc8, 0xcb, 0xcc), &"frieze": Color8(0x3c, 0x48, 0x44),
+	# the band round a running tunnel's mouth in the frieze's tiles a few shades lighter: between the white walls and the
+	# dark arch, so it reads as a trim, not as more of the opening.
+	&"mouth_ring": Color8(0x7a, 0x89, 0x83), &"cable": Color8(0x60, 0x60, 0x60),
 	# The track bed's ballast a dark grey, near black, under the rails (owner, 2026-11-12).
 	&"ballast": Color8(0x4a, 0x4a, 0x4a),
 	# The vault's tiles, the walls' faintly cooler: the warm light from below would turn a down-facing white tan.
@@ -64,7 +68,7 @@ extends Resource
 ## The finishes painted the one safety colour (yellow, off both team hues): their tints may be saturated.
 @export var safety_finishes: Array[StringName] = [&"gap_line"]
 @export var finish_pbr: Dictionary[StringName, Vector2] = {
-	&"wall_tile": Vector2(0.7, 0.0), &"vault_tile": Vector2(0.7, 0.0), &"frieze": Vector2(0.6, 0.0),
+	&"wall_tile": Vector2(0.7, 0.0), &"vault_tile": Vector2(0.7, 0.0), &"frieze": Vector2(0.6, 0.0), &"mouth_ring": Vector2(0.6, 0.0),
 	&"terrazzo": Vector2(0.8, 0.0), &"hall_floor": Vector2(0.7, 0.0),
 	&"tread": Vector2(0.9, 0.6), &"steel": Vector2(1.0, 0.2), &"car": Vector2(0.9, 0.3),
 	&"rust": Vector2(1.0, 0.3), &"shutter": Vector2(1.0, 0.4),
@@ -128,6 +132,12 @@ extends Resource
 ## its corners in the platform's tiles round it, as the north mouth's (the owner, 2026-11-17: they were drawn in
 ## `outside`, near black, "tunnel wall is glitching around the train").
 @export var mouth_walls: StringName = &"wall_tile"
+## Round a running tunnel's mouth, on the wall it opens in: a band this wide (m) following its arch and down its sides
+## to the floor in front, standing `mouth_ring_proud` m off the wall, in `mouth_ring_finish` (the owner, 2026-11-17:
+## "maybe add a subtle pattern around the edge of the tunnel"; the frieze's tiles, lighter). Look only.
+@export var mouth_ring_width: float = 0.24
+@export var mouth_ring_proud: float = 0.02
+@export var mouth_ring_finish: StringName = &"mouth_ring"
 ## A running tunnel's way on round its bend (StationDressing.TunnelBend): drawn in pieces about this long (m) round it.
 @export var bend_step: float = 1.0
 ## The vault's ribs (TB1: its lining rings): one `vault_rib_width` m wide every `vault_rib_every` m along it, standing

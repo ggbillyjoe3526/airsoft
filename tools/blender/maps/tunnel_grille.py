@@ -26,12 +26,13 @@ from mathutils import Vector  # noqa: E402
 
 NAME = "tunnel_grille"
 BUDGET = 1100
-# The running tunnel's lining (tools/subway/layout.py RUN_VAULTS): 3.6 m across, straight sides to 2.7 m over the
-# track bed, then an arc rising 1.4 m more at its middle. The grille keeps 10 mm inside it.
-HALF = 1.8 - 0.01
+# The running tunnel's lining (tools/subway/layout.py RUN_VAULTS, RUN_Z0 and RUN_Z1): 3.9 m across, straight sides to
+# 2.7 m over the track bed, then an arc rising 1.4 m more at its middle. The grille keeps 10 mm inside it.
+LINING = 1.95                              # the lining's half width
+HALF = LINING - 0.01
 SPRING = 2.7
 RISE = 1.4
-RADIUS = (1.8 * 1.8 + RISE * RISE) / (2.0 * RISE)
+RADIUS = (LINING * LINING + RISE * RISE) / (2.0 * RISE)
 CENTRE = SPRING + RISE - RADIUS            # the arc's centre over the track bed
 TOP = CENTRE + RADIUS - 0.01
 DEEP = 0.12                                # Blender y: -DEEP (its front) .. 0 (its back on the wall)

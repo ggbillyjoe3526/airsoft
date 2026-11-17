@@ -164,6 +164,11 @@ func test_the_mouths_and_the_platform_ends_are_backed_where_the_wall_stops() -> 
 	var look := play.station_look
 	assert_gt(look.vault_backing, 0.0)
 	var mesh := StationSurface.mesh(map, play.map_style, look, play.site_look.props.named_only())
+	var south: StationDressing.TunnelVault = null
+	for v in map.station.vaults:
+		if v.open_west and v.area.position.y > 0.0:
+			south = v
+	assert_not_null(south, "the south running tunnel")
 	var mouth := 0
 	var end := 0
 	for s in mesh.get_surface_count():
@@ -171,7 +176,9 @@ func test_the_mouths_and_the_platform_ends_are_backed_where_the_wall_stops() -> 
 		for p in verts:
 			if absf(p.x - 50.0) > 1e-4:
 				continue
-			if p.z >= 9.0 - 1e-4 and p.z <= 9.0 + look.vault_backing + 1e-4 and p.y >= 2.7 - 1e-4 and p.y <= 4.1 + 1e-4:
+			# the strip's top corner over the mouth's platform side, at the arch's crown height
+			if absf(p.z - (south.area.position.y + look.vault_backing)) < 1e-4 \
+					and absf(p.y - (south.y + south.rise)) < 1e-4:
 				mouth += 1
 			if p.z > 5.5 - 1e-4 and p.z < 12.5 + 1e-4 and absf(p.y - (4.1 + look.vault_backing)) < 1e-4:
 				end += 1
@@ -219,3 +226,39 @@ func _front_hit(tris: PackedVector3Array, y: float, z: float) -> float:
 		if hit != null and (hit as Vector3).x > best:
 			best = (hit as Vector3).x
 	return best
+
+
+func test_the_running_tunnels_leave_the_trains_room_each_side_and_their_mouths_are_trimmed() -> void:
+	# The owner, 2026-11-17: "the tunnel mouth needs to have slightly more gap on the sides between it and the train.
+	# it should be smooth. maybe add a subtle pattern around the edge of the tunnel." Each running tunnel is wider than
+	# a car by 0.2 m or more a side, centred on its track; a band in its own finish runs round each mouth on the wall.
+	var look := play.station_look
+	var half_car := 0.0
+	for path in look.trains.paths():
+		var mesh := look.trains.mesh(path)
+		if mesh != null:
+			half_car = maxf(half_car, maxf(mesh.get_aabb().end.z, -mesh.get_aabb().position.z))
+	assert_gt(half_car, 1.5)
+	var mouths := 0
+	for v in map.station.vaults:
+		if not v.open_west:
+			continue
+		mouths += 1
+		var track := 0.0
+		for t in map.trains:
+			if signf(t.box.get_center().z) == signf(v.area.get_center().y):
+				track = t.box.get_center().z
+		assert_almost_eq(v.area.get_center().y, track, 0.01, "centred on its track")
+		assert_gte(v.area.size.y * 0.5 - half_car, 0.2, "a car clear of the sides by 0.2 m")
+	assert_eq(mouths, 2)
+	assert_gt(look.mouth_ring_width, 0.0)
+	assert_eq(look.mouth_ring_finish, &"mouth_ring")
+	assert_ne(look.tint_of(look.mouth_ring_finish, null), look.tint_of(look.mouth_walls, null), "it reads as a trim")
+	var mesh := StationSurface.mesh(map, play.map_style, look, play.site_look.props.named_only())
+	var ring := 0
+	var x := 50.0 - look.vault_proud - look.mouth_ring_proud
+	for s in mesh.get_surface_count():
+		for p: Vector3 in mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX]:
+			if absf(p.x - x) < 1e-4:
+				ring += 1
+	assert_gt(ring, 0, "the bands drawn on the mouths' wall")

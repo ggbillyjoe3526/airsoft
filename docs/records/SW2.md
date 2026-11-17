@@ -80,6 +80,16 @@ around the train", his 6.png) and 27 (the trains' front and end models need refi
   (`test_the_cab_fronts_and_outer_ends_have_no_holes_in_their_faces`). `train_end_outer` is 3,603 triangles (budget
   2,600 to 3,700), `train_cab` 4,056 of 4,200.
 
+- **The tunnel mouths, the owner's follow-up** (2026-11-17, after the PR opened: "the tunnel mouth needs to have
+  slightly more gap on the sides between it and the train. it should be smooth. maybe add a subtle pattern around the
+  edge of the tunnel"): each running tunnel is 3.9 m across (was 3.6 m), centred on its track (`layout.py RUN_Z0`,
+  `RUN_Z1`), so a car has about 0.23 m clear each side through the mouth and along the tunnel (5 cm on the platform
+  side before). The south train stands half in its tunnel, so two slots run beside it there (`run_s_in`, `run_s_out`).
+  The cross passage and the grille (`tunnel_grille.py LINING` 1.95) follow. A band 0.24 m wide in the frieze's tiles,
+  a few shades lighter (`mouth_ring`, green-grey #7a8983), runs round each mouth's arch and down its platform side,
+  2 cm off the wall with its edges drawn back (`StationSurface._add_mouth_ring`, `StationLook.mouth_ring_*`). Pictures
+  `09` to `09e` and `13-mouths-overview.jpg`.
+
 ## The models against their references
 
 The owner's photo `04-cab-front/Screenshot 2026-11-11 113653.png` (front-on) against `train_cab`'s dimensions,
@@ -128,6 +138,9 @@ tuned: the fuse stays 22 s. Reports: the shared files' `pipeline/runs/SW2/attemp
   sight with no straight look down it.
 - **The cab's triangle budget is 4,200** (was 4,000): the closed face beside the mask needs its cells; the attempt 2
   critic said to raise it rather than skimp. Two cabs stand in Subway.
+- **The running tunnels widen, not the cars narrow:** the cars stay 1.72 m a side (their platform doors meet the
+  platforms' edges); the tunnels past the mouths are look and cover only for the east team's start, so 0.3 m more
+  width there changes no lane.
 - **Only the cars' sides moved in** (1.75 to 1.72 m): the tunnel's lining stays where the platform edges and the
   trains' doors meet it.
 
