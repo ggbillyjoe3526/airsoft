@@ -54,6 +54,9 @@ msgstr "%d m"
 msgid "HUD_METRES_PLUS"
 msgstr "%d m+"
 
+msgid "HUD_BACK_IN"
+msgstr "Back in"
+
 msgid "HUD_RICOCHET"
 msgstr "Ricochet: play on"
 

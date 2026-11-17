@@ -24,6 +24,10 @@ const LEVEL_BANDS: Dictionary[StringName, Vector2] = {
 const EASY_ROUNDS_MAX := 1.6
 ## Rounds that run out the clock: under 1 in 10 (the browser's ON_TIME_BAND).
 const ON_TIME_MAX := 0.1
+## ... with respawns (RS1): Attack / Defend's clock is the defenders' every win, at most what the attackers' band leaves
+## them; Plant The Bomb's is a round the attackers never armed the bomb in, no more than one in four.
+const FLAG_ON_TIME_RESPAWN_MAX := 0.62
+const PLANT_ON_TIME_RESPAWN_MAX := 0.25
 ## Attack / Defend: the attackers' share of all rounds, each level against itself (the browser game's depotFlag,
 ## depotProFlag and neonHeightsFlag balance files): Normal's per map (Depot's, any other map's), the other levels' as in
 ## LEVEL_BANDS but wider at Normal's level of play on the pole.
@@ -174,12 +178,13 @@ static func figures(map_name: String, ends: Array[String], matches: Array[MatchR
 	return out
 
 
-## The band's top for rounds that run out the clock in `matches`: ON_TIME_MAX, or none (measured only) once anyone
-## respawned (RS1): with hits coming back the clock is how the defenders win, so it is no longer a stand-off.
-static func clock_max(matches: Array[MatchRunner.MatchTally]) -> float:
+## The band's top for rounds that run out the clock in `matches`: ON_TIME_MAX, or `respawning` once anyone respawned
+## (RS1): with hits coming back nobody is wiped out, so the clock is how the defenders win, and only a field where it
+## takes far more than their share is a stand-off.
+static func clock_max(matches: Array[MatchRunner.MatchTally], respawning: float) -> float:
 	for m in matches:
 		if m.respawns > 0:
-			return INF
+			return respawning
 	return ON_TIME_MAX
 
 
@@ -208,7 +213,8 @@ static func flag_figures(map_id: String, map_name: String, matches: Array[MatchR
 	var out: Array[Figure] = []
 	out.append(share("%s: the attackers' share of rounds" % at, attack_wins, rounds, band.x, band.y,
 			"%d of %d rounds" % [attack_wins, rounds]))
-	out.append(share("%s: rounds that run out the clock" % at, on_time, rounds, -INF, clock_max(matches),
+	out.append(share("%s: rounds that run out the clock" % at, on_time, rounds, -INF,
+			clock_max(matches, FLAG_ON_TIME_RESPAWN_MAX),
 			"%d of %d rounds" % [on_time, rounds]))
 	out.append(share("%s: rounds won by raising the flag" % at, captures, rounds, -INF, INF,
 			"%d of %d rounds" % [captures, rounds]))
@@ -246,7 +252,8 @@ static func plant_figures(map_name: String, matches: Array[MatchRunner.MatchTall
 	var out: Array[Figure] = []
 	out.append(share("%s: the attackers' share of rounds" % at, attack_wins, rounds, band.x, band.y,
 			"%d of %d rounds" % [attack_wins, rounds]))
-	out.append(share("%s: rounds that run out the clock" % at, on_time, rounds, -INF, clock_max(matches),
+	out.append(share("%s: rounds that run out the clock" % at, on_time, rounds, -INF,
+			clock_max(matches, PLANT_ON_TIME_RESPAWN_MAX),
 			"%d of %d rounds" % [on_time, rounds]))
 	out.append(share("%s: rounds the bomb is armed in" % at, armed, rounds, -INF, INF,
 			"%d of %d rounds" % [armed, rounds]))

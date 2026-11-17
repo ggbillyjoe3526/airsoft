@@ -282,11 +282,11 @@ var _watch_input: PlayerCommand = PlayerCommand.new()
 var _intents: BotIntentView = null
 var _retro: RetroFilter = null
 var _rematch_left: float = -1.0
+## Where you come back when out with a respawn coming (RS1, PlayerCommand.spawn_pick): 0 the start area.
+var _spawn_pick: int = 0
 ## Skipping the round you are out of: the rest is played out at once under the cover with the HUD hidden and no sound;
 ## whether the trigger was up once you could skip (a press made before does not count); the cover and its line.
 var _skipping: bool = false
-## Where you come back when out with a respawn coming (RS1, PlayerCommand.spawn_pick): 0 the start area.
-var _spawn_pick: int = 0
 var _skip_armed: bool = false
 ## Seconds you have been able to skip (out, the round live), counted while the match plays: the trigger skips only
 ## after PlayTuning.skip_grace (UF2).

@@ -453,7 +453,7 @@ func test_the_panel_shows_the_wait_and_the_places_while_you_wait() -> void:
 	assert_eq(panel.place_names(), PackedStringArray([tr("HUD_RESPAWN_START")]), "the rule off: the start area only")
 
 
-func test_the_balance_report_judges_the_clock_only_in_one_life_matches() -> void:
+func test_the_balance_report_widens_the_clock_band_with_respawns() -> void:
 	var m := MatchRunner.MatchTally.new()
 	var r := MatchRunner.RoundTally.new()
 	r.winner = 1
@@ -463,9 +463,9 @@ func test_the_balance_report_judges_the_clock_only_in_one_life_matches() -> void
 	var matches: Array[MatchRunner.MatchTally] = [m]
 	assert_eq(BalanceReport.flag_figures("depot", "Depot", matches)[1].band_max, BalanceReport.ON_TIME_MAX)
 	m.respawns = 3
-	assert_eq(BalanceReport.flag_figures("depot", "Depot", matches)[1].band_max, INF,
-			"with respawns the clock is the defenders' win, measured only")
-	assert_eq(BalanceReport.plant_figures("Depot", matches)[1].band_max, INF)
+	assert_eq(BalanceReport.flag_figures("depot", "Depot", matches)[1].band_max,
+			BalanceReport.FLAG_ON_TIME_RESPAWN_MAX, "with respawns the clock is the defenders' win: a wide band")
+	assert_eq(BalanceReport.plant_figures("Depot", matches)[1].band_max, BalanceReport.PLANT_ON_TIME_RESPAWN_MAX)
 
 
 func test_with_respawns_an_untended_flag_slips_back_down() -> void:
@@ -534,3 +534,27 @@ func test_a_field_s_defender_respawn_is_read_and_played_and_blank_keeps_the_game
 		assert_eq(MatchRunner.sized_for(e.id).rounds.defender_respawn_delay, back, "%s: the measures play it" % e.id)
 	assert_gt(own, 0, "a field has its own, or this test proves nothing")
 	assert_eq(base.rounds.defender_respawn_delay, games, "the loaded tuning is never written")
+
+
+func test_coming_back_comes_up_out_of_dark_with_back_in_and_only_for_you() -> void:
+	var you := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
+	var hud := Hud.new()
+	add_child_autofree(hud)
+	var cfg := HudConfig.new()
+	hud.setup(cfg, TeamConfig.new(), ViewConfig.new(), SimTuning.new(), you)
+	var state := GameState.new(1, tuning)
+	state.characters.append(you)
+	state.characters.append(Character.new(1, 1, Vector3.ZERO, 0.0, loadout))
+	state.events.add(GameEvent.Kind.RESPAWNED).actor = 1
+	hud.on_tick(state)
+	hud.update(state, 0.0, 0.0)
+	assert_eq(hud.back_in_dark(), 0.0, "someone else's return: no fade")
+	state.events.clear()
+	state.events.add(GameEvent.Kind.RESPAWNED).actor = 0
+	hud.on_tick(state)
+	hud.update(state, 0.0, 0.0)
+	assert_almost_eq(hud.back_in_dark(), cfg.back_in_dark, 1e-4, "your return starts dark")
+	hud.update(state, 0.0, cfg.back_in_fade * 0.5)
+	assert_almost_eq(hud.back_in_dark(), cfg.back_in_dark * 0.5, 1e-4, "and comes up")
+	hud.update(state, 0.0, cfg.back_in_fade)
+	assert_eq(hud.back_in_dark(), 0.0, "then clear")

@@ -1,7 +1,7 @@
 extends SceneTree
 ## Pictures of the respawn panel (RS1): you are out in an Attack / Defend round on Depot with a respawn coming, as an
-## attacker (the start area and your end's two forward spawns, the second picked) and with an enemy near the first
-## (greyed out), then as a defender (the start area only). Grabbed whole to
+## attacker (the start area and your end's two forward spawns, the second picked), then with an enemy near the first
+## (greyed out, nothing else moves). Grabbed whole to
 ## `<folder>/<tag>_<name>_<W>x<H>.png`. Needs a display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 2560x1440x24" godot --path . --rendering-driver opengl3 \
 ##       -s res://tools/respawn_pictures.gd -- <folder> <tag> <width> <height>
@@ -71,8 +71,6 @@ func _run() -> void:
 			break
 	await _show(session, rs, you.team, 1, 4.6)
 	await _grab(folder, tag, "attacker_enemy_near", size)
-	await _show(session, rs, 1 - you.team, 0, 9.1)
-	await _grab(folder, tag, "defender_start_only", size)
 	session.queue_free()
 	await _frames(4)
 	quit(0)

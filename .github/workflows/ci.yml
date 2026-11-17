@@ -168,9 +168,9 @@ jobs:
 
   # The respawn guards (RS1): Depot's Attack / Defend and Plant The Bomb with respawns, as the game plays them.
   respawn-guards:
-    name: Match guards, respawns (Depot)
+    name: Match guards, respawns
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
 
