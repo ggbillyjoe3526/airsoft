@@ -14,6 +14,7 @@
 - The north platform is level to its end, and its ramp is gone.
 - The east team climbs out of the tunnels over the platform edge, as everywhere else.
 - The tunnel wall no longer flickers round the trains.
+- The train tunnels are wider, leaving a clear gap beside the trains at the tunnel mouths, and a green-grey tiled band trims each mouth's arch.
 - No lines or cracks show on the tiled wall round the tunnel mouths, and underground there is no blue sky in any gap.
 
 ### Trains
