@@ -99,8 +99,8 @@ on in every mode, or off in all of them.
 
 - **How long you wait.** The attackers wait <!-- wiki:config round_config.respawn_delay --> seconds. The defenders'
   wait in Attack / Defend is set for each field so both sides win about as often: 15 s on **Depot**, whose poles are
-  close to the defenders' start, and 5 s on **Woodland**, whose two poles are far apart. In Plant The Bomb they wait
-  <!-- wiki:config round_config.plant_defender_respawn_delay -->
+  close to the defenders' start, 5 s on **Woodland**, whose two poles are far apart, and 7 s on **Subway**. In Plant
+  The Bomb they wait <!-- wiki:config round_config.plant_defender_respawn_delay -->
   seconds.
 - **Where you come back.** While you wait, a **RESPAWN IN** panel at the bottom of the screen lists your **start
   area** and your end's two **forward spawns**, nearer the fight. Pick one with **1**, **2** or **3** (the first two
@@ -116,7 +116,8 @@ on in every mode, or off in all of them.
   flag down.
 
 Each field's forward spawns: **Depot** Upper mid and Huts (west), A short and B alley (east); **Woodland** Pine slope
-and Road west (west camp), Fort gate and Back track (east camp).
+and Road west (west camp), Fort gate and Back track (east camp); **Subway** Concourse and Lift landing (west), East
+passage and North platform east (east).
 
 ## Skirmish and Custom
 
