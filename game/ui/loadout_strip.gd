@@ -1,13 +1,17 @@
 class_name LoadoutStrip
 extends HBoxContainer
 ## The saved loadouts strip (concept `.saved`): a card for each saved loadout with its key 1 to 5, the carried one lit, then
-## "+ NEW LOADOUT" while there is room, and Rename, Duplicate, Replace and Remove on the right. Every action is
-## SavedLoadouts'; the strip only asks for it. Rename types over the carried one's name, Replace asks which loadout takes
+## "+ NEW LOADOUT" while there is room. Rename, Duplicate, Replace and Remove are in a menu that opens on a card when it
+## is right-clicked (owner, 2026-11-17: they were links on the right), or with the Menu key or Shift+F10 on a focused
+## card; the card is carried first, so the menu's actions are on it. Every action is SavedLoadouts'; the strip only
+## asks for it. Rename types over the carried one's name, Replace asks which loadout takes
 ## the carried one's place and Remove asks once more, each left again with Esc (`cancel`). A Replace can be undone for
 ## UNDO_SECONDS (BP7): "<name> replaced" and Undo stand where the actions were, until then, a click on a card, Esc or any
 ## other change.
 
 enum Mode { NORMAL, RENAMING, REPLACING, REMOVING }
+## The card's menu's items, in its order.
+enum MenuItem { RENAME, DUPLICATE, REPLACE, REMOVE }
 
 const HEIGHT := 56.0
 const GAP := 10
@@ -22,6 +26,8 @@ const DASH := 6.0
 const EDIT_WIDTH := 260.0
 ## How long a Replace's Undo stays offered (s).
 const UNDO_SECONDS := 6.0
+## The menu's words by MenuItem (translation keys).
+const MENU_KEYS: Array[String] = ["LOADOUT_RENAME", "LOADOUT_DUPLICATE", "LOADOUT_REPLACE", "LOADOUT_REMOVE"]
 ## The most room a loadout's name takes on its card (px): a longer one ends in "…" and the card's tooltip is the whole
 ## name, so five cards of the longest names and the actions fit the window (UI1).
 const NAME_WIDTH := 170.0
@@ -41,6 +47,8 @@ var _prompt: Label = null
 var _signature: String = ""
 ## Counts Replaces, so a timer left from an earlier one never takes a later one's Undo away.
 var _replaces: int = 0
+## The card's menu, built on its first opening and kept (it is the strip's child, so it goes with it).
+var _menu: PopupMenu = null
 
 
 func _init(saved_in: SavedLoadouts) -> void:
@@ -60,8 +68,63 @@ func new_card() -> MenuCard:
 	return _new
 
 
+## A link the strip shows now (the Remove question's Remove and Keep, a Replace's Undo).
 func action(id: StringName) -> Button:
 	return _actions[id]
+
+
+## Opens the card menu on loadout `index` (carrying it first), `at` from the card's top left (px; the click's point),
+## or under the card for the keyboard. Nothing outside the normal mode.
+func open_menu(index: int, at: Vector2 = Vector2(-1.0, -1.0)) -> void:
+	if mode != Mode.NORMAL or index < 0 or index >= _cards.size() or _cards[index] == null:
+		return
+	if index != saved.current:
+		saved.use(index)
+	if saved.undo_index() >= 0:
+		saved.forget_undo()
+	refresh()
+	var c := _cards[index]
+	if c == null:
+		return
+	if _menu == null:
+		_menu = PopupMenu.new()
+		_menu.name = "LoadoutMenu"
+		for i in MENU_KEYS.size():
+			_menu.add_item(tr(MENU_KEYS[i]), i)
+		_menu.id_pressed.connect(func(id: int) -> void: pick(id as MenuItem))
+		add_child(_menu, false, Node.INTERNAL_MODE_BACK)
+	_menu.set_item_disabled(MenuItem.DUPLICATE, saved.slots.size() >= SavedLoadouts.MAX_SLOTS)
+	_menu.set_item_disabled(MenuItem.REPLACE, saved.slots.size() <= 1)
+	_menu.set_item_disabled(MenuItem.REMOVE, saved.slots.size() <= 1)
+	var point := at if at.x >= 0.0 else Vector2(0.0, c.size.y)
+	_menu.reset_size()
+	_menu.position = Vector2i((c.get_screen_position() + point * c.get_global_transform_with_canvas().get_scale()).round())
+	_menu.popup()
+
+
+## The card menu (null until it first opens).
+func menu() -> PopupMenu:
+	return _menu
+
+
+## Whether the menu's `item` can be picked now (for tests: Duplicate with five loadouts, Replace and Remove with one).
+func menu_disabled(item: MenuItem) -> bool:
+	return _menu != null and _menu.is_item_disabled(item)
+
+
+## Does what the menu's `item` says, on the carried loadout.
+func pick(item: MenuItem) -> void:
+	if _menu != null and _menu.is_item_disabled(item):
+		return
+	match item:
+		MenuItem.RENAME:
+			start_rename()
+		MenuItem.DUPLICATE:
+			_duplicate()
+		MenuItem.REPLACE:
+			start_replace()
+		MenuItem.REMOVE:
+			start_remove()
 
 
 func edit() -> LineEdit:
@@ -121,7 +184,7 @@ func start_remove() -> void:
 func _fit() -> void:
 	for i in _names.size():
 		if _names[i] != null and _cap_name(_names[i]):
-			_cards[i].tooltip_text = saved.slots[i].name
+			_cards[i].tooltip_text = "%s\n%s" % [saved.slots[i].name, tr("LOADOUT_MENU_TIP")]
 	var all: Array[MenuCard] = _cards.duplicate()
 	all.append(_new)
 	for card_node: MenuCard in all:
@@ -193,14 +256,6 @@ func _rebuild() -> void:
 		_ when saved.undo_index() >= 0:
 			_say("LOADOUT_REPLACED", saved.slots[saved.undo_index()].name)
 			_link(&"undo", "LOADOUT_UNDO", undo)
-		_:
-			_link(&"rename", "LOADOUT_RENAME", start_rename)
-			_link(&"duplicate", "LOADOUT_DUPLICATE", _duplicate)
-			_link(&"replace", "LOADOUT_REPLACE", start_replace)
-			_link(&"remove", "LOADOUT_REMOVE", start_remove)
-			_actions[&"duplicate"].disabled = saved.slots.size() >= SavedLoadouts.MAX_SLOTS
-			_actions[&"replace"].disabled = saved.slots.size() <= 1
-			_actions[&"remove"].disabled = saved.slots.size() <= 1
 
 
 func _build_card(index: int) -> MenuCard:
@@ -228,7 +283,24 @@ func _build_card(index: int) -> MenuCard:
 	if mode == Mode.REPLACING:
 		c.set_greyed(lit)
 	c.pressed.connect(_pressed.bind(index))
+	c.gui_input.connect(_card_input.bind(index))
+	c.tooltip_text = tr("LOADOUT_MENU_TIP")
 	return c
+
+
+## A right click on a card, or the Menu key or Shift+F10 with it focused, opens its menu.
+func _card_input(event: InputEvent, index: int) -> void:
+	var click := event as InputEventMouseButton
+	if click != null and click.pressed and click.button_index == MOUSE_BUTTON_RIGHT:
+		_cards[index].accept_event()
+		# deferred: carrying another loadout builds the cards again, this one too
+		open_menu.call_deferred(index, click.position)
+		return
+	var key := event as InputEventKey
+	if key != null and key.pressed and not key.echo and (key.keycode == KEY_MENU
+			or (key.keycode == KEY_F10 and key.shift_pressed)):
+		_cards[index].accept_event()
+		open_menu.call_deferred(index)
 
 
 func _build_new() -> MenuCard:

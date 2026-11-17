@@ -19,8 +19,8 @@ extends Resource
 ## The hop-up readout shows this long (s) after the last turn of the dial; a BB counts as flat while it stays within
 ## hop_band (m) of the aim line, followed at most hop_range (m).
 @export var hop_show_time: float = 1.8
-## "Space to vault" under the crosshair while a Jump press would vault, kept up this long after (s), this far below the
-## centre (px).
+## The Jump key alone, in capitals ("SPACE"; owner 2026-11-17), under the crosshair while a Jump press would vault or
+## climb, kept up this long after (s), this far below the centre (px).
 @export var vault_prompt_hold: float = 0.15
 @export var vault_prompt_drop: float = 56.0
 ## "Leaves in the way · step clear to shoot" under the vault prompt when a bush's leaves stop your own BB within
@@ -76,6 +76,9 @@ extends Resource
 ## order_notice_time (s), and an order picked on the wheel (which shuts as it is picked) waits up to order_notice_wait
 ## (s) for its answer's notice.
 @export var order_notice_time: float = 2.0
+## Plant The Bomb's "YOU HAVE THE BOMB" under the crosshair shows this long (s) once you pick the bomb up, then goes
+## (owner, 2026-11-17: only briefly).
+@export var bomb_carry_notice_time: float = 2.5
 ## Spotted's arrow over a marked enemy (CW1, HudSpotArrows): its tip this far over their eyes (m), its width and height
 ## (px), its colour, and how long (s) it fades out at the end of the mark.
 @export var spot_arrow_lift: float = 0.5

@@ -32,11 +32,12 @@ func test_a_panel_opacity_change_from_the_open_settings_reaches_the_hud() -> voi
 func test_the_preview_s_opacity_never_reaches_the_hud() -> void:
 	var hud := _hud()
 	var p := HudPrefs.new()
+	p.panel_opacity = 1.0
 	hud.apply_prefs(p)
 	var preview := HudPreview.new()
 	add_child_autofree(preview)
 	var shown := HudPrefs.new()
-	shown.panel_opacity = 0.6
+	shown.panel_opacity = 0.3
 	preview.show_prefs(shown)
 	assert_almost_eq(HudStyle.opacity_of(hud._replica), 1.0, 0.001)
 	assert_almost_eq(HudStyle.backing_on(hud.score(), 1.0).a, 1.0, 0.001)

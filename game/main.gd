@@ -44,6 +44,10 @@ const SMOKE_PLAY := 90
 const SMOKE_SPEED := 8
 const SMOKE_MAX_TICKS := 108000
 const SMOKE_SETTLE := 30
+## The menus' hidden pages are built in PREPARE_STEPS steps (the Loadout, the Armory, the settings), each
+## PREPARE_WAIT_FRAMES frames after the last (after the menus first show, or a new interface colour).
+const PREPARE_STEPS := 3
+const PREPARE_WAIT_FRAMES := 3
 ## The smoke match's seed and map, so every run plays the same match.
 const SMOKE_SEED := 1
 const SMOKE_MAP := "depot"
@@ -68,7 +72,9 @@ const REPORT_SCREEN_MENUS := "menus"
 var _credits: Credits
 ## Report a Bug over the menus, while it is open.
 var _report_panel: ReportPanel = null
+## The settings while open, and the menus' settings kept hidden while closed (null: none built).
 var _settings_screen: SettingsScreen
+var _settings_kept: SettingsScreen = null
 ## QUIT GAME? while it is asked (Esc in the menus), else null.
 var _quit_prompt: QuitPrompt = null
 var _menus: MenuScreen
@@ -145,6 +151,7 @@ func _ready() -> void:
 	# before the settings screens and the match, so a key list waiting for a key has F11 first
 	add_child(WindowWatch.new())
 	_build_screens()
+	_prepare_menu_pages_soon()
 	_menus.focus_play()
 	SettingsApply.set_menus(Settings.shared(), true)
 	_credits = Credits.new()
@@ -186,7 +193,30 @@ func _build_screens() -> void:
 	move_child(_menus, 0)
 
 
+## The Loadout page, the Armory and the settings built, hidden, a step every PREPARE_WAIT_FRAMES frames once the menus
+## show, so their tabs open at once (owner, 2026-11-17) and no one frame carries all three builds (their pictures
+## draw in the frame after each); a tab opened sooner builds its page as before. Not in the smoke run or a headless one
+## (nothing is drawn there, and the tests build the menus many times). Stops if the menus go meanwhile.
+func _prepare_menu_pages_soon() -> void:
+	if _smoke or DisplayServer.get_name() == "headless":
+		return
+	var menus := _menus
+	for step: int in PREPARE_STEPS:
+		for i in PREPARE_WAIT_FRAMES:
+			await get_tree().process_frame
+		if menus != _menus or not is_instance_valid(menus) or menus.is_queued_for_deletion():
+			return
+		if step == 0:
+			menus.prepare_loadout()
+		elif step == 1:
+			menus.prepare_armory()
+		elif _settings_screen == null and _settings_kept == null:
+			_settings_kept = _make_settings()
+
+
 func _free_screens() -> void:
+	# the kept settings are the menus' child and go with them
+	_settings_kept = null
 	_menus.queue_free()
 	_menus = null
 
@@ -225,21 +255,16 @@ func _on_tab(tab: NavRail.Tab) -> void:
 		_menus.focus_page()
 
 
-## The settings over the menus, built when asked for and freed once closed (a hidden screen would keep its
-## couple of hundred nodes for the whole session).
+## The settings over the menus. Built once and kept, hidden, between openings while the menus last (owner, 2026-11-17:
+## the tab lagged while its ten tabs were built on every press); each opening shows its first tab. The menus free it
+## with them.
 func _open_settings() -> void:
-	if _settings_screen == null:
-		_settings_screen = SettingsScreen.new()
-		_settings_screen.settings = Settings.shared()
-		_settings_screen.restart = _restart
-		_settings_screen.in_menus = true
-		_settings_screen.closed.connect(_settings_closed)
-		_settings_screen.credits_requested.connect(_show_credits)
-		_settings_screen.report_requested.connect(_show_report)
-		_settings_screen.quit_requested.connect(ask_quit)
-		_settings_screen.restyled.connect(restyle)
-		# beside the rail, which stays on show, and under a graphics notice, the credits and the prompts
-		_menus.add_over_page(_settings_screen)
+	if _settings_screen == null and _settings_kept != null:
+		_settings_screen = _settings_kept
+		_settings_kept = null
+		_settings_screen.show_first_tab()
+	elif _settings_screen == null:
+		_settings_screen = _make_settings()
 	_menus.nav_rail().set_current(NavRail.Tab.SETTINGS)
 	# the settings show over the field's picture, so the page under them steps aside
 	_menus.set_page_hidden(true)
@@ -264,6 +289,8 @@ func _rebuild_menus() -> void:
 	_settings_screen = null
 	_free_screens()
 	_build_screens()
+	# the screens kept between colours (the credits, the loading screen, a prompt) take the new Theme
+	GameTheme.retheme(self)
 	_scale_menus()
 	if tab == NavRail.Tab.LOADOUT:
 		_menus.show_loadout()
@@ -271,10 +298,29 @@ func _rebuild_menus() -> void:
 		_menus.show_armory()
 	_open_settings()
 	_settings_screen.show_display_colour()
+	# the Loadout and the Armory built again, hidden, a step at a time once the new colour has shown
+	_prepare_menu_pages_soon()
 
 
+## The menus' settings screen, hidden, beside the rail.
+func _make_settings() -> SettingsScreen:
+	var screen := SettingsScreen.new()
+	screen.settings = Settings.shared()
+	screen.restart = _restart
+	screen.in_menus = true
+	screen.closed.connect(_settings_closed)
+	screen.credits_requested.connect(_show_credits)
+	screen.report_requested.connect(_show_report)
+	screen.quit_requested.connect(ask_quit)
+	screen.restyled.connect(restyle)
+	# beside the rail, which stays on show, and under a graphics notice, the credits and the prompts
+	_menus.add_over_page(screen)
+	return screen
+
+
+## Closed, the settings are kept hidden for the next opening (`_settings_screen` is the open one only).
 func _settings_closed() -> void:
-	_settings_screen.queue_free()
+	_settings_kept = _settings_screen
 	_settings_screen = null
 	if _menus != null:
 		_menus.set_page_hidden(false)
@@ -481,6 +527,7 @@ func _end_play() -> void:
 	_play.queue_free()
 	_play = null
 	_build_screens()
+	_prepare_menu_pages_soon()
 	SettingsApply.set_menus(Settings.shared(), true)
 	# Leaving a match or the range lands on the Match page with Play focused, the picks kept (owner, 2026-10-30).
 	_menus.focus_play()

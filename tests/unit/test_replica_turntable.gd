@@ -185,15 +185,10 @@ func test_a_replica_with_no_model_shows_nothing_and_does_not_fail() -> void:
 	assert_eq(table.view(), -1)
 
 
-func test_the_ring_hides_looking_down_and_the_render_target_goes_with_the_model() -> void:
+func test_no_ring_under_the_replica_and_the_render_target_goes_with_the_model() -> void:
 	var page := _page(0)
 	var table := page.customise().turntable()
-	var ring := table.find_child("Ring", true, false) as MeshInstance3D
-	assert_true(ring.visible, "the 3/4 view shows the turntable's ring")
-	table.set_view(ReplicaTurntable.View.TOP)
-	assert_false(ring.visible, "from above it would run out of the frame")
-	table.set_view(ReplicaTurntable.View.RIGHT)
-	assert_true(ring.visible)
+	assert_null(table.find_child("Ring", true, false), "no circle under the replica in any view (owner, 2026-11-17)")
 	var port := table.find_child("Port", true, false) as SubViewport
 	page.show_gear()
 	assert_lte(port.size.x, 2, "no render target held while Customise is closed (Godot's least is 2 px)")

@@ -294,7 +294,7 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_place(prompt, Vector4(0.5, 0.5, 0.5, 0.5), Rect2(-TOP_WIDTH * 0.5, cfg.vault_prompt_drop, TOP_WIDTH, 0.0))
 	add_child(prompt)
 	_vault_prompt = HudStyle.label(prompt, GameTheme.SMALL_SIZE, 700, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
-	_vault_prompt.text = tr("HUD_VAULT") % KeyNames.of_action(&"jump")
+	_vault_prompt.text = vault_words()
 	_vault_prompt.add_theme_constant_override("outline_size", 6)
 	_vault_prompt.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.55))
 	_vault_prompt.visible = false
@@ -309,7 +309,7 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_leaves_notice.visible = false
 	_reload_prompt = HudReloadPrompt.new()
 	prompt.add_child(_reload_prompt)
-	_plant_prompt = HudPlantPrompt.new()
+	_plant_prompt = HudPlantPrompt.new(cfg.bomb_carry_notice_time)
 	prompt.add_child(_plant_prompt)
 	_hit_label = HudStyle.label(middle, GameTheme.HUGE_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
 	_hit_label.text = tr("HUD_YOU_ARE_HIT")
@@ -772,14 +772,25 @@ func leaves_notice_shown() -> bool:
 
 
 ## Whether a Jump press would vault this tick, or climb (`climb`, CL1): the prompt shows, and stays up
-## vault_prompt_hold after.
+## vault_prompt_hold after. It is only the key, in capitals, either way (owner, 2026-11-17: "SPACE", not "Space to
+## vault").
 func set_vault_ready(ready: bool, climb: bool = false) -> void:
 	if ready:
 		if _vault_left <= 0.0 or climb != _vault_climb:
 			# the key is whatever Jump is bound to now
-			_vault_prompt.text = tr("HUD_CLIMB" if climb else "HUD_VAULT") % KeyNames.of_action(&"jump")
+			_vault_prompt.text = vault_words()
 			_vault_climb = climb
 		_vault_left = _cfg.vault_prompt_hold
+
+
+## The vault and climb prompt's words: the Jump key as bound now, in capitals.
+static func vault_words() -> String:
+	return KeyNames.of_action(&"jump").to_upper()
+
+
+## The vault prompt's words as shown (tests).
+func vault_prompt_text() -> String:
+	return _vault_prompt.text
 
 
 ## The door or lift button in your reach this tick (DO1, MT2): DoorPrompt.NONE hides the prompt; OPEN and SHUT say what
@@ -1107,14 +1118,17 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		_score.set_clock(overtime, false, true)
 	elif overtime >= 0:
 		_score.set_clock(overtime, true)
-	else:
+	elif rs.phase == RoundState.Phase.LIVE:
 		_score.set_clock(ceili(rs.clock))
+	else:
+		# a round over reads 0:00, however it ended (owner, 2026-11-17: it was left on 0:02)
+		_score.set_clock(0)
 	_score.set_score(rs.score[0], rs.score[1])
 	_score.set_round(rs.number)
 	_score.set_sides(rs.attackers if flag_mode or plant_mode else -1)
 	_gauge.visible = flag_mode
 	if plant_mode:
-		_update_plant(rs, in_play)
+		_update_plant(rs, in_play, delta)
 	if flag_mode and rs.attackers >= 0:
 		# The pole in play, as the marker has it (AB1).
 		_shown_pole = _next_shown(rs)
@@ -1445,7 +1459,7 @@ func _update_warning(rs: RoundState, delta: float) -> void:
 
 ## Plant The Bomb's part of a frame (PB1): the gauge under the score bar, and the prompt (only through your own eyes,
 ## in a live round, while in play). Words are rebuilt only when the state they name changes.
-func _update_plant(rs: RoundState, in_play: bool) -> void:
+func _update_plant(rs: RoundState, in_play: bool, delta: float) -> void:
 	var g := HudPlant.gauge(rs)
 	_gauge.visible = g != HudPlant.Gauge.NONE
 	if g != HudPlant.Gauge.NONE:
@@ -1464,7 +1478,7 @@ func _update_plant(rs: RoundState, in_play: bool) -> void:
 		_gauge.set_flag(HudPlant.gauge_fill(rs, g), _teams.colours[team], team == HudStyle.STRIPED_TEAM)
 	var own := in_play and _watching_name.is_empty()
 	_plant_prompt.show_for(HudPlant.prompt(rs, _player, _sim.plant) if own else HudPlant.Prompt.NONE,
-			own and HudPlant.carrying(rs, _player))
+			own and HudPlant.carrying(rs, _player), delta)
 
 
 ## A bomb event (Plant The Bomb): a feed note for the pick-up, drop, plant and defuse as `HudPlant.feed_words` has them,

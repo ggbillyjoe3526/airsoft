@@ -155,15 +155,17 @@ func test_a_limit_picked_in_settings_from_the_menus_is_held_to_the_rate_and_lowe
 	var main := await _main()
 	main._open_settings()
 	var page: SettingsDisplayPage = main._settings_screen._display_page
-	var last := Settings.FRAME_LIMITS.size()
-	page.limit_choice().button(last).pressed.emit()
+	if Settings.shared().frame_limit != Settings.UNLIMITED:
+		page.limit_off().button(0).pressed.emit()
+	Settings.shared().frame_limit_pick = 240
 	assert_eq(Engine.max_fps, _rate(), "Unlimited picked in the menus: the cap")
-	page.limit_choice().button(Settings.FRAME_LIMITS.find(240)).pressed.emit()
+	page.limit_off().button(0).pressed.emit()
+	assert_eq(Settings.shared().frame_limit, 240, "Off pressed again: the slider's 240")
 	assert_eq(Engine.max_fps, _rate(), "240 on a 144 screen: the rate in the menus")
 	assert_eq(Settings.shared().frame_limit, 240, "but the setting itself stays 240 for the match")
-	page.limit_choice().button(0).pressed.emit()
+	page.limit_slider().value = 30.0
 	assert_eq(Engine.max_fps, 30, "30 is lower than the rate")
-	page.limit_choice().button(Settings.FRAME_LIMITS.find(240)).pressed.emit()
+	page.limit_slider().value = 240.0
 	main._settings_screen.close()
 	main._picks.map_id = "range"
 	main._picks.mode = MatchOptions.MODE_PRACTICE

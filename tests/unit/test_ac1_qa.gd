@@ -23,13 +23,13 @@ func test_loading_a_file_without_the_keys_resets_a_used_object_to_the_defaults()
 	s.team_colours = TeamColours.Set.HIGH_CONTRAST
 	s.reduced_motion = Settings.ReducedMotion.ON
 	s.sound_cues = true
-	s.gauge_patterns = false
+	s.gauge_patterns = true
 	s.hud.hud_size = 1.4
 	s.from_dict({"fov": 90.0})
 	assert_eq(s.team_colours, TeamColours.Set.STANDARD)
 	assert_eq(s.reduced_motion, Settings.ReducedMotion.SYSTEM)
 	assert_false(s.sound_cues)
-	assert_true(s.gauge_patterns)
+	assert_false(s.gauge_patterns, "off by default")
 	assert_eq(s.hud.hud_size, 1.0)
 
 
