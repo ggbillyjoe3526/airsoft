@@ -106,6 +106,7 @@ static func mesh(m: MapData, style: MapStyle, look: StationLook, props: PropDres
 			var c := v.circle()
 			var wider := dress.style_at(Vector3(v.area.position.x - 0.5, v.y + v.rise * 0.5, c.x))
 			_add_mouth(st, look, v, look.style_walls.get(wider, look.mouth_walls))
+			_add_mouth_ring(st, look, dress, v)
 		_add_backing(st, look, dress, v)
 	st.generate_tangents()
 	return st.commit()
@@ -539,6 +540,75 @@ static func _add_mouth(st: SurfaceTool, look: StationLook, v: StationDressing.Tu
 		if GreyboxFaces.face_normal(corner + arc).x > 0.0:
 			arc.reverse()
 		add_face(st, look, corner + arc, finish, tint, NO_FLOOR)
+
+
+## Open vault `v`'s mouth ring (StationLook.mouth_ring_width): a band round its arch on the wider tunnel's end, and
+## down each side to the floor in front where that tunnel's air reaches (a platform's end; not behind a trackside
+## wall), standing `mouth_ring_proud` m off the wall with its edges drawn back to it.
+static func _add_mouth_ring(st: SurfaceTool, look: StationLook, dress: StationDressing,
+		v: StationDressing.TunnelVault) -> void:
+	var w := look.mouth_ring_width
+	var proud := look.mouth_ring_proud
+	if w <= 0.0 or proud <= 0.0:
+		return
+	var finish := look.mouth_ring_finish
+	var tint := look.tint_of(finish, null)
+	var back := v.area.position.x
+	var x := back - look.vault_proud - proud
+	var c := v.circle()
+	var steps := maxi(look.vault_steps, 2)
+	var half := v.half_angle()
+	var z0 := v.area.position.y
+	var z1 := v.area.end.y
+	# The band's inner and outer edges (z, y), from the -z foot of the arch over to the +z one; its ends at the
+	# springings square, on the sides' bands.
+	var inner: Array[Vector2] = []
+	var outer: Array[Vector2] = []
+	for k in steps + 1:
+		var a := -half + 2.0 * half * float(k) / float(steps)
+		inner.append(v.point(a))
+		outer.append(Vector2(c.x + (c.z + w) * sin(a), c.y + (c.z + w) * cos(a)))
+	outer[0] = Vector2(z0 - w, v.y)
+	outer[steps] = Vector2(z1 + w, v.y)
+	var floor_y := NO_FLOOR
+	for side: float in [-1.0, 1.0]:
+		var edge := z0 if side < 0.0 else z1
+		var zone := dress.zone_at(Vector3(back - 0.5, v.y - 0.5, edge + side * w * 0.5))
+		if zone == null:
+			continue
+		floor_y = zone.box.position.y
+		var foot := floor_y
+		var lo := Vector2(minf(edge, edge + side * w), foot)
+		var hi := Vector2(maxf(edge, edge + side * w), v.y)
+		_ring_quad(st, look, [Vector3(x, lo.y, lo.x), Vector3(x, lo.y, hi.x), Vector3(x, hi.y, hi.x),
+				Vector3(x, hi.y, lo.x)], Vector3(-1.0, 0.0, 0.0), finish, tint, floor_y)
+		for e: float in [edge, edge + side * w]:
+			# its edges back to the wall: the inner one facing into the opening, the outer one away from it
+			var out := -side if is_equal_approx(e, edge) else side
+			_ring_quad(st, look, [Vector3(x, foot, e), Vector3(back, foot, e), Vector3(back, v.y, e),
+					Vector3(x, v.y, e)], Vector3(0.0, 0.0, out), finish, tint, floor_y)
+	for k in steps:
+		var ia := inner[k]
+		var ib := inner[k + 1]
+		var oa := outer[k]
+		var ob := outer[k + 1]
+		_ring_quad(st, look, [Vector3(x, ia.y, ia.x), Vector3(x, ib.y, ib.x), Vector3(x, ob.y, ob.x),
+				Vector3(x, oa.y, oa.x)], Vector3(-1.0, 0.0, 0.0), finish, tint, floor_y)
+		# the arch's inner edge back to the wall, facing in under the arch, and its outer edge, facing out
+		var down := Vector3(0.0, c.y - (ia.y + ib.y) * 0.5, c.x - (ia.x + ib.x) * 0.5)
+		_ring_quad(st, look, [Vector3(x, ia.y, ia.x), Vector3(back, ia.y, ia.x), Vector3(back, ib.y, ib.x),
+				Vector3(x, ib.y, ib.x)], down, finish, tint, floor_y)
+		_ring_quad(st, look, [Vector3(x, oa.y, oa.x), Vector3(back, oa.y, oa.x), Vector3(back, ob.y, ob.x),
+				Vector3(x, ob.y, ob.x)], -down, finish, tint, floor_y)
+
+
+## A mouth ring's quad, turned to face along `facing`.
+static func _ring_quad(st: SurfaceTool, look: StationLook, q: Array, facing: Vector3, finish: StringName,
+		tint: Color, floor_y: float) -> void:
+	var quad := PackedVector3Array(q)
+	if GreyboxFaces.face_normal(quad).dot(facing) < 0.0:
+		quad.reverse()
+	add_face(st, look, quad, finish, tint, floor_y)
 
 
 ## Vault `v`'s backing (StationLook.vault_backing): in the shell's plane at each end it is drawn `vault_proud` m in

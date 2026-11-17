@@ -369,18 +369,26 @@ block("barrier", T, -52, -51.5, TRACK_Z - 1.15, TRACK_Z + 1.15, 1.2, dress="buff
 # tunnel that curves into the distance and continues the train tunnels instead of having just a wall"), look only: a
 # steel grille shuts each where its wall stood (StationDressing.TunnelBend, fixtures.bend_ends).
 BEND = dict(radius=40.0, angle=60.0)
-RUN_VAULTS = [dict(name="north_run", x0=50, x1=82, z0=-12.6, z1=-9, y=T + RUN_SPRING, low=P + TRAIN_IN,
+# Each running tunnel's sides (z, the south one's; the north one's mirrored): 3.9 m across, centred on its track, so a
+# car (1.72 m a side) has about 0.23 m clear each side through the mouth and along it (the owner, 2026-11-17: "the
+# tunnel mouth needs to have slightly more gap on the sides between it and the train"; it was 3.6 m, 5 cm on the
+# platform side).
+RUN_Z0, RUN_Z1 = TRACK_Z - 1.95, TRACK_Z + 1.95
+RUN_VAULTS = [dict(name="north_run", x0=50, x1=82, z0=-RUN_Z1, z1=-RUN_Z0, y=T + RUN_SPRING, low=P + TRAIN_IN,
                    rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west",
                    bend=dict(BEND, turn=-1)),
-              dict(name="south_run", x0=50, x1=82, z0=9, z1=12.6, y=T + RUN_SPRING, low=P + TRAIN_IN,
+              dict(name="south_run", x0=50, x1=82, z0=RUN_Z0, z1=RUN_Z1, y=T + RUN_SPRING, low=P + TRAIN_IN,
                    rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west",
                    bend=dict(BEND, turn=1))]
 VAULTS += RUN_VAULTS
-room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=RUN_SPRING, vault=True)
+room("run_n", "North tunnel", 50, 82, -RUN_Z1, -RUN_Z0, T, h=RUN_SPRING, vault=True)
 # The south train's open cab door stands 0.9 m over the track: no steps, a body climbs up into it from the track
 # (VaultConfig climb_depth: the car's floor runs on behind the doorway) and drops back down (owner, 2026-11-12).
-room("run_s", "South tunnel", 60, 82, 9, 12.6, T, h=RUN_SPRING, vault=True)
-room("xpass", "Cross passage", 74, 77, -9, 9, T, h=2.6)
+room("run_s", "South tunnel", 60, 82, RUN_Z0, RUN_Z1, T, h=RUN_SPRING, vault=True)
+# Where the south train stands half in its tunnel, the tunnel's sides clear of the car's: a slot each side of it.
+room("run_s_in", "South tunnel", 50, 60, RUN_Z0, 9, T, h=RUN_SPRING, vault=True)
+room("run_s_out", "South tunnel", 50, 60, 12.5, RUN_Z1, T, h=RUN_SPRING, vault=True)
+room("xpass", "Cross passage", 74, 77, -RUN_Z0, RUN_Z0, T, h=2.6)
 block("cabinet", T, 60.5, 61.8, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley_short",
       squeeze=True)  # trolley
 block("crate", T, 69.5, 70.9, -TRACK_Z - 0.7, -TRACK_Z + 0.7, 1.4, dress="cable_drum_small")  # between the rails
