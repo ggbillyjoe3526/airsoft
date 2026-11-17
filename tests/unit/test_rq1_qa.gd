@@ -146,3 +146,60 @@ func test_a_listed_shadow_model_the_map_does_not_place_or_one_missing_from_disk_
 	for inst in v.views():
 		var shadow := String(inst.name).to_snake_case() == "range_flag"
 		assert_eq(inst.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON, shadow, inst.name)
+
+
+func test_the_bench_and_chrono_models_fill_their_blocks_exactly() -> void:
+	for b in _furniture():
+		var mesh := PropDressConfig.load_mesh(PropDressConfig.new().models[StringName(b.dress)])
+		assert_not_null(mesh, String(b.dress))
+		if mesh == null:
+			continue
+		var box := mesh.get_aabb()
+		assert_almost_eq(box.size.x, b.size.x, 0.01, "%s width" % b.dress)
+		assert_almost_eq(box.size.y, b.size.y, 0.01, "%s height" % b.dress)
+		assert_almost_eq(box.size.z, b.size.z, 0.01, "%s depth" % b.dress)
+
+
+func test_the_range_is_one_concrete_floor_again() -> void:
+	var floors := 0
+	for b in map.blocks:
+		if b.kind == &"floor":
+			floors += 1
+			assert_gt(b.size.y, 0.1, "no thin gravel slab")
+	assert_eq(floors, 1)
+
+
+func test_the_shelter_s_four_lamps_are_cool_white_dark_until_lit_and_freed_with_the_view() -> void:
+	var cfg := StationFixturesConfig.new()
+	var before := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
+	var v := StationFixtures.build(map, cfg)
+	add_child(v)
+	assert_eq(v.lamps().size(), 4, "four battens' lights, no more")
+	for l in v.lamps():
+		assert_false(l.visible, "dark until Lamp lights")
+		assert_eq(l.light_color, cfg.point_lamp_colour)
+		assert_eq(l.omni_range, 8.0)
+		assert_eq(l.light_energy, 3.0)
+		assert_false(l.shadow_enabled)
+		assert_lt(l.global_position.y, 3.6, "under the roof")
+		assert_gt(l.global_position.y, 3.0)
+	v.set_lamps(true)
+	for l in v.lamps():
+		assert_true(l.visible)
+	v.free()
+	assert_eq(Performance.get_monitor(Performance.OBJECT_NODE_COUNT), before, "every lamp left with the view")
+
+
+func test_subway_s_tunnel_lamps_keep_the_lens_colour_range_and_energy() -> void:
+	var cfg := StationFixturesConfig.new()
+	var sub := MapData.load_map("subway", MapStyle.new(), 1)
+	var v := StationFixtures.build(sub, cfg)
+	assert_not_null(v)
+	if v == null:
+		return
+	add_child_autofree(v)
+	assert_gt(v.lamps().size(), 8)
+	for l in v.lamps():
+		assert_eq(l.light_color, cfg.lens_colour)
+		assert_eq(l.omni_range, 6.5)
+		assert_eq(l.light_energy, 1.5)
