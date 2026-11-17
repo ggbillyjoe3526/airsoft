@@ -646,9 +646,10 @@ func _kit(cue: StringName, c: Character, own: bool, now: float) -> void:
 
 ## Subway's easter egg (TA1): `cfg`'s announcements timed for `trains`, their recordings and their one voice.
 func _set_up_announcements(cfg: TrainAnnounceConfig, trains: Array[TrainDressing]) -> void:
+	# Without either recording (warned of by _load), none plays: a play is spent only when it sounds.
+	if _streams[_load(String(cfg.gap_cue))].is_empty() or _streams[_load(String(cfg.once_cue))].is_empty():
+		return
 	_announce = TrainAnnouncements.new(cfg, trains)
-	_load(String(cfg.gap_cue))
-	_load(String(cfg.once_cue))
 	_announcer = AudioStreamPlayer3D.new()
 	_announcer.bus = BUS_EFFECTS
 	_announcer.volume_db = linear_to_db(cfg.gain)
@@ -670,7 +671,7 @@ func _announcement(state: GameState, now: float) -> void:
 	if _listener == null:
 		return
 	var cue := _announce.due(now, _listener.position, _announcer.playing)
-	if cue == &"" or not _streams.has(cue) or _streams[cue].is_empty():
+	if cue == &"":
 		return
 	_announcer.stream = _streams[cue][0]
 	_announcer.global_position = _announce.at
