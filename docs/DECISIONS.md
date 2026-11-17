@@ -735,10 +735,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   Custom's Respawns row: by mode, On or Off. Two forward spawns an end on every field (map data `forwardSpawns`), for
   both sides, shut with an enemy in play within 15 m: the panel greys a shut one out and nothing else on it moves
   (owner, 2026-11-17). A team with a respawn coming is not wiped out. Balance (bot matches): the attackers wait 10 s,
-  the defenders a time set per field (data/maps.md Defender respawn: Depot 15, Woodland 5, Subway 7); with respawns
-  an untended flag slips back down (15 s top to bottom) and up to six defending bots go to pull a flag down. The
-  match guards play one life a round (as measured); respawns have their own guard and the balance report plays them
-  as the game does, with the clock (the defenders' way to win) measured only.
+  the defenders a time set per field in Attack / Defend (data/maps.md Defender respawn: Depot 15, Woodland 5, Subway
+  7) and 5 s in Plant The Bomb; with respawns an untended flag slips back down (15 s top to bottom) and up to six
+  defending bots go to pull a flag down. The match guards play one life a round (as measured); respawns have their own
+  guard and the balance report plays them as the game does, with a wide band on the clock (the defenders' way to win).
 - **Models keep the play boxes they dress (owner, 2026-11-09, WG3).** Woodland's structures are modelled inside the
   blocks as they are: no pitched roofs in taller roof boxes, no open bridge rails, no low lattice on the tower's legs.
   A shape the photos have that needs a bigger or opener box is a play change, and his call.

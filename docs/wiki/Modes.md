@@ -98,8 +98,10 @@ flag goes up or the bomb is planted. **Elimination** keeps one life a round. The
 on in every mode, or off in all of them.
 
 - **How long you wait.** The attackers wait <!-- wiki:config round_config.respawn_delay --> seconds. The defenders'
-  wait is set for each field so both sides win about as often: 15 s on **Depot**, whose poles are close to the
-  defenders' start, and 5 s on **Woodland**, whose two poles are far apart.
+  wait in Attack / Defend is set for each field so both sides win about as often: 15 s on **Depot**, whose poles are
+  close to the defenders' start, and 5 s on **Woodland**, whose two poles are far apart. In Plant The Bomb they wait
+  <!-- wiki:config round_config.plant_defender_respawn_delay -->
+  seconds.
 - **Where you come back.** While you wait, a **RESPAWN IN** panel at the bottom of the screen lists your **start
   area** and your end's two **forward spawns**, nearer the fight. Pick one with **1**, **2** or **3** (the first two
   replica slots and Holster) or the mouse wheel. Your pick is kept for next time.

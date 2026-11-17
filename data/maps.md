@@ -28,12 +28,12 @@ warning; a map with no row is not listed.
   to 21 s, so a fuse longer than that never mattered. Depot's is 24 (16 until DC1's compact hall moved its sites 8 m in
   and its west spawn 10 m in), Subway's 22, Woodland's 25 (PB5, measured again once the three map reworks and the bots'
   route variety were in). One that isn't such a number keeps the game's with a warning.
-- **Defender respawn (s)** is the seconds a defender hit there waits to come back in Attack / Defend and Plant The
-  Bomb (RS1): a whole or decimal number from 2 to 30, or blank for the game's 10 (`game/config/round_config.gd`).
-  Skirmish and Custom both play it. Each field's is set from bot matches so the attackers take about half the rounds
-  (6 seeds, Normal): Depot's is 15 (at 10 s the defenders took 72 %: its poles are close to their start), Woodland's 5
-  (its two poles are 83 m apart and a defender's way back is long), Subway's 7. One that isn't such a number keeps the
-  game's with a warning.
+- **Defender respawn (s)** is the seconds a defender hit there waits to come back in Attack / Defend (RS1; Plant The
+  Bomb's defenders wait the game's 5): a whole or decimal number from 2 to 30, or blank for the game's 10
+  (`game/config/round_config.gd`). Skirmish and Custom both play it. Each field's is set from bot matches so the
+  attackers take about half the rounds (6 seeds, Normal): Depot's is 15 (at 10 s the defenders took 72 %: its poles
+  are close to their start), Woodland's 5 (its two poles are 83 m apart and a defender's way back is long), Subway's
+  7. One that isn't such a number keeps the game's with a warning.
 - **Start mode** is the most a fire selector starts each round on there: `semi` or `burst` holds every replica that
   comes on full auto to its highest mode no higher (SEMI, then BURST, then AUTO), any replica now or added later, the
   bots' too; you can still switch to auto in the round. Blank or `auto` starts every replica as it comes, and a

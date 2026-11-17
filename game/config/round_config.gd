@@ -34,10 +34,13 @@ extends Resource
 enum RespawnRule { BY_MODE, ALWAYS, NEVER }
 @export var respawns: RespawnRule = RespawnRule.BY_MODE
 ## Seconds from a hit to coming back: the attackers' (and either team's in Elimination), and the defenders' in Attack /
-## Defend and Plant The Bomb, where a field may set its own (data/maps.md Defender respawn: bot matches put the
+## Defend, where a field may set its own (data/maps.md Defender respawn: bot matches put the
 ## attackers near half the rounds with Depot 15, Woodland 5, Subway 7).
 @export var respawn_delay: float = 10.0
 @export var defender_respawn_delay: float = 10.0
+## ... and Plant The Bomb's defenders' (no field sets its own): until the bomb is armed the attackers keep coming, and
+## at 10 s they took 63 % on Depot and 71 % on Woodland (5 s: 56 % and 66 %, bot matches, 6 seeds).
+@export var plant_defender_respawn_delay: float = 5.0
 ## Whether the defenders in Attack / Defend and Plant The Bomb may come back at their end's forward spawns too (the
 ## attackers and either team in Elimination always may).
 @export var defender_forward_spawns: bool = true

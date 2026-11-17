@@ -34,7 +34,7 @@ const RAISE_RANGE := Vector2(3.0, 20.0)
 const FUSE_COLUMN := "Fuse (s)"
 const FUSE_RANGE := Vector2(15.0, 60.0)
 ## The defenders' respawn column, optional (RS1): the seconds from a hit to a defender coming back there in Attack /
-## Defend and Plant The Bomb (RoundConfig.defender_respawn_delay). Blank keeps the round tuning's.
+## Defend (RoundConfig.defender_respawn_delay). Blank keeps the round tuning's.
 const DEFENDER_RESPAWN_COLUMN := "Defender respawn (s)"
 const DEFENDER_RESPAWN_RANGE := Vector2(2.0, 30.0)
 const START_MODES: Dictionary[String, ReplicaConfig.FireMode] = {

@@ -47,10 +47,12 @@ static func forward_for(sided: bool, attackers: int, team: int, rounds: RoundCon
 	return not sided or team == attackers or rounds.defender_forward_spawns
 
 
-## The seconds a hit on `team` waits before coming back in `rs`'s round (RoundConfig): the defenders' with sides,
-## everyone else's otherwise.
+## The seconds a hit on `team` waits before coming back in `rs`'s round (RoundConfig): the defenders' in Attack /
+## Defend (a field's own) and in Plant The Bomb, everyone else's otherwise.
 static func delay(rs: RoundState, rounds: RoundConfig, team: int) -> float:
 	if rs.sided() and rs.attackers >= 0 and team != rs.attackers:
+		if rs.mode == RoundState.Mode.PLANT_THE_BOMB:
+			return maxf(0.0, rounds.plant_defender_respawn_delay)
 		return maxf(0.0, rounds.defender_respawn_delay)
 	return maxf(0.0, rounds.respawn_delay)
 
