@@ -666,7 +666,7 @@ def water_tower() -> sk.Model:
                 qa = a + (b - a) * (k / n) + Vector((0, 0.17 if k % 2 == 0 else -0.17, 0))
                 qb = a + (b - a) * ((k + 1) / n) + Vector((0, -0.17 if k % 2 == 0 else 0.17, 0))
                 m.tube(tuple(qa), tuple(qb), 0.025, 0.025, 3, "legs_dark")
-    for ya, yb_ in zip(levels, levels[1:]):
+    for ya, yb_ in zip(levels[:-2], levels[1:-1]):  # none in the top bay: the photos' rods stop under the bowl
         for i in range(4):
             j = (i + 1) % 4
             for u, v in ((i, j), (j, i)):
