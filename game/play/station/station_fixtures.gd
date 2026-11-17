@@ -72,9 +72,15 @@ static func build(map: MapData, cfg: StationFixturesConfig) -> StationFixtures:
 			for inst in view._views:
 				if inst.multimesh.mesh == mesh:
 					inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+					# and in the GI, so a roof shuts out the sky's blue under it and bounces the sunlit floor
+					inst.gi_mode = GeometryInstance3D.GI_MODE_STATIC
 		if cfg.lit_models.has(String(model)):
 			for t: Transform3D in placed[model]:
 				view._add_lamp(t * Vector3(0.0, 0.0, cfg.lamp_out), cfg)
+		if cfg.lamp_points.has(model):
+			for t: Transform3D in placed[model]:
+				for p: Vector3 in cfg.lamp_points[model]:
+					view._add_lamp(t * p, cfg)
 	return view
 
 

@@ -272,7 +272,7 @@ func test_no_other_map_has_fixtures_and_freeing_leaves_no_orphans() -> void:
 	assert_no_new_orphans()
 
 
-func test_the_range_s_shelter_and_flag_cast_shadows_and_its_signs_none() -> void:
+func test_the_range_s_shelter_and_flag_cast_shadows_and_its_battens_light_the_line() -> void:
 	var view := StationFixtures.build(_map("range"), cfg)
 	assert_not_null(view, "the Range's firing point drawn")
 	if view == null:
@@ -283,7 +283,11 @@ func test_the_range_s_shelter_and_flag_cast_shadows_and_its_signs_none() -> void
 		var shadow := cfg.shadow_models.has(String(v.name).to_snake_case())
 		assert_eq(v.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON, shadow,
 				"%s %s" % [v.name, "casts a shadow" if shadow else "casts none"])
-	assert_eq(view.lamps().size(), 0, "no light of its own (its battens only glow)")
+		assert_eq(v.gi_mode == GeometryInstance3D.GI_MODE_STATIC, shadow, "%s in the GI: %s" % [v.name, shadow])
+	assert_eq(view.lamps().size(), 4, "a light under each of the shelter's four battens")
+	for l in view.lamps():
+		assert_between(l.position.y, 3.0, 3.6, "%s under the roof, over a standing head" % l.name)
+		assert_false(l.shadow_enabled, "%s casts no shadow" % l.name)
 
 
 func test_subway_s_ceiling_lamps_are_the_strip_model_turned_along_their_rooms() -> void:

@@ -48,8 +48,9 @@ extends Resource
 	&"range_sign_eye_pro": "res://assets/textures/range/signs.png",
 	&"range_sign_safe_zone": "res://assets/textures/range/signs.png",
 }
-## The models that cast shadows (RQ1: the Range's firing point shelter and its flag, out under the sun, which would
-## float without them); every other one is flat on a wall or under a roof and casts none.
+## The models that cast shadows and stand in the GI (RQ1: the Range's firing point shelter and its flag, out under
+## the sun, which would float without them, and whose shade would take the open sky's blue); every other one is flat
+## on a wall or under a roof and casts none.
 @export var shadow_models: PackedStringArray = PackedStringArray(["range_canopy", "range_flag"])
 @export_range(0.0, 1.0) var roughness: float = 0.7
 @export_range(0.0, 1.0) var metallic: float = 0.0
@@ -67,6 +68,13 @@ extends Resource
 @export var lamp_out: float = 0.25
 @export var lamp_range: float = 6.5
 @export var lamp_energy: float = 1.5
+## Lights at points of a model's own (in its frame, m), for a model with several lamps of its own (RQ1: the Range's
+## shelter's four LED battens light the firing line under it, which its roof otherwise leaves in deep shade); as the
+## lit models' lights, `lens_colour`, `lamp_range`, `lamp_energy`, no shadow, shown with the Lamp lights setting.
+@export var lamp_points: Dictionary[StringName, PackedVector3Array] = {
+	&"range_canopy": PackedVector3Array([Vector3(-7.5, 3.4, 0.55), Vector3(-2.5, 3.4, 0.55), Vector3(2.5, 3.4, 0.55),
+			Vector3(7.5, 3.4, 0.55)]),
+}
 
 
 ## The model `model`'s file.
