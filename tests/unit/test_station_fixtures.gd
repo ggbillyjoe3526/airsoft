@@ -288,6 +288,11 @@ func test_the_range_s_shelter_and_flag_cast_shadows_and_its_battens_light_the_li
 	for l in view.lamps():
 		assert_between(l.position.y, 3.0, 3.6, "%s under the roof, over a standing head" % l.name)
 		assert_false(l.shadow_enabled, "%s casts no shadow" % l.name)
+		assert_eq(l.light_color, cfg.point_lamp_colour, "%s an LED's cool white" % l.name)
+		assert_eq(l.omni_range, cfg.point_lamp_range, "%s reaches the floor and the benches" % l.name)
+		assert_eq(l.light_energy, cfg.point_lamp_energy, "%s at the shelter's own energy" % l.name)
+	assert_gt(cfg.point_lamp_range, 3.4, "a lamp 3.4 m up reaches the floor under it")
+	assert_gt(cfg.point_lamp_colour.b, cfg.point_lamp_colour.r, "the battens' white is cool, not the tunnel's warm")
 
 
 func test_subway_s_ceiling_lamps_are_the_strip_model_turned_along_their_rooms() -> void:
