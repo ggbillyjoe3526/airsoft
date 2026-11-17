@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-17 | 1 | build thread (three workers, one per group) | ✓ touched tests (CI runs the rest) | 6/8 Retry | check 1: mast head flat, crane gusset/hook, fuselage nose and closed tear, water tower legs and bowl; check 4: no test fails on the old models |
-| 2026-11-17 | 2 | build thread (two workers) | ✓ touched tests (CI runs the rest) | | |
+| 2026-11-17 | 2 | build thread (two workers) | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: the water tower's top-bay tie rods ran through the bowl |
+| 2026-11-17 | 3 | build thread | ✓ touched tests (CI runs the rest) | | |
 
 ## Decisions
 
