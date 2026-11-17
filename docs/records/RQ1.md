@@ -1,4 +1,4 @@
-# RQ1 · The Range given a firing point, detail and a gravel lane
+# RQ1 · The Range given a firing point and detail
 
 **Review:** pending
 
@@ -18,10 +18,10 @@
 - **The lighting is kept; the content is what was plain.** The Range already uses the default day look (the same sun,
   sky and exposure as Woodland, `LookConfig`). Its pictures read flat because nearly everything in them was one
   timber tone on one grey slab. The fix is variety and shade: a sheltered firing point (its roof casts the shade the
-  line stands in, lit by GI from the sunlit gravel), coloured signs, a red flag and the darker gravel lane.
+  line stands in, lit by GI from the sunlit slab), coloured signs and a red flag.
 - **A firing point** (`range_extras.py`, look-only fixtures in `dressing.fixtures`): a steel canopy over the line
   (Warren trusses, knee-braced columns, purlins, a light grey roof underside, LED battens lit as Lens, lane boards 1
-  to 4 printed on the sheet), a range flag (crimson, rippled, with its "range hot" notice), the rules board in a
+  to 4 printed on the sheet), a range flag (Depot's fire red, rippled, with its "range hot" notice), the rules board in a
   timber frame and three signs (chrono, eye protection on both side walls, safe zone). Words and pictograms are drawn
   on one 1024² sheet (`range_signs.py`, cells in `range_cells.py`), no brand. The canopy and flag cast shadows
   (`StationFixturesConfig.shadow_models`); the signs don't (they sit flat on walls).
@@ -33,9 +33,9 @@
   budget 4,200). Finish `timber` (`SiteLook.kind_finishes.furniture`).
 - **The chrono table** (`chrono_table.py`, budget 4,000) is a block by the back wall at (-4, 5.6), under its sign:
   a folding table with a chronograph, a clipboard, a tray of BBs, a bottle and a spare magazine.
-- **Gravel downrange.** A second floor slab 0.09 m thick (a floor 0.1 m or thinner is gravel; float32 0.1 reads
-  over 0.1, hence 0.09) covers the lanes from the line to the backstop; the slab behind the line keeps concrete.
-  A painted firing line (`dressing.site.lines`) runs across at z 0.
+- **Concrete kept downrange.** A gravel lane from the line to the backstop was tried (a second floor 0.09 m thick,
+  which SiteLook draws as gravel): at Ultra it read near white and tiled, plainer than the stained concrete, so it
+  came out; the one slab is as it was. A painted firing line (`dressing.site.lines`) runs across at z 0.
 - **The wall bays weathered** (`range_wall_bay.py`): three variants of the wall and the backstop each
   (`PropDressConfig.variants`), boards mixed in four shades with a grey sun-bleached one, screw heads at the board
   ends and the middle batten, grime at the foot. The bevel was taken off: a chamfer pulled the bay's end faces 3 mm

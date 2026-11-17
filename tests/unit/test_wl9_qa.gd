@@ -9,8 +9,8 @@ extends GutTest
 ## rebuilt Depot as the hall; the old play area is the yard fixture (tests/support/maps/yard.json).
 const RANGE_KEYS: Array[String] = ["name", "blocks", "killY", "spawns", "deadZones", "lanes", "targets", "bakedLight",
 		"keepClear"]
-## RQ1 (0.1 Beta 2) renewed it: the Range's four shooting benches, chrono table and gravel lane are blocks.
-const RANGE_PLAY_SHA := "60140c5ac2bfcd6e1058bf4dd629c427cab991177226401971d746ae448b9f2a"
+## RQ1 (0.1 Beta 2) renewed it: the Range's four shooting benches and chrono table are blocks.
+const RANGE_PLAY_SHA := "adc993e0b40f643e10ac081d5b2963cd98e1d7f3492629cd09f9f847a9a9c935"
 const MAPS: Array[String] = ["depot", "woodland"]
 
 var tuning: SimTuning = SimTuning.load_default()

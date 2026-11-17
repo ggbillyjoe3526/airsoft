@@ -18,7 +18,7 @@ const BUDGETS: Dictionary[StringName, int] = {
 	&"fire_point": 425, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500, &"pipe_run_1": 360,
 	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
 	&"depot_sign_ppe": 52, &"depot_sign_pallet_storage": 52, &"depot_sign_fire_exit": 52,
-	# the Range's firing point (RQ1, tests/unit/test_rq1_range.gd checks where they stand)
+	# the Range's firing point (RQ1, tests/unit/test_rq1_qa.gd checks they leave the walk and the lines clear)
 	&"range_canopy": 3300, &"range_flag": 280, &"range_sign_rules": 66, &"range_sign_chrono": 52,
 	&"range_sign_eye_pro": 52, &"range_sign_safe_zone": 52,
 }
