@@ -2,8 +2,9 @@ class_name HudPlantPrompt
 extends VBoxContainer
 ## Plant The Bomb's prompt under the crosshair (PB1), in the reload prompt's plate: "HOLD G · PICK UP THE BOMB", "HOLD G
 ## · PLANT THE BOMB" or "HOLD G · DEFUSE", Use's key as bound now (HudPlant.Prompt says which applies), and under it a
-## quiet line, "YOU HAVE THE BOMB", while you carry it and no prompt shows. The words are built only when the prompt
-## changes (or on `refresh_key`, after a rebind), never per frame.
+## quiet line, "YOU HAVE THE BOMB", for a moment once you pick it up (owner, 2026-11-17: only briefly; it stayed while
+## you carried it), while no prompt shows. The words are built only when the prompt changes (or on `refresh_key`, after
+## a rebind), never per frame.
 
 ## The words' size, the quiet line's size and its backing, and the plate's padding (px).
 const SIZE := GameTheme.SMALL_SIZE
@@ -20,9 +21,14 @@ var _plate: PanelContainer = null
 var _words: Label = null
 var _quiet: Label = null
 var _prompt: HudPlant.Prompt = HudPlant.Prompt.NONE
+## How long the quiet line shows from a pick-up (s), what is left of it, and whether you carried the bomb last frame.
+var _quiet_time: float = 0.0
+var _quiet_left: float = 0.0
+var _carried: bool = false
 
 
-func _init() -> void:
+func _init(quiet_time: float = 0.0) -> void:
+	_quiet_time = quiet_time
 	name = "BombPrompt"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -43,13 +49,21 @@ func _init() -> void:
 	visible = false
 
 
-## Shows `prompt` (HudPlant.Prompt) and, with none and `carrying`, the quiet line. Rebuilds the words only on a change.
-func show_for(prompt: HudPlant.Prompt, carrying: bool) -> void:
+## Shows `prompt` (HudPlant.Prompt) and, with none, the quiet line for its time from the frame `carrying` began,
+## `delta` s on. Rebuilds the words only on a change.
+func show_for(prompt: HudPlant.Prompt, carrying: bool, delta: float) -> void:
 	if prompt != _prompt:
 		_prompt = prompt
 		_build()
+	if carrying and not _carried:
+		_quiet_left = _quiet_time
+	elif carrying:
+		_quiet_left = maxf(0.0, _quiet_left - delta)
+	else:
+		_quiet_left = 0.0
+	_carried = carrying
 	_plate.visible = prompt != HudPlant.Prompt.NONE
-	_quiet.visible = carrying and prompt == HudPlant.Prompt.NONE
+	_quiet.visible = carrying and _quiet_left > 0.0 and prompt == HudPlant.Prompt.NONE
 	visible = _plate.visible or _quiet.visible
 
 

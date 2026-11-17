@@ -57,12 +57,6 @@ msgstr "%d m+"
 msgid "HUD_RICOCHET"
 msgstr "Ricochet: play on"
 
-msgid "HUD_VAULT"
-msgstr "%s to vault"
-
-msgid "HUD_CLIMB"
-msgstr "%s to climb"
-
 msgid "HUD_DOOR_OPEN"
 msgstr "%s to open the door"
 
@@ -1211,6 +1205,9 @@ msgstr "%s as carried, against it as it comes. Speed as a site's chrono reads it
 
 msgid "LOADOUT_NEW"
 msgstr "+ NEW LOADOUT"
+
+msgid "LOADOUT_MENU_TIP"
+msgstr "Right-click to rename, duplicate, replace or remove."
 
 msgid "LOADOUT_RENAME"
 msgstr "Rename"
@@ -3146,6 +3143,12 @@ msgstr "COLOUR"
 
 msgid "SETTINGS_UI_COLOUR_HELP"
 msgstr "The colour of the main buttons, what you have picked and the comms wheel. Team colours stay as they are."
+
+msgid "SETTINGS_TOOLTIPS"
+msgstr "TOOLTIPS"
+
+msgid "SETTINGS_TOOLTIPS_HELP"
+msgstr "The notes that pop up when you hover over an item, a setting or a button."
 
 msgid "SETTINGS_UI_COLOUR_BLUE"
 msgstr "Blue"

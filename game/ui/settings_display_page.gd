@@ -2,11 +2,12 @@ class_name SettingsDisplayPage
 extends HBoxContainer
 ## The settings' Display tab (concept `settings-display.png`): the window (Window mode as Windowed, Borderless or
 ## Fullscreen, the F11 and Alt+Enter keys in its tooltip; Monitor, shown only with two screens or more, each as its
-## number, size and rate) and the frame rate (V-Sync, and the frame-rate limit from 30 to 360 or Off) and the view (field
-## of view, Show FPS) and the interface's colour (UA2: a swatch per UiColours colour, its name in its tooltip), in one
-## column. The longer explanations are the rows' tooltips (UI1: help only where a player would
-## be stuck). Each choice is applied at once through SettingsApply and `changed` asks the screen to save it. F11 pressed
-## while the tab shows moves Window mode with it (`Settings.changed`).
+## number, size and rate) and the frame rate (V-Sync, and the frame-rate limit: a slider from 30 to 360 with Off beside
+## it, owner 2026-11-17) and the view (field of view, Show FPS) and the interface (its colour, UA2: a swatch per
+## UiColours colour, its name in its tooltip; and Tooltips, on or off, owner 2026-11-17), in one column. The longer
+## explanations are the rows' tooltips (UI1: help only where a player would be stuck). Each choice is applied at once
+## through SettingsApply and `changed` asks the screen to save it. F11 pressed while the tab shows moves Window mode
+## with it (`Settings.changed`).
 
 ## A choice landed: saved now (`immediate`, a click) or a moment after a slider stops.
 signal changed(immediate: bool)
@@ -18,8 +19,12 @@ const LEFT_WIDTH := 1100.0
 const COLUMN_GAP := 48
 const LEFT_LABEL := SettingsScreen.ROW_LABEL_WIDTH
 const FOV_STEP := 1.0
+## The frame-rate limit's slider moves a frame a second at a time.
+const LIMIT_STEP := 1.0
 ## The window modes in Settings.WindowMode's order, as the buttons name them (short: the long names are the notices').
 const WINDOW_KEYS: Array[String] = ["SETTINGS_WINDOWED", "SETTINGS_MODE_BORDERLESS", "SETTINGS_MODE_FULLSCREEN"]
+## The limit's slider and figure while it is Off.
+const OFF_ALPHA := 0.45
 ## A screen whose refresh rate the system doesn't give reports this or less.
 const NO_RATE := 0.0
 
@@ -28,10 +33,12 @@ var _window: MenuChoice = null
 var _monitor_row: HBoxContainer = null
 var _monitor: MenuChoice = null
 var _vsync: CheckButton = null
-var _limit: MenuChoice = null
+var _limit: HSlider = null
+var _limit_off: MenuChoice = null
 var _fov: HSlider = null
 var _fps: CheckButton = null
 var _ui_colour: MenuSwatches = null
+var _tooltips: CheckButton = null
 
 
 func _init() -> void:
@@ -60,10 +67,10 @@ func refresh() -> void:
 	_show_monitors()
 	_screen.set_check(_vsync, s.vsync)
 	_show_vsync_note()
-	var at := Settings.FRAME_LIMITS.find(s.frame_limit)
-	_limit.put(at if at >= 0 else Settings.FRAME_LIMITS.size())
+	_show_limit()
 	_screen.set_slider(_fov, s.fov)
 	_ui_colour.put(s.ui_colour)
+	_screen.set_check(_tooltips, s.tooltips)
 	_screen.set_check(_fps, s.show_fps)
 
 
@@ -89,8 +96,18 @@ func vsync_note() -> String:
 	return _vsync.tooltip_text
 
 
-func limit_choice() -> MenuChoice:
+## The frame-rate limit's slider (30 to 360) and its Off button beside it (one choice, lit while there is no limit).
+func limit_slider() -> HSlider:
 	return _limit
+
+
+func limit_off() -> MenuChoice:
+	return _limit_off
+
+
+## Settings › Display › Interface › Tooltips.
+func tooltips() -> CheckButton:
+	return _tooltips
 
 
 func fov() -> HSlider:
@@ -168,24 +185,47 @@ func _build_frame_rate(column: VBoxContainer) -> void:
 		_screen.settings.vsync = on
 		SettingsApply.apply_display(_screen.settings)
 		changed.emit(true))
-	var row := _screen.add_row(column, "SETTINGS_FRAME_LIMIT", LEFT_LABEL)
-	var words := PackedStringArray()
-	for limit in Settings.FRAME_LIMITS:
-		words.append(str(limit))
-	words.append(tr("SETTINGS_NO_LIMIT"))
-	_limit = MenuChoice.new(words)
-	_limit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_limit.picked.connect(func(i: int) -> void:
-		var limits := Settings.FRAME_LIMITS
-		_screen.settings.frame_limit = limits[i] if i < limits.size() else Settings.UNLIMITED
+	var limits := Settings.FRAME_LIMIT_RANGE
+	_limit = _screen.add_slider_row(column, "SETTINGS_FRAME_LIMIT", limits.x, limits.y, LIMIT_STEP, "%d", LEFT_LABEL)
+	var row := _limit.get_parent() as HBoxContainer
+	_limit.value_changed.connect(func(v: float) -> void:
+		# moving the slider sets a limit, Off or not
+		_screen.settings.frame_limit_pick = roundi(v)
+		_screen.settings.frame_limit = roundi(v)
+		_limit_off.put(-1)
+		_show_limit_lit()
 		SettingsApply.apply_frame_rate(_screen.settings)
+		changed.emit(false))
+	_limit_off = MenuChoice.new(PackedStringArray([tr("SETTINGS_NO_LIMIT")]))
+	_limit_off.name = "LimitOff"
+	_limit_off.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_limit_off.picked.connect(func(_i: int) -> void:
+		# Off pressed again puts the slider's limit back
+		var s := _screen.settings
+		s.frame_limit = s.frame_limit_pick if s.frame_limit == Settings.UNLIMITED else Settings.UNLIMITED
+		_show_limit()
+		SettingsApply.apply_frame_rate(s)
 		changed.emit(true))
-	row.add_child(_limit)
+	row.add_child(_limit_off)
 	var help := tr("SETTINGS_FRAME_LIMIT_HELP") % [Engine.physics_ticks_per_second,
 			SettingsApply.screens().config.background_fps]
-	row.tooltip_text = help
-	for i in _limit.get_child_count():
-		_limit.button(i).tooltip_text = help
+	_screen.explain(row, help)
+
+
+## The limit's slider on its number (the one kept while Off) and Off lit while there is no limit.
+func _show_limit() -> void:
+	var s := _screen.settings
+	_screen.set_slider(_limit, s.frame_limit_pick if s.frame_limit == Settings.UNLIMITED else s.frame_limit)
+	_limit_off.put(0 if s.frame_limit == Settings.UNLIMITED else -1)
+	_show_limit_lit()
+
+
+## The slider and its figure dim while the limit is Off: the number is what turning it on gives.
+func _show_limit_lit() -> void:
+	var off := _screen.settings.frame_limit == Settings.UNLIMITED
+	var shade := Color(1.0, 1.0, 1.0, OFF_ALPHA if off else 1.0)
+	_limit.modulate = shade
+	(_limit.get_meta(&"readout") as Control).modulate = shade
 
 
 ## View: the field of view and Show FPS.
@@ -204,7 +244,7 @@ func _build_view(column: VBoxContainer) -> void:
 		changed.emit(true))
 
 
-## Interface: the colour of the main buttons and the selection (UiColours), applied at once.
+## Interface: the colour of the main buttons and the selection (UiColours), applied at once, and Tooltips.
 func _build_interface(column: VBoxContainer) -> void:
 	_screen.add_section(column, tr("SETTINGS_INTERFACE"))
 	var row := _screen.add_row(column, "SETTINGS_UI_COLOUR", LEFT_LABEL)
@@ -220,6 +260,12 @@ func _build_interface(column: VBoxContainer) -> void:
 			restyled.emit())
 	row.add_child(_ui_colour)
 	_screen.explain(row, tr("SETTINGS_UI_COLOUR_HELP"))
+	_tooltips = _screen.add_check_row(column, "SETTINGS_TOOLTIPS", "SETTINGS_ON", "SETTINGS_OFF", LEFT_LABEL)
+	_tooltips.tooltip_text = tr("SETTINGS_TOOLTIPS_HELP")
+	_tooltips.toggled.connect(func(on: bool) -> void:
+		_screen.settings.tooltips = on
+		SettingsApply.apply_tooltips(_screen.settings)
+		changed.emit(true))
 
 
 func _show_window() -> void:

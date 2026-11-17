@@ -31,15 +31,6 @@ const FRAME_WIDE := 1.3
 const FRAME_HIGH := 1.5
 ## The most the viewport is drawn over the rect's size (a 4K screen gets sharper pixels, not more).
 const MAX_SUPERSAMPLE := 2.0
-## The turntable's ring under the replica: its radius against the replica's half length (inside the frame at 3/4), its tube, and its colour.
-const RING_REACH := 0.62
-const RING_TUBE := 0.02
-const RING_COLOUR := Color(1.0, 1.0, 1.0, 0.22)
-## How flat the ring is (its tube squashed to a band).
-const RING_FLAT := 0.12
-const RING_SEGMENTS := 96
-## Looking down more steeply than this (pitch, degrees), the ring would run out of the frame: it hides.
-const RING_HIDE_PITCH := -40.0
 
 var _port: SubViewport = null
 var _camera: Camera3D = null
@@ -48,8 +39,6 @@ var _camera: Camera3D = null
 var _tilt: Node3D = null
 var _spin: Node3D = null
 var _holder: Node3D = null
-var _ring: MeshInstance3D = null
-var _ring_material: StandardMaterial3D = null
 var _model: Node3D = null
 var _key: StringName = &""
 var _paint: StringName = &""
@@ -95,13 +84,6 @@ func _init() -> void:
 	_holder = Node3D.new()
 	_holder.name = "Holder"
 	_spin.add_child(_holder)
-	_ring_material = StandardMaterial3D.new()
-	_ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_ring_material.albedo_color = RING_COLOUR
-	_ring = MeshInstance3D.new()
-	_ring.name = "Ring"
-	_tilt.add_child(_ring)
 	_camera = Camera3D.new()
 	_camera.fov = FOV
 	_camera.keep_aspect = Camera3D.KEEP_WIDTH
@@ -272,7 +254,6 @@ func _set_angles(angles: Vector2) -> void:
 	_pitch = clampf(angles.y, PITCH_MIN, PITCH_MAX)
 	_spin.rotation_degrees = Vector3(0.0, _yaw, 0.0)
 	_tilt.rotation_degrees = Vector3(0.0, 0.0, _pitch)
-	_ring.visible = _pitch > RING_HIDE_PITCH
 
 
 func _load(key: StringName) -> void:
@@ -293,24 +274,8 @@ func _load(key: StringName) -> void:
 	_half = Vector3(maxf(box.size.z, ReplicaPictures.MIN_EXTENT), maxf(box.size.y, ReplicaPictures.MIN_EXTENT),
 			maxf(box.size.x, ReplicaPictures.MIN_EXTENT)) * 0.5
 	_holder.position = -box.get_center()
-	_shape_ring()
 	_place_camera()
 	_size_port()
-
-
-## The ring under the replica's middle, at its feet.
-func _shape_ring() -> void:
-	var radius := _half.x * RING_REACH
-	var tube := maxf(_half.x * RING_TUBE, ReplicaPictures.MIN_EXTENT)
-	var torus := TorusMesh.new()
-	torus.inner_radius = radius - tube
-	torus.outer_radius = radius + tube
-	torus.rings = RING_SEGMENTS
-	torus.ring_segments = 4
-	torus.material = _ring_material
-	_ring.mesh = torus
-	_ring.position = Vector3(0.0, -_half.y, 0.0)
-	_ring.scale = Vector3(1.0, RING_FLAT, 1.0)
 
 
 ## The camera back along +X far enough that the bare replica, with its room, fits across and up; nearer with the zoom.

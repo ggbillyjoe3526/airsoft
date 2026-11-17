@@ -38,12 +38,15 @@ is from a long way off; a silenced replica carries half as far.
   Fullscreen, on the screen the game starts on; after that it opens in the mode you left.
   **F11** or **Alt+Enter** switches between windowed and your last fullscreen mode.
 - **Monitor:** with two screens or more, the screen the window opens on.
-- **V-Sync** (off by default) and a **Frame-rate limit**: 30 to 360 frames a second, or Off for no limit. In the background
+- **V-Sync** (off by default) and a **Frame-rate limit**: a slider from 30 to 360 frames a second, with **Off** beside
+  it for no limit (Off is the default; moving the slider turns it off). In the background
   the game drops to 30 frames a second. The menus never draw more frames than your screen shows, whatever
   the limit.
 - **Field of view** (87° by default, 70° to 110°) and **Show FPS** (the figure sits in the bottom-right corner).
 - **Interface colour:** the colour of the main buttons, what you have picked and the comms wheel's lit button: blue
   (the default), beige, red, green, pink, orange or violet. The menus change as you click. Team colours don't change.
+- **Tooltips** (on by default): the notes that pop up when you hover over an item, a setting or a button. Off hides
+  them all.
 
 ## Graphics
 
@@ -99,7 +102,7 @@ If the game stutters, lower the preset or the render scale first.
 - **Hit feed:** top right or bottom left; lines fade after a few seconds, or on **Keep** the last 10 hits stay up all
   match.
 - **HUD opacity** fades the backgrounds of the ammo and bomb panel and the minimap in a match, from solid down to
-  20 %. Their icons, numbers and words stay solid.
+  20 % (60 % by default). Their icons, numbers and words stay solid.
 - **HUD size** from 80 % to 150 %. The crosshair and hit marker keep their size.
 - **Minimap:** Rotating or Fixed, and its **Zoom**, 50 % to 200 % (how close it shows the field).
 - **Callouts:** On (the default) shows your teammates' calls in the hit feed with a radio click, and lets you hear

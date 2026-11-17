@@ -228,7 +228,8 @@ func test_every_display_row_is_applied_and_saved() -> void:
 	page.vsync().button_pressed = false
 	assert_false(_saved().vsync)
 	assert_eq(ds.vsync_mode, DisplayServer.VSYNC_DISABLED)
-	page.limit_choice().button(3).pressed.emit()
+	page.limit_slider().value = 144.0
+	screen._save()
 	assert_eq(_saved().frame_limit, 144)
 	page.show_fps().button_pressed = true
 	assert_true(_saved().show_fps)
@@ -269,9 +270,7 @@ func test_minimise_then_restore_with_the_window_events_alone() -> void:
 
 
 func test_every_limit_leaves_the_physics_steps_to_catch_up_to_60_a_second() -> void:
-	var worst := ds.config.background_fps
-	for l in Settings.FRAME_LIMITS:
-		worst = mini(worst, l)
+	var worst := mini(ds.config.background_fps, Settings.FRAME_LIMIT_RANGE.x)
 	var per_frame := ceili(float(Engine.physics_ticks_per_second) / float(worst))
 	assert_eq(Engine.physics_ticks_per_second, 60)
 	assert_lte(per_frame, Engine.max_physics_steps_per_frame, "a frame at the slowest limit runs the ticks it owes")

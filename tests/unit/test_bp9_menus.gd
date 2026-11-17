@@ -1,8 +1,8 @@
 extends GutTest
 ## BP9, the menus, the HUD and the saves: the interface colour reaches the switches' focus ring and a button's press
 ## ring made before it changed; picking a colour from the settings opened over the Loadout or the Armory comes back to
-## that page; Spotted's arrow follows its figure between ticks; an order that ended by itself is told in the wheel's
-## circle with the wheel shut; and graphics the safe start put by before Volumetric haze had levels come back with
+## that page; Spotted's arrow follows its figure between ticks; an order that ended by itself says nothing (owner,
+## 2026-11-17); and graphics the safe start put by before Volumetric haze had levels come back with
 ## their Custom "on" as High.
 
 const ROOT := "user://test-bp9"
@@ -124,7 +124,7 @@ func test_spotteds_arrow_follows_its_figure_between_ticks() -> void:
 
 # --- an order that ended by itself, the wheel shut ---
 
-func test_an_order_that_ended_by_itself_is_told_in_the_circle_alone_with_the_wheel_shut() -> void:
+func test_an_order_that_ended_by_itself_says_nothing_wheel_shut_or_open() -> void:
 	var controls := ControlsConfig.new()
 	var hud_cfg := HudConfig.new()
 	var pointer := OrderWheelPointer.new(OrderWheelLayout.new(controls))
@@ -134,29 +134,28 @@ func test_an_order_that_ended_by_itself_is_told_in_the_circle_alone_with_the_whe
 	var outcome := SquadOrders.Outcome.new()
 	wheel.update(pointer, SquadOrder.Kind.COVER, outcome, 0, 0.016)
 	assert_false(wheel.visible, "shut, nothing to say: nothing drawn")
-	# Your helper is hit: the book ends the order and says so, unasked.
+	# Your helper is hit: the book ends the order, unasked. Nothing comes up (owner, 2026-11-17: no "Back to the team
+	# plan" when the bots go back to it).
 	outcome.record(0, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED, true)
 	wheel.update(pointer, SquadOrder.Kind.NONE, outcome, 0, 0.016)
-	assert_true(wheel.visible, "the circle comes up by itself")
-	assert_false(wheel.draws_wheel(), "alone: no buttons, no pointer")
-	assert_eq(wheel.notice_text(), tr("HUD_ORDER_CANCELLED"))
-	wheel.update(pointer, SquadOrder.Kind.NONE, outcome, 0, hud_cfg.order_notice_time - 0.1)
-	assert_true(wheel.visible, "for the notice's time")
-	wheel.update(pointer, SquadOrder.Kind.NONE, outcome, 0, 0.2)
-	assert_false(wheel.visible, "then gone")
-	# The answer to a key pressed with the wheel shut still shows nothing (SO4), and someone else's news is not yours.
+	assert_false(wheel.visible, "an order ending by itself: nothing on screen")
+	outcome.record(0, SquadOrder.Kind.NONE, SquadOrders.Notice.QUIET, true)
+	wheel.update(pointer, SquadOrder.Kind.NONE, outcome, 0, 0.016)
+	assert_false(wheel.visible, "all quiet: nothing on screen")
+	# The answer to a key pressed with the wheel shut still shows nothing (SO4).
 	outcome.record(0, SquadOrder.Kind.NONE, SquadOrders.Notice.NOBODY)
 	wheel.update(pointer, SquadOrder.Kind.NONE, outcome, 0, 0.016)
 	assert_false(wheel.visible, "a key's own answer: nothing on screen")
-	outcome.record(3, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED, true)
-	wheel.update(pointer, SquadOrder.Kind.NONE, outcome, 0, 0.016)
-	assert_false(wheel.visible, "a teammate's order ending is not told to you")
-	# News while the wheel is up shows in its middle, as any notice does.
+	# Nor while the wheel is up: its band shows the team plan in force.
 	pointer.start(Time.get_ticks_msec() - 1000)
 	outcome.record(0, SquadOrder.Kind.NONE, SquadOrders.Notice.QUIET, true)
 	wheel.update(pointer, SquadOrder.Kind.NONE, outcome, 0, 0.016)
 	assert_true(wheel.draws_wheel())
-	assert_eq(wheel.notice_text(), tr("HUD_ORDER_QUIET"))
+	assert_eq(wheel.notice_text(), "", "no notice for an order that ended by itself")
+	# The answer to an order you give on the wheel still shows in its middle.
+	outcome.record(0, SquadOrder.Kind.NONE, SquadOrders.Notice.NOBODY)
+	wheel.update(pointer, SquadOrder.Kind.NONE, outcome, 0, 0.016)
+	assert_eq(wheel.notice_text(), tr("HUD_ORDER_NOBODY"))
 
 
 # --- the safe start's graphics, put by on an older build ---
