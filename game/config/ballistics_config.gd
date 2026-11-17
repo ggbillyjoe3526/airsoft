@@ -37,3 +37,12 @@ extends Resource
 @export var leaf_stop_depth: float = 0.6
 @export var leaf_kept_per_metre: float = 0.35
 @export var leaf_scatter_per_metre: float = 0.5
+## The leaves a bush's drawn plant really fills (Foliage.count_leaves, LF1, owner's playtest 2026-11-17: a bot in the
+## ferns took hits that never landed): a fern (up to leaf_fern_tallest m tall, WoodsConfig.fern_tallest's ferns; a test
+## holds them equal) counts an ellipsoid of leaf_fern_shares of its drawn radius (x) and height (y) on its foot, a
+## shrub leaf_bush_shares. Measured against the models (fern.glb, bush.glb) from 3,000 lines into and past them: at
+## the drawn sizes about half the lines a fern stopped met no frond (14 % of all lines, a shrub 16 %); at these shares
+## about 2 %, and lines that touch a frond yet get through (a BB past one blade) 7 %.
+@export var leaf_fern_tallest: float = 1.45
+@export var leaf_fern_shares: Vector2 = Vector2(0.6, 0.8)
+@export var leaf_bush_shares: Vector2 = Vector2(0.8, 0.8)

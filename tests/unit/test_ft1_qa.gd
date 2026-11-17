@@ -218,8 +218,10 @@ func test_only_spruce_is_spread_and_other_grids_keep_their_cells() -> void:
 
 # --- the core --------------------------------------------------------------------------------------------------
 
-func test_a_spruce_core_is_a_fifth_of_the_thicket_s_height_in_the_shade_colour() -> void:
-	assert_almost_eq(look.props.model_cores[&"spruce"].y, 0.2, 1e-6)
+## LF1 (owner's playtest 2026-11-17) took the thickets' core away: their spruces close them without it. The core box's
+## rules stay for any prop that names one, and the thicket keeps its shade colour (the minimap's).
+func test_a_thicket_has_no_core_and_keeps_its_shade_colour() -> void:
+	assert_false(look.props.model_cores.has(&"spruce"), "no core box between a thicket's spruces (LF1)")
 	assert_eq(MapLevel.CORE_SHARE, 0.3)
 	var under := play.map_style.colours[&"thicket"]
 	var forest := Color8(0x2b, 0x5c, 0x48)

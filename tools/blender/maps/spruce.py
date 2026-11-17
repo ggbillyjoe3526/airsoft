@@ -6,7 +6,7 @@ branches all the way to the ground, each tier a ragged skirt whose tips droop un
 light comes through, a thin spire at the top; dark blue-green, lighter on the tips that catch the sun.
 
 A thicket stops BBs and sight, so the spruce is solid: every tier closed underneath, its cone overlapping the next
-(and the thicket's dark core box still stands behind them, PropDressConfig.model_cores). Fills its cell exactly: the
+(spread wider than its cell so a thicket closes without a core box, LF1). Fills its cell exactly: the
 lowest tier's tips are its width, its spire its top. Budget 500 triangles (docs/ASSETS.md): there are about 2,200.
 Plain vertex colours, no texture.
 
