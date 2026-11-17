@@ -131,6 +131,9 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   Plant The Bomb's bomb put down (and picked up, a stand-in), its code keyed in, the fuse's beep, the defusal, made safe
   and going off (`plant-the-bomb/` and `shotgun/` in the raw folder). The shotgun's shot is the Sniper Rifle's (owner,
   2026-11-13).
+  His two of 2026-11-17 (TA1: `gap.wav` and `kings_cross.wav`, train announcements he recorded himself, owner
+  2026-11-17) are Subway's easter egg, `announce_gap_1.wav` and `announce_kings_cross_1.wav`, as he recorded them
+  (one channel, the silence round them cut: `tools/announce_sound.py`; raw in `subway-easter-egg/`).
   Owner-made for the game; same licence as the code. To re-cut: `python3 tools/cut_recordings.py <raw folder>`,
   then `godot --headless --path . --import`.
 - **Sounds:** the rest of the sounds and 4 ambience loops are still rendered from the browser game's synthesis

@@ -236,6 +236,8 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## own level, under the Ambience volume (owner, 2026-11-01: too loud and distracting; AU1).
 @export var ambiences: AmbienceConfig = AmbienceConfig.new()
 @export var ambience_gain: float = 0.5
+## Subway's easter egg (TA1): the owner's two train announcements, the gap near a train or in one, King's Cross inside one.
+@export var train_announcements: TrainAnnounceConfig = TrainAnnounceConfig.new()
 ## The referee's pea whistle: whistle_short and whistle_long blasts, whistle_variants of each, played at whistle_gain on
 ## the Interface bus: the browser's 0.25 lifted 5 dB, as a real whistle's loudest 50 ms sit that far under the old
 ## full-scale sine's. Since AU6 the owner's own pea whistle, cut by tools/cut_recordings.py (AU3's synthesised stand-in
