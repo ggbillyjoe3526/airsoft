@@ -1,6 +1,6 @@
 # LF1 · Bushes stop only what their leaves cover; no boxes at the thickets' feet
 
-**Review:** 3 attempts · critic (attempt 3 below) · qa Pass (attempts 1 and 3) · performance Pass (attempts 1 and 3)
+**Review:** 3 attempts · critic Accept 8/8 (attempt 3, d0078ef) · qa Pass (attempts 1 and 3) · performance Pass (attempts 1 and 3)
 
 The owner's playtest of 0.1 Beta 1 (2026-11-17), items 30 to 32: "i was clearly hitting an enemy bot but they seemed
 stuck and hits didn't seem to register ... it may or may not be related to the woodlands map and the foliage/trees";
@@ -14,7 +14,7 @@ spotted bot is (if they are close enough) ... check that it works in all maps".
 |---|---|---|---|---|---|
 | 2026-11-17 | 1 | Opus 5.5 (build thread) | pass | Retry 6/8 | Spotted shown on Woodland A/D only, teammates told not shown, 97 misses not all explained; probe header stale; the fern height in two configs |
 | 2026-11-17 | 2 | Opus 5.5 (build thread) | pass | Accept 8/8 | CI: a Woodland Plant The Bomb bot held up (test_wb1_qa, seed 3) |
-| 2026-11-17 | 3 | Opus 5.5 (build thread) | pass | – | – |
+| 2026-11-17 | 3 | Opus 5.5 (build thread) | pass | Accept 8/8 | – |
 
 ## What was wrong
 
@@ -71,7 +71,9 @@ spotted bot is (if they are close enough) ... check that it works in all maps".
   enemy fell from 187 to 21; misses where it hides them too, 137 then 153.
 - **Balance** (Woodland, Normal, seeds 1 to 16; the BP9 run had 32 seeds): Elimination west end 42.5 % ±4.5 on main,
   40.3 % ±4.4 now (band 45 to 55, both outside within noise as BP9's 44.4 % was); median round 57.4 s then 53.2 s;
-  first hit 17.2 s then 16.9 s. Attack / Defend attackers 56.5 % ±4.5 now (BP9 54.6 %). Reports in
+  first hit 17.2 s then 16.9 s. Attack / Defend attackers 56.5 % ±4.5 now (BP9 54.6 %). Plant The Bomb with
+  attempt 3's fetcher (seeds 1 to 16): attackers 44.6 % ±4.5 (band 40 to 65; PB5's 50.0 % on 32 seeds, within noise),
+  clock run out 1.7 %, median round 74.6 s (`attempt-3/balance-woodland-plant.md`). Reports in
   `pipeline/runs/LF1/attempt-2/`.
 
 ## Decisions
@@ -85,6 +87,9 @@ spotted bot is (if they are close enough) ... check that it works in all maps".
   overlapping ferns). The wiki's Maps page says so.
 
 ## Known issues left
+
+- The fetcher's "on the bomb's storey beats not" still has no hold for the one already going where the height rule
+  applies (a bomb on a hut's floor or the tower's deck with the fetcher's route over a rise): can wait, no run met it.
 
 - About 0.8 % of Woodland looks (34 of 4,094 on seed 1) meet counted leaves where the drawn plant shows the enemy, so
   Spotted marks nobody there: what is left of the shares' 2 % stopped-but-unseen lines. Watch it in playtest (N31).
