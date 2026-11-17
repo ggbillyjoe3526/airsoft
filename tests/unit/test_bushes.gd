@@ -13,6 +13,8 @@ const EPS := 1e-4
 const SPEED := 90.0
 
 var tuning: SimTuning = SimTuning.new()
+## The ferns BushView draws as the fern model: the simulation's split (LF1).
+var fern_tallest: float = BallisticsConfig.new().leaf_fern_tallest
 var events: SimEvents = SimEvents.new()
 var ends: Array[MapEnd] = []
 var nobody: Array[Character] = []
@@ -599,13 +601,13 @@ static func _woodland() -> MapData:
 func test_woodland_s_bushes_are_ferns_and_shrubs_a_draw_a_square_filling_its_bush_on_its_foot() -> void:
 	var map := _woodland()
 	var cfg := PlayTuning.load_default().woods
-	var view := BushView.build(map, cfg)
+	var view := BushView.build(map, cfg, fern_tallest)
 	add_child_autofree(view)
 	var parts := view.parts()
 	assert_eq(view.drawn(), map.foliage.size(), "every bush drawn once")
 	var ferns := 0
 	for i in map.foliage.size():
-		if map.foliage.heights[i] <= cfg.fern_tallest:
+		if map.foliage.heights[i] <= fern_tallest:
 			ferns += 1
 	var drawn_ferns := 0
 	var squares := {}
@@ -631,7 +633,7 @@ func test_woodland_s_bushes_are_ferns_and_shrubs_a_draw_a_square_filling_its_bus
 	var turns := BushView.turns_of(map)
 	for i in map.foliage.size():
 		var f := map.foliage
-		var model := PropDressConfig.load_mesh(cfg.fern_model if f.heights[i] <= cfg.fern_tallest else cfg.bush_model)
+		var model := PropDressConfig.load_mesh(cfg.fern_model if f.heights[i] <= fern_tallest else cfg.bush_model)
 		var box := model.get_aabb()
 		var xf := BushView.fitted(f, i, box, turns[i])
 		var drawn := xf * box
@@ -643,14 +645,14 @@ func test_woodland_s_bushes_are_ferns_and_shrubs_a_draw_a_square_filling_its_bus
 		# and a corner's reach at most
 		var reach := Vector2(drawn.size.x, drawn.size.z) * 0.5
 		assert_lte(maxf(reach.x, reach.y), f.radii[i] * sqrt(2.0) + EPS, "bush %d no wider than its radius" % i)
-	assert_null(BushView.build(MapData.load_map("depot", MapStyle.new(), 3), cfg), "nothing on a map without bushes")
+	assert_null(BushView.build(MapData.load_map("depot", MapStyle.new(), 3), cfg, fern_tallest), "nothing on a map without bushes")
 
 
 func test_without_the_models_the_bushes_fall_back_to_ellipsoids() -> void:
 	var map := _woodland()
 	var cfg := PlayTuning.load_default().woods.duplicate() as WoodsConfig
 	cfg.fern_model = "res://nowhere/fern.glb"
-	var view := BushView.build(map, cfg)
+	var view := BushView.build(map, cfg, fern_tallest)
 	add_child_autofree(view)
 	assert_eq(view.parts().size(), 1, "one draw of ellipsoids")
 	assert_eq(view.drawn(), map.foliage.size())

@@ -79,9 +79,21 @@ func test_walking_through_keeps_the_drawn_size() -> void:
 	assert_almost_eq(f.heights[0], FERN_H, 1e-6, "drawn height kept for BushView")
 
 
-func test_the_fern_split_is_the_look_s() -> void:
-	assert_eq(tuning.ballistics.leaf_fern_tallest, WoodsConfig.new().fern_tallest,
-			"the ferns the simulation counts are the ones drawn as ferns")
+func test_the_ferns_drawn_are_the_ferns_counted() -> void:
+	var map := MapData.load_map("woodland", MapStyle.new(), 3)
+	var tallest := tuning.ballistics.leaf_fern_tallest
+	var view := BushView.build(map, WoodsConfig.new(), tallest)
+	add_child_autofree(view)
+	var ferns := 0
+	for i in map.foliage.size():
+		if map.foliage.heights[i] <= tallest:
+			ferns += 1
+	var drawn := 0
+	for part in view.parts():
+		if part.name.begins_with("Ferns"):
+			drawn += part.multimesh.instance_count
+	assert_gt(ferns, 0, "Woodland has ferns")
+	assert_eq(drawn, ferns, "the simulation's split draws them: one value for both")
 
 
 func test_shares_never_count_more_than_drawn() -> void:
