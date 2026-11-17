@@ -213,6 +213,8 @@ MAG_HD = 0.0158
 BB_R = 0.003
 BB_ROUND = 34
 BB_BANDS = 17
+# The one BB on the pistol's own magazine: sides round (half as many bands), as the rifle's (aeg.REPLICA_BB_ROUND).
+REPLICA_BB_ROUND = 24
 
 MAG_TOP = (0.0, Y(MAG_TOP_PX[0]), Z(MAG_TOP_PX[1]))
 # Under the dust cover's rail, where the parts file's laser and light sit (photo about x 100, py 152).
@@ -1032,10 +1034,10 @@ def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detai
     # The follower and one BB at the lips (the owner, 0.1 Beta 2: "only 1 visible bb"); a small accent tab on it.
     c = top + down * 0.002
     b.box((-0.0040, c.y - 0.012, c.z - 0.002), (0.0040, c.y + 0.010, c.z + 0.0005), "Detail")
-    # The replica's own magazine keeps its six-band BB (its budget is the pistol's); a part's is a true ball.
-    ball = ([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026), (0.0026, 0.0015),
-             (0.003, 0.0)] if fine == 1 else hs.ball(BB_R, BB_BANDS))
-    b.lathe(ball, "BB", 10 if fine == 1 else BB_ROUND, centre=(0.0, c.y + 0.006, c.z + 0.0032), axis="z")
+    # A true ball on the replica's own magazine too (OB1: turned on the triangles the dropped BB freed); the part's
+    # finer still.
+    sides = REPLICA_BB_ROUND if fine == 1 else BB_ROUND
+    b.lathe(hs.ball(BB_R, sides // 2), "BB", sides, centre=(0.0, c.y + 0.006, c.z + 0.0032), axis="z")
     b.box((-0.0015, c.y - 0.011, c.z + 0.0005), (0.0015, c.y - 0.007, c.z + 0.0012), "Accent")
     return hs.join(name, [hs.finish(b.build(), 0.0005, 1 if fine == 1 else 2), plate])
 

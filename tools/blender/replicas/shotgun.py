@@ -659,8 +659,8 @@ def magazine() -> object:
     # The feed lips and one BB in their middle (the owner, 0.1 Beta 2: "There should only be 1 visible bb"; there
     # were three side by side, one for each barrel).
     d.box((-0.0105, Y(MAG_PX[0] + 34), Z(MAG_TOP_PY)), (0.0105, Y(MAG_PX[0] + 8), Z(MAG_TOP_PY) + 0.0030), "Rubber")
-    d.lathe([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026), (0.0026, 0.0015),
-             (0.003, 0.0)], "BB", 12, centre=(0.0, Y(MAG_PX[0] + 21), Z(MAG_TOP_PY) + 0.0036), axis="z")
+    d.lathe(hs.ball(aeg.BB_R, aeg.REPLICA_BB_ROUND // 2), "BB", aeg.REPLICA_BB_ROUND,
+            centre=(0.0, Y(MAG_PX[0] + 21), Z(MAG_TOP_PY) + 0.0036), axis="z")
     bits = hs.finish(d.build(), 0.0004, 1)
     return hs.join("Magazine", [ob, bits])
 
