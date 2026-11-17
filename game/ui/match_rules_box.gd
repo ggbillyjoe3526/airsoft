@@ -336,7 +336,7 @@ func _build_rows() -> void:
 	var bounces := PackedStringArray([tr("RULE_RICOCHETS_NO").to_upper(), tr("RULE_RICOCHETS_YES").to_upper()])
 	_ricochets = _choice_row("RICOCHETS", tr("RULE_RICOCHETS"), bounces)
 	_ricochets.picked.connect(_on_ricochets)
-	var respawn_words := PackedStringArray([tr("RULE_RESPAWNS_BY_MODE").to_upper(), tr("RULE_ON").to_upper(),
+	var respawn_words := PackedStringArray([tr("RULE_RESPAWNS_MODE_BUTTON").to_upper(), tr("RULE_ON").to_upper(),
 			tr("RULE_OFF").to_upper()])
 	_respawns = _choice_row("RESPAWNS", tr("RULE_RESPAWNS"), respawn_words)
 	_respawns.picked.connect(_on_respawns)

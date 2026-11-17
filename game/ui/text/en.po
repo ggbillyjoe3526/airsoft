@@ -1068,6 +1068,10 @@ msgstr "Respawns"
 msgid "RULE_RESPAWNS_BY_MODE"
 msgstr "Not in Elimination"
 
+# The Custom rules button for respawns as each mode plays (short, so the row fits).
+msgid "RULE_RESPAWNS_MODE_BUTTON"
+msgstr "By mode"
+
 msgid "RULE_RESPAWNS_BLURB_0"
 msgstr "As each mode plays: back after a short wait in Attack / Defend and Plant The Bomb (until the bomb is armed), one life in Elimination."
 
