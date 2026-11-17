@@ -21,10 +21,15 @@
   line stands in, lit by GI from the sunlit slab), coloured signs and a red flag.
 - **A firing point** (`range_extras.py`, look-only fixtures in `dressing.fixtures`): a steel canopy over the line
   (Warren trusses, knee-braced columns, purlins, a light grey roof underside, LED battens lit as Lens, lane boards 1
-  to 4 printed on the sheet), a range flag (Depot's fire red, rippled, with its "range hot" notice), the rules board in a
-  timber frame and three signs (chrono, eye protection on both side walls, safe zone). Words and pictograms are drawn
-  on one 1024² sheet (`range_signs.py`, cells in `range_cells.py`), no brand. The canopy and flag cast shadows
+  to 4 printed on the sheet), a range flag (Depot's fire red, rippled, with its "range hot" notice), the rules board
+  in a timber frame and three signs (chrono, eye protection on both side walls, safe zone). Words and pictograms are
+  drawn on one 1024² sheet (`range_signs.py`, cells in `range_cells.py`), no brand. The canopy and flag cast shadows
   (`StationFixturesConfig.shadow_models`); the signs don't (they sit flat on walls).
+- **The shelter's shade lit by its battens.** Drawn as fixtures are (no GI), its shade took the open sky's blue; in
+  the GI (SDFGI) it went near black, the bounce from the sunlit slab too weak. So the shelter and flag stand in the GI
+  (`GI_MODE_STATIC`, as they cast shadows) and the four LED battens are lights (`StationFixturesConfig.lamp_points`,
+  the tunnel lamps' colour, range and energy, no shadow), shown with Settings › Graphics › Lamp lights (High and
+  Ultra) like Subway's lamps. Where the GI and the lamp lights are off, the shade keeps the sky's fill.
 - **The canopy is look only.** It has no block and no collision: it stands 3.3 m and higher over the line, above
   any BB's path from the firing line, so it changes no shot.
 - **Four shooting benches are solid** (`furniture` blocks at x ±2.5 and ±7.5, 0.5 m behind the line, 1.8 × 0.9 ×
