@@ -143,7 +143,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"log_tunnel_mouth": "res://assets/models/props/log_tunnel_mouth.glb",
 	# The practice range's (RM1), modelled in Blender by tools/blender/maps/.
 	&"range_wall": "res://assets/models/props/range_wall.glb",
+	&"range_wall_b": "res://assets/models/props/range_wall_b.glb",
+	&"range_wall_c": "res://assets/models/props/range_wall_c.glb",
 	&"range_backstop": "res://assets/models/props/range_backstop.glb",
+	&"range_backstop_b": "res://assets/models/props/range_backstop_b.glb",
+	&"range_backstop_c": "res://assets/models/props/range_backstop_c.glb",
 	&"sandbags": "res://assets/models/props/sandbags.glb",
 	&"sandbags_b": "res://assets/models/props/sandbags_b.glb",
 	&"sandbags_c": "res://assets/models/props/sandbags_c.glb",
@@ -153,6 +157,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"site_toilet": "res://assets/models/props/site_toilet.glb",
 	&"water_tote": "res://assets/models/props/water_tote.glb",
 	&"generator": "res://assets/models/props/generator.glb",
+	# The Range's firing point (RQ1): the timber shooting benches and the chrono table.
+	&"shooting_bench": "res://assets/models/props/shooting_bench.glb",
+	&"chrono_table": "res://assets/models/props/chrono_table.glb",
 	# Subway's works gear, booths and plant-room models (SM4, tools/blender/maps/), each named by its block
 	# (tools/subway/layout.py) and fitted to it, the booths and buffer stops turned by the block's facing.
 	&"skip_wagon": "res://assets/models/props/skip_wagon.glb",
@@ -246,6 +253,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"parts_cage": PackedStringArray(["parts_cage_b", "parts_cage_c"]),
 	&"cordwood": PackedStringArray(["cordwood_b", "cordwood_c"]),
 	&"sandbags": PackedStringArray(["sandbags_b", "sandbags_c"]),
+	# RQ1: the Range's wall bays, their boards' tones shuffled three ways
+	&"range_wall": PackedStringArray(["range_wall_b", "range_wall_c"]),
+	&"range_backstop": PackedStringArray(["range_backstop_b", "range_backstop_c"]),
 }
 ## How a prop a block names (MapData.Block.dress, WR3) is laid in it; one not listed is fitted to the box (FIT, long
 ## side along the box's).
@@ -332,11 +342,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 @export var stake_vary: float = 0.15
 @export var stake_rail_heights: Vector2 = Vector2(0.8, 0.7)
 ## A named prop whose box is still drawn behind it, cut down to a share (y) of its height and inset (x, m, at most
-## MapLevel.CORE_SHARE of the box's width) on each side with no other such box against it, rather than not at all: a thicket's dark
-## core between its spruces' feet, unbroken across touching thickets, so nothing is seen through a thicket that stops
-## BBs under its boughs. A spruce core reaches 0.2 of the thicket's height, under the spruces' widest boughs (FT1: at
-## 0.6 it stood past their narrowing tops and read as a plain block).
-@export var model_cores: Dictionary[StringName, Vector2] = {&"spruce": Vector2(0.7, 0.2)}
+## MapLevel.CORE_SHARE of the box's width) on each side with no other such box against it, rather than not at all
+## (unbroken across touching boxes). None now: a thicket's spruces had a dark core box between their feet (WR3, FT1)
+## until the owner's playtest (2026-11-17, "trees have boxes at the bottom of them"); its spruces drawn wider than
+## their cells (grid_spread) already close the thicket, so LF1 took the core away.
+@export var model_cores: Dictionary[StringName, Vector2] = {}
 ## TREE's models: each one's trunk's widest reach (m) round its origin at the ground and under it (an oak's buttress
 ## roots), which the box's half-width is; as each build script prints it (tools/blender/maps/pine.py, oak.py,
 ## birch.py). A tree model not listed keeps its box.

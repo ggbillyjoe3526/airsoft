@@ -169,6 +169,9 @@ func test_every_listed_model_is_on_disk_with_an_import_and_subway_names_only_lis
 	# Depot's wall extras (DX1) are listed for its own fixtures
 	for f in MapData.load_map("depot", play.map_style, SimTuning.new().rounds.team_size).fixtures:
 		named[String(f.model)] = true
+	# and the Range's firing point and signs (RQ1)
+	for f in MapData.load_map("range", play.map_style, 1).fixtures:
+		named[String(f.model)] = true
 	for model in cfg.models:
 		assert_true(named.has(model), "%s listed but unused" % model)
 

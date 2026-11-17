@@ -52,7 +52,15 @@ TROLLEY = (0.5, 0.42)  # RangeViewConfig.trolley_size
 FEET = 0.12  # RangeConfig.mover_trolley_height
 SEG = 15
 
-rk.check_colours(["peg_wood", "peg_end", "stand_black", "zinc", "motor_grey", "rail_steel", "rubber"])
+rk.PAINT.update({
+    # RQ1: the scoring zones painted a shade darker on the face, and the dents BBs have knocked into the plywood
+    "peg_zone": 0xb59f72,
+    "peg_pock": 0x6a645a,
+})
+rk.check_colours(["peg_wood", "peg_end", "peg_zone", "peg_pock", "stand_black", "zinc", "motor_grey", "rail_steel",
+                  "rubber"])
+ZONE_PROUD = 0.0015  # the zones' paint over the face (m), and the dents' over that
+POCK_PROUD = 0.0025
 
 
 def _head(z: float, from_r: float, steps: int) -> list:
@@ -103,12 +111,48 @@ def peg(name: str, crouched: bool) -> object:
     faces = k.prism(_outline(profile), "y", 0.0, THICK, "peg_wood")
     k._faces(faces[2:], "peg_end")
     _leaf(k)
+    _zones(k, head_z, top, crouched)
     ob = k.build()
     rk.finish(ob, angle=math.radians(35.0))
     # The hinge's axis to the origin.
     ob.data.transform(_to_hinge())
     rk.bake(ob)
     return ob
+
+
+def _flat(k: rk.Kit, pts: list, y: float, mat: str) -> None:
+    """A flat face through the points (x, z) at y, seen from the front (-y)."""
+    from mathutils import Vector
+    bm = k.bm
+    vs = [bm.verts.new(Vector((x, y, z))) for x, z in pts]
+    f = bm.faces.new(vs)
+    f.normal_update()
+    if f.normal.y > 0.0:
+        f.normal_flip()
+    k._faces([f], mat)
+
+
+def _zones(k: rk.Kit, head_z: float, top: float, crouched: bool) -> None:
+    """RQ1: the face's scoring zones (a round one on the head, a tall rounded one on the chest) painted a shade
+    darker, and a scatter of BB dents round them, more in the middle (a well-used target)."""
+    import random
+    rng = random.Random(7 if crouched else 3)
+    ring = [(0.07 * math.cos(a), head_z + 0.07 * math.sin(a)) for a in (2 * math.pi * i / 16 for i in range(16))]
+    _flat(k, ring, -ZONE_PROUD, "peg_zone")
+    if crouched:
+        chest = [(x, z + top - 0.26) for x, z in rk.hs.rounded_rect(0.09, 0.13, 0.04, 3)]
+    else:
+        chest = [(x, z + top - 0.36) for x, z in rk.hs.rounded_rect(0.12, 0.24, 0.05, 3)]
+    _flat(k, chest, -ZONE_PROUD, "peg_zone")
+    centres = [(0.0, head_z, 0.06), (0.0, top - (0.26 if crouched else 0.36), 0.12)]
+    for i in range(34):
+        cx, cz, spread = centres[0] if i % 3 == 0 else centres[1]
+        x = rng.gauss(0.0, spread * 0.6)
+        z = cz + rng.gauss(0.0, spread * 0.8)
+        r = rng.uniform(0.006, 0.01)
+        a = rng.uniform(0.0, 2.0 * math.pi)
+        _flat(k, [(x + r * math.cos(a + t), z + r * math.sin(a + t)) for t in (0.0, 2.1, 4.2)], -POCK_PROUD,
+              "peg_pock")
 
 
 def _to_hinge():

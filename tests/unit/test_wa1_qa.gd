@@ -73,7 +73,7 @@ func test_building_and_freeing_woodland_leaves_no_nodes() -> void:
 		level.build(m, play.map_style, BodyConfig.new())
 		var woods := WoodsView.build(m, play.woods, play.skyline, play.lighting, play.map_style)
 		add_child(woods)
-		var bushes := BushView.build(m, play.woods)
+		var bushes := BushView.build(m, play.woods, SimTuning.load_default().ballistics.leaf_fern_tallest)
 		if bushes != null:
 			add_child(bushes)
 			bushes.free()

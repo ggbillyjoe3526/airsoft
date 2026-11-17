@@ -3,9 +3,10 @@ extends Node3D
 ## A station's lamps and extras (SM5, Subway: MapData.station's fixtures): the running tunnels' bulkhead lamps, the
 ## station's name boards, way-out signs, posters, clocks, CCTV cameras, fire extinguishers, litter bins and the
 ## platform edges' warnings; and a hall's wall extras (DX1, Depot: MapData.fixtures, its fire points, call points,
-## pipework and safety signs). One MultiMesh a model (StationFixturesConfig). A lamp's glass glows (no
-## real light: the ceilings' strip lamps light the station, RoofView), a printed face shows its sign sheet. Look only:
-## no collider, no shadow, nothing the simulation reads. Built once; nothing runs a frame.
+## pipework and safety signs; RQ1, the Range: its firing point's shelter, red flag and signs). One MultiMesh a model
+## (StationFixturesConfig). A lamp's glass glows (no real light: the ceilings' strip lamps light the station, RoofView),
+## a printed face shows its sign sheet. Look only: no collider, nothing the simulation reads; no shadow but from
+## StationFixturesConfig.shadow_models. Built once; nothing runs a frame.
 
 const PROP_SURFACE := &"Prop"
 const LENS_SURFACE := &"Lens"
@@ -67,9 +68,19 @@ static func build(map: MapData, cfg: StationFixturesConfig) -> StationFixtures:
 				view._add(model, mesh, groups[i], i)
 		else:
 			view._add(model, mesh, placed[model])
+		if cfg.shadow_models.has(String(model)):
+			for inst in view._views:
+				if inst.multimesh.mesh == mesh:
+					inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+					# and in the GI, so a roof shuts out the sky's blue under it and bounces the sunlit floor
+					inst.gi_mode = GeometryInstance3D.GI_MODE_STATIC
 		if cfg.lit_models.has(String(model)):
 			for t: Transform3D in placed[model]:
-				view._add_lamp(t * Vector3(0.0, 0.0, cfg.lamp_out), cfg)
+				view._add_lamp(t * Vector3(0.0, 0.0, cfg.lamp_out), cfg.lens_colour, cfg.lamp_range, cfg.lamp_energy)
+		if cfg.lamp_points.has(model):
+			for t: Transform3D in placed[model]:
+				for p: Vector3 in cfg.lamp_points[model]:
+					view._add_lamp(t * p, cfg.point_lamp_colour, cfg.point_lamp_range, cfg.point_lamp_energy)
 	return view
 
 
@@ -149,13 +160,13 @@ func _add(model: StringName, mesh: ArrayMesh, transforms: Array, part: int = -1)
 	_views.append(inst)
 
 
-func _add_lamp(at: Vector3, cfg: StationFixturesConfig) -> void:
+func _add_lamp(at: Vector3, colour: Color, reach: float, energy: float) -> void:
 	var lamp := OmniLight3D.new()
 	lamp.name = "Lamp%d" % _lamps.size()
 	lamp.position = at
-	lamp.omni_range = cfg.lamp_range
-	lamp.light_energy = cfg.lamp_energy
-	lamp.light_color = cfg.lens_colour
+	lamp.omni_range = reach
+	lamp.light_energy = energy
+	lamp.light_color = colour
 	lamp.shadow_enabled = false
 	lamp.visible = false
 	add_child(lamp)

@@ -326,7 +326,7 @@ static func add_woods(port: Node, map: MapData, play: PlayTuning, station: bool 
 	if woods != null:
 		port.add_child(woods)
 		woods.set_quality(GraphicsQuality.MeshDetail.HIGH, 0.0)
-	var bushes := BushView.build(map, play.woods)
+	var bushes := BushView.build(map, play.woods, SimTuning.load_default().ballistics.leaf_fern_tallest)
 	if bushes != null:
 		port.add_child(bushes)
 

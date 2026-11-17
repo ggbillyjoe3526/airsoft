@@ -123,10 +123,12 @@ stacks. Bots use all six. Attackers start in the west camp and defenders in the 
   walled by a log palisade of sharpened stakes; each stops a BB about where you see it, a round trunk by its bark. The
   woodpiles, split logs of every shape and size stacked by hand, are 1.8 m tall, so they hide you standing; the camps' gate screens stand 2.8 m. The thickets of spruce at
   the edges and between the lanes can't be entered or seen through.
-- **Ferns** grow knee to hip high in eight beds where you'd want to hide, and leafy **bushes** stand taller. Nobody sees you
-  through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and
-  bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)), and a BB that pushes 0.6 m
-  into leaves stops there. The minimap marks them. Grass never hides you.
+- **Ferns** grow knee to hip high in eight beds where you'd want to hide, and leafy **bushes** stand taller. Only the
+  thick of a plant counts, the fronds and leaf clusters you can see, never its wispy tips: nobody sees you through more
+  than about half a metre of it, and a BB that pushes 0.6 m into it stops there. Crouch deep in a fern bed to vanish;
+  at its edge or with your head over the fronds you can be seen, spotted and hit. You can walk through ferns and
+  bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)). The minimap marks them.
+  Grass never hides you.
 - **Three crouch tunnels,** 1.4 m high: the Crawl box, a hollow log through the Berm between the Ridge and the
   Clearing; the Badger run, another hollow log through the Knoll between the middle and the south; and the Culvert,
   the concrete-lined stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots

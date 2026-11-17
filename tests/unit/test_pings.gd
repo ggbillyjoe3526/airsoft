@@ -50,8 +50,9 @@ func _field(walls: Array, bushes: Array) -> Array:
 	for pair: Array in walls:
 		m.blocks.append(_block(&"wall", pair[0], pair[1]))
 		w.add_box(pair[0], pair[1])
+	# A big shrub whose counted leaves (LF1: a share of the drawn plant) still close over a standing head.
 	for foot: Vector3 in bushes:
-		w.add_bush(foot, 1.5, 2.2)
+		w.add_bush(foot, 1.5, 2.6)
 	for e in 2:
 		var end := MapEnd.new()
 		for i in 3:

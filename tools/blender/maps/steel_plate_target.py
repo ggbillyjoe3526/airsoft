@@ -28,7 +28,7 @@ import range_kit as rk  # noqa: E402
 from range_kit import hs  # noqa: E402
 
 OUT = os.path.join(rk.RANGE, "steel_target.glb")
-BUDGET = 800  # stand and plate
+BUDGET = 860  # stand and plate (RQ1: the face's paint chips)
 FRAME_BUDGET = 1500
 
 PLATE_R = 0.2  # RangeConfig.plate_radius
@@ -38,8 +38,10 @@ POST_BEHIND = 0.06  # RangeConfig.post_behind
 NECK_DROP = 0.1  # RangeConfig.post_above_plate: the pin to the plate's top
 FRAME_W = 0.06  # RangeConfig.swinger_frame_width
 ARM = 1.0  # RangeConfig.swinger_arm
+CHIP = 0.0012  # RQ1: how far the paint chips stand proud of the plate's painted face
 
-rk.check_colours(["plate_white", "stand_black", "zinc", "post_timber"])
+rk.PAINT.update({"steel_bare": 0x8c8c8e})  # RQ1: the steel where BBs have chipped the white paint off
+rk.check_colours(["plate_white", "stand_black", "zinc", "post_timber", "steel_bare"])
 
 
 def base() -> object:
@@ -144,7 +146,29 @@ def face() -> object:
     seg = 48
     # The disc, its front edge chamfered so the rim catches the light.
     c = 0.003
-    k.lathe([(0.0, PLATE_R - c), (c, PLATE_R), (PLATE_T, PLATE_R)], "plate_white", segments=seg, axis="y")
+    # RQ1: the paint's face CHIP behind the plate's front, so the chips (bare steel just proud of it) are the front
+    # the simulation's plate is drawn at (RangeTargetsView puts the model's front there)
+    k.lathe([(CHIP, PLATE_R - c), (CHIP + c, PLATE_R), (PLATE_T, PLATE_R)], "plate_white", segments=seg, axis="y")
+    # RQ1: chips of paint knocked off by BBs, bare steel, most near the middle (a plate that gets shot), each a
+    # small ragged patch just proud of the paint
+    import random
+    from mathutils import Vector
+    rng = random.Random(5)
+    for _i in range(18):
+        d = PLATE_R * 0.75 * math.sqrt(rng.random()) * (0.55 if rng.random() < 0.6 else 1.0)
+        a = rng.uniform(0.0, 2.0 * math.pi)
+        cx, cz = d * math.cos(a), d * math.sin(a)
+        r = rng.uniform(0.005, 0.014)
+        pts = []
+        for j in range(5):
+            t = 2.0 * math.pi * j / 5 + rng.uniform(-0.3, 0.3)
+            rr = r * rng.uniform(0.6, 1.0)
+            pts.append(Vector((cx + rr * math.cos(t), 0.0, cz + rr * math.sin(t))))
+        f = k.bm.faces.new([k.bm.verts.new(p) for p in pts])
+        f.normal_update()
+        if f.normal.y > 0.0:
+            f.normal_flip()
+        k._faces([f], "steel_bare")
     ob = k.build()
     rk.finish(ob, angle=math.radians(50.0))
     rk.bake(ob)

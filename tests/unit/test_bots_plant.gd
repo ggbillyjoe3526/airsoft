@@ -162,6 +162,37 @@ func test_the_one_fetching_a_bomb_a_storey_off_is_kept_whoever_passes_nearer() -
 	assert_true(_bot(2).fetcher, "the one going is out: the next")
 
 
+func test_open_ground_is_one_storey_however_it_climbs() -> void:
+	# LF1: Woodland, bomb seed 3. The fetcher's route went over a rise above the bomb's level, a teammate down by it took
+	# the job, and the two swapped it every few ticks, walking back and forth on the spot.
+	_world()
+	var rise := w.cfg.plant_player_level + 2.0
+	# Ground flat west of START, then climbing `rise` m over 20 m eastward.
+	w.terrain = TerrainGrid.create(START.x - 40.0, -20.0, 1.0, 100, 40,
+			func(x: float, _z: float) -> float: return clampf((x - START.x) / 20.0, 0.0, 1.0) * rise)
+	rs.plant.position = START
+	cs[0].position = START + Vector3(20.0, rise, 0.0)
+	cs[1].position = START + Vector3(30.0, rise, 0.0)
+	cs[2].position = START + Vector3(40.0, rise, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(0).fetcher, "up the slope, on the same open ground: the nearest fetches it")
+	# It walks over the rise; a teammate down on the bomb's level but farther off does not take the job.
+	cs[0].position = START + Vector3(17.0, rise * 0.85, 0.0)
+	cs[1].position = START + Vector3(-25.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(0).fetcher, "kept on the slope: no storey between it and the bomb")
+	assert_false(_bot(1).fetcher)
+	cs[1].position = START + Vector3(-5.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(1).fetcher, "one nearer by more than the margin takes over, as on flat ground")
+	# A deck over the ground is a storey of its own.
+	cs[1].position = START + Vector3(45.0, rise, 0.0)
+	cs[0].position = START + Vector3(25.0, rise, 0.0)
+	cs[2].position = START + Vector3(2.0, rise + 1.0, 0.0)
+	BotPlant.plan(w)
+	assert_true(_bot(0).fetcher, "on the open ground before one 2 m off on a deck over it")
+
+
 func test_a_fetcher_has_not_come_to_a_bomb_it_stands_under() -> void:
 	_world()
 	var storey := w.cfg.plant_player_level + 6.0

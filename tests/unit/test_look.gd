@@ -120,7 +120,7 @@ func test_woodland_is_drawn_in_the_shared_light() -> void:
 		if shader != null and not shader.code.contains("unshaded") and shader.code != WoodsView.TUFT_SHADER:
 			assert_true(shader.code.contains("look_light.gdshaderinc") or shader == LookMaterials.VERTEX_SHADER
 					or shader == LookMaterials.CLEAR_SHADER, "every lit woods material in the shared light")
-	var bushes := BushView.build(m, play.woods)
+	var bushes := BushView.build(m, play.woods, SimTuning.load_default().ballistics.leaf_fern_tallest)
 	if bushes != null:
 		add_child_autofree(bushes)
 		for mat in bushes.materials():
