@@ -40,6 +40,7 @@
 [ext_resource type="Script" path="res://game/config/plant_view_config.gd" id="37_pb1pv"]
 [ext_resource type="Script" uid="uid://cc52dhprynifg" path="res://game/config/train_look.gd" id="54_sm1tl"]
 [ext_resource type="Script" uid="uid://botios24ftgv6" path="res://game/config/hands_life_config.gd" id="55_ha1hl"]
+[ext_resource type="Script" uid="uid://dybhd7jeafogs" path="res://game/config/train_announce_config.gd" id="56_ta1an"]
 
 [sub_resource type="Resource" id="Resource_01h5l"]
 script = ExtResource("1_ermsw")
@@ -234,9 +235,13 @@ night = Dictionary[StringName, ExtResource("1_jm3g4")]({
 &"yard": SubResource("Resource_4hk2b")
 })
 
+[sub_resource type="Resource" id="Resource_ta1an"]
+script = ExtResource("56_ta1an")
+
 [sub_resource type="Resource" id="Resource_4l7r4"]
 script = ExtResource("7_2hh1h")
 ambiences = SubResource("Resource_amb3c")
+train_announcements = SubResource("Resource_ta1an")
 
 [sub_resource type="Resource" id="Resource_rbn8w"]
 script = ExtResource("8_s0wu6")
