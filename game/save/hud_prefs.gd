@@ -28,6 +28,8 @@ const GAP_RANGE := Vector2(0.0, 12.0)
 const OPACITY_RANGE := Vector2(0.2, 1.0)
 const MARKER_SIZE_RANGE := Vector2(0.5, 2.5)
 const PANEL_OPACITY_RANGE := Vector2(0.2, 1.0)
+## The HUD opacity a first start has (owner, 2026-11-17: 60 %).
+const PANEL_OPACITY_DEFAULT := 0.6
 ## The minimap's zoom (MC1, owner 2026-11-01): 1 shows MinimapConfig.view_radius from its middle to its edge, 2 half
 ## that (closer), 0.5 twice it; in steps of MINIMAP_ZOOM_STEP.
 const MINIMAP_ZOOM_RANGE := Vector2(0.5, 2.0)
@@ -59,8 +61,8 @@ var ping_markers: bool = true
 ## unshown (the screen reader still reads its notices).
 var mag_hand_off: bool = true
 ## The HUD opacity: the replica panel (count, magazines, bombs) and the minimap, words and all, in a match (owner,
-## 2026-11-03).
-var panel_opacity: float = 1.0
+## 2026-11-03), 60 % by default.
+var panel_opacity: float = PANEL_OPACITY_DEFAULT
 var minimap_turn: MinimapTurn = MinimapTurn.ROTATING
 var minimap_zoom: float = 1.0
 ## The whole HUD's scale but the crosshair's (AccessibilityConfig.HUD_SIZE_RANGE, 1 = as drawn), on top of the window's

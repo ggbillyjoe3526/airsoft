@@ -2,8 +2,11 @@ class_name MenuScreen
 extends Control
 ## The menus, the first screen the game shows (no title screen: owner, 2026-11-02): the rail down the left (NavRail)
 ## beside a page, over the picked field's blurred picture (MenuBackdrop): the Match page (MatchPage, which keeps its
-## picks in the MatchPicks it is given), the Loadout page (LoadoutPage, built when its tab is opened and freed, after
-## saving, when the Match tab comes back) or the Armory (ArmoryPage, built and freed the same way). A tab press goes to
+## picks in the MatchPicks it is given), the Loadout page (LoadoutPage) or the Armory (ArmoryPage). Those two are built
+## once (`prepare_pages`, or the first time their tab opens) and then kept, hidden, while another tab shows, so a tab
+## press shows its page at once with the pictures it drew (owner, 2026-11-17: "lag between clicking and the page
+## changing"); the Loadout is saved each time it is left, and either is built again only when its locks changed. A
+## match frees the menus whole. A tab press goes to
 ## the entry screen, which opens the settings beside the rail and asks for the page. Esc backs out of what the page has
 ## open (the Loadout's rename, replace and Customise); with nothing open it reaches Main, which asks QUIT GAME? (FB1),
 ## as the rail's QUIT does. A notice (GraphicsNotice) shows at the page's bottom left over it (`show_notice`).
@@ -30,6 +33,11 @@ var _loadout: LoadoutPage = null
 var _armory: ArmoryPage = null
 var _settings: Settings = null
 var _from_practice: bool = false
+## The page showing: MATCH, LOADOUT or ARMORY.
+var _tab: NavRail.Tab = NavRail.Tab.MATCH
+## Whether the Loadout and the Armory are kept built (prepare_pages): a page built again for new locks is then built
+## hidden at once, not on its next tab press.
+var _kept: bool = false
 
 
 func _init(picks: MatchPicks = null, settings: Settings = null) -> void:
@@ -61,13 +69,22 @@ func show_level() -> void:
 	_rail.set_level(standing.level, into, _settings.dev.disable_levelling)
 	if _loadout != null and _loadout.locks_changed():
 		var slot := _loadout.slot()
+		var showing := _tab == NavRail.Tab.LOADOUT
 		leave_loadout()
-		show_loadout()
-		if _from_practice:
-			_loadout.open_from_practice(slot)
+		if showing:
+			show_loadout()
+			if _from_practice:
+				_loadout.open_from_practice(slot)
+		elif _kept:
+			# built again hidden, a frame on, so its tab still opens at once
+			_build_loadout.call_deferred()
 	if _armory != null and _armory.stale():
+		var showing := _tab == NavRail.Tab.ARMORY
 		leave_armory()
-		show_armory()
+		if showing:
+			show_armory()
+		elif _kept:
+			_build_armory.call_deferred()
 
 
 func nav_rail() -> NavRail:
@@ -110,11 +127,11 @@ func add_over_page(screen: Control) -> void:
 
 ## Hides the page showing (the settings are open over the field's picture), or shows it again; the rail stays.
 func set_page_hidden(hidden: bool) -> void:
-	_match.visible = not hidden and _loadout == null and _armory == null
+	_match.visible = not hidden and _tab == NavRail.Tab.MATCH
 	if _loadout != null:
-		_loadout.visible = not hidden
+		_loadout.visible = not hidden and _tab == NavRail.Tab.LOADOUT
 	if _armory != null:
-		_armory.visible = not hidden
+		_armory.visible = not hidden and _tab == NavRail.Tab.ARMORY
 	# A waiting notice steps aside under Settings, whose BACK sits in the same corner (BP3), and comes back after it.
 	if _notice != null:
 		_notice.visible = not hidden
@@ -142,19 +159,26 @@ func match_page() -> MatchPage:
 
 ## The Loadout page while it is open, else null.
 func loadout_page() -> LoadoutPage:
-	return _loadout
+	return _loadout if _tab == NavRail.Tab.LOADOUT else null
 
 
 ## The Armory page while it is open, else null.
 func armory_page() -> ArmoryPage:
+	return _armory if _tab == NavRail.Tab.ARMORY else null
+
+
+## The Loadout page and the Armory as built, open or kept hidden (null: not built).
+func kept_loadout() -> LoadoutPage:
+	return _loadout
+
+
+func kept_armory() -> ArmoryPage:
 	return _armory
 
 
 ## The tab whose page is showing: MATCH, LOADOUT or ARMORY.
 func page_tab() -> NavRail.Tab:
-	if _loadout != null:
-		return NavRail.Tab.LOADOUT
-	return NavRail.Tab.ARMORY if _armory != null else NavRail.Tab.MATCH
+	return _tab
 
 
 func focus_play() -> void:
@@ -170,23 +194,60 @@ func focus_play() -> void:
 func focus_page() -> void:
 	if _notice != null:
 		_focus_notice()
-	elif _loadout != null:
+	elif _tab == NavRail.Tab.LOADOUT:
 		_loadout.focus_default()
-	elif _armory != null:
+	elif _tab == NavRail.Tab.ARMORY:
 		_rail.tab_button(NavRail.Tab.ARMORY).grab_focus()
 	else:
 		_match.focus_play()
 
 
-## Shows the Loadout page, building it the first time.
+## Builds the Loadout page and the Armory, hidden, if they aren't yet, so their tabs open at once with their pictures
+## drawn, and keeps them built from then on (a page whose locks change is built again hidden).
+func prepare_pages() -> void:
+	prepare_loadout()
+	prepare_armory()
+
+
+## The Loadout page alone (Main builds the pages a frame or two apart, so no one frame carries both).
+func prepare_loadout() -> void:
+	_kept = true
+	_build_loadout()
+
+
+func prepare_armory() -> void:
+	_kept = true
+	_build_armory()
+
+
+func _build_loadout() -> void:
+	if _loadout != null:
+		return
+	_loadout = LoadoutPage.new(null, _settings)
+	_loadout.offset_left = NavRail.WIDTH
+	_loadout.visible = false
+	add_child(_loadout)
+	# under the rail, over the Match page
+	move_child(_loadout, _rail.get_index())
+
+
+func _build_armory() -> void:
+	if _armory != null:
+		return
+	_armory = ArmoryPage.new(_settings)
+	_armory.offset_left = NavRail.WIDTH
+	_armory.visible = false
+	add_child(_armory)
+	# under the rail, over the Match page
+	move_child(_armory, _rail.get_index())
+
+
+## Shows the Loadout page, building it the first time (the Armory is kept, hidden).
 func show_loadout() -> void:
-	leave_armory()
-	if _loadout == null:
-		_loadout = LoadoutPage.new(null, _settings)
-		_loadout.offset_left = NavRail.WIDTH
-		add_child(_loadout)
-		# under the rail, over the Match page
-		move_child(_loadout, _rail.get_index())
+	_hide_armory()
+	_build_loadout()
+	_tab = NavRail.Tab.LOADOUT
+	_loadout.visible = true
 	# the figures in the air of the field the Match page has picked (AUD2)
 	_loadout.set_field(_match.picks)
 	_match.visible = false
@@ -211,28 +272,47 @@ func from_practice() -> bool:
 	return _from_practice
 
 
-## Shows the Armory, building it the first time (the Loadout page is saved and freed).
+## Shows the Armory, building it the first time (the Loadout page is saved and kept, hidden).
 func show_armory() -> void:
-	leave_loadout()
-	if _armory == null:
-		_armory = ArmoryPage.new(_settings)
-		_armory.offset_left = NavRail.WIDTH
-		add_child(_armory)
-		# under the rail, over the Match page
-		move_child(_armory, _rail.get_index())
+	_hide_loadout()
+	_build_armory()
+	_tab = NavRail.Tab.ARMORY
+	_armory.visible = true
 	_match.visible = false
 	_rail.set_current(NavRail.Tab.ARMORY)
 
 
-## Shows the Match page again; the Loadout page is saved and freed, the Armory freed.
+## Shows the Match page again; the Loadout page is saved, and it and the Armory kept, hidden.
 func show_match() -> void:
-	leave_loadout()
-	leave_armory()
+	_hide_loadout()
+	_hide_armory()
+	_tab = NavRail.Tab.MATCH
 	_match.visible = true
 	_rail.set_current(NavRail.Tab.MATCH)
 
 
-## Saves the loadouts and frees the Loadout page, if it is open (a match is about to start, or another tab opens).
+## Leaves the Loadout page showing another: Customise lets its pictures go, the loadouts are saved, the page hides.
+func _hide_loadout() -> void:
+	if _loadout == null:
+		return
+	if _tab == NavRail.Tab.LOADOUT:
+		_loadout.show_gear()
+		_loadout.close()
+	_loadout.visible = false
+	if _tab == NavRail.Tab.LOADOUT:
+		_tab = NavRail.Tab.MATCH
+
+
+func _hide_armory() -> void:
+	if _armory == null:
+		return
+	_armory.visible = false
+	if _tab == NavRail.Tab.ARMORY:
+		_tab = NavRail.Tab.MATCH
+
+
+## Saves the loadouts and frees the Loadout page, if it is built (a match is about to start, its locks changed, or the
+## menus are built again).
 func leave_loadout() -> void:
 	if _loadout == null:
 		return
@@ -240,15 +320,19 @@ func leave_loadout() -> void:
 	remove_child(_loadout)
 	_loadout.queue_free()
 	_loadout = null
+	if _tab == NavRail.Tab.LOADOUT:
+		_tab = NavRail.Tab.MATCH
 
 
-## Frees the Armory page, if it is open, with the pictures it drew.
+## Frees the Armory page, if it is built, with the pictures it drew.
 func leave_armory() -> void:
 	if _armory == null:
 		return
 	remove_child(_armory)
 	_armory.queue_free()
 	_armory = null
+	if _tab == NavRail.Tab.ARMORY:
+		_tab = NavRail.Tab.MATCH
 
 
 func _on_tab(tab: NavRail.Tab) -> void:

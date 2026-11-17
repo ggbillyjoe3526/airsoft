@@ -39,8 +39,8 @@ shoulder show exactly as far as a BB could hit them.
 
 ## Vault
 
-Press **Jump** at a low wall to vault over it; "Space to vault" shows under the crosshair (it names your own Jump key)
-whenever a press would vault. A vault takes under half a second, carries your replica with you, and you can't fire
+Press **Jump** at a low wall to vault over it; your Jump key, such as **SPACE**, shows under the crosshair whenever a
+press would vault. A vault takes under half a second, carries your replica with you, and you can't fire
 for a moment after it. Vaults are loud, and you can't vault while crouched. Waist-high crouch cover and the plywood
 port walls on [Depot](Maps#depot) can't be vaulted.
 
@@ -49,7 +49,7 @@ Bots vault the same low walls the same way, when it saves them a long walk round
 ## Climb
 
 Press **Jump** at a ledge of the same height whose flat top runs on, such as a station platform's edge, to climb up
-onto it: "Space to climb" shows under the crosshair. You put a hand on the
+onto it: your Jump key shows under the crosshair the same way. You put a hand on the
 edge, pull up and stand on the top in about half a second, your replica held low until you are up. Crates and other
 props are never climbed, only vaulted. Bots climb up and drop back down the same way.
 

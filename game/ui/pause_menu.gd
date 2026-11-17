@@ -413,6 +413,7 @@ func open_settings() -> void:
 ## colour picked, deferred so the screen that sent it finishes its click. The rest of the match's HUD keeps the colour
 ## it was built with until the next match (docs/KNOWN_ISSUES.md).
 func restyle() -> void:
+	GameTheme.retheme(self)
 	_dress_main(_resume)
 	_rebuild_settings.call_deferred()
 

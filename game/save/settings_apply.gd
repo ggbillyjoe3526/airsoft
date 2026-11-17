@@ -18,6 +18,7 @@ static func apply_all(s: Settings) -> void:
 	apply_graphics(s)
 	apply_bindings(s)
 	apply_ui_colour(s)
+	apply_tooltips(s)
 	s.changed.emit()
 
 
@@ -33,6 +34,11 @@ static func apply_controls(s: Settings) -> void:
 	c.auto_reload = s.auto_reload
 	c.wheel_pick = s.wheel_pick
 	s.tuning.view.horizontal_fov_16x9 = s.fov
+
+
+## Whether tooltips show (Settings › Display › Interface; TooltipWrap).
+static func apply_tooltips(s: Settings) -> void:
+	TooltipWrap.enabled = s.tooltips
 
 
 ## The interface's colour (UA2): GameTheme's accent and the shared Theme. Whether it changed (the menus are then built

@@ -13,9 +13,9 @@ signal changed
 const PATH := "user://settings.save"
 const KIND := "settings"
 ## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1), 4 made Volumetric haze four levels (VF1), 5 moved
-## the field of view's and the volumes' defaults (FV1, with the Power source's scale); an older file is brought over
-## once by `migrate_defaults`.
-const VERSION := 5
+## the field of view's and the volumes' defaults (FV1, with the Power source's scale), 6 turned the gauge patterns off
+## and the HUD opacity to 60 % by default (owner, 2026-11-17); an older file is brought over once by `migrate_defaults`.
+const VERSION := 6
 ## A Custom Volumetric haze row saved by a version 3 file or older, when it was one switch, and the level its "on"
 ## drew: the finest grid, which High still draws (VF1). Its "off" is still Off.
 const FOG_ROW_V3 := "volumetric_fog"
@@ -29,7 +29,7 @@ const KNOWN_KEYS: Array[String] = [
 	"what_got_you", "hud", "custom_rules", "practice_challenge", "dev", "dev_enabled", "graphics_base",
 	"graphics_choice", "graphics_custom", "frame_limit", "monitor", "last_fullscreen", "renderer", "first_start_seen",
 	"team_colours", "gauge_patterns", "sound_cues", "sound_cue_size", "sound_cue_colour", "read_out", "reduced_motion",
-	"robots", "simulate_skips", "ui_colour",
+	"robots", "simulate_skips", "ui_colour", "frame_limit_pick", "tooltips",
 ]
 ## Windowed leaves the window as it is (the project starts maximised); the other two are the DisplayServer's
 ## borderless and exclusive fullscreen. The first start is Exclusive (WINDOW_MODE_DEFAULT).
@@ -93,10 +93,16 @@ const FOV_MAX := 110.0
 const FOV_DEFAULT := 87.0
 ## The field of view a version 1 to 4 file started with: one still on it was never moved, and goes to FOV_DEFAULT.
 const FOV_DEFAULT_V3 := 90.0
-## The frame-rate limits offered besides Unlimited (UNLIMITED, 0); a saved number that isn't one reads as the nearest,
-## the higher on a tie (the browser game's FRAME_RATE_CAPS, with katanashotgun's 165 and 360).
-const FRAME_LIMITS: Array[int] = [30, 60, 120, 144, 165, 240, 360]
+## The frame-rate limit's slider, 30 to 360 a second, besides Off (UNLIMITED, 0; owner, 2026-11-17: a slider, with Off
+## beside it); a saved number outside reads as the nearer end, a fraction as the nearest whole number. The slider's
+## number when the limit is first turned on: the owner's screen's rate.
+const FRAME_LIMIT_RANGE := Vector2i(30, 360)
+const FRAME_LIMIT_PICK_DEFAULT := 240
 const UNLIMITED := 0
+## The gauge patterns and the HUD opacity a version 1 to 5 file started with: one still on it was never changed, and
+## goes to the new default.
+const GAUGE_PATTERNS_V5 := true
+const PANEL_OPACITY_V5 := 1.0
 ## The monitor the window opens on: MONITOR_HERE is wherever it is; a saved index above MONITOR_MOST is a typo. A
 ## saved monitor that is gone is SettingsApply's to fall back from (GR3).
 const MONITOR_HERE := -1
@@ -131,8 +137,13 @@ var graphics_base: StringName = GraphicsTable.DEFAULT_PRESET
 var graphics_custom: Dictionary[String, Variant] = {}
 ## The `--graphics=` preset forcing this run (GraphicsPick.forced), or "": never saved.
 var graphics_forced: StringName = &""
-## Frames a second at most, or UNLIMITED.
+## Frames a second at most, or UNLIMITED (Off).
 var frame_limit: int = UNLIMITED
+## The slider's number, kept while the limit is Off, so turning it on again gives the rate last set.
+var frame_limit_pick: int = FRAME_LIMIT_PICK_DEFAULT
+## The tooltips shown on hovering an item, a setting or a button (Settings › Display › Interface; owner, 2026-11-17:
+## on by default).
+var tooltips: bool = true
 ## The monitor's index, or MONITOR_HERE.
 var monitor: int = MONITOR_HERE
 ## The fullscreen mode F11 goes back to: Borderless or Exclusive (the first start's mode until one is left).
@@ -154,8 +165,8 @@ var simulate_skips: bool = false
 var hud: HudPrefs = HudPrefs.new()
 ## Settings › Accessibility (AC1): the team colour set (TeamColours), shown from the next match.
 var team_colours: TeamColours.Set = TeamColours.Set.STANDARD
-## Stripes on Beta's gauges and a low magazine, so they read without colour.
-var gauge_patterns: bool = true
+## Stripes on Beta's gauges and a low magazine, so they read without colour (off by default: owner, 2026-11-17).
+var gauge_patterns: bool = false
 ## Markers round the crosshair for the sounds you hear: off by default, so playing by ear stays the norm; their size
 ## (AccessibilityConfig.CUE_SIZE_RANGE) and colour (an index into HudPrefs.COLOURS).
 var sound_cues: bool = false
@@ -231,14 +242,18 @@ static func custom_rows_now(custom: Variant) -> void:
 
 
 ## `data` as a version `version` file's, with every value still at the old default moved to the new one (a value the
-## player changed is kept): the volumes and the field of view (from version 1 to 4), Windowed and V-Sync (from version
-## 1); and a Custom Volumetric haze row of "on" (version 3 or older) as the level it drew, High. A Power source volume
-## the player set before version 5 is scaled by its new gain, so it sounds as it did. The current version or later is
-## returned as it is. A new dictionary; `data` is not changed.
+## player changed is kept): the gauge patterns and the HUD opacity (from version 1 to 5), the volumes and the field of
+## view (from version 1 to 4), Windowed and V-Sync (from version 1); and a Custom Volumetric haze row of "on" (version 3
+## or older) as the level it drew, High. A Power source volume the player set before version 5 is scaled by its new
+## gain, so it sounds as it did. The current version or later is returned as it is. A new dictionary; `data` is not
+## changed.
 static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	if version >= VERSION:
 		return data
 	var moved := data.duplicate(true)
+	_move_hud_defaults(moved)
+	if version >= 5:
+		return moved
 	var fov_saved: Variant = moved.get("fov")
 	if (fov_saved is float or fov_saved is int) and is_equal_approx(float(fov_saved), FOV_DEFAULT_V3):
 		moved["fov"] = FOV_DEFAULT
@@ -270,6 +285,19 @@ static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	if vsync_saved is bool and vsync_saved == VSYNC_DEFAULT_V1:
 		moved["vsync"] = VSYNC_DEFAULT
 	return moved
+
+
+## A version 1 to 5 file's gauge patterns and HUD opacity still on their old defaults go to the new ones (owner,
+## 2026-11-17), in `moved`; a value the player changed is kept.
+static func _move_hud_defaults(moved: Dictionary) -> void:
+	var patterns: Variant = moved.get("gauge_patterns")
+	if patterns is bool and patterns == GAUGE_PATTERNS_V5:
+		moved["gauge_patterns"] = false
+	var saved_hud: Variant = moved.get("hud")
+	if saved_hud is Dictionary:
+		var opacity: Variant = (saved_hud as Dictionary).get("panel_opacity")
+		if (opacity is float or opacity is int) and is_equal_approx(float(opacity), PANEL_OPACITY_V5):
+			(saved_hud as Dictionary)["panel_opacity"] = HudPrefs.PANEL_OPACITY_DEFAULT
 
 
 ## Writes `path`; false if it could not be written (or holds a newer build's settings).
@@ -310,7 +338,8 @@ func to_dict() -> Dictionary:
 		"simulate_skips": simulate_skips, "ui_colour": int(ui_colour),
 		"hud": hud.to_dict(), "custom_rules": custom_rules.to_dict(), "practice_challenge": practice_challenge,
 		"dev": dev.to_dict(), "graphics_base": String(graphics_base),
-		"graphics_custom": graphics_custom.duplicate(), "frame_limit": frame_limit, "monitor": monitor,
+		"graphics_custom": graphics_custom.duplicate(), "frame_limit": frame_limit,
+		"frame_limit_pick": frame_limit_pick, "tooltips": tooltips, "monitor": monitor,
 		"last_fullscreen": int(last_fullscreen), "renderer": int(renderer), "first_start_seen": first_start_seen,
 		"team_colours": int(team_colours), "gauge_patterns": gauge_patterns, "sound_cues": sound_cues,
 		"sound_cue_size": sound_cue_size, "sound_cue_colour": sound_cue_colour, "read_out": read_out,
@@ -366,6 +395,10 @@ func from_dict(data: Dictionary) -> void:
 	dev.from_dict(saved_dev if saved_dev is Dictionary and not box_unticked else {})
 	_graphics_from(data)
 	frame_limit = nearest_frame_limit(_number(data, "frame_limit", UNLIMITED, UNLIMITED, INF))
+	var pick_fallback := frame_limit if frame_limit != UNLIMITED else FRAME_LIMIT_PICK_DEFAULT
+	frame_limit_pick = nearest_frame_limit(_number(data, "frame_limit_pick", pick_fallback, FRAME_LIMIT_RANGE.x,
+			FRAME_LIMIT_RANGE.y))
+	tooltips = _flag(data, "tooltips", true)
 	monitor = roundi(_number(data, "monitor", MONITOR_HERE, MONITOR_HERE, MONITOR_MOST))
 	var fullscreen := roundi(_number(data, "last_fullscreen", WINDOW_MODE_DEFAULT, WindowMode.BORDERLESS,
 			WindowMode.EXCLUSIVE))
@@ -441,15 +474,11 @@ func change_graphics_row(row: StringName, value: Variant, picked: StringName, ta
 	return true
 
 
-## `limit` as one of FRAME_LIMITS, the nearest and the higher on a tie, or UNLIMITED for 0 or less.
+## `limit` as a whole number inside FRAME_LIMIT_RANGE, or UNLIMITED for 0 or less.
 static func nearest_frame_limit(limit: float) -> int:
 	if is_nan(limit) or limit <= UNLIMITED:
 		return UNLIMITED
-	var best := FRAME_LIMITS[0]
-	for l in FRAME_LIMITS:
-		if absf(limit - l) <= absf(limit - best):
-			best = l
-	return best
+	return roundi(clampf(limit, FRAME_LIMIT_RANGE.x, FRAME_LIMIT_RANGE.y))
 
 
 ## The settings file and its backups go and every setting is back to its default, applied at once: the first-launch
@@ -510,7 +539,7 @@ func _graphics_from(data: Dictionary) -> void:
 func _accessibility_from(data: Dictionary) -> void:
 	var sets := TeamColours.Set.size() - 1.0
 	team_colours = roundi(_number(data, "team_colours", TeamColours.Set.STANDARD, 0.0, sets)) as TeamColours.Set
-	gauge_patterns = _flag(data, "gauge_patterns", true)
+	gauge_patterns = _flag(data, "gauge_patterns", false)
 	sound_cues = _flag(data, "sound_cues", false)
 	var sizes := AccessibilityConfig.CUE_SIZE_RANGE
 	var size := _number(data, "sound_cue_size", AccessibilityConfig.CUE_SIZE_DEFAULT, sizes.x, sizes.y)

@@ -37,10 +37,10 @@ nothing.
   holds the spot under the map's pointer instead, your teammates side by side across the way there and looking on.
 - An order lasts until you give another, until you are hit, or until the round (or the match) ends. In Attack / Defend it overrides
   your teammates' work at the pole.
-- An order that ends by itself tells you: when the last teammate carrying it is hit, when you walk away from Cover Me
-  or Watching Here, or when a Go There has gone quiet, the wheel's circle shows alone over the crosshair
-  for <!-- wiki:config hud_config.order_notice_time --> s with "Back to the team plan" ("All quiet: back to the team
-  plan" for the Go There), whether or not the wheel is open.
+- An order that ends by itself ends quietly: when the last teammate carrying it is hit, when you walk away from Cover
+  Me or Watching Here, or when a Go There has gone quiet, your teammates go back to the team plan without a notice
+  on screen. The wheel's circle shows a notice for <!-- wiki:config hud_config.order_notice_time --> s only to
+  answer an order you gave.
 - Orders do nothing on the [Practice Range](Practice-Range), where there's nobody to order.
 
 All the keys can be rebound in Settings › Controls ([Controls](Controls)).

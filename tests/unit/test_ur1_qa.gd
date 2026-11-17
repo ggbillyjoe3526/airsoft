@@ -104,6 +104,10 @@ func test_the_settings_open_over_the_page_under_the_rail_and_a_notice() -> void:
 func test_opening_and_closing_the_settings_about_credits_and_report_leaves_nothing_behind() -> void:
 	var main := _main()
 	await wait_process_frames(3)
+	# the menus' settings are built on the first opening and kept after (owner, 2026-11-17): counted from there
+	main._on_tab(NavRail.Tab.SETTINGS)
+	main._settings_screen.close()
+	await wait_process_frames(2)
 	var base_nodes := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 	var base_orphans := int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT))
 	for i in 4:

@@ -239,6 +239,8 @@ MAG_RIB_CROWN = ((0.00015, 0.00305), (0.00036, 0.0029), (0.0006, 0.0026), (0.000
 # A magazine part's BBs (6 mm): balls of this radius, half as many bands of latitude as they have sides, so every step
 # is far under the bevel's angle: nothing on them is bevelled or split and they shade round.
 BB_R = 0.003
+# Sides round the one BB on the replicas' own magazines (half as many bands of latitude: 15 degrees a step).
+REPLICA_BB_ROUND = 24
 
 # Bones: name -> head (each points +Y, 0.0313 long, roll 0, as the old file's).
 BONES = {
@@ -714,8 +716,9 @@ def mag_ribs(name: str, bottom: float, fine: int, ribs: tuple = MAG_RIBS) -> obj
 
 
 def mag_top_shells(b: object, fine: int, lips: bool = False, round_bb: int = 16) -> None:
-    """Adds to `b` the magazine's feed tower and the three BBs on it. A part's tower has folded steel `lips` along its
-    sides if asked, and its BBs are true balls `round_bb` sides round."""
+    """Adds to `b` the magazine's feed tower and the one BB at its lips (the owner, 0.1 Beta 2: "There should only be 1
+    visible bb"; there were three). A part's tower has folded steel `lips` along its sides if asked, and its BB is a
+    true ball `round_bb` sides round."""
     b.box((-0.0045, MAG_TOP[1] + 0.012, mz(-0.012)), (0.0045, MAG_TOP[1] + 0.030, mz(-0.012) + 0.006), "Rubber")
     if lips:
         # Folded steel lips along the feed tower's sides, standing just over it, their top edges broken.
@@ -724,12 +727,11 @@ def mag_top_shells(b: object, fine: int, lips: bool = False, round_bb: int = 16)
                      (sx * 0.0044, mz(-0.012) + 0.0067), (sx * 0.0030, mz(-0.012) + 0.0067),
                      (sx * 0.0030, mz(-0.012) + 0.0061), (sx * 0.0042, mz(-0.012) + 0.0061),
                      (sx * 0.0042, mz(-0.012) + 0.0004)], "y", MAG_TOP[1] + 0.0115, MAG_TOP[1] + 0.0305, "Detail")
-    # The replica's own magazine keeps its six-band BBs (its budget is the rifle's); a part's are true balls.
-    ball = ([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026), (0.0026, 0.0015),
-             (0.003, 0.0)] if fine == 1 else hs.ball(BB_R, round_bb // 2))
-    for i in range(3):
-        b.lathe(ball, "BB", 10 if fine == 1 else round_bb,
-                centre=(0.0, MAG_TOP[1] + 0.024 - i * 0.0062, mz(-0.012) + 0.0090 - i * 0.0007), axis="z")
+    # A true ball on the replica's own magazine too (OB1: the one BB is the magazine's top in front of the camera on
+    # every reload, turned on the triangles the two dropped ones freed); a part's as round as its budget holds.
+    sides = REPLICA_BB_ROUND if fine == 1 else round_bb
+    b.lathe(hs.ball(BB_R, sides // 2), "BB", sides, centre=(0.0, MAG_TOP[1] + 0.024, mz(-0.012) + 0.0090),
+            axis="z")
 
 
 def mag_top(name: str, fine: int, lips: bool = False, round_bb: int = 16) -> object:

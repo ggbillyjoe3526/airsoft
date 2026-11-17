@@ -586,14 +586,14 @@ func test_display_window_mode_and_frame_rate_limit_keep_their_values_and_the_new
 		await _click(window.button(i))
 		assert_eq(s.window_mode, modes[i], "choice %d is the same mode as before" % i)
 		assert_eq(_saved().window_mode, modes[i], "and saved")
-	var limit := page.limit_choice()
-	assert_eq(limit.get_child_count(), Settings.FRAME_LIMITS.size() + 1)
-	assert_eq(limit.button(limit.get_child_count() - 1).text, "OFF", "the last choice reads Off")
-	for i in Settings.FRAME_LIMITS.size():
-		await _click(limit.button(i))
-		assert_eq(s.frame_limit, Settings.FRAME_LIMITS[i], "limit %d" % Settings.FRAME_LIMITS[i])
-		assert_eq(Engine.max_fps, Settings.FRAME_LIMITS[i])
-	await _click(limit.button(limit.get_child_count() - 1))
+	var limit := page.limit_off()
+	assert_eq(limit.get_child_count(), 1)
+	assert_eq(limit.button(0).text, "OFF", "Off beside the slider")
+	for v: int in [30, 144, 360]:
+		page.limit_slider().value = v
+		assert_eq(s.frame_limit, v, "limit %d" % v)
+		assert_eq(Engine.max_fps, v)
+	await _click(limit.button(0))
 	assert_eq(s.frame_limit, Settings.UNLIMITED, "Off is still the unlimited value")
 	assert_eq(Engine.max_fps, 0)
 	assert_eq(_saved().frame_limit, Settings.UNLIMITED)
@@ -703,7 +703,7 @@ func test_a_full_loadout_strip_of_long_names_stays_inside_the_window() -> void:
 	await wait_process_frames(6)
 	var first := strip.card(0)
 	var name_label := first.find_child("Name", true, false) as Label
-	assert_eq(first.tooltip_text, "Close quarters rifle", "a cut name is whole in the card's tooltip")
+	assert_eq(first.tooltip_text.get_slice("\n", 0), "Close quarters rifle", "a cut name is whole in the card's tooltip")
 	assert_lte(name_label.size.x, LoadoutStrip.NAME_WIDTH + 1.0, "the name takes no more than its room")
 	saved.from_dict(before)
 	saved.dirty = false

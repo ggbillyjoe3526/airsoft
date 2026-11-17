@@ -83,6 +83,8 @@ func _session(mode: String, team: int) -> PlaySession:
 	session.player_team = team
 	session.bots_active = false
 	session.settings = Settings.new(PlayTuning.new())
+	# these tests are about the patterns, which start off since UB2 (owner, 2026-11-17)
+	session.settings.gauge_patterns = true
 	add_child_autofree(session)
 	return session
 

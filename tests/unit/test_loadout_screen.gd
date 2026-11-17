@@ -83,16 +83,22 @@ func test_the_loadout_tab_is_on_and_opens_the_gear_page() -> void:
 	assert_eq(page.gear().customise_button().text, "CUSTOMISE")
 
 
-func test_the_match_tab_brings_the_match_page_back_and_frees_the_loadout_page() -> void:
+func test_the_match_tab_brings_the_match_page_back_and_keeps_the_loadout_page_hidden() -> void:
 	var menus := MenuScreen.new(MatchPicks.new(), settings)
 	add_child_autofree(menus)
 	menus.show_loadout()
 	var page := menus.loadout_page()
 	menus.show_match()
-	assert_null(menus.loadout_page())
-	assert_true(page.is_queued_for_deletion())
+	assert_null(menus.loadout_page(), "not the page open")
+	assert_same(menus.kept_loadout(), page, "kept, so the tab opens at once next time (owner, 2026-11-17)")
+	assert_false(page.visible)
+	assert_false(page.is_queued_for_deletion())
 	assert_true(menus.match_page().visible)
 	assert_eq(menus.nav_rail().current(), NavRail.Tab.MATCH)
+	menus.show_loadout()
+	assert_same(menus.loadout_page(), page, "the same page again")
+	assert_true(page.visible)
+	assert_false(menus.match_page().visible)
 
 
 func test_the_entry_scene_shows_the_page_for_the_tab_and_the_match_tab_goes_back() -> void:
@@ -102,7 +108,7 @@ func test_the_entry_scene_shows_the_page_for_the_tab_and_the_match_tab_goes_back
 	var menus: MenuScreen = main._menus
 	assert_not_null(menus.loadout_page())
 	main._on_tab(NavRail.Tab.MATCH)
-	assert_null(menus.loadout_page(), "the Match tab frees the Loadout")
+	assert_null(menus.loadout_page(), "the Match tab leaves the Loadout")
 	assert_eq(menus.nav_rail().current(), NavRail.Tab.MATCH)
 
 
@@ -163,30 +169,64 @@ func test_the_strip_creates_renames_duplicates_replaces_and_removes() -> void:
 	strip.new_card().pressed.emit()
 	assert_eq(saved.slots.size(), 2)
 	assert_eq(saved.current, 1)
-	strip.action(&"rename").pressed.emit()
+	assert_null(strip.find_child("Action_rename", true, false), "no links on the right any more (owner, 2026-11-17)")
+	strip.open_menu(1)
+	assert_true(strip.menu().visible, "a right-click's menu on the card")
+	assert_eq(strip.menu().item_count, 4)
+	strip.pick(LoadoutStrip.MenuItem.RENAME)
 	assert_eq(strip.mode, LoadoutStrip.Mode.RENAMING)
 	strip.edit().text = "Long Lanes"
 	strip.edit().text_submitted.emit("Long Lanes")
 	assert_eq(saved.slots[1].name, "Long Lanes")
 	assert_eq(strip.mode, LoadoutStrip.Mode.NORMAL)
-	strip.action(&"duplicate").pressed.emit()
+	strip.open_menu(1)
+	strip.menu().id_pressed.emit(LoadoutStrip.MenuItem.DUPLICATE)
 	assert_eq(saved.slots.size(), 3)
 	assert_eq(saved.current, 1, "the copy is not carried")
 	saved.rules.set_bb_weight(saved.carried(), AEG, 0.3)
-	strip.action(&"replace").pressed.emit()
+	strip.open_menu(1)
+	strip.pick(LoadoutStrip.MenuItem.REPLACE)
 	assert_eq(strip.mode, LoadoutStrip.Mode.REPLACING)
 	strip.card(2).pressed.emit()
 	assert_eq(saved.rules.tune_of(saved.slots[2], AEG).bb_weight, 0.3, "the carried loadout took its place")
 	# BP7: its Undo stands where the actions were; Esc puts it away and they come back
 	assert_true(strip.action(&"undo").visible)
 	assert_true(strip.cancel())
-	strip.action(&"remove").pressed.emit()
+	strip.open_menu(1)
+	strip.pick(LoadoutStrip.MenuItem.REMOVE)
 	assert_eq(strip.mode, LoadoutStrip.Mode.REMOVING)
 	strip.action(&"keep").pressed.emit()
 	assert_eq(saved.slots.size(), 3)
-	strip.action(&"remove").pressed.emit()
+	strip.open_menu(1)
+	strip.pick(LoadoutStrip.MenuItem.REMOVE)
 	strip.action(&"remove_yes").pressed.emit()
 	assert_eq(saved.slots.size(), 2)
+
+
+func test_right_clicking_a_card_carries_it_and_opens_its_menu() -> void:
+	var page := _page()
+	var strip := page.strip()
+	strip.new_card().pressed.emit()
+	saved.use(0)
+	await wait_process_frames(1)
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_RIGHT
+	click.pressed = true
+	click.position = Vector2(10.0, 10.0)
+	strip.card(1).gui_input.emit(click)
+	await wait_process_frames(1)
+	assert_eq(saved.current, 1, "the right-clicked loadout is carried, so the menu acts on it")
+	assert_true(strip.menu().visible)
+	strip.menu().hide()
+	var key := InputEventKey.new()
+	key.keycode = KEY_F10
+	key.shift_pressed = true
+	key.pressed = true
+	strip.card(0).gui_input.emit(key)
+	await wait_process_frames(1)
+	assert_eq(saved.current, 0)
+	assert_true(strip.menu().visible, "Shift+F10 on a focused card opens it too")
+	strip.menu().hide()
 
 
 ## BP7 (row 89): a Replace is undone by its Undo, offered for a few seconds: the loadout it wrote over comes back
@@ -205,13 +245,13 @@ func test_a_replace_can_be_undone_for_a_few_seconds() -> void:
 	assert_eq(strip.mode, LoadoutStrip.Mode.NORMAL)
 	assert_string_contains(strip.prompt_text(), "Long Lanes")
 	assert_eq(strip.action(&"undo").text, tr("LOADOUT_UNDO"))
-	assert_false(strip._actions.has(&"remove"), "the actions wait while Undo stands")
+	assert_false(strip._actions.has(&"remove"), "only Undo stands")
 	strip.action(&"undo").pressed.emit()
 	assert_eq(saved.slots[1].to_dict(), before, "the loadout written over is back as it was")
 	assert_eq(saved.current, 0, "the carried one still carried")
 	assert_true(saved.dirty, "and saved like any change")
 	assert_false(strip._actions.has(&"undo"), "Undo is gone once used")
-	assert_true(strip._actions.has(&"remove"), "the actions are back")
+	assert_true(strip._actions.is_empty(), "nothing on the right: the card's menu holds the actions (owner, 2026-11-17)")
 	# the offer runs out by itself
 	strip.start_replace()
 	strip.card(1).pressed.emit()

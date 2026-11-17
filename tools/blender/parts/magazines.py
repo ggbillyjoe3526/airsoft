@@ -77,11 +77,12 @@ EXTENDED_FINE = 9
 # (place along the side, half width, m), the lapped seam down its back (-1: back; half width, height, its flat crown's
 # share of the width) with a row of spot welds, folded steel feed lips. The low-cap is moulded polymer: the rifle's
 # five wide ribs, and the mould's parting line, a fine ridge down its front and back (through every second ring).
-# Their BBs are true balls, as round as each budget holds (`round_bb` sides, half as many bands): the magazine's top
-# is in front of the camera on every reload.
+# Their one BB is a true ball, as round as each budget holds (`round_bb` sides, half as many bands): the magazine's top
+# is in front of the camera on every reload. One shows where three did (0.1 Beta 2), turned as finely as the three's
+# triangles were.
 HICAP_SHAPE = {"ribs": ((-0.0213, 0.0019), (-0.0071, 0.0019), (0.0071, 0.0019), (0.0213, 0.0019)), "lips": True,
-               "seams": ((-1, 0.0024, 0.0005, 0.75),), "welds": 7, "round_bb": 32}
-LOWCAP_SHAPE = {"seams": ((1, 0.0005, 0.0003, 0.0), (-1, 0.0005, 0.0003, 0.0)), "seam_step": 2, "round_bb": 34}
+               "seams": ((-1, 0.0024, 0.0005, 0.75),), "welds": 7, "round_bb": 54}
+LOWCAP_SHAPE = {"seams": ((1, 0.0005, 0.0003, 0.0), (-1, 0.0005, 0.0003, 0.0)), "seam_step": 2, "round_bb": 58}
 # The magazines' wear (RW2): one mask a file, at about the replicas' own texel size (a 2K mask over a whole replica),
 # each file's own seed, and the scratches times the replicas' magazines' factor (aeg.py, gbb.py: "Magazine" 2.5).
 WEAR_SIZE = 1024

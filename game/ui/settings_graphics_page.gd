@@ -2,14 +2,14 @@ class_name SettingsGraphicsPage
 extends HBoxContainer
 ## The settings' Graphics tab (concept `settings-graphics.png`; the rows are data/graphics.md's, through
 ## GraphicsTable.shared()): on the left the preset (Low to Ultra, or Custom) with "For your card" on the card's pick and
-## a line on the one in force, Resolution (render scale, upscaler) and Edges (edge and temporal smoothing), then Your
-## system; on the right Shadows and Light and detail, Start-up (the renderer the next start asks for: Auto or
-## Compatibility, written to RendererOverride's file at once) and Reset to For your card. Each row shows what it takes
-## from the graphics card as squares (the table's Cost); a choice the renderer in use can't draw is greyed, and the row
-## shows the one drawn instead (on the simpler renderer Low's FSR 1 shows as bilinear). Changing a row makes the choice
-## Custom on the preset you were on, its changed rows marked with a dot. Every change is drawn at once
-## (SettingsApply.apply_graphics) and `changed` asks the screen to save it; a slider applies when it is let go, since a
-## new render size or shadow map can hitch.
+## a line on the one in force, Resolution (render scale, upscaler), Edges (edge and temporal smoothing), Light effects
+## and Reset to For your card; on the right Shadows and Light and detail, Start-up (the renderer the next start asks
+## for: Auto or Compatibility, written to RendererOverride's file at once) and Your system: every row on one page at
+## 1080p, with nothing to scroll (owner, 2026-11-17). Each row shows what it takes from the graphics card as squares
+## (the table's Cost); a choice the renderer in use can't draw is greyed, and the row shows the one drawn instead (on
+## the simpler renderer Low's FSR 1 shows as bilinear). Changing a row makes the choice Custom on the preset you were
+## on, its changed rows marked with a dot. Every change is drawn at once (SettingsApply.apply_graphics) and `changed`
+## asks the screen to save it; a slider applies when it is let go, since a new render size or shadow map can hitch.
 
 ## A choice landed: saved now (`immediate`, a click) or a moment after a slider stops.
 signal changed(immediate: bool)
@@ -138,12 +138,12 @@ func build(screen: SettingsScreen) -> void:
 	screen.add_section(left, tr("GRAPHICS_QUALITY"))
 	_build_preset(left)
 	_build_sections(left, LEFT_SECTIONS, LEFT_LABEL)
-	_build_system(left)
+	_build_reset(left)
 	var right := _column(0.0)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_build_sections(right, RIGHT_SECTIONS, RIGHT_LABEL)
 	_build_renderer(right)
-	_build_reset(right)
+	_build_system(right)
 
 
 ## Shows the settings as they are now: the preset lit, its line, each row's value and mark, and the system. Allocates:

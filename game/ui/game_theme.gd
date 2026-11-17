@@ -60,6 +60,12 @@ const TAB_GAP := 14
 const PANEL_RADIUS := 14
 const BUTTON_MARGIN_X := 18
 const BUTTON_MARGIN_Y := 8
+## A right-click menu: its panel's padding and fill's opacity, the gap between its rows (px), and how strongly the
+## interface colour lights the row under the pointer.
+const POPUP_PAD := 8
+const POPUP_ALPHA := 0.96
+const POPUP_ROW_GAP := 12
+const POPUP_HOVER_ALPHA := 0.28
 const MAIN_MARGIN_X := 56
 const MAIN_MARGIN_Y := 18
 const SLIDER_HEIGHT := 6
@@ -94,6 +100,8 @@ const SPACING_LABEL := 0.04
 const SPACING_SECTION := SPACING_HEADING
 ## The Button states a box is drawn in (focus is drawn over one of them).
 const BUTTON_STATES: Array[String] = ["normal", "hover", "pressed", "hover_pressed", "disabled"]
+## Marks a Theme as one of the shared ones (`retheme` swaps only those).
+const THEME_MARK := &"game_theme"
 
 static var _theme: Theme = null
 static var _fonts: Dictionary[int, Font] = {}
@@ -236,8 +244,10 @@ static func pill_box(fill: Color) -> StyleBoxFlat:
 	return box(fill, Color(0.0, 0.0, 0.0, 0.0), TAB_PAD.x, TAB_PAD.y)
 
 
-## Lights the interface in `pick`'s colour (Settings › Display, UA2): the accent and its ink, and the shared Theme's
-## boxes and colours redone in place, so whatever uses the Theme redraws in it at once. Whether it changed.
+## Lights the interface in `pick`'s colour (Settings › Display, UA2): the accent and its ink, and a new shared Theme in
+## it. The old Theme is left as it was, so the screens built in it are not each laid out and shaped again (that took
+## seconds over the whole menus, owner 2026-11-17: "slow and laggy"): the menus are built again in the new one
+## (Main.restyle), and a screen kept between changes takes it with `retheme`. Whether it changed.
 static func use_colour(pick: UiColours.Pick) -> bool:
 	var at := clampi(pick, 0, UiColours.ACCENTS.size() - 1)
 	if accent == UiColours.ACCENTS[at] and accent_ink == UiColours.INKS[at]:
@@ -245,11 +255,19 @@ static func use_colour(pick: UiColours.Pick) -> bool:
 	accent = UiColours.ACCENTS[at]
 	accent_ink = UiColours.INKS[at]
 	_knob = null
-	if _theme != null:
-		_add_buttons(_theme)
-		_add_panels(_theme)
-		_add_inputs(_theme)
+	_theme = null
 	return true
+
+
+## Every Control under `node` (it too) dressed in an older shared Theme takes the one now (a few small screens kept
+## between colour changes: the credits, the loading screen, a prompt); a Control with a theme of its own keeps it.
+static func retheme(node: Node) -> void:
+	var now := get_theme()
+	var c := node as Control
+	if c != null and c.theme != null and c.theme != now and c.theme.has_meta(THEME_MARK):
+		c.theme = now
+	for child in node.get_children():
+		retheme(child)
 
 
 ## The shared Theme.
@@ -257,6 +275,7 @@ static func get_theme() -> Theme:
 	if _theme != null:
 		return _theme
 	_theme = Theme.new()
+	_theme.set_meta(THEME_MARK, true)
 	_theme.default_font = font(600)
 	_theme.default_font_size = BODY_SIZE
 	_add_text(_theme)
@@ -370,10 +389,20 @@ static func focus_ring_out() -> StyleBoxFlat:
 static func _add_panels(t: Theme) -> void:
 	t.set_stylebox("panel", "PanelContainer", panel_box(0, 0))
 	t.set_stylebox("panel", "Panel", panel_box(0, 0))
-	t.set_stylebox("panel", "PopupMenu", box(PANEL, LINE, BUTTON_MARGIN_X, BUTTON_MARGIN_Y))
-	t.set_stylebox("hover", "PopupMenu", box(CARD_HI, Color(0.0, 0.0, 0.0, 0.0), 0, 2))
+	# A right-click menu (the loadout cards'): the glass panel with its edge, rows in the cards' size, the row under the
+	# pointer lit in the interface colour, a row that can't be picked dimmed.
+	var menu := box(Color(PANEL, POPUP_ALPHA), LINE, POPUP_PAD, POPUP_PAD)
+	menu.shadow_color = Color(0.0, 0.0, 0.0, 0.45)
+	menu.shadow_size = POPUP_PAD
+	t.set_stylebox("panel", "PopupMenu", menu)
+	t.set_stylebox("hover", "PopupMenu", box(Color(accent, POPUP_HOVER_ALPHA), Color(0.0, 0.0, 0.0, 0.0), POPUP_PAD, 0))
 	t.set_color("font_color", "PopupMenu", TEXT)
 	t.set_color("font_hover_color", "PopupMenu", TEXT)
+	t.set_color("font_disabled_color", "PopupMenu", Color(MUTED, MUTED.a * 0.6))
+	t.set_font_size("font_size", "PopupMenu", SMALL_SIZE)
+	t.set_constant("v_separation", "PopupMenu", POPUP_ROW_GAP)
+	t.set_constant("item_start_padding", "PopupMenu", POPUP_PAD)
+	t.set_constant("item_end_padding", "PopupMenu", POPUP_PAD * 2)
 	# Tabs: a row of pills over the panel, a gap between them (UI concept B v2 `settings.png`); the selected one white
 	# with dark words.
 	var tab_panel := panel_box(20, 12)

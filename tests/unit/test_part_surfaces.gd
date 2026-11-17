@@ -43,8 +43,8 @@ const BB_RADIUS := 0.003
 const BB_SKIN := 0.00002
 ## Corners closer than this (m) are one corner (a seam in the unwrap splits them in the file).
 const BB_SNAP := 0.000002
-## File, part, BBs showing.
-const BBS := [["aeg", "magazine_hiCap", 3], ["aeg", "magazine_lowCap", 3], ["pistol", "magazine_extended", 2]]
+## File, part, BBs showing (one at each magazine's lips: the owner, 0.1 Beta 2).
+const BBS := [["aeg", "magazine_hiCap", 1], ["aeg", "magazine_lowCap", 1], ["pistol", "magazine_extended", 1]]
 
 var _nodes: Array[Node] = []
 

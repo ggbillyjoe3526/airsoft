@@ -1,8 +1,9 @@
 extends GutTest
 ## HA2 (the owner, 2026-11-15): the pistols sit low on the right at about the rifles' share of the screen and angle,
-## turned a little in at the hip; and turned over in an inspect, your shoulders stay where your body has them, so an
-## arm's cut-off end never turns into view, while both hands keep their hold on the replica. Aimed, a pistol's hands
-## are drawn whole, never faded ("the pistol ADS shows the hand fading, it shouldn't do this").
+## square to the eye at the hip as the rifles are (0.1 Beta 2, the owner: the turn in was "slightly too far left"); and
+## turned over in an inspect, your shoulders stay where your body has them, so an arm's cut-off end never turns into
+## view, while both hands keep their hold on the replica. Aimed, a pistol's hands are drawn whole, never faded ("the
+## pistol ADS shows the hand fading, it shouldn't do this").
 
 const DT := 1.0 / 60.0
 const PISTOLS: Array[StringName] = [&"pistol", &"cyber"]
@@ -56,14 +57,14 @@ func _in_replica(view: ReplicaView, bone: String) -> Vector3:
 	return view._held[0].root.global_transform.affine_inverse() * at
 
 
-func test_the_pistols_sit_low_on_the_right_further_off_and_turned_a_little_in() -> void:
+func test_the_pistols_sit_low_on_the_right_further_off_and_square_as_the_rifles() -> void:
 	for id: StringName in PISTOLS:
 		var hip: Vector3 = cfg.hip[id]
 		assert_gt(hip.x, 0.05, "%s: on the right" % id)
 		assert_lt(hip.y, -0.05, "%s: low" % id)
 		assert_almost_eq(-hip.z, 0.35, 1e-4, "%s: 35 cm from the eye (was 25: less of the screen)" % id)
-		var turn: Vector3 = cfg.hip_turn[id]
-		assert_between(turn.y, 0.05, 0.3, "%s: the muzzle turned a little left, its side to the eye" % id)
+		assert_eq(cfg.hip_turn.get(id, Vector3.ZERO), cfg.hip_turn.get(&"aeg", Vector3.ZERO),
+				"%s: at the rifles' angle, the muzzle on the crosshair (no turn left)" % id)
 		var k := hip.z / OLD_HIP.z
 		assert_lt((cfg.reload_move(id) - OLD_MOVE * k).length(), 2e-3, "%s: the reload scaled with its distance" % id)
 		# The reload peak stays in front of the eye and inside a 75 degree half-field.
@@ -73,14 +74,26 @@ func test_the_pistols_sit_low_on_the_right_further_off_and_turned_a_little_in() 
 	assert_false(cfg.hip_turn.has(&"aeg"), "the rifles' hip is as it was")
 
 
-func test_the_hip_turn_holds_at_the_hip_and_is_gone_aimed() -> void:
+func test_the_pistols_lie_square_at_the_hip() -> void:
 	for id: StringName in PISTOLS:
 		var vc := _view(id)
 		var view: ReplicaView = vc[0]
 		var c: Character = vc[1]
 		_frames(view, c, 30)
+		assert_almost_eq(view._held[0].root.rotation, Vector3.ZERO, Vector3.ONE * 1e-3, "%s: square at the hip" % id)
+
+
+func test_a_hip_turn_holds_at_the_hip_and_is_gone_aimed() -> void:
+	# The config still takes a turn by replica id (none today): it holds at the hip and eases out as the sight rises.
+	const TURN := Vector3(0.0, 0.1, 0.0)
+	for id: StringName in PISTOLS:
+		cfg.hip_turn[id] = TURN
+		var vc := _view(id)
+		var view: ReplicaView = vc[0]
+		var c: Character = vc[1]
+		_frames(view, c, 30)
 		var root := view._held[0].root
-		assert_almost_eq(root.rotation, cfg.hip_turn[id], Vector3.ONE * 1e-3, "%s: turned at the hip" % id)
+		assert_almost_eq(root.rotation, TURN, Vector3.ONE * 1e-3, "%s: turned at the hip" % id)
 		_frames(view, c, 30, 1.0)
 		assert_almost_eq(root.rotation, Vector3.ZERO, Vector3.ONE * 1e-3, "%s: square to the eye aimed" % id)
 

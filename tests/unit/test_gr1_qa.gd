@@ -286,7 +286,7 @@ func test_an_old_file_without_the_graphics_fields_loads_and_keeps_its_values() -
 	assert_eq(got.renderer, Settings.Renderer.AUTO)
 	assert_false(got.first_start_seen)
 	assert_eq(got.load_message, "", "no complaint")
-	assert_eq(Settings.VERSION, 5, "5 since FV1 moved the field of view's and the volumes' defaults")
+	assert_eq(Settings.VERSION, 6, "6 since the gauge patterns and the HUD opacity moved (owner, 2026-11-17)")
 	var raw := SaveFile.read(path, Settings.KIND)
 	assert_eq(int(raw.version), Settings.VERSION)
 
@@ -374,8 +374,8 @@ func test_changing_a_row_to_the_value_it_has_still_makes_custom_with_no_rows() -
 
 func test_the_frame_limit_edges() -> void:
 	var cases := {
-		0.0: 0, -1.0: 0, -1000.0: 0, 0.001: 30, 1.0: 30, 29.9: 30, 30.0: 30, 44.9: 30, 45.0: 60, 90.0: 120,
-		91.0: 120, 132.0: 144, 154.5: 165, 202.5: 240, 300.0: 360, 360.0: 360, 361.0: 360, 1.0e9: 360, 1.0e300: 360,
+		0.0: 0, -1.0: 0, -1000.0: 0, 0.001: 30, 1.0: 30, 29.9: 30, 30.0: 30, 44.9: 45, 45.0: 45, 90.0: 90,
+		91.4: 91, 132.0: 132, 154.5: 155, 202.5: 203, 300.0: 300, 360.0: 360, 361.0: 360, 1.0e9: 360, 1.0e300: 360,
 	}
 	assert_eq(Settings.nearest_frame_limit(INF), 360)
 	assert_eq(Settings.nearest_frame_limit(-INF), 0)
@@ -386,7 +386,8 @@ func test_the_frame_limit_edges() -> void:
 		assert_eq(_loaded({"frame_limit": given}).frame_limit, Settings.UNLIMITED, "a %s" % str(given))
 	for given: Variant in [60, 60.0, 75, 59.5, 1e12, 0, -5, 0.2]:
 		var f := _loaded({"frame_limit": given}).frame_limit
-		assert_true(f == 0 or Settings.FRAME_LIMITS.has(f), "%s read as %d" % [str(given), f])
+		assert_true(f == 0 or (f >= Settings.FRAME_LIMIT_RANGE.x and f <= Settings.FRAME_LIMIT_RANGE.y),
+				"%s read as %d" % [str(given), f])
 	assert_eq(_loaded({"frame_limit": -5}).frame_limit, Settings.UNLIMITED)
 	assert_eq(_loaded({"frame_limit": 1e12}).frame_limit, 360)
 
