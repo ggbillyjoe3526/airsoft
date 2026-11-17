@@ -12,7 +12,8 @@ at 0.
 ROOMS are walkable volumes: a box of air from its floor up `h` m (a ramp room's floor runs from `ya` at x0 to `yb` at
 x1). Rooms that touch along an edge, with their air overlapping at least OPEN m, open into each other there; every
 other edge of a room gets a wall, and every room a floor and a ceiling. A sealed edge (a train's side, the spiral
-stair's well) is walled from the inside but for its `gaps`. BLOCKS are the cover, `h` m over the floor they stand on.
+stair's well) is walled from the inside but for its `gaps` (from, to; or from, to, height: a doorway walled over).
+BLOCKS are the cover, `h` m over the floor they stand on.
 The links between the two levels: two escalators (-10 to -18), one spiral stair and one ordinary stair (a half
 landing on the way), and two lifts (LIFTS) in a pair of shafts in the ticket hall.
 
@@ -67,6 +68,12 @@ block("wall", C, -55, -49, -10, -6.5, 3.0, dress="ticket_office")  # closed tick
 block("container", C, -49, -46, 7.4, 10, 2.5, 0x8a8478, dress="kiosk")  # shuttered kiosk
 block("cabinet", C, -55.0, -54.4, 2.5, 8.0, 2.0, dress="ticket_machine")
 block("furniture", C, -48.5, -42.5, -10, -9.1, 1.1, dress="booking_counter")  # the old ticket counter, waist high
+# Benches along the hall's walls, backs to the wall, out of the lanes (the owner, 2026-11-17: "add some more benches"):
+# one by the spawn, one each side of the gate line's south end, one on the north wall past the gates.
+HALL_BENCHES = [((-55.0, -54.4), (-6.3, -3.3), "+x"), ((-43.1, -40.1), (9.4, 10.0), "-z"),
+                ((-37.4, -34.4), (9.4, 10.0), "-z"), ((-36.5, -33.5), (-10.0, -9.4), "+z")]
+for (bx0, bx1), (bz0, bz1), bface in HALL_BENCHES:
+    block("furniture", C, bx0, bx1, bz0, bz1, 0.8, dress="station_bench_long", facing=bface)
 # Cable drums left from the works where the west passage was: cover along the hall's north wall (the concourse's
 # pier and the north passage's mouth pier keep the line down it out of the passage).
 block("crate", C, -31, -29, -10, -8.6, 1.8, dress="cable_drum")
@@ -91,8 +98,13 @@ block("pillar", C, -39.2, -38.2, -0.5, 0.5, HALL_H)        # hall column in the 
 SPIRAL = dict(x0=-33.0, x1=-28.0, z0=0.5, z1=5.5, flight=1.3, y0=P, y1=C, sides=8, top=HALL_H,
               dress="spiral_stair")  # the model over its flights and landings, not the core (SM2)
 SPIRAL_WAY = (-29.4, -28.0)   # the gap at its foot onto the platform, and in the rail at its top (both south)
+# The gap at its foot is a doorway as high as the platform's back wall (TUNNEL_H, under the vault's springing), the
+# well's wall going on over it (the owner, 2026-11-17: "wall is glitched showing the below platform").
 room("spiral", "Spiral stair", -33, -28, 0.5, 5.5, P, h=C - P + 0.01, ceil=False,
-     seal={"n": [], "e": [], "w": [], "s": [SPIRAL_WAY]})
+     seal={"n": [], "e": [], "w": [], "s": [(*SPIRAL_WAY, TUNNEL_H)]})
+# Its foot walled off from the space under its flights (the owner, 2026-11-17: "at the bottom level there is an open
+# space under the stairs, block this off"): a wall across the east side under the last flight, up to its underside.
+block("wall", P, -29.45, -28.15, 3.9, 4.05, 3.0)
 block("railing", C, -33.12, -27.88, 0.38, 0.5, 1.1)
 block("railing", C, -33.12, -33.0, 0.5, 5.62, 1.1)
 block("railing", C, -28.0, -27.88, 0.5, 5.62, 1.1)
@@ -157,10 +169,10 @@ VAULTS = [dict(name="north", x0=-52, x1=50, z0=-12.5, z1=-5.5, y=P + TUNNEL_H, l
                style="track"),
           dict(name="south", x0=-52, x1=50, z0=5.5, z1=12.5, y=P + TUNNEL_H, low=P + TRAIN_IN, rise=VAULT_RISE,
                style="track")]
-room("plat_n", "North platform", -52, 47, -9, -5.5, P, h=TUNNEL_H, vault=True)
-room("plat_n_end", "North platform", 47, 50, -7.5, -5.5, P, h=TUNNEL_H, vault=True)
-room("endramp_n", "North platform", 47, 50, -9, -7.5, P, T, h=TUNNEL_H, flat=True, vault=True)
-room("ramp_foot", "North tunnel", 50, 52, -9, -7.5, T, h=RUN_SPRING)
+# Both platforms level all the way to their tunnel's end (the owner, 2026-11-17: "Platforms have ramps. remove them";
+# the north one ran down a ramp to the track at its east end): onto the track a body drops over the edge and climbs
+# back up, as anywhere along it.
+room("plat_n", "North platform", -52, 50, -9, -5.5, P, h=TUNNEL_H, vault=True)
 room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H, vault=True)
 # The track pits, 0.9 m under the platforms: no steps up (owner, 2026-11-10, CL1: "remove the trackside stairs"), a
 # body climbs out over a platform's edge (VaultConfig climb_depth) and drops back down; bots take the same links.
@@ -353,10 +365,16 @@ block("barrier", T, -52, -51.5, TRACK_Z - 1.15, TRACK_Z + 1.15, 1.2, dress="buff
 # shape of the trains"): straight sides to RUN_SPRING over the track bed, 1.8 m over a car's floor where its sides
 # lean in, then an arch to the old roof, 0.5 m over a car's crown and about 0.15 m clear of its shoulders (SM1's car:
 # 1.55 m from its middle at 1.95 m over its floor, 1.3 m at 2.4 m). Its west end opens onto its platform tunnel.
+# Past their east ends both run on round a curve out of sight, away from each other (the owner, 2026-11-17: "create a
+# tunnel that curves into the distance and continues the train tunnels instead of having just a wall"), look only: a
+# steel grille shuts each where its wall stood (StationDressing.TunnelBend, fixtures.bend_ends).
+BEND = dict(radius=40.0, angle=60.0)
 RUN_VAULTS = [dict(name="north_run", x0=50, x1=82, z0=-12.6, z1=-9, y=T + RUN_SPRING, low=P + TRAIN_IN,
-                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west"),
+                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west",
+                   bend=dict(BEND, turn=-1)),
               dict(name="south_run", x0=50, x1=82, z0=9, z1=12.6, y=T + RUN_SPRING, low=P + TRAIN_IN,
-                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west")]
+                   rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west",
+                   bend=dict(BEND, turn=1))]
 VAULTS += RUN_VAULTS
 room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=RUN_SPRING, vault=True)
 # The south train's open cab door stands 0.9 m over the track: no steps, a body climbs up into it from the track

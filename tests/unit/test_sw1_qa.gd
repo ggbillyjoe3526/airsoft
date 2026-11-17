@@ -21,6 +21,8 @@ func before_each() -> void:
 	add_child_autofree(level)
 	level.build(map, MapStyle.new(), tuning.body)
 	nav = NavGrid.build(map, tuning.nav, tuning.body)
+	# The climbs a bot takes (SW2: the platforms run level to their ends, so the east end climbs out of the tunnels).
+	NavVaults.link(nav, level.query(), tuning.vault, tuning.body, BotConfig.load_default().vault_price)
 
 
 ## Walks a character from `from` along the nav route to `goal`, and returns the ticks it took (-1 if it never got

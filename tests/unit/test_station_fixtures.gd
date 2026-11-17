@@ -13,6 +13,7 @@ const BUDGETS: Dictionary[StringName, int] = {
 	&"poster_k": 40, &"poster_l": 40, &"poster_m": 40, &"poster_wide_a": 40, &"poster_wide_b": 40, &"poster_wide_c": 40,
 	&"name_board": 40, &"line_map": 40, &"info_panel": 40, &"notice_smoking": 40, &"notice_handrail": 40,
 	&"notice_cctv": 40, &"wall_sign_out": 40, &"wall_sign_platforms": 40, &"departures_n": 90, &"departures_s": 90,
+	&"tunnel_grille": 1100,
 	# Depot's wall extras (DX1, tests/unit/test_dx1_depot_props.gd checks where they stand)
 	&"fire_point": 425, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500, &"pipe_run_1": 360,
 	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
@@ -89,6 +90,24 @@ func _shrunk(box: AABB, by: float) -> AABB:
 	return AABB(box.position + d, box.size - d * 2.0)
 
 
+## Whether `p` stands round vault `v`'s bend past its east end (SW2), across its tunnel's width from the curve's line.
+func _on_bend(v: StationDressing.TunnelVault, p: Vector3) -> bool:
+	if v.bend == null or p.x <= v.area.end.x:
+		return false
+	var centre := Vector2(v.area.end.x, v.area.get_center().y + v.bend.turn * v.bend.radius)
+	return absf(Vector2(p.x, p.z).distance_to(centre) - v.bend.radius) <= v.area.size.y * 0.5 + 0.01
+
+
+## Whether fixture `f` is a running tunnel's end grille or stands round its bend (fixtures.bend_ends).
+func _at_a_bend(m: MapData, f: StationDressing.Fixture) -> bool:
+	if f.model == &"tunnel_grille":
+		return true
+	for v in m.station.vaults:
+		if _on_bend(v, f.position):
+			return true
+	return false
+
+
 func _in_block(m: MapData, p: Vector3) -> bool:
 	for b in m.blocks:
 		if _block_box(b).has_point(p):
@@ -148,7 +167,8 @@ func test_subway_names_every_model_and_the_tunnels_their_lamps() -> void:
 	for model in cfg.models:
 		if not DEPOT.has(StringName(model)):
 			assert_gt(counts.get(StringName(model), 0), 0, "%s placed" % model)
-	assert_between(counts.get(&"tunnel_lamp", 0), 10, 14, "about 12 tunnel lamps (the model list)")
+	assert_between(counts.get(&"tunnel_lamp", 0), 14, 18,
+			"about 12 tunnel lamps (the model list), and two round each tunnel's bend (SW2)")
 	assert_gte(counts.get(&"name_board", 0), 8, "the station's name along both platforms")
 
 
@@ -159,6 +179,8 @@ func test_each_fixture_stands_in_its_room_on_its_wall_ceiling_or_floor_and_in_no
 	for model in cfg.models:
 		boxes[StringName(model)] = _mesh(StringName(model)).get_aabb()
 	for f in m.station.fixtures:
+		if _at_a_bend(m, f):
+			continue  # past the rooms on purpose (fixtures.bend_ends): test_sw2_subway.gd checks them
 		var t := Transform3D(Basis(Vector3.UP, f.yaw).scaled(Vector3.ONE * f.scale), f.position)
 		var box := t * boxes[f.model]
 		var front := t.basis.z.normalized()
@@ -241,7 +263,7 @@ func test_each_tunnel_lamp_lights_its_running_tunnel_s_arch_from_its_glass() -> 
 		# under the running arch, which it lights from below (the roof's lamps shine down from its crown)
 		var v: StationDressing.TunnelVault = null
 		for o in m.station.vaults:
-			if o.open_west and o.area.has_point(Vector2(lamp.position.x, lamp.position.z)):
+			if o.open_west and (o.area.has_point(Vector2(lamp.position.x, lamp.position.z)) or _on_bend(o, lamp.position)):
 				v = o
 		assert_not_null(v, "in a running tunnel: %s" % lamp.position)
 		if v != null:
@@ -367,6 +389,8 @@ func test_no_fixture_is_drawn_through_a_trim_or_the_vault_s_lid() -> void:
 	var m := _map("subway")
 	var bad: Array[String] = []
 	for f in m.station.fixtures:
+		if f.model == &"tunnel_grille":
+			continue  # it fills its tunnel's arch, the lid's underside (SW2: test_sw2_subway.gd)
 		var t := Transform3D(Basis(Vector3.UP, f.yaw), f.position)
 		var box := _shrunk(t * _mesh(f.model).get_aabb(), TOUCH)
 		for tr in m.station.trims:

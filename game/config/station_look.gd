@@ -119,6 +119,17 @@ extends Resource
 @export var vault_finish: StringName = &"vault_tile"
 @export var vault_steps: int = 32
 @export var vault_proud: float = 0.01
+## Behind a vault's end and a mouth's face, standing `vault_proud` m out from the shell, a strip this wide (m) in the
+## wall's finish, in the shell's own plane over the edge the wall below stops at (its blocks there are the vault's, not
+## drawn): what a look past that edge meets, where it met nothing and showed a thin dark line round the tunnel's mouth
+## (SW2; the owner, 2026-11-17: "tunnel wall is glitching around the train").
+@export var vault_backing: float = 0.15
+## A running tunnel's mouth where no room's air reaches its end over the arch (the south train standing through it):
+## its corners in the platform's tiles round it, as the north mouth's (the owner, 2026-11-17: they were drawn in
+## `outside`, near black, "tunnel wall is glitching around the train").
+@export var mouth_walls: StringName = &"wall_tile"
+## A running tunnel's way on round its bend (StationDressing.TunnelBend): drawn in pieces about this long (m) round it.
+@export var bend_step: float = 1.0
 ## The vault's ribs (TB1: its lining rings): one `vault_rib_width` m wide every `vault_rib_every` m along it, standing
 ## `vault_rib_depth` m under the arc, in `vault_rib_finish` (look only: BBs meet the vault's colliders).
 @export var vault_rib_every: float = 6.0

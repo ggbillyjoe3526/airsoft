@@ -3,12 +3,12 @@ class_name BotLifts
 ## the landing it waits for the car, calling it (the call button, once: Lifts keeps the call) or, with room aboard,
 ## opening its shutting doors again (full, it lets the car go and calls it back); with the car open there and room
 ## aboard it walks in, to its own spot in the car (a corner by its rank aboard, clear of the doorway); aboard, it
-## presses its stop's button (once) and stands while the car rides; open at its stop, it walks out to the landing,
-## where the leg ends. One too many aboard (the buzzer), the highest ids step back out and wait. Waiting on the
-## landing longer than BotConfig.lift_patience it gives up: a fresh route on foot (no links for vault_retry_delay).
-## Aboard a car on a leg on foot (a route planned again inside it), it waits for the doors before walking out, and
-## plans again if they open on another floor than its route's. Writes
-## b.move_dir (zero: stand) and b.lift_press; never stuck while it waits. Allocates nothing.
+## presses its stop's button (once, after any teammate still walking in) and stands while the car rides; open at its
+## stop, it walks out to the landing, where the leg ends. One too many aboard (the buzzer), the highest ids step back
+## out and wait. Waiting on the landing longer than BotConfig.lift_patience it gives up: a fresh route on foot (no links
+## for vault_retry_delay). Aboard a car on a leg on foot (a route planned again inside it), it waits for the doors
+## before walking out, and plans again if they open on another floor than its route's. Writes b.move_dir (zero: stand)
+## and b.lift_press; never stuck while it waits. Allocates nothing.
 
 ## Close enough (m, level) to a spot to stand still on it.
 const ON_SPOT := 0.2
@@ -34,15 +34,22 @@ static func ride(b: Bot, w: BotWorld, link: int, dt: float) -> bool:
 	b.lift_press = Lifts.NONE
 	b.stuck_for = 0.0
 	if spec.holds(p, lifts.y[i], cfg):
-		b.lift_wait = 0.0
 		if lifts.open_at(i, to):
+			b.lift_wait = 0.0
 			_walk_to(b, spec.landing_point(to, cfg))
 			return true
 		if lifts.open_at(i, from) and _over(w, i, spec, me):
+			b.lift_wait = 0.0
 			_walk_to(b, spec.landing_point(from, cfg))
 			return true
 		if not lifts.called(i, to) and not (lifts.stop[i] == to and lifts.phase[i] != LiftState.Phase.MOVING):
-			b.lift_press = Vector2i(i, to)
+			# A press from inside shuts the doors at once (LiftConfig.panel_dwell): it waits for a teammate still
+			# walking in from the landing, at most the car's dwell, then presses.
+			b.lift_wait += dt
+			if b.lift_wait > cfg.dwell or not _boarding(w, i, from, spec, me):
+				b.lift_press = Vector2i(i, to)
+		else:
+			b.lift_wait = 0.0
 		_walk_to(b, _spot(b, w, spec, lifts.y[i]))
 		return true
 	# Out on the far landing: the leg's end is a step away.
@@ -87,6 +94,20 @@ static func hold_aboard(b: Bot, w: BotWorld, wp: Vector3) -> bool:
 	b.move_dir = Vector3.ZERO
 	b.stuck_for = 0.0
 	return true
+
+
+## Whether a teammate of `me` in play stands outside lift `i`'s car, at stop `from`'s doorway in reach of its button
+## (LiftConfig.reach), while the car stands open there with room for one more: someone walking in.
+static func _boarding(w: BotWorld, i: int, from: int, spec: LiftSpec, me: Character) -> bool:
+	if not w.lifts.open_at(i, from) or not _room_aboard(w, i, spec):
+		return false
+	var at := Vector2i(i, from)
+	for c in w.characters:
+		if c != me and c.team == me.team and Elimination.is_in_play(c) \
+				and not spec.holds(c.position, w.lifts.y[i], w.tuning.lifts) \
+				and Lifts.can_press(w.query, w.tuning.lifts, w.lifts, c.position, at):
+			return true
+	return false
 
 
 ## Whether lift `i`'s car has room for one more (LiftConfig.capacity).

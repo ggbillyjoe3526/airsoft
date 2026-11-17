@@ -118,6 +118,10 @@ var _bolt_own: PackedByteArray = PackedByteArray()
 var _bolt_slot: PackedInt32Array = PackedInt32Array()
 ## The voice the keyed code or the defusal kit plays on (-1: neither plays) and its serial in the pool (PB1).
 var _plant_voice: int = -1
+## Each lift's motor voice while it plays (-1 none) and its play's serial: the voice rides with the car
+## (_carry_motors).
+var _motor_voice: PackedInt32Array = PackedInt32Array()
+var _motor_serial: PackedInt64Array = PackedInt64Array()
 var _plant_serial: int = 0
 ## The voice the last `_play` took (-1: it played nothing) and whether it was in your ear.
 var _played_voice: int = -1
@@ -406,10 +410,13 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 						BUS_EFFECTS, 1.0, _cfg.door_reach, null, true)
 			# A lift's cue (MT2): from its button, doorway or car, yours too, muffled by the walls between.
 			GameEvent.Kind.LIFT:
-				var button := e.value == Lifts.Cue.BUTTON
-				_play(LIFT_CUES[clampi(e.value, 0, LIFT_CUES.size() - 1)], e.position, false,
-						_cfg.lift_button_gain if button else _cfg.lift_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach, null,
-						true)
+				if e.value == Lifts.Cue.DEPART:
+					_lift_motor(e)
+				else:
+					var button := e.value == Lifts.Cue.BUTTON
+					_play(LIFT_CUES[clampi(e.value, 0, LIFT_CUES.size() - 1)], e.position, false,
+							_cfg.lift_button_gain if button else _cfg.lift_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach,
+							null, true)
 			GameEvent.Kind.PLANT:
 				_plant_cue(e)
 			GameEvent.Kind.FLAG_ROPE:
@@ -442,10 +449,12 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_blasts.overtime(now)
 			GameEvent.Kind.ROUND_OVER:
 				_stop_plant_work()
+				_stop_motors()
 				_blasts.round_over(now)
 			GameEvent.Kind.MATCH_OVER:
 				_blasts.match_over(now)
 	_cut_bolts(state)
+	_carry_motors(state.lifts)
 	_blow_due(now)
 	_rustle(state, player_id, now)
 	_call(state, now)
@@ -784,6 +793,50 @@ func _plant_cue(e: GameEvent) -> void:
 	if working and _played_voice >= 0:
 		_plant_voice = _played_voice
 		_plant_serial = _field_pool.serial_of(_played_voice)
+
+
+## A lift's car setting off (MT2): its motor from inside the car (SoundConfig.lift_motor_rise over the floor it left,
+## `e.position`), kept to ride with it (_carry_motors).
+func _lift_motor(e: GameEvent) -> void:
+	var at := e.position + Vector3.UP * _cfg.lift_motor_rise
+	_play(LIFT_CUES[Lifts.Cue.DEPART], at, false, _cfg.lift_motor_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach, null,
+			true)
+	var i := e.target
+	if i < 0 or _played_voice < 0:
+		return
+	if _motor_voice.size() <= i:
+		var was := _motor_voice.size()
+		_motor_voice.resize(i + 1)
+		_motor_serial.resize(i + 1)
+		for k in range(was, i + 1):
+			_motor_voice[k] = -1
+	_motor_voice[i] = _played_voice
+	_motor_serial[i] = _field_pool.serial_of(_played_voice)
+
+
+## Moves each lift's motor still playing with its car, lift_motor_rise over its floor. A voice since taken by another
+## play is let go.
+func _carry_motors(lifts: LiftState) -> void:
+	for i in _motor_voice.size():
+		var v := _motor_voice[i]
+		if v < 0:
+			continue
+		if i >= lifts.count() or _field_pool.serial_of(v) != _motor_serial[i] or not _field[v].playing:
+			_motor_voice[i] = -1
+			continue
+		var p := _field[v].global_position
+		p.y = lifts.y[i] + _cfg.lift_motor_rise
+		_field[v].global_position = p
+
+
+## Cuts each lift's motor short as the round ends, if it still plays: the next round puts every car back at its start
+## stop, and a motor carried there would jump with it.
+func _stop_motors() -> void:
+	for i in _motor_voice.size():
+		var v := _motor_voice[i]
+		if v >= 0 and _field_pool.serial_of(v) == _motor_serial[i] and _field[v].playing:
+			_field[v].stop()
+		_motor_voice[i] = -1
 
 
 ## Cuts the keys or the kit short (the hands came off, the work was done or the round ended), if they still play.
