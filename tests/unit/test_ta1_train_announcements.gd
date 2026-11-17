@@ -153,3 +153,44 @@ func test_sim_audio_plays_them_from_the_train_only_on_a_map_with_trains() -> voi
 	add_child_autofree(plain)
 	plain.setup(tuning.sound, [] as Array[StringName], BodyConfig.new(), null, null)
 	assert_null(plain._announcer, "no trains, no announcer")
+
+
+func test_the_ticket_hall_above_the_platforms_is_not_near_a_train() -> void:
+	var a := TrainAnnouncements.new(cfg, subway.trains)
+	var hall := _in_train()
+	hall.y = subway.storeys[1]
+	assert_false(a.near_train(hall), "a storey up, straight above the train")
+	assert_false(a.in_train(hall))
+
+
+func test_a_rematch_is_timed_afresh_and_no_listener_costs_nothing() -> void:
+	var audio := SimAudio.new()
+	add_child_autofree(audio)
+	audio.setup(tuning.sound, [] as Array[StringName], BodyConfig.new(), null, subway)
+	var state := GameState.new(3)
+	state.match_number = 1
+	state.time = 0.0
+	audio.on_tick(state, 0, null)
+	assert_false(audio._announcer.playing, "no listener, nothing plays")
+	state.match_number = 2
+	state.time = 500.0
+	audio.on_tick(state, 0, null)
+	assert_eq(audio._announce_match, 2, "the rematch began afresh")
+	var you := Character.new(0, 0, _in_train())
+	state.characters.append(you)
+	state.time = 500.0 + cfg.once_max + STEP
+	audio.on_tick(state, 0, you)
+	assert_true(audio._announcer.playing, "its announcement is due from the rematch's own start")
+
+
+func test_the_voice_is_stopped_when_the_match_leaves_the_tree() -> void:
+	var audio := SimAudio.new()
+	add_child(audio)
+	audio.setup(tuning.sound, [] as Array[StringName], BodyConfig.new(), null, subway)
+	var voice := audio._announcer
+	voice.stream = audio._streams[cfg.gap_cue][0]
+	voice.play()
+	assert_true(voice.playing)
+	remove_child(audio)
+	assert_false(voice.playing, "stopped on exit")
+	audio.free()
