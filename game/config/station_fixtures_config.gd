@@ -14,6 +14,8 @@ extends Resource
 	"poster_j", "poster_k", "poster_l", "poster_m", "poster_wide_a", "poster_wide_b", "poster_wide_c", "name_board",
 	"line_map", "info_panel", "notice_smoking", "notice_handrail", "notice_cctv", "wall_sign_out", "wall_sign_platforms",
 	"departures_n", "departures_s",
+	# The running tunnels' end grilles (SW2, tools/blender/maps/tunnel_grille.py)
+	"tunnel_grille",
 	# Depot's wall extras (DX1, tools/blender/maps/depot_extras.py)
 	"fire_point", "call_point", "pipe_run", "pipe_run_b", "pipe_run_2", "pipe_run_1",
 	"depot_sign_assembly", "depot_sign_fire_action",

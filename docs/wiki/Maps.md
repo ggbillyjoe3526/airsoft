@@ -160,6 +160,38 @@ Woodland's areas:
 
 <!-- wiki:areas woodland -->
 
+## Subway
+
+**A closed metro station on two levels**, Morrin Street in the town of Copperhill, in 6v6 (5v5 to 8v8 under Custom).
+One team starts in the ticket hall at the west end, the other down in the running tunnels at the east end.
+
+- **The ticket hall and concourse** are one level: the closed ticket office, a shuttered kiosk and the old booking
+  counter at the street end, benches along the walls, then the lifts, the gate line of paddle gates and the hole of
+  the spiral stair, and the concourse with its cable drums beyond.
+- **Four ways down** to the platforms, 8 m below: the escalators to the lower hall between the platform tunnels, an
+  ordinary stair with a half landing, the spiral stair straight down to the south platform, and the two **lifts**.
+  A lift has two stops, the hall and the platforms, and takes 4 seconds. Call it from its landing, or step in and
+  press the stop you want on its panel: from inside, the doors start to shut at once, and they never shut on anyone
+  in the doorway. You hear the doors and the motor from outside too.
+- **The platforms** run level from end to end, each under its own tiled, curved tunnel beside its track: staff booths,
+  works hoardings, crates and benches break the 100 m platforms into short lanes. The tracks lie 0.9 m below the
+  platform edge, low enough to climb in and out of anywhere. The north train stands at its platform with five doors
+  open; the south train stands half in its running tunnel, and its open cab door at the east end is a way through. Look
+  through a car's platform-side windows and you see right into it.
+- **The running tunnels** lead east from the platforms, arched round the trains, past works wagons, trolleys and
+  cable drums, joined by a cross passage. At their east ends both curve away out of sight behind a locked steel
+  grille.
+- **Attack / Defend** puts flag **A** in the south train's first car and flag **B** on the north platform; Plant The
+  Bomb's sites A and B are on the south and north platforms, just east of the lower hall's passages. In Elimination's
+  overtime the flag stands in the lower hall.
+- Shots ring off the tiles: every shot down here carries a short echo.
+
+### Areas
+
+Subway's areas:
+
+<!-- wiki:areas subway -->
+
 ## Range
 
 **The practice range:** lanes of steel plates, figures and moving targets, with no bots and no score, in its own lot

@@ -27,11 +27,8 @@ The rest of this wiki describes all of it.
 
 ### Next
 
-- **0.1 Beta 2:** fixes, balance, speed and polish from the playtests of 0.1 Beta 1. The Beta builds add no new
-  systems; they lead up to 0.1 and Early Access.
-- **In development:** Subway, a closed metro station on two levels, from the ticket hall and concourse down
-  escalators, a spiral stair, a stair and working lifts to the platforms, the trains and the tunnels, tiled,
-  terrazzo-floored and lamp-lit, its shots ringing off the tiles.
+- **0.1 Beta 2:** fixes, balance, speed and polish from the playtests of 0.1 Beta 1, and [Subway](Maps#subway), the
+  metro station, open to everyone. The Beta builds add no new systems; they lead up to 0.1 and Early Access.
 
 ## Early Access: the themed updates
 

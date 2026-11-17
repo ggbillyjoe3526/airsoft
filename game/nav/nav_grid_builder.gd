@@ -18,6 +18,9 @@ const DIRECTIONS := 8
 const SQRT_2 := 1.4142135623730951
 ## The furthest open distance a cell records (cells; NavGrid.open is bytes).
 const OPEN_MAX := 255
+## The share of a cell a corner may lie off a whole cell and still count as on it: the maps' numbers are single
+## precision (a corner at -66.4 m reads -66.400002), and such a corner keeps its own value as the origin.
+const ON_CELL := 1e-4
 
 
 ## Fills `g` (a new grid) from `map`; false, with the grid left empty, when the map has no floor, ramp or terrain to
@@ -51,6 +54,12 @@ static func surface_height_at(b: MapData.Block, x: float, z: float) -> float:
 	return b.center.y + h.y
 
 
+## The whole number of cells at or below v (v itself when it is already on one, within ON_CELL).
+static func _on_cells(v: float, cell: float) -> float:
+	var k := floorf(v / cell + ON_CELL)
+	return v if absf(v / cell - k) < ON_CELL else k * cell
+
+
 ## The grid's bounds (the surfaces' footprints and the terrain's) and cell counts.
 static func _frame(g: NavGrid, map: MapData, cfg: NavConfig) -> bool:
 	# Plain floats, not a Vector2: its components are single precision.
@@ -69,12 +78,16 @@ static func _frame(g: NavGrid, map: MapData, cfg: NavConfig) -> bool:
 	if not is_finite(lo_x):
 		return false
 	g.cell = cfg.cell
-	g.min_x = lo_x
-	g.min_z = lo_z
+	# The origin sits on a whole number of cells, so the cells line up the same wherever the map's far edges lie: a
+	# floor moved at one end never shifts every cell, and never opens or shuts a tight way past at the other.
+	g.min_x = _on_cells(lo_x, cfg.cell)
+	g.min_z = _on_cells(lo_z, cfg.cell)
+	g.floor_min_x = lo_x
+	g.floor_min_z = lo_z
 	g.max_x = hi_x
 	g.max_z = hi_z
-	g.cols = ceili((hi_x - lo_x) / cfg.cell)
-	g.rows = ceili((hi_z - lo_z) / cfg.cell)
+	g.cols = ceili((hi_x - g.min_x) / cfg.cell)
+	g.rows = ceili((hi_z - g.min_z) / cfg.cell)
 	return true
 
 
@@ -300,10 +313,10 @@ static func _block_near_edge(g: NavGrid, r: float, a: int, b: int, y: float, lev
 static func _stamp_outer_edge(g: NavGrid, r: float) -> void:
 	for j in g.rows:
 		var z := g.cell_z(j)
-		var near_z := z - g.min_z < r or g.max_z - z < r
+		var near_z := z - g.floor_min_z < r or g.max_z - z < r
 		for i in g.cols:
 			var x := g.cell_x(i)
-			if near_z or x - g.min_x < r or g.max_x - x < r:
+			if near_z or x - g.floor_min_x < r or g.max_x - x < r:
 				var c := j * g.cols + i
 				for k in range(g.cell_start[c], g.cell_start[c + 1]):
 					g.walkable[k] = 0

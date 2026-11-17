@@ -65,6 +65,8 @@ class TunnelVault:
 	## Whether its west end opens onto a wider tunnel (a running tunnel's mouth): no end drawn there, the wider
 	## tunnel's end round the arch instead.
 	var open_west: bool = false
+	## Its way on past its east end, or null (a plain end): drawn instead of the end, which a grille shuts.
+	var bend: TunnelBend = null
 
 	## The arc's circle: its middle's z and y and its radius.
 	func circle() -> Vector3:
@@ -86,6 +88,28 @@ class TunnelVault:
 		var lo := Vector3(area.position.x - thick, y, area.position.y) - Vector3.ONE * LEVEL_GAP
 		var hi := Vector3(area.end.x + thick, y + rise + thick, area.end.y) + Vector3.ONE * LEVEL_GAP
 		return AABB(lo, hi - lo)
+
+	## A bent tunnel's shut east end under its springing, walls' corners and all: the shell's end wall there is not
+	## drawn (its grille, a fixture, is), only met. An empty box when it has no bend.
+	func shut_end() -> AABB:
+		if bend == null:
+			return AABB()
+		var lo := Vector3(area.end.x, bend.floor_y - thick, area.position.y - thick) - Vector3.ONE * LEVEL_GAP
+		var hi := Vector3(area.end.x + thick, y, area.end.y + thick) + Vector3.ONE * LEVEL_GAP
+		return AABB(lo, hi - lo)
+
+
+## A running tunnel's way on past its east end (the owner, 2026-11-17: "a tunnel that curves into the distance and
+## continues the train tunnels instead of having just a wall"): its vault's walls, arch and floor swept round a curve of
+## `radius` m through `angle` radians, turning towards `turn` (-1: -z, 1: +z), its floor at `floor_y`, its track's
+## middle `track` m across from the tunnel's middle (+z at its start). Look only, out of reach: a grille shuts it.
+class TunnelBend:
+	extends RefCounted
+	var radius: float = 0.0
+	var angle: float = 0.0
+	var turn: float = 1.0
+	var floor_y: float = 0.0
+	var track: float = 0.0
 
 
 ## A look-only box laid on the shell (TB1: a frieze under a vault's springing, a cable run, a platform edge's face),
@@ -159,8 +183,8 @@ static func read(dressing: Variant, warnings: Array[String]) -> StationDressing:
 	for i in (arcs as Array).size() if arcs is Array else 0:
 		var v := _vault((arcs as Array)[i])
 		if v == null:
-			warnings.append(("dressing.station.vaults %d needs x0, x1, z0, z1, y, rise and thick (a finish and a mouth,"
-					+ " \"west\", if any); left out") % i)
+			warnings.append(("dressing.station.vaults %d needs x0, x1, z0, z1, y, rise and thick (a finish, a mouth,"
+					+ " \"west\", and a bend, if any); left out") % i)
 			continue
 		out.vaults.append(v)
 	var laid: Variant = d.get("trims", [])
@@ -178,7 +202,7 @@ static func read(dressing: Variant, warnings: Array[String]) -> StationDressing:
 ## Whether block box `box` lies in a vault's colliders (drawn as its arc instead).
 func in_vault(box: AABB) -> bool:
 	for v in vaults:
-		if v.lid().encloses(box):
+		if v.lid().encloses(box) or (v.bend != null and v.shut_end().encloses(box)):
 			return true
 	return false
 
@@ -329,7 +353,28 @@ static func _vault(raw: Variant) -> TunnelVault:
 		return null
 	v.finish = StringName(finish)
 	v.open_west = mouth == "west"
+	var bend: Variant = (raw as Dictionary).get("bend")
+	if bend != null:
+		v.bend = _bend(bend)
+		if v.bend == null:
+			return null
 	return v
+
+
+## A vault's `bend` ({radius, angle (degrees), turn (-1 or 1), floor, track}), or null when malformed.
+static func _bend(raw: Variant) -> TunnelBend:
+	if not raw is Dictionary or not _numbers(raw as Dictionary, ["radius", "angle", "turn", "floor", "track"]):
+		return null
+	var d: Dictionary = raw
+	var b := TunnelBend.new()
+	b.radius = float(d["radius"])
+	b.angle = deg_to_rad(float(d["angle"]))
+	b.turn = float(d["turn"])
+	b.floor_y = float(d["floor"])
+	b.track = float(d["track"])
+	if b.radius <= 0.0 or b.angle <= 0.0 or b.angle > PI or absf(b.turn) != 1.0:
+		return null
+	return b
 
 
 static func _numbers(d: Dictionary, keys: Array[String]) -> bool:

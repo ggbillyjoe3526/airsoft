@@ -193,6 +193,12 @@ def vaults(L, lift: float, thick: float) -> list[dict]:
         for k in ("finish", "mouth"):
             if k in v:
                 d[k] = v[k]
+        if "bend" in v:
+            # its way on round a curve past its east end (StationDressing.TunnelBend): its floor the track bed, its
+            # track's middle line across from the tunnel's middle
+            mid = (v["z0"] + v["z1"]) / 2
+            line = L.TRACK_Z if mid > 0 else -L.TRACK_Z
+            d["bend"] = {**v["bend"], "floor": r(L.T + lift), "track": r(line - mid)}
         out.append(d)
     return out
 

@@ -11,6 +11,10 @@ extends Resource
 @export var floor_time: float = 4.0
 ## Once its doors stand open, a car waits at least this long (s) before it shuts them for a call: time to walk out.
 @export var dwell: float = 2.0
+## A stop pressed on a car's own panel, from inside, cuts that wait to at most this long (s): the doors start to shut,
+## and are heard to, as the button is pressed (owner, 2026-11-17: "doors closing should play when the button is
+## pressed"). They still never shut on a body in the doorway.
+@export var panel_dwell: float = 0.0
 ## A car leaves with at most this many aboard; one more and it stays open, buzzing (`buzz_every`).
 @export var capacity: int = 4
 @export var buzz_every: float = 1.0
