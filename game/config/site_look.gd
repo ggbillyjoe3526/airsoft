@@ -87,6 +87,7 @@ enum Canvas {
 	&"barrier": &"hoarding", &"wrapped": &"wrapped", &"rack": &"rack", &"gabion": &"gabion", &"toilet": &"toilet",
 	&"ibc": &"ibc", &"generator": &"generator", &"sandbags": &"sandbags", &"skip": &"skip", &"ramp": &"ramp",
 	&"drum": &"drum", &"barrel": &"barrel", &"pillar": &"pillar", &"net": &"netting", &"sofa": &"sofa",
+	&"furniture": &"timber",  # RQ1: the Range's benches and chrono table (drawn as their models)
 }
 ## A floor this thin (m) or thinner is a gravel bed, one standing on the ground (its centre above 0) the dock; a wall
 ## this tall (m) or more is the perimeter's; a barrier this low or lower and this long or longer is a precast

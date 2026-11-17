@@ -399,8 +399,12 @@ func test_the_range_is_dressed_in_its_own_models_each_inside_the_block_that_name
 	assert_eq(dress.count(&"site_toilet"), 1)
 	assert_eq(dress.count(&"water_tote"), 1)
 	assert_eq(dress.count(&"generator"), 1)
-	assert_between(dress.count(&"range_wall") + dress.count(&"range_backstop"), roundi(walls / 2.4) - 4,
-			roundi(walls / 2.4) + 4, "a bay about every 2.4 m of wall")
+	# the bays in their three shuffles each (RQ1: PropDressConfig.variants)
+	var bays := 0
+	for model: StringName in [&"range_wall", &"range_wall_b", &"range_wall_c", &"range_backstop", &"range_backstop_b",
+			&"range_backstop_c"]:
+		bays += dress.count(model)
+	assert_between(bays, roundi(walls / 2.4) - 4, roundi(walls / 2.4) + 4, "a bay about every 2.4 m of wall")
 	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
 	assert_eq(SiteDress.bag_layout(m, look, PackedFloat32Array()).size(), 0, "no round site bags under the model")
 
