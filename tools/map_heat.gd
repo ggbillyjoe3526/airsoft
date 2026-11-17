@@ -8,7 +8,7 @@ extends SceneTree
 ## side (the map's standard by default).
 
 ## Match time a match may take (s), as the balance report allows.
-const MAX_MATCH_SECONDS := 30.0 * 60.0
+const MAX_MATCH_SECONDS := 45.0 * 60.0
 ## Positions are written to this many metres.
 const QUANTUM := 0.25
 ## The modes by the name the command line gives them.

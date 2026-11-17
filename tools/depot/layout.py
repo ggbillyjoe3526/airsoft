@@ -271,6 +271,10 @@ add("crates", 45.5, 13.0, 50.0, 14.0)                 # ramp screen, gap east
 add("crates", 49.0, 9.0, 54.0, 10.0)                  # inner screen, gap west
 SPAWNS_E = [(50.0, 0.75 + i) for i in range(8)]   # the west line mirrored
 DEAD_E = (52.8, 4.5)
+# Forward spawns (RS1, 2026-11-17): where a hit player may come back mid-round besides the start line, by name. Each
+# end's pair is about two fifths of the way to the middle, one north and one south, out of the middle's sight lines.
+FORWARD_W = [("Upper mid", -24.0, -12.0), ("Huts", -22.0, 20.0)]
+FORWARD_E = [("A short", 37.0, -9.0), ("B alley", 39.0, 13.0)]
 
 # --- Containers (20 x 19): stacked containers make three corridors
 container_row(15, 27, 20.75, [(20, 22)])

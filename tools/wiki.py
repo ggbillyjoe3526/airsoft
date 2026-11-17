@@ -596,6 +596,8 @@ def gen_rules(_arg: str) -> str:
              f"{mins(lo)} to {mins(hi)}, in {fmt(step)} s steps"],
             ["Friendly fire", on[hits["friendly_fire"]], "On or Off"],
             ["Ricochets knock you out", on[hits["ricochets_count"]], "On or Off"],
+            ["Respawns", f"after {fmt(float(rounds['respawn_delay']))} s, not in Elimination ([Respawns](#respawns))",
+             "Not in Elimination, On or Off"],
             ["Ends swap", f"after round {rounds['half_time_after']}", "one round before the win"],
         ]
     except KeyError as e:

@@ -32,6 +32,11 @@ extends Resource
 @export var hop_range: float = 60.0
 ## A ricochet that ticks you (when ricochets don't count) says so this long (s).
 @export var ricochet_time: float = 1.5
+## Coming back after a hit (RS1): the screen comes up out of dark over back_in_fade s (from back_in_dark, 0..1
+## black) and "Back in" shows back_in_time s, unless a round's banner is up.
+@export var back_in_fade: float = 0.5
+@export var back_in_dark: float = 0.85
+@export var back_in_time: float = 1.2
 ## A round's banner shows this long (s).
 @export var banner_time: float = 2.5
 ## "GO!" shows this long (s) as the round's start countdown ends.

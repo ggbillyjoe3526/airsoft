@@ -1,17 +1,18 @@
 class_name Round
 ## Match flow in rounds (the browser game's sim/round.ts: Elimination and Attack / Defend; no Extraction yet). Rounds
-## against the clock: a team with members but nobody in play loses the round; both out at once is a draw, played again
-## under the same number. Elimination: the clock running out with both sides standing puts the overtime flag up at the
-## map's spot (OvertimeFlag), and the first team to touch it wins; untouched for OvertimeConfig.time, or on a map with no
-## spot, it is a draw too. Attack / Defend (RoundState.mode): the attackers also win by raising their flag on the pole
-## (Flag), and the time-out goes to the defenders, after up to FlagConfig.max_overtime while the attackers still work
-## the rope. Plant The Bomb (PB1): the attackers carry the bomb to a site and arm it (Plant); armed, it goes off when
-## its fuse runs out, which wins them the round, unless the defenders disarm it first, and wiping the attackers out no
-## longer ends the round; before it is armed the time-out goes to the defenders, after up to PlantConfig.max_overtime
-## while the carrier is arming it. After RoundConfig.reset_delay (or, with RoundState.hold_next, at end_wait) everyone respawns for the next
-## round, until a team has wins_needed wins and a lead of win_by: the match is over until start_match. Ends swap after
-## half_time_after decided rounds, so an uneven map is fair over a match. start_match sets a match up before the first
-## tick; step runs once a tick and allocates nothing.
+## against the clock: a team with members but nobody in play (nor coming back: Respawns, RS1) loses the round; both out
+## at once is a draw, played again under the same number. Elimination: the clock running out with both sides standing
+## puts the overtime flag up at the map's spot (OvertimeFlag), and the first team to touch it wins; untouched for
+## OvertimeConfig.time, or on a map with no spot, it is a draw too. Attack / Defend (RoundState.mode): the attackers
+## also win by raising their flag on the pole (Flag), and the time-out goes to the defenders, after up to
+## FlagConfig.max_overtime while the attackers still work the rope. Plant The Bomb (PB1): the attackers carry the bomb
+## to a site and arm it (Plant); armed, it goes off when its fuse runs out, which wins them the round, unless the
+## defenders disarm it first, and wiping the attackers out no longer ends the round; before it is armed the time-out
+## goes to the defenders, after up to PlantConfig.max_overtime while the carrier is arming it. After
+## RoundConfig.reset_delay (or, with RoundState.hold_next, at end_wait) everyone respawns for the next round, until a
+## team has wins_needed wins and a lead of win_by: the match is over until start_match. Ends swap after half_time_after
+## decided rounds, so an uneven map is fair over a match. start_match sets a match up before the first tick; step runs
+## once a tick and allocates nothing.
 
 
 ## A new match from round 1: scores cleared, fire selectors back to their defaults (held to the field's start mode), every character placed at its team's end and respawned, no BBs in flight,
@@ -24,6 +25,7 @@ static func start_match(rs: RoundState, characters: Array[Character], ends: Arra
 	rs.match_winner = -1
 	rs.winner = -1
 	rs.reason = GameEvent.RoundEnd.ELIMINATED
+	rs.respawns = Respawns.on_in(tuning.rounds, rs.mode) and not rs.practice
 	for c in characters:
 		c.armament.reset_fire_modes(rs.start_mode)
 		c.armament.reset_hop_ups()
@@ -60,7 +62,8 @@ static func step(rs: RoundState, characters: Array[Character], ends: Array[MapEn
 	var alpha_in_play := 0
 	var beta_in_play := 0
 	for c in characters:
-		var playing := 1 if Elimination.is_in_play(c) else 0
+		# One with a respawn coming (RS1) is still in it: a team is wiped out only with nobody left to come back.
+		var playing := 1 if Elimination.is_in_play(c) or Respawns.waiting(c) else 0
 		if c.team == 0:
 			alpha += 1
 			alpha_in_play += playing
@@ -87,7 +90,7 @@ static func step(rs: RoundState, characters: Array[Character], ends: Array[MapEn
 ## plays on until they stop or max_overtime has run.
 static func _step_flag_clock(rs: RoundState, characters: Array[Character], tuning: SimTuning, events: SimEvents,
 		dt: float) -> void:
-	if Flag.step_all(rs.flags, characters, rs.attackers, tuning.flag, events, dt):
+	if Flag.step_all(rs.flags, characters, rs.attackers, tuning.flag, events, dt, Respawns.slip_time(rs, tuning.flag)):
 		_end_round(rs, rs.attackers, GameEvent.RoundEnd.CAPTURED, tuning.rounds, events)
 		return
 	if rs.clock > 0.0:

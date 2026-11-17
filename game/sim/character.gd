@@ -26,6 +26,10 @@ var walk_off_leg: int = 0
 var walk_off_route_pending: bool = false
 ## Seconds it has made no real progress walking off.
 var walk_off_stuck: float = 0.0
+## Out of play with a respawn coming (RS1): the seconds left until it comes back, -1 with none. And the spawn it comes
+## back at, as its controller picks it (PlayerCommand.spawn_pick: 0 the start area, k its end's forward spawn k - 1).
+var respawn_left: float = -1.0
+var spawn_pick: int = 0
 
 ## Feet: the bottom of the collision capsule.
 var position: Vector3 = Vector3.ZERO
@@ -180,10 +184,16 @@ func rescue_if_out_of_world(kill_y: float) -> bool:
 ## Back at its spawn for a new round: in play, standing, full magazines, the torch off; fire selectors and hop-up dials
 ## kept.
 func respawn() -> void:
-	position = spawn_position
-	prev_position = spawn_position
+	respawn_at(spawn_position, spawn_yaw)
+
+
+## Back in play standing at `at`, facing `facing` (respawn: its spawn; Respawns: the spawn picked mid-round), with
+## nothing of its last life kept: full magazines and bombs, upright, the hand down, no respawn waiting.
+func respawn_at(at: Vector3, facing: float) -> void:
+	position = at
+	prev_position = at
 	velocity = Vector3.ZERO
-	yaw = spawn_yaw
+	yaw = facing
 	pitch = 0.0
 	prev_yaw = yaw
 	prev_pitch = 0.0
@@ -220,6 +230,8 @@ func respawn() -> void:
 	status_time = 0.0
 	hit_by = -1
 	walk_off_stuck = 0.0
+	respawn_left = -1.0
+	spawn_pick = 0
 	walk_off_route_pending = false
 	walk_off_route.clear()
 	walk_off_leg = 0

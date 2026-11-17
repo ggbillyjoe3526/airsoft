@@ -14,6 +14,8 @@ var characters: Array[Character] = []
 var bots: Array[Bot] = []
 ## The map's lanes (walkable points from end 0 to end 1) and its cover blocks (BotCover).
 var lanes: Array[PackedVector3Array] = []
+## The map's two ends: where a hit bot may come back (MapEnd.forward, RS1).
+var ends: Array[MapEnd] = []
 var low_cover: Array[BotCover.Block] = []
 var tall_cover: Array[BotCover.Block] = []
 ## The bushes tall enough to hide someone (BotConfig.angle_bush_min_height), as (x, z, radius) in plan, which held
@@ -29,6 +31,8 @@ var round_clock: float = INF
 ## (RoundState's, read each tick) and the one in play (BotFlag.in_play: the one going for, or to pull down).
 var mode: RoundState.Mode = RoundState.Mode.ELIMINATION
 var attackers: int = -1
+## Whether hit characters come back this match (RoundState.respawns, RS1).
+var respawns: bool = false
 var flags: Array[FlagState] = [FlagState.new()]
 var flag: FlagState = flags[0]
 var flag_index: int = 0

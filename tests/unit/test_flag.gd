@@ -20,6 +20,8 @@ var seen: Array[Vector3i] = []
 func before_each() -> void:
 	tuning = SimTuning.new()
 	rules = tuning.rounds
+	# One life a round (RS1): this checks the flag and its retakers as they play without respawns.
+	rules.respawns = RoundConfig.RespawnRule.NEVER
 	rules.round_time = 10.0
 	rules.reset_delay = 2.0
 	rules.wins_needed = 3

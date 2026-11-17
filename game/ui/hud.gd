@@ -167,6 +167,12 @@ var _board: HudScoreboard = null
 var _board_wanted: bool = false
 var _what_got_you: WhatGotYouCard = null
 var _skip_hint: PanelContainer = null
+## The respawn panel (RS1) over the watching line, and the map's ends it reads the places from (empty: none set up).
+var _respawn: HudRespawn = null
+## Coming back after a hit (RS1): the dark the screen comes up out of, and its seconds left.
+var _back_fade: ColorRect = null
+var _back_left: float = 0.0
+var _ends: Array[MapEnd] = []
 var _skip_key: Label = null
 ## The graphics step-down's line, its words and its seconds left.
 var _step_line: PanelContainer = null
@@ -212,6 +218,13 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	theme = GameTheme.get_theme()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Coming back after a hit (RS1): the screen comes up out of dark, under everything else.
+	_back_fade = ColorRect.new()
+	_back_fade.color = Color(0.0, 0.0, 0.0, 0.0)
+	_back_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_back_fade.visible = false
+	add_child(_back_fade)
+	_back_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	# Teammate markers under everything else (setup_field fills them), the hit feed in its corner.
 	_team_markers = HudTeamMarkers.new()
 	add_child(_team_markers)
@@ -354,6 +367,8 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	bottom.alignment = BoxContainer.ALIGNMENT_END
 	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	add_child(bottom)
+	_respawn = HudRespawn.new()
+	bottom.add_child(_respawn)
 	_watching = HudStyle.label(bottom, HudStyle.AIM_SIZE, 700, Color(GameTheme.TEXT, 0.8), HORIZONTAL_ALIGNMENT_CENTER,
 			HudStyle.SPACING_AIM)
 	_watching.uppercase = true
@@ -852,6 +867,20 @@ func what_got_you() -> WhatGotYouCard:
 	return _what_got_you
 
 
+## The map's ends, whose start areas and forward spawns the respawn panel offers (RS1).
+func setup_respawns(ends: Array[MapEnd]) -> void:
+	_ends = ends
+
+
+func respawn_panel() -> HudRespawn:
+	return _respawn
+
+
+## How dark the screen is now as you come back after a hit (0: clear), for tests.
+func back_in_dark() -> float:
+	return _back_fade.color.a if _back_fade.visible else 0.0
+
+
 ## Whether "SPACE Hold to skip the round" shows (you are out and the round plays on); the key is Fire's as bound now.
 func set_skip_hint(show: bool) -> void:
 	if show == _skip_hint.visible:
@@ -917,6 +946,13 @@ func on_tick(state: GameState, mag_from_wheel: bool = false) -> void:
 				if e.actor == _player.id and e.target < 0 and e.value == BBStep.IN_LEAVES \
 						and e.position.distance_to(Lean.eye(_player, _sim.body, _sim.hits)) <= _cfg.leaves_notice_near:
 					_leaves_left = _cfg.leaves_notice_time
+			GameEvent.Kind.RESPAWNED:
+				if e.actor == _player.id:
+					_back_left = _cfg.back_in_fade
+					# Never over a round's own banner.
+					if not _banner.visible:
+						_show_banner("", HudStyle.caps("HUD_BACK_IN"))
+						_banner_left = _cfg.back_in_time
 			GameEvent.Kind.ROUND_COUNT:
 				_count.count(e.value)
 			GameEvent.Kind.ROUND_GO:
@@ -1030,8 +1066,14 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		_step_left -= delta
 		_step_line.visible = _step_left > 0.0
 	_vault_prompt.visible = _vault_left > 0.0 and in_play
+	if not _ends.is_empty():
+		_respawn.show_for(c, state.round_state, _ends, state.characters, _rounds)
 	_door_prompt.visible = _door_want != DoorPrompt.NONE and in_play and not _vault_prompt.visible
 	_leaves_left = maxf(0.0, _leaves_left - delta)
+	if _back_left > 0.0 or _back_fade.visible:
+		_back_left = maxf(0.0, _back_left - delta)
+		_back_fade.visible = _back_left > 0.0
+		_back_fade.color.a = _cfg.back_in_dark * _back_left / maxf(_cfg.back_in_fade, 0.001)
 	_leaves_notice.visible = _leaves_left > 0.0 and in_play
 	_reload_prompt.show_when(manual_reload and in_play and state.round_state.is_live() and a.reload_due())
 	# The round's stamp stays up as long as the table under it, the match's banner as long as the XP.

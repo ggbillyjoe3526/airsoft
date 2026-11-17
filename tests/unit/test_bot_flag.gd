@@ -7,7 +7,8 @@ extends GutTest
 
 const DT := 1.0 / 60.0
 
-var tuning: SimTuning = SimTuning.load_default()
+## One life a round (RS1): the rules here as they play without respawns.
+var tuning: SimTuning = MatchGuard.one_life(SimTuning.load_default())
 var config: BotConfig = BotConfig.load_default()
 var map: MapData = null
 var level: MapLevel = null

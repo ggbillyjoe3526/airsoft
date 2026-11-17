@@ -282,6 +282,8 @@ var _watch_input: PlayerCommand = PlayerCommand.new()
 var _intents: BotIntentView = null
 var _retro: RetroFilter = null
 var _rematch_left: float = -1.0
+## Where you come back when out with a respawn coming (RS1, PlayerCommand.spawn_pick): 0 the start area.
+var _spawn_pick: int = 0
 ## Skipping the round you are out of: the rest is played out at once under the cover with the HUD hidden and no sound;
 ## whether the trigger was up once you could skip (a press made before does not count); the cover and its line.
 var _skipping: bool = false
@@ -1132,6 +1134,7 @@ func _build_views_rest(ui: CanvasLayer) -> void:
 	_hud.setup_orders(_play.controls)
 	if not practice:
 		_hud.setup_mag_line(_sim.mag_share, state.characters.size())
+		_hud.setup_respawns(_sim.ends)
 	if _overtime_flag != null:
 		_hud.use_overtime_flag()
 	if practice:
@@ -1246,6 +1249,10 @@ func _tick() -> void:
 	_input.allow_orders(not practice, Elimination.is_in_play(player))
 	# Shut under the scoreboard and the match's summary, so a hidden pointer never takes the mouse.
 	_input.allow_map(_hud.field_map() != null and not _input.scoreboard_held() and not _hud.summary_up())
+	# Out with a respawn coming (RS1): the keys and the wheel pick where you come back, taken before the command is
+	# filled (the replica's use of them counts for nothing while out); the pick is held from one time out to the next.
+	if not autopilot and _pilot == null and Respawns.waiting(player):
+		_spawn_pick = _input.spawn_pick(_spawn_pick, _spawn_places())
 	if _pilot != null:
 		_pilot.fill(_commands[PLAYER_ID], player, state.targets, _tuning.body)
 	elif _spectate_any and not autopilot:
@@ -1257,6 +1264,8 @@ func _tick() -> void:
 	else:
 		# a bot plays you (the smoke test): your squad order keys still reach your teammates
 		_input.fill_order(_commands[PLAYER_ID])
+	if not autopilot and _pilot == null:
+		_commands[PLAYER_ID].spawn_pick = _spawn_pick
 	_sim.step(state, _commands, TICK)
 	_ticks += 1
 	# Played out: the tick the round ends in is heard and shown as usual (its whistle, the last hit's call).
@@ -1904,7 +1913,18 @@ func _open_pause() -> void:
 
 ## Whether you can skip the round: you are out of it (hit, walking off or in the dead zone) and it plays on.
 func can_skip() -> bool:
-	return not autopilot and state.round_state.is_live() and not Elimination.is_in_play(player)
+	return not autopilot and state.round_state.is_live() and not Elimination.is_in_play(player) \
+			and not Respawns.waiting(player)
+
+
+## The places you may come back at now (RS1): your start area and, where your team may use them, your end's forward
+## spawns (Respawns.forward_allowed), at most the respawn panel's keys.
+func _spawn_places() -> int:
+	var forward := 0
+	if player.end >= 0 and player.end < _sim.ends.size() and Respawns.forward_allowed(state.round_state, player.team,
+			_sim.tuning.rounds):
+		forward = _sim.ends[player.end].forward.size()
+	return mini(HudRespawn.KEYS.size(), 1 + forward)
 
 
 ## Whether the round is being skipped.

@@ -413,11 +413,18 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## attackers' way in.
 @export var defend_push_chance: float = 0.35
 @export var defend_push_share: float = 0.35
+
+@export_group("Respawns")
+## Hit with a respawn coming (RS1) and free to use its end's forward spawns, a bot picks one (at random) with this
+## chance, else its start area (BotRespawn.pick).
+@export var forward_spawn_chance: float = 0.6
 ## A defender goes after someone seen or heard within this far of the pole (m, and on the pole's floor:
 ## anchor_search_rise); further off, it watches that way from its post.
 @export var defend_search_radius: float = 12.0
 ## Once the flag is off the bottom, this many defending bots in play nearest the pole go to pull it down; the rest hold.
 @export var retakers: int = 2
+## ... with respawns (RS1): the attackers keep coming back to the pole, so more go to pull it down.
+@export var respawn_retakers: int = 6
 ## The attacker raising the flag keeps the rope unless another in flag mode is this much nearer the pole (m).
 @export var raiser_switch_margin: float = 3.0
 ## The raiser stands within this of the pole (m, inside the flag's reach), and counts as there within flag_arrive.

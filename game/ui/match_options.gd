@@ -106,20 +106,23 @@ static func team_size(map: MapCatalog.Entry, custom: CustomRules) -> int:
 
 ## The round tuning a match on `map` plays: `base` with the Custom switches in force (`custom`, null under Skirmish), the
 ## team size the map gives (team_size), under Skirmish the map's round length (data/maps.md Round, WR2) and, under
-## either, the map's flag raise time (data/maps.md Raise, MB3) and bomb fuse (data/maps.md Fuse, PB4). A copy wherever
+## either, the map's flag raise time (data/maps.md Raise, MB3), bomb fuse (data/maps.md Fuse, PB4) and defenders'
+## respawn (data/maps.md Defender respawn, RS1). A copy wherever
 ## it differs from `base`, which is never written (the loaded tuning is shared).
 static func match_tuning(base: SimTuning, map: MapCatalog.Entry, custom: CustomRules) -> SimTuning:
 	var t := base if custom == null else custom.applied_to(base)
 	var size := team_size(map, custom)
 	var length := round_time(map, custom, t.rounds.round_time)
 	var raise := raise_time(map, t.flag.raise_time)
-	if t.rounds.team_size != size or t.rounds.round_time != length:
+	var back := defender_respawn(map, t.rounds.defender_respawn_delay)
+	if t.rounds.team_size != size or t.rounds.round_time != length or t.rounds.defender_respawn_delay != back:
 		if t == base:
 			t = base.duplicate() as SimTuning
 		if t.rounds == base.rounds:
 			t.rounds = base.rounds.duplicate() as RoundConfig
 		t.rounds.team_size = size
 		t.rounds.round_time = length
+		t.rounds.defender_respawn_delay = back
 	if t.flag.raise_time != raise:
 		if t == base:
 			t = base.duplicate() as SimTuning
@@ -149,6 +152,14 @@ static func raise_time(map: MapCatalog.Entry, played: float) -> float:
 	if map == null or map.raise_time <= 0.0:
 		return played
 	return map.raise_time
+
+
+## The seconds a defender hit on `map` waits to come back: the map's own (data/maps.md Defender respawn), else
+## `played`, the round tuning's.
+static func defender_respawn(map: MapCatalog.Entry, played: float) -> float:
+	if map == null or map.defender_respawn <= 0.0:
+		return played
+	return map.defender_respawn
 
 
 ## The seconds from the bomb armed to it going off on `map`: the map's own (data/maps.md Fuse), else `played`, the bomb
@@ -196,7 +207,15 @@ static func rule_chips(rounds: RoundConfig, hits: HitConfig) -> Array[PackedStri
 	out.append(PackedStringArray([_tr("RULE_SWAP"), str(rounds.half_time_after)]))
 	out.append(PackedStringArray([_tr("RULE_RICOCHETS"), _tr(ricochets)]))
 	out.append(PackedStringArray([_tr("RULE_FRIENDLY_FIRE"), _tr(switch_key(hits.friendly_fire))]))
+	out.append(PackedStringArray([_tr("RULE_RESPAWNS"), _tr(respawns_key(rounds.respawns))]))
 	return out
+
+
+## The key of the respawn rule's word (RS1): Skirmish's by mode ("Not in Elimination"), or On or Off.
+static func respawns_key(respawns: RoundConfig.RespawnRule) -> String:
+	if respawns == RoundConfig.RespawnRule.BY_MODE:
+		return "RULE_RESPAWNS_BY_MODE"
+	return switch_key(respawns == RoundConfig.RespawnRule.ALWAYS)
 
 
 ## A chip as one line of text.
@@ -243,7 +262,7 @@ static func custom_blurb(cap: float, lit: Color) -> String:
 
 
 ## The line under a Custom row's buttons for the choice `value` (a team size, rounds to win, or a switch's 0 or 1): the
-## browser game's blurb of that choice. `row` is "TEAM", "WINS", "FRIENDLY_FIRE" or "RICOCHETS".
+## browser game's blurb of that choice. `row` is "TEAM", "WINS", "FRIENDLY_FIRE", "RICOCHETS" or "RESPAWNS".
 static func choice_blurb(row: String, value: int) -> String:
 	var words := _tr("RULE_%s_BLURB_%d" % [row, value])
 	return words % value if words.contains("%d") else words

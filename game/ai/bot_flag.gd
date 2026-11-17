@@ -85,24 +85,27 @@ static func spot(b: Bot, w: BotWorld) -> Vector3:
 ## pull its flag down once it is off the bottom (wants_flag); the rest hold their posts, so tagging a pole doesn't empty
 ## every lane. Re-picked every tick, so if one is hit the next nearest takes over. A bot under a squad order isn't
 ## picked: it does what it was asked. So a flag started at one pole draws defenders there while those fighting at the
-## other stay on its rope (AB1).
+## other stay on its rope (AB1). With respawns (RS1) the pole in play then draws more, up to `respawn_retakers`: the
+## attackers keep coming back to it.
 static func pick_retakers(w: BotWorld) -> void:
 	# Those on a worked rope stay on it first, whichever pole is filled first after (critic, attempt 3).
 	for b in w.bots:
 		b.retake_pole = -1
 		if _free_defender(b, w) and on_worked_rope(b, w) and w.flags[b.flag_pole].progress > 0.0:
 			b.retake_pole = b.flag_pole
-	_pick_for(w, w.flag_index)
+	_pick_for(w, w.flag_index, w.cfg.retakers)
 	for i in w.flags.size():
 		if i != w.flag_index:
-			_pick_for(w, i)
+			_pick_for(w, i, w.cfg.retakers)
+	if w.respawns:
+		_pick_for(w, w.flag_index, w.cfg.respawn_retakers)
 	for b in w.bots:
 		b.retake = b.retake_pole >= 0
 
 
 ## pick_retakers for pole `i` (another than the one in play only with its flag off the bottom): to those already on its
-## worked rope, the nearest free ones one at a time.
-static func _pick_for(w: BotWorld, i: int) -> void:
+## worked rope, the nearest free ones one at a time, up to `wanted`.
+static func _pick_for(w: BotWorld, i: int, wanted: int) -> void:
 	var f := w.flags[i]
 	if i != w.flag_index and f.progress <= 0.0:
 		return
@@ -110,7 +113,7 @@ static func _pick_for(w: BotWorld, i: int) -> void:
 	for b in w.bots:
 		if b.retake_pole == i:
 			picked += 1
-	while picked < w.cfg.retakers:
+	while picked < wanted:
 		var near: Bot = null
 		var best := INF
 		for b in w.bots:

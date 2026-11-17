@@ -46,7 +46,7 @@ func test_skirmish_shows_the_chips_and_its_blurb_and_no_rows() -> void:
 	assert_false(box.rows_visible())
 	assert_eq(box.blurb_text(), "The match as you know it: 6v6, first to 5, 2:30 rounds, friendly fire on.")
 	assert_eq(page.chip_texts(), PackedStringArray(["6 v 6", "First to 5", "Rounds 2:30", "Ends swap after 4",
-			"Ricochets Don't count", "Friendly fire On"]))
+			"Ricochets Don't count", "Friendly fire On", "Respawns Not in Elimination"]))
 	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots")
 
 
@@ -90,7 +90,9 @@ func test_the_rows_start_on_the_settings_and_carry_their_blurbs() -> void:
 	assert_eq(box.row_blurbs(), PackedStringArray(["You and five bot teammates against six bots.",
 			"A long match: first to 7 round wins.",
 			"BBs pass your teammates by: only the other team can knock you out.",
-			"A bounced BB still knocks out whoever it hits, as at fields that count ricochets."]))
+			"A bounced BB still knocks out whoever it hits, as at fields that count ricochets.",
+			"As each mode plays: back after a short wait in Attack / Defend and Plant The Bomb (until the bomb is armed), "
+			+ "one life in Elimination."]))
 	var words := PackedStringArray()
 	for b in box.team_size_choice().find_children("*", "Button", true, false):
 		if (b as Button).visible:
@@ -210,7 +212,7 @@ func test_the_elimination_card_and_the_chips_follow_the_custom_switches() -> voi
 	page.rules_box().ricochets_choice().button(1).pressed.emit()
 	page.rules_box().friendly_fire_choice().button(0).pressed.emit()
 	assert_eq(page.chip_texts(), PackedStringArray(["6 v 6", "First to 7", "Rounds 1:30", "Ends swap after 6",
-			"Ricochets Count", "Friendly fire Off"]))
+			"Ricochets Count", "Friendly fire Off", "Respawns Not in Elimination"]))
 	page.rules_box().rules_button(SKIRMISH).pressed.emit()
 	assert_eq(page.mode_blurb(MatchOptions.MODE_ELIMINATION), "Knock out the other team. First to 5 rounds.")
 	assert_eq(page.chip_texts()[0], "6 v 6", "back on Skirmish the page plays Depot's standard")

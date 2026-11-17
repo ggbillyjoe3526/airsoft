@@ -33,6 +33,8 @@ SLACK = 0.02         # boxes overlapping less than this on an axis don't clash
 GROW = 0.01          # each floor and ramp grown this much a side
 EYE_FACING_EAST = -math.pi / 2
 EYE_FACING_WEST = math.pi / 2
+
+FORWARD_SPOTS = [(-0.5, -0.5), (0.5, -0.5), (-0.5, 0.5), (0.5, 0.5)]   # a forward spawn's four spots, 1 m apart (RS1)
 SHAFT_COLOUR = 0x9c978d   # the shafts' walls, as MT1's shut shaft
 # Nothing hung on a shaft's face this near a lift's door (m beside each jamb: its call button 0.3 m out, LiftConfig
 # .call_beside, and its plate), nor this far out from the face (the owner, 2026-11-17: a poster over a lift door).
@@ -758,6 +760,12 @@ def spot(x: float, z: float, y: float, yaw: float) -> dict:
     return {"position": {"x": x, "y": r(floor_y(x, z, y) + LIFT), "z": z}, "yaw": yaw}
 
 
+def forward(places: list[tuple], yaw: float) -> list[dict]:
+    """An end's forward spawns (RS1): each named place's four spots, 1 m apart round it, on the floor nearest its level."""
+    return [{"name": name, "spots": [spot(x + dx, z + dz, y, yaw) for dx, dz in FORWARD_SPOTS]}
+            for name, x, z, y in places]
+
+
 def build() -> dict:
     shell_boxes, ramps = shell()
     sp_ramps, sp_boxes = spiral()
@@ -832,6 +840,7 @@ def build() -> dict:
                    [spot(x, z, L.T, EYE_FACING_WEST) for x, z in L.SPAWNS_E]],
         "deadZones": [[spot(x, z, L.SPAWN_Y_W, EYE_FACING_EAST) for x, z in L.DEAD_W],
                       [spot(x, z, L.T, EYE_FACING_WEST) for x, z in L.DEAD_E]],
+        "forwardSpawns": [forward(L.FORWARD_W, EYE_FACING_EAST), forward(L.FORWARD_E, EYE_FACING_WEST)],
         "lanes": [[lane_point(*p) for p in lane] for lane in L.LANES.values()],
         "flags": [{"x": x, "y": r(y + LIFT), "z": z} for x, z, y in L.FLAGS],
         "bombSites": [{"x": x, "y": r(y + LIFT), "z": z, "radius": radius} for x, z, y, radius in L.BOMB_SITES],

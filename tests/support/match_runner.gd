@@ -70,6 +70,8 @@ class RoundTally:
 	var site: int = -1
 	var drops: int = 0
 	var top_defuse: float = 0.0
+	## Hit characters back in the round (RS1, RESPAWNED events).
+	var respawns: int = 0
 
 
 ## One match: its rounds and everything that must never happen, counted.
@@ -110,6 +112,8 @@ class MatchTally:
 	var hits: int = 0
 	## BBs fired (SHOT events): the callouts' guard plays a match with and without them and compares.
 	var shots: int = 0
+	## Hit characters back in play (RS1), over the match.
+	var respawns: int = 0
 	var friendly_hits: int = 0
 	var self_hits: int = 0
 	var friendly_ricochets: int = 0
@@ -263,7 +267,7 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 ## The round tuning a match on `map_id` plays in the guards and the balance report: `base` (the loaded tuning by
 ## default) where the map offers its team size and has no round length of its own, else a copy at the map's standard
 ## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game), its round length, its flag raise time and
-## its bomb fuse, as a Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00, a 9 s raise and its
+## its bomb fuse and its defenders' respawn (RS1), as a Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00, a 9 s raise and its
 ## own fuse. With `picked` (a Custom size, TS1), that size where the map offers it, else its standard.
 static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -> SimTuning:
 	var t := base if base != null else SimTuning.load_default()
@@ -274,13 +278,15 @@ static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -
 	var size := entry.team_size_for(picked if picked > 0 else t.rounds.team_size)
 	var raise := MatchOptions.raise_time(entry, t.flag.raise_time)
 	var fuse := MatchOptions.fuse_time(entry, t.plant.fuse_time)
+	var back := MatchOptions.defender_respawn(entry, t.rounds.defender_respawn_delay)
 	if size == t.rounds.team_size and t.rounds.round_time == length and t.flag.raise_time == raise \
-			and t.plant.fuse_time == fuse:
+			and t.plant.fuse_time == fuse and t.rounds.defender_respawn_delay == back:
 		return t
 	var sized := t.duplicate() as SimTuning
 	sized.rounds = t.rounds.duplicate() as RoundConfig
 	sized.rounds.team_size = size
 	sized.rounds.round_time = length
+	sized.rounds.defender_respawn_delay = back
 	sized.flag = t.flag.duplicate() as FlagConfig
 	sized.flag.raise_time = raise
 	sized.plant = t.plant.duplicate() as PlantConfig
@@ -447,6 +453,9 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 					t.rings += 1
 				GameEvent.Kind.OVERTIME:
 					round_now.overtime = true
+				GameEvent.Kind.RESPAWNED:
+					t.respawns += 1
+					round_now.respawns += 1
 				GameEvent.Kind.PLANT:
 					match e.value:
 						Plant.Cue.PICKED_UP:

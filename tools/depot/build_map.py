@@ -37,6 +37,8 @@ SILL, LINTEL = 1.0, 2.0
 EYE_FACING_EAST = -math.pi / 2  # yaw -90 degrees looks along +x
 EYE_FACING_WEST = math.pi / 2
 
+FORWARD_SPOTS = [(-0.5, -0.5), (0.5, -0.5), (-0.5, 0.5), (0.5, 0.5)]   # a forward spawn's four spots, 1 m apart (RS1)
+
 
 def r(v: float) -> float:
     return round(v, 3)
@@ -140,6 +142,11 @@ def bomb_site(x: float, z: float, radius: float) -> dict:
 def dead_zone(cx: float, cz: float, yaw: float) -> list[dict]:
     """Eight walk-off spots (8v8, TS1): two columns of four, 0.8 m apart, round (cx, cz)."""
     return [spot(cx + dx, cz + dz, yaw) for dz in (-1.2, -0.4, 0.4, 1.2) for dx in (-0.4, 0.4)]
+
+
+def forward(places: list[tuple], yaw: float) -> list[dict]:
+    """An end's forward spawns (RS1): each named place's four spots, 1 m apart round it."""
+    return [{"name": name, "spots": [spot(x + dx, z + dz, yaw) for dx, dz in FORWARD_SPOTS]} for name, x, z in places]
 
 
 def areas() -> list[dict]:
@@ -269,6 +276,7 @@ def build() -> dict:
         "spawns": [[spot(x, z, EYE_FACING_EAST) for x, z in L.SPAWNS_W],
                    [spot(x, z, EYE_FACING_WEST) for x, z in L.SPAWNS_E]],
         "deadZones": [dead_zone(*L.DEAD_W, EYE_FACING_EAST), dead_zone(*L.DEAD_E, EYE_FACING_WEST)],
+        "forwardSpawns": [forward(L.FORWARD_W, EYE_FACING_EAST), forward(L.FORWARD_E, EYE_FACING_WEST)],
         "lanes": [[{"x": x, "y": 0, "z": z} for x, z in L.LANES[k]] for k in L.LANE_ORDER],
         "flags": [{"x": x, "y": 0, "z": z} for x, z in L.FLAGS],
         "bombSites": [bomb_site(*s) for s in L.BOMB_SITES],

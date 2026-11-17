@@ -3,6 +3,9 @@ extends RefCounted
 ## The one input every character acts through (docs/ARCHITECTURE.md › Contracts 2): the player's controller and each
 ## bot fill one per tick, and nothing else moves a character. View angles are absolute.
 
+## Out of play with a respawn coming (RS1): where to come back, held, not a press: 0 the start area, k the end's forward
+## spawn k - 1 (MapEnd.forward). The simulation reads it only then (Respawns).
+var spawn_pick: int = 0
 ## -1..1, forward positive, relative to yaw.
 var forward: float = 0.0
 ## -1..1, right positive, relative to yaw.
@@ -99,6 +102,7 @@ var lift_stop: int = -1
 
 ## Back to no input, looking along (yaw, pitch).
 func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
+	spawn_pick = 0
 	forward = 0.0
 	right = 0.0
 	yaw = view_yaw

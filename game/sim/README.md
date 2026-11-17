@@ -29,7 +29,7 @@ and, on the range, `test_range_map.gd`).
 | `sound_path.gd` | `SoundPath`: the share of rays from an ear to a character's knees and head that the level blocks, and a line stopping short of a surface; the bots' hearing and the player's muffling hear through the same walls |
 | `railings.gd` | `Railings`: a map's bar railings (SR1), each a block's box of square bars between a top and a bottom rail (RailingConfig); the first bar or rail a BB's path crosses, filed in a grid, and each run's parts for drawing |
 | `box_world.gd` | A level of boxes answering both interfaces without a physics engine, for headless tests and tools |
-| `map_end.gd`, `spawn_point.gd` | A map's two ends: spawns and dead-zone spots |
+| `map_end.gd`, `spawn_point.gd`, `forward_spawn.gd` | A map's two ends: spawns, dead-zone spots and forward spawns (RS1) |
 | `movement.gd`, `accuracy.gd`, `aiming.gd`, `footsteps.gd` | Paces, crouch and jump; spread by stance and motion; aiming down sights; footsteps and landings (further on gravel and steel plate: the event's carry) |
 | `lean.gd` | Q / E held: the one lean geometry (eyes, BB origin, hit volume, camera, figure, bot vision), stopped short of walls |
 | `vault.gd`, `vault_state.gd` | Jump at a low obstacle: finding one with level rays, the path through the mover, fire held after, presses kept |
@@ -45,6 +45,7 @@ and, on the range, `test_range_map.gd`).
 | `hit_fit.gd`, `hit_pose.gd` | HV1: the human figure's joints baked from its own animation graph (`tools/hit_fit_bake.gd`), and posed from them as the graph and FigureBend pose the drawn figure |
 | `upper_blend.gd` | BP6: the arms' eases into and out of the holster and the sprint, each tick, as the drawn figure eases them, so the hit volume follows them |
 | `elimination.gd` | Hit calling: alive, calling, walking off, leaving, out |
+| `respawns.gd` | Respawns (RS1): which modes bring hits back, each wait, the pick of the start area or a forward spawn (shut with an enemy near), coming back, and an untended flag slipping down |
 | `round.gd`, `round_state.gd` | Rounds in Elimination and Attack / Defend: clock, score, half time, reset, match over; the flag's time-out and overtime; Elimination's overtime flag at the buzzer; the practice switch (no rounds, no clock) |
 | `range_target.gd`, `range_targets.gd` | Practice range targets: steel plates (front only, on posts), figures with a player's hit volume that fall and rise, pop-ups, movers and swingers on seeded times; BBs stop on them as `TARGET_HIT`; full spares in practice |
 | `range_challenge.gd` | The range's timed challenge: ready on the START plate, a counted-down start, lit targets picked from the match's stream for a timed run, cues as `CHALLENGE` events, and the run's best (none with a Dev cheat on since START) |

@@ -27,10 +27,13 @@ const ROUND_SLACK := 0.1
 
 
 ## A runner on `map_id` at the team size the game plays there (MatchRunner.sized_for: 6v6 on every field), at `level`,
-## at night when `night` is set or the map offers no day, else by day; with `base`'s tuning when given.
+## at night when `night` is set or the map offers no day, else by day; with `base`'s tuning when given. One life a
+## round (one_life) unless `respawns`.
 static func runner(test: GutTest, map_id: String, level: StringName, night: bool,
-		mode: RoundState.Mode = RoundState.Mode.ELIMINATION, base: SimTuning = null) -> MatchRunner:
-	var r := MatchRunner.new(test, map_id, MatchRunner.sized_for(map_id, base))
+		mode: RoundState.Mode = RoundState.Mode.ELIMINATION, base: SimTuning = null,
+		respawns: bool = false) -> MatchRunner:
+	var t := base if base != null else SimTuning.load_default()
+	var r := MatchRunner.new(test, map_id, MatchRunner.sized_for(map_id, t if respawns else one_life(t)))
 	r.difficulty = level
 	r.night = night or r.night
 	r.mode = mode
@@ -38,6 +41,46 @@ static func runner(test: GutTest, map_id: String, level: StringName, night: bool
 	test.assert_eq(r.map.problems, [] as Array[String], "%s loads" % map_id)
 	test.assert_lt(r.lowest_floor, INF, "%s has a floor to guard" % map_id)
 	return r
+
+
+## `base` with respawns off (RS1): the guards were measured one life a round, and what a respawn plays (the bots'
+## errands, a stalled round) is theirs to guard either way; respawn_match guards the respawns themselves, and the
+## balance report plays them as the game does. A copy: the loaded tuning stays as it is.
+static func one_life(base: SimTuning) -> SimTuning:
+	var t := base.duplicate() as SimTuning
+	t.rounds = base.rounds.duplicate() as RoundConfig
+	t.rounds.respawns = RoundConfig.RespawnRule.NEVER
+	return t
+
+
+## `mode` with respawns as the game plays them (RS1) over `seeds` seeds: every match won, no round past the clock and
+## its overtime, no round won by a wipe-out while respawns stay open (Attack / Defend; Plant The Bomb's shut at the
+## plant), hit bots back in the round in every match, and nobody held up, out of the level or knocked out by a teammate.
+## Returns [rounds, respawns, rounds won by the attackers].
+static func respawn_match(test: GutTest, map_id: String, mode: RoundState.Mode, seeds: int) -> PackedInt32Array:
+	var r: MatchRunner = await runner(test, map_id, &"normal", false, mode, null, true)
+	var name := label(r, map_id) + " respawns"
+	var longest := longest_round(r.tuning, mode)
+	var t := PackedInt32Array([0, 0, 0])
+	for seed_value in range(1, seeds + 1):
+		var m := r.play(seed_value, MAX_MATCH_SECONDS * 2.0)
+		var at := "%s seed %d" % [name, seed_value]
+		test.assert_true(m.finished, "%s: the match is won" % at)
+		test.assert_gt(m.respawns, 0, "%s: hit bots come back" % at)
+		t[0] += m.rounds.size()
+		t[1] += m.respawns
+		for round_tally in m.rounds:
+			test.assert_lte(round_tally.seconds, longest, "%s: no round runs past the clock and its overtime" % at)
+			if mode == RoundState.Mode.ATTACK_DEFEND:
+				test.assert_ne(round_tally.reason, GameEvent.RoundEnd.ELIMINATED, "%s: nobody is wiped out" % at)
+			if round_tally.winner >= 0 and round_tally.winner == round_tally.attackers:
+				t[2] += 1
+		_heights(test, r, m, at)
+		test.assert_lte(m.held_up, HELD_UP_MAX, "%s: bots aren't held up on their way" % at)
+		test.assert_eq(m.friendly_hits, 0, "%s: no bot knocks out a teammate" % at)
+	test.gut.p("%s: %d rounds over %d seeds, %d respawns, %d to the attackers" % [name, t[0], seeds, t[1], t[2]])
+	r.free_level()
+	return t
 
 
 ## The name a runner's field, level and time of day print under ("woodland hard night").

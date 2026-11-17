@@ -116,6 +116,46 @@ func plan(w: BotWorld) -> void:
 				b.lane_shift = shift
 
 
+## A bot back in the round mid-way (RS1, Respawns): a fresh life (Bot.reset) on the lane passing nearest where it came
+## back, walked on from the point ahead of it there (BotMovement.resume_point) as its team's plan walks a lane:
+## defending, to its first or, with defend_forward_chance, second point, where it holds; otherwise as walk_points says.
+## It sets off at once at its team's pace. Its draws are its own (Bot.rng), so a respawn never moves the plan's streams.
+func rejoin(b: Bot, w: BotWorld) -> void:
+	var c := b.character
+	var lane := nearest_lane(c.position, w.lanes)
+	var points := 0
+	if lane >= 0:
+		var defending := RoundState.has_sides(w.mode) and w.attackers >= 0 and c.team != w.attackers
+		if defending:
+			points = mini(w.lanes[lane].size(), 2 if b.rng.randf() < w.cfg.defend_forward_chance else 1)
+		else:
+			points = walk_points(b, lane, w)
+	b.reset(lane, points, 0.0, w.cfg)
+	b.pace = paces[c.team] if c.team >= 0 and c.team < paces.size() else 1.0
+	if lane >= 0 and points > 0:
+		b.lane_index = 0 if b.lane_dir > 0 else w.lanes[lane].size() - 1
+		b.lane_index = BotMovement.resume_point(b, w) - b.lane_dir
+
+
+## The lane (index) passing nearest `at` on the flat, -1 with none.
+static func nearest_lane(at: Vector3, lanes: Array[PackedVector3Array]) -> int:
+	var best := -1
+	var best_d := INF
+	var flat := Vector3(at.x, 0.0, at.z)
+	for i in lanes.size():
+		var points := lanes[i]
+		for k in points.size():
+			var a := Vector3(points[k].x, 0.0, points[k].z)
+			var d := a.distance_squared_to(flat)
+			if k + 1 < points.size():
+				var e := Vector3(points[k + 1].x, 0.0, points[k + 1].z)
+				d = Geometry3D.get_closest_point_to_segment(flat, a, e).distance_squared_to(flat)
+			if d < best_d:
+				best_d = d
+				best = i
+	return best
+
+
 ## How many points of `lane` bot `b` walks from its end before it is done with it (not a defender, who holds a post):
 ## in Attack / Defend an attacker walks to the first past the middle (then makes for the pole), in Elimination an anchor
 ## (bots.md › Holds until) only to the last short of the middle, where it holds (BotPersonality.anchor_holding); anyone

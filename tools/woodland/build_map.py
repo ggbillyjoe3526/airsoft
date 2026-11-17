@@ -83,6 +83,8 @@ BUSH_HEIGHT = 1.7
 TOWER_RAMP_WIDTH = 1.2
 EYE_FACING_EAST = -math.pi / 2  # yaw -90 degrees looks along +x
 EYE_FACING_WEST = math.pi / 2
+
+FORWARD_SPOTS = [(-0.5, -0.5), (0.5, -0.5), (-0.5, 0.5), (0.5, 0.5)]   # a forward spawn's four spots, 1 m apart (RS1)
 FIRE, LANTERN = 0xFF9A4A, 0xFFD27A
 BOT_SIGHT = 60.0
 
@@ -539,6 +541,13 @@ def spawns() -> list[list[dict]]:
             [{"position": spot(x, z), "yaw": EYE_FACING_WEST} for (x, z) in L.SPAWNS_E]]
 
 
+def forward_spawns() -> list[list[dict]]:
+    """Each end's forward spawns (RS1): each named place's four spots, 1 m apart round it, on the ground there."""
+    return [[{"name": name, "spots": [{"position": spot(x + dx, z + dz), "yaw": yaw} for dx, dz in FORWARD_SPOTS]}
+             for name, x, z in places]
+            for places, yaw in ((L.FORWARD_W, EYE_FACING_EAST), (L.FORWARD_E, EYE_FACING_WEST))]
+
+
 def dead_zones() -> list[list[dict]]:
     out = []
     for (cx, cz), yaw in ((L.DEAD_W, EYE_FACING_EAST), (L.DEAD_E, EYE_FACING_WEST)):
@@ -717,6 +726,7 @@ def main() -> None:
         "killY": -10,
         "spawns": spawns(),
         "deadZones": dead_zones(),
+        "forwardSpawns": forward_spawns(),
         "lanes": lanes(),
         "flags": [spot(x, z) for x, z in L.FLAGS],
         "bombSites": [bomb_site(*s) for s in L.BOMB_SITES],

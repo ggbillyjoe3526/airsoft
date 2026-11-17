@@ -54,6 +54,9 @@ msgstr "%d m"
 msgid "HUD_METRES_PLUS"
 msgstr "%d m+"
 
+msgid "HUD_BACK_IN"
+msgstr "Back in"
+
 msgid "HUD_RICOCHET"
 msgstr "Ricochet: play on"
 
@@ -1058,6 +1061,25 @@ msgstr "A BB that has bounced off a wall or the floor ticks you, but you're stil
 
 msgid "RULE_RICOCHETS_BLURB_1"
 msgstr "A bounced BB still knocks out whoever it hits, as at fields that count ricochets."
+
+msgid "RULE_RESPAWNS"
+msgstr "Respawns"
+
+msgid "RULE_RESPAWNS_BY_MODE"
+msgstr "Not in Elimination"
+
+# The Custom rules button for respawns as each mode plays (short, so the row fits).
+msgid "RULE_RESPAWNS_MODE_BUTTON"
+msgstr "By mode"
+
+msgid "RULE_RESPAWNS_BLURB_0"
+msgstr "As each mode plays: back after a short wait in Attack / Defend and Plant The Bomb (until the bomb is armed), one life in Elimination."
+
+msgid "RULE_RESPAWNS_BLURB_1"
+msgstr "Hit, you walk off and come back after a short wait, at your start or a forward spawn, in every mode. Plant The Bomb stops them once the bomb is armed."
+
+msgid "RULE_RESPAWNS_BLURB_2"
+msgstr "One life a round in every mode: hit, you walk off and wait for the next round."
 
 msgid "MENU_SUMMARY_REST"
 msgstr "%s · %s · %s bots"
@@ -2330,6 +2352,13 @@ msgstr "No"
 
 msgid "HUD_SKIP_PRESS"
 msgstr "Press to skip the round"
+
+msgid "HUD_RESPAWN_IN"
+msgstr "RESPAWN IN %d"
+
+msgid "HUD_RESPAWN_START"
+msgstr "Start area"
+
 
 msgid "HUD_GRAPHICS_KICKER"
 msgstr "Graphics"

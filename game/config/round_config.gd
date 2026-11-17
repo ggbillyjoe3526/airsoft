@@ -25,3 +25,25 @@ extends Resource
 ## attackers' highest flag in Attack / Defend (a flag going up favours them).
 @export var simulate_power: float = 2.0
 @export var simulate_flag_lead: float = 2.0
+
+## Respawns (RS1, owner 2026-11-17: "matches should let players/bots respawn", so a round runs its clock): a hit
+## character calls it and walks off as ever, then comes back into the round at its start area, or at a forward spawn of
+## its end it picked, a delay after the hit. BY_MODE (Skirmish): in Attack / Defend, and in Plant The Bomb until the bomb
+## is armed; never in Elimination, where one life is the mode. ALWAYS and NEVER: the Custom rule's On and Off (in Plant
+## The Bomb On still ends at the plant).
+enum RespawnRule { BY_MODE, ALWAYS, NEVER }
+@export var respawns: RespawnRule = RespawnRule.BY_MODE
+## Seconds from a hit to coming back: the attackers' (and either team's in Elimination), and the defenders' in Attack /
+## Defend, where a field may set its own (data/maps.md Defender respawn: bot matches put the
+## attackers near half the rounds with Depot 15, Woodland 5, Subway 7).
+@export var respawn_delay: float = 10.0
+@export var defender_respawn_delay: float = 10.0
+## ... and Plant The Bomb's defenders' (no field sets its own): until the bomb is armed the attackers keep coming, and
+## at 10 s they took 63 % on Depot and 71 % on Woodland (5 s: 56 % and 66 %, bot matches, 6 seeds).
+@export var plant_defender_respawn_delay: float = 5.0
+## Whether the defenders in Attack / Defend and Plant The Bomb may come back at their end's forward spawns too (the
+## attackers and either team in Elimination always may).
+@export var defender_forward_spawns: bool = true
+## A forward spawn with an enemy in play within this many metres of its middle is shut: a pick of it comes back at the
+## start area instead (no coming back in someone's sights).
+@export var forward_block_radius: float = 15.0

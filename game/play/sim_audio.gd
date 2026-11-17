@@ -327,6 +327,14 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_play(&"radio_ack", Vector3.ZERO, true, _cfg.radio_ack_gain, Kind.RADIO, BUS_INTERFACE)
 			GameEvent.Kind.MAG_TOSS:
 				_mechanism(&"magToss", state, e, own)
+			# Coming back after a hit (RS1): the shot timer's GO beep in your ear; anyone else's kit settling where they
+			# stand, heard as a magazine stowed.
+			GameEvent.Kind.RESPAWNED when own:
+				count_beep(_cfg.go_pitch)
+			GameEvent.Kind.RESPAWNED:
+				var back := state.character(e.actor)
+				_play(&"magCatch", back.eye(_body) if back != null else e.position, false, _cfg.mechanism_gain,
+						Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, back)
 			GameEvent.Kind.MAG_CATCH:
 				var catcher := state.character(e.target)
 				_play(&"magCatch", catcher.eye(_body) if catcher != null else e.position, e.target == player_id,

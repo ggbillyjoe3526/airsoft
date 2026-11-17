@@ -17,8 +17,9 @@ static func is_parked(c: Character) -> bool:
 	return c.status == Character.Status.OUT and c.grounded and c.status_time > 0.0
 
 
-## Eliminates `victim` (a no-op if it is already out of play) and picks its dead-zone spot: the next free one at its
-## end, in the order teammates were hit, or its spawn if the end has none. The route there is planned by
+## Eliminates `victim` (a no-op if it is already out of play) and picks its dead-zone spot: the first one at its end
+## no teammate out of play is bound for (a teammate who respawned frees its spot, RS1), or by count once all are taken,
+## or its spawn if the end has none. The route there is planned by
 ## plan_walk_off_routes on a later tick, never inside the hit (browser M27).
 static func eliminate(victim: Character, shooter_id: int, characters: Array[Character], ends: Array[MapEnd]) -> void:
 	if not is_in_play(victim):
@@ -36,11 +37,25 @@ static func eliminate(victim: Character, shooter_id: int, characters: Array[Char
 	if victim.end >= 0 and victim.end < ends.size() and ends[victim.end] != null:
 		var spots := ends[victim.end].dead_zone
 		if not spots.is_empty():
-			spot = spots[already_out % spots.size()]
+			spot = spots[_free_spot(victim, characters, spots, already_out)]
 	victim.dead_zone_target = spot.position if spot != null else victim.spawn_position
 	victim.dead_zone_yaw = spot.yaw if spot != null else victim.spawn_yaw
 	victim.walk_off_leg = 0
 	victim.walk_off_route_pending = true
+
+
+static func _free_spot(victim: Character, characters: Array[Character], spots: Array[SpawnPoint],
+		already_out: int) -> int:
+	for i in spots.size():
+		var taken := false
+		for c in characters:
+			if c != victim and c.team == victim.team and not is_in_play(c) \
+					and c.dead_zone_target.is_equal_approx(spots[i].position):
+				taken = true
+				break
+		if not taken:
+			return i
+	return already_out % spots.size()
 
 
 ## Plans the walk-off route of at most one victim a tick (the first still waiting, in character order); a victim calls
