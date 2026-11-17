@@ -6,9 +6,10 @@ extends Control
 ## colour on its outer edge, the pointer a white dot. A button kept free is drawn empty and faint, and never lit. Drawn only once
 ## the key is held past a tap (OrderWheelPointer.held), wherever the pointer went meanwhile (BP9), so a tap that spots
 ## never flashes it up. A notice (nobody to order, back on the team plan) shows in the circle, dimming the rest, for
-## HudConfig.order_notice_time; there is no order text anywhere else. The notice of an order that ended by itself
-## (SquadOrders.Outcome.news: its last carrier hit, you walked away from it, all quiet) shows in the circle alone
-## with the wheel shut (BP9). Built on its first showing and drawn only while
+## HudConfig.order_notice_time; there is no order text anywhere else. An order that ended by itself
+## (SquadOrders.Outcome.news: its last carrier hit, you walked away from it, all quiet) says nothing, wheel shut or
+## open (owner, 2026-11-17: no "Back to the team plan" when the bots go back to it); the wheel's band shows the team
+## plan in force again. Built on its first showing and drawn only while
 ## up: shut, it does nothing and a frame costs a comparison. Need a Mag (MH3) reads Toss a Mag while a toss is in reach
 ## (set_mag_toss), and a refusal of the hand-off picked on the wheel shows in the circle as an order's notice does
 ## (tell).
@@ -100,8 +101,9 @@ func setup(cfg: HudConfig, controls: ControlsConfig, colour: Color) -> void:
 ## `now_ms` (Time.get_ticks_msec, by default now) tells a tap from a hold.
 func update(wheel: OrderWheelPointer, in_force: SquadOrder.Kind, outcome: SquadOrders.Outcome, you: int,
 		delta: float, now_ms: int = -1) -> void:
-	var told := outcome.serial != _serial and outcome.giver == you and outcome.notice != SquadOrders.Notice.NONE
-	var news := told and outcome.news
+	# an order that ended by itself is not told (owner, 2026-11-17): only the answer to one you gave
+	var told := outcome.serial != _serial and outcome.giver == you and outcome.notice != SquadOrders.Notice.NONE \
+			and not outcome.news
 	_serial = outcome.serial
 	var words := ""
 	if told:
@@ -113,7 +115,7 @@ func update(wheel: OrderWheelPointer, in_force: SquadOrder.Kind, outcome: SquadO
 	# A notice for you while it is open (an order key pressed with it held) shows it at once, tap or not.
 	var shown := wheel.held(Time.get_ticks_msec() if now_ms < 0 else now_ms, _controls.wheel_tap) or (told and wheel.open)
 	if not shown and not (_was_open and wheel.open):
-		_closed(told, words, delta, news)
+		_closed(told, words, delta)
 		return
 	_was_open = true
 	var pick := wheel.pick()
@@ -172,17 +174,15 @@ func _process(_delta: float) -> void:
 
 ## A frame with the wheel shut (or held no longer than a tap). Just shut on a button, it waits order_notice_wait for
 ## the notice of the order it was shut by: one that comes shows alone in the circle for order_notice_time, then goes;
-## none, or shut on nothing, and it goes at once. `news` (an order that ended by itself, SquadOrders.Outcome.news)
-## shows the same way whenever it comes: you asked nothing, so nothing else would tell you (BP9). A key's own answer
-## with the wheel shut still shows nothing (SO4).
-func _closed(told: bool, words: String, delta: float, news: bool) -> void:
+## none, or shut on nothing, and it goes at once. A key's own answer with the wheel shut still shows nothing (SO4).
+func _closed(told: bool, words: String, delta: float) -> void:
 	if _was_open:
 		var on_slice := _on_slice
 		dismiss()
 		_wait_left = _cfg.order_notice_wait if on_slice else 0.0
 	elif _wait_left > 0.0:
 		_wait_left -= delta
-	if told and (news or _wait_left > 0.0):
+	if told and _wait_left > 0.0:
 		_wait_left = 0.0
 		_open()
 		_notice_only = true

@@ -13,7 +13,7 @@ team colour, so nothing in the scenery reads as a player.
 
 ## Gauge patterns
 
-On by default. Beta's score pips, score block and flag gauge are **striped** while Alpha's stay solid, in both colour
+Off by default; turn them on in Settings › Accessibility. Beta's score pips, score block and flag gauge are **striped** while Alpha's stay solid, in both colour
 sets, so the teams read apart without colour. A low magazine turns yellow **and** striped.
 
 ## Sound cues

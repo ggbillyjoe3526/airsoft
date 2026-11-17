@@ -136,7 +136,7 @@ func test_the_match_page_s_team_picks_follow_the_saved_set_at_once() -> void:
 	add_child_autofree(page)
 	for side in 2:
 		_assert_colour(page.team_card(side).accent, HC_HUD[side], "team card %d" % side)
-		_assert_colour(page.team_card(side).bar, HC_HUD[side], "team bar %d" % side)
+		assert_eq(page.team_card(side).bar.a, 0.0, "no colour bar down the team card's edge (owner, 2026-11-17)")
 	s.team_colours = TeamColours.Set.STANDARD
 	s.mark_changed()
 	var today := PlayTuning.new().teams.colours

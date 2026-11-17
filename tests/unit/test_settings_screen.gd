@@ -353,7 +353,12 @@ func test_the_menus_have_a_settings_tab_that_opens_the_screen() -> void:
 	assert_true(opened.visible)
 	opened.close()
 	await wait_process_frames(1)
-	assert_null(_settings_child(main._menus), "freed once closed")
+	assert_null(main._settings_screen, "closed")
+	assert_false(opened.visible)
+	assert_same(_settings_child(main._menus), opened, "kept, hidden, so the tab opens at once next time (owner, 2026-11-17)")
+	button.pressed.emit()
+	assert_same(main._settings_screen, opened, "the same screen opened again")
+	assert_eq(opened.current_tab(), 0, "on its first tab")
 
 
 func _settings_child(parent: Node) -> SettingsScreen:
@@ -565,12 +570,14 @@ func test_the_display_tab_has_the_concept_s_rows() -> void:
 	# the longer explanations are tooltips now (UI1), the keys too (UI1 round 1)
 	for want: String in ["F11", "Alt", "Enter", "switches at any time"]:
 		assert_string_contains(page.window_choice().button(0).tooltip_text, want)
-	assert_string_contains(page.limit_choice().button(0).tooltip_text, "still plays at 60 ticks a second")
-	assert_string_contains(page.limit_choice().button(0).tooltip_text, "In the background it draws 30")
+	assert_string_contains(page.limit_slider().tooltip_text, "still plays at 60 ticks a second")
+	assert_string_contains(page.limit_off().button(0).tooltip_text, "In the background it draws 30")
 	assert_eq(page.show_fps().tooltip_text, "Frames a second, bottom right.")
-	assert_eq(_texts(page.limit_choice()), PackedStringArray(["30", "60", "120", "144", "165", "240", "360",
-			"OFF"]))
-	assert_eq(page.limit_choice().selected(), Settings.FRAME_LIMITS.size(), "Unlimited by default")
+	assert_eq(page.limit_slider().min_value, 30.0, "a slider from 30 (owner, 2026-11-17)")
+	assert_eq(page.limit_slider().max_value, 360.0, "to 360")
+	assert_eq(_texts(page.limit_off()), PackedStringArray(["OFF"]), "and Off beside it")
+	assert_eq(page.limit_off().selected(), 0, "Off by default")
+	assert_eq(page.limit_slider().value, float(Settings.FRAME_LIMIT_PICK_DEFAULT), "the slider on 240 for when it is on")
 	assert_false(page.vsync().button_pressed, "V-Sync off by default (owner, 2026-10-29)")
 	assert_eq(page.vsync_note(), "No tearing, at most the screen’s 144 a second. Off: a little less input delay.")
 	assert_false(page.monitor_row().visible, "no Monitor row with one screen")
@@ -611,16 +618,28 @@ func test_a_screen_with_no_rate_shows_its_size_only() -> void:
 func test_a_frame_rate_limit_applies_at_once_and_is_saved() -> void:
 	_fake_screens()
 	var page := screen._display_page
-	page.limit_choice().button(0).pressed.emit()
+	page.limit_slider().value = 30.0
 	assert_eq(s.frame_limit, 30)
 	assert_eq(Engine.max_fps, 30)
-	assert_eq(_saved().frame_limit, 30)
-	page.limit_choice().button(Settings.FRAME_LIMITS.size()).pressed.emit()
+	assert_eq(page.limit_off().selected(), -1, "moving the slider turns Off off")
+	page.limit_slider().value = 197.0
+	assert_eq(s.frame_limit, 197, "any number from 30 to 360")
+	assert_eq(Engine.max_fps, 197)
+	screen._save()
+	assert_eq(_saved().frame_limit, 197)
+	page.limit_off().button(0).pressed.emit()
 	assert_eq(s.frame_limit, Settings.UNLIMITED)
 	assert_eq(Engine.max_fps, 0)
+	assert_eq(_saved().frame_limit, Settings.UNLIMITED)
+	assert_eq(page.limit_slider().value, 197.0, "the slider keeps its number while Off")
+	page.limit_off().button(0).pressed.emit()
+	assert_eq(s.frame_limit, 197, "Off pressed again puts the limit back")
+	assert_eq(Engine.max_fps, 197)
+	assert_eq(page.limit_off().selected(), -1)
 	s.frame_limit = 165
 	screen.open()
-	assert_eq(page.limit_choice().selected(), Settings.FRAME_LIMITS.find(165))
+	assert_eq(page.limit_slider().value, 165.0)
+	assert_eq(page.limit_off().selected(), -1)
 
 
 func test_f11_switches_and_the_tab_follows_but_not_while_a_key_is_being_rebound() -> void:

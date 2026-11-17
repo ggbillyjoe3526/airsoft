@@ -587,7 +587,7 @@ func _follow_team_colours() -> bool:
 static func _colour_team_card(card: MenuCard, colour: Color) -> void:
 	card.accent = colour
 	card.picked_fill = GameTheme.CARD.lerp(colour, TEAM_TINT)
-	card.bar = colour
+	# no colour bar down its left edge: only the picked card shows its team's colour (owner, 2026-11-17)
 	card.refresh()
 
 
