@@ -1,13 +1,14 @@
 # RQ1 · The Range given a firing point and detail
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 (check 1's reference photos for the bench, chrono table and shelter
+pending the owner: none exist; his card recommends judging them from the screenshots) · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-17 | 1 | build thread | ✓ touched tests (CI runs the rest) | 7/8 Retry | check 1: no reference photos; rest bag a blob, chrono a box; grey wall stripes; murky shade; zones unseen at 5 m |
-| 2026-11-17 | 2 | build thread | ✓ touched tests (CI runs the rest) | pending | |
+| 2026-11-17 | 2 | build thread | ✓ touched tests (CI runs the rest) | 8/8 Accept | |
 
 ## Decisions
 
@@ -60,3 +61,10 @@
   chipped to bare steel at 18 spots, its face kept at the simulation's plate.
 - **The crate dressed** in its model.
 - **Rebaked** (`tools/bake_light.gd -- range`); `test_wl9_qa`'s Range play hash renewed for the new blocks.
+
+## Known issues
+
+- The flag's red is Depot's fire red (#ac2264), which can read pink: a true red falls within 20° of High contrast's
+  Beta orange. On the owner's checklist (N33).
+- On Medium and Low (no lamp lights, no GI) the shelter's shade takes the sky's blue fill, as every sun shadow
+  does there.
