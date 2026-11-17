@@ -29,6 +29,11 @@ const SHOTS: Array = [
 	["targets_close", Vector3(-3.5, 1.6, -5.0), Vector3(-5.0, 0.9, -10.0)],
 	["bench", Vector3(-4.6, 1.7, 2.6), Vector3(-2.5, 0.7, 0.4)],
 	["chrono", Vector3(-2.6, 1.7, 3.6), Vector3(-4.0, 1.1, 5.8)],
+	["sky_east", Vector3(8.0, 3.2, -16.0), Vector3(50.0, 7.0, -24.0)],
+	["sky_west", Vector3(-8.0, 3.2, -24.0), Vector3(-40.0, 8.0, -34.0)],
+	["sky_north_east", Vector3(8.0, 3.2, -12.0), Vector3(60.0, 5.0, 12.0)],
+	["sky_south_east", Vector3(6.0, 3.2, -40.0), Vector3(50.0, 7.0, -80.0)],
+	["sky_mast", Vector3(6.0, 3.2, -2.0), Vector3(14.5, 12.5, -12.5)],
 ]
 
 

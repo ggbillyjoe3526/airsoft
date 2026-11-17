@@ -41,6 +41,9 @@ blocks read from `data/maps/woodland.json` (rerun a structure's script after `to
 | `birch.py` | `birch.glb`, `birch_crown.glb` | Woodland's birches (TREE) |
 | `spruce.py` | `spruce.glb` | Woodland's thickets, a spruce a 1.5 m cell (GRID) |
 | `far_tree.py` | `forest_tree.glb`, `skyline/treeline.glb` | The wood past Woodland's fence (`WoodsConfig.forest_model`) and the skyline's treeline band (`SkylineConfig.treeline_model`) |
+| `skyline_towers.py` (built through `skyline.py crane mast water_tower`) | `skyline/crane.glb`, `skyline/mast.glb`, `skyline/water_tower.glb` | The Range skyline's pillar jib crane, phone mast (with the yard's floodlights) and water tower (RQ2), stretched to their pieces as `skyline.py`'s kinds are |
+| `skyline_sheds.py` (built through `skyline.py shed shed_long shed_deep watch_tower`) | `skyline/shed.glb`, `skyline/shed_long.glb`, `skyline/shed_deep.glb`, `skyline/watch_tower.glb` | The Range skyline's ribbed steel sheds in three sizes and its braced watch tower with stairs, railed deck and cabin (RQ2), stretched to their pieces as `skyline.py`'s kinds are |
+| `skyline_hulls.py` (built through `skyline.py silo fuselage`) | `skyline/silo.glb`, `skyline/fuselage.glb` | The Range skyline's banded feed silo drum on its braced stand, with caged ladder, fill pipes and roof rail, and the derelict airliner fuselage, torn open at the rear with its tail broken off beside it (RQ2), stretched to their pieces as `skyline.py`'s kinds are |
 | `skip_wagon.py`, `ballast_wagon.py`, `engineering_wagon.py` | `skip_wagon.glb`, `ballast_wagon.glb`, `engineering_wagon.glb` | Subway's works train, each wagon on the station's running rails (SM4) |
 | `platelayer_trolley.py` | `platelayer_trolley.glb`, `_short`, `_long` | Subway's trackside trolleys, the size by the box (SM4) |
 | `buffer_stop.py` | `buffer_stop.glb` | Subway's buffer stops at the tracks' west ends, facing the track (`facing`) |

@@ -25,8 +25,9 @@ The movers ride rails and the pop-ups stand up from a motor box. Timber fences o
 generator behind the firing point. The sandbags are filled hessian sacks laid in wandering courses that lock into each other
 along the whole line, no two stretches alike, tied corners showing on the faces and bags laid across closing each wall's ends; the toilet's
 walls are moulded with sweeping scoops under a firm white roof, and the tote is a milky tank, the water's line showing
-through it, in a steel cage on a black pallet, its valve set back in the tank's foot. Beyond the walls stand Depot's green steel sheds, a water tower, yellow jib
-cranes, feed silos, a steel watch tower, an old airliner fuselage on sleepers, phone masts carrying the yard's
+through it, in a steel cage on a black pallet, its valve set back in the tank's foot. Beyond the walls stand Depot's green steel sheds with roller shutters and
+rooflights, a lattice-legged water tower, yellow jib cranes with their hoists and hooks, feed silos, a steel watch
+tower, an old airliner fuselage torn open on sleepers, phone masts with three-sided antenna heads carrying the yard's
 floodlights, and smoking chimneys.
 
 <!-- wiki:range-targets -->

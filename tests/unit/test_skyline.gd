@@ -24,13 +24,13 @@ const YARD := """{"name": "Yard", "blocks": [
 		{"kind": "shed", "x": 0, "z": 30, "width": 6, "depth": 4}]}}"""
 const LANDMARKS: Array[StringName] = [&"watchTower", &"fuselage", &"mast"]
 ## The skyline's triangles at most (the Dev 3 model plan's 20k), and the lamps on a mast's model.
-const TRIANGLES_MOST := 20000
+const TRIANGLES_MOST := 95000
 const MAST_MODEL_LAMPS := 4
 ## Each modelled kind's triangle budget (tools/blender/maps/skyline.py, docs/ASSETS.md).
-const MODEL_BUDGETS: Dictionary[StringName, int] = {&"shed": 500, &"crane": 800, &"mast": 500, &"fuselage": 700,
-		&"silo": 650, &"watchTower": 750, &"waterTower": 900}
+const MODEL_BUDGETS: Dictionary[StringName, int] = {&"shed": 2600, &"crane": 4000, &"mast": 3600, &"fuselage": 4000,
+		&"silo": 3200, &"watchTower": 4500, &"waterTower": 4500}
 ## The shed's other sizes' budgets, by file (SkylineConfig.variants).
-const VARIANT_BUDGETS: Dictionary[String, int] = {"shed_long.glb": 660, "shed_deep.glb": 600}
+const VARIANT_BUDGETS: Dictionary[String, int] = {"shed_long.glb": 3200, "shed_deep.glb": 3000}
 ## How unevenly a shed's model may stretch to its piece (its largest scale over its smallest): the critic's
 ## "doors and windows keep their size".
 const SHED_STRETCH_MOST := 1.3
@@ -407,7 +407,7 @@ func test_every_skyline_model_is_inside_its_budget() -> void:
 		var mesh := play.skyline.model_of(kind)
 		assert_not_null(mesh, "%s's model loads" % kind)
 		var tris := (mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
-		assert_between(tris, 1, MODEL_BUDGETS[kind], "%s: %d triangles" % [kind, tris])
+		assert_between(tris, MODEL_BUDGETS[kind] * 3 / 4, MODEL_BUDGETS[kind], "%s: %d triangles, most of its budget (RQ2)" % [kind, tris])
 
 
 func test_every_shed_size_is_inside_its_budget_and_each_range_shed_stretches_evenly() -> void:
@@ -416,7 +416,8 @@ func test_every_shed_size_is_inside_its_budget_and_each_range_shed_stretches_eve
 		var mesh := PropDressConfig.load_mesh(path)
 		assert_not_null(mesh, "%s loads" % path)
 		var tris := (mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
-		assert_between(tris, 1, VARIANT_BUDGETS[path.get_file()], "%s: %d triangles" % [path.get_file(), tris])
+		var most := VARIANT_BUDGETS[path.get_file()]
+		assert_between(tris, most * 3 / 4, most, "%s: %d triangles, most of its budget (RQ2)" % [path.get_file(), tris])
 	assert_eq(cfg.models_of(&"shed").size(), 3, "the shed in three sizes")
 	var m := _range()
 	var middle := SkylineView.middle_of(m)
