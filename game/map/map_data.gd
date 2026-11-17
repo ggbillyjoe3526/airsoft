@@ -272,6 +272,7 @@ static func parse(text: String, style: MapStyle, team_size: int) -> MapData:
 	if m.terrain != null:
 		m._paint_ground(d.get("ground"), style)
 	m._read_ends(d.get("spawns"), d.get("deadZones"), team_size)
+	m._read_forward(d.get("forwardSpawns"))
 	m._read_lanes(d.get("lanes"))
 	m._read_targets(d.get("targets"))
 	m.areas = MapAreas.read(d.get("areas"), m.warnings)
@@ -536,6 +537,33 @@ func _read_ends(spawns: Variant, dead_zones: Variant, team_size: int) -> void:
 		if end.dead_zone.is_empty():
 			problems.append("end %d has no dead zone" % e)
 		ends.append(end)
+
+
+## Forward spawns are optional (RS1): each end's list of named places, each with its spots. One without spots is left
+## out with a warning; a list not given for both ends gives none.
+func _read_forward(list: Variant) -> void:
+	if list == null:
+		return
+	if not list is Array or (list as Array).size() != ends.size():
+		warnings.append("forwardSpawns is not a list for each end")
+		return
+	for e in ends.size():
+		var raw_end: Variant = (list as Array)[e]
+		if not raw_end is Array:
+			warnings.append("end %d's forward spawns are not a list" % e)
+			continue
+		for raw: Variant in raw_end:
+			var d: Dictionary = raw if raw is Dictionary else {}
+			var f := ForwardSpawn.new()
+			f.name = str(d.get("name", ""))
+			f.spots = _spots(d.get("spots"))
+			if f.spots.is_empty():
+				warnings.append("end %d's forward spawn \"%s\" has no spots" % [e, f.name])
+				continue
+			for s in f.spots:
+				f.centre += s.position
+			f.centre /= float(f.spots.size())
+			ends[e].forward.append(f)
 
 
 ## Lanes are optional: bots on a map without them hunt from the start.

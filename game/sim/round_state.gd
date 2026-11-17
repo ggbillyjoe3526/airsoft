@@ -70,6 +70,9 @@ var overtime_flag: OvertimeFlag = OvertimeFlag.new()
 ## selector on it at most (Armament.start_mode), "no full auto indoors"; AUTO, selectors start the match as they come
 ## and stay as set until it ends.
 var start_mode: ReplicaConfig.FireMode = ReplicaConfig.FireMode.AUTO
+## Whether hit characters come back this match (RS1; Round.start_match sets it from RoundConfig.respawns and the mode),
+## and whether they still do this round: Plant The Bomb shuts them as the bomb is armed (Respawns.open).
+var respawns: bool = false
 
 
 ## Every flag at the bottom of its pole for a new round, one for each pole (one at least).

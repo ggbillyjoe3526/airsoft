@@ -1,7 +1,7 @@
 class_name CustomRules
 extends RefCounted
 ## The Custom rule set's switches (concept `rules-custom.png`; the browser game's config/matchRules.ts MatchRules):
-## players per team, rounds to win, the round's length, friendly fire and whether ricochets count. Saved with the
+## players per team, rounds to win, the round's length, friendly fire, whether ricochets count and respawns (RS1). Saved with the
 ## settings under "custom_rules", each value checked on its own; they start as Skirmish's, the match the game always
 ## had. A Custom match plays them (applied_to), stays out of the records and gives XP at no more than the Custom
 ## multiplier (data/levels.md).
@@ -14,12 +14,18 @@ const TEAM_SIZES: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8]
 const WINS_NEEDED: Array[int] = [3, 5, 7, 10]
 const ROUND_TIME_RANGE := Vector2(90.0, 300.0)
 const ROUND_TIME_STEP := 30.0
+## The respawn rule's choices, in the row's order (RoundConfig.RespawnRule: by mode, on, off).
+const RESPAWN_RULES: Array[int] = [RoundConfig.RespawnRule.BY_MODE, RoundConfig.RespawnRule.ALWAYS,
+		RoundConfig.RespawnRule.NEVER]
 
 var team_size: int = 0
 var wins_needed: int = 0
 var round_time: float = 0.0
 var friendly_fire: bool = false
 var ricochets_count: bool = false
+## Respawns (RS1), a RoundConfig.RespawnRule: as Skirmish plays them (by mode: not in Elimination), in every mode
+## (Plant The Bomb's until the bomb is armed) or in none.
+var respawns: int = RoundConfig.RespawnRule.BY_MODE
 
 
 func _init() -> void:
@@ -45,6 +51,7 @@ func applied_to(tuning: SimTuning) -> SimTuning:
 	t.rounds.half_time_after = maxi(1, wins_needed - 1)
 	t.hits.friendly_fire = friendly_fire
 	t.hits.ricochets_count = ricochets_count
+	t.rounds.respawns = respawns as RoundConfig.RespawnRule
 	return t
 
 
@@ -59,7 +66,7 @@ func copy() -> CustomRules:
 func to_dict() -> Dictionary:
 	return {
 		"team_size": team_size, "wins_needed": wins_needed, "round_time": round_time, "friendly_fire": friendly_fire,
-		"ricochets_count": ricochets_count,
+		"ricochets_count": ricochets_count, "respawns": respawns,
 	}
 
 
@@ -72,6 +79,7 @@ func from_dict(data: Dictionary) -> void:
 	round_time = _round_time(data, d.round_time)
 	friendly_fire = _flag(data, "friendly_fire", d.friendly_fire)
 	ricochets_count = _flag(data, "ricochets_count", d.ricochets_count)
+	respawns = _choice(data, "respawns", d.respawns, RESPAWN_RULES)
 
 
 static func _choice(data: Dictionary, key: String, fallback: int, choices: Array[int]) -> int:

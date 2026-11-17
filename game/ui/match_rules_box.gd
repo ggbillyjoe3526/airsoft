@@ -1,8 +1,8 @@
 class_name MatchRulesBox
 extends VBoxContainer
 ## The Match page's RULES section (concepts `rules-skirmish.png` and `rules-custom.png`, docs/records/CR2.md): the
-## SKIRMISH | CUSTOM picker, the picked one's blurb, and under it Skirmish's rules as chips or Custom's five rows (team
-## size, first to, round time, friendly fire, ricochets), each with its blurb. A Custom change lands in the settings'
+## SKIRMISH | CUSTOM picker, the picked one's blurb, and under it Skirmish's rules as chips or Custom's six rows (team
+## size, first to, round time, friendly fire, ricochets, respawns), each with its blurb. A Custom change lands in the settings'
 ## CustomRules and is saved at once; `changed` tells the page, which re-reads the round tuning. The pick itself goes
 ## into the MatchPicks. The Team size row offers only the picked map's sizes (data/maps.md) and lights the size played:
 ## the saved one where the map offers it, else the map's standard; the saved size changes only when one is picked.
@@ -58,6 +58,7 @@ var _dragging: bool = false
 var _clock: Label = null
 var _friendly_fire: MenuChoice = null
 var _ricochets: MenuChoice = null
+var _respawns: MenuChoice = null
 ## Each choice row's line under its buttons.
 var _subs: Dictionary[String, Label] = {}
 ## The Day / Night row (shown on a map offering both) and the presets each map offers, read once a map.
@@ -138,6 +139,10 @@ func friendly_fire_choice() -> MenuChoice:
 
 func ricochets_choice() -> MenuChoice:
 	return _ricochets
+
+
+func respawns_choice() -> MenuChoice:
+	return _respawns
 
 
 ## The Day / Night row's buttons (LightingConfig.PRESETS' order), and whether the row shows.
@@ -331,6 +336,10 @@ func _build_rows() -> void:
 	var bounces := PackedStringArray([tr("RULE_RICOCHETS_NO").to_upper(), tr("RULE_RICOCHETS_YES").to_upper()])
 	_ricochets = _choice_row("RICOCHETS", tr("RULE_RICOCHETS"), bounces)
 	_ricochets.picked.connect(_on_ricochets)
+	var respawn_words := PackedStringArray([tr("RULE_RESPAWNS_BY_MODE").to_upper(), tr("RULE_ON").to_upper(),
+			tr("RULE_OFF").to_upper()])
+	_respawns = _choice_row("RESPAWNS", tr("RULE_RESPAWNS"), respawn_words)
+	_respawns.picked.connect(_on_respawns)
 
 
 ## A row: its label on the left, the buttons over their blurb on the right. `key` names the blurb (MatchOptions).
@@ -485,6 +494,12 @@ func _on_ricochets(index: int) -> void:
 	_edited()
 
 
+## By mode is the first button, On the second, Off the third (CustomRules.RESPAWN_RULES).
+func _on_respawns(index: int) -> void:
+	_settings.custom_rules.respawns = CustomRules.RESPAWN_RULES[index]
+	_edited()
+
+
 ## A Custom switch moved: saved at once, as the settings screen saves a click. The settings' own `changed` tells the page
 ## (it listens while in the tree), so this box sends none: the page retuned twice for one click when it did (AUD1).
 func _edited() -> void:
@@ -516,10 +531,12 @@ func _show_switches() -> void:
 	_clock.text = MatchOptions.clock_text(r.round_time)
 	_friendly_fire.put(int(r.friendly_fire))
 	_ricochets.put(int(r.ricochets_count))
+	_respawns.put(CustomRules.RESPAWN_RULES.find(r.respawns))
 	_subs["TEAM"].text = MatchOptions.choice_blurb("TEAM", played)
 	_subs["WINS"].text = MatchOptions.choice_blurb("WINS", r.wins_needed)
 	_subs["FRIENDLY_FIRE"].text = MatchOptions.choice_blurb("FRIENDLY_FIRE", int(r.friendly_fire))
 	_subs["RICOCHETS"].text = MatchOptions.choice_blurb("RICOCHETS", int(r.ricochets_count))
+	_subs["RESPAWNS"].text = MatchOptions.choice_blurb("RESPAWNS", r.respawns)
 	for key: String in _subs:
 		_explain(_subs[key].get_parent().get_child(0) as MenuChoice, _subs[key].text)
 

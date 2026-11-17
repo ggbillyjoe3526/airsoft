@@ -413,6 +413,11 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## attackers' way in.
 @export var defend_push_chance: float = 0.35
 @export var defend_push_share: float = 0.35
+
+@export_group("Respawns")
+## Hit with a respawn coming (RS1) and free to use its end's forward spawns, a bot picks one (at random) with this
+## chance, else its start area (BotRespawn.pick).
+@export var forward_spawn_chance: float = 0.6
 ## A defender goes after someone seen or heard within this far of the pole (m, and on the pole's floor:
 ## anchor_search_rise); further off, it watches that way from its post.
 @export var defend_search_radius: float = 12.0

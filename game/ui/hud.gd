@@ -167,6 +167,9 @@ var _board: HudScoreboard = null
 var _board_wanted: bool = false
 var _what_got_you: WhatGotYouCard = null
 var _skip_hint: PanelContainer = null
+## The respawn panel (RS1) over the watching line, and the map's ends it reads the places from (empty: none set up).
+var _respawn: HudRespawn = null
+var _ends: Array[MapEnd] = []
 var _skip_key: Label = null
 ## The graphics step-down's line, its words and its seconds left.
 var _step_line: PanelContainer = null
@@ -354,6 +357,8 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	bottom.alignment = BoxContainer.ALIGNMENT_END
 	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	add_child(bottom)
+	_respawn = HudRespawn.new()
+	bottom.add_child(_respawn)
 	_watching = HudStyle.label(bottom, HudStyle.AIM_SIZE, 700, Color(GameTheme.TEXT, 0.8), HORIZONTAL_ALIGNMENT_CENTER,
 			HudStyle.SPACING_AIM)
 	_watching.uppercase = true
@@ -841,6 +846,15 @@ func what_got_you() -> WhatGotYouCard:
 	return _what_got_you
 
 
+## The map's ends, whose start areas and forward spawns the respawn panel offers (RS1).
+func setup_respawns(ends: Array[MapEnd]) -> void:
+	_ends = ends
+
+
+func respawn_panel() -> HudRespawn:
+	return _respawn
+
+
 ## Whether "SPACE Hold to skip the round" shows (you are out and the round plays on); the key is Fire's as bound now.
 func set_skip_hint(show: bool) -> void:
 	if show == _skip_hint.visible:
@@ -1019,6 +1033,8 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		_step_left -= delta
 		_step_line.visible = _step_left > 0.0
 	_vault_prompt.visible = _vault_left > 0.0 and in_play
+	if not _ends.is_empty():
+		_respawn.show_for(c, state.round_state, _ends, state.characters, _rounds)
 	_door_prompt.visible = _door_want != DoorPrompt.NONE and in_play and not _vault_prompt.visible
 	_leaves_left = maxf(0.0, _leaves_left - delta)
 	_leaves_notice.visible = _leaves_left > 0.0 and in_play

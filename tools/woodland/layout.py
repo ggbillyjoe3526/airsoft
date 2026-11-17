@@ -271,6 +271,10 @@ SPAWNS_W = [(-83.0, -3.75 + 2.0 * i) for i in range(8)]   # Beta / attackers
 SPAWNS_E = [(79.5, -9.25 + 2.0 * i) for i in range(8)]    # Alpha / defenders
 DEAD_W = (-85.0, 26.0)
 DEAD_E = (84.5, -24.0)
+# Forward spawns (RS1, 2026-11-17): where a hit player may come back mid-round besides the camp, by name; each end's
+# pair north and south of its camp, about a third of the way to the stream.
+FORWARD_W = [("Pine slope", -55.0, -28.0), ("Road west", -58.0, 36.0)]
+FORWARD_E = [("Fort gate", 69.5, -29.0), ("Back track", 72.0, 28.0)]
 # WB1 (the owner, 2026-11-15, Concept B of the map action redesign): both flags 14 m nearer the stream, so the
 # defenders have ground in front of them to hold and the fights come mid-map. A stands in Fern hollow beside the oak,
 # west of the Fort; B at Log stacks, in the pocket between three cordwood stacks on the road's south verge, 6 m off the

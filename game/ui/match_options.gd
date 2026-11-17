@@ -196,7 +196,15 @@ static func rule_chips(rounds: RoundConfig, hits: HitConfig) -> Array[PackedStri
 	out.append(PackedStringArray([_tr("RULE_SWAP"), str(rounds.half_time_after)]))
 	out.append(PackedStringArray([_tr("RULE_RICOCHETS"), _tr(ricochets)]))
 	out.append(PackedStringArray([_tr("RULE_FRIENDLY_FIRE"), _tr(switch_key(hits.friendly_fire))]))
+	out.append(PackedStringArray([_tr("RULE_RESPAWNS"), _tr(respawns_key(rounds.respawns))]))
 	return out
+
+
+## The key of the respawn rule's word (RS1): Skirmish's by mode ("Not in Elimination"), or On or Off.
+static func respawns_key(respawns: RoundConfig.RespawnRule) -> String:
+	if respawns == RoundConfig.RespawnRule.BY_MODE:
+		return "RULE_RESPAWNS_BY_MODE"
+	return switch_key(respawns == RoundConfig.RespawnRule.ALWAYS)
 
 
 ## A chip as one line of text.
@@ -243,7 +251,7 @@ static func custom_blurb(cap: float, lit: Color) -> String:
 
 
 ## The line under a Custom row's buttons for the choice `value` (a team size, rounds to win, or a switch's 0 or 1): the
-## browser game's blurb of that choice. `row` is "TEAM", "WINS", "FRIENDLY_FIRE" or "RICOCHETS".
+## browser game's blurb of that choice. `row` is "TEAM", "WINS", "FRIENDLY_FIRE", "RICOCHETS" or "RESPAWNS".
 static func choice_blurb(row: String, value: int) -> String:
 	var words := _tr("RULE_%s_BLURB_%d" % [row, value])
 	return words % value if words.contains("%d") else words

@@ -10,8 +10,8 @@ extends SceneTree
 ## Every field (the range is not a match map). Each plays at the team size the game gives it (MatchRunner.sized_for:
 ## its standard, 6v6) or the one asked for, and at the time of day the runner gives it (by day on all three).
 const MAPS: Array[String] = ["depot", "woodland", "subway"]
-## Match time a match may take (s), as the guards allow.
-const MAX_MATCH_SECONDS := 30.0 * 60.0
+## Match time a match may take (s): longer than the guards allow, as respawns (RS1) play rounds out to their clock.
+const MAX_MATCH_SECONDS := 45.0 * 60.0
 ## Each mode's name in the log.
 const MODE_NAMES: Dictionary[RoundState.Mode, String] = {
 	RoundState.Mode.ELIMINATION: "Elimination", RoundState.Mode.ATTACK_DEFEND: "Attack / Defend",

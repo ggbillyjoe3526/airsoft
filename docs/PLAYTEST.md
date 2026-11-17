@@ -1904,6 +1904,20 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   mostly a bot working out a long route: `docs/KNOWN_ISSUES.md`, Bots): say whether you feel any on yours, at which
   team size and preset, and about how often.
 
+## Respawns (RS1)
+
+- [ ] **A hit comes back.** Play Attack / Defend on Depot at Normal and get hit. Pass: you call the hit and walk off as
+  ever; "RESPAWN IN 10" counts down at the bottom; at 0 you stand at your start with full magazines; a round now
+  mostly runs to the flag or the clock instead of ending in a minute.
+- [ ] **Picking where you come back.** As the attackers, while you wait, press 1, 2 and 3 and roll the wheel. Pass: the
+  lit place follows; you come back at the forward spawn you picked (Depot: Upper mid or Huts as the west, A short or B
+  alley as the east); with an enemy near it, its chip dims ("ENEMY NEAR") and you come back at the start instead. As
+  the defenders the panel offers only the start area.
+- [ ] **Plant The Bomb.** Play it on Woodland. Pass: hits come back until the bomb is armed; after "BOMB ARMED" a hit
+  stays out, and a team with nobody left loses the round.
+- [ ] **Elimination and Custom.** Play Elimination: one life, as before. In Custom, set Respawns to On and play
+  Elimination, then Off and play Attack / Defend. Pass: each plays as set.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

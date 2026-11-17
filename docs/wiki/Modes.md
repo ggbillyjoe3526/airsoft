@@ -33,7 +33,8 @@ each site: the attackers win by raising their flag on either, and each pole's fl
   win the round by **holding it up for <!-- wiki:config flag_config.hold_time --> seconds**. The flag stays up on its own, but a defender on the
   rope pulls it off the top and the hold starts again; with both teams on the rope the hold waits. The FLAG gauge
   counts the hold down: **HOLD 3, 2, 1**
-- **Defenders** win by holding out until the clock runs out, or by taking out every attacker. Defenders at the pole
+- **Defenders** win by holding out until the clock runs out (or, with [respawns](#respawns) off, by taking out every
+  attacker). Defenders at the pole
   pull a raised flag down in **<!-- wiki:config flag_config.lower_time --> seconds**.
 - With both teams at the pole, the flag holds still.
 - **Overtime:** if attackers are on the rope, or a raised flag is being held, when time runs out, the round goes on
@@ -88,6 +89,27 @@ someone defuses it, a pair of teal wire cutters lies open beside its wires. Whoe
 left hip, so you can tell the carrier at a glance.
 
 A map needs bomb sites for Plant The Bomb; the Match screen says when one hasn't got them.
+
+## Respawns
+
+In **Attack / Defend** and **Plant The Bomb** a hit doesn't end your round. You call your hit and walk off as usual,
+and <!-- wiki:config round_config.respawn_delay --> seconds after the hit you come back into the round with full
+magazines, so a round runs its clock unless a flag goes up or the bomb is planted. **Elimination** keeps one life a
+round. The Custom rule **Respawns** can turn them on in every mode, or off in all of them.
+
+- **Where you come back.** While you wait, a **RESPAWN IN** panel at the bottom of the screen lists your **start
+  area** and your end's two **forward spawns**, nearer the fight. Pick one with **1**, **2** or **3** (the first two
+  replica slots and Holster) or the mouse wheel. Your pick is kept for next time.
+- **Forward spawns are the attackers'.** In Attack / Defend and Plant The Bomb the defenders start by their pole or
+  sites already, so they always come back at their start area. In Elimination with respawns on, both ends have them.
+- **An enemy near shuts a forward spawn.** With an enemy within <!-- wiki:config round_config.forward_block_radius -->
+  m of it, the panel marks it **ENEMY NEAR** and a pick of it brings you back at your start area instead.
+- **Plant The Bomb stops respawns once the bomb is armed.** Whoever is out then stays out, and the round is played out
+  by whoever is left.
+- **Bots** respawn on the same rules and pick their own spawn.
+
+Each field's forward spawns: **Depot** Upper mid and Huts (west), A short and B alley (east); **Woodland** Pine slope
+and Road west (west camp), Fort gate and Back track (east camp).
 
 ## Skirmish and Custom
 

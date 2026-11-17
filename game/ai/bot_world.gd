@@ -12,6 +12,8 @@ var characters: Array[Character] = []
 var bots: Array[Bot] = []
 ## The map's lanes (walkable points from end 0 to end 1) and its cover blocks (BotCover).
 var lanes: Array[PackedVector3Array] = []
+## The map's two ends: where a hit bot may come back (MapEnd.forward, RS1).
+var ends: Array[MapEnd] = []
 var low_cover: Array[BotCover.Block] = []
 var tall_cover: Array[BotCover.Block] = []
 ## The bushes tall enough to hide someone (BotConfig.angle_bush_min_height), as (x, z, radius) in plan, which held

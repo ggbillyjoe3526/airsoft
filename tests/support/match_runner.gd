@@ -70,6 +70,8 @@ class RoundTally:
 	var site: int = -1
 	var drops: int = 0
 	var top_defuse: float = 0.0
+	## Hit characters back in the round (RS1, RESPAWNED events).
+	var respawns: int = 0
 
 
 ## One match: its rounds and everything that must never happen, counted.
@@ -110,6 +112,8 @@ class MatchTally:
 	var hits: int = 0
 	## BBs fired (SHOT events): the callouts' guard plays a match with and without them and compares.
 	var shots: int = 0
+	## Hit characters back in play (RS1), over the match.
+	var respawns: int = 0
 	var friendly_hits: int = 0
 	var self_hits: int = 0
 	var friendly_ricochets: int = 0
@@ -447,6 +451,9 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 					t.rings += 1
 				GameEvent.Kind.OVERTIME:
 					round_now.overtime = true
+				GameEvent.Kind.RESPAWNED:
+					t.respawns += 1
+					round_now.respawns += 1
 				GameEvent.Kind.PLANT:
 					match e.value:
 						Plant.Cue.PICKED_UP:

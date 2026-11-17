@@ -643,6 +643,27 @@ func _wheel_to(cmd: PlayerCommand, held_slot: int, hand: Grenades.Hand, holstere
 		cmd.switch_to = item
 
 
+## Out with a respawn coming (RS1): the spawn picked since the last tick, from `current` among `count` (the start area
+## first, then the end's forward spawns): the first two replica slots' keys and Holster's pick the first three (1, 2 and
+## 3 by default), Next and Previous replica (the mouse wheel) step through them, round and round. Takes those presses,
+## so the command filled after it switches nothing.
+func spawn_pick(current: int, count: int) -> int:
+	var picked := clampi(current, 0, maxi(0, count - 1))
+	if count <= 0:
+		return 0
+	if _slot_latch >= 0 and _slot_latch < count:
+		picked = _slot_latch
+	elif _holster_latch and SLOTS.size() < count:
+		picked = SLOTS.size()
+	if _slot_steps != 0:
+		picked = posmod(picked + _slot_steps, count)
+	_slot_latch = -1
+	_slot_steps = 0
+	_shared_steps = 0
+	_holster_latch = false
+	return picked
+
+
 ## Writes the squad order keyed or picked since the last tick, and a ping pressed since, into `cmd`, once. `fill`
 ## does; while a bot plays for you (the smoke test) the play scene calls it alone.
 func fill_order(cmd: PlayerCommand) -> void:

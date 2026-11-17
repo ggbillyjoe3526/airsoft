@@ -75,6 +75,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	nav.smoke.release(nav, tuning.grenades, tuning.nav, tuning.body.stand_eye_height)
 	w.characters = state.characters
 	w.lanes = map.lanes
+	w.ends = map.ends
 	var cover := options.cover
 	if cover == null:
 		cover = BotCover.find_cover(map, nav, config, tuning) if options.groundwork else BotCover.Found.new()
@@ -154,6 +155,9 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	for b in w.bots:
 		var cmd := commands[b.character.id]
 		BotBrain.think(b, w, cmd, dt)
+		# Out with a respawn coming (RS1): where it comes back.
+		if Respawns.waiting(b.character):
+			cmd.spawn_pick = BotRespawn.pick(b, w)
 		BotTorch.step(b, w, cmd)
 		if w.plant != null:
 			BotPlant.act(b, w, cmd)
@@ -227,6 +231,8 @@ func observe(state: GameState) -> void:
 			_overtime(state.time)
 		elif e.kind == GameEvent.Kind.PING:
 			_ping(e, state)
+		elif e.kind == GameEvent.Kind.RESPAWNED:
+			_rejoin(e.actor)
 		elif e.kind == GameEvent.Kind.MATCH_OVER:
 			# No round follows to end the orders, so Hold here's marker would stay over the results.
 			orders.clear()
@@ -320,6 +326,14 @@ func _overtime(time: float) -> void:
 	for b in world.bots:
 		b.overtime_at = time + b.pick(b.skill.overtime_reaction)
 		b.overtime_flank = b.rng.randf() < b.skill.flank_chance
+
+
+## The bot driving character `id` came back into the round (RS1): a fresh life from where it stands (RoundPlanner.rejoin).
+func _rejoin(id: int) -> void:
+	for b in world.bots:
+		if b.character.id == id:
+			world.planner.rejoin(b, world)
+			return
 
 
 func _new_round(state: GameState) -> void:

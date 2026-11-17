@@ -392,6 +392,11 @@ SPAWNS_W = [(x, z) for x in (-52.6, -50.6) for z in (-4.5, -1.5, 1.5, 4.5)]
 SPAWNS_E = [(75.5, z) for z in (-7.5, -5.4, -3.2, -1.1, 1.1, 3.2, 5.4, 7.5)]
 DEAD_W = [(x, z) for x in (-53.6, -52.8) for z in (6.4, 7.2, 8.0, 8.8)]          # the hall's south-west corner
 DEAD_E = [(x, z) for x in (80.4, 81.2) for z in (-12.0, -11.2, -10.4, -9.6)]    # the north tunnel's blocked end
+# Forward spawns (RS1, 2026-11-17): where a hit player may come back mid-round besides the start, by name and floor
+# (the level's height the floor is found nearest): the Street team's concourse and lift landing, the Tunnel team's
+# east passage and the north platform's east end.
+FORWARD_W = [("Concourse", -15.0, 0.0, C), ("Lift landing", -44.0, -3.2, P)]
+FORWARD_E = [("East passage", 47.0, 0.0, P), ("North platform east", 46.0, -7.5, P)]
 # MB1: flag B stands on the north platform, between its east hoarding and booth (it stood on the stair's half landing,
 # 8 m from A: one fight at the stair top decided every round). The two poles are now a platform apart, each 12 m from
 # a lower-hall door, the east passage the defenders' way between them and the stair the attackers' way in behind both.
