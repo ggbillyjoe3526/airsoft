@@ -213,10 +213,11 @@ extends Resource
 
 @export_group("Bushes")
 ## The map's bushes (MapData.foliage, WL5; BushView), drawn on every preset as models (WG2): foliage up to
-## BallisticsConfig.leaf_fern_tallest m tall as the fern clump (the simulation's own split, LF1), the rest as the bush, each kind an instanced draw for every `bush_chunk` m
-## square of the field (so a bed out of view is culled), the ferns casting no shadow (`fern_shadow`; knee to hip high,
-## their shadow adds little and costs a draw of every fern a cascade), every plant stretched to its foliage's radius
-## and height, turned at random and up to `bush_jitter` lighter or darker, as rough as
+## BallisticsConfig.leaf_fern_tallest m tall as the fern clump (the simulation's own split, LF1), the rest as the bush,
+## each kind an instanced draw for every `bush_chunk` m square of the field (so a bed out of view is culled), the ferns
+## casting no shadow (`fern_shadow`; knee to hip high, their shadow adds little and costs a draw of every fern a
+## cascade), every plant stretched to its foliage's radius and height, turned at random and up to `bush_jitter` lighter
+## or darker, as rough as
 ## `bush_roughness`. Woodland's ferns stand 1.2 m (they hide a crouched player), its bushes 1.7 m (a standing one).
 @export var fern_model: String = "res://assets/models/props/fern.glb"
 @export var bush_model: String = "res://assets/models/props/bush.glb"

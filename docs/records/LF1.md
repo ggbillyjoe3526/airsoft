@@ -1,6 +1,6 @@
 # LF1 · Bushes stop only what their leaves cover; no boxes at the thickets' feet
 
-**Review:** 2 attempts · critic (attempt 2 below) · qa Pass (attempt 1, 6074be8) · performance Pass (attempt 1, bc8b077)
+**Review:** 2 attempts · critic Accept 8/8 (attempt 2, c244beb) · qa Pass (6074be8) · performance Pass (bc8b077)
 
 The owner's playtest of 0.1 Beta 1 (2026-11-17), items 30 to 32: "i was clearly hitting an enemy bot but they seemed
 stuck and hits didn't seem to register ... it may or may not be related to the woodlands map and the foliage/trees";
@@ -13,7 +13,7 @@ spotted bot is (if they are close enough) ... check that it works in all maps".
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-17 | 1 | Opus 5.5 (build thread) | pass | Retry 6/8 | Spotted shown on Woodland A/D only, teammates told not shown, 97 misses not all explained; probe header stale; the fern height in two configs |
-| 2026-11-17 | 2 | Opus 5.5 (build thread) | pass | – | – |
+| 2026-11-17 | 2 | Opus 5.5 (build thread) | pass | Accept 8/8 | – |
 
 ## What was wrong
 
@@ -74,4 +74,5 @@ spotted bot is (if they are close enough) ... check that it works in all maps".
 
 ## Known issues left
 
-- None.
+- About 0.8 % of Woodland looks (34 of 4,094 on seed 1) meet counted leaves where the drawn plant shows the enemy, so
+  Spotted marks nobody there: what is left of the shares' 2 % stopped-but-unseen lines. Watch it in playtest (N31).
