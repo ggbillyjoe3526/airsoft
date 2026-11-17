@@ -69,12 +69,16 @@ extends Resource
 @export var lamp_range: float = 6.5
 @export var lamp_energy: float = 1.5
 ## Lights at points of a model's own (in its frame, m), for a model with several lamps of its own (RQ1: the Range's
-## shelter's four LED battens light the firing line under it, which its roof otherwise leaves in deep shade); as the
-## lit models' lights, `lens_colour`, `lamp_range`, `lamp_energy`, no shadow, shown with the Lamp lights setting.
+## shelter's four LED battens light the firing line under it, which its roof otherwise leaves in deep shade): each
+## `point_lamp_colour` (an LED's cool white), reaching `point_lamp_range` m at `point_lamp_energy`, no shadow, shown
+## with the Lamp lights setting as the lit models' lights are.
 @export var lamp_points: Dictionary[StringName, PackedVector3Array] = {
 	&"range_canopy": PackedVector3Array([Vector3(-7.5, 3.4, 0.55), Vector3(-2.5, 3.4, 0.55), Vector3(2.5, 3.4, 0.55),
 			Vector3(7.5, 3.4, 0.55)]),
 }
+@export var point_lamp_colour: Color = Color(0.94, 0.97, 1.0)
+@export var point_lamp_range: float = 8.0
+@export var point_lamp_energy: float = 3.0
 
 
 ## The model `model`'s file.

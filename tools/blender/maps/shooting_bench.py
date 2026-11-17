@@ -49,21 +49,30 @@ rk.check_colours(["bench_timber", "bench_dark", "bench_light", "can_olive", "can
 
 
 def _rest_bag(k: rk.Kit, cx: float, cy: float, z0: float, hx: float, hy: float, hz: float) -> None:
-    """A hessian rest bag lying on the top: a pillow hx either side along x, its middle `hy` deep and `hz` high,
-    pinched to its sewn ends, a little flattened where it sits; its tied neck at the +x end."""
+    """A hessian rest bag lying on the top along x, the kind a shooter beds a forend into: a pillow full in its belly,
+    `hx` either side, `hy` deep and `hz` high there, its foot flat on the boards. Each end is a sewn seam, flat and
+    still wide, its corners standing out as ears; along its middle a groove pressed in where the forend lies. A dark
+    stitched band across each seam and the tied neck's cord at the +x end."""
     rings = []
-    steps = 9
+    steps = 12
     for i in range(steps + 1):
         t = -1.0 + 2.0 * i / steps
-        swell = math.cos(t * math.pi * 0.5) ** 0.45
-        sy, sz = max(0.012, hy * swell), max(0.01, hz * (0.25 + 0.75 * swell))
+        swell = math.cos(t * math.pi * 0.5) ** 0.5
+        sy = hy * (0.66 + 0.34 * swell)  # the ends stay wide: the seam's ears
+        sz = hz * (0.14 + 0.86 * swell)  # and flat
+        n = 2.6 + 3.0 * (1.0 - swell)  # squarer towards the seam, so its corners read as ears
         ring = []
-        for x2, z2 in hs.superellipse(sy, sz, sz * 0.9, 3.2, 14):
-            ring.append((cx + t * hx, cy + x2, z0 + sz + z2 * 1.0))
+        for x2, z2 in hs.superellipse(sy, sz, sz * 0.55, n, 16):
+            if z2 > 0.0:  # the groove along the top, deepest mid-length
+                z2 -= 0.3 * hz * swell * max(0.0, 1.0 - (x2 / (sy * 0.7)) ** 2)
+            ring.append((cx + t * hx, cy + x2, z0 + sz * 0.55 + max(z2, -sz * 0.55)))
         rings.append(ring)
     k.loft(rings, "hessian", cap0=True, cap1=True)
-    # the neck's cord, wound round the pinched +x end
-    k.cyl((cx + hx * 0.93, cy, z0 + hz * 0.32), 0.018, 0.03, "tie", seg=10, axis="x")
+    for sx in (-1.0, 1.0):  # the stitched seams
+        x = cx + sx * hx * 0.97
+        k.blk((x - 0.006, cy - hy * 0.68, z0), (x + 0.006, cy + hy * 0.68, z0 + hz * 0.2), "hessian_dark")
+    # the neck's cord, wound round the +x end's seam
+    k.cyl((cx + hx * 0.9, cy, z0 + hz * 0.3), 0.016, 0.026, "tie", seg=10, axis="x")
 
 
 def _ammo_can(k: rk.Kit, cx: float, cy: float, z0: float, h: float = 0.1) -> None:

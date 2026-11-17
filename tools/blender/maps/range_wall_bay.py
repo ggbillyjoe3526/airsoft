@@ -41,11 +41,10 @@ CAP = 0.03
 BATTEN = 0.07  # RQ1: the cover batten up each face's middle, over the boards (flush with the posts' faces)
 SCREW = 0.006  # a screw head's half width
 rk.PAINT.update({
-    # RQ1: a weathered board gone silver-grey in the sun, and the screw heads' dark galvanising
-    "board_grey": 0x9c9888,
+    # RQ1: the screw heads' dark galvanising
     "screw": 0x4a4a4c,
 })
-rk.check_colours(["board", "board_dark", "board_light", "board_grey", "rail_timber", "block", "block_dark", "mortar",
+rk.check_colours(["board", "board_dark", "board_light", "rail_timber", "block", "block_dark", "mortar",
                   "fence_core", "screw"], shade=0.12)
 
 
@@ -85,10 +84,12 @@ def _head(k: rk.Kit, x: float, y: float, z: float, side: float) -> None:
 
 def _grime(ob: object, seed: int) -> None:
     """RQ1: the weather on the corner colours: the boards' feet darkened by splash-back over the plinth, the plinth's
-    foot by the yard's dirt, and every corner mottled a little (a board is never one flat tone end to end)."""
+    foot by the yard's dirt, and every corner its own shade (a board is never one flat tone end to end)."""
     me = ob.data
     col = me.color_attributes["Color"]
     rng = random.Random(seed)
+    # each corner's own shade, so a board fades in tone from end to end and no course reads as one flat stripe
+    shade = [rng.uniform(-0.07, 0.07) for _ in me.vertices]
     for loop in me.loops:
         co = me.vertices[loop.vertex_index].co
         k = 1.0
@@ -97,7 +98,7 @@ def _grime(ob: object, seed: int) -> None:
         if co.z < 0.18:
             k *= 0.78 + 0.22 * co.z / 0.18
         k *= 1.0 + 0.05 * math.sin(co.x * 7.3 + co.z * 3.1 + seed) * math.sin(co.x * 2.1 - co.z * 5.7) \
-            + rng.uniform(-0.02, 0.02)
+            + shade[loop.vertex_index]
         c = col.data[loop.index].color
         col.data[loop.index].color = (c[0] * k, c[1] * k, c[2] * k, 1.0)
 
@@ -132,8 +133,7 @@ def bay(name: str, height: float, seed: int) -> object:
         while z < top - 1e-6:
             z1 = min(z + BOARD, top)
             pick = rng.random()
-            mat = "board" if pick < 0.44 else ("board_light" if pick < 0.68 else (
-                "board_dark" if pick < 0.92 else "board_grey"))
+            mat = "board" if pick < 0.46 else ("board_light" if pick < 0.73 else "board_dark")
             y = (-face, -face + 0.02) if side < 0 else (face - 0.02, face)
             _slab(k, (-hl + POST * 0.5, y[0], z), (hl - POST * 0.5, y[1], z1), mat, side)
             # each board screwed at both ends into the posts (RQ1): a dark head on its face
@@ -157,7 +157,7 @@ def bay(name: str, height: float, seed: int) -> object:
     ob = k.build()
     # no bevel: a chamfer at the bay's ends would open a slit where two bays meet (test_bp9_flicker_qa2)
     rk.finish(ob, angle=rk.math.radians(30.0))
-    rk.bake(ob, jitter={"board": 0.07, "board_light": 0.06, "board_dark": 0.06, "board_grey": 0.05, "block": 0.05},
+    rk.bake(ob, jitter={"board": 0.07, "board_light": 0.06, "board_dark": 0.06, "block": 0.05},
             seed=seed)
     _grime(ob, seed)
     rk.fit_box(ob, (-hl, -hd, 0.0), (hl, hd, height))

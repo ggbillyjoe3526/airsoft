@@ -20,7 +20,7 @@ import range_kit as rk  # noqa: E402
 from range_kit import hs  # noqa: E402
 
 OUT = os.path.join(rk.PROPS, "chrono_table.glb")
-BUDGET = 4000  # docs/CC0_ASSETS.md › Size limits: a prop
+BUDGET = 3700  # docs/CC0_ASSETS.md › Size limits: a prop (about 95 % used)
 HX, HY, HIGH = 0.9, 0.375, 0.95
 TOP = 0.7  # the top's underside
 TOP_T = 0.04
@@ -66,18 +66,26 @@ def _legs(k: rk.Kit, sx: float) -> None:
 
 
 def _chrono(k: rk.Kit, cx: float, cy: float, z0: float) -> None:
-    """The chronograph on its timber block: a black tube along x with a flared muzzle mouth at -x, its display box on
-    top with the grey screen and two buttons."""
+    """The chronograph on its timber block: a black tube along x, the muzzle's flared mouth at -x, the two sensor gates
+    clamped round it (a collar each with its sensor housing on top, 0.12 m apart), the display box between them with
+    its grey screen and two buttons, and a stand of two feet under the tube."""
     k.blk((cx - 0.13, cy - 0.06, z0), (cx + 0.13, cy + 0.06, z0 + 0.05), "block_timber")
-    zc = z0 + 0.05 + 0.04
-    k.lathe([(0.0, 0.036), (0.03, 0.04), (0.2, 0.04), (0.22, 0.034)], "chrono_black", segments=16,
+    zc = z0 + 0.05 + 0.034
+    for x in (cx - 0.08, cx + 0.08):  # the stand's feet, the tube's saddles
+        k.blk((x - 0.012, cy - 0.035, z0 + 0.05), (x + 0.012, cy + 0.035, zc - 0.018), "foot_black")
+    k.lathe([(0.0, 0.026), (0.02, 0.022), (0.22, 0.022), (0.23, 0.019)], "chrono_black", segments=16,
             centre=(cx - 0.11, cy, zc), axis="x")
-    k.lathe([(-0.012, 0.03), (-0.012, 0.028), (0.0, 0.028)], "foot_black", segments=16, centre=(cx - 0.11, cy, zc),
+    k.lathe([(-0.014, 0.034), (-0.014, 0.03), (0.0, 0.026)], "foot_black", segments=16, centre=(cx - 0.11, cy, zc),
             axis="x")
-    k.blk((cx - 0.06, cy - 0.04, zc + 0.03), (cx + 0.07, cy + 0.04, zc + 0.065), "chrono_black")
-    k.blk((cx - 0.045, cy - 0.032, zc + 0.065), (cx + 0.035, cy + 0.032, zc + 0.067), "screen")
-    for y in (cy - 0.015, cy + 0.015):
-        k.cyl((cx + 0.052, y, zc + 0.065), 0.007, 0.004, "foot_black", seg=8)
+    for x in (cx - 0.06, cx + 0.06):  # the gates: a collar and its sensor housing
+        k.lathe([(0.0, 0.025), (0.0, 0.03), (0.022, 0.03), (0.022, 0.025)], "clip", segments=16,
+                centre=(x - 0.011, cy, zc), axis="x")
+        k.blk((x - 0.014, cy - 0.018, zc + 0.026), (x + 0.014, cy + 0.018, zc + 0.05), "chrono_black")
+        k.blk((x - 0.006, cy - 0.019, zc + 0.034), (x + 0.006, cy + 0.019, zc + 0.04), "screen")  # the sensor's eye
+    k.blk((cx - 0.04, cy - 0.032, zc + 0.022), (cx + 0.04, cy + 0.032, zc + 0.056), "chrono_black")
+    k.blk((cx - 0.032, cy - 0.026, zc + 0.056), (cx + 0.018, cy + 0.026, zc + 0.058), "screen")
+    for y in (cy - 0.012, cy + 0.012):
+        k.cyl((cx + 0.029, y, zc + 0.056), 0.006, 0.004, "foot_black", seg=8)
 
 
 def _clipboard(k: rk.Kit, cx: float, cy: float, z0: float, turn: float) -> None:

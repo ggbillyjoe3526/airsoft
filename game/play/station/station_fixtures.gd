@@ -76,11 +76,11 @@ static func build(map: MapData, cfg: StationFixturesConfig) -> StationFixtures:
 					inst.gi_mode = GeometryInstance3D.GI_MODE_STATIC
 		if cfg.lit_models.has(String(model)):
 			for t: Transform3D in placed[model]:
-				view._add_lamp(t * Vector3(0.0, 0.0, cfg.lamp_out), cfg)
+				view._add_lamp(t * Vector3(0.0, 0.0, cfg.lamp_out), cfg.lens_colour, cfg.lamp_range, cfg.lamp_energy)
 		if cfg.lamp_points.has(model):
 			for t: Transform3D in placed[model]:
 				for p: Vector3 in cfg.lamp_points[model]:
-					view._add_lamp(t * p, cfg)
+					view._add_lamp(t * p, cfg.point_lamp_colour, cfg.point_lamp_range, cfg.point_lamp_energy)
 	return view
 
 
@@ -160,13 +160,13 @@ func _add(model: StringName, mesh: ArrayMesh, transforms: Array, part: int = -1)
 	_views.append(inst)
 
 
-func _add_lamp(at: Vector3, cfg: StationFixturesConfig) -> void:
+func _add_lamp(at: Vector3, colour: Color, reach: float, energy: float) -> void:
 	var lamp := OmniLight3D.new()
 	lamp.name = "Lamp%d" % _lamps.size()
 	lamp.position = at
-	lamp.omni_range = cfg.lamp_range
-	lamp.light_energy = cfg.lamp_energy
-	lamp.light_color = cfg.lens_colour
+	lamp.omni_range = reach
+	lamp.light_energy = energy
+	lamp.light_color = colour
 	lamp.shadow_enabled = false
 	lamp.visible = false
 	add_child(lamp)

@@ -54,8 +54,8 @@ SEG = 15
 
 rk.PAINT.update({
     # RQ1: the scoring zones painted a shade darker on the face, and the dents BBs have knocked into the plywood
-    "peg_zone": 0xcdbb90,
-    "peg_pock": 0xa8987a,
+    "peg_zone": 0xb59f72,
+    "peg_pock": 0x6a645a,
 })
 rk.check_colours(["peg_wood", "peg_end", "peg_zone", "peg_pock", "stand_black", "zinc", "motor_grey", "rail_steel",
                   "rubber"])
@@ -149,7 +149,7 @@ def _zones(k: rk.Kit, head_z: float, top: float, crouched: bool) -> None:
         cx, cz, spread = centres[0] if i % 3 == 0 else centres[1]
         x = rng.gauss(0.0, spread * 0.6)
         z = cz + rng.gauss(0.0, spread * 0.8)
-        r = rng.uniform(0.004, 0.007)
+        r = rng.uniform(0.006, 0.01)
         a = rng.uniform(0.0, 2.0 * math.pi)
         _flat(k, [(x + r * math.cos(a + t), z + r * math.sin(a + t)) for t in (0.0, 2.1, 4.2)], -POCK_PROUD,
               "peg_pock")
