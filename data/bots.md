@@ -142,6 +142,6 @@ left out: then every bot plays the same jobs there.
 | Personality | Defends | Goes back from (×) | Takes the bomb or rope from (×) | Forward spawn (chance) |
 |---|---|---|---|---|
 | Rusher | forward | 0.7 | 1.5 | 0.85 |
-| Anchor | deep | 1.4 | 1 | 0.35 |
+| Anchor | deep | 1 | 1 | 0.35 |
 | Flanker | – | 1 | 1.2 | 0.7 |
 | Careful | – | 1.2 | 0.6 | 0.5 |

@@ -139,8 +139,8 @@ static func _free_defender(b: Bot, w: BotWorld) -> bool:
 ## Each tick: of the attacking bots in play that have swept their lane, one raises the flag and the others guard the pole
 ## (a second raiser adds nothing: the rope goes up no faster). Bots in flag mode first, then the nearest the pole (its
 ## distance scaled by its personality's carry_scale), the current raiser counted raiser_switch_margin nearer; never a
-## bot under a squad order. Nobody raises while an attacker who isn't a bot (the player) is at the pole already. A raiser on the worked rope of another pole (_held_elsewhere)
-## keeps raising there, and isn't counted for this one.
+## bot under a squad order. Nobody raises while an attacker who isn't a bot (the player) is at the pole already. A
+## raiser on the worked rope of another pole (_held_elsewhere) keeps raising there, and isn't counted for this one.
 static func pick_raiser(w: BotWorld) -> void:
 	var raiser: Bot = null
 	var best_rank := 2

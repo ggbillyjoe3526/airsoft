@@ -138,8 +138,8 @@ func rejoin(b: Bot, w: BotWorld) -> void:
 		b.lane_index = BotMovement.resume_point(b, w) - b.lane_dir
 
 
-## The points a defender walks to its post (PS1, bots.md › Defends): the second (forward) one when the plan's draw says so
-## (`forward`), the first when not; a personality that defends forward always holds the second, one that defends deep
+## The points a defender walks to its post (PS1, bots.md › Defends): the second (forward) one when the plan's draw says
+## so (`forward`), the first when not; a personality that defends forward always holds the second, one that defends deep
 ## always the first.
 static func defend_points(post: BotsFile.Post, forward: bool) -> int:
 	match post:

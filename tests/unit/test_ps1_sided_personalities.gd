@@ -118,7 +118,7 @@ func test_the_shipped_file_gives_each_personality_a_job_with_sides() -> void:
 	assert_eq(anchor.post, BotsFile.Post.DEEP)
 	assert_eq(file.style(&"flanker").post, BotsFile.Post.SAME)
 	assert_lt(rusher.retake_scale, 1.0, "a rusher goes back among the first")
-	assert_gt(anchor.retake_scale, 1.0, "an anchor stays at its post longer")
+	assert_eq(anchor.retake_scale, 1.0, "an anchor by the pole goes back as its distance says")
 	assert_lt(careful.carry_scale, 1.0, "a careful bot takes the bomb in")
 	assert_gt(rusher.carry_scale, 1.0, "a rusher leaves it to others")
 	var mean := 0.0
@@ -211,18 +211,20 @@ func test_elimination_plans_as_before_whatever_the_jobs() -> void:
 		assert_eq(w.bots[i].lane_points, before[i], "Elimination walks every lane point, forward or deep")
 
 
-func test_a_rusher_goes_back_before_a_nearer_anchor() -> void:
+func test_a_rusher_goes_back_before_a_nearer_bot_that_stays_longer() -> void:
 	var pole := Vector3(10.0, 0.0, 0.0)
 	var w := _bare(RoundState.Mode.ATTACK_DEFEND, 1, [pole + Vector3(2.0, 0, 0), pole + Vector3(2.6, 0, 0),
 			pole + Vector3(3.0, 0, 0)] as Array[Vector3])
 	w.flags[0].position = pole
 	w.cfg.retakers = 2
-	w.bots[0].style = file.style(&"anchor")
+	var stays := BotsFile.Style.new()
+	stays.retake_scale = 1.4
+	w.bots[0].style = stays
 	w.bots[2].style = file.style(&"rusher")
 	BotFlag.pick_retakers(w)
 	assert_true(w.bots[2].retake, "the rusher, furthest, goes back")
 	assert_true(w.bots[1].retake)
-	assert_false(w.bots[0].retake, "the anchor, nearest, holds its post")
+	assert_false(w.bots[0].retake, "the one that stays longer, nearest, holds its post")
 	w.bots[0].style = BotsFile.neutral()
 	BotFlag.pick_retakers(w)
 	assert_true(w.bots[0].retake and w.bots[2].retake, "neutral: the nearest goes back, and the rusher")
