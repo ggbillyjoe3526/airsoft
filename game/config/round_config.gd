@@ -50,6 +50,10 @@ enum RespawnRule { BY_MODE, ALWAYS, NEVER }
 ## ... and Plant The Bomb's defenders' (no field sets its own): until the bomb is armed the attackers keep coming, and
 ## at 10 s they took 63 % on Depot and 71 % on Woodland (5 s: 56 % and 66 %, bot matches, 6 seeds).
 @export var plant_defender_respawn_delay: float = 5.0
+## ... but against Hard bots this (s) where a field sets it (data/maps.md Bomb defender respawn at Hard, applied by
+## MatchOptions.match_tuning and level_tuning), 0 for the same as every level: on Depot's close sites Hard defenders held
+## the bomb off at 5 s (the attackers took 35 %, bot matches, BP10), and a Hard scale on every field put Subway's at 70 %.
+@export var plant_defender_respawn_hard: float = 0.0
 ## Whether the defenders in Attack / Defend and Plant The Bomb may come back at their end's forward spawns too (the
 ## attackers and either team in Elimination always may).
 @export var defender_forward_spawns: bool = true

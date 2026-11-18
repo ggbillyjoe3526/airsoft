@@ -105,7 +105,7 @@ on in every mode, or off in all of them.
   never more than <!-- wiki:config round_config.defender_respawn_most --> seconds (Depot's is that most, Woodland's
   about 10 s and Subway's 13 s), and against **Easy** bots three quarters as long (about 11 s, 4 s and 5 s). In Plant
   The Bomb they wait <!-- wiki:config round_config.plant_defender_respawn_delay -->
-  seconds.
+  seconds, but against **Hard** bots 8 s on **Depot**, whose bomb sites are close to the defenders' start.
 - **Where you come back.** While you wait, a **RESPAWN IN** panel at the bottom of the screen lists your **start
   area** and your end's two **forward spawns**, nearer the fight. Pick one with **1**, **2** or **3** (the first two
   replica slots and Holster) or the mouse wheel. Your pick is kept for next time. You come back facing the way that

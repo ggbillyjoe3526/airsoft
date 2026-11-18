@@ -160,8 +160,11 @@ func test_the_bots_level_scales_the_defenders_wait_and_nothing_else() -> void:
 		assert_almost_eq(played.rounds.defender_respawn_delay, minf(field * scale, base.rounds.defender_respawn_most), 0.001,
 				String(level))
 		assert_eq(played.rounds.respawn_delay, base.rounds.respawn_delay, "%s: the attackers' wait kept" % level)
-		assert_eq(played.rounds.plant_defender_respawn_delay, base.rounds.plant_defender_respawn_delay,
-				"%s: Plant The Bomb's kept" % level)
+		# Plant The Bomb's is kept, but at Hard a field's own Hard wait (part 3, data/maps.md: Depot's).
+		var bomb := base.rounds.plant_defender_respawn_delay
+		if level == &"hard" and base.rounds.plant_defender_respawn_hard > 0.0:
+			bomb = base.rounds.plant_defender_respawn_hard
+		assert_eq(played.rounds.plant_defender_respawn_delay, bomb, "%s: Plant The Bomb's" % level)
 	assert_eq(base.rounds.defender_respawn_delay, field, "the field's tuning is never written")
 	assert_same(MatchOptions.level_tuning(base, &"unknown"), base, "a level with no scale waits the field's")
 
