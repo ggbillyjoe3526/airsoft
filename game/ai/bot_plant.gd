@@ -351,8 +351,9 @@ static func act(b: Bot, w: BotWorld, cmd: PlayerCommand) -> void:
 ## storey (within plant_player_level of its height) before any that is not. The one already going is kept unless another
 ## on the bomb's storey is raiser_switch_margin nearer, or is there while the one going is not: level distance says
 ## nothing between two bots a storey off (the one walking to the stairs walks away from the bomb, and two of them
-## swapped the job each time they passed until the clock ran out), and never within fetcher_hold of its pick. It walks
-## to it at once and waits beside it (BotMovement) until may_take.
+## swapped the job each time they passed until the clock ran out). It keeps the job for fetcher_hold after its pick
+## whoever is nearer, unless it leaves play or takes an order. It walks to it at once and waits beside it (BotMovement)
+## until may_take.
 static func _pick_fetcher(w: BotWorld) -> void:
 	var keep: Bot = null
 	for b in w.bots:
