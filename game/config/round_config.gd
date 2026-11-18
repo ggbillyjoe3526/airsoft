@@ -38,6 +38,15 @@ enum RespawnRule { BY_MODE, ALWAYS, NEVER }
 ## attackers near half the rounds with Depot 15, Woodland 5, Subway 7).
 @export var respawn_delay: float = 10.0
 @export var defender_respawn_delay: float = 10.0
+## ... times the bots' level (MatchOptions.level_tuning, BP10): with respawns Hard defenders held Attack / Defend's
+## poles far longer than Normal's and Easy's far shorter (bot matches at the fields' waits, 8 seeds: the attackers took
+## 24 to 37 % on Hard, 57 to 72 % on Easy), so a level waits the field's time this many times. A level not named waits
+## the field's.
+@export var defender_respawn_scale: Dictionary[StringName, float] = {&"easy": 0.75, &"hard": 1.9}
+## ... but a level's scale never takes the wait past this (s), nor below the field's own when that is longer: Depot's
+## 15 s at 1.9 (28.5 s) let the attackers take 62 % on Hard, and 25 s gave 47.9 % (BP10, bot matches, 16 seeds); a half-minute wait
+## after a hit is too long to be fun.
+@export var defender_respawn_most: float = 25.0
 ## ... and Plant The Bomb's defenders' (no field sets its own): until the bomb is armed the attackers keep coming, and
 ## at 10 s they took 63 % on Depot and 71 % on Woodland (5 s: 56 % and 66 %, bot matches, 6 seeds).
 @export var plant_defender_respawn_delay: float = 5.0

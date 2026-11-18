@@ -1803,7 +1803,7 @@ def tool_cart() -> None:
     m.box((xa + 0.08, 0.245, za + 0.1), (xa + 0.6, 0.47, za + 0.45), "tape", skip="-y")
     m.box((xa + 0.08, 0.47, za + 0.25), (xa + 0.6, 0.5, za + 0.3), "castor", skip="-y")
     coil = [(0.0, 0.17), (0.07, 0.17), (0.07, 0.07), (0.0, 0.07)]
-    m.b.tube([(0.0, 0.2), (0.08, 0.2)], [(0.0, 0.09), (0.08, 0.09)], m.b.mat("cable"), segments=12,
+    m.b.tube([(0.0, 0.2), (0.08, 0.2)], [(0.0, 0.09), (0.08, 0.09)], "cable", segments=12,
              centre=B(0.25, 0.245, 0.15), axis="z")
     del coil
     # the top tray's tools: a drill case, a socket box, a hammer, a spanner

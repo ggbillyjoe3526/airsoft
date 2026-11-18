@@ -49,6 +49,8 @@ var _signature: String = ""
 var _replaces: int = 0
 ## The card's menu, built on its first opening and kept (it is the strip's child, so it goes with it).
 var _menu: PopupMenu = null
+## Whether the card menu was last opened from the keyboard (its card keeps the keys after a pick that rebuilds the cards).
+var _menu_by_key: bool = false
 
 
 func _init(saved_in: SavedLoadouts) -> void:
@@ -78,6 +80,14 @@ func action(id: StringName) -> Button:
 func open_menu(index: int, at: Vector2 = Vector2(-1.0, -1.0)) -> void:
 	if mode != Mode.NORMAL or index < 0 or index >= _cards.size() or _cards[index] == null:
 		return
+	# Carrying the loadout rebuilds the cards, and a new card has no place until it is laid out: the menu's point and
+	# the keyboard's focus are taken from the card clicked, before (BP10).
+	var clicked := _cards[index]
+	var point := at if at.x >= 0.0 else Vector2(0.0, clicked.size.y)
+	var screen := Vector2i((clicked.get_screen_position() + point * clicked.get_global_transform_with_canvas().get_scale())
+			.round())
+	var focused := clicked.has_focus()
+	_menu_by_key = at.x < 0.0
 	if index != saved.current:
 		saved.use(index)
 	if saved.undo_index() >= 0:
@@ -86,6 +96,8 @@ func open_menu(index: int, at: Vector2 = Vector2(-1.0, -1.0)) -> void:
 	var c := _cards[index]
 	if c == null:
 		return
+	if focused and not c.has_focus():
+		c.grab_focus()
 	if _menu == null:
 		_menu = PopupMenu.new()
 		_menu.name = "LoadoutMenu"
@@ -96,9 +108,8 @@ func open_menu(index: int, at: Vector2 = Vector2(-1.0, -1.0)) -> void:
 	_menu.set_item_disabled(MenuItem.DUPLICATE, saved.slots.size() >= SavedLoadouts.MAX_SLOTS)
 	_menu.set_item_disabled(MenuItem.REPLACE, saved.slots.size() <= 1)
 	_menu.set_item_disabled(MenuItem.REMOVE, saved.slots.size() <= 1)
-	var point := at if at.x >= 0.0 else Vector2(0.0, c.size.y)
 	_menu.reset_size()
-	_menu.position = Vector2i((c.get_screen_position() + point * c.get_global_transform_with_canvas().get_scale()).round())
+	_menu.position = screen
 	_menu.popup()
 
 
@@ -402,6 +413,11 @@ func _create() -> void:
 
 func _duplicate() -> void:
 	saved.duplicate_slot(saved.current)
+	# The copy rebuilds the cards: a menu opened from the keyboard leaves the keys on the carried card (BP10).
+	if _menu_by_key:
+		refresh()
+		if saved.current >= 0 and saved.current < _cards.size() and _cards[saved.current] != null:
+			_cards[saved.current].grab_focus()
 
 
 func _rename(text: String) -> void:

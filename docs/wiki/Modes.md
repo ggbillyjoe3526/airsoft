@@ -30,8 +30,9 @@ each site: the attackers win by raising their flag on either, and each pole's fl
 
 - **Attackers** raise their flag by standing at the pole, on the rope, for **<!-- wiki:config flag_config.raise_time --> seconds** (a
   big field takes longer: the [Maps](Maps) table lists each field's flag raise, and the Match page says it under the rules when you pick one), then
-  win the round by **holding it up for <!-- wiki:config flag_config.hold_time --> seconds**. The flag stays up on its own, but a defender on the
-  rope pulls it off the top and the hold starts again; with both teams on the rope the hold waits. The FLAG gauge
+  win the round by **holding it up for <!-- wiki:config flag_config.hold_time --> seconds**. With one life the flag stays up on its own; with
+  [respawns](#respawns) an attacker has to stay on the rope through the hold, as a flag left alone slips down. A defender
+  on the rope pulls it off the top and the hold starts again; with both teams on the rope the hold waits. The FLAG gauge
   counts the hold down: **HOLD 3, 2, 1**
 - **Defenders** win by holding out until the clock runs out (or, with [respawns](#respawns) off, by taking out every
   attacker). Defenders at the pole
@@ -99,21 +100,28 @@ on in every mode, or off in all of them.
 
 - **How long you wait.** The attackers wait <!-- wiki:config round_config.respawn_delay --> seconds. The defenders'
   wait in Attack / Defend is set for each field so both sides win about as often: 15 s on **Depot**, whose poles are
-  close to the defenders' start, 5 s on **Woodland**, whose two poles are far apart, and 7 s on **Subway**. In Plant
+  close to the defenders' start, 5 s on **Woodland**, whose two poles are far apart, and 7 s on **Subway**, against
+  Normal bots. Better defenders hold a pole longer, so against **Hard** bots the defenders wait 1.9 times as long but
+  never more than <!-- wiki:config round_config.defender_respawn_most --> seconds (Depot's is that most, Woodland's
+  about 10 s and Subway's 13 s), and against **Easy** bots three quarters as long (about 11 s, 4 s and 5 s). In Plant
   The Bomb they wait <!-- wiki:config round_config.plant_defender_respawn_delay -->
   seconds.
 - **Where you come back.** While you wait, a **RESPAWN IN** panel at the bottom of the screen lists your **start
   area** and your end's two **forward spawns**, nearer the fight. Pick one with **1**, **2** or **3** (the first two
-  replica slots and Holster) or the mouse wheel. Your pick is kept for next time.
+  replica slots and Holster) or the mouse wheel. Your pick is kept for next time. You come back facing the way that
+  spawn faces, with the last life's hit lines and "What got you" card cleared. While you wait, the view stays on the
+  teammate you were watching.
 - **An enemy near shuts a forward spawn.** With an enemy within <!-- wiki:config round_config.forward_block_radius -->
   m of it, the panel greys it out and a pick of it brings you back at your start area instead.
-- **A flag left alone slips back down.** With respawns, a part-raised flag nobody is working slides to the bottom in
+- **A flag left alone slips back down.** With respawns, a flag nobody is working, raised or part-raised, slides to the bottom in
   <!-- wiki:config flag_config.respawn_slip_time -->
-  seconds, so a raise has to be finished, not built up a hit at a time.
+  seconds, so a raise has to be finished and held, not built up a hit at a time.
 - **Plant The Bomb stops respawns once the bomb is armed.** Whoever is out then stays out, and the round is played out
   by whoever is left.
 - **Bots** respawn on the same rules and pick their own spawn. With respawns more of the defending bots go to pull a
-  flag down.
+  flag down, and they don't call how many of you are left, since those hit come back.
+- **A round won while you wait** counts as won with you, for your XP and the round table, which lists anyone back in
+  play by the round's end as still in.
 
 Each field's forward spawns: **Depot** Upper mid and Huts (west), A short and B alley (east); **Woodland** Pine slope
 and Road west (west camp), Fort gate and Back track (east camp); **Subway** Concourse and Lift landing (west), East

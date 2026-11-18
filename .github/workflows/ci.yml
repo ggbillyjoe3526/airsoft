@@ -193,6 +193,33 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  # The respawn guards of Plant The Bomb on Woodland and Subway (BP10), a job of their own beside Depot's.
+  respawn-plant-guards:
+    name: Match guards, respawns, Plant The Bomb on Woodland and Subway
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          status: ${{ env.GODOT_STATUS }}
+
+      - name: Match guards (tests/guards/test_respawn_plant_guards.gd)
+        run: tools/match_guards.sh test_respawn_plant_guards
+        env:
+          GUARDS_LOG: respawn-plant-guards.log
+
+      - name: Keep the log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: respawn-plant-guards-log
+          path: respawn-plant-guards.log
+          if-no-files-found: ignore
+          retention-days: 14
+
   # Plant The Bomb's guards (PB1): whole bot matches a field, the bots fetching, arming and disarming the bomb on their
   # own; a job a field.
   plant-guards:

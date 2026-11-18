@@ -54,7 +54,8 @@ func round_of(id: int) -> Stats:
 	return _round[id] if id >= 0 and id < _round.size() else _empty
 
 
-## Rounds `id`'s team won with `id` taking part: an opponent hit in the round, or still in play at its end.
+## Rounds `id`'s team won with `id` taking part: an opponent hit in the round, or still in play (or waiting to come
+## back, RS1) at its end.
 func rounds_won_with(id: int) -> int:
 	return _rounds_won_with[id] if id >= 0 and id < _rounds_won_with.size() else 0
 
@@ -80,7 +81,9 @@ func after_tick(state: GameState, dt: float) -> void:
 				_add_hit(state, e.actor, e.target)
 			GameEvent.Kind.ROUND_OVER:
 				for c in state.characters:
-					if c.team == e.value and (_round[c.id].hits > 0 or Elimination.is_in_play(c)):
+					# Waiting to come back (RS1) counts as on the team when it wins (BP10).
+					if c.team == e.value and (_round[c.id].hits > 0 or Elimination.is_in_play(c)
+							or Respawns.waiting(c)):
 						_rounds_won_with[c.id] += 1
 				version += 1
 	# Time in play counts live play only: not the wait between rounds, nor the tick that set up a new round.

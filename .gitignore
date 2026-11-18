@@ -29,3 +29,6 @@ desktop.ini
 
 # Python tool caches
 __pycache__/
+
+# test_dp2_qa.gd writes these and deletes them after its run; an interrupted run leaves them (BP10)
+assets/maps/bakes/qa_*.res

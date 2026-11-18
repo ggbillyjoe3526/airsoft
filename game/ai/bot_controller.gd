@@ -233,7 +233,7 @@ func observe(state: GameState) -> void:
 		elif e.kind == GameEvent.Kind.PING:
 			_ping(e, state)
 		elif e.kind == GameEvent.Kind.RESPAWNED:
-			_rejoin(e.actor)
+			_rejoin(e.actor, state.time)
 		elif e.kind == GameEvent.Kind.MATCH_OVER:
 			# No round follows to end the orders, so Hold here's marker would stay over the results.
 			orders.clear()
@@ -329,11 +329,15 @@ func _overtime(time: float) -> void:
 		b.overtime_flank = b.rng.randf() < b.skill.flank_chance
 
 
-## The bot driving character `id` came back into the round (RS1): a fresh life from where it stands (RoundPlanner.rejoin).
-func _rejoin(id: int) -> void:
+## The bot driving character `id` came back into the round (RS1): a fresh life from where it stands (RoundPlanner.rejoin),
+## and with Elimination's overtime flag up (Custom respawns on) it sets off for the flag as at its whistle (BP10).
+func _rejoin(id: int, time: float) -> void:
 	for b in world.bots:
 		if b.character.id == id:
 			world.planner.rejoin(b, world)
+			if world.overtime_flag.up:
+				b.overtime_at = time + b.pick(b.skill.overtime_reaction)
+				b.overtime_flank = b.rng.randf() < b.skill.flank_chance
 			return
 
 

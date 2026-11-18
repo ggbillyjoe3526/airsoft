@@ -155,14 +155,16 @@ func _add_row(c: Character, stats: MatchStats, you: Character, state: GameState)
 	var s := stats.round_of(c.id)
 	var cells := PackedStringArray([str(s.hits), str(s.bbs_fired), HudStyle.clock_text(roundi(s.time_in_play)), ""])
 	var colours: Array[Color] = [Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, GameTheme.GOOD]
-	if s.hit_by < 0:
+	# Hit and back in play by the round's end (respawns, RS1) is still in, as one never hit (BP10).
+	var out := s.hit_by >= 0 and not Elimination.is_in_play(c)
+	if not out:
 		cells[3] = tr("HUD_STILL_IN")
 	else:
 		var shooter := state.character(s.hit_by)
 		cells[3] = _name_of(shooter, you)
 		colours[3] = GameTheme.TEXT if shooter == null or shooter.id == you.id \
 				else _teams.colours[shooter.team].lightened(NAME_LIGHTEN)
-	_table.add_row(_name_of(c, you), c.id == you.id, c.team == you.team and c.id != you.id, s.hit_by >= 0, cells,
+	_table.add_row(_name_of(c, you), c.id == you.id, c.team == you.team and c.id != you.id, out, cells,
 			colours)
 
 

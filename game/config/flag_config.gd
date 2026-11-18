@@ -24,7 +24,8 @@ extends Resource
 ## they stop, for at most this long (s): long enough to finish a raise well under way and its hold.
 @export var max_overtime: float = 15.0
 ## With respawns (RS1), a flag nobody works slips back down, from the top to the bottom in this many seconds: a hit
-## attacker's part-raise doesn't wait on the pole for the next one back. 0: it stays where it was left.
+## attacker's part-raise doesn't wait on the pole for the next one back. A raised flag slips too, so its hold needs an
+## attacker on the rope (BP10: left up, attackers took 89 % of Depot's rounds). 0: it stays where it was left.
 @export var respawn_slip_time: float = 15.0
 ## The rope ratchets audibly every this share of the pole (a FLAG_ROPE event).
 @export var rope_step: float = 1.0 / 12.0

@@ -49,19 +49,21 @@ func _init(quiet_time: float = 0.0) -> void:
 	visible = false
 
 
-## Shows `prompt` (HudPlant.Prompt) and, with none, the quiet line for its time from the frame `carrying` began,
-## `delta` s on. Rebuilds the words only on a change.
-func show_for(prompt: HudPlant.Prompt, carrying: bool, delta: float) -> void:
+## Shows `prompt` (HudPlant.Prompt) and, with none, the quiet line for its time from the frame the bomb was taken,
+## `delta` s on: shown while `carrying`, timed while `holding` (carrying, or setting it down: a plant let go of doesn't
+## start the line again, BP10). Rebuilds the words only on a change.
+func show_for(prompt: HudPlant.Prompt, carrying: bool, delta: float, holding: bool = false) -> void:
 	if prompt != _prompt:
 		_prompt = prompt
 		_build()
-	if carrying and not _carried:
+	var held := carrying or holding
+	if held and not _carried:
 		_quiet_left = _quiet_time
-	elif carrying:
+	elif held:
 		_quiet_left = maxf(0.0, _quiet_left - delta)
 	else:
 		_quiet_left = 0.0
-	_carried = carrying
+	_carried = held
 	_plate.visible = prompt != HudPlant.Prompt.NONE
 	_quiet.visible = carrying and _quiet_left > 0.0 and prompt == HudPlant.Prompt.NONE
 	visible = _plate.visible or _quiet.visible

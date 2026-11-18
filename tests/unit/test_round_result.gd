@@ -48,6 +48,7 @@ func _hit(shooter: int, victim: int) -> void:
 	var e := state.events.add(K.CHARACTER_HIT)
 	e.actor = shooter
 	e.target = victim
+	state.character(victim).status = Character.Status.CALLING # as the sim leaves a hit: calling it, out of play (BP10)
 	session.match_stats().after_tick(state, 0.0)
 	state.events.clear()
 

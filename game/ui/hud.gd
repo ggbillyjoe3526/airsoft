@@ -949,6 +949,9 @@ func on_tick(state: GameState, mag_from_wheel: bool = false) -> void:
 			GameEvent.Kind.RESPAWNED:
 				if e.actor == _player.id:
 					_back_left = _cfg.back_in_fade
+					# Back in, the last life's "what got you" card and kept hit lines go, as at a round's start (BP10).
+					hide_what_got_you()
+					_hits.release_kept()
 					# Never over a round's own banner.
 					if not _banner.visible:
 						_show_banner("", HudStyle.caps("HUD_BACK_IN"))
@@ -1520,7 +1523,8 @@ func _update_plant(rs: RoundState, in_play: bool, delta: float) -> void:
 		_gauge.set_flag(HudPlant.gauge_fill(rs, g), _teams.colours[team], team == HudStyle.STRIPED_TEAM)
 	var own := in_play and _watching_name.is_empty()
 	_plant_prompt.show_for(HudPlant.prompt(rs, _player, _sim.plant) if own else HudPlant.Prompt.NONE,
-			own and HudPlant.carrying(rs, _player), delta)
+			own and HudPlant.carrying(rs, _player), delta,
+			own and HudPlant.rail_carry(rs, _player) != WeaponRail.Carry.NONE)
 
 
 ## A bomb event (Plant The Bomb): a feed note for the pick-up, drop, plant and defuse as `HudPlant.feed_words` has them,

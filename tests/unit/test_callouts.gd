@@ -171,6 +171,17 @@ func test_calls_a_hit_with_how_many_are_left_then_the_last_one_and_nothing_once_
 	assert_eq(w.tick([w.hit(2, 0)]), _said([]))
 
 
+func test_with_respawns_open_a_hit_gives_no_count_of_who_is_left() -> void:
+	# BP10: those hit come back in seconds, so "Last one!" would be said every few seconds.
+	var r := _rig()
+	r.state.round_state.respawns = true
+	assert_eq(r.tick([r.hit(2, 0)]), _said([]))
+	var shut := _rig()
+	shut.state.round_state.respawns = true
+	shut.state.round_state.practice = true
+	assert_eq(shut.tick([shut.hit(2, 0)]), _said(["0: Last one!"]), "respawns shut: counted as ever")
+
+
 func test_counts_those_left_in_words() -> void:
 	var r := _rig()
 	# A third on the other team: one hit leaves two.
