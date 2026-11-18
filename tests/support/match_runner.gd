@@ -308,12 +308,14 @@ func free_level() -> void:
 
 ## Plays one whole match on `seed_value`, every character a bot, for at most `max_seconds` of match time.
 func play(seed_value: int, max_seconds: float) -> MatchTally:
-	var sim := Simulation.new(tuning, level.query(), level.mover(tuning.body), map.ends, map.kill_y)
+	# the bots' level scales the defenders' wait in Attack / Defend, as a match against them does (BP10)
+	var played := MatchOptions.level_tuning(tuning, difficulty)
+	var sim := Simulation.new(played, level.query(), level.mover(played.body), map.ends, map.kill_y)
 	sim.nav = nav
-	var state := GameState.new(seed_value, tuning)
+	var state := GameState.new(seed_value, played)
 	var loadout := ReplicaStats.default_loadout()
 	var commands: Array[PlayerCommand] = []
-	var size := tuning.rounds.team_size
+	var size := played.rounds.team_size
 	var kit_names := PackedStringArray()
 	if kitted and _kits == null:
 		_kits = BotKits.shared()
@@ -351,7 +353,7 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 			c.armament.lights = BotKits.lights_for(c.armament.replicas, light_rules, light)
 	var options := BotController.Options.new()
 	options.talk = talk
-	var bots := BotController.new(state, -1, map, nav, level.query(), tuning, config, levels, identities, options)
+	var bots := BotController.new(state, -1, map, nav, level.query(), played, config, levels, identities, options)
 	bots.world.night = NightField.build(map, config, night)
 	t.kits = kit_names
 	kits_now = kit_names
@@ -369,8 +371,8 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 		state.round_state.first_attackers = 0
 	elif mode == RoundState.Mode.PLANT_THE_BOMB:
 		state.round_state.mode = mode
-		state.round_state.plant.set_sites(map.bomb_sites, map.bomb_site_radii, tuning.plant.site_radius)
-		state.round_state.plant.start = map.bomb_start_ahead(tuning.plant.start_ahead)
+		state.round_state.plant.set_sites(map.bomb_sites, map.bomb_site_radii, played.plant.site_radius)
+		state.round_state.plant.start = map.bomb_start_ahead(played.plant.start_ahead)
 		state.round_state.first_attackers = 0
 	else:
 		state.round_state.has_overtime_spot = map.has_overtime_flag and overtime_flag

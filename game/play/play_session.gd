@@ -408,6 +408,8 @@ func _load_map() -> void:
 		_tuning = practice_tuning(_tuning)
 	else:
 		_tuning = MatchOptions.match_tuning(_tuning, MapCatalog.shared().find(map_id), custom_rules)
+		# the other team's level sets the defenders' wait (BP10), both teams', even with your teammates at another level
+		_tuning = MatchOptions.level_tuning(_tuning, difficulty)
 	_play = PlayTuning.load_default()
 	if not practice and not is_equal_approx(_tuning.rounds.start_countdown, _play.round_countdown):
 		# a copy: the shared default tuning is never written to

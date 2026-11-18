@@ -147,3 +147,19 @@ func test_subway_announcements_are_the_players_own_and_never_over_the_results() 
 	state.time += STEP
 	audio.on_tick(state, 0, null)
 	assert_false(audio._announcer.playing, "a new match cuts it")
+
+
+func test_the_bots_level_scales_the_defenders_wait_and_nothing_else() -> void:
+	var base := MatchOptions.match_tuning(SimTuning.load_default(), MapCatalog.shared().find("depot"), null)
+	var field := base.rounds.defender_respawn_delay
+	assert_same(MatchOptions.level_tuning(base, &"normal"), base, "Normal plays the field's wait, the tuning shared")
+	for level: StringName in [&"easy", &"hard"]:
+		var scale: float = base.rounds.defender_respawn_scale[level]
+		assert_ne(scale, 1.0, "%s has a scale of its own" % level)
+		var played := MatchOptions.level_tuning(base, level)
+		assert_almost_eq(played.rounds.defender_respawn_delay, field * scale, 0.001, String(level))
+		assert_eq(played.rounds.respawn_delay, base.rounds.respawn_delay, "%s: the attackers' wait kept" % level)
+		assert_eq(played.rounds.plant_defender_respawn_delay, base.rounds.plant_defender_respawn_delay,
+				"%s: Plant The Bomb's kept" % level)
+	assert_eq(base.rounds.defender_respawn_delay, field, "the field's tuning is never written")
+	assert_same(MatchOptions.level_tuning(base, &"unknown"), base, "a level with no scale waits the field's")
