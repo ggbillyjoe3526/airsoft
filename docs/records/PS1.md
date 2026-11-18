@@ -11,46 +11,66 @@ forward spawns) and keep the attackers' share in its band.
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-18 | 1 | Opus 5.5 (build thread) | ✓ (gdlint, wiki, changelog, touched tests; CI green on ebf01d9) | 6/8 Retry | Subway and Woodland PTB unmeasured; three comment lines over 120 |
-| 2026-11-18 | 2 | Opus 5.5 (build thread) | ✓ (as above) | ? | – |
+| 2026-11-18 | 1 | Opus 5.5 (build thread) | ✓ (gdlint, wiki, changelog, touched tests; CI green on ebf01d9) | 6/8 Retry | Woodland PTB and Subway unmeasured; three comment lines over 120 |
+| 2026-11-18 | 2 | Opus 5.5 (build thread) | ✓ (as above; CI on the final head) | ? | – |
 
 Agents: QA 42k tokens, performance 21k, critic 38k (attempt 1), changelog 24k.
 
 ## What the bots showed
 
-Bot matches, 6v6, Normal, seeds 1 to 32 a field and mode, respawns as each mode plays them (a scratch runner over
-`MatchRunner`, four jobs in parallel). The baseline is main b0c5761, from the Beta 2 pass (16 seeds; Woodland PTB 32).
+Bot matches, 6v6, respawns as each mode plays them, a scratch runner over `MatchRunner` (four jobs in parallel); the
+attackers' share of rounds. Main is the Beta 2 pass's figures on main (16 seeds unless named), or main's behaviour on
+the same seeds (this table with the personality table cut, which plays exactly as main).
 
-| Field | Attack / Defend: attackers | main | Plant The Bomb: attackers | main | Band |
-|---|---|---|---|---|---|
-| Depot | 55.1 % ±3.2 (243 rounds) | 50.9 % | 45.9 % ±3.3 (229) | 51.2 % | A/D 38–67 %, PTB 40–65 % |
-| Woodland | 42.3 % ±3.2 (241) | 44.7 % | 48.5 % ±3.2 (237) | 49.4 % | 40–65 % |
-| Subway | 49.8 % ±3.3 (235) | 51.3 % | 59.1 % ±3.2 (242) | 54.9 % | 40–65 % |
+The first build moved three things out of line, each found by turning one job off at a time:
 
-Rounds run out the clock: A/D Depot 44.9 %, Woodland 57.7 %, Subway 50.2 % (band with respawns ≤ 62 %); PTB Depot
-18.8 %, Woodland 18.6 %, Subway 19.0 % (≤ 25 %). Every share is in its band; Depot moved both ways by about 1.5
-standard errors, and Subway PTB rose a little (58.1 % on main's seeds 1 to 8) (Rushers forward on defence there meet attackers sooner; Careful carriers go in later). Easy and Hard
-Plant The Bomb, 8 seeds: LEVELS. Easy and Hard Attack / Defend wait for BP10's per-level defender wait (#390), which
-the Beta 2 pass measures with this change in.
+| Found | Measured | Cause | Fix |
+|---|---|---|---|
+| Plant slower | Woodland Hard PTB 39.7 % (main 50.9, seeds 1 to 8), more rounds to the clock | Careful bots carried the bomb in: they walk and wait for the team | Flankers carry it (50.8 %) |
+| Depot PTB down | Normal 40.5 % on 32 seeds (main 51.2) | Rushers holding their lane's second point every round (posts off: 52.8 %, Rusher's off: 49.6 %) | Forward now means first pick for the round's pushed post only (44.9 % on 32) |
+| Easy PTB up | Depot Easy 73.7 % (main 43.3, seeds 1 to 8) | Flanker carriers on a lane of their own got past Easy defenders (carry off: 43.1 %) | A milder lean: Flanker 0.85, Rusher 1.25 (49.3 %) |
+
+Final table (Flanker 0.85, Rusher 1.25, forward = pushed post; main with BP10 part 2 for Woodland):
+
+| Field | Mode, level | Attackers | Main | Band |
+|---|---|---|---|---|
+| Depot | A/D Normal (16) | 58.6 % ±4.7 | 50.9 % | 38–67 % |
+| Depot | PTB Normal (16) | 50.4 % ±4.6 | 52.0 % | 40–65 % |
+| Depot | PTB Easy (8) | 49.3 % ±6.0 | 43.3 % | 35–65 % |
+| Depot | PTB Hard (8) | 35.0 % ±6.2 | 32.8 % | 40–60 % (main is out too) |
+| Woodland | A/D Normal (16) | 49.5 % ±4.7 | 44.8 % | 40–65 % |
+| Woodland | PTB Normal (32) | 56.2 % ±3.2 | 53.3 % | 40–65 % |
+| Woodland | PTB Easy (8) | 55.7 % ±6.4 | – | 35–65 % |
+| Woodland | PTB Hard (8) | WOOD_H | 47.0 % | 40–60 % |
+| Subway | A/D Normal (16) | 61.9 % ±4.5 | 51.3 % | 40–65 % |
+| Subway | PTB Normal (16) | 57.0 % ±4.5 | 54.4 % | 40–65 % |
+| Subway | PTB Easy (8) | 57.1 % ±6.2 | 56.7 % | 35–65 % |
+| Subway | PTB Hard (8) | 52.5 % ±6.5 | – | 40–60 % |
+
+Rounds to the clock stay in their bands (A/D 38 to 54 %, PTB 12 to 22 %). Subway A/D is the highest: with the carry
+lean or the spawn chances off it reads 55.3 and 55.8 % (16 seeds each), so no one job lifts it beyond noise. Depot PTB
+Hard is out of band on main as well; the Beta 2 pass (BP10) owns it. Easy and Hard Attack / Defend are measured by
+the Beta 2 pass with BP10's per-level defender wait.
 
 ## Decisions
 
 - **The jobs are a table in `data/bots.md`** (Attack / Defend and Plant the Bomb), optional: without it, or a cell
   that can't be read, every bot plays the same jobs, and play is identical to main (scales of 1 multiply exactly,
   the draws are the same).
-- **Defends forward / deep** changes which lane point a defender holds (RoundPlanner.defend_points) and who takes the
-  round's pushed post (`_pushed_member`: the first forward one round the team from the draw, never a deep one). The
-  pushed post's draws are unchanged.
+- **Defends**: `deep` (Anchor) always holds its lane's first point and is never the pushed defender; `forward`
+  (Rusher) is the first pick for the round's pushed post (`RoundPlanner._pushed_member`) and otherwise holds what the
+  plan deals. The pushed post's draws are unchanged.
 - **Distances scaled, not roles forced**: Goes back from (×) and Takes the bomb or rope from (×) scale a bot's
   distance in the existing nearest-bot picks, so a much nearer teammate still takes the job; a personality only wins
-  it from teammates a little nearer. Anchors go back at 1 (attempt 2: at 1.4 an Anchor by the pole stood while a
-  Rusher ran back from 9 m, the critic's design risk).
-- **With respawns every defender goes back** (respawn_retakers 6), so Goes back from only orders them with one life
-  (Custom › Respawns Off); kept for that and for smaller teams.
+  it from teammates a little nearer. Anchors go back at 1 (critic attempt 1: at 1.4 an Anchor by the pole stood while
+  a Rusher ran back from 9 m). With respawns every defender goes back (respawn_retakers 6), so Goes back from only
+  orders them with one life (Custom › Respawns Off) or a small team.
+- **Flankers carry the bomb and raise the flag** (0.85), Rushers leave both (1.25): Careful carriers were too slow,
+  and a stronger Flanker lean too strong at Easy.
 - **Forward spawn chances** (Rusher 0.85, Anchor 0.35, Flanker 0.7, Careful 0.5) average the game's 0.6, so a team
   comes back forward as often as before. They apply only with sides; Elimination with respawns keeps 0.6 (QA).
 - Card notes left as they were: they describe how each plays everywhere.
 
 ## Known issues left
 
-None.
+None of its own. Depot Plant The Bomb at Hard is out of band on main too (BP10's).
