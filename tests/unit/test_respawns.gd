@@ -483,9 +483,12 @@ func test_with_respawns_an_untended_flag_slips_back_down() -> void:
 	flag.progress = 1.0
 	flag.held = 1.0
 	Flag.step(flag, nobody, 0, cfg, events, 1.0, cfg.respawn_slip_time)
-	assert_eq(flag.progress, 1.0, "a raised flag stays up for its hold (BP10)")
-	assert_true(Flag.step(flag, nobody, 0, cfg, events, cfg.hold_time, cfg.respawn_slip_time),
-			"its hold runs out alone and wins, as with one life")
+	assert_lt(flag.progress, 1.0, "with respawns a raised flag left alone slips too (BP10)")
+	assert_eq(flag.held, 0.0, "and its hold starts again")
+	flag.progress = 1.0
+	flag.held = 1.0
+	assert_false(Flag.step(flag, nobody, 0, cfg, events, 1.0), "one life: left up, its hold runs on")
+	assert_true(Flag.step(flag, nobody, 0, cfg, events, cfg.hold_time), "and wins alone")
 	var rs := RoundState.new()
 	assert_eq(Respawns.slip_time(rs, cfg), 0.0)
 	rs.respawns = true

@@ -30,8 +30,9 @@ each site: the attackers win by raising their flag on either, and each pole's fl
 
 - **Attackers** raise their flag by standing at the pole, on the rope, for **<!-- wiki:config flag_config.raise_time --> seconds** (a
   big field takes longer: the [Maps](Maps) table lists each field's flag raise, and the Match page says it under the rules when you pick one), then
-  win the round by **holding it up for <!-- wiki:config flag_config.hold_time --> seconds**. The flag stays up on its own, but a defender on the
-  rope pulls it off the top and the hold starts again; with both teams on the rope the hold waits. The FLAG gauge
+  win the round by **holding it up for <!-- wiki:config flag_config.hold_time --> seconds**. With one life the flag stays up on its own; with
+  [respawns](#respawns) an attacker has to stay on the rope through the hold, as a flag left alone slips down. A defender
+  on the rope pulls it off the top and the hold starts again; with both teams on the rope the hold waits. The FLAG gauge
   counts the hold down: **HOLD 3, 2, 1**
 - **Defenders** win by holding out until the clock runs out (or, with [respawns](#respawns) off, by taking out every
   attacker). Defenders at the pole
@@ -107,9 +108,9 @@ on in every mode, or off in all of them.
   replica slots and Holster) or the mouse wheel. Your pick is kept for next time.
 - **An enemy near shuts a forward spawn.** With an enemy within <!-- wiki:config round_config.forward_block_radius -->
   m of it, the panel greys it out and a pick of it brings you back at your start area instead.
-- **A flag left alone slips back down.** With respawns, a part-raised flag nobody is working slides to the bottom in
+- **A flag left alone slips back down.** With respawns, a flag nobody is working, raised or part-raised, slides to the bottom in
   <!-- wiki:config flag_config.respawn_slip_time -->
-  seconds, so a raise has to be finished, not built up a hit at a time.
+  seconds, so a raise has to be finished and held, not built up a hit at a time.
 - **Plant The Bomb stops respawns once the bomb is armed.** Whoever is out then stays out, and the round is played out
   by whoever is left.
 - **Bots** respawn on the same rules and pick their own spawn. With respawns more of the defending bots go to pull a

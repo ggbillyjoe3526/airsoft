@@ -104,8 +104,8 @@ static func step(flag: FlagState, characters: Array[Character], attackers: int, 
 		flag.progress = maxf(0.0, flag.progress - dt / cfg.lower_time)
 	else:
 		flag.status = FlagState.Status.IDLE
-		# A raised flag stays up for its hold (the wiki's rule); only a part-raise slips (BP10).
-		if slip_time > 0.0 and flag.progress < 1.0:
+		# Raised as well as part-raised (BP10, measured): with respawns the hold needs an attacker on the rope.
+		if slip_time > 0.0:
 			flag.progress = maxf(0.0, flag.progress - dt / slip_time)
 	if floori(flag.progress / cfg.rope_step) != floori(before / cfg.rope_step):
 		var rope := events.add(GameEvent.Kind.FLAG_ROPE)
