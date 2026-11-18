@@ -37,6 +37,9 @@ const FUSE_RANGE := Vector2(15.0, 60.0)
 ## Defend (RoundConfig.defender_respawn_delay). Blank keeps the round tuning's.
 const DEFENDER_RESPAWN_COLUMN := "Defender respawn (s)"
 const DEFENDER_RESPAWN_RANGE := Vector2(2.0, 30.0)
+## The bomb defenders' respawn column, optional (BP10): the seconds from a hit to a defender coming back there in Plant
+## The Bomb until the bomb is armed (RoundConfig.plant_defender_respawn_delay). Blank keeps the round tuning's.
+const BOMB_RESPAWN_COLUMN := "Bomb defender respawn (s)"
 const START_MODES: Dictionary[String, ReplicaConfig.FireMode] = {
 	"": ReplicaConfig.FireMode.AUTO,
 	"auto": ReplicaConfig.FireMode.AUTO,
@@ -78,6 +81,9 @@ class Entry:
 	## The seconds a defender hit here waits to come back (RS1: a field whose poles are far apart gives them less), 0
 	## for the round tuning's own (RoundConfig.defender_respawn_delay). Skirmish and Custom both play it.
 	var defender_respawn: float = 0.0
+	## The seconds a defender hit here waits to come back in Plant The Bomb (BP10: Depot's close sites let Hard
+	## defenders hold them at the game's 5 s), 0 for the round tuning's own (RoundConfig.plant_defender_respawn_delay).
+	var bomb_respawn: float = 0.0
 
 	## The field's air (°C) by day: its own, else `rated`.
 	func air_or(rated: float) -> float:
@@ -155,6 +161,8 @@ static func parse(text: String) -> MapCatalog:
 			e.fuse_time = _read_number(row, FUSE_COLUMN, FUSE_RANGE, e.fuse_time, at, m.problems, table)
 			e.defender_respawn = _read_number(row, DEFENDER_RESPAWN_COLUMN, DEFENDER_RESPAWN_RANGE, e.defender_respawn, at,
 					m.problems, table)
+			e.bomb_respawn = _read_number(row, BOMB_RESPAWN_COLUMN, DEFENDER_RESPAWN_RANGE, e.bomb_respawn, at, m.problems,
+					table)
 			m.entries.append(e)
 	for column in SIZE_COLUMNS:
 		if not table.has_column(column):
