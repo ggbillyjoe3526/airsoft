@@ -1104,8 +1104,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   6.0 m). The Fort and the Sawmill keep their other pieces and names as the defenders' ground behind the flags; the
   areas at the poles are A site and B site; the Box lantern and the Sawmill's work lamp moved to the flags. The middle
   route ends at Hut row; the two middle routes' last posts are the concept's, 14 m and 10 m short of their poles on
-  the way the attack comes (by the poles the attackers won 64 % ±3). Woodland's fuse was 27 s (25 s from PB5, 26 s from BP10).
-  Bots, 6v6, Normal, seeds 1 to 32, on main with RV1's route variety: Attack / Defend attackers 55 % ±3, the first
+  the way the attack comes (by the poles the attackers won 64 % ±3). Woodland's fuse was 27 s
+  (25 s from PB5, 26 s from BP10). Bots, 6v6, Normal, seeds 1 to 32, on main with RV1's route variety: Attack / Defend attackers 55 % ±3, the first
   hit at 20 s (24 s before), half the knock-outs outside the defenders' third (12 %); Plant The Bomb attackers 47 % ±3
   at 27 s (before RV1 merged: 59 % at the old 23 s, 51 % at 27 s). The ground a bot stands on in at least one round
   in ten grew by 28 % in Elimination and in Attack / Defend.
