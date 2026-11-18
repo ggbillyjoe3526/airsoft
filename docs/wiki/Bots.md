@@ -79,9 +79,9 @@ different ones while there are enough. A personality changes **how** a bot plays
 
 In Attack / Defend and Plant The Bomb each personality also takes a job of its own:
 
-- **Rushers** defend forward, well up their lane, and are the first back when the flag starts going up or the bomb is
-  heard being armed. On attack they leave the bomb and the flag rope to others, and with respawns they come back at a
-  forward spawn most of the time.
+- **Rushers**: on the rounds the defence sends one player well up a lane to catch attackers early, it's a Rusher.
+  Rushers are also the first back when the flag starts going up or the bomb is heard being armed. On attack they
+  leave the bomb and the flag rope to others, and with respawns they come back at a forward spawn most of the time.
 - **Anchors** defend deep, close to the pole or site. With respawns they mostly come back at their start area.
 - **Flankers** pick up the bomb and carry it in, and raise the flag, unless a teammate is much nearer. With
   respawns they often come back at a forward spawn.

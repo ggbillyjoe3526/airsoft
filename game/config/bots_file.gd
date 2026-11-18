@@ -59,8 +59,8 @@ const NONE_CELLS: PackedStringArray = ["", "–", "-", "—"]
 
 ## A Habits cell for a habit some levels have: as the difficulty plays it, on or off.
 enum Habit { SAME, ON, OFF }
-## Where a personality holds when it defends (PS1): as the team's plan deals it, its lane's forward post (and the
-## round's pushed post, RoundPlanner.plan), or its first post nearest home.
+## Where a personality holds when it defends (PS1): as the team's plan deals it, first pick for the round's pushed
+## post (RoundPlanner._pushed_member), or its first post nearest home.
 enum Post { SAME, FORWARD, DEEP }
 ## The Defends cells, as typed (lower case), and the post each means.
 const POST_CELLS: Dictionary[String, Post] = {"forward": Post.FORWARD, "deep": Post.DEEP}

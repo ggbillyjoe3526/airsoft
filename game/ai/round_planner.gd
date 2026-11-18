@@ -139,14 +139,12 @@ func rejoin(b: Bot, w: BotWorld) -> void:
 
 
 ## The points a defender walks to its post (PS1, bots.md › Defends): the second (forward) one when the plan's draw says
-## so (`forward`), the first when not; a personality that defends forward always holds the second, one that defends deep
-## always the first.
+## so (`forward`), the first when not; one that defends deep always the first. One that defends forward holds what the
+## plan deals it: it is the round's pushed post it takes first (_pushed_member). Holding the second point every round
+## as well left the attackers 40 % of Plant The Bomb on Depot (main 51 %).
 static func defend_points(post: BotsFile.Post, forward: bool) -> int:
-	match post:
-		BotsFile.Post.FORWARD:
-			return 2
-		BotsFile.Post.DEEP:
-			return 1
+	if post == BotsFile.Post.DEEP:
+		return 1
 	return 2 if forward else 1
 
 

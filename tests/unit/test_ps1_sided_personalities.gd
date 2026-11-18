@@ -1,7 +1,7 @@
 extends GutTest
 ## Personalities in Attack / Defend and Plant The Bomb (PS1, owner 2026-11-18: "make the personalities matter there"):
-## bots.md's Attack / Defend and Plant the Bomb table gives each personality its job. A Rusher defends forward and takes
-## the round's pushed post, an Anchor defends deep and is never pushed up, the defenders that go back count nearer or
+## bots.md's Attack / Defend and Plant the Bomb table gives each personality its job. A Rusher takes the round's pushed
+## post first, an Anchor defends deep and is never pushed up, the defenders that go back count nearer or
 ## further by their personality, a Flanker attacker carries the bomb in and raises the flag before a nearer Rusher, and
 ## each personality comes back at a forward spawn as often as its own chance says. Elimination plays as before.
 ## Bare bot worlds for the picks, and RV1's flat 60 by 30 m field for the plan (game/ai/round_planner.gd, bot_flag.gd,
@@ -151,16 +151,23 @@ func test_a_file_without_the_table_plays_the_same_jobs_and_a_bad_cell_keeps_neut
 	assert_true(file.style(&"rusher").is_neutral() == false, "its move numbers still count")
 
 
-func test_forward_defenders_hold_the_second_point_and_deep_ones_the_first() -> void:
-	assert_eq(RoundPlanner.defend_points(BotsFile.Post.FORWARD, false), 2)
+func test_deep_defenders_hold_the_first_point_and_forward_ones_what_the_plan_deals() -> void:
+	assert_eq(RoundPlanner.defend_points(BotsFile.Post.FORWARD, false), 1, "forward is the pushed post, not this")
+	assert_eq(RoundPlanner.defend_points(BotsFile.Post.FORWARD, true), 2)
 	assert_eq(RoundPlanner.defend_points(BotsFile.Post.DEEP, true), 1)
 	assert_eq(RoundPlanner.defend_points(BotsFile.Post.SAME, true), 2)
 	assert_eq(RoundPlanner.defend_points(BotsFile.Post.SAME, false), 1)
 	var w := _start(_quiet(0.0), RoundState.Mode.ATTACK_DEFEND)
-	_team_plays(w, 1, &"rusher")
+	_team_plays(w, 1, &"flanker")
+	var dealt: Array[int] = []
 	for b in w.bots:
-		if BotFlag.role(b, w) == BotFlag.Role.DEFEND:
-			assert_eq(b.lane_points, 2, "a rusher holds forward")
+		dealt.append(b.lane_points)
+	# The same match again, its second plan with rushers: the plan's draws are the same.
+	w = _start(_quiet(0.0), RoundState.Mode.ATTACK_DEFEND)
+	_team_plays(w, 1, &"rusher")
+	for i in w.bots.size():
+		if BotFlag.role(w.bots[i], w) == BotFlag.Role.DEFEND:
+			assert_eq(w.bots[i].lane_points, dealt[i], "no pushed post this round: a rusher holds what it was dealt")
 	_team_plays(w, 1, &"anchor")
 	for b in w.bots:
 		if BotFlag.role(b, w) == BotFlag.Role.DEFEND:

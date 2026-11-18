@@ -62,8 +62,8 @@ A personality changes how a bot plays, never how well: its reaction, turning and
 The **Attack / Defend and Plant the Bomb** table gives each personality its job in the modes with sides. It can be
 left out: then every bot plays the same jobs there.
 
-- **Defends.** Where it holds when its team defends: `forward` always holds its lane's forward post and is the first
-  pick for the round's pushed post well up a lane; `deep` always holds the post nearest home and is never pushed up; –
+- **Defends.** Where it holds when its team defends: `forward` is the first pick for the round's pushed post, well up
+  a lane, when the team has one (about one round in three); `deep` always holds the post nearest home and is never pushed up; –
   holds what the team's plan deals it.
 - **Goes back from (×).** When the flag starts going up, or the bomb is heard being armed, the defenders nearest go
   back to it; this scales how near it counts. Below 1 it is among the first back, above 1 it stays at its post longer.
