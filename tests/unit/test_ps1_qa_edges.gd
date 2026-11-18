@@ -68,9 +68,9 @@ func test_the_kept_raiser_holds_the_rope_against_a_slightly_nearer_scaled_rival(
 	for i in 5:
 		BotFlag.pick_raiser(w)
 		assert_true(w.bots[0].raiser and not w.bots[1].raiser, "pick %d: no swap inside the margin" % i)
-	w.bots[1].character.position = pole - Vector3(6.0, 0, 0)
+	w.bots[1].character.position = pole - Vector3(3.5, 0, 0)
 	BotFlag.pick_raiser(w)
-	assert_true(w.bots[1].raiser, "6 m × 0.7 = 4.2 beats the kept rusher's 5 m × 1.5 - 3 = 4.5 (fails unscaled: 6 > 2)")
+	assert_true(w.bots[1].raiser, "3.5 m × 0.85 = 2.98 beats the kept rusher's 5 m × 1.25 - 3 = 3.25 (fails unscaled: 3.5 > 2)")
 
 
 func test_the_kept_fetcher_is_held_and_a_flanker_rival_far_enough_ahead_takes_over() -> void:

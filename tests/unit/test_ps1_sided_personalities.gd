@@ -141,7 +141,7 @@ func test_a_file_without_the_table_plays_the_same_jobs_and_a_bad_cell_keeps_neut
 	assert_eq(r.retake_scale, 1.0)
 	assert_eq(r.carry_scale, 1.0)
 	assert_false(r.has_spawn_chance)
-	var bad := BotsFile.parse(text.replace("| Rusher | forward | 0.7 | 1.5 | 0.85 |", "| Rusher | sideways | x | 9 | 2 |"))
+	var bad := BotsFile.parse(text.replace("| Rusher | forward | 0.7 | 1.25 | 0.85 |", "| Rusher | sideways | x | 9 | 2 |"))
 	assert_eq(bad.problems.size(), 4, "each bad cell reported: %s" % [bad.problems])
 	var b := bad.style(&"rusher")
 	assert_eq(b.post, BotsFile.Post.SAME)
@@ -239,7 +239,7 @@ func test_a_rusher_goes_back_before_a_nearer_bot_that_stays_longer() -> void:
 
 func test_a_flanker_raises_the_flag_before_a_nearer_rusher() -> void:
 	var pole := Vector3(10.0, 0.0, 0.0)
-	var w := _bare(RoundState.Mode.ATTACK_DEFEND, 0, [pole - Vector3(2.0, 0, 0), pole - Vector3(3.0, 0, 0)]
+	var w := _bare(RoundState.Mode.ATTACK_DEFEND, 0, [pole - Vector3(2.0, 0, 0), pole - Vector3(2.5, 0, 0)]
 			as Array[Vector3])
 	w.flags[0].position = pole
 	for b in w.bots:
@@ -247,13 +247,13 @@ func test_a_flanker_raises_the_flag_before_a_nearer_rusher() -> void:
 	w.bots[0].style = file.style(&"rusher")
 	w.bots[1].style = file.style(&"flanker")
 	BotFlag.pick_raiser(w)
-	assert_true(w.bots[1].raiser, "the flanker takes the rope (3 m × 0.7 < 2 m × 1.5)")
+	assert_true(w.bots[1].raiser, "the flanker takes the rope (2.5 m × 0.85 < 2 m × 1.25)")
 	assert_false(w.bots[0].raiser, "the rusher guards")
 
 
 func test_a_flanker_fetches_the_bomb_before_a_nearer_rusher() -> void:
 	var bomb := Vector3(-20.0, 0.0, 0.0)
-	var w := _bare(RoundState.Mode.PLANT_THE_BOMB, 0, [bomb + Vector3(2.0, 0, 0), bomb + Vector3(3.0, 0, 0)]
+	var w := _bare(RoundState.Mode.PLANT_THE_BOMB, 0, [bomb + Vector3(2.0, 0, 0), bomb + Vector3(2.5, 0, 0)]
 			as Array[Vector3])
 	w.plant = PlantState.new()
 	w.plant.status = PlantState.Status.DOWN
