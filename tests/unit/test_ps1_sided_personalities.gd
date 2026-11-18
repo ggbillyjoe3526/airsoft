@@ -1,10 +1,10 @@
 extends GutTest
 ## Personalities in Attack / Defend and Plant The Bomb (PS1, owner 2026-11-18: "make the personalities matter there"):
 ## bots.md's Attack / Defend and Plant the Bomb table gives each personality its job. A Rusher takes the round's pushed
-## post first, an Anchor defends deep and is never pushed up, the defenders that go back count nearer or
-## further by their personality, a Flanker attacker carries the bomb in and raises the flag before a nearer Rusher, and
-## each personality comes back at a forward spawn as often as its own chance says. Elimination plays as before.
-## Bare bot worlds for the picks, and RV1's flat 60 by 30 m field for the plan (game/ai/round_planner.gd, bot_flag.gd,
+## post first, an Anchor defends deep and is never pushed up, the defenders that go back count nearer or further by
+## their personality, a Flanker attacker carries the bomb in before a nearer Rusher (the rope goes by distance alone),
+## and each personality comes back at a forward spawn as often as its own chance says. Elimination plays as before. Bare
+## bot worlds for the picks, and RV1's flat 60 by 30 m field for the plan (game/ai/round_planner.gd, bot_flag.gd,
 ## bot_plant.gd, bot_respawn.gd, game/config/bots_file.gd).
 
 const DT := 1.0 / 60.0
@@ -141,7 +141,8 @@ func test_a_file_without_the_table_plays_the_same_jobs_and_a_bad_cell_keeps_neut
 	assert_eq(r.retake_scale, 1.0)
 	assert_eq(r.carry_scale, 1.0)
 	assert_false(r.has_spawn_chance)
-	var bad := BotsFile.parse(text.replace("| Rusher | forward | 0.7 | 1.25 | 0.85 |", "| Rusher | sideways | x | 9 | 2 |"))
+	var row := "| Rusher | forward | 0.7 | 1.25 | 0.85 |"
+	var bad := BotsFile.parse(text.replace(row, "| Rusher | sideways | x | 9 | 2 |"))
 	assert_eq(bad.problems.size(), 4, "each bad cell reported: %s" % [bad.problems])
 	var b := bad.style(&"rusher")
 	assert_eq(b.post, BotsFile.Post.SAME)
@@ -237,7 +238,7 @@ func test_a_rusher_goes_back_before_a_nearer_bot_that_stays_longer() -> void:
 	assert_true(w.bots[0].retake and w.bots[2].retake, "neutral: the nearest goes back, and the rusher")
 
 
-func test_a_flanker_raises_the_flag_before_a_nearer_rusher() -> void:
+func test_the_nearest_attacker_raises_the_flag_whatever_its_personality() -> void:
 	var pole := Vector3(10.0, 0.0, 0.0)
 	var w := _bare(RoundState.Mode.ATTACK_DEFEND, 0, [pole - Vector3(2.0, 0, 0), pole - Vector3(2.5, 0, 0)]
 			as Array[Vector3])
@@ -247,8 +248,8 @@ func test_a_flanker_raises_the_flag_before_a_nearer_rusher() -> void:
 	w.bots[0].style = file.style(&"rusher")
 	w.bots[1].style = file.style(&"flanker")
 	BotFlag.pick_raiser(w)
-	assert_true(w.bots[1].raiser, "the flanker takes the rope (2.5 m × 0.85 < 2 m × 1.25)")
-	assert_false(w.bots[0].raiser, "the rusher guards")
+	assert_true(w.bots[0].raiser, "the rusher, nearest, takes the rope: a lean there lifted the attackers' share")
+	assert_false(w.bots[1].raiser)
 
 
 func test_a_flanker_fetches_the_bomb_before_a_nearer_rusher() -> void:

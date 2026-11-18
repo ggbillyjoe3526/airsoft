@@ -63,13 +63,12 @@ The **Attack / Defend and Plant the Bomb** table gives each personality its job 
 left out: then every bot plays the same jobs there.
 
 - **Defends.** Where it holds when its team defends: `forward` is the first pick for the round's pushed post, well up
-  a lane, when the team has one (about one round in three); `deep` always holds the post nearest home and is never pushed up; –
-  holds what the team's plan deals it.
+  a lane, when the team has one (about one round in three); `deep` always holds the post nearest home and is never
+  pushed up; – holds what the team's plan deals it.
 - **Goes back from (×).** When the flag starts going up, or the bomb is heard being armed, the defenders nearest go
   back to it; this scales how near it counts. Below 1 it is among the first back, above 1 it stays at its post longer.
-- **Takes the bomb or rope from (×).** The same for the attacker that picks the bomb up (and so carries it in and
-  arms it) or raises the flag: below 1 it takes the job before nearer teammates, above 1 it leaves it to them and
-  guards.
+- **Takes the bomb from (×).** The same for the attacker that picks the bomb up, and so carries it in and arms it:
+  below 1 it takes the job before nearer teammates, above 1 it leaves it to them and guards.
 - **Forward spawn (chance).** With respawns, how often it comes back at one of its end's forward spawns rather than
   its start area (0 to 1). – keeps the game's own chance (0.6).
 
@@ -139,7 +138,7 @@ left out: then every bot plays the same jobs there.
 
 ## Attack / Defend and Plant the Bomb
 
-| Personality | Defends | Goes back from (×) | Takes the bomb or rope from (×) | Forward spawn (chance) |
+| Personality | Defends | Goes back from (×) | Takes the bomb from (×) | Forward spawn (chance) |
 |---|---|---|---|---|
 | Rusher | forward | 0.7 | 1.25 | 0.85 |
 | Anchor | deep | 1 | 1 | 0.35 |

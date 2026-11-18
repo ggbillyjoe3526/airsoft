@@ -348,7 +348,7 @@ static func act(b: Bot, w: BotWorld, cmd: PlayerCommand) -> void:
 
 
 ## The attacking bot that fetches a bomb on the ground: the nearest in play under no squad order (its distance scaled by
-## its personality's carry_scale, bots.md › Takes the bomb or rope from: a flanker carries it in, a rusher leaves
+## its personality's carry_scale, bots.md › Takes the bomb from: a flanker carries it in, a rusher leaves
 ## it), one on the bomb's storey (within plant_player_level of its height) before any that is not. The one already going
 ## is kept unless another on the bomb's storey is raiser_switch_margin nearer, or is there while the one going is not:
 ## level distance says nothing between two bots a storey off (the one walking to the stairs walks away from the bomb,

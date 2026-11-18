@@ -55,7 +55,7 @@ func test_a_table_naming_an_unknown_personality_or_missing_a_column_is_reported_
 	assert_gt(low.problems.size(), 0)
 
 
-func test_the_kept_raiser_holds_the_rope_against_a_slightly_nearer_scaled_rival() -> void:
+func test_the_raiser_has_no_personality_lean_and_keeps_its_margin() -> void:
 	var pole := Vector3(10.0, 0.0, 0.0)
 	var w := _bare(0, [pole - Vector3(5.0, 0, 0), pole - Vector3(9.0, 0, 0)] as Array[Vector3])
 	w.flags[0].position = pole
@@ -70,7 +70,10 @@ func test_the_kept_raiser_holds_the_rope_against_a_slightly_nearer_scaled_rival(
 		assert_true(w.bots[0].raiser and not w.bots[1].raiser, "pick %d: no swap inside the margin" % i)
 	w.bots[1].character.position = pole - Vector3(3.5, 0, 0)
 	BotFlag.pick_raiser(w)
-	assert_true(w.bots[1].raiser, "3.5 m × 0.85 = 2.98 beats the kept rusher's 5 m × 1.25 - 3 = 3.25 (fails unscaled: 3.5 > 2)")
+	assert_true(w.bots[0].raiser, "3.5 m is not nearer than the kept rusher's 5 m - 3: no lean on the rope (PS1)")
+	w.bots[1].character.position = pole - Vector3(1.5, 0, 0)
+	BotFlag.pick_raiser(w)
+	assert_true(w.bots[1].raiser, "1.5 m beats 5 m - 3: the rope is handed on by distance alone")
 
 
 func test_the_kept_fetcher_is_held_and_a_flanker_rival_far_enough_ahead_takes_over() -> void:

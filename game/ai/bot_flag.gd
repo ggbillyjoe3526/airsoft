@@ -136,11 +136,12 @@ static func _free_defender(b: Bot, w: BotWorld) -> bool:
 	return role(b, w) == Role.DEFEND and Elimination.is_in_play(b.character) and b.order == SquadOrder.Kind.NONE
 
 
-## Each tick: of the attacking bots in play that have swept their lane, one raises the flag and the others guard the pole
-## (a second raiser adds nothing: the rope goes up no faster). Bots in flag mode first, then the nearest the pole (its
-## distance scaled by its personality's carry_scale), the current raiser counted raiser_switch_margin nearer; never a
-## bot under a squad order. Nobody raises while an attacker who isn't a bot (the player) is at the pole already. A
-## raiser on the worked rope of another pole (_held_elsewhere) keeps raising there, and isn't counted for this one.
+## Each tick: of the attacking bots in play that have swept their lane, one raises the flag and the others guard the
+## pole (a second raiser adds nothing: the rope goes up no faster). Bots in flag mode first, then the nearest the pole,
+## the current raiser counted raiser_switch_margin nearer; never a bot under a squad order (PS1: no personality lean
+## here, as one lifted the attackers' share of Attack / Defend). Nobody raises while an attacker who isn't a bot (the
+## player) is at the pole already. A raiser on the worked rope of another pole (_held_elsewhere) keeps raising there,
+## and isn't counted for this one.
 static func pick_raiser(w: BotWorld) -> void:
 	var raiser: Bot = null
 	var best_rank := 2
@@ -155,8 +156,7 @@ static func pick_raiser(w: BotWorld) -> void:
 			b.raiser = keep
 			continue
 		var rank := 0 if b.mode == Bot.Mode.FLAG else 1
-		# A personality that takes the rope sooner counts nearer (bots.md › Takes the bomb or rope from).
-		var d := _to_pole(b.character, w) * b.style.carry_scale - (w.cfg.raiser_switch_margin if keep else 0.0)
+		var d := _to_pole(b.character, w) - (w.cfg.raiser_switch_margin if keep else 0.0)
 		if rank < best_rank or (rank == best_rank and d < best):
 			best_rank = rank
 			best = d

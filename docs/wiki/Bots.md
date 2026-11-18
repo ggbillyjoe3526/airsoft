@@ -81,9 +81,9 @@ In Attack / Defend and Plant The Bomb each personality also takes a job of its o
 
 - **Rushers**: on the rounds the defence sends one player well up a lane to catch attackers early, it's a Rusher.
   Rushers are also the first back when the flag starts going up or the bomb is heard being armed. On attack they
-  leave the bomb and the flag rope to others, and with respawns they come back at a forward spawn most of the time.
+  leave the bomb to others, and with respawns they come back at a forward spawn most of the time.
 - **Anchors** defend deep, close to the pole or site. With respawns they mostly come back at their start area.
-- **Flankers** pick up the bomb and carry it in, and raise the flag, unless a teammate is much nearer. With
+- **Flankers** pick up the bomb and carry it in, unless a teammate is much nearer. With
   respawns they often come back at a forward spawn.
 
 Names show on a WATCHING line while you spectate a bot and on the [What got you](HUD-and-Minimap#what-got-you) card,

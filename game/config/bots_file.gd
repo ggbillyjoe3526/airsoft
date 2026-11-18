@@ -51,7 +51,7 @@ const POST_COLUMN := "Defends"
 ## Sided: each (×) column, the Style field it sets, the most it may be and the least.
 const SIDED_SCALE_COLUMNS: Array[Array] = [
 	["Goes back from (×)", &"retake_scale", 5.0, 0.1],
-	["Takes the bomb or rope from (×)", &"carry_scale", 5.0, 0.1],
+	["Takes the bomb from (×)", &"carry_scale", 5.0, 0.1],
 ]
 const SPAWN_COLUMN := "Forward spawn (chance)"
 ## The cells that mean "nothing here".
@@ -105,14 +105,15 @@ class Style:
 	## Its distance counts this many times over when the defenders nearest a pole or a site being armed are picked to
 	## go back (BotFlag.pick_retakers): below 1 it is among the first back, above 1 among the last.
 	var retake_scale: float = 1.0
-	## Its distance counts this many times over when the attacker that fetches the bomb (BotPlant._pick_fetcher) or
-	## raises the flag (BotFlag.pick_raiser) is picked.
+	## Its distance counts this many times over when the attacker that fetches the bomb (BotPlant._pick_fetcher) is
+	## picked, and so carries it in.
 	var carry_scale: float = 1.0
 	## In place of BotConfig.forward_spawn_chance while has_spawn_chance (BotRespawn.pick).
 	var has_spawn_chance: bool = false
 	var spawn_chance: float = 0.0
 
-	## Whether it changes nothing at all.
+	## Whether it changes nothing in a bot's BotSkill (BotPersonality.personal_skill); the jobs with sides (post,
+	## retake_scale, carry_scale, spawn chance) are read from the style where they apply.
 	func is_neutral() -> bool:
 		return hold_time == 1.0 and hold_cover_chance == 1.0 and contact_cover_min_distance == 1.0 \
 				and search_walk_distance == 1.0 and flank_chance == 0.0 and burst == 1.0 and burst_pause == 1.0 \
