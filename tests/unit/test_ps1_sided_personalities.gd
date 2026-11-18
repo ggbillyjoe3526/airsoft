@@ -264,6 +264,7 @@ func test_a_flanker_fetches_the_bomb_before_a_nearer_rusher() -> void:
 	assert_true(w.bots[1].fetcher, "the flanker picks it up, and so carries it in")
 	assert_false(w.bots[0].fetcher)
 	w.bots[1].character.position = bomb + Vector3(12.0, 0, 0)
+	w.time += w.cfg.fetcher_hold + 0.1
 	BotPlant._pick_fetcher(w)
 	assert_true(w.bots[0].fetcher, "far off, the flanker leaves it to the rusher by it")
 
