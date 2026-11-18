@@ -282,3 +282,8 @@ func test_each_personality_comes_back_forward_with_its_own_chance() -> void:
 	b.reset(-1, 0, 0.0, w.cfg)
 	b.style = BotsFile.neutral()
 	assert_gt(BotRespawn.pick(b, w), 0, "no chance of its own: the game's")
+	b.reset(-1, 0, 0.0, w.cfg)
+	b.style = always
+	w.mode = RoundState.Mode.ELIMINATION
+	w.attackers = -1
+	assert_gt(BotRespawn.pick(b, w), 0, "Elimination with respawns: the game's chance, not the personality's")

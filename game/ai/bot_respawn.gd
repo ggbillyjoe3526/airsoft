@@ -19,7 +19,9 @@ static func pick(b: Bot, w: BotWorld) -> int:
 	var allowed := Respawns.forward_for(RoundState.has_sides(w.mode), w.attackers, c.team, w.tuning.rounds)
 	if count == 0 or not allowed:
 		return 0
-	var chance := b.style.spawn_chance if b.style.has_spawn_chance else w.cfg.forward_spawn_chance
+	# A personality's own chance is for the modes with sides (bots.md › Attack / Defend and Plant the Bomb).
+	var own := b.style.has_spawn_chance and RoundState.has_sides(w.mode)
+	var chance := b.style.spawn_chance if own else w.cfg.forward_spawn_chance
 	if b.rng.randf() < chance:
 		b.spawn_pick = 1 + b.rng.randi_range(0, count - 1)
 	return b.spawn_pick
