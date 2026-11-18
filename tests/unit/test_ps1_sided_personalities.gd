@@ -126,8 +126,9 @@ func test_the_shipped_file_gives_each_personality_a_job_with_sides() -> void:
 		assert_true(file.style(k).has_spawn_chance, "%s has its own forward spawn chance" % k)
 		mean += file.style(k).spawn_chance
 	assert_gt(rusher.spawn_chance, anchor.spawn_chance, "a rusher comes back forward more often")
-	assert_almost_eq(mean / file.kinds.size(), config.forward_spawn_chance, 0.05,
-			"on the whole as often as before, so the jobs move who, not how many")
+	mean /= file.kinds.size()
+	assert_lt(mean, config.forward_spawn_chance, "under the game's chance: the most hit come back forward most")
+	assert_gt(mean, config.forward_spawn_chance - 0.2, "but not far under, so a team still comes back forward")
 
 
 func test_a_file_without_the_table_plays_the_same_jobs_and_a_bad_cell_keeps_neutral() -> void:
@@ -141,7 +142,7 @@ func test_a_file_without_the_table_plays_the_same_jobs_and_a_bad_cell_keeps_neut
 	assert_eq(r.retake_scale, 1.0)
 	assert_eq(r.carry_scale, 1.0)
 	assert_false(r.has_spawn_chance)
-	var row := "| Rusher | forward | 0.7 | 1.25 | 0.85 |"
+	var row := _row(text, "| Rusher | forward |")
 	var bad := BotsFile.parse(text.replace(row, "| Rusher | sideways | x | 9 | 2 |"))
 	assert_eq(bad.problems.size(), 4, "each bad cell reported: %s" % [bad.problems])
 	var b := bad.style(&"rusher")
@@ -298,3 +299,10 @@ func test_each_personality_comes_back_forward_with_its_own_chance() -> void:
 	w.mode = RoundState.Mode.ELIMINATION
 	w.attackers = -1
 	assert_gt(BotRespawn.pick(b, w), 0, "Elimination with respawns: the game's chance, not the personality's")
+
+
+## The whole line of the table row that starts with `start` (so a tuned number doesn't break the test).
+func _row(text: String, start: String) -> String:
+	var at := text.find(start)
+	assert_gt(at, -1, "the row %s is in bots.md" % start)
+	return text.substr(at, text.find("\n", at) - at)

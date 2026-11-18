@@ -43,7 +43,7 @@ func test_an_empty_team_and_a_neutral_team_keep_the_drawn_pusher() -> void:
 
 func test_a_table_naming_an_unknown_personality_or_missing_a_column_is_reported_not_fatal() -> void:
 	var text := FileAccess.get_file_as_string(BotsFile.PATH)
-	var ghost := BotsFile.parse(text.replace("| Careful | – | 1.2 | 1 | 0.5 |", "| Ghost | deep | 1 | 1 | 0.5 |"))
+	var ghost := BotsFile.parse(text.replace(_row(text, "| Careful | – |"), "| Ghost | deep | 1 | 1 | 0.5 |"))
 	assert_gt(ghost.problems.size(), 0, "Ghost is not in the Personalities table")
 	assert_eq(ghost.style(&"careful").carry_scale, 1.0, "the left-out personality keeps neutral")
 	var missing := BotsFile.parse(text.replace("| Forward spawn (chance) |", "| Spawn |"))
@@ -119,3 +119,10 @@ func test_a_pick_draws_the_same_from_its_stream_whatever_chance_it_has() -> void
 	twin.style = BotsFile.neutral()
 	BotRespawn.pick(twin, w)
 	assert_eq(twin.rng.randf(), with_style, "one randf either way: a style changes the odds, not the stream")
+
+
+## The whole line of the bots.md table row that starts with `start`.
+func _row(text: String, start: String) -> String:
+	var at := text.find(start)
+	assert_gt(at, -1, "the row %s is in bots.md" % start)
+	return text.substr(at, text.find("\n", at) - at)

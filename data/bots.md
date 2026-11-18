@@ -70,7 +70,8 @@ left out: then every bot plays the same jobs there.
 - **Takes the bomb from (×).** The same for the attacker that picks the bomb up, and so carries it in and arms it:
   below 1 it takes the job before nearer teammates, above 1 it leaves it to them and guards.
 - **Forward spawn (chance).** With respawns, how often it comes back at one of its end's forward spawns rather than
-  its start area (0 to 1). – keeps the game's own chance (0.6).
+  its start area (0 to 1). – keeps the game's own chance (0.6). The four average a little under it: the bots that
+  are hit most come back forward most, and an average of 0.6 gave the attackers 63 % of Depot's Attack / Defend.
 
 ## Roster
 
@@ -140,7 +141,7 @@ left out: then every bot plays the same jobs there.
 
 | Personality | Defends | Goes back from (×) | Takes the bomb from (×) | Forward spawn (chance) |
 |---|---|---|---|---|
-| Rusher | forward | 0.7 | 1.25 | 0.85 |
-| Anchor | deep | 1 | 1 | 0.35 |
-| Flanker | – | 1 | 0.85 | 0.7 |
-| Careful | – | 1.2 | 1 | 0.5 |
+| Rusher | forward | 0.7 | 1.25 | 0.7 |
+| Anchor | deep | 1 | 1 | 0.3 |
+| Flanker | – | 1 | 0.85 | 0.6 |
+| Careful | – | 1.2 | 1 | 0.4 |
