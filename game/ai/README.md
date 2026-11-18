@@ -79,7 +79,10 @@ bot's 20 s gap, so no press is refused tick after tick.
 
 Every bot has a name and personality from `data/bots.md` (`BotsFile`), drawn on the match's seed (`BotRoster`): a
 rusher pushes in and never waits, an anchor holds its lane short of the middle until late and aims from cover, a flanker
-takes a lane of its own and flanks more, a careful bot walks and clears corners. A personality changes how a bot plays
+takes a lane of its own and flanks more, a careful bot walks and clears corners. With sides (PS1, bots.md › Attack /
+Defend and Plant the Bomb) each has a job too: where it defends (`RoundPlanner.defend_points`, the pushed post), how
+soon it goes back (`BotFlag.pick_retakers`), whether it takes the bomb or the rope (`BotPlant._pick_fetcher`,
+`BotFlag.pick_raiser`) and how often it comes back forward (`BotRespawn.pick`). A personality changes how a bot plays
 at its level, never how well (`BotPersonality`).
 
 | File | What |

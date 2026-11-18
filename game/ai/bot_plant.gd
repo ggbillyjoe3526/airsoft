@@ -347,7 +347,8 @@ static func act(b: Bot, w: BotWorld, cmd: PlayerCommand) -> void:
 				_hands_on(cmd)
 
 
-## The attacking bot that fetches a bomb on the ground: the nearest in play under no squad order, one on the bomb's
+## The attacking bot that fetches a bomb on the ground: the nearest in play under no squad order (its distance scaled by
+## its personality's carry_scale, bots.md › Takes the bomb or rope from: a careful bot carries it in, a rusher leaves it), one on the bomb's
 ## storey (within plant_player_level of its height) before any that is not. The one already going is kept unless another
 ## on the bomb's storey is raiser_switch_margin nearer, or is there while the one going is not: level distance says
 ## nothing between two bots a storey off (the one walking to the stairs walks away from the bomb, and two of them
@@ -367,7 +368,7 @@ static func _pick_fetcher(w: BotWorld) -> void:
 	var kept := keep != null and _may_fetch(keep, w)
 	if kept:
 		best = keep
-		best_d = _flat(keep.character.position, w.plant.position) - w.cfg.raiser_switch_margin
+		best_d = _flat(keep.character.position, w.plant.position) * keep.style.carry_scale - w.cfg.raiser_switch_margin
 		best_level = on_bomb_level(keep.character, w)
 	for b in w.bots:
 		if b == keep or not _may_fetch(b, w):
@@ -375,7 +376,7 @@ static func _pick_fetcher(w: BotWorld) -> void:
 		var level := on_bomb_level(b.character, w)
 		if kept and not level:
 			continue
-		var d := _flat(b.character.position, w.plant.position)
+		var d := _flat(b.character.position, w.plant.position) * b.style.carry_scale
 		if (level and not best_level) or (level == best_level and d < best_d):
 			best = b
 			best_d = d

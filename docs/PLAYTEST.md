@@ -698,6 +698,11 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
   and then one defender waits further out. Does it feel less predictable, and still fair?
 - [ ] **Anchors (BP5).** In Elimination with over a minute left, give an anchor teammate Follow me (F), then end it
   with F again: it goes hunting.
+- [ ] **Personalities with sides (PS1).** Play Attack / Defend and Plant The Bomb on two maps and spectate the bots
+  once you're out. Defending, Rushers hold well up their lanes and are first back to the flag or an armed bomb, and
+  Anchors stay close to the pole or site. Attacking, a Careful bot usually carries the bomb in and raises the flag.
+  With respawns, Rushers and Flankers mostly come back at a forward spawn and Anchors at the start. Can you tell them
+  apart, and does neither side feel hopeless?
 
 ## Modes
 

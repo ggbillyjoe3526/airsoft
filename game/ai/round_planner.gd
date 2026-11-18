@@ -85,6 +85,7 @@ func plan(w: BotWorld) -> void:
 		var pusher := _variety.randi_range(0, maxi(0, _members.size() - 1))
 		if _variety.randf() >= cfg.defend_push_chance or not defending:
 			pusher = -1
+		pusher = _pushed_member(pusher)
 		for i in _members.size():
 			var b := _members[i]
 			var lane := _dealt[i]
@@ -102,7 +103,7 @@ func plan(w: BotWorld) -> void:
 				# its lane only sometimes, defend_forward_chance); the others hold the first.
 				var shared := _dealt.count(lane) > 1
 				var forward := ahead == 0 and (shared or _rng.randf() < cfg.defend_forward_chance)
-				points = mini(points, 2 if forward or (shared and b.skill.team_play) else 1)
+				points = mini(points, defend_points(b.style.post, forward or (shared and b.skill.team_play)))
 				if i == pusher:
 					points = _pushed_post(w.lanes[lane], team, b.character.end, points, cfg)
 			elif points > 0:
@@ -127,7 +128,7 @@ func rejoin(b: Bot, w: BotWorld) -> void:
 	if lane >= 0:
 		var defending := RoundState.has_sides(w.mode) and w.attackers >= 0 and c.team != w.attackers
 		if defending:
-			points = mini(w.lanes[lane].size(), 2 if b.rng.randf() < w.cfg.defend_forward_chance else 1)
+			points = mini(w.lanes[lane].size(), defend_points(b.style.post, b.rng.randf() < w.cfg.defend_forward_chance))
 		else:
 			points = walk_points(b, lane, w)
 	b.reset(lane, points, 0.0, w.cfg)
@@ -135,6 +136,36 @@ func rejoin(b: Bot, w: BotWorld) -> void:
 	if lane >= 0 and points > 0:
 		b.lane_index = 0 if b.lane_dir > 0 else w.lanes[lane].size() - 1
 		b.lane_index = BotMovement.resume_point(b, w) - b.lane_dir
+
+
+## The points a defender walks to its post (PS1, bots.md › Defends): the second (forward) one when the plan's draw says so
+## (`forward`), the first when not; a personality that defends forward always holds the second, one that defends deep
+## always the first.
+static func defend_points(post: BotsFile.Post, forward: bool) -> int:
+	match post:
+		BotsFile.Post.FORWARD:
+			return 2
+		BotsFile.Post.DEEP:
+			return 1
+	return 2 if forward else 1
+
+
+## The team member (index in _members) who holds the round's pushed post, from `drawn` (the variety stream's pick, -1
+## for none): a personality that defends forward takes it first (the first such from `drawn` on, round the team), and
+## one that defends deep never does (the next that doesn't, or none). The same draws whoever takes it.
+func _pushed_member(drawn: int) -> int:
+	if drawn < 0:
+		return -1
+	var n := _members.size()
+	var fallback := -1
+	for k in n:
+		var i := (drawn + k) % n
+		var post := _members[i].style.post
+		if post == BotsFile.Post.FORWARD:
+			return i
+		if fallback < 0 and post != BotsFile.Post.DEEP:
+			fallback = i
+	return fallback
 
 
 ## The lane (index) passing nearest `at` on the flat, -1 with none.
