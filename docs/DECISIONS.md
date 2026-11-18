@@ -737,7 +737,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   both sides, shut with an enemy in play within 15 m: the panel greys a shut one out and nothing else on it moves
   (owner, 2026-11-17). A team with a respawn coming is not wiped out. Balance (bot matches): the attackers wait 10 s,
   the defenders a time set per field in Attack / Defend (data/maps.md Defender respawn: Depot 15, Woodland 5, Subway
-  7) and 5 s in Plant The Bomb; with respawns an untended flag slips back down (15 s top to bottom), a fully raised
+  7) and 5 s in Plant The Bomb (Depot 8 s, data/maps.md Bomb defender respawn, BP10: no level scale, as Hard's
+  1.9 put Subway's attackers at 70 %); with respawns an untended flag slips back down (15 s top to bottom), a fully raised
   one too (BP10: held up, Depot's attackers took 89 %), and up to six defending bots go to pull a flag down. Against
   Easy and Hard bots the Attack / Defend defenders' wait is the field's times the level's scale
   (`RoundConfig.defender_respawn_scale`: 0.75 and 1.9, BP10, measured; a scaled wait 25 s at most,
