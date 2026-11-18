@@ -371,7 +371,7 @@ rect("crates", -10.0, 6.5, 2.6, 2.6, 10, top=2.6)            # ammo-crate stack,
 rect("tyrestack", -1.0, -5.0, 1.8, 1.8)
 rect("log", -4.0, 9.5, 6.5, 0.8, -8)
 rect("crates", -1.0, 12.0, 2.4, 1.6, 0, top=2.4)            # south crate stack: cover for the Tyre wall exit
-rect("tyre", -15.0, -4.0, 1.7, 1.7)
+rect("tyrestack", -15.0, -4.0, 1.8, 1.8)                     # BP10: was a lone tyre; the west end lost 61 % in Elimination
 # MB1: the west's sweep ended in the open under the Hut rise, 20 m from the head of the Ford's ramp: a fallen tree lies
 # just past the field's middle, between that stop (LANES) and the ramp. It lies north of the straight way from the
 # Ford to the overtime flag (across that way it cost the east 1.1 s to the flag: test_woodland_layout), clear of the
