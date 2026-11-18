@@ -79,7 +79,9 @@ func on_tick(state: GameState) -> void:
 				if e.value2 == GameEvent.RoundEnd.SIMULATED:
 					hits -= _round_hits
 					bbs_fired -= _round_bbs
-				elif e.value == me.team and (_hit_this_round or me.status == Character.Status.ALIVE):
+				elif e.value == me.team and (_hit_this_round or me.status == Character.Status.ALIVE
+						or Respawns.waiting(me)):
+					# Waiting to come back (RS1) is still on the team: the round is won with you (BP10).
 					rounds_won += 1
 				_round_hits = 0
 				_round_bbs = 0

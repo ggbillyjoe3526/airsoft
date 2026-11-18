@@ -1520,7 +1520,8 @@ func _update_plant(rs: RoundState, in_play: bool, delta: float) -> void:
 		_gauge.set_flag(HudPlant.gauge_fill(rs, g), _teams.colours[team], team == HudStyle.STRIPED_TEAM)
 	var own := in_play and _watching_name.is_empty()
 	_plant_prompt.show_for(HudPlant.prompt(rs, _player, _sim.plant) if own else HudPlant.Prompt.NONE,
-			own and HudPlant.carrying(rs, _player), delta)
+			own and HudPlant.carrying(rs, _player), delta,
+			own and HudPlant.rail_carry(rs, _player) != WeaponRail.Carry.NONE)
 
 
 ## A bomb event (Plant The Bomb): a feed note for the pick-up, drop, plant and defuse as `HudPlant.feed_words` has them,
