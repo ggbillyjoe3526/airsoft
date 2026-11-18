@@ -225,6 +225,8 @@ var raiser: bool = false
 ## Plant The Bomb (BotPlant): picked to fetch the bomb from the ground (an attacker), or to disarm it (a defender);
 ## `raiser` is the carrier, who arms it.
 var fetcher: bool = false
+## When this bot was picked to fetch the bomb (BotWorld.time), for fetcher_hold.
+var fetcher_since: float = -INF
 var defuser: bool = false
 var flag_goal: Vector3 = Vector3.ZERO
 ## Where the pole, site or bomb stood when its flag spot was picked: when that moves (the bomb armed off the site's
@@ -404,6 +406,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	flag_pole = -1
 	raiser = false
 	fetcher = false
+	fetcher_since = -INF
 	defuser = false
 	flag_guard = false
 	overtime_at = INF
