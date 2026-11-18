@@ -1750,7 +1750,7 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 
 ## Plant The Bomb's fuse on each field (PB4)
 
-- [ ] **A short fuse is fair to the defenders.** Defend on Depot (24 s fuse), Woodland (25 s) and Subway (22 s) at
+- [ ] **A short fuse is fair to the defenders.** Defend on Depot (24 s fuse), Woodland (26 s) and Subway (22 s) at
   Normal and Hard; let the attackers arm the bomb on the site nearest you and on the one farthest away, then go for
   it. The Match page says the field's fuse under the rules.
   Pass: from the near site you always have time to defuse it yourself; from the far site it is a race you can win if
