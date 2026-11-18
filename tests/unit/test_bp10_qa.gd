@@ -353,3 +353,37 @@ func test_a_null_listener_never_starts_an_announcement_and_a_new_match_still_cut
 		state.time = 300.0 + k * 0.5
 		audio.on_tick(state, 0, state.characters[0])
 	assert_false(audio._announcer.playing, "the results: silence")
+
+
+func _delay(mode: RoundState.Mode, rounds: RoundConfig, team: int) -> float:
+	var rs := RoundState.new()
+	rs.mode = mode
+	rs.attackers = 0
+	return Respawns.delay(rs, rounds, team)
+
+
+func test_the_level_scale_reaches_only_attack_defend_defenders_whatever_the_custom_rules() -> void:
+	var custom := CustomRules.new()
+	custom.respawns = RoundConfig.RespawnRule.ALWAYS
+	var base := MatchOptions.match_tuning(SimTuning.load_default(), MapCatalog.shared().find("depot"), custom)
+	var hard := MatchOptions.level_tuning(base, &"hard")
+	assert_almost_eq(_delay(RoundState.Mode.ATTACK_DEFEND, hard.rounds, 1), base.rounds.defender_respawn_delay * 1.9, 0.001)
+	assert_eq(_delay(RoundState.Mode.ATTACK_DEFEND, hard.rounds, 0), base.rounds.respawn_delay, "attackers keep theirs")
+	assert_eq(_delay(RoundState.Mode.PLANT_THE_BOMB, hard.rounds, 1), base.rounds.plant_defender_respawn_delay)
+	assert_eq(_delay(RoundState.Mode.ELIMINATION, hard.rounds, 1), base.rounds.respawn_delay, "Elimination unscaled")
+	assert_eq(hard.rounds.respawns, base.rounds.respawns, "the rule itself is kept")
+
+
+func test_a_map_with_no_defender_wait_scales_the_game_default_and_the_shared_tuning_stays() -> void:
+	var shared := SimTuning.load_default()
+	var before := shared.rounds.defender_respawn_delay
+	var easy := MatchOptions.level_tuning(MatchOptions.match_tuning(shared, null, null), &"easy")
+	assert_almost_eq(easy.rounds.defender_respawn_delay, before * 0.75, 0.001)
+	assert_eq(SimTuning.load_default().rounds.defender_respawn_delay, before, "never written")
+	assert_ne(easy.rounds, shared.rounds, "a copy of the rounds")
+
+
+func test_scaling_twice_does_not_compound_from_a_fresh_load() -> void:
+	var a := MatchOptions.level_tuning(SimTuning.load_default(), &"hard").rounds.defender_respawn_delay
+	var b := MatchOptions.level_tuning(SimTuning.load_default(), &"hard").rounds.defender_respawn_delay
+	assert_eq(a, b)
