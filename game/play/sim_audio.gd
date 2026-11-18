@@ -475,7 +475,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 	_blow_due(now)
 	_rustle(state, player_id, now)
 	_call(state, now)
-	_announcement(state, now)
+	_announcement(state, now, player_id)
 
 
 ## The radio click, in your ear only, when the squad order last recorded in `outcome` (since the last call) is one of
@@ -669,14 +669,18 @@ func _set_up_announcements(cfg: TrainAnnounceConfig, trains: Array[TrainDressing
 
 ## The train announcement due at `now` (s) where the listener stands (TA1: the gap near a train or in one, King's Cross
 ## inside one), from the nearest point of the train's inside on its own voice, timed afresh for each match from its
-## seed. None without a listener or trains, nor over one still playing.
-func _announcement(state: GameState, now: float) -> void:
+## seed. None without a listener or trains, nor over one still playing. It is the player's (the owner's rule: where
+## you stand), in play with the view their own: none while out and watching someone else, nor once the match is over
+## (under the results, BP10); a new match cuts one still playing.
+func _announcement(state: GameState, now: float, player_id: int) -> void:
 	if _announce == null:
 		return
 	if state.match_number != _announce_match:
 		_announce_match = state.match_number
 		_announce.begin(state.match_seed, state.match_number, now)
-	if _listener == null:
+		_announcer.stop()
+	if _listener == null or _listener.id != player_id or not Elimination.is_in_play(_listener) \
+			or state.round_state.phase == RoundState.Phase.MATCH_OVER:
 		return
 	var cue := _announce.due(now, _listener.position, _announcer.playing)
 	if cue == &"":

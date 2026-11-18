@@ -303,6 +303,9 @@ func _on_hit(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
 	for p in _teams[shooter.team].queue:
 		if COUNTS.has(p.event):
 			p.until = -INF
+	# With respawns open (RS1) those hit come back in seconds: no count of who is left, nor a "Last one" (BP10).
+	if Respawns.open(state.round_state):
+		return
 	var chars := state.characters
 	var left := 0
 	var last := -1

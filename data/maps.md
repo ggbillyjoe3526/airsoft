@@ -33,7 +33,8 @@ warning; a map with no row is not listed.
   (`game/config/round_config.gd`). Skirmish and Custom both play it. Each field's is set from bot matches so the
   attackers take about half the rounds (6 seeds, Normal): Depot's is 15 (at 10 s the defenders took 72 %: its poles
   are close to their start), Woodland's 5 (its two poles are 83 m apart and a defender's way back is long), Subway's
-  7. One that isn't such a number keeps the game's with a warning.
+  7. Against Easy and Hard bots the wait is this times the level's scale (`RoundConfig.defender_respawn_scale`, BP10:
+  0.75 and 1.9, a scaled wait 25 s at most), as bot matches measured them. One that isn't such a number keeps the game's with a warning.
 - **Start mode** is the most a fire selector starts each round on there: `semi` or `burst` holds every replica that
   comes on full auto to its highest mode no higher (SEMI, then BURST, then AUTO), any replica now or added later, the
   bots' too; you can still switch to auto in the round. Blank or `auto` starts every replica as it comes, and a
