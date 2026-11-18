@@ -1757,7 +1757,7 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   you go at once; your bots still leave the defuse to you while you are close.
 - [ ] **Attacking is worth it now.** Attack on the same fields and hold the site after the plant.
   Pass: holding the site feels like it wins rounds; the bomb goes off now and then, not every time.
-- [ ] **Depot's defenders wait 8 s (BP10).** Defend Depot's Plant The Bomb against Hard bots and get hit before the
+- [ ] **Depot's defenders wait 8 s against Hard bots (BP10).** Defend Depot's Plant The Bomb against Hard bots and get hit before the
   plant. Pass: the 8 s wait doesn't feel long, and the attackers can win a round against a Hard defence.
 
 ## Woodland's nearer flags and six routes (WB1)

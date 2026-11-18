@@ -36,11 +36,12 @@ warning; a map with no row is not listed.
   are close to their start), Woodland's 5 (its two poles are 83 m apart and a defender's way back is long), Subway's
   7. Against Easy and Hard bots the wait is this times the level's scale (`RoundConfig.defender_respawn_scale`, BP10:
   0.75 and 1.9, a scaled wait 25 s at most), as bot matches measured them. One that isn't such a number keeps the game's with a warning.
-- **Bomb defender respawn (s)** is the seconds a defender hit there waits to come back in Plant The Bomb, until the
-  bomb is armed (BP10): a whole or decimal number from 2 to 30, or blank for the game's 5 (`game/config/round_config.gd`).
-  No level scales it. Depot's is 8: its sites are close to the defenders' start, and at 5 s Hard bots held them (the
-  attackers took 35 %). A longer wait at Hard on every field put Subway's attackers at 70 %. One that isn't such a
-  number keeps the game's with a warning.
+- **Bomb defender respawn at Hard (s)** is the seconds a defender hit there waits to come back in Plant The Bomb, until
+  the bomb is armed, against Hard bots (BP10): a whole or decimal number from 2 to 30, or blank for the game's 5 at every
+  level (`game/config/round_config.gd`). Depot's is 8: its sites are close to the defenders' start, and at 5 s Hard bots
+  held them (the attackers took 35 %, at Normal 52 %). The same wait at every level put Depot's Normal at 62 %, and a
+  longer wait at Hard on every field put Subway's attackers at 70 %. One that isn't such a number keeps the game's with
+  a warning.
 - **Start mode** is the most a fire selector starts each round on there: `semi` or `burst` holds every replica that
   comes on full auto to its highest mode no higher (SEMI, then BURST, then AUTO), any replica now or added later, the
   bots' too; you can still switch to auto in the round. Blank or `auto` starts every replica as it comes, and a
@@ -59,7 +60,7 @@ warning; a map with no row is not listed.
 
 ## Maps
 
-| Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Fuse (s) | Defender respawn (s) | Bomb defender respawn (s) | Start mode | Wind (×) | Air (°C) | Blurb |
+| Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Fuse (s) | Defender respawn (s) | Bomb defender respawn at Hard (s) | Start mode | Wind (×) | Air (°C) | Blurb |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 | 8 | burst | 0 | 20 | An indoor airsoft hall: five lanes, two dark tunnels. |
 | woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 26 | 5 |  |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
