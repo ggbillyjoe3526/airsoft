@@ -61,6 +61,10 @@ const SHOTS: Array = [
 	# the west camp's woodpiles (RM2): close at eye height, and along the stack
 	["woodpile_near", Vector3(-77.5, EYE, -7.5), Vector3(-79.0, 1.4, -11.5), false],
 	["woodpile_along", Vector3(-72.5, EYE, -9.5), Vector3(-82.0, 1.4, -11.8), false],
+	# BP10: the Clearing's west edge, where a tyre stack replaced the lone tyre (the west end's first cover going in)
+	["clearing_west_in", Vector3(-22.0, EYE, -1.0), Vector3(-15.0, 0.9, -4.0), false],
+	["clearing_west_out", Vector3(-7.0, EYE, -6.5), Vector3(-15.0, 0.9, -4.0), false],
+	["clearing_west_behind", Vector3(-17.5, EYE, -3.5), Vector3(16.0, 1.6, -6.0), false],
 ]
 
 

@@ -152,9 +152,11 @@ func test_the_one_fetching_a_bomb_a_storey_off_is_kept_whoever_passes_nearer() -
 	assert_true(_bot(0).fetcher, "the job is not swapped between two bots neither of whom is on its storey")
 	assert_false(_bot(1).fetcher)
 	cs[2].position = START + Vector3(35.0, storey, 0.0)
+	w.time += w.cfg.fetcher_hold + 0.1
 	BotPlant.plan(w)
-	assert_true(_bot(2).fetcher, "one who is on its storey takes over")
+	assert_true(_bot(2).fetcher, "one who is on its storey takes over, once the one going has had its hold")
 	cs[0].position = START + Vector3(1.0, storey, 0.0)
+	w.time += w.cfg.fetcher_hold + 0.1
 	BotPlant.plan(w)
 	assert_true(_bot(0).fetcher, "and on the same storey the nearer by the margin")
 	cs[0].status = Character.Status.OUT
@@ -183,12 +185,14 @@ func test_open_ground_is_one_storey_however_it_climbs() -> void:
 	assert_true(_bot(0).fetcher, "kept on the slope: no storey between it and the bomb")
 	assert_false(_bot(1).fetcher)
 	cs[1].position = START + Vector3(-5.0, 0.0, 0.0)
+	w.time += w.cfg.fetcher_hold + 0.1
 	BotPlant.plan(w)
 	assert_true(_bot(1).fetcher, "one nearer by more than the margin takes over, as on flat ground")
 	# A deck over the ground is a storey of its own.
 	cs[1].position = START + Vector3(45.0, rise, 0.0)
 	cs[0].position = START + Vector3(25.0, rise, 0.0)
 	cs[2].position = START + Vector3(2.0, rise + 1.0, 0.0)
+	w.time += w.cfg.fetcher_hold + 0.1
 	BotPlant.plan(w)
 	assert_true(_bot(0).fetcher, "on the open ground before one 2 m off on a deck over it")
 

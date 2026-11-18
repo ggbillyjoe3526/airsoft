@@ -484,6 +484,10 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Open ground is one storey however it slopes (BotPlant.on_bomb_level, LF1): someone, or the bomb, within this (m) over
 ## the terrain under them stands on it; a hut's floor, a tower's deck or a log's top is not open ground.
 @export var plant_ground_reach: float = 0.5
+## A bot picked to fetch the bomb keeps the job this long (s) whoever comes nearer (BotPlant._pick_fetcher): nearness
+## is measured straight, so a fetcher whose way runs round a wall lost it to a teammate a step nearer (BP10: by a hut on
+## Woodland's Hut row the attackers traded it every second or so and none of them went, until the clock ran out).
+@export var fetcher_hold: float = 4.0
 ## The bot disarming keeps its hands on it whoever it sees once the fuse leaves only the defuse plus this (s).
 @export var plant_no_time: float = 1.5
 ## While the player carries the bomb, the bots make for the site the player is within this of (m) and nearer to than

@@ -26,8 +26,9 @@ warning; a map with no row is not listed.
   15 to 60, or blank for the game's 30 (`game/config/plant_config.gd`). Skirmish and Custom both play it. Each field's
   is set from bot matches so the attackers take about half the rounds: once the bomb is armed the fight is over in 13
   to 21 s, so a fuse longer than that never mattered. Depot's is 24 (16 until DC1's compact hall moved its sites 8 m in
-  and its west spawn 10 m in), Subway's 22, Woodland's 25 (PB5, measured again once the three map reworks and the bots'
-  route variety were in). One that isn't such a number keeps the game's with a warning.
+  and its west spawn 10 m in), Subway's 22, Woodland's 26 (25 from PB5, once the three map reworks and the bots' route
+  variety were in, until BP10 put a tyre stack at the Clearing's west edge). One that isn't such
+  a number keeps the game's with a warning.
 - **Defender respawn (s)** is the seconds a defender hit there waits to come back in Attack / Defend (RS1; Plant The
   Bomb's defenders wait the game's 5): a whole or decimal number from 2 to 30, or blank for the game's 10
   (`game/config/round_config.gd`). Skirmish and Custom both play it. Each field's is set from bot matches so the
@@ -56,6 +57,6 @@ warning; a map with no row is not listed.
 | Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Fuse (s) | Defender respawn (s) | Start mode | Wind (×) | Air (°C) | Blurb |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 | burst | 0 | 20 | An indoor airsoft hall: five lanes, two dark tunnels. |
-| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 25 | 5 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
+| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 26 | 5 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
 | subway | Subway | field | public | 5 | 6 | 8 |  |  | 22 | 7 | burst | 0 | 14 | A closed metro station on two levels, from the ticket hall and concourse down to the trains. |
 | range | Range | range | public | 1 | 1 | 1 |  |  |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |
