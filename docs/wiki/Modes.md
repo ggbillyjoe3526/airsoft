@@ -105,7 +105,9 @@ on in every mode, or off in all of them.
   seconds.
 - **Where you come back.** While you wait, a **RESPAWN IN** panel at the bottom of the screen lists your **start
   area** and your end's two **forward spawns**, nearer the fight. Pick one with **1**, **2** or **3** (the first two
-  replica slots and Holster) or the mouse wheel. Your pick is kept for next time.
+  replica slots and Holster) or the mouse wheel. Your pick is kept for next time. You come back facing the way that
+  spawn faces, with the last life's hit lines and "What got you" card cleared. While you wait, the view stays on the
+  teammate you were watching.
 - **An enemy near shuts a forward spawn.** With an enemy within <!-- wiki:config round_config.forward_block_radius -->
   m of it, the panel greys it out and a pick of it brings you back at your start area instead.
 - **A flag left alone slips back down.** With respawns, a flag nobody is working, raised or part-raised, slides to the bottom in
@@ -114,7 +116,9 @@ on in every mode, or off in all of them.
 - **Plant The Bomb stops respawns once the bomb is armed.** Whoever is out then stays out, and the round is played out
   by whoever is left.
 - **Bots** respawn on the same rules and pick their own spawn. With respawns more of the defending bots go to pull a
-  flag down.
+  flag down, and they don't call how many of you are left, since those hit come back.
+- **A round won while you wait** counts as won with you, for your XP and the round table, which lists anyone back in
+  play by the round's end as still in.
 
 Each field's forward spawns: **Depot** Upper mid and Huts (west), A short and B alley (east); **Woodland** Pine slope
 and Road west (west camp), Fort gate and Back track (east camp); **Subway** Concourse and Lift landing (west), East
