@@ -83,8 +83,8 @@ In Attack / Defend and Plant The Bomb each personality also takes a job of its o
   heard being armed. On attack they leave the bomb and the flag rope to others, and with respawns they come back at a
   forward spawn most of the time.
 - **Anchors** defend deep, close to the pole or site. With respawns they mostly come back at their start area.
-- **Flankers** take the lane they're given and often come back at a forward spawn.
-- **Careful** bots pick up the bomb and carry it in, and raise the flag, unless a teammate is much nearer.
+- **Flankers** pick up the bomb and carry it in, and raise the flag, unless a teammate is much nearer. With
+  respawns they often come back at a forward spawn.
 
 Names show on a WATCHING line while you spectate a bot and on the [What got you](HUD-and-Minimap#what-got-you) card,
 never over heads.

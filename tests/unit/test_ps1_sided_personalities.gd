@@ -2,7 +2,7 @@ extends GutTest
 ## Personalities in Attack / Defend and Plant The Bomb (PS1, owner 2026-11-18: "make the personalities matter there"):
 ## bots.md's Attack / Defend and Plant the Bomb table gives each personality its job. A Rusher defends forward and takes
 ## the round's pushed post, an Anchor defends deep and is never pushed up, the defenders that go back count nearer or
-## further by their personality, a Careful attacker carries the bomb in and raises the flag before a nearer Rusher, and
+## further by their personality, a Flanker attacker carries the bomb in and raises the flag before a nearer Rusher, and
 ## each personality comes back at a forward spawn as often as its own chance says. Elimination plays as before.
 ## Bare bot worlds for the picks, and RV1's flat 60 by 30 m field for the plan (game/ai/round_planner.gd, bot_flag.gd,
 ## bot_plant.gd, bot_respawn.gd, game/config/bots_file.gd).
@@ -113,13 +113,13 @@ func test_the_shipped_file_gives_each_personality_a_job_with_sides() -> void:
 	assert_eq(file.problems, [] as Array[String], "bots.md reads cleanly")
 	var rusher := file.style(&"rusher")
 	var anchor := file.style(&"anchor")
-	var careful := file.style(&"careful")
+	var flanker := file.style(&"flanker")
 	assert_eq(rusher.post, BotsFile.Post.FORWARD)
 	assert_eq(anchor.post, BotsFile.Post.DEEP)
-	assert_eq(file.style(&"flanker").post, BotsFile.Post.SAME)
+	assert_eq(flanker.post, BotsFile.Post.SAME)
 	assert_lt(rusher.retake_scale, 1.0, "a rusher goes back among the first")
 	assert_eq(anchor.retake_scale, 1.0, "an anchor by the pole goes back as its distance says")
-	assert_lt(careful.carry_scale, 1.0, "a careful bot takes the bomb in")
+	assert_lt(flanker.carry_scale, 1.0, "a flanker takes the bomb in")
 	assert_gt(rusher.carry_scale, 1.0, "a rusher leaves it to others")
 	var mean := 0.0
 	for k in file.kinds:
@@ -230,7 +230,7 @@ func test_a_rusher_goes_back_before_a_nearer_bot_that_stays_longer() -> void:
 	assert_true(w.bots[0].retake and w.bots[2].retake, "neutral: the nearest goes back, and the rusher")
 
 
-func test_a_careful_attacker_raises_the_flag_before_a_nearer_rusher() -> void:
+func test_a_flanker_raises_the_flag_before_a_nearer_rusher() -> void:
 	var pole := Vector3(10.0, 0.0, 0.0)
 	var w := _bare(RoundState.Mode.ATTACK_DEFEND, 0, [pole - Vector3(2.0, 0, 0), pole - Vector3(3.0, 0, 0)]
 			as Array[Vector3])
@@ -238,13 +238,13 @@ func test_a_careful_attacker_raises_the_flag_before_a_nearer_rusher() -> void:
 	for b in w.bots:
 		b.lane_done = true
 	w.bots[0].style = file.style(&"rusher")
-	w.bots[1].style = file.style(&"careful")
+	w.bots[1].style = file.style(&"flanker")
 	BotFlag.pick_raiser(w)
-	assert_true(w.bots[1].raiser, "the careful bot takes the rope (3 m × 0.6 < 2 m × 1.5)")
+	assert_true(w.bots[1].raiser, "the flanker takes the rope (3 m × 0.7 < 2 m × 1.5)")
 	assert_false(w.bots[0].raiser, "the rusher guards")
 
 
-func test_a_careful_attacker_fetches_the_bomb_before_a_nearer_rusher() -> void:
+func test_a_flanker_fetches_the_bomb_before_a_nearer_rusher() -> void:
 	var bomb := Vector3(-20.0, 0.0, 0.0)
 	var w := _bare(RoundState.Mode.PLANT_THE_BOMB, 0, [bomb + Vector3(2.0, 0, 0), bomb + Vector3(3.0, 0, 0)]
 			as Array[Vector3])
@@ -252,13 +252,13 @@ func test_a_careful_attacker_fetches_the_bomb_before_a_nearer_rusher() -> void:
 	w.plant.status = PlantState.Status.DOWN
 	w.plant.position = bomb
 	w.bots[0].style = file.style(&"rusher")
-	w.bots[1].style = file.style(&"careful")
+	w.bots[1].style = file.style(&"flanker")
 	BotPlant._pick_fetcher(w)
-	assert_true(w.bots[1].fetcher, "the careful bot picks it up, and so carries it in")
+	assert_true(w.bots[1].fetcher, "the flanker picks it up, and so carries it in")
 	assert_false(w.bots[0].fetcher)
 	w.bots[1].character.position = bomb + Vector3(12.0, 0, 0)
 	BotPlant._pick_fetcher(w)
-	assert_true(w.bots[0].fetcher, "far off, the careful bot leaves it to the rusher by it")
+	assert_true(w.bots[0].fetcher, "far off, the flanker leaves it to the rusher by it")
 
 
 func test_each_personality_comes_back_forward_with_its_own_chance() -> void:

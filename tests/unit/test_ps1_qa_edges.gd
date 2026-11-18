@@ -43,7 +43,7 @@ func test_an_empty_team_and_a_neutral_team_keep_the_drawn_pusher() -> void:
 
 func test_a_table_naming_an_unknown_personality_or_missing_a_column_is_reported_not_fatal() -> void:
 	var text := FileAccess.get_file_as_string(BotsFile.PATH)
-	var ghost := BotsFile.parse(text.replace("| Careful | – | 1.2 | 0.6 | 0.5 |", "| Ghost | deep | 1 | 1 | 0.5 |"))
+	var ghost := BotsFile.parse(text.replace("| Careful | – | 1.2 | 1 | 0.5 |", "| Ghost | deep | 1 | 1 | 0.5 |"))
 	assert_gt(ghost.problems.size(), 0, "Ghost is not in the Personalities table")
 	assert_eq(ghost.style(&"careful").carry_scale, 1.0, "the left-out personality keeps neutral")
 	var missing := BotsFile.parse(text.replace("| Forward spawn (chance) |", "| Spawn |"))
@@ -62,18 +62,18 @@ func test_the_kept_raiser_holds_the_rope_against_a_slightly_nearer_scaled_rival(
 	for b in w.bots:
 		b.lane_done = true
 	w.bots[0].style = file.style(&"rusher")
-	w.bots[1].style = file.style(&"careful")
+	w.bots[1].style = file.style(&"flanker")
 	w.cfg.raiser_switch_margin = 3.0
 	w.bots[0].raiser = true
 	for i in 5:
 		BotFlag.pick_raiser(w)
 		assert_true(w.bots[0].raiser and not w.bots[1].raiser, "pick %d: no swap inside the margin" % i)
-	w.bots[1].character.position = pole - Vector3(7.0, 0, 0)
+	w.bots[1].character.position = pole - Vector3(6.0, 0, 0)
 	BotFlag.pick_raiser(w)
-	assert_true(w.bots[1].raiser, "7 m × 0.6 = 4.2 beats the kept rusher's 5 m × 1.5 - 3 = 4.5 (fails unscaled: 7 > 2)")
+	assert_true(w.bots[1].raiser, "6 m × 0.7 = 4.2 beats the kept rusher's 5 m × 1.5 - 3 = 4.5 (fails unscaled: 6 > 2)")
 
 
-func test_the_kept_fetcher_is_held_and_a_careful_rival_far_enough_ahead_takes_over() -> void:
+func test_the_kept_fetcher_is_held_and_a_flanker_rival_far_enough_ahead_takes_over() -> void:
 	var bomb := Vector3(-20.0, 0.0, 0.0)
 	var w := _bare(0, [bomb + Vector3(3.0, 0, 0), bomb + Vector3(8.0, 0, 0)] as Array[Vector3])
 	w.mode = RoundState.Mode.PLANT_THE_BOMB
@@ -82,7 +82,7 @@ func test_the_kept_fetcher_is_held_and_a_careful_rival_far_enough_ahead_takes_ov
 	w.plant.position = bomb
 	w.cfg.raiser_switch_margin = 2.0
 	w.bots[0].style = file.style(&"rusher")
-	w.bots[1].style = file.style(&"careful")
+	w.bots[1].style = file.style(&"flanker")
 	w.bots[0].fetcher = true
 	BotPlant._pick_fetcher(w)
 	var after_first := w.bots[0].fetcher

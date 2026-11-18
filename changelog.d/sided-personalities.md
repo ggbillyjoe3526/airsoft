@@ -3,6 +3,5 @@
 - Rushers leave the bomb and the flag rope to others, and mostly come back at a forward spawn.
 - Anchors defend close to the pole or bomb site.
 - Anchors mostly respawn at their start area.
-- Flankers often come back at a forward spawn.
-- Careful bots pick up the bomb and carry it in, and raise the flag, unless a teammate is much nearer.
+- Flankers pick up the bomb and carry it in, and raise the flag, unless a teammate is much nearer. They often come back at a forward spawn.
 - Personalities change how bots play, never how well they play.
