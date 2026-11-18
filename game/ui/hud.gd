@@ -949,6 +949,9 @@ func on_tick(state: GameState, mag_from_wheel: bool = false) -> void:
 			GameEvent.Kind.RESPAWNED:
 				if e.actor == _player.id:
 					_back_left = _cfg.back_in_fade
+					# Back in, the last life's "what got you" card and kept hit lines go, as at a round's start (BP10).
+					hide_what_got_you()
+					_hits.release_kept()
 					# Never over a round's own banner.
 					if not _banner.visible:
 						_show_banner("", HudStyle.caps("HUD_BACK_IN"))

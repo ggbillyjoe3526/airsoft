@@ -278,6 +278,8 @@ var _aim := AimFollow.new()
 var _spectate_any: bool = false
 var _watch_id: int = -1
 var _watch_fire_was: bool = false
+## The teammate watched while you are out (Spectate any off), kept while in play (-1: none yet).
+var _out_watch_id: int = -1
 var _watch_input: PlayerCommand = PlayerCommand.new()
 var _intents: BotIntentView = null
 var _retro: RetroFilter = null
@@ -1484,6 +1486,10 @@ func _after_tick() -> void:
 			GameEvent.Kind.MAG_ASK, GameEvent.Kind.MAG_TOSS, GameEvent.Kind.MAG_REFUSED:
 				if e.actor == PLAYER_ID and _input.mag_sent:
 					mag_presses += 1
+			GameEvent.Kind.RESPAWNED when e.actor == PLAYER_ID:
+				# Back in, you look the way the spawn faces, not where the mouse turned while you were out, and a
+				# toggled aim or crouch is let go, as at a round's start (BP10).
+				_input.face(player.yaw)
 			GameEvent.Kind.ROUND_START:
 				_input.face(player.spawn_yaw)
 				_puffs.clear()
@@ -1768,11 +1774,16 @@ func spectated() -> Character:
 			return followed
 	if player.status != Character.Status.OUT:
 		return player
+	# The teammate watched stays watched while in play: with respawns (RS1) one coming back mustn't take the view (BP10).
+	var kept := state.character(_out_watch_id)
+	if kept != null and kept.team == player.team and Elimination.is_in_play(kept):
+		return kept
 	var anyone: Character = null
 	for c in state.characters:
 		if not Elimination.is_in_play(c):
 			continue
 		if c.team == player.team:
+			_out_watch_id = c.id
 			return c
 		if anyone == null:
 			anyone = c
