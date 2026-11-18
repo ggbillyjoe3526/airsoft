@@ -42,7 +42,7 @@ enum RespawnRule { BY_MODE, ALWAYS, NEVER }
 ## poles far longer than Normal's and Easy's far shorter (bot matches at the fields' waits, 8 seeds: the attackers took
 ## 24 to 37 % on Hard, 57 to 72 % on Easy), so a level waits the field's time this many times. A level not named waits
 ## the field's.
-@export var defender_respawn_scale: Dictionary[StringName, float] = {&"easy": 0.75, &"hard": 1.8}
+@export var defender_respawn_scale: Dictionary[StringName, float] = {&"easy": 0.75, &"hard": 1.9}
 ## ... and Plant The Bomb's defenders' (no field sets its own): until the bomb is armed the attackers keep coming, and
 ## at 10 s they took 63 % on Depot and 71 % on Woodland (5 s: 56 % and 66 %, bot matches, 6 seeds).
 @export var plant_defender_respawn_delay: float = 5.0
