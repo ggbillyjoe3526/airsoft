@@ -367,7 +367,8 @@ func test_the_level_scale_reaches_only_attack_defend_defenders_whatever_the_cust
 	custom.respawns = RoundConfig.RespawnRule.ALWAYS
 	var base := MatchOptions.match_tuning(SimTuning.load_default(), MapCatalog.shared().find("depot"), custom)
 	var hard := MatchOptions.level_tuning(base, &"hard")
-	assert_almost_eq(_delay(RoundState.Mode.ATTACK_DEFEND, hard.rounds, 1), base.rounds.defender_respawn_delay * 1.9, 0.001)
+	assert_almost_eq(_delay(RoundState.Mode.ATTACK_DEFEND, hard.rounds, 1), minf(base.rounds.defender_respawn_delay * 1.9,
+			base.rounds.defender_respawn_most), 0.001)
 	assert_eq(_delay(RoundState.Mode.ATTACK_DEFEND, hard.rounds, 0), base.rounds.respawn_delay, "attackers keep theirs")
 	assert_eq(_delay(RoundState.Mode.PLANT_THE_BOMB, hard.rounds, 1), base.rounds.plant_defender_respawn_delay)
 	assert_eq(_delay(RoundState.Mode.ELIMINATION, hard.rounds, 1), base.rounds.respawn_delay, "Elimination unscaled")

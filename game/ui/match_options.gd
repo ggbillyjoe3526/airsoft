@@ -148,14 +148,16 @@ static func round_time(map: MapCatalog.Entry, custom: CustomRules, played: float
 
 
 ## The round tuning `t` played against bots at `level` (BOT_LEVELS): Attack / Defend's defenders wait the field's time
-## times the level's scale (RoundConfig.defender_respawn_scale, BP10). A copy where it changes; `t` is never written.
+## times the level's scale (RoundConfig.defender_respawn_scale, BP10), no longer than RoundConfig.defender_respawn_most
+## unless the field's own is. A copy where it changes; `t` is never written.
 static func level_tuning(t: SimTuning, level: StringName) -> SimTuning:
 	var scale: float = t.rounds.defender_respawn_scale.get(level, 1.0)
 	if is_equal_approx(scale, 1.0):
 		return t
 	var out := t.duplicate() as SimTuning
 	out.rounds = t.rounds.duplicate() as RoundConfig
-	out.rounds.defender_respawn_delay = t.rounds.defender_respawn_delay * scale
+	var field := t.rounds.defender_respawn_delay
+	out.rounds.defender_respawn_delay = minf(field * scale, maxf(field, t.rounds.defender_respawn_most))
 	return out
 
 

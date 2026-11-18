@@ -739,7 +739,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   7) and 5 s in Plant The Bomb; with respawns an untended flag slips back down (15 s top to bottom), a fully raised
   one too (BP10: held up, Depot's attackers took 89 %), and up to six defending bots go to pull a flag down. Against
   Easy and Hard bots the Attack / Defend defenders' wait is the field's times the level's scale
-  (`RoundConfig.defender_respawn_scale`: 0.75 and 1.9, BP10, measured), by the other team's level for both teams: a
+  (`RoundConfig.defender_respawn_scale`: 0.75 and 1.9, BP10, measured; a scaled wait 25 s at most,
+  `defender_respawn_most`), by the other team's level for both teams: a
   match has one level, as its records do. The match guards play one life a round (as measured); respawns have their own
   guard and the balance report plays them as the game does, with a wide band on the clock (the defenders' way to win).
 - **Models keep the play boxes they dress (owner, 2026-11-09, WG3).** Woodland's structures are modelled inside the

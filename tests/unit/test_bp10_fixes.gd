@@ -157,9 +157,24 @@ func test_the_bots_level_scales_the_defenders_wait_and_nothing_else() -> void:
 		var scale: float = base.rounds.defender_respawn_scale[level]
 		assert_ne(scale, 1.0, "%s has a scale of its own" % level)
 		var played := MatchOptions.level_tuning(base, level)
-		assert_almost_eq(played.rounds.defender_respawn_delay, field * scale, 0.001, String(level))
+		assert_almost_eq(played.rounds.defender_respawn_delay, minf(field * scale, base.rounds.defender_respawn_most), 0.001,
+				String(level))
 		assert_eq(played.rounds.respawn_delay, base.rounds.respawn_delay, "%s: the attackers' wait kept" % level)
 		assert_eq(played.rounds.plant_defender_respawn_delay, base.rounds.plant_defender_respawn_delay,
 				"%s: Plant The Bomb's kept" % level)
 	assert_eq(base.rounds.defender_respawn_delay, field, "the field's tuning is never written")
 	assert_same(MatchOptions.level_tuning(base, &"unknown"), base, "a level with no scale waits the field's")
+
+
+func test_a_levels_wait_stops_at_the_ceiling_unless_the_fields_own_is_longer() -> void:
+	var base := MatchOptions.match_tuning(SimTuning.load_default(), MapCatalog.shared().find("depot"), null)
+	var most := base.rounds.defender_respawn_most
+	assert_gt(base.rounds.defender_respawn_delay * base.rounds.defender_respawn_scale[&"hard"], most, "Depot on Hard")
+	assert_eq(MatchOptions.level_tuning(base, &"hard").rounds.defender_respawn_delay, most, "Depot's Hard wait is the ceiling")
+	var long := base.duplicate() as SimTuning
+	long.rounds = base.rounds.duplicate() as RoundConfig
+	long.rounds.defender_respawn_delay = most + 5.0
+	assert_eq(MatchOptions.level_tuning(long, &"hard").rounds.defender_respawn_delay, most + 5.0,
+			"a field longer than the ceiling keeps its own")
+	assert_almost_eq(MatchOptions.level_tuning(long, &"easy").rounds.defender_respawn_delay, (most + 5.0) * 0.75, 0.001,
+			"Easy still shortens it")
