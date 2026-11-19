@@ -380,6 +380,10 @@ static func _walk_to(b: Bot, w: BotWorld, goal: Vector3, arrive: float, dt: floa
 	if Vector2(goal.x - p.x, goal.z - p.z).length() <= arrive or (settle and _arrived_for(b, goal, w)):
 		_stand(b)
 		return false
+	# No way there last time (a vault or lift link off for a while): ask again after route_retry_delay, as a flag or a
+	# search does, rather than stand while the goal stays within replan_distance (Regroup, Follow Me's still giver; BP11).
+	if b.route_state == Bot.RouteState.FAILED and w.time >= b.route_retry_at:
+		b.route_state = Bot.RouteState.NONE
 	BotRoutes.want(b, goal, w.cfg)
 	return BotRoutes.follow(b, w, dt, true)
 

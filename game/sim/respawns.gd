@@ -108,8 +108,10 @@ static func _bring_back(c: Character, rs: RoundState, ends: Array[MapEnd], chara
 	var k := resolve(c, rs, ends, characters, tuning.rounds)
 	var at := c.spawn_position
 	var facing := c.spawn_yaw
-	if k > 0:
-		var spot := free_spot(ends[c.end].forward[k - 1], characters, tuning.body)
+	var spot: SpawnPoint = free_spot(ends[c.end].forward[k - 1], characters, tuning.body) if k > 0 else null
+	if spot == null:
+		k = 0
+	else:
 		at = spot.position + Vector3(0.0, tuning.body.rest_gap, 0.0)
 		facing = spot.yaw
 	c.respawn_at(at, facing)
@@ -119,15 +121,18 @@ static func _bring_back(c: Character, rs: RoundState, ends: Array[MapEnd], chara
 	e.position = at
 
 
-## The first of `f`'s spots nobody in play stands on (within two body radii, flat), else its first.
+## The first of `f`'s spots nobody in play stands on (within two body radii, flat, and within a body's height of it, so
+## someone on the floor above or below a spot doesn't take it), else null: at 7v7 and 8v8 a fifth coming back to a
+## forward spawn's four spots at once comes back at its start, as at a shut one, never inside a teammate (BP11).
 static func free_spot(f: ForwardSpawn, characters: Array[Character], body: BodyConfig) -> SpawnPoint:
 	var room := body.radius * 2.0
 	for s in f.spots:
 		var taken := false
 		for c in characters:
-			if Elimination.is_in_play(c) and Vector2(c.position.x - s.position.x, c.position.z - s.position.z).length() < room:
+			if Elimination.is_in_play(c) and absf(c.position.y - s.position.y) < body.height \
+					and Vector2(c.position.x - s.position.x, c.position.z - s.position.z).length() < room:
 				taken = true
 				break
 		if not taken:
 			return s
-	return f.spots[0]
+	return null

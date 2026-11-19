@@ -233,6 +233,26 @@ func test_two_coming_back_together_take_different_spots() -> void:
 	assert_same(Respawns.free_spot(f, state.characters, tuning.body), f.spots[1], "the first is taken")
 
 
+func test_every_spot_taken_brings_one_back_at_the_start_not_inside_a_teammate() -> void:
+	# BP11: at 7v7 and 8v8 a fifth back at a forward spawn's four spots at once stood inside the first spot's teammate.
+	var m := _match(RoundState.Mode.ATTACK_DEFEND)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var f := sim.ends[0].forward[0]
+	state.characters[0].position = f.spots[0].position
+	state.characters[2].position = f.spots[1].position
+	assert_null(Respawns.free_spot(f, state.characters, tuning.body), "both spots taken")
+
+
+func test_someone_a_floor_above_a_spot_does_not_take_it() -> void:
+	var m := _match(RoundState.Mode.ATTACK_DEFEND)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var f := sim.ends[0].forward[0]
+	state.characters[0].position = f.spots[0].position + Vector3(0.0, 4.5, 0.0)
+	assert_same(Respawns.free_spot(f, state.characters, tuning.body), f.spots[0], "Subway: the Concourse over a platform")
+
+
 func test_arming_the_bomb_ends_respawns_and_drops_every_wait() -> void:
 	var m := _match(RoundState.Mode.PLANT_THE_BOMB)
 	var sim: Simulation = m[0]

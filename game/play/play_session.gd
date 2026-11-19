@@ -248,6 +248,9 @@ var _cover_task: int = -1
 var _cover_out: Array[BotCover.Found] = []
 var _cover: BotCover.Found = null
 var _first_frame_due: bool = false
+## An Esc or a lost focus on the build's last frame, before the loading screen went (`started`): the pause opens once it
+## has, not hidden under it (BP11).
+var _pause_due: bool = false
 ## Staged, the views step a piece a frame (AUD2: built in one call it stopped the loading screen 0.7 to 1.5 s): the
 ## views before the figures, the figures BUILD_SLICE_USEC a frame (one at least), their models, their bodies as the
 ## figures, the rest, then the start; the same views in the same order as built at once. The piece under way, and the
@@ -1670,6 +1673,9 @@ func _process(delta: float) -> void:
 		if not _holding:
 			_start_sound()
 		started.emit()
+		if _pause_due:
+			_pause_due = false
+			_open_pause()
 
 
 ## Holding for `go`: `ready_to_go` once the match has been drawn and its shaders are warm, or go_fallback after the first
@@ -1803,7 +1809,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	# Esc while paused reaches the menu instead: this node is paused with the tree.
 	if event.is_action_pressed(&"pause") and not event.is_echo():
-		_open_pause()
+		if _first_frame_due:
+			_pause_due = true
+		else:
+			_open_pause()
 		get_viewport().set_input_as_handled()
 	elif practice and not autopilot and event.is_action_pressed(&"loadout") and not event.is_echo():
 		# only on the range; in a match the key is nobody's
@@ -1851,7 +1860,10 @@ func _notification(what: int) -> void:
 		_focused = true
 		_read_window()
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and _input != null and _input.active and not autopilot:
-		_open_pause()
+		if _first_frame_due:
+			_pause_due = true
+		else:
+			_open_pause()
 
 
 func _exit_tree() -> void:
@@ -1969,6 +1981,7 @@ func start_skip() -> void:
 	_hud.set_skip_hint(false)
 	# the HUD's live region goes with it: its last line is not left standing for the round's end (BP6)
 	_hud.announce().text = ""
+	_hud.announce().announcer().skipping = true
 	_hud.visible = false
 	if settings.read_out:
 		_skip_said.accessibility_live = AccessibilityServer.LIVE_POLITE
@@ -2015,6 +2028,7 @@ func _stop_skip() -> void:
 	if not _skipping:
 		return
 	_skipping = false
+	_hud.announce().announcer().skipping = false
 	get_viewport().disable_3d = false
 	_skip_said.text = ""
 	_skip_said.accessibility_live = AccessibilityServer.LIVE_OFF

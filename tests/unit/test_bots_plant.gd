@@ -413,6 +413,26 @@ func test_a_site_no_defender_s_lane_ends_at_gets_guards_of_its_own() -> void:
 	assert_true(BotPlant.wants_site(_bot(4), w))
 
 
+func test_a_site_guard_back_from_a_hit_guards_its_site_again() -> void:
+	# BP11: rejoin's fresh life dropped Bot.site_guard, so once its guards' first lives were gone the open site stood
+	# unguarded for the rest of the round (Subway, where every lane ends by the south site).
+	_world()
+	w.lanes = [PackedVector3Array([START, SITE_A + Vector3(4.0, 0.0, 2.0)]),
+			PackedVector3Array([START, SITE_A + Vector3(6.0, 0.0, 9.0)]),
+			PackedVector3Array([START, SITE_A + Vector3(2.0, 0.0, -3.0)])]
+	_deal([0, 1, 2])
+	BotPlant.plan(w)
+	assert_eq(_bot(4).site_guard, 1)
+	cs[4].position = Vector3(38.0, 0.0, 0.0)
+	w.planner.rejoin(_bot(4), w)
+	assert_eq(_bot(4).site_guard, 1, "back at its own site")
+	assert_eq(BotFlag.pole_of(_bot(4), w), 1)
+	assert_true(BotPlant.wants_site(_bot(4), w))
+	cs[3].position = Vector3(38.0, 0.0, 0.0)
+	w.planner.rejoin(_bot(3), w)
+	assert_eq(_bot(3).site_guard, -1, "one who held a lane holds a lane again")
+
+
 func test_with_a_post_by_each_site_nobody_is_moved() -> void:
 	_world()
 	w.lanes = [PackedVector3Array([START, SITE_A + Vector3(4.0, 0.0, 2.0)]),

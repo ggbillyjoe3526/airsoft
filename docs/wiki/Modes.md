@@ -112,7 +112,8 @@ on in every mode, or off in all of them.
   spawn faces, with the last life's hit lines and "What got you" card cleared. While you wait, the view stays on the
   teammate you were watching.
 - **An enemy near shuts a forward spawn.** With an enemy within <!-- wiki:config round_config.forward_block_radius -->
-  m of it, the panel greys it out and a pick of it brings you back at your start area instead.
+  m of it, the panel greys it out and a pick of it brings you back at your start area instead. So does a forward
+  spawn whose spots are all taken by teammates standing on them (a big team coming back at once).
 - **A flag left alone slips back down.** With respawns, a flag nobody is working, raised or part-raised, slides to the bottom in
   <!-- wiki:config flag_config.respawn_slip_time -->
   seconds, so a raise has to be finished and held, not built up a hit at a time.

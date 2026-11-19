@@ -237,11 +237,14 @@ static func _read_number(row: DataTable.Row, column: String, limits: Vector2, bu
 	var raw := row.cell(column)
 	if raw.is_empty():
 		return built_in
-	if not raw.is_valid_float() or raw.to_float() < limits.x or raw.to_float() > limits.y:
+	# Read as every other table reads a number, so "−5" (a typed minus sign) is a cold field's air (BP11); a percent
+	# is no number here.
+	var v := NAN if raw.strip_edges().ends_with("%") else DataTable.parse_number(raw)
+	if is_nan(v) or v < limits.x or v > limits.y:
 		problems.append("%s: %s \"%s\" is not a number from %s to %s: %s keeps its built-in value"
 				% [at, column, raw, limits.x, limits.y, row.key])
 		return built_in
-	return raw.to_float()
+	return v
 
 
 ## The entry for `map_id`, or null.

@@ -427,6 +427,33 @@ func update() -> void:
 			order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED, true)
 
 
+## A bot back in the round from a hit (RS1 respawns, BotController._rejoin): a Follow me or Regroup its team's giver
+## still has in force, carried by a teammate meanwhile, takes it in again at the first free slot behind them, so a
+## standing order doesn't thin out over a long round (BP11; the order lapsed when everyone carrying it was out). The
+## orders to a spot (Hold here, Go there, Watching here, Cover me) are not taken up again: their spots were dealt to
+## the team in play as they were given.
+func rejoin(b: Bot) -> void:
+	for id in _given.size():
+		var kind := _given[id] as SquadOrder.Kind
+		if kind != SquadOrder.Kind.FOLLOW and kind != SquadOrder.Kind.REGROUP:
+			continue
+		var giver := _character(id)
+		if giver == null or giver == b.character or giver.team != b.character.team \
+				or not Elimination.is_in_play(giver):
+			continue
+		var slot := 0
+		var taken := true
+		while taken:
+			taken = false
+			for o in _world.bots:
+				if o != b and o.order_giver == giver and o.order_slot == slot:
+					taken = true
+					slot += 1
+					break
+		SquadOrders.start(b, giver, kind, slot)
+		return
+
+
 ## Before the bots think (as the browser game's updateOrders): each bot back within regroup_arrive of whoever gave it
 ## Regroup turns to Follow me, and the order reads Follow me once all have.
 func regroup_arrivals() -> void:

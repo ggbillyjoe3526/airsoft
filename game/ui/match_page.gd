@@ -73,9 +73,6 @@ var _tuning: SimTuning = null
 var _tuned_map: String = ""
 ## A settings change came while the page was hidden (the menus' Settings open over it): it reads them when shown.
 var _stale: bool = false
-## The mode you had on the field you left for the Range (Practice too, when you picked it), given back when a field is
-## picked next; "" when the page opened on the Range, so the field opens on its first mode, not the Range's Practice.
-var _field_mode: String = ""
 ## The kind of the map picked at the last refresh (&"" before the first or for a map not in the catalogue).
 var _last_kind: StringName = &""
 var _play_tuning: PlayTuning = null
@@ -668,10 +665,10 @@ func _refresh() -> void:
 	if on_field and _last_kind == &"range":
 		# The Range's Practice gives way: to your field's mode, or the field's first where there is none or it can't be
 		# picked ("" is never pickable, so the fallback below takes the first).
-		picks.mode = _field_mode
-		_field_mode = ""
+		picks.mode = picks.field_mode
+		picks.field_mode = ""
 	elif kind == &"range" and _last_kind != &"range" and _last_kind != &"":
-		_field_mode = picks.mode
+		picks.field_mode = picks.mode
 	_last_kind = kind
 	if not MatchOptions.mode_pickable(picks.mode, entry, pole):
 		picks.mode = MatchOptions.DEFAULT_MODE

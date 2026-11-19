@@ -18,6 +18,11 @@ var rules: String = MatchOptions.RULES_SKIRMISH
 ## The lighting preset picked (LightingConfig.PRESETS), or &"" for the map's first; a map that doesn't offer it plays
 ## its first (MapData.preset_played).
 var lighting: StringName = &""
+## The mode you had on the field you left for the Range (Practice too, when you picked it), given back when a field is
+## picked next (MatchPage._refresh); "" when the menus opened on the Range, so the field opens on its first mode, not
+## the Range's Practice. Kept here, not on the page, so menus built again (after practice, a colour change) still give
+## it back (BP11).
+var field_mode: String = ""
 
 
 ## The Custom switches the match plays (`settings`'), or null when Skirmish is picked.

@@ -255,7 +255,9 @@ func _read_multipliers(t: DataTable) -> void:
 			problems.append("%s: \"%s\" is listed twice" % [t.where(row.line), row.cell(DIFFICULTY_COLUMN)])
 			continue
 		seen[key] = true
-		var v := DataTable.parse_number(row.cell("Multiplier"))
+		# A percent is refused, not read as its number: "50 %" is not 50 times the XP (BP11).
+		var v := NAN if row.cell("Multiplier").strip_edges().ends_with("%") \
+				else DataTable.parse_number(row.cell("Multiplier"))
 		if is_nan(v) or v < MIN_MULTIPLIER or v > MAX_MULTIPLIER:
 			problems.append("%s: Multiplier must be a number from %s to %s, not \"%s\"" % [t.where(row.line),
 					MIN_MULTIPLIER, MAX_MULTIPLIER, row.cell("Multiplier")])

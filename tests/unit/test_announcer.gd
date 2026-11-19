@@ -120,6 +120,22 @@ func test_a_round_end_says_who_won_why_and_the_score_your_team_first() -> void:
 			"Won · Round 3 · Alpha take the round · Alpha 1 – 2 Beta", "a wipe-out in Attack / Defend")
 
 
+func test_a_skipped_round_reads_out_its_result_not_every_hit_it_played_through() -> void:
+	# BP11: a skip plays many seconds of round a frame, so the join window gathered its hits into the result's message.
+	var a := _announcer()
+	a.skipping = true
+	var rs := _state.round_state
+	rs.number = 3
+	rs.score = PackedInt32Array([2, 1])
+	_hit(ROOK, MATE)
+	_hit(YOU, DASH)
+	_event(GameEvent.Kind.ROUND_OVER, 0, GameEvent.RoundEnd.ELIMINATED)
+	assert_eq(_out(a), "Won · Round 3 · Alpha take the round · Alpha 2 – 1 Beta")
+	a.skipping = false
+	_hit(ROOK, MATE)
+	assert_eq(_out(a), "Mags called HIT · Rook", "the hits read out again once the skip is over")
+
+
 func test_the_score_puts_your_team_first_from_beta() -> void:
 	var a := Announcer.new(_teams, _state.characters[ROOK], 0)
 	var rs := _state.round_state

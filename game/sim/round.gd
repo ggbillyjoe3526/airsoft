@@ -280,6 +280,8 @@ static func _end_round(rs: RoundState, winner: int, reason: GameEvent.RoundEnd, 
 		events: SimEvents) -> void:
 	rs.winner = winner
 	rs.reason = reason
+	if rs.mode == RoundState.Mode.PLANT_THE_BOMB:
+		Plant.halt(rs.plant, events)
 	var over := events.add(GameEvent.Kind.ROUND_OVER)
 	over.value = winner
 	over.value2 = reason

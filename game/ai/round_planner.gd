@@ -132,7 +132,11 @@ func rejoin(b: Bot, w: BotWorld) -> void:
 			points = mini(w.lanes[lane].size(), defend_points(b.style.post, forward))
 		else:
 			points = walk_points(b, lane, w)
+	# A Plant The Bomb defender dealt a site of its own to guard (BotPlant._post_defenders, once a round) guards it again
+	# on coming back, or the open site would stand unguarded once its guards' first lives were gone (BP11).
+	var guard := b.site_guard
 	b.reset(lane, points, 0.0, w.cfg)
+	b.site_guard = guard
 	b.pace = paces[c.team] if c.team >= 0 and c.team < paces.size() else 1.0
 	if lane >= 0 and points > 0:
 		b.lane_index = 0 if b.lane_dir > 0 else w.lanes[lane].size() - 1
