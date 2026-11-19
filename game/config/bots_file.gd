@@ -44,11 +44,27 @@ const LEVEL_HABIT_COLUMNS: Array[Array] = [["Holds angles", &"holds_angles"], ["
 ## Optional: a Habits table without it watches nothing first (BotPersonality.overtime_watching, OV2).
 const FLAG_COLUMN := "Watches the flag first (s)"
 const FLAG_MAX := 60.0
+## Optional (PS1): what each personality does in Attack / Defend and Plant The Bomb. Without the table, or a cell that
+## can't be read, they all play the same jobs there.
+const SIDED := "Attack / Defend and Plant the Bomb"
+const POST_COLUMN := "Defends"
+## Sided: each (×) column, the Style field it sets, the most it may be and the least.
+const SIDED_SCALE_COLUMNS: Array[Array] = [
+	["Goes back from (×)", &"retake_scale", 5.0, 0.1],
+	["Takes the bomb from (×)", &"carry_scale", 5.0, 0.1],
+]
+const SPAWN_COLUMN := "Forward spawn, Attack / Defend (chance)"
+const BOMB_SPAWN_COLUMN := "Forward spawn, Plant the Bomb (chance)"
 ## The cells that mean "nothing here".
 const NONE_CELLS: PackedStringArray = ["", "–", "-", "—"]
 
 ## A Habits cell for a habit some levels have: as the difficulty plays it, on or off.
 enum Habit { SAME, ON, OFF }
+## Where a personality holds when it defends (PS1): as the team's plan deals it, first pick for the round's pushed
+## post (RoundPlanner._pushed_member), or its first post nearest home.
+enum Post { SAME, FORWARD, DEEP }
+## The Defends cells, as typed (lower case), and the post each means.
+const POST_CELLS: Dictionary[String, Post] = {"forward": Post.FORWARD, "deep": Post.DEEP}
 
 
 ## What a personality changes (bots.md › How they move and Habits). The scales multiply the difficulty's BotSkill
@@ -85,8 +101,23 @@ class Style:
 	## Holds cover by the overtime flag this long (s) before going in, while watches_flag.
 	var watches_flag: bool = false
 	var flag_watch: float = 0.0
+	## Attack / Defend and Plant The Bomb (PS1). Where it holds on defence.
+	var post: Post = Post.SAME
+	## Its distance counts this many times over when the defenders nearest a pole or a site being armed are picked to
+	## go back (BotFlag.pick_retakers): below 1 it is among the first back, above 1 among the last.
+	var retake_scale: float = 1.0
+	## Its distance counts this many times over when the attacker that fetches the bomb (BotPlant._pick_fetcher) is
+	## picked, and so carries it in.
+	var carry_scale: float = 1.0
+	## In place of BotConfig.forward_spawn_chance in Attack / Defend while has_spawn_chance (BotRespawn.pick).
+	var has_spawn_chance: bool = false
+	var spawn_chance: float = 0.0
+	## The same in Plant The Bomb while has_bomb_spawn_chance.
+	var has_bomb_spawn_chance: bool = false
+	var bomb_spawn_chance: float = 0.0
 
-	## Whether it changes nothing at all.
+	## Whether it changes nothing in a bot's BotSkill (BotPersonality.personal_skill); the jobs with sides (post,
+	## retake_scale, carry_scale, spawn chance) are read from the style where they apply.
 	func is_neutral() -> bool:
 		return hold_time == 1.0 and hold_cover_chance == 1.0 and contact_cover_min_distance == 1.0 \
 				and search_walk_distance == 1.0 and flank_chance == 0.0 and burst == 1.0 and burst_pause == 1.0 \
@@ -156,6 +187,15 @@ static func parse(text: String) -> BotsFile:
 	var habits_table := f._required(tables, HABITS, habits)
 	for row in f._rows_of(habits_table):
 		f._read_habits(row, habits_table)
+	var sided := DataTable.find(tables, SIDED)
+	if sided != null:
+		var sided_columns: PackedStringArray = [PERSONALITY_COLUMN, POST_COLUMN, SPAWN_COLUMN,
+				BOMB_SPAWN_COLUMN]
+		for c in SIDED_SCALE_COLUMNS:
+			sided_columns.append(c[0])
+		var sided_table := f._required(tables, SIDED, sided_columns)
+		for row in f._rows_of(sided_table):
+			f._read_sided(row, sided_table)
 	f._read_roster(f._required(tables, ROSTER, [NAME_COLUMN, PERSONALITY_COLUMN]))
 	return f
 
@@ -247,6 +287,44 @@ func _read_habits(row: DataTable.Row, t: DataTable) -> void:
 	else:
 		s.watches_flag = true
 		s.flag_watch = watch
+
+
+## Attack / Defend and Plant The Bomb (PS1): where it defends, how soon it goes back, how readily it takes the bomb,
+## and how often it comes back at a forward spawn in each mode. A cell it can't read keeps the neutral value.
+func _read_sided(row: DataTable.Row, t: DataTable) -> void:
+	var s := styles[StringName(row.cell(PERSONALITY_COLUMN).to_lower())]
+	var post := row.cell(POST_COLUMN)
+	if POST_CELLS.has(post.to_lower()):
+		s.post = POST_CELLS[post.to_lower()]
+	elif not NONE_CELLS.has(post):
+		problems.append("%s: %s: \"%s\" is not forward, deep or –" % [t.where(row.line), POST_COLUMN, post])
+	for c in SIDED_SCALE_COLUMNS:
+		var v := _number(row.cell(c[0]))
+		if is_nan(v) or v < c[3] or v > c[2]:
+			problems.append("%s: %s: \"%s\" is not a number from %s to %d" % [t.where(row.line), c[0], row.cell(c[0]),
+					String.num(c[3]), c[2]])
+		else:
+			s.set(c[1], v)
+	var chance := _chance(row, t, SPAWN_COLUMN)
+	if not is_nan(chance):
+		s.has_spawn_chance = true
+		s.spawn_chance = chance
+	chance = _chance(row, t, BOMB_SPAWN_COLUMN)
+	if not is_nan(chance):
+		s.has_bomb_spawn_chance = true
+		s.bomb_spawn_chance = chance
+
+
+## The chance (0 to 1) in `row`'s `column`, or NAN for – (none) and for a cell it can't read (reported).
+func _chance(row: DataTable.Row, t: DataTable, column: String) -> float:
+	var cell := row.cell(column)
+	if NONE_CELLS.has(cell):
+		return NAN
+	var chance := _number(cell)
+	if is_nan(chance) or chance < 0.0 or chance > 1.0:
+		problems.append("%s: %s: \"%s\" is not a chance from 0 to 1, or –" % [t.where(row.line), column, cell])
+		return NAN
+	return chance
 
 
 ## Unique made-up names, each playing a personality the file describes.
