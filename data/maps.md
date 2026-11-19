@@ -37,9 +37,10 @@ warning; a map with no row is not listed.
   7. Against Easy and Hard bots the wait is this times the level's scale (`RoundConfig.defender_respawn_scale`, BP10:
   0.75 and 1.9, a scaled wait 25 s at most), as bot matches measured them. One that isn't such a number keeps the game's with a warning.
 - **Defender respawn at Hard (s)** is the seconds a defender hit there waits to come back in Attack / Defend against
-  Hard bots (BP11): a whole or decimal number from 2 to 30, or blank for the field's wait times the Hard scale. Subway's
-  is 15.2: at the scale's 13.3 s Hard defenders held its poles (the attackers took 41.7 %, 32 seeds) and 15.2 s gave
-  53.7 %, while moving the field's own wait to 8 s (the same 15.2 s at Hard) took Normal from 48.5 % to 54.1 %.
+  Hard bots (BP11): a whole or decimal number from 2 to 30 (the scaled wait's 25 s ceiling doesn't hold it), or blank
+  for the field's wait times the Hard scale. Subway's is 15.2: at the scale's 13.3 s Hard defenders held its poles (the
+  attackers took 41.7 %, 32 seeds) and 15.2 s gave 53.7 %, while moving the field's own wait to 8 s (the same 15.2 s at
+  Hard) took Normal from 48.5 % to 54.1 %.
 - **Bomb defender respawn at Hard (s)** is the seconds a defender hit there waits to come back in Plant The Bomb, until
   the bomb is armed, against Hard bots (BP10): a whole or decimal number from 2 to 30, or blank for the game's 5 at every
   level (`game/config/round_config.gd`). Depot's is 8: its sites are close to the defenders' start, and at 5 s Hard bots
