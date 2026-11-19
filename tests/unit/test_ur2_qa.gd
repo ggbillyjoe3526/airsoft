@@ -113,6 +113,9 @@ func test_a_gone_map_falls_back_and_tells_the_backdrop() -> void:
 
 func test_freeing_the_page_leaves_no_orphans_or_connections() -> void:
 	var settings := Settings.new()
+	# the map cards an earlier test's page re-listed are freed at the end of a frame (MatchPage._list_maps): let them go
+	# first, or they count here and are gone by the end (BP10: the pages build faster now, so no frame passed between)
+	await wait_process_frames(2)
 	var before := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
 	var page := MatchPage.new(MatchPicks.new(), settings)
 	add_child(page)
