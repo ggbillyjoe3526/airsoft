@@ -1,6 +1,6 @@
 # PS1 · Bot personalities take jobs in Attack / Defend and Plant The Bomb
 
-**Review:** 4 attempts · critic Accept ?/8 · qa Pass · performance Pass
+**Review:** 4 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 The owner's ask (2026-11-18): bots already had four personalities, but in Attack / Defend and Plant The Bomb they
 differed only in pace, cover, bursts and lanes (the Anchor's hold and its flag watch are Elimination's). "Do that and
@@ -14,9 +14,10 @@ forward spawns) and keep the attackers' share in its band.
 | 2026-11-18 | 1 | Opus 5.5 (build thread) | ✓ (gdlint, wiki, changelog, touched tests; CI green on ebf01d9) | 6/8 Retry | Woodland PTB and Subway unmeasured; three comment lines over 120 |
 | 2026-11-18 | 2 | Opus 5.5 (build thread) | ✓ (as above; CI green on 53d754b) | 6/8 Retry | Normal rows not all on 32 seeds, Woodland PTB Hard unfinished, Subway A/D near 65 %; two long lines; `is_neutral`'s comment |
 | 2026-11-19 | 3 | Opus 5.5 (build thread) | ✓ (as above; CI green on 623ca0a) | 6/8 Retry | Easy rows on 8 seeds and Woodland A/D Easy unmeasured; four long lines; a stale known issue |
-| 2026-11-19 | 4 | Opus 5.5 (build thread) | ✓ (as above; CI on the final head) | ? | – |
+| 2026-11-19 | 4 | Opus 5.5 (build thread) | ✓ (as above; CI green on a7ca558) | 7/8 Accept | – |
 
-Agents: QA 42k tokens and 29k (re-check), performance 21k and 23k (re-check), critic 38k (attempt 1) and 50k (attempt 3), changelog 24k.
+Agents: QA 42k tokens and 29k (re-check), performance 21k and 23k (re-check), critic 38k (attempt 1), 50k (attempt 3)
+and 32k (attempt 4), changelog 24k.
 
 ## What the bots showed
 
