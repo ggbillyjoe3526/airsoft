@@ -122,12 +122,16 @@ func test_the_shipped_file_gives_each_personality_a_job_with_sides() -> void:
 	assert_lt(flanker.carry_scale, 1.0, "a flanker takes the bomb in")
 	assert_gt(rusher.carry_scale, 1.0, "a rusher leaves it to others")
 	var mean := 0.0
+	var bomb_mean := 0.0
 	for k in file.kinds:
 		assert_true(file.style(k).has_spawn_chance, "%s has its own forward spawn chance" % k)
-		mean += file.style(k).spawn_chance
+		assert_true(file.style(k).has_bomb_spawn_chance, "%s has one for Plant the Bomb" % k)
+		mean += file.style(k).spawn_chance / file.kinds.size()
+		bomb_mean += file.style(k).bomb_spawn_chance / file.kinds.size()
 	assert_gt(rusher.spawn_chance, anchor.spawn_chance, "a rusher comes back forward more often")
-	mean /= file.kinds.size()
-	assert_lt(mean, config.forward_spawn_chance, "under the game's chance: the most hit come back forward most")
+	assert_gt(rusher.bomb_spawn_chance, anchor.bomb_spawn_chance)
+	assert_almost_eq(bomb_mean, config.forward_spawn_chance, 0.05, "Plant the Bomb: as often as before on the whole")
+	assert_lt(mean, config.forward_spawn_chance, "Attack / Defend: under the game's chance (0.6 lifted the attackers)")
 	assert_gt(mean, config.forward_spawn_chance - 0.2, "but not far under, so a team still comes back forward")
 
 
@@ -142,14 +146,16 @@ func test_a_file_without_the_table_plays_the_same_jobs_and_a_bad_cell_keeps_neut
 	assert_eq(r.retake_scale, 1.0)
 	assert_eq(r.carry_scale, 1.0)
 	assert_false(r.has_spawn_chance)
+	assert_false(r.has_bomb_spawn_chance)
 	var row := _row(text, "| Rusher | forward |")
-	var bad := BotsFile.parse(text.replace(row, "| Rusher | sideways | x | 9 | 2 |"))
-	assert_eq(bad.problems.size(), 4, "each bad cell reported: %s" % [bad.problems])
+	var bad := BotsFile.parse(text.replace(row, "| Rusher | sideways | x | 9 | 2 | -1 |"))
+	assert_eq(bad.problems.size(), 5, "each bad cell reported: %s" % [bad.problems])
 	var b := bad.style(&"rusher")
 	assert_eq(b.post, BotsFile.Post.SAME)
 	assert_eq(b.retake_scale, 1.0)
 	assert_eq(b.carry_scale, 1.0)
 	assert_false(b.has_spawn_chance)
+	assert_false(b.has_bomb_spawn_chance)
 	assert_true(file.style(&"rusher").is_neutral() == false, "its move numbers still count")
 
 
@@ -296,6 +302,18 @@ func test_each_personality_comes_back_forward_with_its_own_chance() -> void:
 	assert_gt(BotRespawn.pick(b, w), 0, "no chance of its own: the game's")
 	b.reset(-1, 0, 0.0, w.cfg)
 	b.style = always
+	w.mode = RoundState.Mode.PLANT_THE_BOMB
+	always.spawn_chance = 1.0
+	w.cfg.forward_spawn_chance = 0.0
+	assert_eq(BotRespawn.pick(b, w), 0, "Plant The Bomb reads its own column: none here, so the game's (0)")
+	b.reset(-1, 0, 0.0, w.cfg)
+	always.has_bomb_spawn_chance = true
+	always.bomb_spawn_chance = 1.0
+	assert_gt(BotRespawn.pick(b, w), 0, "and its own chance once it has one")
+	b.reset(-1, 0, 0.0, w.cfg)
+	w.cfg.forward_spawn_chance = 1.0
+	always.spawn_chance = 0.0
+	always.bomb_spawn_chance = 0.0
 	w.mode = RoundState.Mode.ELIMINATION
 	w.attackers = -1
 	assert_gt(BotRespawn.pick(b, w), 0, "Elimination with respawns: the game's chance, not the personality's")

@@ -43,10 +43,10 @@ func test_an_empty_team_and_a_neutral_team_keep_the_drawn_pusher() -> void:
 
 func test_a_table_naming_an_unknown_personality_or_missing_a_column_is_reported_not_fatal() -> void:
 	var text := FileAccess.get_file_as_string(BotsFile.PATH)
-	var ghost := BotsFile.parse(text.replace(_row(text, "| Careful | – |"), "| Ghost | deep | 1 | 1 | 0.5 |"))
+	var ghost := BotsFile.parse(text.replace(_row(text, "| Careful | – |"), "| Ghost | deep | 1 | 1 | 0.5 | 0.5 |"))
 	assert_gt(ghost.problems.size(), 0, "Ghost is not in the Personalities table")
 	assert_eq(ghost.style(&"careful").carry_scale, 1.0, "the left-out personality keeps neutral")
-	var missing := BotsFile.parse(text.replace("| Forward spawn (chance) |", "| Spawn |"))
+	var missing := BotsFile.parse(text.replace("| Forward spawn, Plant the Bomb (chance) |", "| Spawn |"))
 	assert_gt(missing.problems.size(), 0, "a missing column is reported")
 	assert_eq(missing.style(&"rusher").post, BotsFile.Post.SAME, "and none of the table is used")
 	assert_false(missing.style(&"rusher").has_spawn_chance)
