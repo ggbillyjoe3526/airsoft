@@ -41,6 +41,9 @@ nothing.
   Me or Watching Here, or when a Go There has gone quiet, your teammates go back to the team plan without a notice
   on screen. The wheel's circle shows a notice for <!-- wiki:config hud_config.order_notice_time --> s only to
   answer an order you gave.
+- With respawns, a teammate hit while following you (Follow Me or Regroup) takes it up again when it comes back, as
+  long as another teammate still carries it. Orders to a spot (Hold Here, Go There, Watching Here, Cover Me) are not
+  taken up again.
 - Orders do nothing on the [Practice Range](Practice-Range), where there's nobody to order.
 
 All the keys can be rebound in Settings › Controls ([Controls](Controls)).

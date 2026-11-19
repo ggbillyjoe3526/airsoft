@@ -37,6 +37,9 @@ const FUSE_RANGE := Vector2(15.0, 60.0)
 ## Defend (RoundConfig.defender_respawn_delay). Blank keeps the round tuning's.
 const DEFENDER_RESPAWN_COLUMN := "Defender respawn (s)"
 const DEFENDER_RESPAWN_RANGE := Vector2(2.0, 30.0)
+## The defenders' respawn column at Hard, optional (BP11): the seconds from a hit to a defender coming back there in
+## Attack / Defend against Hard bots (RoundConfig.defender_respawn_hard). Blank plays the field's times the Hard scale.
+const DEFENDER_RESPAWN_HARD_COLUMN := "Defender respawn at Hard (s)"
 ## The bomb defenders' respawn column at Hard, optional (BP10): the seconds from a hit to a defender coming back there
 ## in Plant The Bomb, until the bomb is armed, against Hard bots (RoundConfig.plant_defender_respawn_hard). Blank keeps
 ## the round tuning's, as every other level does.
@@ -82,6 +85,9 @@ class Entry:
 	## The seconds a defender hit here waits to come back (RS1: a field whose poles are far apart gives them less), 0
 	## for the round tuning's own (RoundConfig.defender_respawn_delay). Skirmish and Custom both play it.
 	var defender_respawn: float = 0.0
+	## The seconds a defender hit here waits to come back in Attack / Defend against Hard bots (BP11: Subway's poles held
+	## too well at the Hard scale's wait), 0 for the field's times the Hard scale (RoundConfig.defender_respawn_scale).
+	var defender_respawn_hard: float = 0.0
 	## The seconds a defender hit here waits to come back in Plant The Bomb against Hard bots (BP10: Depot's close sites
 	## let Hard defenders hold them at the game's 5 s), 0 for the round tuning's own (RoundConfig.plant_defender_respawn_delay).
 	var bomb_respawn_hard: float = 0.0
@@ -162,6 +168,8 @@ static func parse(text: String) -> MapCatalog:
 			e.fuse_time = _read_number(row, FUSE_COLUMN, FUSE_RANGE, e.fuse_time, at, m.problems, table)
 			e.defender_respawn = _read_number(row, DEFENDER_RESPAWN_COLUMN, DEFENDER_RESPAWN_RANGE, e.defender_respawn, at,
 					m.problems, table)
+			e.defender_respawn_hard = _read_number(row, DEFENDER_RESPAWN_HARD_COLUMN, DEFENDER_RESPAWN_RANGE,
+					e.defender_respawn_hard, at, m.problems, table)
 			e.bomb_respawn_hard = _read_number(row, BOMB_RESPAWN_HARD_COLUMN, DEFENDER_RESPAWN_RANGE, e.bomb_respawn_hard, at,
 					m.problems, table)
 			m.entries.append(e)
@@ -237,11 +245,14 @@ static func _read_number(row: DataTable.Row, column: String, limits: Vector2, bu
 	var raw := row.cell(column)
 	if raw.is_empty():
 		return built_in
-	if not raw.is_valid_float() or raw.to_float() < limits.x or raw.to_float() > limits.y:
+	# Read as every other table reads a number, so "−5" (a typed minus sign) is a cold field's air (BP11); a percent
+	# is no number here.
+	var v := NAN if raw.strip_edges().ends_with("%") else DataTable.parse_number(raw)
+	if is_nan(v) or v < limits.x or v > limits.y:
 		problems.append("%s: %s \"%s\" is not a number from %s to %s: %s keeps its built-in value"
 				% [at, column, raw, limits.x, limits.y, row.key])
 		return built_in
-	return raw.to_float()
+	return v
 
 
 ## The entry for `map_id`, or null.

@@ -335,6 +335,7 @@ func _rejoin(id: int, time: float) -> void:
 	for b in world.bots:
 		if b.character.id == id:
 			world.planner.rejoin(b, world)
+			orders.rejoin(b)
 			if world.overtime_flag.up:
 				b.overtime_at = time + b.pick(b.skill.overtime_reaction)
 				b.overtime_flank = b.rng.randf() < b.skill.flank_chance

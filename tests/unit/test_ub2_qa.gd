@@ -64,6 +64,23 @@ func test_the_vault_prompt_is_the_jump_key_in_capitals_and_follows_a_rebind() ->
 	assert_false("vault" in hud.vault_prompt_text().to_lower(), "only the key, no sentence")
 
 
+func test_a_vault_prompt_held_through_the_pause_takes_a_rebound_jump_on_resume() -> void:
+	# BP11: up when you paused, it kept the old key after a rebind until you stepped away (its hold is reset each tick).
+	var h := _hud()
+	var hud: Hud = h[0]
+	hud.set_vault_ready(true, false)
+	var before := hud.vault_prompt_text()
+	InputMap.action_erase_events(&"jump")
+	var ev := InputEventKey.new()
+	ev.physical_keycode = KEY_V
+	InputMap.action_add_event(&"jump", ev)
+	hud.set_vault_ready(true, false)
+	assert_eq(hud.vault_prompt_text(), before, "the prompt still up keeps its words")
+	hud.refresh_door_prompt() # PlaySession._resume
+	assert_eq(hud.vault_prompt_text(), Hud.vault_words())
+	assert_ne(hud.vault_prompt_text(), before)
+
+
 # --- the clock ---
 
 func test_the_clock_reads_zero_once_the_round_is_not_live() -> void:

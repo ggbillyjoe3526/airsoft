@@ -28,6 +28,9 @@ const ORDER_KEYS: Dictionary[int, String] = {SquadOrder.Kind.FOLLOW: "ORDER_FOLL
 
 ## Whether messages are made (Settings.read_out).
 var on: bool = true
+## A round being skipped (PlaySession.start_skip): only the rounds' and the match's turns are read out, as the skip's
+## sounds and callouts go unplayed, not every hit it plays through gathered into the result's message (BP11).
+var skipping: bool = false
 
 var _teams: TeamConfig = null
 var _you: Character = null
@@ -72,6 +75,9 @@ func on_tick(state: GameState) -> void:
 	var events := state.events
 	for i in events.count:
 		var e := events.items[i]
+		if skipping and e.kind != GameEvent.Kind.ROUND_OVER and e.kind != GameEvent.Kind.MATCH_OVER \
+				and e.kind != GameEvent.Kind.ROUND_START:
+			continue
 		match e.kind:
 			GameEvent.Kind.CHARACTER_HIT:
 				if e.actor >= 0:

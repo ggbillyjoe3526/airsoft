@@ -838,12 +838,14 @@ func refresh_rail_keys() -> void:
 
 
 ## The door prompt built again with Use's key as it is bound now: after the pause menu's settings may have rebound
-## it, while you still stand at the door (BP2).
+## it, while you still stand at the door (BP2); the plant and vault prompts' keys with it.
 func refresh_door_prompt() -> void:
 	var what := _door_want
 	_door_want = DoorPrompt.NONE
 	set_door_prompt(what, _door_stop)
 	_plant_prompt.refresh_key()
+	# the vault prompt held up through the pause keeps its words until it drops: rebuild them for a rebound Jump (BP11)
+	_vault_prompt.text = vault_words()
 
 
 ## Shows "What got you" for `facts` (the hit on you just called): the shooter's name in their team's colour and the

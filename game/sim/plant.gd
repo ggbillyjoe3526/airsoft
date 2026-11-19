@@ -136,10 +136,23 @@ static func beep_gap(fuse_left: float, cfg: PlantConfig) -> float:
 	return lerpf(cfg.beep_fast, cfg.beep_slow, clampf(fuse_left / maxf(cfg.fuse_time, SLACK), 0.0, 1.0))
 
 
-## The clock ran out or the Dev tab ended the round: a bomb armed goes off on the next tick.
+## The clock ran out or the Dev tab ended the round: a bomb armed goes off on the next tick, and an arming under way
+## stops, so the round ends on the clock rather than finishing the arming and running the whole fuse (BP11).
 static func run_out(ps: PlantState) -> void:
 	if ps.status == PlantState.Status.PLANTED:
 		ps.fuse_left = 0.0
+	elif ps.planter >= 0:
+		ps.planter = -1
+		ps.planting = 0.0
+		ps.site = -1
+
+
+## A round's end (Round._end_round): nobody keeps both hands on the bomb through the pause between rounds (busy), so a
+## planter or a defuser at work as the round ends is free to move and the HUD's bar goes (BP11).
+static func halt(ps: PlantState, events: SimEvents) -> void:
+	if ps.status == PlantState.Status.CARRIED:
+		_stop_arming(ps, events)
+	ps.defuser = -1
 
 
 ## On the ground: the first attacker in play holding Use in reach takes it.

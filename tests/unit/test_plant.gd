@@ -541,6 +541,38 @@ func test_ending_the_round_now_gives_it_to_the_defenders_or_sets_an_armed_bomb_o
 	assert_eq(rs.reason, GameEvent.RoundEnd.WENT_OFF)
 
 
+func test_ending_the_round_now_mid_arming_ends_it_on_the_clock_not_after_a_fuse() -> void:
+	# BP11: pressed a tick before the arming finished, the arming went on and the "ended" round ran the whole fuse.
+	_start()
+	_pick_up(0)
+	cs[0].position = SITE_A + Vector3(1.0, 0.0, 0.0)
+	cs[0].using = true
+	_run(cfg.plant_time - 2.0 * DT)
+	assert_eq(ps.planter, 0, "arming, a tick or two from done")
+	assert_true(Round.run_clock_out(rs))
+	_run(2.0 * DT)
+	assert_eq(rs.winner, 1, "the defenders' round, as on time")
+	assert_eq(rs.reason, GameEvent.RoundEnd.TIME)
+	assert_false(ps.planted())
+
+
+func test_a_round_won_while_the_bomb_is_being_armed_frees_the_planter_s_hands() -> void:
+	# BP11: the defenders wiped out while an attacker armed it left the planter set through the pause (Plant.busy).
+	_start()
+	_pick_up(0)
+	cs[0].position = SITE_A + Vector3(1.0, 0.0, 0.0)
+	cs[0].using = true
+	_run(cfg.plant_time * 0.5)
+	assert_true(Plant.busy(ps, cs[0]))
+	_out(2)
+	_out(3)
+	_run(DT)
+	assert_eq(rs.winner, 0)
+	assert_eq(rs.reason, GameEvent.RoundEnd.ELIMINATED)
+	assert_eq(ps.planter, -1)
+	assert_false(Plant.busy(ps, cs[0]), "free to move through the pause between rounds")
+
+
 func test_a_simulated_round_leans_to_the_attackers_once_the_bomb_is_armed() -> void:
 	var wins := 0
 	var rng := RandomNumberGenerator.new()
