@@ -107,7 +107,8 @@ static func team_size(map: MapCatalog.Entry, custom: CustomRules) -> int:
 ## The round tuning a match on `map` plays: `base` with the Custom switches in force (`custom`, null under Skirmish), the
 ## team size the map gives (team_size), under Skirmish the map's round length (data/maps.md Round, WR2) and, under
 ## either, the map's flag raise time (data/maps.md Raise, MB3), bomb fuse (data/maps.md Fuse, PB4) and defenders'
-## respawn (data/maps.md Defender respawn, RS1; Bomb defender respawn at Hard, BP10). A copy wherever
+## respawn (data/maps.md Defender respawn, RS1; Defender respawn at Hard, BP11; Bomb defender respawn at Hard, BP10).
+## A copy wherever
 ## it differs from `base`, which is never written (the loaded tuning is shared).
 static func match_tuning(base: SimTuning, map: MapCatalog.Entry, custom: CustomRules) -> SimTuning:
 	var t := base if custom == null else custom.applied_to(base)
@@ -115,9 +116,10 @@ static func match_tuning(base: SimTuning, map: MapCatalog.Entry, custom: CustomR
 	var length := round_time(map, custom, t.rounds.round_time)
 	var raise := raise_time(map, t.flag.raise_time)
 	var back := defender_respawn(map, t.rounds.defender_respawn_delay)
+	var back_hard := defender_respawn_hard(map, t.rounds.defender_respawn_hard)
 	var bomb_back := bomb_respawn_hard(map, t.rounds.plant_defender_respawn_hard)
 	if t.rounds.team_size != size or t.rounds.round_time != length or t.rounds.defender_respawn_delay != back \
-			or t.rounds.plant_defender_respawn_hard != bomb_back:
+			or t.rounds.defender_respawn_hard != back_hard or t.rounds.plant_defender_respawn_hard != bomb_back:
 		if t == base:
 			t = base.duplicate() as SimTuning
 		if t.rounds == base.rounds:
@@ -125,6 +127,7 @@ static func match_tuning(base: SimTuning, map: MapCatalog.Entry, custom: CustomR
 		t.rounds.team_size = size
 		t.rounds.round_time = length
 		t.rounds.defender_respawn_delay = back
+		t.rounds.defender_respawn_hard = back_hard
 		t.rounds.plant_defender_respawn_hard = bomb_back
 	if t.flag.raise_time != raise:
 		if t == base:
@@ -152,17 +155,21 @@ static func round_time(map: MapCatalog.Entry, custom: CustomRules, played: float
 
 ## The round tuning `t` played against bots at `level` (BOT_LEVELS): Attack / Defend's defenders wait the field's time
 ## times the level's scale (RoundConfig.defender_respawn_scale, BP10), no longer than RoundConfig.defender_respawn_most
-## unless the field's own is; at Hard, Plant The Bomb's defenders wait the field's Hard time where it has one
-## (RoundConfig.plant_defender_respawn_hard). A copy where it changes; `t` is never written.
+## unless the field's own is; at Hard, Attack / Defend's and Plant The Bomb's defenders wait the field's Hard time
+## where it has one (RoundConfig.defender_respawn_hard, plant_defender_respawn_hard). A copy where it changes; `t` is
+## never written.
 static func level_tuning(t: SimTuning, level: StringName) -> SimTuning:
 	var scale: float = t.rounds.defender_respawn_scale.get(level, 1.0)
+	var own_hard := level == &"hard" and t.rounds.defender_respawn_hard > 0.0
 	var bomb_hard := level == &"hard" and t.rounds.plant_defender_respawn_hard > 0.0
-	if is_equal_approx(scale, 1.0) and not bomb_hard:
+	if is_equal_approx(scale, 1.0) and not own_hard and not bomb_hard:
 		return t
 	var out := t.duplicate() as SimTuning
 	out.rounds = t.rounds.duplicate() as RoundConfig
 	var field := t.rounds.defender_respawn_delay
 	out.rounds.defender_respawn_delay = minf(field * scale, maxf(field, t.rounds.defender_respawn_most))
+	if own_hard:
+		out.rounds.defender_respawn_delay = t.rounds.defender_respawn_hard
 	if bomb_hard:
 		out.rounds.plant_defender_respawn_delay = t.rounds.plant_defender_respawn_hard
 	return out
@@ -181,6 +188,14 @@ static func defender_respawn(map: MapCatalog.Entry, played: float) -> float:
 	if map == null or map.defender_respawn <= 0.0:
 		return played
 	return map.defender_respawn
+
+
+## The seconds a defender hit on `map` waits to come back in Attack / Defend against Hard bots: the map's own
+## (data/maps.md Defender respawn at Hard), else `played`, the round tuning's (0: the field's times the Hard scale).
+static func defender_respawn_hard(map: MapCatalog.Entry, played: float) -> float:
+	if map == null or map.defender_respawn_hard <= 0.0:
+		return played
+	return map.defender_respawn_hard
 
 
 ## The seconds a defender hit on `map` waits to come back in Plant The Bomb against Hard bots: the map's own

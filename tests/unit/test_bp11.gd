@@ -1,7 +1,8 @@
 extends GutTest
 ## BP11, the second pass before 0.1 Beta 2: the edge cases it fixed that have no older test file of their own. The
 ## Match page keeps the field's mode across menus built again, maps.md reads a typed minus sign, levels.md refuses a
-## percent multiplier, and a bot under Regroup or Follow Me asks for a route again after one failed.
+## percent multiplier, a bot under Regroup or Follow Me asks for a route again after one failed, and a field sets its
+## own Attack / Defend wait against Hard bots (Subway's, data/maps.md Defender respawn at Hard).
 
 
 # --- the Match page ---
@@ -31,7 +32,7 @@ func test_the_field_mode_comes_back_after_the_range_through_menus_built_again() 
 
 func test_a_typed_minus_sign_reads_as_a_cold_field_s_air() -> void:
 	var text := FileAccess.get_file_as_string(MapCatalog.PATH)
-	var row := "| depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 | 8 | burst | 0 | 20 |"
+	var row := "| depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 |  | 8 | burst | 0 | 20 |"
 	assert_string_contains(text, row, "the test's row is the shipped one")
 	var cold := MapCatalog.parse(text.replace(row, row.replace("| 0 | 20 |", "| 0 | −5 |")))
 	assert_eq(cold.find("depot").air, -5.0, "−5 as the other tables read it")
@@ -107,3 +108,48 @@ func test_a_follower_back_from_a_hit_follows_again_while_the_order_stands() -> v
 	book.give_order(you, SquadOrder.Kind.TEAM_PLAN)
 	book.rejoin(hit)
 	assert_eq(hit.order, SquadOrder.Kind.NONE)
+
+
+# --- Attack / Defend's wait at Hard ---
+
+func test_a_field_s_hard_wait_is_read_and_blank_or_bad_keeps_the_scale() -> void:
+	var head := "# Maps\n\n## Maps\n\n| Id | Name | Kind | Tag | Min | Standard | Max | Defender respawn at Hard (s) " \
+			+ "| Blurb |\n|---|---|---|---|---|---|---|---|---|\n"
+	var row := "| %s | %s | field | public | 5 | 6 | 8 | %s | A field. |\n"
+	var m := MapCatalog.parse(head + row % ["near", "Near", ""] + row % ["far", "Far", "15.2"])
+	assert_eq(m.problems, [] as Array[String])
+	assert_eq(m.find("near").defender_respawn_hard, 0.0, "blank: the field's times the Hard scale")
+	assert_eq(m.find("far").defender_respawn_hard, 15.2)
+	for cell: String in ["1", "31", "soon", "15 %"]:
+		var bad := MapCatalog.parse(head + row % ["far", "Far", cell])
+		assert_eq(bad.find("far").defender_respawn_hard, 0.0, "%s keeps the scale" % cell)
+		assert_eq(bad.problems.size(), 1, "%s warns" % cell)
+
+
+func test_subway_s_defenders_wait_their_own_time_only_against_hard_bots() -> void:
+	var base := SimTuning.load_default()
+	var subway := MapCatalog.shared().find("subway")
+	assert_gt(subway.defender_respawn_hard, 0.0, "Subway sets its own Hard wait")
+	var played: Array[SimTuning] = [MatchOptions.match_tuning(base, subway, null),
+			MatchOptions.match_tuning(base, subway, CustomRules.new()), MatchRunner.sized_for("subway")]
+	for t in played:
+		assert_eq(t.rounds.defender_respawn_hard, subway.defender_respawn_hard)
+		assert_eq(MatchOptions.level_tuning(t, &"hard").rounds.defender_respawn_delay, subway.defender_respawn_hard)
+		assert_eq(MatchOptions.level_tuning(t, &"normal").rounds.defender_respawn_delay, subway.defender_respawn)
+		var easy: float = subway.defender_respawn * base.rounds.defender_respawn_scale[&"easy"]
+		assert_almost_eq(MatchOptions.level_tuning(t, &"easy").rounds.defender_respawn_delay, easy, 0.001)
+		# Plant The Bomb keeps its own column.
+		assert_eq(MatchOptions.level_tuning(t, &"hard").rounds.plant_defender_respawn_delay,
+				base.rounds.plant_defender_respawn_delay)
+	assert_eq(base.rounds.defender_respawn_hard, 0.0, "the loaded tuning is never written")
+
+
+func test_a_field_without_a_hard_wait_plays_its_own_times_the_hard_scale() -> void:
+	var base := SimTuning.load_default()
+	for e in MapCatalog.shared().entries:
+		if e.kind != &"field" or e.defender_respawn_hard > 0.0:
+			continue
+		var t := MatchOptions.match_tuning(base, e, null)
+		var want := minf(t.rounds.defender_respawn_delay * base.rounds.defender_respawn_scale[&"hard"],
+				maxf(t.rounds.defender_respawn_delay, base.rounds.defender_respawn_most))
+		assert_eq(MatchOptions.level_tuning(t, &"hard").rounds.defender_respawn_delay, want, e.id)
