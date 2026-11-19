@@ -59,6 +59,21 @@ A personality changes how a bot plays, never how well: its reaction, turning and
   it, before it goes in to touch it; it goes at once when it is the last of its team in play, and every bot goes in
   for the overtime's last seconds. – goes straight for the flag. The column can be left out: then nobody watches first.
 
+The **Attack / Defend and Plant the Bomb** table gives each personality its job in the modes with sides. It can be
+left out: then every bot plays the same jobs there.
+
+- **Defends.** Where it holds when its team defends: `forward` is the first pick for the round's pushed post, well up
+  a lane, when the team has one (about one round in three); `deep` always holds the post nearest home and is never
+  pushed up; – holds what the team's plan deals it.
+- **Goes back from (×).** When the flag starts going up, or the bomb is heard being armed, the defenders nearest go
+  back to it; this scales how near it counts. Below 1 it is among the first back, above 1 it stays at its post longer.
+- **Takes the bomb from (×).** The same for the attacker that picks the bomb up, and so carries it in and arms it:
+  below 1 it takes the job before nearer teammates, above 1 it leaves it to them and guards.
+- **Forward spawn (chance), one column a mode.** With respawns, how often it comes back at one of its end's forward
+  spawns rather than its start area (0 to 1). – keeps the game's own chance (0.6). In Plant the Bomb the four
+  average the game's chance; in Attack / Defend a little under it, as an average of 0.6 there gave the attackers 63 %
+  of Depot's rounds (main 51 %), and the lower one in Plant the Bomb took 10 points from its Hard attackers.
+
 ## Roster
 
 | Name | Personality |
@@ -122,3 +137,12 @@ A personality changes how a bot plays, never how well: its reaction, turning and
 | Anchor | no | yes | no | 60 | yes | yes | – | 12 |
 | Flanker | no | no | yes | – | no | – | – | – |
 | Careful | no | yes | no | – | no | – | yes | 5 |
+
+## Attack / Defend and Plant the Bomb
+
+| Personality | Defends | Goes back from (×) | Takes the bomb from (×) | Forward spawn, Attack / Defend (chance) | Forward spawn, Plant the Bomb (chance) |
+|---|---|---|---|---|---|
+| Rusher | forward | 0.7 | 1.25 | 0.7 | 0.85 |
+| Anchor | deep | 1 | 1 | 0.3 | 0.35 |
+| Flanker | – | 1 | 0.85 | 0.6 | 0.7 |
+| Careful | – | 1.2 | 1 | 0.4 | 0.5 |

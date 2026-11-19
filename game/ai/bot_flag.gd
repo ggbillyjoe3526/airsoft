@@ -104,7 +104,8 @@ static func pick_retakers(w: BotWorld) -> void:
 
 
 ## pick_retakers for pole `i` (another than the one in play only with its flag off the bottom): to those already on its
-## worked rope, the nearest free ones one at a time, up to `wanted`.
+## worked rope, the nearest free ones one at a time, up to `wanted`, each one's distance scaled by its personality's
+## (BotsFile.Style.retake_scale).
 static func _pick_for(w: BotWorld, i: int, wanted: int) -> void:
 	var f := w.flags[i]
 	if i != w.flag_index and f.progress <= 0.0:
@@ -119,7 +120,8 @@ static func _pick_for(w: BotWorld, i: int, wanted: int) -> void:
 		for b in w.bots:
 			if b.retake_pole >= 0 or not _free_defender(b, w):
 				continue
-			var d := _to(b.character, f.position)
+			# A personality that goes back sooner counts nearer (bots.md › Goes back from).
+			var d := _to(b.character, f.position) * b.style.retake_scale
 			if d < best or (d == best and near != null and b.character.id < near.character.id):
 				best = d
 				near = b
@@ -134,11 +136,12 @@ static func _free_defender(b: Bot, w: BotWorld) -> bool:
 	return role(b, w) == Role.DEFEND and Elimination.is_in_play(b.character) and b.order == SquadOrder.Kind.NONE
 
 
-## Each tick: of the attacking bots in play that have swept their lane, one raises the flag and the others guard the pole
-## (a second raiser adds nothing: the rope goes up no faster). Bots in flag mode first, then the nearest the pole, the
-## current raiser counted raiser_switch_margin nearer; never a bot under a squad order. Nobody raises while an attacker
-## who isn't a bot (the player) is at the pole already. A raiser on the worked rope of another pole (_held_elsewhere)
-## keeps raising there, and isn't counted for this one.
+## Each tick: of the attacking bots in play that have swept their lane, one raises the flag and the others guard the
+## pole (a second raiser adds nothing: the rope goes up no faster). Bots in flag mode first, then the nearest the pole,
+## the current raiser counted raiser_switch_margin nearer; never a bot under a squad order (PS1: no personality lean
+## here, as one lifted the attackers' share of Attack / Defend). Nobody raises while an attacker who isn't a bot (the
+## player) is at the pole already. A raiser on the worked rope of another pole (_held_elsewhere) keeps raising there,
+## and isn't counted for this one.
 static func pick_raiser(w: BotWorld) -> void:
 	var raiser: Bot = null
 	var best_rank := 2
