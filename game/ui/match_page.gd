@@ -17,6 +17,9 @@ signal map_picked(map_id: String)
 
 ## The three panels' columns (the page's margins, title and panels are MenuParts'): the fields' and the team's widths.
 const FIELDS_WIDTH := 520.0
+## A field's check (_check): it can't load, and it has a flag pole.
+const CHECK_REFUSED := 1
+const CHECK_POLE := 2
 const SIDE_WIDTH := 500.0
 const SECTION_GAP := 26
 const HEADING_GAP := 12
@@ -110,6 +113,10 @@ var _only_tags: Dictionary[String, MenuTag] = {}
 var _mode_blurbs: Dictionary[String, Label] = {}
 ## The Custom size the maps were last checked for (0 under Skirmish): each is checked at the size it would play.
 var _checked_custom: int = -1
+## Each field's check kept for the session (_check): a map's file never changes while the game runs, and the page is
+## built at boot, after each match and on each colour change; reading every map's file again each time took about
+## 0.6 s of a colour change (BP10).
+static var _checks: Dictionary[String, int] = {}
 ## The Play card's picture of the picked field and its name.
 var _play_picture: TextureRect = null
 var _play_name: Label = null
@@ -457,10 +464,10 @@ func _list_maps() -> void:
 	var playable: Array[MapCatalog.Entry] = []
 	var later: Array[MapCatalog.Entry] = []
 	for e in fields:
-		var m := MatchOptions.map_check(e.id, _play_tuning.map_style, MatchOptions.team_size(e, custom))
-		var refused := not m.problems.is_empty()
+		var check := _check(e.id, _play_tuning.map_style, MatchOptions.team_size(e, custom))
+		var refused := check & CHECK_REFUSED != 0
 		problems[e.id] = refused
-		_poles[e.id] = m.has_pole
+		_poles[e.id] = check & CHECK_POLE != 0
 		(later if refused else playable).append(e)
 	var ordered := playable + later
 	var ids := PackedStringArray()
@@ -478,6 +485,16 @@ func _list_maps() -> void:
 		_map_cards[e.id] = card
 	_keep_a_playable_map()
 	_refresh()
+
+
+## Whether map `id` can't load at `team_size` (CHECK_REFUSED) and whether it has a flag pole (CHECK_POLE), from
+## MatchOptions.map_check the first time it is asked for that size and style.
+static func _check(id: String, style: MapStyle, team_size: int) -> int:
+	var key := "%s|%d|%d" % [id, team_size, style.get_instance_id()]
+	if not _checks.has(key):
+		var m := MatchOptions.map_check(id, style, team_size)
+		_checks[key] = (CHECK_REFUSED if not m.problems.is_empty() else 0) | (CHECK_POLE if m.has_pole else 0)
+	return _checks[key]
 
 
 ## Keeps the picked map if it is still listed and can load; else the first that can.
