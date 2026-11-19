@@ -93,4 +93,7 @@ Normal the clock ends 48 to 52 % of Attack / Defend rounds (band 62 %) and 12 to
 
 ## Known issues left
 
-None of its own. Depot Plant The Bomb at Hard is out of band on main too (BP10's).
+None of its own. Subway Attack / Defend at Hard reads 44.4 % against main's 52.8 % on the same seeds: in band, but
+the lowest Hard row; the Beta 2 pass watches it in its pass over PS1. The five `.uid` files for main's BP10 and
+respawn guard tests are Godot's own, written on import here (main had them untracked); they go in with this pull
+request as the uid rule asks.

@@ -128,7 +128,8 @@ func rejoin(b: Bot, w: BotWorld) -> void:
 	if lane >= 0:
 		var defending := RoundState.has_sides(w.mode) and w.attackers >= 0 and c.team != w.attackers
 		if defending:
-			points = mini(w.lanes[lane].size(), defend_points(b.style.post, b.rng.randf() < w.cfg.defend_forward_chance))
+			var forward := b.rng.randf() < w.cfg.defend_forward_chance
+			points = mini(w.lanes[lane].size(), defend_points(b.style.post, forward))
 		else:
 			points = walk_points(b, lane, w)
 	b.reset(lane, points, 0.0, w.cfg)

@@ -5,8 +5,8 @@ class_name BotRespawn
 
 ## The spawn `b` picks (PlayerCommand.spawn_pick), out with a respawn coming: decided the first time it is asked this
 ## time out (b.spawn_picked; Bot.reset clears it as it comes back). With its team free to use its end's forward spawns
-## (Respawns.forward_for), one of them at random with its personality's chance for the mode (bots.md › Forward spawn), or
-## BotConfig.forward_spawn_chance; otherwise, and on an end with none, 0: the start area.
+## (Respawns.forward_for), one of them at random with its personality's chance for the mode (bots.md › Forward
+## spawn), or BotConfig.forward_spawn_chance; otherwise, and on an end with none, 0: the start area.
 static func pick(b: Bot, w: BotWorld) -> int:
 	if b.spawn_picked:
 		return b.spawn_pick
@@ -19,7 +19,8 @@ static func pick(b: Bot, w: BotWorld) -> int:
 	var allowed := Respawns.forward_for(RoundState.has_sides(w.mode), w.attackers, c.team, w.tuning.rounds)
 	if count == 0 or not allowed:
 		return 0
-	# A personality's own chance is for the modes with sides, one for each (bots.md › Attack / Defend and Plant the Bomb).
+	# A personality's own chance is for the modes with sides, one for each
+	# (bots.md › Attack / Defend and Plant the Bomb).
 	var chance := w.cfg.forward_spawn_chance
 	if w.mode == RoundState.Mode.ATTACK_DEFEND and b.style.has_spawn_chance:
 		chance = b.style.spawn_chance

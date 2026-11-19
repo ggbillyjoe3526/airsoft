@@ -699,10 +699,10 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
 - [ ] **Anchors (BP5).** In Elimination with over a minute left, give an anchor teammate Follow me (F), then end it
   with F again: it goes hunting.
 - [ ] **Personalities with sides (PS1).** Play Attack / Defend and Plant The Bomb on two maps and spectate the bots
-  once you're out. Defending, the one bot that waits well up a lane (some rounds) is a Rusher, Rushers are first back to the flag or an armed bomb, and
-  Anchors hold close to the pole or site. Attacking, a Flanker usually carries the bomb in.
-  With respawns, Rushers and Flankers mostly come back at a forward spawn and Anchors at the start. Can you tell them
-  apart, and does neither side feel hopeless?
+  once you're out. Defending, the one bot that waits well up a lane (some rounds) is a Rusher, Rushers are first back
+  to the flag or an armed bomb, and Anchors hold close to the pole or site. Attacking, a Flanker usually carries the
+  bomb in. With respawns, Rushers and Flankers mostly come back at a forward spawn and Anchors at the start. Can you
+  tell them apart, and does neither side feel hopeless?
 
 ## Modes
 
