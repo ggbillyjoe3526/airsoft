@@ -268,7 +268,8 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 ## default) where the map offers its team size and has no round length of its own, else a copy at the map's standard
 ## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game), its round length, its flag raise time and
 ## its bomb fuse and its defenders' respawn (RS1, and at Hard, BP11, and Plant The Bomb's at Hard, BP10), as a
-## Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00, a 9 s raise and its own fuse. With `picked` (a Custom size, TS1), that size where the map offers it, else its standard.
+## Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00, a 9 s raise and its own fuse. With
+## `picked` (a Custom size, TS1), that size where the map offers it, else its standard.
 static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -> SimTuning:
 	var t := base if base != null else SimTuning.load_default()
 	var entry := MapCatalog.shared().find(map_id)
