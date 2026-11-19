@@ -121,6 +121,35 @@ func test_a_pick_draws_the_same_from_its_stream_whatever_chance_it_has() -> void
 	assert_eq(twin.rng.randf(), with_style, "one randf either way: a style changes the odds, not the stream")
 
 
+func test_a_bad_cell_in_one_spawn_column_leaves_the_other_column_read() -> void:
+	var text := FileAccess.get_file_as_string(BotsFile.PATH)
+	var row := _row(text, "| Rusher | forward |")
+	var cells := row.split("|")
+	var bomb_at := -1
+	var ad_at := -1
+	var table := BotsFile.parse(text)
+	assert_gt(table.style(&"rusher").bomb_spawn_chance, 0.0, "the shipped row has both chances")
+	for i in cells.size():
+		if cells[i].strip_edges() == String.num(table.style(&"rusher").bomb_spawn_chance):
+			bomb_at = i
+		if cells[i].strip_edges() == String.num(table.style(&"rusher").spawn_chance):
+			ad_at = i
+	assert_gt(bomb_at, -1)
+	assert_gt(ad_at, -1)
+	var bad_bomb := cells.duplicate()
+	bad_bomb[bomb_at] = " 1.5 "
+	var a := BotsFile.parse(text.replace(row, "|".join(bad_bomb)))
+	assert_eq(a.problems.size(), 1, "one bad cell, one problem: %s" % [a.problems])
+	assert_true(a.style(&"rusher").has_spawn_chance, "the Attack / Defend chance is still read")
+	assert_false(a.style(&"rusher").has_bomb_spawn_chance, "the bad one keeps the game's")
+	var bad_ad := cells.duplicate()
+	bad_ad[ad_at] = " often "
+	var b := BotsFile.parse(text.replace(row, "|".join(bad_ad)))
+	assert_eq(b.problems.size(), 1)
+	assert_false(b.style(&"rusher").has_spawn_chance)
+	assert_true(b.style(&"rusher").has_bomb_spawn_chance, "the Plant The Bomb chance is still read")
+
+
 ## The whole line of the bots.md table row that starts with `start`.
 func _row(text: String, start: String) -> String:
 	var at := text.find(start)
