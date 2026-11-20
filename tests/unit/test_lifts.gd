@@ -146,7 +146,7 @@ func test_a_call_brings_the_car_shut_ride_open_in_the_set_times() -> void:
 	_run(sim, state, roundi(cfg.floor_time * 0.5 / DT))
 	assert_almost_eq(state.lifts.y[0], (LOW + HIGH) * 0.5, 0.1)
 	cues = _run(sim, state, _ticks(cfg.floor_time * 0.5))
-	assert_eq(cues, [Lifts.Cue.ARRIVE])
+	assert_eq(cues, [Lifts.Cue.ARRIVE, Lifts.Cue.OPENING], "it chimes and its doors are heard opening (UL3)")
 	assert_almost_eq(state.lifts.y[0], HIGH, 1e-6)
 	assert_true(_doorway_solid(w, 1), "opening, the doorway stays solid until the doors stand open")
 	_run(sim, state, _ticks(cfg.door_time))

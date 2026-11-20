@@ -2,16 +2,16 @@ class_name Lifts
 extends RefCounted
 ## Lifts (MT2): a car in a shaft, stopping at each of its stops. A Use press at a landing's door calls the car there;
 ## inside the car, a press takes the panel's button nearest the view's line (LiftSpec.panel_button), each a stop. The
-## car stands at a stop with its doors open; called elsewhere it waits LiftConfig.dwell after opening (panel_dwell
-## once its own panel is pressed), shuts its doors (door_time), rides to the nearest called stop ahead of the way it
-## last went (floor_time a stop), stopping on the way at any stop called meanwhile, and opens them. Its doors never
-## shut on a body in the doorway, nor with anyone hit aboard (they walk off), nor with more than `capacity` aboard (it
-## buzzes). Its riders rise and fall with its floor (carry). A doorway is a solid steel leaf to bombs, sight and bodies
-## but while the car stands open at it, and to BBs where its two leaves stand at that tick while they shut or open
-## (WorldQuery.set_lift_ajar, bb_ray). Each press, chime, door and ride is a LIFT event, heard out to LiftConfig.heard
-## through walls. Each match and each round starts with every car at its start stop, open, nothing called. Pure rules
-## on GameState.lifts; the level is told each move through WorldQuery.set_lift_car and set_lift_door. Allocates nothing
-## a tick.
+## car stands at a stop with its doors open; called elsewhere it waits LiftConfig.dwell after opening (panel_dwell once
+## its own panel is pressed), shuts its doors (door_time: heard shut_lead before the leaves move), rides to the nearest
+## called stop ahead of the way it last went (floor_time a stop), stopping on the way at any stop called meanwhile, and
+## chimes and opens them. Its doors never shut on a body in the doorway, nor with anyone hit aboard (they walk off), nor
+## with more than `capacity` aboard (it buzzes). Its riders rise and fall with its floor (carry). A doorway is a solid
+## steel leaf to bombs, sight and bodies but while the car stands open at it, and to BBs where its two leaves stand at
+## that tick while they shut or open (WorldQuery.set_lift_ajar, bb_ray). Each press, chime, door and ride is a LIFT
+## event, heard out to LiftConfig.heard through walls. Each match and each round starts with every car at its start
+## stop, open, nothing called. Pure rules on GameState.lifts; the level is told each move through
+## WorldQuery.set_lift_car and set_lift_door. Allocates nothing a tick.
 
 ## What a LIFT event says (its value).
 enum Cue { BUTTON, OPENING, SHUTTING, DEPART, ARRIVE, BUZZ }
@@ -86,7 +86,9 @@ func step(state: GameState, dt: float) -> void:
 				_wait_open(i, state, dt)
 			LiftState.Phase.SHUTTING:
 				lifts.left[i] = maxf(0.0, lifts.left[i] - dt)
-				lifts.doors[i] = lifts.left[i] / _cfg.door_time
+				# The leaves stand open through the sound's lead (LiftConfig.shut_lead), then meet in shut_time.
+				var span := _cfg.shut_time()
+				lifts.doors[i] = minf(1.0, lifts.left[i] / span) if span > 0.0 else 0.0
 				if lifts.left[i] <= 0.0:
 					_depart(i, state)
 			LiftState.Phase.MOVING:
@@ -271,7 +273,7 @@ func _press_button(i: int, k: int, c: Character, state: GameState) -> void:
 			# Opened again from as far as they had shut, the stop's call kept for after.
 			lifts.phase[i] = LiftState.Phase.OPENING
 			lifts.left[i] = _cfg.door_time * (1.0 - lifts.doors[i])
-			_event(state, Cue.OPENING, i, k, spec.door_center(k), c.id, _cfg.heard)
+			_event(state, Cue.OPENING, i, k, spec.door_center(k), c.id, _cfg.heard, _through(spec))
 
 
 ## Lift `i` standing open: once its wait is over, with a stop called elsewhere, it shuts its doors, unless a body
@@ -292,13 +294,13 @@ func _wait_open(i: int, state: GameState, dt: float) -> void:
 		lifts.buzz_left[i] -= dt
 		if lifts.buzz_left[i] <= 0.0:
 			lifts.buzz_left[i] = _cfg.buzz_every
-			_event(state, Cue.BUZZ, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard)
+			_event(state, Cue.BUZZ, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard, _through(spec))
 		return
 	lifts.buzz_left[i] = 0.0
 	lifts.phase[i] = LiftState.Phase.SHUTTING
 	lifts.left[i] = _cfg.door_time
 	_query.set_lift_door(i, k, true)
-	_event(state, Cue.SHUTTING, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard)
+	_event(state, Cue.SHUTTING, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard, _through(spec))
 
 
 ## Whether anyone out of play stands in lift `i`'s car.
@@ -319,7 +321,8 @@ func _depart(i: int, state: GameState) -> void:
 	if t < 0:
 		lifts.phase[i] = LiftState.Phase.OPENING
 		lifts.left[i] = _cfg.door_time
-		_event(state, Cue.OPENING, i, lifts.stop[i], spec.door_center(lifts.stop[i]), lifts.caller[i], _cfg.heard)
+		_event(state, Cue.OPENING, i, lifts.stop[i], spec.door_center(lifts.stop[i]), lifts.caller[i], _cfg.heard,
+				_through(spec))
 		return
 	lifts.phase[i] = LiftState.Phase.MOVING
 	lifts.to[i] = t
@@ -351,7 +354,9 @@ func _ride(i: int, state: GameState, dt: float) -> void:
 	lifts.calls[i] &= ~(1 << k)
 	lifts.phase[i] = LiftState.Phase.OPENING
 	lifts.left[i] = _cfg.door_time
-	_event(state, Cue.ARRIVE, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard)
+	_event(state, Cue.ARRIVE, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard, _through(spec))
+	# Its doors are heard opening as they open, with the chime (they slid open silently before UL3).
+	_event(state, Cue.OPENING, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard, _through(spec))
 
 
 ## The speed (m/s) of a car at `y` heading `heading` (1 up, -1 down): its stretch between two stops in floor_time.
@@ -394,11 +399,20 @@ func _next_stop(i: int, lifts: LiftState) -> int:
 	return best if best >= 0 else any
 
 
-func _event(state: GameState, cue: Cue, i: int, k: int, at: Vector3, actor: int, reach: float) -> void:
+## A doorway's cue `through` its depth: its middle to its face, so the sound plays from the face on the hearer's side
+## and its own leaves never muffle it (SimAudio); none for a button's or the car's.
+func _event(state: GameState, cue: Cue, i: int, k: int, at: Vector3, actor: int, reach: float,
+		through: Vector3 = Vector3.ZERO) -> void:
 	var e := state.events.add(GameEvent.Kind.LIFT)
+	e.direction = through
 	e.actor = actor
 	e.target = i
 	e.value = cue
 	e.value2 = k
 	e.position = at
 	e.reach = reach
+
+
+## From the middle of lift `spec`'s doorway to its face on the landing's side (half its depth, out).
+static func _through(spec: LiftSpec) -> Vector3:
+	return Vector3(spec.out.x, 0.0, spec.out.y) * (spec.door_depth * 0.5)

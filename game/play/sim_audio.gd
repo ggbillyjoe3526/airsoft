@@ -431,7 +431,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 					_lift_motor(e)
 				else:
 					var button := e.value == Lifts.Cue.BUTTON
-					_play(LIFT_CUES[clampi(e.value, 0, LIFT_CUES.size() - 1)], e.position, false,
+					_play(LIFT_CUES[clampi(e.value, 0, LIFT_CUES.size() - 1)], doorway_face(e, _ear), false,
 							_cfg.lift_button_gain if button else _cfg.lift_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach,
 							null, true)
 			GameEvent.Kind.PLANT:
@@ -851,6 +851,15 @@ func _plant_cue(e: GameEvent) -> void:
 	if working and _played_voice >= 0:
 		_plant_voice = _played_voice
 		_plant_serial = _field_pool.serial_of(_played_voice)
+
+
+## Where a lift's cue `e` plays from for ears at `ear`: a doorway's (UL3: its event's `direction` runs from the
+## doorway's middle to its face) from the face on the ears' side, so its own leaves, solid from the moment they start
+## to shut, never muffle it; a button's and the car's where they are.
+static func doorway_face(e: GameEvent, ear: Vector3) -> Vector3:
+	if e.direction == Vector3.ZERO:
+		return e.position
+	return e.position + e.direction * signf(e.direction.dot(ear - e.position))
 
 
 ## A lift's car setting off (MT2): its motor from inside the car (SoundConfig.lift_motor_rise over the floor it left,

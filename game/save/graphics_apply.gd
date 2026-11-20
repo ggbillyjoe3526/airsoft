@@ -380,7 +380,7 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		woods.set_quality(values.mesh_detail, values.wind_dust / PERCENT)
 	if lamps != null:
 		lamps.set_mode(values.lamp_lights, values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST,
-				values.global_illumination == GraphicsQuality.GlobalIllumination.SCENE)
+				scene_bounce(values, lighting))
 		if lighting != null:
 			lighting.set_key_share(lamps.key_share(values.lamp_lights))
 			lighting.set_ambient_share(lamps.ambient_share(values.lamp_lights))
@@ -393,6 +393,13 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 ## would shade every floor below it (and on High and Ultra it is out while the lamps shine).
 static func sun_shadows(values: GraphicsQuality, lighting: FieldLighting = null) -> bool:
 	return values.sun_shadows and (lighting == null or not lighting.underground())
+
+
+## Whether the scene's bounce light (SDFGI) lights `lighting`'s field with `values`: Global illumination Scene, unless
+## the field is underground (FieldLighting.underground, UL3), where the field's fill lights the shade instead.
+static func scene_bounce(values: GraphicsQuality, lighting: FieldLighting = null) -> bool:
+	return values.global_illumination == GraphicsQuality.GlobalIllumination.SCENE \
+			and (lighting == null or not lighting.underground())
 
 
 ## Whether the figures draw their contact shadows with `values` (over `lighting`'s field): where the sun casts none.
