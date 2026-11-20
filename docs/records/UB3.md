@@ -1,6 +1,6 @@
 # UB3 · Beta 2 playtest: Remove beside the menu, one tap spots, ACTION [KEY] prompts, haze on or off
 
-**Review:** REVIEW_LINE
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass (attempt 1, 14 tests in test_ub3_qa) · performance Pass (attempt 1)
 
 The owner's Beta 2 playtest notes (2026-11-20), items 1, 2, 4 and 8. Other threads own items 3, 5, 6 and 7 (Woodland
 hits, Subway's darkness, bots vanishing, the lift's sounds).
@@ -9,16 +9,18 @@ hits, Subway's darkness, bots vanishing, the lift's sounds).
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-ATTEMPT_ROWS
+| 2026-11-20 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | No changelog note; the performance report not in pipeline/out; comment wrap nits |
+| 2026-11-20 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## What changed
 
 - **1. Remove beside the menu.** The question ("Remove <name>?", then Remove and Keep, the owner's words: they were
-  "Remove it" and "Keep it") was a line at the loadout strip's far right. It is now a small panel (`LoadoutStrip` `RemoveConfirm`, the menu's own glass style) beside the
-  right-click menu, its foot level with the menu's, so it sits by the Remove row; it flips to the menu's left where
-  the window has no room. The menu stays up while it asks. Keep, Esc or a click off the panel keeps the loadout and
-  shuts both. Remove asked with no menu up opens it under the carried card. The owner asked for a picture first: it was
-  posted to the thread (`playtest/ui-b2-remove/` in the project's files) and the work went on without waiting.
+  "Remove it" and "Keep it") was a line at the loadout strip's far right. It is now a small panel (`LoadoutStrip`
+  `RemoveConfirm`, the menu's own glass style) beside the right-click menu, its foot level with the menu's, so it sits
+  by the Remove row; it flips to the menu's left where the window has no room. The menu stays up while it asks. Keep,
+  Esc or a click off the panel keeps the loadout and shuts both. Remove asked with no menu up opens it under the
+  carried card. The owner asked for a picture first: it was posted to the thread (`playtest/ui-b2-remove/` in the
+  project's files) and the work went on without waiting.
 - **2. One tap spots.** Two causes found; both fixed. A tap had to be let go within 0.2 s; a relaxed tap often runs
   longer, and then the wheel came up and letting go gave whatever the pointer was on (an order if the mouse had moved
   while tracking someone). `ControlsConfig.wheel_tap` is 0.3 s. And Spotted looked for the enemy only up to the first
@@ -48,6 +50,11 @@ ATTEMPT_ROWS
 - **Hold actions read "[HOLD G]".** The key in brackets with how it is pressed, so the format stays "ACTION [KEY]".
 - **Lift panel: "GO TO <STOP> [G]".** The stop's name in capitals, as the action.
 - **Tap 0.3 s.** Long enough for a relaxed tap; the wheel shows 0.1 s later when held, which nobody waits on.
+- **Focus rings clear of the words (owner, 2026-11-20: "make sure any other buttons/options are fixed too").** A probe
+  over every focusable control in the menus, Customise, the Armory, Settings, Report and the pause menu found three
+  rings within 3 px of their words: the quiet links, Customise's Realistic colours switch and the rail's QUIT. They use
+  `GameTheme.focus_clear`, drawn 6 px across and 4 px up and down outside the control (QUIT: up and down only, the
+  rail's edge leaves no room across).
 - **Not changed:** the out-of-play hints (the skip-the-round line and the Range's Loadout line) keep their key chips;
   they are hints, not prompts at a thing in reach.
 
