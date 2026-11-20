@@ -32,16 +32,21 @@ func test_no_bb_passes_a_thin_wall_on_depot_or_woodland() -> void:
 		level.build(m, style, tuning.body)
 		var lo: Array[Vector3] = []
 		var hi: Array[Vector3] = []
-		# What is solid, for "ends inside a block": each block's box, a round prop's its stepped boxes (BP7).
+		# What is solid, for "ends inside a block": each block's box, a round prop's its stepped boxes (BP7), a thicket's its
+		# tiers (TV1).
 		var solid_lo: Array[Vector3] = []
 		var solid_hi: Array[Vector3] = []
 		var middle := PropLayout.field_middle(m)
 		var steps: Array[AABB] = []
+		var tiered := TierSteps.tiered_blocks(m, style, PropDressConfig.new())
 		for b in m.blocks:
 			# Ramps are wedges: their boxes hold air above the slope.
 			lo.append(b.center - b.size * 0.5 if b.rise == MapData.Rise.NONE else Vector3.INF)
 			hi.append(b.center + b.size * 0.5 if b.rise == MapData.Rise.NONE else -Vector3.INF)
 			RoundSteps.boxes(b, style, PropDressConfig.new(), middle, steps)
+			if steps.is_empty():
+				# a thicket's tiers (TV1)
+				TierSteps.boxes(b, style, PropDressConfig.new(), tiered, steps)
 			if steps.is_empty():
 				solid_lo.append(lo[-1])
 				solid_hi.append(hi[-1])

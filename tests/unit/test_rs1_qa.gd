@@ -85,6 +85,12 @@ func _until_back(sim: Simulation, state: GameState, cmds: Array[PlayerCommand], 
 	return null
 
 
+## Ticks for a zero wait to bring someone back: the hit called, then the fade off the field (TV1: never drawn at its
+## spawn mid-walk), and a few to spare.
+func _call_and_fade_ticks() -> int:
+	return ceili((tuning.hits.call_time + tuning.hits.vanish_time) / DT) + 10
+
+
 func _zero_delay(r: RoundConfig) -> void:
 	r.respawn_delay = 0.0
 	r.defender_respawn_delay = 0.0
@@ -103,8 +109,8 @@ func test_a_bomb_carrier_hit_drops_the_bomb_and_a_zero_delay_return_does_not_tak
 	var cmds := _cmds(4)
 	sim.step(state, cmds, DT)
 	_hit(sim, state, carrier)
-	var back := _until_back(sim, state, cmds, carrier, 10)
-	assert_not_null(back, "a zero delay brings it back within a few ticks")
+	var back := _until_back(sim, state, cmds, carrier, _call_and_fade_ticks())
+	assert_not_null(back, "a zero delay brings it back once its hit is called and it has faded (TV1)")
 	for i in 5:
 		sim.step(state, cmds, DT)
 	assert_eq(rs.plant.status, PlantState.Status.DOWN, "the bomb stays where it was dropped")
@@ -199,7 +205,7 @@ func test_a_pick_with_no_end_or_a_missing_end_comes_back_at_the_start_area() -> 
 	assert_eq(Respawns.resolve(c, rs, sim.ends, state.characters, t.rounds), 0, "a negative pick")
 
 
-func test_a_zero_or_negative_delay_comes_back_within_a_few_ticks() -> void:
+func test_a_zero_or_negative_delay_comes_back_once_called_and_faded() -> void:
 	for delay: float in [0.0, -5.0]:
 		var m := _match(RoundState.Mode.ATTACK_DEFEND, 2, func(r: RoundConfig) -> void:
 			r.respawn_delay = delay
@@ -208,7 +214,7 @@ func test_a_zero_or_negative_delay_comes_back_within_a_few_ticks() -> void:
 		var state: GameState = m[1]
 		var c := state.characters[0]
 		_hit(sim, state, c)
-		assert_not_null(_until_back(sim, state, _cmds(4), c, 6), "delay %s" % delay)
+		assert_not_null(_until_back(sim, state, _cmds(4), c, _call_and_fade_ticks()), "delay %s" % delay)
 
 
 func test_a_wait_pending_when_the_round_ends_is_gone_in_the_next_round() -> void:
