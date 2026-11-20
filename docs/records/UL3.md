@@ -1,6 +1,6 @@
 # UL3 · Subway's light on Ultra and the lift's sounds
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 The owner's 0.1 Beta 2 playtest (2026-11-20), items 5 and 7: "subway map is too dark. could be a shadow issue as it
 improves the closer i get to an object/surface" (two screenshots: the concourse's kiosk, the top of the escalators,
@@ -10,7 +10,7 @@ both Ultra's warm look) and "lift sounds are still out of sync. should play befo
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-20 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-20 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Accept | – (check 8: the lift's open doorway during the lead in KNOWN_ISSUES and the Settings wiki's wrap, both fixed) |
 
 ## Decisions
 
@@ -37,6 +37,9 @@ both Ultra's warm look) and "lift sounds are still out of sync. should play befo
 - **A doorway's cue plays from its face on your side** (`SimAudio.doorway_face`, the LIFT event's `direction`): the
   leaves turn solid as they start to shut, and a cue at the doorway's middle was muffled by them from a landing off
   to the side (both of Subway's lifts, a test).
+- **A press during the lead** reopens at once (`left` 0): the shut's sound, then the opening's, with no leaf moved.
+  Plausible as a door motor reversing; by ear in play (PLAYTEST UL3).
+- Pictures: `art/graphics/ul3/` in the shared files (before and after on Ultra, High, Medium and Low).
 
 ## Known issues left
 
