@@ -266,26 +266,17 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 		model_name: StringName = &"") -> void:
 	var model := boxes[picks[0]]
 	var along_x := size.x >= size.z
-	var long := size.x if along_x else size.z
-	var across := size.z if along_x else size.x
-	var n := Vector3i(maxi(1, roundi(long / maxf(cell.x, 1e-6))),
-			1 if cell.y <= 0.0 else maxi(1, roundi(size.y / cell.y)), maxi(1, roundi(across / maxf(cell.z, 1e-6))))
-	var step := Vector3(long / n.x, size.y / n.y, across / n.z)
+	var n := grid_count(size, cell)
+	var high := size.y / n.y
 	# Drawn wider than its cell where grid_spread says (FT1), never past the box: the end ones flush with its ends and
 	# the rest evenly between, so neighbours overlap. At a spread of 1 each is its cell, as before.
 	var spread: Vector2 = cfg.grid_spread.get(model_name, Vector2.ONE)
-	var drawn := Vector3(minf(step.x * spread.x, long), step.y, minf(step.z * spread.y, across))
-	var pitch := Vector2((long - drawn.x) / maxi(n.x - 1, 1), (across - drawn.z) / maxi(n.z - 1, 1))
+	var flat := grid_drawn(size, cell, spread)
+	var drawn := Vector3(flat.x, high, flat.y)
 	# The model's z across the box: unturned on a box long in x, a quarter turn (its z to world x) on one long in z.
 	var yaw := 0.0 if along_x else PI * 0.5
 	var square := absf(model.size.x - model.size.z) < 0.05 * maxf(model.size.x, model.size.z)
-	# Scattered (WS1): off its even place, from a stream of the box's own.
-	var scatter: float = cfg.grid_scatter.get(model_name, 0.0)
-	var scattered := scatter > 0.0
-	var own := RandomNumberGenerator.new() if scattered else null
-	if scattered:
-		own.seed = hash(Vector3i(roundi(foot.x * 100.0), roundi(foot.y * 100.0), roundi(foot.z * 100.0)))
-	var room := Vector2(maxf(long - drawn.x, 0.0) * 0.5, maxf(across - drawn.z, 0.0) * 0.5)
+	var spots := grid_spots(foot, size, cell, spread, cfg.grid_scatter.get(model_name, 0.0))
 	# A line closed by end models (grid_ends, RM2): its model's -x end at the line's low end on a box long in x; a
 	# box long in z turns the model's +x to world -z, so there its +x end is at the line's low end.
 	var ends: PackedStringArray = cfg.grid_ends.get(model_name, PackedStringArray())
@@ -297,12 +288,8 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 	var high_end := StringName(ends[1 if along_x else 0]) if closed else &""
 	for i in n.x:
 		for k in n.z:
-			var u := (drawn.x - long) * 0.5 + i * pitch.x
-			var v := (drawn.z - across) * 0.5 + k * pitch.y
-			if scattered:
-				u = clampf(u + own.randf_range(-scatter, scatter) * step.x, -room.x, room.x)
-				v = clampf(v + own.randf_range(-scatter, scatter) * step.z, -room.y, room.y)
-			var at := foot + (Vector3(u, 0.0, v) if along_x else Vector3(v, 0.0, u))
+			var uv := spots[i * n.z + k]
+			var at := foot + (Vector3(uv.x, 0.0, uv.y) if along_x else Vector3(uv.y, 0.0, uv.x))
 			for j in n.y:
 				var turn := yaw + (_quarter_turn(rng) if square else PI * float(rng.randi_range(0, 1)))
 				if cfg.grid_unturned.has(model_name):
@@ -319,8 +306,56 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 				var shade := _shade(cfg, rng)
 				if picks.size() > 1 or closed:
 					shade = 1.0
-				_placed(out, pick).add(fit(boxes[pick], at + Vector3(0.0, j * step.y, 0.0), _turned(drawn, turn - yaw),
+				_placed(out, pick).add(fit(boxes[pick], at + Vector3(0.0, j * high, 0.0), _turned(drawn, turn - yaw),
 						turn), shade)
+
+
+## A GRID box of `size`'s cells of `cell` (PropDressConfig.grid_cells): how many along its long side, up (one where
+## the cell sets no height) and across it.
+static func grid_count(size: Vector3, cell: Vector3) -> Vector3i:
+	var long := maxf(size.x, size.z)
+	var across := size.z if size.x >= size.z else size.x
+	return Vector3i(maxi(1, roundi(long / maxf(cell.x, 1e-6))),
+			1 if cell.y <= 0.0 else maxi(1, roundi(size.y / cell.y)), maxi(1, roundi(across / maxf(cell.z, 1e-6))))
+
+
+## The size each GRID model in a box of `size` is drawn (along the box's long side, across it): its cell `spread` times
+## (PropDressConfig.grid_spread), never past the box. One source for _grid and the colliders that hug what it draws
+## (TierSteps).
+static func grid_drawn(size: Vector3, cell: Vector3, spread: Vector2) -> Vector2:
+	var long := maxf(size.x, size.z)
+	var across := size.z if size.x >= size.z else size.x
+	var n := grid_count(size, cell)
+	return Vector2(minf(long / n.x * spread.x, long), minf(across / n.z * spread.y, across))
+
+
+## Where each GRID model in a box of `size` standing on `foot` stands off the foot, (along the box's long side, across
+## it), along first then across (grid_count's cells): drawn grid_drawn wide, the end ones flush with the box's ends and
+## the rest evenly between; scattered off those places by up to `scatter` of the pitch either way (WS1, from a stream of
+## the box's own, seeded by its foot), never past the box. One source for _grid and the colliders that hug what it
+## draws (TierSteps).
+static func grid_spots(foot: Vector3, size: Vector3, cell: Vector3, spread: Vector2, scatter: float) \
+		-> PackedVector2Array:
+	var long := maxf(size.x, size.z)
+	var across := size.z if size.x >= size.z else size.x
+	var n := grid_count(size, cell)
+	var step := Vector2(long / n.x, across / n.z)
+	var drawn := grid_drawn(size, cell, spread)
+	var pitch := Vector2((long - drawn.x) / maxi(n.x - 1, 1), (across - drawn.y) / maxi(n.z - 1, 1))
+	var own := RandomNumberGenerator.new() if scatter > 0.0 else null
+	if own != null:
+		own.seed = hash(Vector3i(roundi(foot.x * 100.0), roundi(foot.y * 100.0), roundi(foot.z * 100.0)))
+	var room := Vector2(maxf(long - drawn.x, 0.0) * 0.5, maxf(across - drawn.y, 0.0) * 0.5)
+	var out := PackedVector2Array()
+	for i in n.x:
+		for k in n.z:
+			var u := (drawn.x - long) * 0.5 + i * pitch.x
+			var v := (drawn.y - across) * 0.5 + k * pitch.y
+			if own != null:
+				u = clampf(u + own.randf_range(-scatter, scatter) * step.x, -room.x, room.x)
+				v = clampf(v + own.randf_range(-scatter, scatter) * step.y, -room.y, room.y)
+			out.append(Vector2(u, v))
+	return out
 
 
 ## `model` and its GRID variants (PropDressConfig.variants) that have bounds in `boxes`, `model` first.

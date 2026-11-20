@@ -80,8 +80,10 @@ static func resolve(c: Character, rs: RoundState, ends: Array[MapEnd], character
 
 
 ## One tick (`dt` s) of the live round's respawns, before Round.step judges wipe-outs: each character out of play takes
-## its controller's pick (`commands` by id; none: the start area) and, newly out, starts its wait; a wait run out brings
-## it back (a RESPAWNED event). Once respawns are shut (Plant The Bomb's bomb armed), every wait is dropped.
+## its controller's pick (`commands` by id; none: the start area) and, newly out, starts its wait; one still walking
+## off leaves the field as its wait's last HitConfig.vanish_time starts, and a wait run out brings it back (a RESPAWNED
+## event) once it is out (still calling its hit, it calls, walks off and leaves first). Once respawns are shut (Plant The
+## Bomb's bomb armed), every wait is dropped.
 static func step(rs: RoundState, characters: Array[Character], commands: Array[PlayerCommand], ends: Array[MapEnd],
 		tuning: SimTuning, events: SimEvents, dt: float) -> void:
 	if not rs.is_live():
@@ -98,8 +100,14 @@ static func step(rs: RoundState, characters: Array[Character], commands: Array[P
 		if c.respawn_left < 0.0:
 			c.respawn_left = delay(rs, tuning.rounds, c.team)
 			continue
-		c.respawn_left -= dt
-		if c.respawn_left <= 0.0:
+		# Never under 0 while it waits to be out of sight: a wait run out still counts as coming (waiting).
+		c.respawn_left = maxf(c.respawn_left - dt, 0.0)
+		# Walking off as the wait runs out, it leaves the field (Elimination's fade) on its last vanish_time, so it is
+		# out of sight as it comes back, never drawn at its spawn in a blink (the owner's playtest of 0.1 Beta 2, item
+		# 6); once out, it comes back.
+		if c.status == Character.Status.WALKING_OFF and c.respawn_left <= tuning.hits.vanish_time:
+			Elimination.leave(c)
+		if c.respawn_left <= 0.0 and c.status == Character.Status.OUT:
 			_bring_back(c, rs, ends, characters, tuning, events)
 
 
