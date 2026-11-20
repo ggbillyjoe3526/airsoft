@@ -395,6 +395,8 @@ static func _add_panels(t: Theme) -> void:
 	menu.shadow_color = Color(0.0, 0.0, 0.0, 0.45)
 	menu.shadow_size = POPUP_PAD
 	t.set_stylebox("panel", "PopupMenu", menu)
+	# the Remove question beside it (LoadoutStrip): the same panel
+	t.set_stylebox("panel", "PopupPanel", menu)
 	t.set_stylebox("hover", "PopupMenu", box(Color(accent, POPUP_HOVER_ALPHA), Color(0.0, 0.0, 0.0, 0.0), POPUP_PAD, 0))
 	t.set_color("font_color", "PopupMenu", TEXT)
 	t.set_color("font_hover_color", "PopupMenu", TEXT)

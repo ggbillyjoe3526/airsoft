@@ -1829,16 +1829,13 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 - [ ] **A pistol points where the rifle points.** Switch between the AEG and the GBB Pistol, then the Cyber Pistol,
   at the hip. Pass: both lie at the same angle, the pistol's muzzle toward the crosshair, not off to its left.
 
-## Volumetric haze in four levels (VF1)
+## Volumetric haze, off or on (VF1, UB3)
 
-- [ ] **Each level's look and cost on your card.** Settings › Graphics › Volumetric haze now offers Off, Low, Medium
-  and High (Medium preset Low, High preset Medium, Ultra High, Low none). In Depot's hall with the lamps on, on
-  Woodland facing the sun and on Subway's platform, press F3 and step the row through Off, Low, Medium and High.
-  Pass: near you the haze is the same at every level; going up it reaches farther (the hall's far end hazier) and its
-  light shafts get finer and smoother; Low has no flicker or crawling blocks that bother you; the frame time grows a
-  little each step (on the laptop at Medium, Low haze should cost well under 1 ms); High looks as the old "on" did.
-- [ ] **An old Custom setting.** If you had Volumetric haze switched on in a Custom preset before this change, it now
-  reads High.
+- [ ] **The switch.** Settings › Graphics › Volumetric haze is a switch (on with the High and Ultra presets). In
+  Depot's hall with the lamps on, on Woodland facing the sun and on Subway's platform, press F3 and flip it. Pass: on,
+  the haze and its light shafts show as High's did; off, none; the frame time on Medium's laptop is unchanged (the
+  haze is off there).
+- [ ] **An old Custom setting.** A Custom preset saved with haze at Low, Medium or High now reads On.
 
 ## Depot's compact hall (DC1)
 
@@ -1934,6 +1931,16 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   stays out, and a team with nobody left loses the round.
 - [ ] **Elimination and Custom.** Play Elimination: one life, as before. In Custom, set Respawns to On and play
   Elimination, then Off and play Attack / Defend. Pass: each plays as set.
+
+## Beta 2 playtest: prompts, Remove, Spotted (UB3)
+
+- [ ] **Prompts.** Walk up to a door, a lift, a low wall, a platform edge and the bomb, and empty a magazine. Pass:
+  each prompt reads the action and then the key, in capitals: OPEN DOOR [G], CLOSE DOOR [G], CALL LIFT [G], GO TO
+  TICKET HALL [G], VAULT [SPACE], CLIMB [SPACE], PLANT BOMB [HOLD G], RELOAD [R]; a rebound key shows in the brackets.
+- [ ] **Remove beside the menu.** Right-click a loadout and pick Remove. Pass: "Remove <name>?" with Remove it and
+  Keep it opens right beside the menu; Keep it, Esc or a click elsewhere keeps it and shuts both.
+- [ ] **A single tap spots.** In a match, tap Z (quickly) at an enemy in the open, one peeking over a crate and one
+  beside a tree. Pass: one tap puts the yellow arrow over each; one fully behind a wall is never spotted.
 
 ## Reporting what you find
 

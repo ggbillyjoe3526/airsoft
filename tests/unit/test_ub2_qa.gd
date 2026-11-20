@@ -46,22 +46,23 @@ func test_a_mouse_click_on_the_armory_line_gives_focus_the_ring_does_not_draw_fo
 
 # --- the vault prompt ---
 
-func test_the_vault_prompt_is_the_jump_key_in_capitals_and_follows_a_rebind() -> void:
+func test_the_vault_prompt_is_vault_and_the_jump_key_in_capitals_and_follows_a_rebind() -> void:
+	# UB3 (owner, 2026-11-20): "VAULT [SPACE]" and "CLIMB [SPACE]", as every prompt; UB2's was the key alone.
 	var h := _hud()
 	var hud: Hud = h[0]
 	assert_eq(Hud.vault_words(), Hud.vault_words().to_upper())
-	assert_eq(Hud.vault_words(), KeyNames.of_action(&"jump").to_upper())
+	assert_eq(Hud.vault_words(), "VAULT [%s]" % KeyNames.of_action(&"jump").to_upper())
 	hud.set_vault_ready(true, false)
 	assert_eq(hud.vault_prompt_text(), Hud.vault_words())
 	InputMap.action_erase_events(&"jump")
 	var ev := InputEventKey.new()
 	ev.physical_keycode = KEY_V
 	InputMap.action_add_event(&"jump", ev)
-	assert_eq(Hud.vault_words(), KeyNames.of_action(&"jump").to_upper(), "the rebound key")
-	assert_ne(Hud.vault_words(), "SPACE")
-	hud.set_vault_ready(true, true) # a climb takes the same words
-	assert_eq(hud.vault_prompt_text(), Hud.vault_words())
-	assert_false("vault" in hud.vault_prompt_text().to_lower(), "only the key, no sentence")
+	assert_eq(Hud.vault_words(), "VAULT [%s]" % KeyNames.of_action(&"jump").to_upper(), "the rebound key")
+	assert_ne(Hud.vault_words(), "VAULT [SPACE]")
+	hud.set_vault_ready(true, true) # a climb says so
+	assert_eq(hud.vault_prompt_text(), Hud.vault_words(true))
+	assert_eq(hud.vault_prompt_text(), "CLIMB [%s]" % KeyNames.of_action(&"jump").to_upper())
 
 
 func test_a_vault_prompt_held_through_the_pause_takes_a_rebound_jump_on_resume() -> void:
@@ -221,7 +222,7 @@ func test_the_defaults_are_the_new_ones() -> void:
 	assert_true(s.tooltips)
 	assert_eq(s.frame_limit, Settings.UNLIMITED)
 	assert_eq(s.frame_limit_pick, 240)
-	assert_eq(Settings.VERSION, 6)
+	assert_eq(Settings.VERSION, 7, "UB3 made the haze one switch")
 
 
 func test_the_frame_limit_pick_is_saved_read_and_clamped() -> void:

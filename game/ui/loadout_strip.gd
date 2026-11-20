@@ -5,7 +5,8 @@ extends HBoxContainer
 ## is right-clicked (owner, 2026-11-17: they were links on the right), or with the Menu key or Shift+F10 on a focused
 ## card; the card is carried first, so the menu's actions are on it. Every action is SavedLoadouts'; the strip only
 ## asks for it. Rename types over the carried one's name, Replace asks which loadout takes
-## the carried one's place and Remove asks once more, each left again with Esc (`cancel`). A Replace can be undone for
+## the carried one's place and Remove asks once more, in a small panel beside the menu (owner, 2026-11-20: it was at the
+## strip's far right), each left again with Esc (`cancel`); a click off the Remove panel keeps the loadout too. A Replace can be undone for
 ## UNDO_SECONDS (BP7): "<name> replaced" and Undo stand where the actions were, until then, a click on a card, Esc or any
 ## other change.
 
@@ -24,6 +25,10 @@ const ACTION_GAP := 8
 const ACTION_PAD := 10
 const DASH := 6.0
 const EDIT_WIDTH := 260.0
+## The room between the card menu and the Remove panel beside it, and between the panel's question and its links (px).
+const CONFIRM_GAP := 6
+const CONFIRM_ROW_GAP := 10
+const CONFIRM_PAD := 8
 ## How long a Replace's Undo stays offered (s).
 const UNDO_SECONDS := 6.0
 ## The menu's words by MenuItem (translation keys).
@@ -51,6 +56,9 @@ var _replaces: int = 0
 var _menu: PopupMenu = null
 ## Whether the card menu was last opened from the keyboard (its card keeps the keys after a pick that rebuilds the cards).
 var _menu_by_key: bool = false
+## Remove's question and its two links, in a panel beside the card menu (the strip's child, built on its first use).
+var _confirm: PopupPanel = null
+var _confirm_box: VBoxContainer = null
 
 
 func _init(saved_in: SavedLoadouts) -> void:
@@ -70,7 +78,7 @@ func new_card() -> MenuCard:
 	return _new
 
 
-## A link the strip shows now (the Remove question's Remove and Keep, a Replace's Undo).
+## A link the strip shows now (the Remove panel's Remove and Keep, a Replace's Undo).
 func action(id: StringName) -> Button:
 	return _actions[id]
 
@@ -101,9 +109,11 @@ func open_menu(index: int, at: Vector2 = Vector2(-1.0, -1.0)) -> void:
 	if _menu == null:
 		_menu = PopupMenu.new()
 		_menu.name = "LoadoutMenu"
+		# Remove leaves the menu up, its question beside it (_menu_picked); every other row shuts it.
+		_menu.hide_on_item_selection = false
 		for i in MENU_KEYS.size():
 			_menu.add_item(tr(MENU_KEYS[i]), i)
-		_menu.id_pressed.connect(func(id: int) -> void: pick(id as MenuItem))
+		_menu.id_pressed.connect(func(id: int) -> void: _menu_picked(id as MenuItem))
 		add_child(_menu, false, Node.INTERNAL_MODE_BACK)
 	_menu.set_item_disabled(MenuItem.DUPLICATE, saved.slots.size() >= SavedLoadouts.MAX_SLOTS)
 	_menu.set_item_disabled(MenuItem.REPLACE, saved.slots.size() <= 1)
@@ -116,6 +126,11 @@ func open_menu(index: int, at: Vector2 = Vector2(-1.0, -1.0)) -> void:
 ## The card menu (null until it first opens).
 func menu() -> PopupMenu:
 	return _menu
+
+
+## The Remove panel (null until Remove is first asked).
+func confirm_panel() -> PopupPanel:
+	return _confirm
 
 
 ## Whether the menu's `item` can be picked now (for tests: Duplicate with five loadouts, Replace and Remove with one).
@@ -136,6 +151,13 @@ func pick(item: MenuItem) -> void:
 			start_replace()
 		MenuItem.REMOVE:
 			start_remove()
+
+
+## A row of the card menu clicked: Remove keeps the menu up with its question beside it; any other row shuts it first.
+func _menu_picked(item: MenuItem) -> void:
+	if item != MenuItem.REMOVE or _menu.is_item_disabled(item):
+		_menu.hide()
+	pick(item)
 
 
 func edit() -> LineEdit:
@@ -217,12 +239,15 @@ func _set_mode(m: Mode) -> void:
 	mode = m
 	_signature = ""
 	refresh()
+	if m != Mode.REMOVING:
+		_close_confirm()
 	if not is_inside_tree():
 		return
 	if m == Mode.RENAMING and _edit != null:
 		_edit.grab_focus()
 		_edit.select_all()
 	elif m == Mode.REMOVING:
+		_show_confirm()
 		(_actions[&"keep"] as Button).grab_focus()
 	elif m == Mode.NORMAL and _cards.size() > saved.current and _cards[saved.current] != null:
 		_cards[saved.current].grab_focus()
@@ -259,9 +284,7 @@ func _rebuild() -> void:
 		Mode.REPLACING:
 			_say("LOADOUT_REPLACE_PROMPT", saved.carried().name)
 		Mode.REMOVING:
-			_say("LOADOUT_REMOVE_PROMPT", saved.carried().name)
-			_link(&"remove_yes", "LOADOUT_REMOVE_YES", _remove_carried)
-			_link(&"keep", "LOADOUT_KEEP", cancel)
+			_fill_confirm()
 		Mode.RENAMING:
 			_say("LOADOUT_RENAME_PROMPT", "")
 		_ when saved.undo_index() >= 0:
@@ -355,13 +378,13 @@ func _edit_input(event: InputEvent) -> void:
 		cancel()
 
 
-func _say(key: String, arg: String) -> void:
+func _say(key: String, arg: String, into: Control = self) -> void:
 	_prompt = MenuParts.text(tr(key) % arg if arg != "" else tr(key), NAME_SIZE - 2, 700, GameTheme.accent)
 	_prompt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	add_child(_prompt)
+	into.add_child(_prompt)
 
 
-func _link(id: StringName, key: String, on_press: Callable) -> void:
+func _link(id: StringName, key: String, on_press: Callable, into: Control = self) -> void:
 	var b := Button.new()
 	b.name = "Action_%s" % id
 	b.theme_type_variation = GameTheme.LINK_UNDERLINED
@@ -369,12 +392,75 @@ func _link(id: StringName, key: String, on_press: Callable) -> void:
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	b.add_theme_constant_override("h_separation", 0)
 	b.pressed.connect(on_press)
-	add_child(b)
+	into.add_child(b)
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(ACTION_GAP, 0.0)
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(gap)
+	into.add_child(gap)
 	_actions[id] = b
+
+
+## Writes Remove's question ("Remove <name>?") and its Remove it and Keep it links into the Remove panel, building the
+## panel on its first use.
+func _fill_confirm() -> void:
+	if _confirm == null:
+		_confirm = PopupPanel.new()
+		_confirm.name = "RemoveConfirm"
+		_confirm_box = VBoxContainer.new()
+		_confirm_box.add_theme_constant_override("separation", CONFIRM_ROW_GAP)
+		# room round the words, so the focused link's ring stays inside the panel
+		var pad := MenuParts.padded(CONFIRM_PAD, CONFIRM_PAD, CONFIRM_PAD, CONFIRM_PAD)
+		pad.add_child(_confirm_box)
+		_confirm.add_child(pad)
+		# a click off the panel, or Esc in it, shuts it: the loadout is kept
+		_confirm.popup_hide.connect(_confirm_closed)
+		add_child(_confirm, false, Node.INTERNAL_MODE_BACK)
+	for child in _confirm_box.get_children():
+		_confirm_box.remove_child(child)
+		child.queue_free()
+	_say("LOADOUT_REMOVE_PROMPT", saved.carried().name, _confirm_box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 0)
+	_confirm_box.add_child(row)
+	_link(&"remove_yes", "LOADOUT_REMOVE_YES", _remove_carried, row)
+	_link(&"keep", "LOADOUT_KEEP", cancel, row)
+
+
+## Pops the Remove panel up beside the card menu, its foot level with the menu's (Remove is the menu's last row): on the
+## menu's right, or on its left where the window has no room. With no menu up (Remove asked another way), under the
+## carried card.
+func _show_confirm() -> void:
+	if _confirm == null:
+		return
+	_confirm.reset_size()
+	var size_now := _confirm.size
+	var at := Vector2i.ZERO
+	if _menu != null and _menu.visible:
+		at = Vector2i(_menu.position.x + _menu.size.x + CONFIRM_GAP, _menu.position.y + _menu.size.y - size_now.y)
+		if at.x + size_now.x > int(get_viewport_rect().size.x):
+			at.x = _menu.position.x - CONFIRM_GAP - size_now.x
+	elif saved.current < _cards.size() and _cards[saved.current] != null:
+		var c := _cards[saved.current]
+		at = Vector2i((c.get_screen_position() + Vector2(0.0, c.size.y) * c.get_global_transform_with_canvas().get_scale())
+				.round())
+	_confirm.position = at
+	_confirm.popup()
+
+
+## Shuts the Remove panel and the card menu beside it.
+func _close_confirm() -> void:
+	if _confirm != null and _confirm.visible:
+		_confirm.hide()
+	if _menu != null and _menu.visible:
+		_menu.hide()
+
+
+## The Remove panel shut by a click off it or Esc: the loadout is kept.
+func _confirm_closed() -> void:
+	if mode == Mode.REMOVING:
+		cancel()
+	elif _menu != null and _menu.visible:
+		_menu.hide()
 
 
 func _pressed(index: int) -> void:

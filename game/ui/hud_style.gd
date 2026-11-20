@@ -358,6 +358,12 @@ static func tight_font(weight: int, font_size: int) -> Font:
 	return v
 
 
+## A prompt's words (owner, 2026-11-20): the action, then the key in brackets, in capitals, "OPEN DOOR [G]": the
+## translation `key` (its "%s" takes `args`) in capitals.
+static func prompt_words(key: StringName, args: Variant) -> String:
+	return (TranslationServer.translate(key) % args).to_upper()
+
+
 ## A Label under `parent` in Inter at `weight`, with `em_spacing` between letters (0 for none).
 static func label(parent: Control, font_size: int, weight: int, colour: Color, align: HorizontalAlignment,
 		em_spacing: float = 0.0) -> Label:

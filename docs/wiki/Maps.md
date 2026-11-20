@@ -82,7 +82,7 @@ The minimap names the area you stand in. Depot's areas:
 Depot has 15 hinged doors and Woodland's huts 8: two-panel timber doors in a frame, darker than the plywood so they
 stand out from it. Every round starts with the same doors
 open and the same ones shut. Press **Open / shut door** (G, [Controls](Controls)) within reach of one to open or shut
-it; a line under the crosshair tells you which.
+it; a line under the crosshair tells you which (**OPEN DOOR [G]** or **CLOSE DOOR [G]**).
 
 - **A shut door is solid.** It stops BBs, bombs, sight and bodies, so it hides who is behind it.
 - **Doors are loud.** Opening or shutting one creaks and bangs, and the other team hears it out to <!-- wiki:config door_config.heard -->
@@ -171,8 +171,8 @@ One team starts in the ticket hall at the west end, the other down in the runnin
   the spiral stair, and the concourse with its cable drums beyond.
 - **Four ways down** to the platforms, 8 m below: the escalators to the lower hall between the platform tunnels, an
   ordinary stair with a half landing, the spiral stair straight down to the south platform, and the two **lifts**.
-  A lift has two stops, the hall and the platforms, and takes 4 seconds. Call it from its landing, or step in and
-  press the stop you want on its panel: from inside, the doors start to shut at once, and they never shut on anyone
+  A lift has two stops, the hall and the platforms, and takes 4 seconds. Call it from its landing (**CALL LIFT [G]**), or step in and
+  press the stop you want on its panel (**GO TO TICKET HALL [G]**): from inside, the doors start to shut at once, and they never shut on anyone
   in the doorway. You hear the doors and the motor from outside too.
 - **The platforms** run level from end to end, each under its own tiled, curved tunnel beside its track: staff booths,
   works hoardings, crates and benches break the 100 m platforms into short lanes. The tracks lie 0.9 m below the

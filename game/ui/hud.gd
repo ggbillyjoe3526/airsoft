@@ -787,20 +787,21 @@ func leaves_notice_shown() -> bool:
 
 
 ## Whether a Jump press would vault this tick, or climb (`climb`, CL1): the prompt shows, and stays up
-## vault_prompt_hold after. It is only the key, in capitals, either way (owner, 2026-11-17: "SPACE", not "Space to
-## vault").
+## vault_prompt_hold after. "VAULT [SPACE]" or "CLIMB [SPACE]", as every prompt (owner, 2026-11-20: action, then the
+## key in brackets, in capitals; it was the key alone).
 func set_vault_ready(ready: bool, climb: bool = false) -> void:
 	if ready:
 		if _vault_left <= 0.0 or climb != _vault_climb:
 			# the key is whatever Jump is bound to now
-			_vault_prompt.text = vault_words()
+			_vault_prompt.text = vault_words(climb)
 			_vault_climb = climb
 		_vault_left = _cfg.vault_prompt_hold
 
 
-## The vault and climb prompt's words: the Jump key as bound now, in capitals.
-static func vault_words() -> String:
-	return KeyNames.of_action(&"jump").to_upper()
+## The vault (or, `climb`, the climb) prompt's words: "VAULT [<Jump's key as bound now>]".
+static func vault_words(climb: bool = false) -> String:
+	return HudStyle.prompt_words(&"HUD_CLIMB" if climb else &"HUD_VAULT", KeyNames.of_action(&"jump"))
+
 
 
 ## The vault prompt's words as shown (tests).
@@ -822,13 +823,18 @@ func set_door_prompt(what: DoorPrompt, stop: String = "") -> void:
 	var key := KeyNames.of_action(&"use_door")
 	match what:
 		DoorPrompt.OPEN:
-			_door_prompt.text = tr("HUD_DOOR_OPEN") % key
+			_door_prompt.text = HudStyle.prompt_words(&"HUD_DOOR_OPEN", key)
 		DoorPrompt.SHUT:
-			_door_prompt.text = tr("HUD_DOOR_SHUT") % key
+			_door_prompt.text = HudStyle.prompt_words(&"HUD_DOOR_SHUT", key)
 		DoorPrompt.LIFT_CALL:
-			_door_prompt.text = tr("HUD_LIFT_CALL") % key
+			_door_prompt.text = HudStyle.prompt_words(&"HUD_LIFT_CALL", key)
 		DoorPrompt.LIFT_TO:
-			_door_prompt.text = tr("HUD_LIFT_TO") % [key, stop]
+			_door_prompt.text = HudStyle.prompt_words(&"HUD_LIFT_TO", [stop, key])
+
+
+## The door or lift prompt's words as last built (tests).
+func door_prompt_text() -> String:
+	return _door_prompt.text
 
 
 ## The weapon rail's key labels read again, after the pause menu's settings may have rebound them (PP1).
@@ -845,7 +851,7 @@ func refresh_door_prompt() -> void:
 	set_door_prompt(what, _door_stop)
 	_plant_prompt.refresh_key()
 	# the vault prompt held up through the pause keeps its words until it drops: rebuild them for a rebound Jump (BP11)
-	_vault_prompt.text = vault_words()
+	_vault_prompt.text = vault_words(_vault_climb)
 
 
 ## Shows "What got you" for `facts` (the hit on you just called): the shooter's name in their team's colour and the

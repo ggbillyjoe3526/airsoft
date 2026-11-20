@@ -61,19 +61,25 @@ msgid "HUD_RICOCHET"
 msgstr "Ricochet: play on"
 
 msgid "HUD_DOOR_OPEN"
-msgstr "%s to open the door"
+msgstr "Open door [%s]"
 
 msgid "HUD_DOOR_SHUT"
-msgstr "%s to shut the door"
+msgstr "Close door [%s]"
 
 msgid "HUD_LIFT_CALL"
-msgstr "%s to call the lift"
+msgstr "Call lift [%s]"
 
 msgid "HUD_LIFT_TO"
-msgstr "%s: %s"
+msgstr "Go to %s [%s]"
+
+msgid "HUD_VAULT"
+msgstr "Vault [%s]"
+
+msgid "HUD_CLIMB"
+msgstr "Climb [%s]"
 
 msgid "HUD_RELOAD"
-msgstr "RELOAD"
+msgstr "Reload [%s]"
 
 msgid "HUD_LEAVES_IN_THE_WAY"
 msgstr "Leaves in the way · step clear to shoot"
@@ -2631,7 +2637,7 @@ msgid "GRAPHICS_VOLUMETRIC_FOG"
 msgstr "VOLUMETRIC HAZE"
 
 msgid "GRAPHICS_VOLUMETRIC_FOG_NOTE"
-msgstr "A faint haze the light shines through. Higher levels reach farther into the distance and draw its light shafts finer and smoother."
+msgstr "A faint haze the light shines through, with soft shafts where the sun and the lamps fall."
 
 msgid "GRAPHICS_LAMP_LIGHTS"
 msgstr "LAMP LIGHT"
@@ -3966,13 +3972,13 @@ msgstr "Site %s"
 
 # The prompt under the crosshair (%s: the Use key as bound), and the quiet line while you carry the bomb.
 msgid "HUD_BOMB_PICK_UP"
-msgstr "Hold %s · pick up the bomb"
+msgstr "Pick up bomb [Hold %s]"
 
 msgid "HUD_BOMB_PLANT"
-msgstr "Hold %s · plant the bomb"
+msgstr "Plant bomb [Hold %s]"
 
 msgid "HUD_BOMB_DEFUSE"
-msgstr "Hold %s · defuse"
+msgstr "Defuse bomb [Hold %s]"
 
 msgid "HUD_BOMB_CARRYING"
 msgstr "You have the bomb"

@@ -23,9 +23,9 @@ enum Reflections { OFF, PROBES, SCREEN }
 ## An indoor field's roof lamps as real lights (RoofLamps): none (the hall lit by the preset's overhead sun alone), the
 ## lamps near you, or the lamps out to the hall's far end; every real lamp casts the sun's grade of shadow.
 enum LampLights { OFF, NEAR, FAR }
-## The volumetric haze's quality (VF1): none, or the same haze reaching farther from the eye with its light worked out
-## on a finer grid at each level (LookConfig.fog_reach, fog_grid, fog_filtered); its strength is the same at every level.
-enum VolumetricFog { OFF, LOW, MEDIUM, HIGH }
+## The volumetric haze: none, or the haze (LookConfig's Volumetric fog group). One switch again (owner, 2026-11-20: VF1's
+## Low, Medium and High looked the same to him); On draws what High drew.
+enum VolumetricFog { OFF, ON }
 
 ## The choice that is a preset with your own rows over it.
 const CUSTOM := &"custom"
@@ -74,7 +74,7 @@ const CHOICES: Dictionary[StringName, Array] = {
 	LAMP_LIGHTS: ["off", "near", "far"],
 	GLOW: ["off", "on"],
 	EYE_ADAPTATION: ["off", "on"],
-	VOLUMETRIC_FOG: ["off", "low", "medium", "high"],
+	VOLUMETRIC_FOG: ["off", "on"],
 	WEAR_MARKS: ["off", "on"],
 }
 ## The widest range the file may give a range row (a typo guard): the render scale within what the viewport takes, in

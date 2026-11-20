@@ -12,7 +12,8 @@ Your team is always on the left in its own colour (Alpha blue, Beta orange), eve
 In Attack / Defend it adds **ATK** and **DEF** tags and the **FLAG** gauge, and "OT" on the clock in overtime. In
 Plant The Bomb it has the same tags; once the bomb is armed the clock turns to the interface colour and counts the fuse,
 and a gauge under it reads **BOMB ARMED**, whichever team armed it, and fills as someone defuses it (**DEFUSING**).
-While you key the bomb in, the gauge reads **PLANTING**. A prompt under the crosshair says when holding Use picks the bomb up, plants it or defuses it;
+While you key the bomb in, the gauge reads **PLANTING**. A prompt under the crosshair says when holding Use picks the bomb up, plants it or defuses it
+(**PLANT BOMB [HOLD G]**);
 **YOU HAVE THE BOMB** shows under it for <!-- wiki:config hud_config.bomb_carry_notice_time --> s as you pick the bomb
 up, then goes. A marker points to the site your team is making for, or to the bomb once it is down or armed. Big
 slanted banners call the round start, half time with the ends swapped, and who took the round or the match.
@@ -37,7 +38,7 @@ replica is holstered. The notes above the ammo panel (RELOADING, a bomb in hand,
 rail, so it never moves. The pictures come from the models
 themselves, so a new paint or replica shows as it is.
 
-The crosshair opens with your spread, so it tells you how steady you are. Under it, a **RELOAD** prompt with your
+The crosshair opens with your spread, so it tells you how steady you are. Under it, a **RELOAD [R]** prompt with your
 Reload key shows while your magazine is empty and you have one to load, unless reloads are Automatic in Settings; it
 goes as the reload starts.
 

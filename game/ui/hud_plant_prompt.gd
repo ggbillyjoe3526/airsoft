@@ -1,7 +1,7 @@
 class_name HudPlantPrompt
 extends VBoxContainer
-## Plant The Bomb's prompt under the crosshair (PB1), in the reload prompt's plate: "HOLD G · PICK UP THE BOMB", "HOLD G
-## · PLANT THE BOMB" or "HOLD G · DEFUSE", Use's key as bound now (HudPlant.Prompt says which applies), and under it a
+## Plant The Bomb's prompt under the crosshair (PB1), in the reload prompt's plate: "PICK UP BOMB [HOLD G]", "PLANT
+## BOMB [HOLD G]" or "DEFUSE BOMB [HOLD G]" (owner, 2026-11-20: every prompt the action, then the key), Use's key as bound now (HudPlant.Prompt says which applies), and under it a
 ## quiet line, "YOU HAVE THE BOMB", for a moment once you pick it up (owner, 2026-11-17: only briefly; it stayed while
 ## you carried it), while no prompt shows. The words are built only when the prompt changes (or on `refresh_key`, after
 ## a rebind), never per frame.
@@ -92,4 +92,4 @@ func quiet_text() -> String:
 func _build() -> void:
 	if _prompt == HudPlant.Prompt.NONE:
 		return
-	_words.text = (tr(KEYS[_prompt]) % KeyNames.of_action(&"use_door")).to_upper()
+	_words.text = HudStyle.prompt_words(KEYS[_prompt], KeyNames.of_action(&"use_door"))

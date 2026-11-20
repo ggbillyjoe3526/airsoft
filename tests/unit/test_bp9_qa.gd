@@ -326,12 +326,12 @@ func test_trying_settings_again_with_odd_saved_graphics_tables_does_not_break() 
 		assert_eq(s.graphics_choice, GraphicsQuality.CUSTOM)
 
 
-func test_a_v3_file_still_brings_the_custom_haze_on_over_as_high_and_v4_keeps_it() -> void:
+func test_a_v3_files_custom_haze_on_stays_on_and_a_v4_level_becomes_on() -> void:
 	var fog := GraphicsQuality.VOLUMETRIC_FOG
 	var moved := Settings.migrate_defaults({"graphics_custom": {fog: "on"}}, 3)
-	assert_eq((moved["graphics_custom"] as Dictionary)[fog], GraphicsQuality.CHOICES[fog][GraphicsQuality.VolumetricFog.HIGH])
-	var kept := Settings.migrate_defaults({"graphics_custom": {fog: "on"}}, 4)
-	assert_eq((kept["graphics_custom"] as Dictionary)[fog], "on", "a version 4 file's value is its own")
+	assert_eq((moved["graphics_custom"] as Dictionary)[fog], GraphicsQuality.CHOICES[fog][GraphicsQuality.VolumetricFog.ON])
+	var level := Settings.migrate_defaults({"graphics_custom": {fog: "high"}}, 4)
+	assert_eq((level["graphics_custom"] as Dictionary)[fog], "on", "VF1's levels are one switch again (UB3)")
 
 
 # --- Spotted's arrow ---

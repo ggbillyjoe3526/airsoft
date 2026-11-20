@@ -50,8 +50,9 @@ All the keys can be rebound in Settings › Controls ([Controls](Controls)).
 
 ## Spotted
 
-**Tap <!-- wiki:key order_wheel -->** (press and let go quickly), or let go of the wheel with the dot in its middle, to
-spot the opponent under your crosshair. You have to be able to see them, but you don't need perfect aim. A small yellow
+**Tap <!-- wiki:key order_wheel -->** (press and let go within <!-- wiki:config controls_config.wheel_tap --> s), or let go of the wheel with the dot in its middle, to
+spot the opponent under your crosshair. You have to be able to see them, but you don't need perfect aim: the crate or tree they are peeking past can be
+under your crosshair. A small yellow
 arrow hangs over their head for <!-- wiki:config ping_config.spot_time --> seconds, following them and showing through
 walls and cover. It fades out over the last second, and it goes when they are out or the round ends. Spotting them
 again starts the time over. Only your team sees it, and a soft pip says your spot went out.
