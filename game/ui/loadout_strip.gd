@@ -406,6 +406,7 @@ func _fill_confirm() -> void:
 	if _confirm == null:
 		_confirm = PopupPanel.new()
 		_confirm.name = "RemoveConfirm"
+		_confirm.theme_type_variation = GameTheme.MENU_PANEL
 		_confirm_box = VBoxContainer.new()
 		_confirm_box.add_theme_constant_override("separation", CONFIRM_ROW_GAP)
 		# room round the words, so the focused link's ring stays inside the panel

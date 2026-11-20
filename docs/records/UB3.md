@@ -12,6 +12,10 @@ hits, Subway's darkness, bots vanishing, the lift's sounds).
 | 2026-11-20 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | No changelog note; the performance report not in pipeline/out; comment wrap nits |
 | 2026-11-20 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
+CI after review (unit part 6, not run locally): test_so4_orders_hud still held 0.25 s as "past a tap", now read from
+`wheel_tap`; and the Remove panel's glass had been set on every `PopupPanel`, which widened the tooltips 8 px off the
+screen's edge, so it is a theme variation (`GameTheme.MENU_PANEL`) the Remove panel alone uses.
+
 ## What changed
 
 - **1. Remove beside the menu.** The question ("Remove <name>?", then Remove and Keep, the owner's words: they were

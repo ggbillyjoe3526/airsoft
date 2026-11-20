@@ -78,6 +78,8 @@ const LINK_BUTTON := &"QuietLink"
 ## The same with a rule under it (Licences).
 const LINK_UNDERLINED := &"QuietLinkRuled"
 const UNDERLINE_GAP := 4
+## A popup panel in the right-click menu's glass (LoadoutStrip's Remove question); plain PopupPanels are tooltips.
+const MENU_PANEL := &"MenuPanel"
 ## How far focus_clear's ring stands out from a control with no room round its words (px, across and up and down).
 const FOCUS_CLEAR_PAD := Vector2i(6, 4)
 ## The main button's corners and how much lighter it is under the pointer.
@@ -409,8 +411,9 @@ static func _add_panels(t: Theme) -> void:
 	menu.shadow_color = Color(0.0, 0.0, 0.0, 0.45)
 	menu.shadow_size = POPUP_PAD
 	t.set_stylebox("panel", "PopupMenu", menu)
-	# the Remove question beside it (LoadoutStrip): the same panel
-	t.set_stylebox("panel", "PopupPanel", menu)
+	# the Remove question beside it (LoadoutStrip): the same panel, as a variation so tooltips keep their own
+	t.set_type_variation(MENU_PANEL, "PopupPanel")
+	t.set_stylebox("panel", MENU_PANEL, menu)
 	t.set_stylebox("hover", "PopupMenu", box(Color(accent, POPUP_HOVER_ALPHA), Color(0.0, 0.0, 0.0, 0.0), POPUP_PAD, 0))
 	t.set_color("font_color", "PopupMenu", TEXT)
 	t.set_color("font_hover_color", "PopupMenu", TEXT)

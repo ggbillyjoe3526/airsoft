@@ -83,20 +83,21 @@ func test_every_name_fits_its_button_at_full_size() -> void:
 
 func test_a_tap_never_draws_the_wheel() -> void:
 	var w := hud.order_wheel()
+	var past_tap := roundi(ControlsConfig.new().wheel_tap * 1000.0) + 50 # ms: just past a tap (UB3: 0.3 s)
 	wheel.start(5000)
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 5050)
 	assert_false(w.visible, "50 ms in the middle: not drawn")
-	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 5250)
+	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 5000 + past_tap)
 	assert_true(w.visible, "held past a tap: drawn")
 	wheel.close()
-	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 5300)
+	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 5050 + past_tap)
 	assert_false(w.visible)
 	# BP9: a tap is told by its time alone, so the pointer leaving the middle inside a tap draws nothing either.
 	wheel.start(9000)
 	wheel.at = ON_FOLLOW
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 9010)
 	assert_false(w.visible, "out of the middle at once: still a tap, not drawn")
-	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 9200)
+	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016, 9000 + past_tap)
 	assert_true(w.visible, "held past a tap: drawn, the pointer where the flick took it")
 
 
