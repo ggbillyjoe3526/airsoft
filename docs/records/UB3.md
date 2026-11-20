@@ -13,8 +13,8 @@ ATTEMPT_ROWS
 
 ## What changed
 
-- **1. Remove beside the menu.** The question ("Remove <name>?", then Remove and Keep, the owner's words: they were "Remove it" and "Keep it") was a line at the loadout strip's
-  far right. It is now a small panel (`LoadoutStrip` `RemoveConfirm`, the menu's own glass style) beside the
+- **1. Remove beside the menu.** The question ("Remove <name>?", then Remove and Keep, the owner's words: they were
+  "Remove it" and "Keep it") was a line at the loadout strip's far right. It is now a small panel (`LoadoutStrip` `RemoveConfirm`, the menu's own glass style) beside the
   right-click menu, its foot level with the menu's, so it sits by the Remove row; it flips to the menu's left where
   the window has no room. The menu stays up while it asks. Keep, Esc or a click off the panel keeps the loadout and
   shuts both. Remove asked with no menu up opens it under the carried card. The owner asked for a picture first: it was

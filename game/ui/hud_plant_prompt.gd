@@ -1,10 +1,10 @@
 class_name HudPlantPrompt
 extends VBoxContainer
-## Plant The Bomb's prompt under the crosshair (PB1), in the reload prompt's plate: "PICK UP BOMB [HOLD G]", "PLANT
-## BOMB [HOLD G]" or "DEFUSE BOMB [HOLD G]" (owner, 2026-11-20: every prompt the action, then the key), Use's key as bound now (HudPlant.Prompt says which applies), and under it a
-## quiet line, "YOU HAVE THE BOMB", for a moment once you pick it up (owner, 2026-11-17: only briefly; it stayed while
-## you carried it), while no prompt shows. The words are built only when the prompt changes (or on `refresh_key`, after
-## a rebind), never per frame.
+## Plant The Bomb's prompt under the crosshair (PB1), in the reload prompt's plate: "PICK UP BOMB [HOLD G]", "PLANT BOMB
+## [HOLD G]" or "DEFUSE BOMB [HOLD G]" (owner, 2026-11-20: every prompt the action, then the key), Use's key as bound
+## now (HudPlant.Prompt says which applies), and under it a quiet line, "YOU HAVE THE BOMB", for a moment once you pick
+## it up (owner, 2026-11-17: only briefly; it stayed while you carried it), while no prompt shows. The words are built
+## only when the prompt changes (or on `refresh_key`, after a rebind), never per frame.
 
 ## The words' size, the quiet line's size and its backing, and the plate's padding (px).
 const SIZE := GameTheme.SMALL_SIZE

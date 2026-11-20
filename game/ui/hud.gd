@@ -803,7 +803,6 @@ static func vault_words(climb: bool = false) -> String:
 	return HudStyle.prompt_words(&"HUD_CLIMB" if climb else &"HUD_VAULT", KeyNames.of_action(&"jump"))
 
 
-
 ## The vault prompt's words as shown (tests).
 func vault_prompt_text() -> String:
 	return _vault_prompt.text

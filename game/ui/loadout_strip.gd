@@ -1,14 +1,14 @@
 class_name LoadoutStrip
 extends HBoxContainer
-## The saved loadouts strip (concept `.saved`): a card for each saved loadout with its key 1 to 5, the carried one lit, then
-## "+ NEW LOADOUT" while there is room. Rename, Duplicate, Replace and Remove are in a menu that opens on a card when it
-## is right-clicked (owner, 2026-11-17: they were links on the right), or with the Menu key or Shift+F10 on a focused
-## card; the card is carried first, so the menu's actions are on it. Every action is SavedLoadouts'; the strip only
-## asks for it. Rename types over the carried one's name, Replace asks which loadout takes
-## the carried one's place and Remove asks once more, in a small panel beside the menu (owner, 2026-11-20: it was at the
-## strip's far right), each left again with Esc (`cancel`); a click off the Remove panel keeps the loadout too. A Replace can be undone for
-## UNDO_SECONDS (BP7): "<name> replaced" and Undo stand where the actions were, until then, a click on a card, Esc or any
-## other change.
+## The saved loadouts strip (concept `.saved`): a card for each saved loadout with its key 1 to 5, the carried one lit,
+## then "+ NEW LOADOUT" while there is room. Rename, Duplicate, Replace and Remove are in a menu that opens on a card
+## when it is right-clicked (owner, 2026-11-17: they were links on the right), or with the Menu key or Shift+F10 on a
+## focused card; the card is carried first, so the menu's actions are on it. Every action is SavedLoadouts'; the strip
+## only asks for it. Rename types over the carried one's name, Replace asks which loadout takes the carried one's place
+## and Remove asks once more, in a small panel beside the menu (owner, 2026-11-20: it was at the strip's far right),
+## each left again with Esc (`cancel`); a click off the Remove panel keeps the loadout too. A Replace can be undone for
+## UNDO_SECONDS (BP7): "<name> replaced" and Undo stand where the actions were, until then, a click on a card, Esc or
+## any other change.
 
 enum Mode { NORMAL, RENAMING, REPLACING, REMOVING }
 ## The card's menu's items, in its order.
