@@ -210,11 +210,13 @@ func _match(delay: float = -1.0) -> Array:
 	return [sim, state]
 
 
-## Steps until `c` is back in play (or `seconds` run out); returns the statuses it had, one a tick.
-func _watch(sim: Simulation, state: GameState, c: Character, seconds: float) -> Array[Character.Status]:
+## Steps until `c` is back in play (or `seconds` run out), everyone facing `yaw`; returns the statuses it had, one a
+## tick.
+func _watch(sim: Simulation, state: GameState, c: Character, seconds: float, yaw: float = 0.0) -> Array[Character.Status]:
 	var cmds: Array[PlayerCommand] = []
 	for i in 4:
 		cmds.append(PlayerCommand.new())
+		cmds[i].yaw = yaw
 	var seen: Array[Character.Status] = []
 	for i in roundi(seconds / DT):
 		sim.step(state, cmds, DT)
@@ -286,4 +288,79 @@ func test_a_subway_platform_walk_off_steps_down_to_the_east_dead_zone() -> void:
 		for i in range(1, route.size()):
 			down = down or route[i - 1].y - route[i].y > 0.5
 		assert_true(down, "stepping down off the platform")
+	r.free_level()
+
+
+## The first character `c` with the others (all in play) standing 6 m off its walk, facing it, `wall` with a wall between;
+## 3 s waits, so it is still walking off near them as its wait runs out.
+func _watched(wall: bool) -> Array:
+	var m := _match(3.0)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var c := state.characters[1]
+	c.position = Vector3(0.0, tuning.body.rest_gap, 4.0)
+	for o: Character in [state.characters[0], state.characters[2], state.characters[3]]:
+		o.position = Vector3(0.0, tuning.body.rest_gap, -6.0)
+		o.yaw = PI
+	if wall:
+		var w := sim.query as BoxWorld
+		w.add_box(Vector3(0.0, 1.5, -3.0), Vector3(40.0, 3.0, 0.4))
+	return [sim, state, c]
+
+
+func test_a_walk_off_someone_watches_walks_on_before_it_fades() -> void:
+	var m := _watched(false)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var c: Character = m[2]
+	assert_true(Respawns.seen(c, state.characters, tuning, sim.query, RayHit.new()), "the others see it")
+	Elimination.eliminate(c, 0, state.characters, sim.ends)
+	var seen := _watch(sim, state, c, 40.0, PI)
+	assert_eq(seen[-1], Character.Status.ALIVE, "it comes back")
+	var wait := 3.0
+	var walked := seen.count(Character.Status.WALKING_OFF) * DT
+	assert_gt(seen.size() * DT, wait + tuning.hits.seen_most - DT * 3.0, "it walked on, watched, past its wait")
+	assert_lt(seen.size() * DT, wait + tuning.hits.seen_most + DT * 6.0, "but no longer than seen_most")
+	assert_gt(walked, 0.0, "walking off all that while")
+	assert_almost_eq(seen.count(Character.Status.LEAVING) * DT, tuning.hits.vanish_time, DT * 1.5, "then faded")
+
+
+func test_a_walk_off_nobody_can_see_fades_as_its_wait_runs_out() -> void:
+	var m := _watched(true)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var c: Character = m[2]
+	assert_false(Respawns.seen(c, state.characters, tuning, sim.query, RayHit.new()), "the wall hides it")
+	Elimination.eliminate(c, 0, state.characters, sim.ends)
+	var seen := _watch(sim, state, c, 40.0, PI)
+	assert_almost_eq(seen.size() * DT, 3.0, DT * 2.0, "back when its wait ran out")
+
+
+func test_nobody_out_of_play_or_facing_away_sees_it() -> void:
+	var m := _watched(false)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var c: Character = m[2]
+	var hit := RayHit.new()
+	for o: Character in [state.characters[0], state.characters[2], state.characters[3]]:
+		o.yaw = 0.0
+	assert_false(Respawns.seen(c, state.characters, tuning, sim.query, hit), "all facing away")
+	state.characters[0].yaw = PI
+	Elimination.eliminate(state.characters[0], 1, state.characters, sim.ends)
+	assert_false(Respawns.seen(c, state.characters, tuning, sim.query, hit), "the one facing it is out")
+	assert_false(Respawns.seen(c, state.characters, tuning, null, hit), "no level, nobody sees")
+
+
+func test_a_subway_track_walk_off_needing_a_climb_is_refused_without_a_search() -> void:
+	var r := MatchRunner.new(self, "subway")
+	var bots := BotConfig.load_default()
+	NavVaults.link(r.nav, r.level.query(), r.tuning.vault, r.tuning.body, bots.vault_price)
+	var dz: Vector3 = r.map.ends[1].dead_zone[0].position
+	var route := PackedVector3Array()
+	var platform := Vector3(37.7, 0.9, -6.9)
+	assert_true(r.nav.find_route(platform, dz, route, false, null, true), "down to the dead zone from the platform")
+	# and back up: from the dead zone to the platform only a climb goes
+	var before := r.nav.searches
+	assert_false(r.nav.find_route(dz, platform, route, false, null, true), "no drop goes up")
+	assert_eq(r.nav.searches, before, "refused before any search")
 	r.free_level()

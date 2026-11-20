@@ -128,6 +128,11 @@ static func finish(f: Finder, g: NavGrid, price: float) -> int:
 		for l in range(start[k], start[k + 1]):
 			_add_point(g, k, to[l], nodes + l, g.astar.get_point_weight_scale(k), price)
 			join(g.vault_region, g.region[k], g.region[to[l]])
+			if drop[l] == 1 and g.region[k] != g.region[to[l]]:
+				var down: PackedInt32Array = g.drop_regions.get(g.region[k], PackedInt32Array())
+				if not down.has(g.region[to[l]]):
+					down.append(g.region[to[l]])
+					g.drop_regions[g.region[k]] = down
 	for r: int in g.vault_region:
 		g.vault_region[r] = root(g.vault_region, r)
 	return to.size()

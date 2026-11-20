@@ -81,11 +81,12 @@ static func resolve(c: Character, rs: RoundState, ends: Array[MapEnd], character
 
 ## One tick (`dt` s) of the live round's respawns, before Round.step judges wipe-outs: each character out of play takes
 ## its controller's pick (`commands` by id; none: the start area) and, newly out, starts its wait; one still walking
-## off leaves the field as its wait's last HitConfig.vanish_time starts, and a wait run out brings it back (a RESPAWNED
-## event) once it is out (still calling its hit, it calls, walks off and leaves first). Once respawns are shut (Plant The
-## Bomb's bomb armed), every wait is dropped.
+## off leaves the field as its wait's last HitConfig.vanish_time starts once nobody in play sees it (seen, through
+## `query` with `hit` for its rays; none given, nobody does) or it has walked HitConfig.seen_most past it, and a wait
+## run out brings it back (a RESPAWNED event) once it is out (still calling its hit, it calls, walks off and leaves
+## first). Once respawns are shut (Plant The Bomb's bomb armed), every wait is dropped.
 static func step(rs: RoundState, characters: Array[Character], commands: Array[PlayerCommand], ends: Array[MapEnd],
-		tuning: SimTuning, events: SimEvents, dt: float) -> void:
+		tuning: SimTuning, events: SimEvents, dt: float, query: WorldQuery = null, hit: RayHit = null) -> void:
 	if not rs.is_live():
 		return
 	var is_open := open(rs)
@@ -99,16 +100,46 @@ static func step(rs: RoundState, characters: Array[Character], commands: Array[P
 		c.spawn_pick = cmd.spawn_pick if cmd != null else 0
 		if c.respawn_left < 0.0:
 			c.respawn_left = delay(rs, tuning.rounds, c.team)
+			c.respawn_seen = 0.0
 			continue
 		# Never under 0 while it waits to be out of sight: a wait run out still counts as coming (waiting).
 		c.respawn_left = maxf(c.respawn_left - dt, 0.0)
 		# Walking off as the wait runs out, it leaves the field (Elimination's fade) on its last vanish_time, so it is
 		# out of sight as it comes back, never drawn at its spawn in a blink (the owner's playtest of 0.1 Beta 2, item
-		# 6); once out, it comes back.
+		# 6); seen, it walks on (at most seen_most) so nobody watches it fade where it stands; once out, it comes back.
 		if c.status == Character.Status.WALKING_OFF and c.respawn_left <= tuning.hits.vanish_time:
-			Elimination.leave(c)
+			if c.respawn_seen < tuning.hits.seen_most and seen(c, characters, tuning, query, hit):
+				c.respawn_seen += dt
+			else:
+				Elimination.leave(c)
 		if c.respawn_left <= 0.0 and c.status == Character.Status.OUT:
 			_bring_back(c, rs, ends, characters, tuning, events)
+
+
+## Whether anyone in play sees `c` (HitConfig.seen_range, seen_angle): faces it, near enough, with a clear sight line
+## (`query`'s sight_ray, into `hit`) from their eye to its chest. False with no `query`.
+static func seen(c: Character, characters: Array[Character], tuning: SimTuning, query: WorldQuery,
+		hit: RayHit) -> bool:
+	if query == null or hit == null:
+		return false
+	var hits := tuning.hits
+	var chest := c.position + Vector3(0.0, (hits.torso_bottom + hits.torso_top) * 0.5, 0.0)
+	var reach := hits.seen_range * hits.seen_range
+	var cone := cos(deg_to_rad(hits.seen_angle))
+	for o in characters:
+		if o == c or not Elimination.is_in_play(o):
+			continue
+		var eye := o.eye(tuning.body)
+		var to := chest - eye
+		if to.length_squared() > reach:
+			continue
+		var flat := Vector2(to.x, to.z)
+		var ahead := Vector2(-sin(o.yaw), -cos(o.yaw))
+		if flat.length_squared() > 1e-6 and flat.normalized().dot(ahead) < cone:
+			continue
+		if not query.sight_ray(eye, chest, hit):
+			return true
+	return false
 
 
 static func _bring_back(c: Character, rs: RoundState, ends: Array[MapEnd], characters: Array[Character],

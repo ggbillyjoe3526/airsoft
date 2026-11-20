@@ -23,6 +23,12 @@ extends Resource
 @export var stuck_time: float = 0.5
 ## Leaving the field: the figure fades out over this long (s), then stands in the dead zone.
 @export var vanish_time: float = 0.6
+## With respawns (TV1, the owner's playtest of 0.1 Beta 2, item 6): a walk-off whose wait is running out leaves the
+## field only once nobody in play sees it, someone within seen_range m facing it (within seen_angle degrees of their
+## view) with a clear sight line to its chest, or after it has kept walking seen_most s past its wait.
+@export var seen_range: float = 40.0
+@export var seen_angle: float = 60.0
+@export var seen_most: float = 3.0
 ## Crouching lowers everything above the hips this far (m).
 @export var crouch_drop: float = 0.62
 ## The head: a sphere covering head, cap and goggles.

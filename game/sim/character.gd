@@ -30,6 +30,8 @@ var walk_off_stuck: float = 0.0
 ## back at, as its controller picks it (PlayerCommand.spawn_pick: 0 the start area, k its end's forward spawn k - 1).
 var respawn_left: float = -1.0
 var spawn_pick: int = 0
+## Seconds it has kept walking off past its wait because someone in play sees it (Respawns, HitConfig.seen_most).
+var respawn_seen: float = 0.0
 
 ## Feet: the bottom of the collision capsule.
 var position: Vector3 = Vector3.ZERO
@@ -232,6 +234,7 @@ func respawn_at(at: Vector3, facing: float) -> void:
 	walk_off_stuck = 0.0
 	respawn_left = -1.0
 	spawn_pick = 0
+	respawn_seen = 0.0
 	walk_off_route_pending = false
 	walk_off_route.clear()
 	walk_off_leg = 0
