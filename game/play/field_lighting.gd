@@ -237,7 +237,7 @@ func look() -> LookConfig:
 func add_probes(map: MapData) -> void:
 	_probes = AreaProbes.build(map, _look)
 	if _probes != null:
-		_probes.set_bounce(_scene_light)
+		_probes.set_bounce(_bounce())
 		add_child(_probes)
 
 
@@ -252,7 +252,7 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 	if env.ssil_enabled != ssil:
 		env.ssil_enabled = ssil
 	_scene_light = gi == GraphicsQuality.GlobalIllumination.SCENE
-	var sdfgi := _scene_light and _refresh_left == 0
+	var sdfgi := _bounce() and _refresh_left == 0
 	if env.sdfgi_enabled != sdfgi:
 		env.sdfgi_enabled = sdfgi
 	var ssr := reflections == GraphicsQuality.Reflections.SCREEN
@@ -263,7 +263,7 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 		if _probes.visible != probes:
 			_probes.visible = probes
 		# Under the scene's bounce light an interior probe keeps its ambient light (AreaProbes, BP9).
-		_probes.set_bounce(_scene_light)
+		_probes.set_bounce(_bounce())
 	if env.glow_enabled != glow:
 		env.glow_enabled = glow
 	if env.volumetric_fog_enabled != fog:
@@ -281,7 +281,7 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 ## had gathered follows a change to the field's lights (Lamp light switched in the pause menu) only as the view moves,
 ## so the old lamps' bounce, or the roof still shutting out the sky, stayed where you stood. Nothing without it on.
 func refresh_scene_light() -> void:
-	if not _scene_light or _refresh_left > 0 or not is_inside_tree():
+	if not _bounce() or _refresh_left > 0 or not is_inside_tree():
 		return
 	environment.sdfgi_enabled = false
 	_refresh_left = SCENE_LIGHT_REFRESH_FRAMES
@@ -302,20 +302,13 @@ func _on_refresh_frame() -> void:
 func _end_refresh() -> void:
 	_refresh_left = 0
 	get_tree().process_frame.disconnect(_on_refresh_frame)
-	if environment.sdfgi_enabled != _scene_light:
-		environment.sdfgi_enabled = _scene_light
+	if environment.sdfgi_enabled != _bounce():
+		environment.sdfgi_enabled = _bounce()
 
 
 func _exit_tree() -> void:
 	if _refresh_left > 0:
 		_end_refresh()
-
-
-## How far the volumetric haze reaches from the eye (m; Graphics › Volumetric haze's level, LookConfig.fog_reach). Only
-## set when it changes; never per frame.
-func set_fog_reach(reach: float) -> void:
-	if not is_equal_approx(environment.volumetric_fog_length, reach):
-		environment.volumetric_fog_length = reach
 
 
 ## The eyes adapting (Graphics › Eye adaptation, UG3): the field's world meters what its camera sees and brightens a
@@ -358,22 +351,32 @@ func set_key_share(share: float) -> void:
 ## An underground field (`on`, MapData.roof_underground, UL1): no sky reaches it, so its ambient light is the preset's
 ## fill alone (none of the sky's blue in it), the sky is in no reflection (the area probes and screen reflections
 ## still draw theirs) and none shows behind the station (SW2); GraphicsApply.sun_shadows then keeps the sun's shadow
-## off. Ultra's bounce light (SDFGI) is stronger and fed on further there (LookConfig.sdfgi_*_underground, UL2), as
-## the lamps' bounce alone lights the shade. Off: the preset's own. Set once as the field is built.
+## off. Global illumination Scene (Ultra) gathers no bounce light (SDFGI) there (UL3): with no sky for its rays it
+## came out near black (the escalator shafts, the ceilings), and the area probes' own darker light stood in for it,
+## so the field's fill lights the shade as on High (owner, 2026-11-20: "subway map is too dark"). Off: the preset's
+## own. Set once as the field is built.
 func set_underground(on: bool) -> void:
 	_underground = on
 	environment.ambient_light_sky_contribution = 0.0 if on else _sky_share
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED if on \
 			else Environment.REFLECTION_SOURCE_SKY
-	environment.sdfgi_energy = _look.sdfgi_energy_underground if on else _look.sdfgi_energy
-	environment.sdfgi_bounce_feedback = _look.sdfgi_bounce_underground if on else _look.sdfgi_bounce
 	# Nothing of the sky shows underground: where no face is drawn, near black (LookConfig.underground_background).
 	environment.background_mode = Environment.BG_COLOR if on else Environment.BG_SKY
 	environment.background_color = _look.underground_background
+	var sdfgi := _bounce() and _refresh_left == 0
+	if environment.sdfgi_enabled != sdfgi:
+		environment.sdfgi_enabled = sdfgi
+	if _probes != null:
+		_probes.set_bounce(_bounce())
 
 
 func underground() -> bool:
 	return _underground
+
+
+## Whether the scene's bounce light (SDFGI) lights the shade: Global illumination Scene, above ground (UL3).
+func _bounce() -> bool:
+	return _scene_light and not _underground
 
 
 ## The sky's ambient light at `share` of the preset's: below 1 under an indoor field's roof while its real lamps light

@@ -98,6 +98,8 @@ func _init() -> void:
 	column.add_child(_level_box)
 	_quit = _flat_button(tr("MENU_QUIT"), QUIT_SIZE, GameTheme.DIM)
 	_quit.name = "Quit"
+	# its words fill its height: the ring stands above and below them (across, the rail's edge leaves no room)
+	_quit.add_theme_stylebox_override("focus", GameTheme.focus_clear(Vector2i(0, GameTheme.FOCUS_CLEAR_PAD.y)))
 	_quit.pressed.connect(func() -> void: quit_pressed.emit())
 	column.add_child(_quit)
 	set_current(Tab.MATCH)

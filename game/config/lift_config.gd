@@ -7,6 +7,10 @@ extends Resource
 ## A car's doors (and the landing's with them) take this long to open or to shut (s). They stop BBs and bodies from
 ## the moment they start to shut until they stand fully open.
 @export var door_time: float = 1.5
+## Of a shut's door_time, its doors' sound plays this long (s) before their leaves move, as a lift's door motor
+## starts before its leaves do (owner, 2026-11-20: "should play before doors close"); the leaves then shut in the rest
+## (`shut_time`). Bodies are kept out of the doorway from the start, as before; BBs pass the leaves standing open.
+@export var shut_lead: float = 0.4
 ## A car takes this long from one stop to the next (s), whatever the floors' height apart.
 @export var floor_time: float = 4.0
 ## Once its doors stand open, a car waits at least this long (s) before it shuts them for a call: time to walk out.
@@ -42,3 +46,9 @@ extends Resource
 @export var heard: float = 24.0
 ## How far a button's beep carries (m): the caller's hand, not the car.
 @export var button_heard: float = 6.0
+
+
+## How long (s) a shut's leaves take to meet, after its sound's `shut_lead`: what is left of door_time, never more
+## than door_time (a negative lead) nor less than none (a lead past it).
+func shut_time() -> float:
+	return clampf(door_time - shut_lead, 0.0, door_time)

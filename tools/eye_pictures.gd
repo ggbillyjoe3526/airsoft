@@ -9,8 +9,8 @@ extends SceneTree
 ## Yaw 0 looks along -z (north), 90 along -x (west); pitch is up from level; a fifth number is the floor's height the
 ## eye stands on (a map built in storeys), else the ground's. An argument `preset=<low|medium|high|ultra>`
 ## draws that Graphics preset's values (GraphicsApply) instead of High; `fov=<degrees>` a narrower or wider view (the
-## range's card is 40); `night` the map's night preset, its lights' pools and fixtures lit (WG4); `fog=<off|low|medium|
-## high>` that Volumetric haze level over the preset's (VF1); `measure=<frames>` prints each picture's mean render time
+## range's card is 40); `night` the map's night preset, its lights' pools and fixtures lit (WG4); `fog=<off|on>` the
+## Volumetric haze switch over the preset's (VF1, UB3); `measure=<frames>` prints each picture's mean render time
 ## over that many frames after it settles (the cloud's software Vulkan: a level against another, never a real card's
 ## milliseconds); `size=<w>x<h>` the pictures' size; `set=<config>.<value>=<number>` one of PlayTuning's configs' values
 ## for this run (`set=roof.lamp_light_energy=4`: a look tried before it is written into the config); `raw` draws with
@@ -202,7 +202,7 @@ func _run() -> void:
 	if fog != "":
 		var fog_level := GraphicsTable.shared().level_of(GraphicsQuality.VOLUMETRIC_FOG, fog)
 		if fog_level == GraphicsTable.NO_LEVEL:
-			push_error("eye_pictures: fog=%s is not a Volumetric haze level" % fog)
+			push_error("eye_pictures: fog=%s is not off or on" % fog)
 			quit(1)
 			return
 		values.volumetric_fog = fog_level as GraphicsQuality.VolumetricFog

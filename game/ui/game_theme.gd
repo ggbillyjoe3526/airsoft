@@ -78,6 +78,10 @@ const LINK_BUTTON := &"QuietLink"
 ## The same with a rule under it (Licences).
 const LINK_UNDERLINED := &"QuietLinkRuled"
 const UNDERLINE_GAP := 4
+## A popup panel in the right-click menu's glass (LoadoutStrip's Remove question); plain PopupPanels are tooltips.
+const MENU_PANEL := &"MenuPanel"
+## How far focus_clear's ring stands out from a control with no room round its words (px, across and up and down).
+const FOCUS_CLEAR_PAD := Vector2i(6, 4)
 ## The main button's corners and how much lighter it is under the pointer.
 const MAIN_RADIUS := 12
 const MAIN_HOVER_LIGHTEN := 0.15
@@ -341,7 +345,7 @@ static func _add_buttons(t: Theme) -> void:
 	var none := StyleBoxEmpty.new()
 	for state: String in BUTTON_STATES:
 		t.set_stylebox(state, LINK_BUTTON, none)
-	t.set_stylebox("focus", LINK_BUTTON, focus_box())
+	t.set_stylebox("focus", LINK_BUTTON, focus_clear())
 	t.set_color("font_color", LINK_BUTTON, MUTED)
 	t.set_color("font_hover_color", LINK_BUTTON, TEXT)
 	t.set_color("font_pressed_color", LINK_BUTTON, TEXT)
@@ -377,6 +381,18 @@ static func focus_box() -> StyleBoxFlat:
 	return s
 
 
+## The focus outline for a control whose words run to its edges (a quiet link, a switch with its words, the rail's
+## QUIT): drawn `pad` outside it (across, up and down), so it never cuts the words (owner, 2026-11-20: it cut through
+## "Keep it").
+static func focus_clear(pad: Vector2i = FOCUS_CLEAR_PAD) -> StyleBoxFlat:
+	var s := focus_box()
+	s.expand_margin_left = pad.x
+	s.expand_margin_right = pad.x
+	s.expand_margin_top = pad.y
+	s.expand_margin_bottom = pad.y
+	return s
+
+
 ## The focus outline drawn just outside a control (a white pill's tab or choice), so it lies on the dark round it and
 ## not on the white, where accent would hardly show.
 static func focus_ring_out() -> StyleBoxFlat:
@@ -395,6 +411,9 @@ static func _add_panels(t: Theme) -> void:
 	menu.shadow_color = Color(0.0, 0.0, 0.0, 0.45)
 	menu.shadow_size = POPUP_PAD
 	t.set_stylebox("panel", "PopupMenu", menu)
+	# the Remove question beside it (LoadoutStrip): the same panel, as a variation so tooltips keep their own
+	t.set_type_variation(MENU_PANEL, "PopupPanel")
+	t.set_stylebox("panel", MENU_PANEL, menu)
 	t.set_stylebox("hover", "PopupMenu", box(Color(accent, POPUP_HOVER_ALPHA), Color(0.0, 0.0, 0.0, 0.0), POPUP_PAD, 0))
 	t.set_color("font_color", "PopupMenu", TEXT)
 	t.set_color("font_hover_color", "PopupMenu", TEXT)

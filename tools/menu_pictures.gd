@@ -5,7 +5,7 @@ extends SceneTree
 ## folder (the menus read and write the player's own); under xvfb:
 ##   XDG_DATA_HOME=/tmp/x XDG_CONFIG_HOME=/tmp/xc xvfb-run -a -s "-screen 0 3840x2160x24" godot --path . \
 ##       --rendering-driver opengl3 -s res://tools/menu_pictures.gd -- <folder> <width> <height> [names...]
-## With names (woodland: the Match page's Woodland picked first; match custom loadout customise armory settings report loading pause xp), only those. Dev only.
+## With names (woodland: the Match page's Woodland picked first; match custom loadout loadout_remove customise armory settings report loading pause xp), only those. Dev only.
 
 const SETTLE := 10
 
@@ -57,11 +57,22 @@ func _run() -> void:
 		menus.match_page().rules_box().rules_button(MatchOptions.RULES_CUSTOM).pressed.emit()
 		await _grab("match_custom")
 		menus.match_page().rules_box().rules_button(MatchOptions.RULES_SKIRMISH).pressed.emit()
-	if only.is_empty() or only.has("loadout") or only.has("customise"):
+	if only.is_empty() or only.has("loadout") or only.has("loadout_remove") or only.has("customise"):
 		main._on_tab(NavRail.Tab.LOADOUT)
 		await _frames(SETTLE)
 		if only.is_empty() or only.has("loadout"):
 			await _grab("loadout")
+		if only.is_empty() or only.has("loadout_remove"):
+			# a second loadout, its card menu opened by a right click, Remove picked: the question beside the menu
+			var strip := menus.loadout_page().strip()
+			strip.saved.create()
+			strip.refresh()
+			await _frames(SETTLE)
+			strip.open_menu(1, Vector2(40.0, 30.0))
+			await _grab("loadout_menu")
+			strip.menu().id_pressed.emit(LoadoutStrip.MenuItem.REMOVE)
+			await _grab("loadout_remove")
+			strip.cancel()
 		if only.is_empty() or only.has("customise"):
 			var page := menus.loadout_page()
 			page.show_customise()
