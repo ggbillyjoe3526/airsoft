@@ -3,7 +3,7 @@
 The owner's playtest of 0.1 Beta 2 (20 November), items 3 ("hit detection/spotting on woodland ... behind the nearby
 trees") and 6 ("i saw a bot disappear right infront of me even though they hadn't been hit").
 
-**Review:** REVIEWLINE
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -11,7 +11,7 @@ trees") and 6 ("i saw a bot disappear right infront of me even though they hadn'
 |---|---|---|---|---|---|
 | 2026-11-20 | 1 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | 6/8 Retry | 6: a walk-off still faded in view; a walk-off needing a climb searched the whole grid. 8: no record, known-issue row or A/D and PTB figures |
 | 2026-11-20 | 2 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | 8: Woodland's figures not in; QA and performance hadn't read the walk-on and drops_reach |
-| 2026-11-20 | 3 | Opus 5.5 (build thread) | ✓ | ATTEMPT3 | – |
+| 2026-11-20 | 3 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 Performance failed once inside attempt 1 (+4,045 CollisionShape3D nodes for the tiers); the tiers became shape owners
 on their surface's body (nodes 1,621 against main's 1,846).
@@ -62,7 +62,6 @@ nearest the half `docs/DECISIONS.md` asks a fuse for (48.6 %; 25.5 s gives 56.4 
 
 - A hit player someone watches sees the respawn counter hold at 1 for up to 3.6 s while they walk on (the wait is
   run out, the walk-on isn't counted): N46 asks the owner whether it reads as a stall.
-
 - Subway: a west-team walk-off down on the east track needs a climb to its dead zone and still fades there (4 of 241
   in the probe): `docs/KNOWN_ISSUES.md`.
 - Not checked: Godot's occlusion culling hiding a figure early (headless can't draw); the playtest checklist's N46
