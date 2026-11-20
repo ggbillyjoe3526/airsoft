@@ -64,6 +64,8 @@ func test_the_lead_is_inside_the_door_time_and_leaves_time_to_shut() -> void:
 	var odd := LiftConfig.new()
 	odd.shut_lead = odd.door_time * 2.0
 	assert_eq(odd.shut_time(), 0.0, "a lead past the door's time leaves none, never less")
+	odd.shut_lead = -1.0
+	assert_eq(odd.shut_time(), odd.door_time, "a negative lead never makes the leaves slower than the door")
 
 
 func test_a_shut_is_heard_before_its_leaves_move_and_the_car_sets_off_on_time() -> void:

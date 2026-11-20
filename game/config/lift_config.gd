@@ -48,6 +48,7 @@ extends Resource
 @export var button_heard: float = 6.0
 
 
-## How long (s) a shut's leaves take to meet, after its sound's `shut_lead`: what is left of door_time (none past it).
+## How long (s) a shut's leaves take to meet, after its sound's `shut_lead`: what is left of door_time, never more
+## than door_time (a negative lead) nor less than none (a lead past it).
 func shut_time() -> float:
-	return maxf(0.0, door_time - shut_lead)
+	return clampf(door_time - shut_lead, 0.0, door_time)
