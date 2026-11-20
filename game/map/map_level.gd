@@ -263,6 +263,11 @@ func _add_block_colliders() -> void:
 		RoundSteps.boxes(b, _style, props, middle, steps)
 		if steps.is_empty() and not tiered.is_empty():
 			TierSteps.boxes(b, _style, props, tiered, steps)
+			# A thicket's tiers (Woodland: about 4,000 boxes) go on its surface's body as shapes of their own, not as a
+			# node each (TV1's performance review: the scene's node count).
+			if not steps.is_empty():
+				_add_owned_boxes(_bodies[b.surface], steps)
+				continue
 		for box in steps:
 			var step := CollisionShape3D.new()
 			step.position = box.get_center()
@@ -288,6 +293,17 @@ func _add_block_colliders() -> void:
 			_own_body(_railing_bodies, b.surface, "Colliders_Railing_%s").add_child(shape)
 		else:
 			_bodies[b.surface].add_child(shape)
+
+
+## `boxes` as `body`'s shapes, each through a shape owner of its own placed at the box's middle (CollisionObject3D's
+## owners: no node a box), the body their owner.
+static func _add_owned_boxes(body: StaticBody3D, boxes: Array[AABB]) -> void:
+	for box in boxes:
+		var shape := BoxShape3D.new()
+		shape.size = box.size
+		var owner_id := body.create_shape_owner(body)
+		body.shape_owner_set_transform(owner_id, Transform3D(Basis.IDENTITY, box.get_center()))
+		body.shape_owner_add_shape(owner_id, shape)
 
 
 ## The rest, once the colliders are in: the indoor roof, the level's rays and query, the railings' mesh, the doors and
