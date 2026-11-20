@@ -78,7 +78,8 @@ every preset; turn it on if you want it.
 - **Occlusion culling** skips drawing what walls, containers and houses hide from you, such as a player behind a wall.
   It saves the graphics card work and costs the processor a little, so it is off on Low and on from Medium.
 - **Light effects:** **Bounce light** is light bouncing off the field: Screen bounces what you see, Scene the whole
-  field (underground, in Subway, Scene lights the shade as Screen does). **Reflections** on Probes show the room a shiny surface is in; Screen adds what is on screen. **Glow** makes
+  field (underground, in Subway, Scene lights the shade as Screen does). **Reflections** on Probes show the room a
+  shiny surface is in; Screen adds what is on screen. **Glow** makes
   lamps bloom softly. **Eye adaptation** (High and Ultra) lets your eyes open up slowly in a dark tunnel or under the trees, so you can see what is there, and close again as you step back into the light; ordinary views look the same either way, and nights stay dark. **Volumetric haze** is a faint haze the light shines through, so light has shafts and a long hall its depth: Low, Medium and High draw the same haze, each reaching farther (30, 50 and 80 m) and drawing its shafts finer and smoother than the one below (Medium preset Low, High preset Medium, Ultra High; none on Low). **Lamp light** makes an indoor
   hall's roof lamps real lights that cast shadows (and, at night, fires and lanterns cast shadows too): Near (High)
   and Far (Ultra) light the whole hall with its lamps alone, as no sunlight gets indoors; Near shadows the lamps round
