@@ -160,31 +160,31 @@ func test_an_order_that_ended_by_itself_says_nothing_wheel_shut_or_open() -> voi
 
 # --- the safe start's graphics, put by on an older build ---
 
-func test_try_my_settings_again_brings_an_old_custom_haze_on_back_as_high() -> void:
+func test_try_my_settings_again_brings_an_old_custom_haze_level_back_as_on() -> void:
 	var s := Settings.new(PlayTuning.new())
 	s.choose_graphics(GraphicsQuality.CUSTOM, &"medium")
 	var g := GraphicsGuard.new()
-	# As a build before the haze had levels wrote it, the safe start waiting on the title for an answer.
+	# As a build with the haze's levels (VF1) wrote it, the safe start waiting on the title for an answer.
 	g.from_dict({"state": "starting", "previous": {"graphics_choice": "custom", "graphics_base": "medium",
-			"graphics_custom": {"volumetric_fog": "on", "glow": "off"}, "renderer": int(Settings.Renderer.AUTO)},
+			"graphics_custom": {"volumetric_fog": "medium", "glow": "off"}, "renderer": int(Settings.Renderer.AUTO)},
 			"renderer_notice": ""})
 	assert_true(g.asking(), "graphics wait to be tried again")
 	g.try_again(s)
 	assert_eq(s.graphics_choice, GraphicsQuality.CUSTOM)
-	assert_eq(s.graphics_custom.get(FOG), GraphicsQuality.CHOICES[FOG][GraphicsQuality.VolumetricFog.HIGH],
-			"the haze it drew, by its name now")
+	assert_eq(s.graphics_custom.get(FOG), GraphicsQuality.CHOICES[FOG][GraphicsQuality.VolumetricFog.ON],
+			"the haze on, by its name now")
 	assert_eq(s.graphics_custom.get("glow"), "off", "the other rows as they were")
 	var table := GraphicsTable.read_file()
 	var q := GraphicsQuality.resolve(s.graphics_choice, s.graphics_base, s.graphics_custom, table)
-	assert_eq(q.volumetric_fog, GraphicsQuality.VolumetricFog.HIGH)
+	assert_eq(q.volumetric_fog, GraphicsQuality.VolumetricFog.ON)
 
 
 func test_custom_rows_now_leaves_todays_tables_and_odd_values_alone() -> void:
-	for level: String in ["off", "low", "medium", "high"]:
+	for level: String in ["off", "on"]:
 		var custom := {"volumetric_fog": level, "glow": "on"}
 		Settings.custom_rows_now(custom)
 		assert_eq(custom, {"volumetric_fog": level, "glow": "on"}, level)
-	for odd: Variant in [null, 3, "on", [], {"volumetric_fog": 1}, {"glow": "on"}]:
+	for odd: Variant in [null, 3, "high", [], {"volumetric_fog": 1}, {"volumetric_fog": "HIGH"}, {"glow": "on"}]:
 		var before: Variant = odd.duplicate(true) if odd is Dictionary or odd is Array else odd
 		Settings.custom_rows_now(odd)
 		assert_eq(odd, before, "left as it was: %s" % str(odd))

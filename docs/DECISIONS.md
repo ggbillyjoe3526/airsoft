@@ -1480,6 +1480,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   only briefly on the pick-up. Defaults taken: the Graphics tab fits one page with no scrolling (option A; his
   pictures of a single scrolling column are in the project's `playtest/ui-b2/`), and a round no longer live reads
   0:00 on the clock.
+- **Beta 2 playtest, prompts, Remove, Spotted and haze (owner, 2026-11-20, Beta 2 playtest items 1, 2, 4 and 8; UB3).**
+  Every prompt is the action, then the key in brackets, in capitals: "OPEN DOOR [G]", "CLOSE DOOR [G]", "VAULT
+  [SPACE]", "CLIMB [SPACE]", "RELOAD [R]", "CALL LIFT [G]", "GO TO TICKET HALL [G]", "PLANT BOMB [HOLD G]" (replacing
+  UB2's key-alone vault prompt). A loadout's Remove asks in a panel beside the right-click menu, not at the strip's far
+  right. A single tap of the order wheel's key should be enough to spot. Volumetric haze is one switch, Off or On
+  (replacing VF1's Off, Low, Medium and High, which looked the same to him); a saved level reads as On, settings
+  version 7. Defaults taken: On draws VF1's High (80 m, 128 x 128, smoothed) and is on from the High preset up.
 - **A UI redesign, a Visual redesign, an Audio redesign and a Performance update are planned for later, their versions
   not set (owner, 2026-10-13 and 2026-10-16).** Parked in `docs/IDEAS.md` until he places them, with no work before.
 

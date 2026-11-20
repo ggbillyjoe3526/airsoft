@@ -3,7 +3,8 @@ extends RefCounted
 ## Spotted (CW1, owner 2026-11-15, after Battlefield's spotting): a tap of the order wheel's key (or letting it go on
 ## the wheel's middle) marks the enemy under your view for your team. The simulation raises a PING event with value2
 ## PING_SPOT; BotController.observe hands it here. The enemy is the one a ping would mark, a little more forgivingly
-## (PingConfig.spot_cone_deg), and only one the bots' sight rules let you see; nobody under the view, nothing happens.
+## (PingConfig.spot_cone_deg, and past the cover the view meets in front of them), and only one the bots' sight rules
+## let you see; nobody under the view, nothing happens.
 ## They stay marked PingConfig.spot_time (seconds of match time; spotted again, the time starts over), until they are
 ## out, or until the round ends; the HUD draws an arrow over their head meanwhile, through walls (HudSpotArrows). While
 ## they are marked, the spotter's bot teammates within spot_share_radius of them hear where they are now, at once and
@@ -63,8 +64,9 @@ func place(e: GameEvent, now: float, w: BotWorld, pings: Pings) -> Character:
 	var spotter := w.character(e.actor)
 	if spotter == null or not Elimination.is_in_play(spotter) or e.value == Pings.ON_MAP:
 		return null
-	var reach := e.reach if e.value == 1 else _cfg.reach
-	var enemy := pings.enemy_under_view(spotter, e.position, e.direction, reach, _cfg.spot_cone_deg, w)
+	# As far as a ping reaches, not only to what the view meets (owner, 2026-11-20: one tap should spot): a view on the
+	# crate they peek over, or the trunk beside them, still marks them; the sight rules still want them seen.
+	var enemy := pings.enemy_under_view(spotter, e.position, e.direction, _cfg.reach, _cfg.spot_cone_deg, w)
 	if enemy == null or enemy.id >= _until.size():
 		return null
 	_until[enemy.id] = now + _cfg.spot_time

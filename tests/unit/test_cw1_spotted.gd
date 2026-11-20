@@ -20,6 +20,8 @@ const SPOTS: Array[Vector3] = [Vector3(-30.0, 0.0, 20.0), Vector3(-32.0, 0.0, 23
 const ENEMY_AT := Vector3(-10.0, 0.0, 20.0)
 ## A wall across the view 10 m east of you: [centre, size].
 const WALL: Array[Vector3] = [Vector3(-20.0, 1.5, 20.0), Vector3(0.4, 3.0, 8.0)]
+## A 1.1 m crate a metre in front of the opponent (UB3): [centre, size].
+const CRATE: Array[Vector3] = [Vector3(-11.0, 0.55, 20.0), Vector3(0.8, 1.1, 1.6)]
 
 var tuning: SimTuning = SimTuning.load_default()
 var config: BotConfig = BotConfig.load_default().duplicate() as BotConfig
@@ -215,6 +217,28 @@ func test_nobody_under_the_view_or_behind_a_wall_marks_nobody() -> void:
 	_spot_toward(_chest(orange))
 	assert_eq(bots.spots.placed, before, "behind a wall you can't see them, so you can't spot them")
 	assert_false(bots.spots.is_spotted(ORANGE, state.time))
+
+
+# UB3 (owner, 2026-11-20: a single tap should be enough): the view on the cover in front of them still spots.
+func test_a_view_on_the_cover_in_front_of_them_still_spots_them() -> void:
+	_squad(ENEMY_AT, [CRATE])
+	var head := BotSenses.body_point(orange, tuning.hits, config.head_height_fraction)
+	var before := bots.spots.placed
+	# The view meets the crate's face (a little under its top), their head showing just above it.
+	_spot_toward(Vector3(head.x, 1.0, head.z))
+	assert_eq(bots.spots.placed, before + 1, "the crate they peek over doesn't eat the spot")
+	assert_true(bots.spots.is_spotted(ORANGE, state.time))
+
+
+func test_cover_they_are_wholly_behind_still_hides_them() -> void:
+	_squad(ENEMY_AT, [WALL])
+	var before := bots.spots.placed
+	_spot_toward(_chest(orange))
+	assert_eq(bots.spots.placed, before, "behind a wall: the sight rules still want them seen")
+
+
+func test_a_tap_is_up_to_three_tenths_of_a_second() -> void:
+	assert_almost_eq(ControlsConfig.new().wheel_tap, 0.3, 0.0001)
 
 
 func test_the_cone_is_more_forgiving_than_a_pings() -> void:

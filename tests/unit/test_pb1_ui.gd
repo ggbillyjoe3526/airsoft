@@ -364,7 +364,7 @@ func test_the_prompt_offers_each_job_to_the_player_who_can_do_it() -> void:
 	assert_eq(prompt.text(), "", "the bomb is 2 m away")
 	you.position = Vector3(1.0, 0.0, 0.0)
 	_update()
-	assert_eq(prompt.text(), "HOLD %s · PICK UP THE BOMB" % key)
+	assert_eq(prompt.text(), "PICK UP BOMB [HOLD %s]" % key)
 	assert_false(prompt.visible and prompt.quiet_text() != "", "no quiet line while a prompt shows")
 	# carried into the site: the plant
 	rs.plant.status = PlantState.Status.CARRIED
@@ -380,7 +380,7 @@ func test_the_prompt_offers_each_job_to_the_player_who_can_do_it() -> void:
 	assert_false(prompt.visible)
 	you.position = Vector3(18.0, 0.0, 0.0)
 	_update()
-	assert_eq(prompt.text(), "HOLD %s · PLANT THE BOMB" % key)
+	assert_eq(prompt.text(), "PLANT BOMB [HOLD %s]" % key)
 	assert_eq(prompt.quiet_text(), "", "the prompt takes the quiet line's place")
 	rs.plant.planter = 0
 	_update()
@@ -400,7 +400,7 @@ func test_the_defender_is_offered_the_defuse_beside_the_armed_bomb() -> void:
 	var ps := _arm(0)
 	you.position = ps.position + Vector3(1.0, 0.0, 0.0)
 	_update()
-	assert_eq(hud.plant_prompt().text(), "HOLD %s · DEFUSE" % key)
+	assert_eq(hud.plant_prompt().text(), "DEFUSE BOMB [HOLD %s]" % key)
 	ps.defuser = 0
 	_update()
 	assert_eq(hud.plant_prompt().text(), "", "already on it")

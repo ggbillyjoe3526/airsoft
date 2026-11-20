@@ -67,7 +67,7 @@ enum WheelPick { HOVER, CLICK }
 @export var wheel_strip: float = 20.0
 ## A tap: the wheel's key let go within wheel_tap (s) of pressing it, which spots wherever the pointer went; the wheel
 ## is drawn, and takes the trigger, only once the key is held this long, so a tap never flashes it up or stops a burst.
-@export var wheel_tap: float = 0.2
+@export var wheel_tap: float = 0.3
 ## While the full-screen map is open (FM1) the mouse moves the map's pointer: this many px a mouse count, times the
 ## sensitivity.
 @export var map_gain: float = 1.0

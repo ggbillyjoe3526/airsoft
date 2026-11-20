@@ -22,7 +22,7 @@ func _init(label_text: String, note_text: String) -> void:
 	accessibility_description = note_text
 	var none := StyleBoxEmpty.new()
 	GameTheme.dress(self, none, none, none)
-	add_theme_stylebox_override("focus", GameTheme.focus_box())
+	add_theme_stylebox_override("focus", GameTheme.focus_clear())
 	_row = HBoxContainer.new()
 	_row.add_theme_constant_override("separation", GAP)
 	_row.mouse_filter = Control.MOUSE_FILTER_IGNORE

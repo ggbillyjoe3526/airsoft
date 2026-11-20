@@ -14,13 +14,14 @@ const PATH := "user://settings.save"
 const KIND := "settings"
 ## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1), 4 made Volumetric haze four levels (VF1), 5 moved
 ## the field of view's and the volumes' defaults (FV1, with the Power source's scale), 6 turned the gauge patterns off
-## and the HUD opacity to 60 % by default (owner, 2026-11-17); an older file is brought over once by `migrate_defaults`.
-const VERSION := 6
-## A Custom Volumetric haze row saved by a version 3 file or older, when it was one switch, and the level its "on"
-## drew: the finest grid, which High still draws (VF1). Its "off" is still Off.
-const FOG_ROW_V3 := "volumetric_fog"
-const FOG_ON_V3 := "on"
-const FOG_ON_NOW := "high"
+## and the HUD opacity to 60 % by default (owner, 2026-11-17), 7 made Volumetric haze one switch again (owner,
+## 2026-11-20); an older file is brought over once by `migrate_defaults`.
+const VERSION := 7
+## A Custom Volumetric haze row saved by a version 4 to 6 file, when it had levels (VF1), and the value each of them
+## is now: On (High's haze). A version 3 file's "on" and every "off" are as they were.
+const FOG_ROW := "volumetric_fog"
+const FOG_LEVELS_V6: Array[String] = ["low", "medium", "high"]
+const FOG_ON := "on"
 ## The keys this build reads (with two it reads once and no longer writes: "dev_enabled", FB3, and "robots", FI6); any
 ## other key in the file is kept as it was.
 const KNOWN_KEYS: Array[String] = [
@@ -231,34 +232,35 @@ func load_file(path: String = PATH) -> void:
 	from_dict(migrate_defaults(r.data, int(r.version)))
 
 
-## A saved Custom graphics table (`custom`, a file's "graphics_custom"; anything else is left alone) with a version 3
-## Volumetric haze row of "on" as the level it drew, High, in place. The value means nothing else, so a table of any
-## age may be passed: a file's as it is brought over, and the graphics the safe start put by (GraphicsGuard.previous,
-## which no file version covers).
+## A saved Custom graphics table (`custom`, a file's "graphics_custom"; anything else is left alone) with a version 4
+## to 6 Volumetric haze level (low, medium or high) as On, in place. The values mean nothing else now, so a table of
+## any age may be passed: a file's as it is brought over, and the graphics the safe start put by (GraphicsGuard
+## .previous, which no file version covers).
 static func custom_rows_now(custom: Variant) -> void:
-	if custom is Dictionary and (custom as Dictionary).get(FOG_ROW_V3) is String \
-			and (custom as Dictionary)[FOG_ROW_V3] == FOG_ON_V3:
-		(custom as Dictionary)[FOG_ROW_V3] = FOG_ON_NOW
+	if custom is Dictionary and (custom as Dictionary).get(FOG_ROW) is String \
+			and FOG_LEVELS_V6.has((custom as Dictionary)[FOG_ROW]):
+		(custom as Dictionary)[FOG_ROW] = FOG_ON
 
 
 ## `data` as a version `version` file's, with every value still at the old default moved to the new one (a value the
 ## player changed is kept): the gauge patterns and the HUD opacity (from version 1 to 5), the volumes and the field of
-## view (from version 1 to 4), Windowed and V-Sync (from version 1); and a Custom Volumetric haze row of "on" (version 3
-## or older) as the level it drew, High. A Power source volume the player set before version 5 is scaled by its new
+## view (from version 1 to 4), Windowed and V-Sync (from version 1); and a Custom Volumetric haze level (version 4 to 6)
+## as On. A Power source volume the player set before version 5 is scaled by its new
 ## gain, so it sounds as it did. The current version or later is returned as it is. A new dictionary; `data` is not
 ## changed.
 static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	if version >= VERSION:
 		return data
 	var moved := data.duplicate(true)
+	custom_rows_now(moved.get("graphics_custom"))
+	if version >= 6:
+		return moved
 	_move_hud_defaults(moved)
 	if version >= 5:
 		return moved
 	var fov_saved: Variant = moved.get("fov")
 	if (fov_saved is float or fov_saved is int) and is_equal_approx(float(fov_saved), FOV_DEFAULT_V3):
 		moved["fov"] = FOV_DEFAULT
-	if version < 4:
-		custom_rows_now(moved.get("graphics_custom"))
 	var old_volumes := VOLUME_DEFAULTS_V1 if version < 2 else VOLUME_DEFAULTS_V2 if version < 3 else VOLUME_DEFAULTS_V3
 	var saved_vol: Variant = moved.get("volumes")
 	if saved_vol is Dictionary:

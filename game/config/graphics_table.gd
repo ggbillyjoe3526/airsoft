@@ -61,8 +61,8 @@ const BUILT_IN: Dictionary[StringName, Array] = {
 	GraphicsQuality.GLOW: ["GRAPHICS_GLOW", "off, on", "1", "all", "off", "on", "on", "on"],
 	GraphicsQuality.EYE_ADAPTATION: ["GRAPHICS_EYE_ADAPTATION", "off, on", "1", "forward_plus, mobile", "off", "off", "on",
 			"on"],
-	GraphicsQuality.VOLUMETRIC_FOG: ["GRAPHICS_VOLUMETRIC_FOG", "off, low, medium, high", "3", "forward_plus", "off",
-			"low", "medium", "high"],
+	GraphicsQuality.VOLUMETRIC_FOG: ["GRAPHICS_VOLUMETRIC_FOG", "off, on", "3", "forward_plus", "off", "off", "on",
+			"on"],
 }
 ## BUILT_IN's cells, by column.
 const CELL_LABEL := 0
