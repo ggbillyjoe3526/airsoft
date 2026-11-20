@@ -256,10 +256,10 @@ every quality level, and a night or golden-hour sky changes everything at once.
 An **underground** field (`roof.underground`, Subway, UL1) sees no sky: its ambient is the map's fill alone, the sky is
 in no reflection (the area probes and screen reflections give its sheen from Medium up), and the sun that stands in for
 the lamps on Low and Medium casts no shadow, so the storeys above don't leave every floor below in one flat shade. High
-and Ultra light it with its lamps, as Depot's hall. With no sky, Ultra's bounce light (SDFGI) is all that reaches its
-ceilings and shade, so it is stronger there (energy 1.5, bounce 1.0) and a station's strip lamps feed it five times
-their own share (`RoofConfig.plain_lamp_indirect`), standing in for the light a tube throws up and sideways (UL2): the
-ceilings read dark grey, never black, and the shade stays deeper than High's.
+and Ultra light it with its lamps, as Depot's hall. Ultra gathers no scene bounce light (SDFGI) underground (UL3): with
+no sky for its rays it came out near black in the escalator shafts and on the ceilings even when made stronger (UL2),
+and the area probes' own darker light stood in for it, so the owner found the station too dark (2026-11-20). There the
+map's fill lights the shade on Ultra as on High, under Ultra's every lamp's shadow, haze and screen bounce.
 
 ## A map in the look
 

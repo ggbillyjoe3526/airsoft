@@ -1935,6 +1935,17 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 - [ ] **Elimination and Custom.** Play Elimination: one life, as before. In Custom, set Respawns to On and play
   Elimination, then Off and play Attack / Defend. Pass: each plays as set.
 
+## Subway's light on Ultra and the lift's sounds (UL3)
+
+- [ ] **Subway on Ultra.** Ultra, Subway: stand in the ticket hall, at the concourse's booth, at the top of the
+  escalators looking down, and on a platform. Pass: ceilings and shaded corners read grey, never black; the escalator
+  shaft is lit all the way down; the light no longer brightens as you walk up to a wall; the lamps' pools and
+  shadows still show. Then High and Medium on the same spots: much the same brightness as Ultra.
+- [ ] **The lift's doors.** Step into a Subway lift and press the other stop at once; then call one from its landing
+  and stand off to the side. Pass: the doors are heard a moment before they start to move and shut as the sound
+  plays, never after; as the car arrives you hear the chime and the doors opening; from the side of the landing the
+  doors sound as clear as from in front.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
