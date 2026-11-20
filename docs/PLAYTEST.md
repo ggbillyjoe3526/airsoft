@@ -1937,8 +1937,8 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 - [ ] **Prompts.** Walk up to a door, a lift, a low wall, a platform edge and the bomb, and empty a magazine. Pass:
   each prompt reads the action and then the key, in capitals: OPEN DOOR [G], CLOSE DOOR [G], CALL LIFT [G], GO TO
   TICKET HALL [G], VAULT [SPACE], CLIMB [SPACE], PLANT BOMB [HOLD G], RELOAD [R]; a rebound key shows in the brackets.
-- [ ] **Remove beside the menu.** Right-click a loadout and pick Remove. Pass: "Remove <name>?" with Remove it and
-  Keep it opens right beside the menu; Keep it, Esc or a click elsewhere keeps it and shuts both.
+- [ ] **Remove beside the menu.** Right-click a loadout and pick Remove. Pass: "Remove <name>?" with Remove and Keep
+  opens right beside the menu; Keep, Esc or a click elsewhere keeps it and shuts both; no focus ring cuts any words.
 - [ ] **A single tap spots.** In a match, tap Z (quickly) at an enemy in the open, one peeking over a crate and one
   beside a tree. Pass: one tap puts the yellow arrow over each; one fully behind a wall is never spotted.
 

@@ -8,7 +8,7 @@ power, BB weight, hop-up and colours. Every edit applies at once; there is no Sa
 The **LOADOUT** tab keeps up to **five** named loadouts. Press **1** to **5** to pick one, or make a new one.
 **Right-click** a loadout (or press Shift+F10) to rename, duplicate, replace or remove it. The one picked is carried
 into the next match. After **Replace…** an **Undo** shows for a few seconds and puts back the loadout you wrote over;
-Remove asks first, in a small panel beside the menu: **Remove it** or **Keep it** (Esc or a click elsewhere keeps it).
+Remove asks first, in a small panel beside the menu: **Remove** or **Keep** (Esc or a click elsewhere keeps it).
 
 Each loadout has a **primary** and a **secondary** replica. The primary's card is the big one at the top, the
 secondary's sits under it beside your grenades, and every replica shows at its true size against the others. Click a

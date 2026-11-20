@@ -1250,10 +1250,10 @@ msgid "LOADOUT_REMOVE"
 msgstr "Remove"
 
 msgid "LOADOUT_REMOVE_YES"
-msgstr "Remove it"
+msgstr "Remove"
 
 msgid "LOADOUT_KEEP"
-msgstr "Keep it"
+msgstr "Keep"
 
 msgid "LOADOUT_RENAME_PROMPT"
 msgstr "Type a name, Enter keeps it, Esc cancels"

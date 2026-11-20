@@ -21,14 +21,14 @@ const NAME_SIZE := 18
 const KEY_SIZE := 13
 const KEY_GAP := 10
 const SPACING := 0.04
-const ACTION_GAP := 8
+const ACTION_GAP := 16
 const ACTION_PAD := 10
 const DASH := 6.0
 const EDIT_WIDTH := 260.0
 ## The room between the card menu and the Remove panel beside it, and between the panel's question and its links (px).
 const CONFIRM_GAP := 6
 const CONFIRM_ROW_GAP := 10
-const CONFIRM_PAD := 8
+const CONFIRM_PAD := 12
 ## How long a Replace's Undo stays offered (s).
 const UNDO_SECONDS := 6.0
 ## The menu's words by MenuItem (translation keys).
@@ -400,7 +400,7 @@ func _link(id: StringName, key: String, on_press: Callable, into: Control = self
 	_actions[id] = b
 
 
-## Writes Remove's question ("Remove <name>?") and its Remove it and Keep it links into the Remove panel, building the
+## Writes Remove's question ("Remove <name>?") and its Remove and Keep links into the Remove panel, building the
 ## panel on its first use.
 func _fill_confirm() -> void:
 	if _confirm == null:

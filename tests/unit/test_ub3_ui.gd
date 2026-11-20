@@ -63,8 +63,8 @@ func test_remove_asks_in_a_panel_beside_the_open_menu() -> void:
 	assert_string_contains(strip.prompt_text(), strip.saved.carried().name)
 	assert_eq(panel.position.x, menu.position.x + menu.size.x + LoadoutStrip.CONFIRM_GAP, "right beside the menu")
 	assert_eq(panel.position.y + panel.size.y, menu.position.y + menu.size.y, "its foot level with the menu's")
-	assert_true(panel.is_ancestor_of(strip.action(&"remove_yes")), "Remove it is in the panel")
-	assert_true(panel.is_ancestor_of(strip.action(&"keep")), "Keep it is in the panel")
+	assert_true(panel.is_ancestor_of(strip.action(&"remove_yes")), "Remove is in the panel")
+	assert_true(panel.is_ancestor_of(strip.action(&"keep")), "Keep is in the panel")
 
 
 func test_keep_it_or_a_click_off_shuts_the_panel_and_the_menu_and_keeps_the_loadout() -> void:
@@ -115,3 +115,25 @@ func test_remove_asked_with_no_menu_up_opens_under_the_carried_card() -> void:
 	assert_almost_eq(float(strip.confirm_panel().position.y), c.get_screen_position().y + c.size.y, 1.0)
 	strip.cancel()
 	assert_false(strip.confirm_panel().visible)
+
+
+# --- focus rings clear of the words (owner, 2026-11-20) ---
+
+func test_the_clear_focus_ring_stands_outside_and_the_links_and_switch_use_it() -> void:
+	var ring := GameTheme.focus_clear()
+	var border := float(ring.border_width_left)
+	assert_gt(ring.expand_margin_left, border, "the ring's inside edge is outside the words")
+	assert_gt(ring.expand_margin_top, border)
+	assert_eq(ring.expand_margin_left, ring.expand_margin_right)
+	assert_eq(ring.expand_margin_top, ring.expand_margin_bottom)
+	var link := GameTheme.get_theme().get_stylebox(&"focus", GameTheme.LINK_BUTTON) as StyleBoxFlat
+	assert_eq(link.expand_margin_left, ring.expand_margin_left, "the quiet links' ring")
+	var toggle := MenuToggle.new("WORDS", "")
+	add_child_autofree(toggle)
+	var own := toggle.get_theme_stylebox(&"focus") as StyleBoxFlat
+	assert_eq(own.expand_margin_left, ring.expand_margin_left, "the switch with its words")
+
+
+func test_the_remove_panels_links_have_room_for_the_ring_between_them() -> void:
+	assert_gt(LoadoutStrip.ACTION_GAP, GameTheme.FOCUS_CLEAR_PAD.x * 2, "two rings never meet")
+	assert_gt(LoadoutStrip.CONFIRM_PAD, GameTheme.FOCUS_CLEAR_PAD.x, "the ring stays inside the panel")
