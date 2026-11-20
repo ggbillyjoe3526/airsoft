@@ -6,7 +6,7 @@ extends SceneTree
 ## - "jump": in play on both ticks yet moved further than JUMP m in one (a rescue from under the world, a lift, a
 ##   vault gone wrong): where and what it was doing;
 ## - "fade": a walk-off that left the field (Elimination's LEAVING, its figure fading): as its respawn came (TV1), or
-##   stuck or out of time (with where);
+##   stuck or out of time (with where); and of those, how many someone in play saw (Respawns.seen) as it began;
 ## - each respawn: from the dead zone, as its fade ended, or a pop (anything else).
 ## Measured, never asserted.
 ##   godot --headless --path . -s res://tools/vanish_probe.gd -- <map id> [seeds] [mode]
@@ -29,6 +29,7 @@ var _counts: Dictionary[String, int] = {}
 var _printed: Dictionary[String, int] = {}
 var _round: int = -1
 var _hits: HitConfig = null
+var _ray: RayHit = RayHit.new()
 
 
 func _initialize() -> void:
@@ -108,6 +109,8 @@ func _each_tick(state: GameState, _bots: BotController) -> void:
 		elif c.status == Character.Status.LEAVING and was == Character.Status.WALKING_OFF \
 				and c.respawn_left >= 0.0 and c.respawn_left <= _hits.vanish_time + 1e-3:
 			_count("fade: walk-off left the field as its respawn came")
+			if Respawns.seen(c, state.characters, _runner.tuning, _runner.level.query(), _ray):
+				_count("fade: ... and someone saw it fade (walked on seen_most)")
 		elif c.status == Character.Status.LEAVING and was == Character.Status.WALKING_OFF:
 			_count("fade: walk-off left the field, stuck or out of time")
 			_say("fade", "seed %d t %.1f: #%d faded walking off at %s, %.0f m short of the dead zone" % [_seed,
