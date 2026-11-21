@@ -169,7 +169,9 @@ One team starts in the ticket hall at the west end, the other down in the runnin
 
 - **The ticket hall and concourse** are one level: the closed ticket office, a shuttered kiosk and the old booking
   counter at the street end, benches along the walls, then the lifts, the gate line of paddle gates and the hole of
-  the spiral stair, and the concourse with its cable drums beyond.
+  the spiral stair, and the concourse with its cable drums beyond. Right behind the street team's start, a doorway in
+  the west wall looks onto a stair and an escalator climbing to the street in daylight, shut off by a locked folding
+  gate.
 - **Four ways down** to the platforms, 8 m below: the escalators to the lower hall between the platform tunnels, an
   ordinary stair with a half landing, the spiral stair straight down to the south platform, and the two **lifts**.
   A lift has two stops, the hall and the platforms, and takes 4 seconds. Call it from its landing (**CALL LIFT [G]**), or step in and

@@ -1970,6 +1970,14 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   cable drums, buffer stop and fan housing show their ribs, bolts and frames; nothing flickers or shimmers; no prop
   sits higher, wider or in a different place than before; Low holds 60 FPS in the hall.
 
+## Subway's street entrance (TQ2)
+
+- [ ] **Behind the hall's start.** Subway on Low and on your usual preset, on the street team: turn round at the start.
+  Pass: a doorway in the west wall shows a tiled stair and an escalator going up to the street, a black sign over it,
+  and a locked folding gate across it; you can't walk, climb or shoot through the gate; the light up the stair is
+  brighter than the hall and doesn't light the hall's floor in a hard square; nothing flickers; Low holds 60 FPS
+  looking at it.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

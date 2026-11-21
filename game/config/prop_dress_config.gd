@@ -193,6 +193,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"station_bench": "res://assets/models/props/station_bench.glb",
 	&"station_bench_long": "res://assets/models/props/station_bench_long.glb",
 	&"crowd_barrier": "res://assets/models/props/crowd_barrier.glb",
+	# the street entrance behind the Street team's start (the owner, 2026-11-21): its folding gate, the stairs and
+	# escalator up behind it and the street at their head, one model in one solid block (station_entrance.py)
+	&"station_entrance": "res://assets/models/props/station_entrance.glb",
 	# Subway's (Dev 3, SM1, tools/blender/maps/train.py), named by their blocks (SD1): the trains' seats and the tool
 	# carts in the south train's aisle, and the bogie under each train end. The cars themselves are TrainView's.
 	&"train_seat": "res://assets/models/props/train_seat.glb",
