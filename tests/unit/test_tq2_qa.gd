@@ -53,3 +53,23 @@ func test_a_trainview_leaves_no_orphans_when_freed() -> void:
 	view.free()
 	await wait_physics_frames(2)
 	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before)
+
+
+func test_only_the_entrance_carries_the_lit_kind() -> void:
+	# a stray UV y of 109 on another prop would make it glow by its own colour
+	var strays := PackedStringArray()
+	for f in DirAccess.get_files_at("res://assets/models/props"):
+		if not f.ends_with(".glb") or f == "station_entrance.glb":
+			continue
+		var mesh := PropDressConfig.load_mesh("res://assets/models/props/" + f)
+		if mesh == null:
+			continue
+		for s in mesh.get_surface_count():
+			var uvs: Variant = mesh.surface_get_arrays(s)[Mesh.ARRAY_TEX_UV]
+			if uvs == null:
+				continue
+			for uv: Vector2 in uvs as PackedVector2Array:
+				if absf(uv.y - 109.0) < 0.01:
+					strays.append(f)
+					break
+	assert_eq(strays.size(), 0, "no other prop is lit: %s" % [strays])
