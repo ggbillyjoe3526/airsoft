@@ -22,8 +22,8 @@ extends Resource
 @export_range(0.0, 1.0) var screen_opacity: float = 0.45
 @export_range(0.0, 1.0) var glass_roughness: float = 0.1
 @export var gangway: String = "res://assets/models/props/train_gangway.glb"
-## A car's poles, seat rails, door-head bars and draft screens' frames (TQ2, the owner, 2026-11-21: "more smooth and
-## minimalistic"): round, smoothly bent tubes in the stripe's orange, a model of their own over the body, in the props'
+## A car's poles and seat rails, one bent tube a bay, and its door-head bars (TQ2, the owner, 2026-11-21: "more smooth
+## and minimalistic"): round, smoothly bent tubes in the stripe's orange, a model of their own over the body, in the props'
 ## material; and the grab handles on the end walls (by what stands at the end, as `leds`) and in each gangway.
 @export var poles: String = "res://assets/models/props/train_poles.glb"
 @export var end_rails: Dictionary[StringName, String] = {

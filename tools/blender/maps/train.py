@@ -18,7 +18,7 @@ gets (x, -z, y), so the glTF export gives the game's axes back.
     train_cab_leds.glb    a cab front's white LED lamps (headlamps, side strips, marker lamps), drawn glowing over it
     train_end_leds.glb    the uncoupled end's white LED lamps, drawn glowing over train_end_outer
     train_body.glb        a car's sides, floor, ceiling and fittings, every door hole open (x +-7.35, z +-1.72)
-    train_poles.glb       its poles, seat rails, door-head bars and draft screens' frames: round, smoothly bent tubes
+    train_poles.glb       its poles and seat rails (one bent tube a bay) and door-head bars: round, smooth tubes
     train_adverts.glb     its cove's twelve printed advert cards (the advert sheet, train_adverts.py)
     train_door.glb        a shut pair of door leaves, filling a door hole (x +-0.8, z 1.36..1.705)
     train_gangway.glb     the joint between two coupled cars, an open gangway through it (x +-0.15)
@@ -107,7 +107,7 @@ RAIL_Y = 1.98
 # they shade smooth; a bend is a radiused curve, never a mitred kink.
 TUBE_SIDES = 12
 BEND_STEP = math.radians(22.5)
-RAIL_BEND = 0.07      # a seat rail's bends up into the cove
+RAIL_BEND = 0.12      # a bay rail's bends down into its poles
 FLANGE = 0.012        # a pole's or rail's flat round fixing, this much wider than the tube
 GANG_HW = 0.6         # the gangway's half width (layout.py's car ends leave 1.2 m between them)
 CAB_DOOR_HW = 0.6     # the cab's door (the south train's way out: 1.2 m)
@@ -121,10 +121,10 @@ DOOR_IN = 0.03        # the end door set back into it again
 # A car is about 27k (TQ1; the list's 22k was 12k outside, 10k inside): its body (18k), its eight door pairs (about
 # 5k) and its seats (about 4.7k a car, drawn by PropDress).
 # A car end is 1.5k, a gangway two of them; the uncoupled end adds its underframe's end (1k, the slack in its car).
-# TQ2: the poles and rails left the body for a model of their own (train_poles, round and smoothly bent, more triangles
-# than the body could spare), as did the end walls' and gangways' grab handles (train_end_rails, train_gangway_rails);
+# TQ2: the poles and rails left the body for a model of their own (train_poles, round and smoothly bent, one tube a
+# bay), as did the end walls' and gangways' grab handles (train_end_rails, train_gangway_rails);
 # the body's budget came down by what it gave up.
-BUDGET = {"train_body": 15400, "train_poles": 6350, "train_end_rails": 680, "train_gangway_rails": 900,
+BUDGET = {"train_body": 15400, "train_poles": 2650, "train_end_rails": 680, "train_gangway_rails": 900,
           "train_adverts": 25, "train_screens": 120, "train_door": 640, "train_door_glazed": 640, "train_windows": 240, "train_door_glass": 60, "train_gangway": 2760, "train_end": 1230, "train_end_outer": 3700,
           "train_cab": 4200, "train_cab_open": 4200, "train_seat": 620, "train_seat_short": 420, "train_lights": 100,
           "tool_cart": 1500, "train_bogie": 3000, "train_cab_leds": 270, "train_end_leds": 180}
@@ -923,33 +923,31 @@ def side(m: Model, s: float, screens: "Glow", poles: Model, ads, panes: "Glow | 
                 m.poly([(pa, ya, s * za), (pb, ya, s * za), (pb, yb, s * zb), (pa, yb, s * zb)], (0, 0.2, -s), "seat")
             for x, f in ((pa, -1), (pb, 1)):
                 m.poly([(x, y, s * z) for z, y in prof], (f, 0, 0), "seat")
-        seat_rail(poles, s, a, b)
-    # the poles at the door holes' edges, over the seats' front corners, floor to ceiling on a flat round plate each
+        bay_rail(poles, s, a, b)
+    # the draft screen beside each door hole at the seat's end (the owner's photos): a white panel to the seat back's
+    # height, a framed glass screen over it, the passenger alarm on its doorway face
     for a, b in doors:
-        for x in (a - 0.09, b + 0.09):
-            poles.tube([(x, 0.0, s * POLE_Z), (x, TOP, s * POLE_Z)], POLE_R, "pole")
-            flange(poles, (x, 0.002, s * POLE_Z), (0, 1, 0), POLE_R + FLANGE)
-            flange(poles, (x, TOP - 0.002, s * POLE_Z), (0, -1, 0), POLE_R + FLANGE)
-        # and the draft screen beside each door hole at the seat's end (the owner's photos): a white panel to the
-        # seat back's height, a glass screen over it in a steel frame curving round its top, the passenger alarm on
-        # its doorway face
         for x, f in ((a - 0.02, -1), (b + 0.02, 1)):
-            draft_screen(m, s, x, f, screens, poles)
+            draft_screen(m, s, x, f, screens)
 
 
-def seat_rail(poles: Model, s: float, a: float, b: float) -> None:
-    """The grab rail over bay a..b's seats (TQ2): one tube along the bay at RAIL_Y, its ends bending up (RAIL_BEND
-    round) into the cove, where each stands on a flat round plate; no brackets."""
-    # where the rail's legs, over POLE_Z, meet the cove's slope (they run on a hair into it), and its face there
-    y_top = cove_at((zin(COVE_Y) - POLE_Z) / (zin(COVE_Y) - COVE_Z))[0]
-    (y0, z0), (y1, z1) = cove_at(0.0), cove_at(1.0)
-    run = math.hypot(y1 - y0, z1 - z0)
-    n = (0.0, -(z0 - z1) / run, -s * (y1 - y0) / run)     # towards the aisle and down
-    xa, xb, z = a + 0.12, b - 0.12, s * POLE_Z
-    poles.tube(filleted([(xa, y_top + 0.01, z), (xa, RAIL_Y, z), (xb, RAIL_Y, z), (xb, y_top + 0.01, z)], RAIL_BEND),
-               POLE_R, "pole")
-    for x in (xa, xb):
-        flange(poles, (x, y_top + 0.002 * n[1], z + 0.002 * n[2]), n, POLE_R + FLANGE)
+def bay_rail(poles: Model, s: float, a: float, b: float) -> None:
+    """Bay a..b's grab rail and its poles (TQ2, the critic: one tube, never two side by side, none ending in a seat or
+    in the air): at each end against a door hole a pole on the floor at the draft screen's doorway face (the owner's
+    photos, 02-train-car-inside 113845 and 113816), up to RAIL_Y, bending (RAIL_BEND round) into the rail along the bay
+    over the seats' front (113835: the rail bending down into the pole); at an end against the car's end wall, the rail
+    runs straight into that wall. Each pole stands on a flat round plate."""
+    z = s * POLE_Z
+    reach = 0.02 - 0.004 - POLE_R      # from the door hole's edge past the screen's doorway face, a hair clear of it
+    ends = []
+    for x, inward in ((a, 1), (b, -1)):
+        if abs(abs(x) - IN_X) < 1e-6:
+            ends.append([(x, RAIL_Y, z)])
+        else:
+            leg = x + inward * reach
+            ends.append([(leg, 0.0, z), (leg, RAIL_Y, z)])
+            flange(poles, (leg, 0.002, z), (0, 1, 0), POLE_R + FLANGE)
+    poles.tube(filleted(ends[0] + list(reversed(ends[1])), RAIL_BEND), POLE_R, "pole")
 
 
 def on_side(m: Model, s: float, pts: list, paint: str, off: float) -> None:
@@ -1020,9 +1018,8 @@ def cove_adverts(m: Model, ads, s: float, a: float, b: float, i: int) -> None:
         quad(a + 0.12, b - 0.12, tt, tt + 0.014, 0.006, "inner_lo")
 
 
-def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow, poles: Model) -> None:
-    """A draft screen at a seat's end, in the plane x (its doorway face) running f * 0.045 thick away from the door;
-    its frame's tube goes in `poles`."""
+def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow) -> None:
+    """A draft screen at a seat's end, in the plane x (its doorway face) running f * 0.045 thick away from the door."""
     t = 0.03
     front = IN_Z - SEAT_D + 0.04
     low = 0.95
@@ -1044,8 +1041,9 @@ def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow, poles: M
     # its foot, a dark kick strip round the panel's front
     m.poly([(x - f * 0.002, 0.0, s * (front + 0.035)), (x - f * 0.002, 0.0, s * IN_Z), (x - f * 0.002, 0.07, s * IN_Z),
             (x - f * 0.002, 0.07, s * (front + 0.035))], (-f, 0, 0), "plinth")
-    # the glass over it, its top front corner round (radius rr), in a steel frame: a tube up its front and over its
-    # top into the wall, a flat bar along its foot
+    # the glass over it, its top front corner round (radius rr), on a flat steel bar along its foot, held in a black
+    # edge frame up its front and over its top into the wall (TQ2: as the owner's photos' screens, 02-train-car-inside
+    # 113845; the orange tube that ran round it, ending in the air beside the clear glass, is gone)
     top, rr = 1.6, 0.2
     zf, zw = front + 0.03, IN_Z - 0.02
     xm = x + f * t * 0.5
@@ -1055,8 +1053,8 @@ def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow, poles: M
         ring.append((zf + rr * (1 - math.cos(u)), top - rr + rr * math.sin(u)))
     ring.append((zw, top))
     screens.poly([(xm, y, s * z) for z, y in ring], (f, 0, 0), "pane")
-    # what makes the glass read (TQ1, the critic): its black edge seal inside the tube along its front and over its
-    # top, and a pale frosted band across it at eye height, each on both faces a hair off the glass
+    # what makes the glass read (TQ1, the critic): its black frame along its front and over its top, a band on both
+    # faces a hair off the glass and a strip across its edge, and a pale frosted band across it at eye height
     cz, cy = zw - 0.2, (low + top) * 0.5
     for d, ff in ((0.002, f), (-0.002, -f)):
         for (za, ya), (zb, yb) in zip(ring[1:-1], ring[2:]):
@@ -1067,11 +1065,11 @@ def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow, poles: M
             (ia, ja), (ib, jb) = inward(za, ya), inward(zb, yb)
             m.poly([(xm + d, ya, s * za), (xm + d, yb, s * zb), (xm + d, jb, s * ib), (xm + d, ja, s * ia)],
                    (ff, 0, 0), "rubber")
+            if d > 0.0:
+                m.poly([(xm - 0.006, ya, s * za), (xm + 0.006, ya, s * za), (xm + 0.006, yb, s * zb),
+                        (xm - 0.006, yb, s * zb)], (0, (ya + yb) * 0.5 - cy, s * ((za + zb) * 0.5 - cz)), "rubber")
         m.poly([(xm + d, 1.24, s * (zf + 0.02)), (xm + d, 1.24, s * zw), (xm + d, 1.29, s * zw),
                 (xm + d, 1.29, s * (zf + 0.02))], (ff, 0, 0), "frost")
-    # (TQ2: one smooth tube, its bend round the glass's corner, into the wall)
-    poles.tube(filleted([(xm, low, s * (zf - 0.012)), (xm, top + 0.012, s * (zf - 0.012)), (xm, top + 0.012, s * IN_Z)],
-                        rr + 0.012), 0.014, "pole")
     m.box((min(x, x + f * t), low - 0.002, min(s * front, s * IN_Z)), (max(x, x + f * t), low + 0.025,
           max(s * front, s * IN_Z)), "steel", skip="-y")
     # on its doorway face, small as the photos': the passenger alarm (a yellow ring round its push) and the door's
