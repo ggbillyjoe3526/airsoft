@@ -127,7 +127,7 @@ func test_the_view_draws_every_car_door_end_and_gangway() -> void:
 		assert_gt(leds[path], 0, "%s has ends to light" % path)
 		assert_eq(view.count(path), leds[path], "white LEDs at every cab and uncoupled end: %s" % path)
 	assert_eq(view.count(look.leds[&"cab"]), 3, "the north train's two cabs and the south train's open one")
-	assert_eq(view.materials().size(), 4)
+	assert_eq(view.materials().size(), 5, "the props', the strips', the LEDs', the windows' and the draft screens' glass")
 	for path: String in [look.windows, look.door_glass]:
 		var g := view.view_of(path)
 		assert_eq(g.material_override, view.materials()[3], "%s is see-through" % path)

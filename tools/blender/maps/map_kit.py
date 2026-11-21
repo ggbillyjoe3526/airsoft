@@ -264,6 +264,8 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
         tone = me.attributes.get("tone")
         perf = (int(ob["perf_axes"][0]), int(ob["perf_axes"][1]), ob["perf_middle"]) if "perf" in ob else None
         ribs = int(ob["ribs"]) if "ribs" in ob else None
+        # what the part is made of (SQ1, surface_kinds.py), as look_vertex.gdshader reads it: UV (0, 100 + kind)
+        kind = (0.0, 100.0 + int(ob["kind"])) if "kind" in ob and int(ob["kind"]) > 0 else (0.0, 0.0)
         smooth = bool(ob.get("smooth", False))
         me.calc_loop_triangles()
         for tri in me.loop_triangles:
@@ -280,7 +282,7 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
                 foot = 1.0 - FOOT_SHADE * (1.0 - (me.vertices[vi].co.z - z0) / span)
                 k = shade * foot * (tone.data[vi].value if tone is not None else 1.0)
                 own = me.vertices[vi].co
-                uv = (round(2.0 + own[perf[0]] - perf[2], 5), round(own[perf[1]], 5)) if perf else (0.0, 0.0)
+                uv = (round(2.0 + own[perf[0]] - perf[2], 5), round(own[perf[1]], 5)) if perf else kind
                 if ribs is not None:
                     uv = (-2.0, round(own[ribs], 5))
                 row = ((round(co.x, 5), round(co.z, 5), round(-co.y, 5)), (round(n.x, 4), round(n.z, 4),
@@ -298,9 +300,9 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
 
 def export(path: str, name: str, objects: list, unit: tuple = None, middle: tuple = None) -> int:
     """Writes `objects` as one vertex-coloured mesh `name` to the glb at `path` (in a 1 m cube with `unit`, _gather);
-    returns its triangle count. The UVs (TEXCOORD_0) are written only when a part is perforated or ribbed."""
+    returns its triangle count. The UVs (TEXCOORD_0) are written only when a part is perforated, ribbed or of a kind."""
     positions, normals, colours, uvs, indices = _gather(objects, unit, middle)
-    with_uv = any("perf" in ob or "ribs" in ob for ob in objects)
+    with_uv = any("perf" in ob or "ribs" in ob or int(ob.get("kind", 0)) > 0 for ob in objects)
 
     def pack(fmt: str, rows: list) -> bytes:
         return b"".join(struct.pack("<" + fmt, *r) for r in rows)

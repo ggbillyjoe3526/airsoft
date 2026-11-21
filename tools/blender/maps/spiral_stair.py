@@ -40,6 +40,7 @@ TREAD = 0x4A4845
 RISER = 0x5A5752
 SOFFIT = 0x8C877E
 RAIL = 0x232226
+tk.KINDS[RAIL] = tk.sk.RUBBER  # the black rubber handrail (SQ1, surface_kinds.py)
 SEED = 16
 
 

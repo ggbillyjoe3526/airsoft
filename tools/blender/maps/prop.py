@@ -23,6 +23,7 @@ import bmesh  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
 import hardsurface as hs  # noqa: E402
+import surface_kinds  # noqa: E402
 
 OUT = os.path.normpath(os.path.join(HERE, "..", "..", "..", "assets", "models", "props"))
 
@@ -39,6 +40,9 @@ PALETTE = {
     "fire": 0xac2264,
 }
 
+# What each paint is made of (SQ1, surface_kinds.py): a paint string ("concrete*0.8") and its kind, filled by the kits
+# and the models (hallkit's stainless, glass and screens); a paint not named is plain (the props' roughness).
+KINDS: dict = {}
 # The vertical gradient: a corner at the model's foot takes this share of its paint, one at the top all of it.
 FOOT_SHADE = 0.86
 
@@ -126,13 +130,14 @@ class Prop:
         n = hs.tris(ob)
         if n > budget:
             raise SystemExit(f"{self.name}: {n} triangles, over its budget of {budget}")
+        kinds = surface_kinds.write(ob, lambda name: KINDS.get(name, 0))
         ob.data.materials.clear()
         path = os.path.join(OUT, file_name)
         bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
                                   export_animations=False, export_yup=True, export_materials="NONE",
                                   export_vertex_color="ACTIVE", export_all_vertex_colors=False,
                                   export_draco_mesh_compression_enable=False, export_extras=False,
-                                  export_cameras=False, export_lights=False, export_texcoords=False)
+                                  export_cameras=False, export_lights=False, export_texcoords=kinds)
         dims = ob.dimensions
         print(f"{file_name}: {n} triangles of {budget} ({100.0 * n / budget:.0f}%), "
               f"{dims.x:.3f} x {dims.z:.3f} x {dims.y:.3f} m (w x h x d)")

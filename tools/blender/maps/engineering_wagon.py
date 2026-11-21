@@ -1,9 +1,15 @@
 """Subway's engineering wagon (SM4, model 7): a works flat wagon left loaded on the north track, from the owner's
 photos (art/references/maps/subway/07-engineering-wagon: the long sleeper-carrying flat wagons and the low-sided works
 wagon) and the model list's default for its 2.6 m box (thread "Subway models", 2026-11-11: a loaded flat wagon that
-fills it): a steel deck with timber cross-bearers on a channel underframe with works-yellow solebars, short stanchions
-down both sides, loaded with two stacks of concrete sleepers on timber dunnage and, over them, a load of kit under a
-lashed tarpaulin, its straps ratcheted to the solebars. No lettering, no livery.
+fills it): a steel deck with a works-yellow edge angle and timber cross-bearers on the ballast wagon's detailed
+underframe (ballast_wagon.underframe: W-irons, leaf springs, axle boxes, buffers, coupling, brake gear) with
+works-yellow solebar webs, corner steps and grab handles at the ends; tapered yellow stanchions down both sides in
+riveted U-pockets, each capped; loaded with two stacks of concrete sleepers on timber dunnage and, over them, a load
+of kit under a lashed tarpaulin, crumpled a little, its skirt's hem rolled, its four webbing straps running down the
+sleepers' ends to ratchets with their handles and on under the solebars. No lettering, no livery.
+
+SQ1 (2026-11-21) rebuilt it finer: the detailed underframe, the stanchions' pockets and caps, the deck's edge, the
+steps and handles, and straps with thickness and ratchets (they were flat ribbons ending in mid-air).
 
 Its block (4 x 2 m and 2.6 m high, data/maps/subway.json) is centred on the north track, so the wagon's wheels stand
 on the station's running rails (works_kit.running_rails).
@@ -21,12 +27,16 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import works_kit as wk  # noqa: E402
+import ballast_wagon as bw  # noqa: E402  (the detailed underframe both wagons share)
 from works_kit import wt  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
 NAME = "engineering_wagon"
-BUDGET = 3000
+BUDGET = 6000
 HL, HD, HIGH = 2.0, 1.0, 2.6
+
+# The deck's steel plate (a satin steel by its name)
+wk.PAINT["deck_steel"] = 0x55534f
 
 DECK_X = 1.86          # the deck's half length
 DECK_Y = 0.94          # the deck's half width (the stanchions stand outside it, to the box's side)
@@ -62,26 +72,63 @@ def tarp_lines(n: int, half: float, shoulder: float, n_sh: int = 4) -> list:
     return [-u * half for u in sh] + [t * half for t in top] + [u * half for u in reversed(sh)]
 
 
+def strap(k: wk.Kit, x: float, pts: list, mid: tuple, w: float = 0.05, t: float = 0.006) -> None:
+    """A webbing strap `w` wide along x through the points (y, z) at x, `t` thick on the side away from `mid` (y, z):
+    a flat loft, closed, so it reads from either side."""
+    rings = []
+    for i, (y, z) in enumerate(pts):
+        a, b = pts[max(0, i - 1)], pts[min(len(pts) - 1, i + 1)]
+        ty, tz = b[0] - a[0], b[1] - a[1]
+        ln = math.hypot(ty, tz) or 1.0
+        ny, nz = -tz / ln, ty / ln
+        if ny * (y - mid[0]) + nz * (z - mid[1]) < 0.0:
+            ny, nz = -ny, -nz
+        rings.append([(x - w * 0.5, y, z), (x + w * 0.5, y, z), (x + w * 0.5, y + ny * t, z + nz * t),
+                      (x - w * 0.5, y + ny * t, z + nz * t)])
+    k.loft(rings, "strap")
+
+
 def build() -> object:
     k = wk.Kit(NAME)
     rail_top = k.running_rails(-HL, HL)
     k.mark("track")
-    top = wk.underframe(k, HL, 0.9, 1.15, 0.3, rail_top, "frame_black", buffer_y=0.55)
-    for s in (-1.0, 1.0):  # the solebars' outer faces in works yellow
-        y0, y1 = sorted((s * 0.82, s * 0.835))
-        k.blk((-HL + 0.12, y0, top - 0.26), (HL - 0.12, y1, top), "works_yellow")
+    top = bw.underframe(k, HL, 0.9, 1.15, 0.3, rail_top, "frame_black", buffer_y=0.55, web="works_yellow")
+    zc = rail_top + 0.3
+    # Corner steps under the headstocks' ends and a grab handle on each headstock's corners.
+    for sx in (-1.0, 1.0):
+        for s in (-1.0, 1.0):
+            x = sx * (HL - 0.17)
+            k.sqbar((x, s * 0.88, zc + 0.1), (x, s * 0.95, zc - 0.2), 0.04, "frame_black", h=0.014)
+            k.blk((x - 0.08, min(s * 0.86, s * 0.99), zc - 0.215), (x + 0.08, max(s * 0.86, s * 0.99), zc - 0.19),
+                  "works_yellow")  # its tread
+            xg = sx * (HL - 0.115)
+            for a, b in (((xg, s * 0.66, top - 0.04), (xg + sx * 0.06, s * 0.66, top - 0.04)),
+                         ((xg + sx * 0.06, s * 0.66, top - 0.04), (xg + sx * 0.06, s * 0.82, top - 0.04)),
+                         ((xg + sx * 0.06, s * 0.82, top - 0.04), (xg, s * 0.82, top - 0.04))):
+                k.bar(a, b, 0.012, "works_yellow", seg=5)
     k.mark("underframe")
     deck = top + 0.04
-    k.blk((-DECK_X, -DECK_Y, top), (DECK_X, DECK_Y, deck), "frame_black")
+    k.blk((-DECK_X, -DECK_Y, top), (DECK_X, DECK_Y, deck), "deck_steel")
+    for s in (-1.0, 1.0):  # the deck's edge: a yellow angle along each side, its toe up
+        y0, y1 = sorted((s * DECK_Y, s * (DECK_Y - 0.04)))
+        k.blk((-DECK_X, y0, deck), (DECK_X, y1, deck + 0.035), "works_yellow")
     for i in range(7):  # cross-bearers, the sleepers' dunnage on the deck
         x = -DECK_X + 0.12 + i * (2 * DECK_X - 0.24) / 6
         k.blk((x - 0.05, -DECK_Y + 0.04, deck), (x + 0.05, DECK_Y - 0.04, deck + 0.07), "timber")
-    # Stanchions: short steel posts in pockets down both sides, standing out to the box's side.
+    # Stanchions: tapered steel posts in U-pockets riveted to the solebars, a cap on each, standing out to the
+    # box's side.
     for s in (-1.0, 1.0):
-        y0, y1 = sorted((s * DECK_Y, s * HD))
+        y0, y1 = sorted((s * (DECK_Y - 0.005), s * (HD - 0.012)))
         for x in (-1.6, -0.8, 0.0, 0.8, 1.6):
-            k.blk((x - 0.04, y0, top - 0.12), (x + 0.04, y1, deck + 0.55), "works_yellow")
-            k.blk((x - 0.06, y0, top - 0.14), (x + 0.06, y1, top - 0.04), "frame_black")
+            k.prism([(x - 0.042, top - 0.2), (x + 0.042, top - 0.2), (x + 0.03, deck + 0.55), (x - 0.03, deck + 0.55)],
+                    "y", y0, y1, "works_yellow")
+            k.blk((x - 0.038, min(y0, y1) - 0.004, deck + 0.55), (x + 0.038, max(y0, y1) + 0.004, deck + 0.575),
+                  "frame_black")  # its cap
+            for dx in (-1.0, 1.0):  # the pocket's cheeks and its face
+                k.blk((x + dx * 0.055 - 0.01, min(s * 0.9, s * HD), top - 0.2),
+                      (x + dx * 0.055 + 0.01, max(s * 0.9, s * HD), top - 0.04), "frame_black")
+            k.blk((x - 0.065, min(s * (HD - 0.012), s * HD), top - 0.2), (x + 0.065, max(s * (HD - 0.012), s * HD),
+                  top - 0.12), "frame_black")
     k.mark("deck")
     # Two stacks of concrete sleepers across the wagon, three layers on timber dunnage.
     sw, sl, sh = SLEEPER
@@ -100,36 +147,45 @@ def build() -> object:
                     k.blk((x0, y - 0.05, z), (x0 + PER_LAYER * (sw + 0.03) - 0.03, y + 0.05, z + 0.05), "timber")
             z += 0.05
     k.mark("sleepers")
-    # The tarpaulin over a load of kit on the top layer, lashed down by four straps.
+    # The tarpaulin over a load of kit on the top layer, crumpled a little, lashed down by four straps.
     z0 = z
     bm = k.bm
     nx, ny = 19, 14
     xs, ys = tarp_lines(nx, TARP_X, 0.1), tarp_lines(ny, TARP_Y, 0.2)
-    grid = [[bm.verts.new(Vector((x, y, tarp_h(x, y, z0)))) for x in xs] for y in ys]
+
+    def crumple(x: float, y: float) -> float:
+        return (wt.fbm(Vector((x * 2.0, y * 2.0, 0.0)), 0.5, 57) - 0.5) * 0.03 * (1.0 - (abs(y) / TARP_Y) ** 6)
+    grid = [[bm.verts.new(Vector((x, y, min(HIGH, tarp_h(x, y, z0) + crumple(x, y))))) for x in xs] for y in ys]
     faces = [bm.faces.new((grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i])) for j in range(ny)
              for i in range(nx)]
-    # the tarp's skirt hanging down over the top layer's sides and ends
+    # the tarp's skirt hanging down over the top layer's sides and ends, its hem rolled
     edge = [grid[0][i] for i in range(nx + 1)] + [grid[j][nx] for j in range(1, ny + 1)] + \
         [grid[ny][i] for i in range(nx - 1, -1, -1)] + [grid[j][0] for j in range(ny - 1, 0, -1)]
-    low = [bm.verts.new(Vector((v.co.x * 1.012, v.co.y * 1.02, z0 - 0.16))) for v in edge]
+    low = [bm.verts.new(Vector((v.co.x * 1.012, v.co.y * 1.02,
+                                z0 - 0.15 - 0.02 * math.sin(v.co.x * 9.0 + v.co.y * 7.0)))) for v in edge]
+    hem = [bm.verts.new(Vector((v.co.x * 1.0 + (0.008 if v.co.x > 0 else -0.008) * (abs(v.co.x) > TARP_X * 0.99),
+                                v.co.y * 1.0 + (0.008 if v.co.y > 0 else -0.008) * (abs(v.co.y) > TARP_Y * 0.99),
+                                v.co.z - 0.03))) for v in low]
     for a in range(len(edge)):
         b = (a + 1) % len(edge)
         faces.append(bm.faces.new((edge[a], edge[b], low[b], low[a])))
+        faces.append(bm.faces.new((low[a], low[b], hem[b], hem[a])))
     for f in faces:
         f.normal_update()
     import bmesh
     bmesh.ops.recalc_face_normals(bm, faces=faces)
     k._faces(faces, "tarp")
     k.mark("tarp")
-    for x in STRAPS:  # straps over the tarp to the solebars
-        pts = []
-        for y in ys:
-            pts.append((x, y * 1.01, tarp_h(x, y, z0) + 0.012))
-        pts = [(x, -HD + 0.01, top - 0.05), (x, -TARP_Y * 1.02, z0 - 0.16)] + pts + \
-            [(x, TARP_Y * 1.02, z0 - 0.16), (x, HD - 0.01, top - 0.05)]
-        k.loft([[(px - 0.025, py, pz), (px + 0.025, py, pz)] for px, py, pz in pts], "strap", cap0=False, cap1=False,
-               closed=False)  # a flat strap, one face up and out
-        k.blk((x - 0.04, -HD, top - 0.25), (x + 0.04, -HD + 0.04, top - 0.12), "steel_bare")  # its ratchet
+    for x in STRAPS:  # straps over the tarp, down the sleepers' ends to ratchets and hooks under the solebars
+        over = [(y * 1.01, tarp_h(x, y, z0) + crumple(x, y) + 0.004) for y in ys]
+        down = [(TARP_Y * 1.03, z0 - 0.17), (0.945, z0 - 0.2), (0.945, deck + 0.12), (0.93, top - 0.25)]
+        pts = [(-y, z) for y, z in reversed(down)] + over + down
+        strap(k, x, pts, (0.0, z0 - 0.3))
+        for s in (-1.0, 1.0):
+            zr = deck + 0.22
+            k.blk((x - 0.04, min(s * 0.951, s * 0.985), zr - 0.06), (x + 0.04, max(s * 0.951, s * 0.985), zr + 0.06),
+                  "steel_bare")  # its ratchet
+            k.sqbar((x, s * 0.975, zr + 0.04), (x, s * 0.975, zr + 0.2), 0.03, "rubber", h=0.014)  # its handle
     k.mark("straps")
     return k.build()
 
