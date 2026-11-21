@@ -191,3 +191,15 @@ func test_campfire_and_lantern_fixtures_draw_surfaced() -> void:
 	var m := LightFixtures._prop_material(fx)
 	assert_eq(m.shader, LookMaterials.SURFACE_SHADER, "the fixtures' props use their surfaces' shader")
 	assert_not_null(m.get_shader_parameter(&"surfaces"), "their surface array loads (as TextureLayered)")
+
+
+func test_a_pine_crown_reads_its_cutout_from_a_fine_mip_and_an_oak_crown_keeps_the_full_range() -> void:
+	var d := _dress(cfg)
+	for model: StringName in [&"pine_young_crown", &"pine_grown_crown", &"pine_old_crown"]:
+		assert_eq(d._material_of(model).get_shader_parameter(&"alpha_lod"), 2.0, "%s limits its alpha mip" % model)
+	assert_eq(d._material_of(&"oak").get_shader_parameter(&"alpha_lod"), PropDress.ALPHA_LOD, "oak keeps the default")
+	var plain := cfg.duplicate() as PropDressConfig
+	plain.model_alpha_lod = {}
+	var d2 := _dress(plain)
+	assert_eq(d2._material_of(&"pine_grown_crown").get_shader_parameter(&"alpha_lod"), PropDress.ALPHA_LOD)
+	assert_not_same(d._material_of(&"pine_grown_crown"), d._material_of(&"spruce"), "alpha mip is part of the cache key")
