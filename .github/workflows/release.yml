@@ -115,9 +115,11 @@ jobs:
           chmod +x build/linux/Airsoft.x86_64
           ls -la build/*
 
+      # The smoke match takes about two minutes on a runner (main 114 s on 2026-11-21), so the guard against a hang
+      # allows five, as tools/smoke_test.sh allows the editor's run ten.
       - name: Check the Linux build starts, runs and shows its version
         run: |
-          timeout 120 build/linux/Airsoft.x86_64 --headless -- --smoke 2>&1 | tee exported.log
+          timeout 300 build/linux/Airsoft.x86_64 --headless -- --smoke 2>&1 | tee exported.log
           grep -q "^\[smoke\] ok" exported.log
           grep -qF "[boot] Airsoft $NAME " exported.log
           ! grep -qE "SCRIPT ERROR|Parse Error" exported.log

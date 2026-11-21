@@ -59,6 +59,9 @@ were; the woodpiles (RM2) are closed and untouched; Low keeps 60 FPS.
 
 ## Decisions
 
+- The Linux build's smoke check in `release.yml` waits 5 minutes, not 2, as the Windows build's already does: the smoke
+  match takes about two minutes on a runner (main 114 s), and this branch's run went over twice by a second or two
+  (head to head with main in the cloud, 130 s against 128 s).
 - **Leaf cards on photo bark replace the solid clumps (default taken, DECISIONS).** The owner asked for better leaves,
   branches and textures; cut-out cards over a darker core is the way real-time trees get leaves without losing fill.
 - **Low reads less (GraphicsApply.SURFACE_DETAIL 0).** The performance review measured the software renderer's GPU
