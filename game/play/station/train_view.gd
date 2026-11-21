@@ -62,13 +62,13 @@ static func build(map: MapData, look: TrainLook, roof: RoofConfig = null) -> Tra
 	return view
 
 
-## Model `path`'s material: the strips' and the LEDs' glow, the windows' glass, else the props'.
+## Model `path`'s material: the strips' and the LEDs' glow, the windows' and the draft screens' glass, else the props'.
 func _material_of(look: TrainLook, path: String) -> Material:
 	if path == look.lights:
 		return _lamps
 	if look.leds.values().has(path):
 		return _leds
-	if path == look.windows or path == look.door_glass:
+	if path == look.windows or path == look.screens or path == look.door_glass:
 		return _glass
 	return _material
 
@@ -176,6 +176,7 @@ static func _place_car(look: TrainLook, car: TrainDressing.Car, placed: Dictiona
 	var half := Basis(Vector3.UP, PI)
 	_put(placed, look.body, at)
 	_put(placed, look.windows, at)
+	_put(placed, look.screens, at)
 	_put(placed, look.lights, at)
 	_put(placed, look.lights, at * Transform3D(half, Vector3.ZERO))
 	for slot in TrainDressing.SLOTS:

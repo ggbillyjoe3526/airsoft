@@ -19,6 +19,7 @@ render_mode blend_mix, cull_back;
 #include "res://game/play/look/look_light.gdshaderinc"
 #include "res://game/play/look/retro_vertex.gdshaderinc"
 #include "res://game/play/look/look_wear.gdshaderinc"
+#include "res://game/play/look/look_surface.gdshaderinc"
 
 uniform vec4 tint : source_color = vec4(1.0);
 uniform float roughness : hint_range(0.0, 1.0) = 0.8;
@@ -50,10 +51,19 @@ varying vec3 paint;
 varying vec2 perforation;
 varying vec3 wear_at; // world position
 varying float wear_foot; // metres over the model's floor
+// A part whose UV y is SURFACE_KIND_BASE or over (TQ1, Subway's trains) is made of kind UV y - SURFACE_KIND_BASE
+// (look_surface.gdshaderinc: gloss paint, steel, moquette, the floor's speckle, glass, rubber), its roughness,
+// metalness and fine pattern; its UV x is 0, so it is never perforated or ribbed, and no texture's UV reaches it.
+varying vec3 own_at; // the model's own position and normal, for its surface kind's pattern
+varying vec3 own_n;
+varying float surface_kind;
 
 void vertex() {
 	paint = paint_by_custom ? mix(vec3(1.0), INSTANCE_CUSTOM.rgb, COLOR.a) : vec3(1.0);
 	perforation = perforations ? UV : vec2(0.0);
+	own_at = VERTEX;
+	own_n = NORMAL;
+	surface_kind = UV.y >= SURFACE_KIND_BASE - 0.5 ? UV.y - SURFACE_KIND_BASE : 0.0;
 	wear_at = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	wear_foot = wear_at.y - (MODEL_MATRIX * vec4(0.0, wear_floor, 0.0, 1.0)).y;
 	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1).
@@ -89,13 +99,23 @@ void fragment() {
 	}
 	vec3 col = own * paint * LOOK_LINEAR(tint.rgb);
 	float rough = roughness;
+	float metal = metallic;
+	float spec = specular;
+	float worn = 1.0;
+	if (surface_kind > 0.5) {
+		look_surface(surface_kind, own_at, own_n, col, rough, metal, spec, worn);
+	}
+	vec3 clean = col;
+	float clean_rough = rough;
 	look_worn(col, rough, (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz, wear_at, wear_foot);
+	col = mix(clean, col, worn);
+	rough = mix(clean_rough, rough, worn);
 	vec3 albedo = look_paint(col);
 	if (keep_by_alpha) {
 		albedo = mix(albedo, col, COLOR.a);
 	}
 	ALBEDO = LOOK_ALBEDO(albedo);
 	ROUGHNESS = rough;
-	METALLIC = metallic;
-	SPECULAR = specular;
+	METALLIC = metal;
+	SPECULAR = spec;
 }

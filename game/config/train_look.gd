@@ -15,6 +15,8 @@ extends Resource
 ## see-through in the clear material (`glass_opacity`, `glass_roughness`) over the body's open windows. The map's
 ## `glass` blocks in the holes stop BBs and bodies but not the eye (MapStyle.clear_kinds), so bots see through too.
 @export var windows: String = "res://assets/models/props/train_windows.glb"
+## The draft screens' glass over the seats' ends, a car's (TQ1, the owner's photos), drawn in the same clear material.
+@export var screens: String = "res://assets/models/props/train_screens.glb"
 @export_range(0.0, 1.0) var glass_opacity: float = 0.3
 @export_range(0.0, 1.0) var glass_roughness: float = 0.1
 @export var gangway: String = "res://assets/models/props/train_gangway.glb"
@@ -56,7 +58,7 @@ var _meshes: Dictionary[String, Mesh] = {}
 
 ## Every model's path.
 func paths() -> PackedStringArray:
-	var out := PackedStringArray([body, door, door_glazed, door_glass, windows, gangway, lights])
+	var out := PackedStringArray([body, door, door_glazed, door_glass, windows, screens, gangway, lights])
 	for k: StringName in ends:
 		out.append(ends[k])
 	for k: StringName in leds:
