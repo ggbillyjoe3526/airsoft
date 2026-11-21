@@ -177,9 +177,10 @@ One team starts in the ticket hall at the west end, the other down in the runnin
 - **Four ways down** to the platforms, 8 m below: the escalators to the lower hall between the platform tunnels, an
   ordinary stair with a half landing, the spiral stair straight down to the south platform, and the two **lifts**.
   A lift has two stops, the hall and the platforms, and takes 4 seconds. Call it from its landing (**CALL LIFT [G]**), or step in and
-  press the stop you want on its panel (**GO TO TICKET HALL [G]**): from inside, the doors start to shut at once, and they never shut on anyone
-  in the doorway. You hear the doors start a moment before they move, their chime and opening as the car arrives, and
-  the motor, from outside too.
+  press the stop you want on its panel (**GO TO TICKET HALL [G]**): from inside, the doors start to shut as you press,
+  even standing right by them (you step back from the doors as they shut), and they never shut on anyone in the
+  doorway from outside. Inside the car you hear the doors start a moment before they move, the motor, and the chime
+  and the doors opening as it arrives; outside a car you hear only its buttons.
 - **The platforms** run level from end to end, each under its own tiled, curved tunnel beside its track: staff booths,
   works hoardings, crates and benches break the 100 m platforms into short lanes. The tracks lie 0.9 m below the
   platform edge, low enough to climb in and out of anywhere. The north train stands at its platform with five doors
