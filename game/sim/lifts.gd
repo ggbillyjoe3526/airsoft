@@ -311,9 +311,11 @@ func _press_button(i: int, k: int, c: Character, state: GameState) -> void:
 		if inside and lifts.phase[i] == LiftState.Phase.OPEN:
 			lifts.left[i] = minf(lifts.left[i], _cfg.panel_dwell)
 		# From inside, opening: they shut again from where they stand, heard on the press, as a press standing open
-		# shuts them at once (docs/records/LS1.md). Not with anyone hit aboard or too many: those keep it open anyway.
+		# shuts them at once (docs/records/LS1.md). Not with anyone hit aboard, too many or anyone in the doorway from
+		# outside: those keep it open anyway.
 		elif inside and lifts.phase[i] == LiftState.Phase.OPENING and not _hit_aboard(i, lifts, state.characters) \
-				and aboard(i, lifts, state.characters) <= _cfg.capacity:
+				and aboard(i, lifts, state.characters) <= _cfg.capacity \
+				and _blocked_from_outside(i, lifts.stop[i], lifts, state.characters) < 0:
 			_start_shut(i, state, _cfg.shut_lead + _cfg.shut_time() * lifts.doors[i])
 		return
 	match lifts.phase[i]:

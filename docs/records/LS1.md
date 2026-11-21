@@ -1,6 +1,6 @@
 # LS1 · Subway's lift sounds start on the press, heard only inside
 
-**Review:** pending
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner's 0.1 Beta 2 playtest (2026-11-21), after UL3: "lift sound timing still off. should play just after the
 player presses a button. should also only play when the player is inside the lift".
@@ -11,7 +11,7 @@ player presses a button. should also only play when the player is inside the lif
 |---|---|---|---|---|---|
 | 2026-11-21 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | check 1: a press from inside while the doors open waited door_time + dwell |
 | 2026-11-21 | 2 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | check 1: with another rider aboard, a press while opening still waited the dwell |
-| 2026-11-21 | 3 | Opus 5.5 (build thread) | ✓ | – | – |
+| 2026-11-21 | 3 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – (nit taken: no shut from ajar with someone in the doorway from outside) |
 
 ## Decisions
 
@@ -41,4 +41,8 @@ player presses a button. should also only play when the player is inside the lif
 
 ## Known issues left
 
-- How it sounds and feels in play: PLAYTEST LS1 and the Beta 2 checklist.
+- How it sounds and feels in play: PLAYTEST LS1 and the Beta 2 checklist (N52).
+- A bot boarding a car while it opens can press and shut it on a rider who meant to get out there; they can press
+  their stop to reopen it, as against a press standing open (critic note; can wait).
+- UL3's note that a landing off to the side no longer muffles the doors is moot now: outside a car they aren't heard
+  (its changelog line removed).
