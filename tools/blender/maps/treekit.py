@@ -514,6 +514,8 @@ class Tree:
             for i in f:
                 self.verts[i] = self.verts[i] + shift
             keep.append(f)
+        print("%s: %d of %d leaf cards kept in the crown's box" % (self.name, len(cards) - (len(self.faces) - len(keep)),
+                                                                 len(cards)))
         self.faces = keep
         self.card_faces = []
         self.card_homes = {}

@@ -265,10 +265,12 @@ def bend(p0: tuple, ang: float, length: float, curl: float, n: int) -> list:
 
 
 def needle_shoot(cell: Cell, base: tuple, ang: float, length: float, needle: float, density: float,
-                 spread: float, curl: float, shade: float, forward: float = 0.55, w: float = 3.0) -> None:
+                 spread: float, curl: float, shade: float, forward: float = 0.55, w: float = 3.0,
+                 ragged: float = 0.0) -> None:
     """A pine shoot: a twig from `base` heading `ang`, `length` long, clothed along its outer three quarters in long
     needles `needle` long fanned `spread` radians off it and swept `forward` toward its tip (a bottlebrush seen from
-    the side), the inner ones darker (deeper in), the tip's paler (new growth)."""
+    the side), the inner ones darker (deeper in), the tip's paler (new growth); `ragged` (0 to 1) scatters the
+    needles' lengths, so the brush's outline is jagged and stays so mipped far off."""
     rng = cell.rng
     path = bend(base, ang, length, curl, 8)
     count = int(length * density)
@@ -285,7 +287,8 @@ def needle_shoot(cell: Cell, base: tuple, ang: float, length: float, needle: flo
         a = heading + side * rng.uniform(0.25, spread) * (1.0 - forward * 0.5)
         a = a * (1.0 - forward) + heading * forward if abs(a - heading) > 0.0 else a
         a += side * rng.uniform(0.1, 0.6)
-        ln = needle * rng.uniform(0.7, 1.1) * (0.75 + 0.25 * math.sin(math.pi * min(1.0, t * 1.1)))
+        ln = needle * rng.uniform(0.7 - 0.35 * ragged, 1.1 + 0.4 * ragged) \
+            * (0.75 + 0.25 * math.sin(math.pi * min(1.0, t * 1.1)))
         tip = (px + math.sin(a) * ln, py - math.cos(a) * ln)
         mid = (px + math.sin(a + side * 0.12) * ln * 0.5, py - math.cos(a + side * 0.12) * ln * 0.5)
         depth = rng.random()
@@ -303,34 +306,30 @@ def needle_shoot(cell: Cell, base: tuple, ang: float, length: float, needle: flo
 
 
 def pine_cell(seed: int, young: bool = False) -> Image.Image:
-    """A Scots pine's branch end (owner's photos, 01-pine-tree): a bare twig forking into long, narrow bottlebrush
-    shoots that turn up at their ends, sky between them, so the spray reads as spiky needle brushes near and as a
-    ragged tuft (never a round leaf) once mipped far off. A young pine's: a whorl of long brushes from one node."""
+    """A Scots pine's branch end (owner's photos, 01-pine-tree): a bare shoot with two or three long, narrow
+    bottlebrushes off it at different heights, turning up and crossing, their needles hair-thin and their ends ragged,
+    so the spray reads as bristly needle brushes near and as a ragged tuft (never a hand or a leaf) once mipped far
+    off. A young pine's: the same, slenderer, two brushes off the leader (its whorls swept up)."""
     c = Cell(seed)
     s = c.s
     rng = c.rng
-    if young:
-        # a young pine's whorl seen from the side: long, thin brushes radiating from its node with gaps between, the
-        # upper ones longest (the photos' young pines), so it reads as a spiky star, never a fan or a hand
-        hub = (s * 0.5, s * 0.56)
-        for k in range(7):
-            a = math.tau * k / 7 + rng.uniform(-0.12, 0.12)
-            up = -math.cos(a)  # 1 straight up, -1 straight down
-            ln = s * (0.36 + 0.08 * max(0.0, up) - 0.1 * max(0.0, -up)) * rng.uniform(0.85, 1.05)
-            needle_shoot(c, hub, a, ln, s * 0.075, 1.2, 1.3, -0.35 * math.sin(a), rng.uniform(0.7, 0.95),
-                         forward=0.3, w=1.8)
-        return c.done()
-    # the twig up the cell, forking low into five long, narrow brushes that turn up at their tips, sky between them
-    # (wide enough apart that the gaps stay open three mip levels down, where a pine draws 10 to 20 m off)
-    base = (s * 0.5, s * 0.97)
-    hub = (s * 0.5 + rng.uniform(-12, 12), s * 0.86)  # low: the brushes start at the card's foot, on their tuft
-    c.line(base, hub, 10, (0.5, 0.4, 0.33))
-    n = 5
-    for k in range(n):
-        a = -1.1 + 2.2 * k / (n - 1) + rng.uniform(-0.08, 0.08)
-        ln = s * rng.uniform(0.5, 0.62) * (1.0 - 0.2 * abs(a) / 1.1)
-        # hair-thin needles splayed wide off the shoot, so it reads as a bristly brush, never a frond of leaflets
-        needle_shoot(c, hub, a, ln, s * 0.075, 1.2, 1.3, -0.5 * a, rng.uniform(0.62, 0.85), forward=0.3, w=1.8)
+    # a shoot up the cell with two or three brushes off it at different heights, of unequal length, curving up and
+    # crossing (never fanned from one point: that reads as a hand once mipped), their needle ends ragged
+    base = (s * 0.5 + rng.uniform(-20, 20), s * 0.97)
+    lean = rng.uniform(-0.25, 0.25)
+    main = bend(base, lean, s * 0.25, -lean * 0.5, 4)
+    c.line(base, main[-1], 8, (0.5, 0.4, 0.33))
+    slender = 0.85 if young else 1.0
+    # the leading brush on up the shoot
+    needle_shoot(c, main[-1], lean * 0.5, s * rng.uniform(0.55, 0.65), s * 0.085 * slender, 1.2, 1.2, -lean * 0.4,
+                 rng.uniform(0.68, 0.88), forward=0.35, w=1.8, ragged=1.0)
+    # side brushes out of the shoot low down, each its own way, sweeping up across the leader
+    sides = [-1.0, 1.0] + ([rng.choice((-1.0, 1.0))] if not young and rng.random() < 0.7 else [])
+    for n, side in enumerate(sides):
+        at = main[min(len(main) - 1, 1 + n)]
+        a = side * rng.uniform(0.75, 1.05)
+        needle_shoot(c, at, a, s * rng.uniform(0.38, 0.52) * slender, s * 0.08 * slender, 1.2, 1.2,
+                     -a * rng.uniform(0.7, 1.0), rng.uniform(0.62, 0.85), forward=0.35, w=1.8, ragged=1.0)
     return c.done()
 
 

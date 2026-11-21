@@ -37,6 +37,8 @@ BARK_UPPER = tk.srgb(0xBCAE74)      # golden tan: the photos' orange upper bark,
 BARK_YOUNG = tk.srgb(0x9C9470)
 STUB = tk.srgb(P["stone"], 0.85)
 TWIG = tk.srgb(P["bark"], 0.55)  # the crown's twigs out to its lesser clumps: dark, so they read as wood in shade
+# the crown's limbs: darker than the bole's golden tan (WQ1), which shows only on the bole under the crown
+LIMB = tk.mix(BARK_UPPER, tk.srgb(P["bark"], 0.65), 0.6)
 NEEDLE_TOP = tk.mix(tk.srgb(P["pine"], 0.86), tk.srgb(P["canopy"], 0.86), 0.35)  # WQ1: the photos' dark needles
 NEEDLE_UNDER = tk.srgb(P["forest"], 0.72)
 # How high (m, in the model) anything but the stem may come down: 2.6 m over the ground (WoodsConfig.crown_clear, over
@@ -50,10 +52,10 @@ NEEDLE_YOUNG = tk.mix(tk.srgb(P["canopy"]), tk.srgb(P["olive"]), 0.25)
 # NO_CORE), none moved off its tuft (CARD_SHIFT).
 PER_M2 = 1.1
 NO_CORE = 1e9
-LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.6, per_m2=PER_M2 * 1.15, least=6,
+LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.6, per_m2=PER_M2 * 1.08, least=6,
                  most=18, core_min=NO_CORE, tilt=(0.45, 0.9), under=0.8)
 CARD_SHIFT = 0.1
-CARD_REACH = 1.3  # no card's middle more than this many of its clump's radii from it
+CARD_REACH = 1.15  # no card's middle more than this many of its clump's radii from it
 
 # the old pine's bigger clouds take more sprays each
 LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.7, per_m2=PER_M2,
@@ -181,7 +183,7 @@ def grown() -> None:
             a = spin + math.tau * k / n + rng.uniform(-0.3, 0.3)
             out = Vector((math.cos(a), 0.0, math.sin(a)))
             ln = reach * rng.uniform(0.7, 1.2)
-            bp = branch(tree, at, out, ln, ln * rng.uniform(0.05, 0.25), 0.08, 3, 1, BARK_UPPER, flake=1.0)
+            bp = branch(tree, at, out, ln, ln * rng.uniform(0.05, 0.25), 0.08, 3, 1, LIMB, flake=1.0)
             size = 1.0 + 1.1 * shape
             # the tip's tuft droops a little under the branch's end; the branch is clothed to the stem
             tree.tuft(bp[-1] - UP * 0.12 * size - out * 0.25, size, out, 2, NEEDLE_TOP, NEEDLE_UNDER, centre,
@@ -197,8 +199,10 @@ def grown() -> None:
     for k in range(4):
         a = math.tau * k / 4 + rng.uniform(-0.4, 0.4)
         out = Vector((math.cos(a), 0.0, math.sin(a)))
-        tree.tuft(path[-1] + UP * rng.uniform(-1.3, -0.6) + out * rng.uniform(0.45, 0.8), 0.95, out, 1, NEEDLE_TOP,
-                  NEEDLE_UNDER, centre, flat=0.9)
+        at = path[-1] + UP * rng.uniform(-1.3, -0.6) + out * rng.uniform(0.45, 0.8)
+        # on a shoot from the leader, so it never hangs in the air (WQ1)
+        tree.limb([axis_at(path, at.y - 0.25), at], [0.035, 0.02], 3, lambda t, a: TWIG, cap=False)
+        tree.tuft(at, 0.95, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.9)
     tree.export(2000, foot_r, CLEAR_GROWN, crown=True)
 
 
@@ -232,18 +236,18 @@ def old() -> None:
         ln = (3.0 - 1.3 * t) * rng.uniform(0.85, 1.15) * (1.0 + 0.3 * math.cos(a - lop))
         rise = ln * rng.uniform(0.3, 0.5) + (height * 0.88 - y) * 0.15
         at = axis_at(path, y)
-        lp = branch(tree, at, out, ln, rise, 0.14 - 0.05 * t, 5, 3, BARK_UPPER, droop=-0.2 * ln, flake=1.0)
+        lp = branch(tree, at, out, ln, rise, 0.14 - 0.05 * t, 5, 3, LIMB, droop=-0.2 * ln, flake=1.0)
         side = out.cross(UP).normalized() * rng.choice((-1.0, 1.0))
         start = tk.along(lp, 0.6)
         fo = (out + side * rng.uniform(0.6, 1.0)).normalized()
         fl = ln * rng.uniform(0.4, 0.55)
-        fp = branch(tree, start, fo, fl, fl * 0.35, 0.05, 4, 2, BARK_UPPER, flake=1.0)
+        fp = branch(tree, start, fo, fl, fl * 0.35, 0.05, 4, 2, LIMB, flake=1.0)
         tree.tuft(fp[-1] + UP * 0.15, 2.0 + 0.4 * (1.0 - t), fo, 3, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,
                   spread=0.6, twig=TWIG)
         # a second, shorter fork to the other side, nearer the bole
         fo2 = (out - side * rng.uniform(0.5, 0.9)).normalized()
         fl2 = ln * rng.uniform(0.3, 0.42)
-        fp2 = branch(tree, tk.along(lp, 0.4), fo2, fl2, fl2 * 0.45, 0.045, 4, 2, BARK_UPPER, flake=1.0)
+        fp2 = branch(tree, tk.along(lp, 0.4), fo2, fl2, fl2 * 0.45, 0.045, 4, 2, LIMB, flake=1.0)
         tree.tuft(fp2[-1] + UP * 0.15, 1.7 + 0.3 * (1.0 - t), fo2, 2, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.65,
                   spread=0.55, twig=TWIG)
         tree.tuft(lp[-1] + UP * 0.2, 2.4 + 0.5 * (1.0 - t), out, 4, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,
