@@ -98,7 +98,8 @@ and a few seconds after the hit you come back into the round with full magazines
 flag goes up or the bomb is planted. **Elimination** keeps one life a round. The Custom rule **Respawns** can turn them
 on in every mode, or off in all of them. Someone still walking off as their wait runs out fades from the field over
 half a second before they come back, never blinking out mid-walk; while anyone can see them they walk on first, up to
-3 s more, so they fade out of sight where they can.
+3 s more, so they fade out of sight where they can (thick leaves or a smoke cloud between hide them, as they hide you
+from the bots).
 
 - **How long you wait.** The attackers wait <!-- wiki:config round_config.respawn_delay --> seconds. The defenders'
   wait in Attack / Defend is set for each field so both sides win about as often: 15 s on **Depot**, whose poles are

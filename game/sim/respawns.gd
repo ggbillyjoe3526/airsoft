@@ -82,11 +82,12 @@ static func resolve(c: Character, rs: RoundState, ends: Array[MapEnd], character
 ## One tick (`dt` s) of the live round's respawns, before Round.step judges wipe-outs: each character out of play takes
 ## its controller's pick (`commands` by id; none: the start area) and, newly out, starts its wait; one still walking
 ## off leaves the field as its wait's last HitConfig.vanish_time starts once nobody in play sees it (seen, through
-## `query` with `hit` for its rays; none given, nobody does) or it has walked HitConfig.seen_most past it, and a wait
-## run out brings it back (a RESPAWNED event) once it is out (still calling its hit, it calls, walks off and leaves
-## first). Once respawns are shut (Plant The Bomb's bomb armed), every wait is dropped.
+## `query` with `hit` for its rays and the round's `grenades` for their smoke; none given, nobody does) or it has
+## walked HitConfig.seen_most past it, and a wait run out brings it back (a RESPAWNED event) once it is out (still
+## calling its hit, it calls, walks off and leaves first). Once respawns are shut (Plant The Bomb's bomb armed), every wait is dropped.
 static func step(rs: RoundState, characters: Array[Character], commands: Array[PlayerCommand], ends: Array[MapEnd],
-		tuning: SimTuning, events: SimEvents, dt: float, query: WorldQuery = null, hit: RayHit = null) -> void:
+		tuning: SimTuning, events: SimEvents, dt: float, query: WorldQuery = null, hit: RayHit = null,
+		grenades: Array[Grenade] = []) -> void:
 	if not rs.is_live():
 		return
 	var is_open := open(rs)
@@ -108,7 +109,7 @@ static func step(rs: RoundState, characters: Array[Character], commands: Array[P
 		# out of sight as it comes back, never drawn at its spawn in a blink (the owner's playtest of 0.1 Beta 2, item
 		# 6); seen, it walks on (at most seen_most) so nobody watches it fade where it stands; once out, it comes back.
 		if c.status == Character.Status.WALKING_OFF and c.respawn_left <= tuning.hits.vanish_time:
-			if c.respawn_seen < tuning.hits.seen_most and seen(c, characters, tuning, query, hit):
+			if c.respawn_seen < tuning.hits.seen_most and seen(c, characters, tuning, query, hit, grenades):
 				c.respawn_seen += dt
 			else:
 				Elimination.leave(c)
@@ -117,9 +118,10 @@ static func step(rs: RoundState, characters: Array[Character], commands: Array[P
 
 
 ## Whether anyone in play sees `c` (HitConfig.seen_range, seen_angle): faces it, near enough, with a clear sight line
-## (`query`'s sight_ray, into `hit`) from their eye to its chest. False with no `query`.
+## (`query`'s sight_ray, into `hit`) from their eye to its chest, through no more than seen_leaves of bush (`query`'s
+## foliage) and seen_smoke of `grenades`' smoke. False with no `query`.
 static func seen(c: Character, characters: Array[Character], tuning: SimTuning, query: WorldQuery,
-		hit: RayHit) -> bool:
+		hit: RayHit, grenades: Array[Grenade] = []) -> bool:
 	if query == null or hit == null:
 		return false
 	var hits := tuning.hits
@@ -137,8 +139,14 @@ static func seen(c: Character, characters: Array[Character], tuning: SimTuning, 
 		var ahead := Vector2(-sin(o.yaw), -cos(o.yaw))
 		if flat.length_squared() > 1e-6 and flat.normalized().dot(ahead) < cone:
 			continue
-		if not query.sight_ray(eye, chest, hit):
-			return true
+		if query.sight_ray(eye, chest, hit):
+			continue
+		if query.foliage != null and query.foliage.depth(eye, chest, hits.seen_leaves) > hits.seen_leaves:
+			continue
+		if not grenades.is_empty() \
+				and Grenades.smoke_depth(grenades, tuning.grenades, eye, chest, hits.seen_smoke) > hits.seen_smoke:
+			continue
+		return true
 	return false
 
 

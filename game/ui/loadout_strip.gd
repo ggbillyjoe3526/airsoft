@@ -425,6 +425,11 @@ func _fill_confirm() -> void:
 	_confirm_box.add_child(row)
 	_link(&"remove_yes", "LOADOUT_REMOVE_YES", _remove_carried, row)
 	_link(&"keep", "LOADOUT_KEEP", cancel, row)
+	# no gap after the last link: the panel's room either side of its links is its own padding alone (BP12: Keep stood
+	# ACTION_GAP further from the panel's right edge than Remove from its left)
+	var tail := row.get_child(row.get_child_count() - 1)
+	row.remove_child(tail)
+	tail.free()
 
 
 ## Pops the Remove panel up beside the card menu, its foot level with the menu's (Remove is the menu's last row): on the
