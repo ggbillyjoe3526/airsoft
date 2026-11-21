@@ -145,7 +145,10 @@ kept in the vertex colours (a detail texel of 0.5 draws the paint as it is):
   crown's one soft shape; the sun through a leaf toward the eye glows a little (`look_foliage.gdshader`,
   `leaf_translucency` 0.35). A far crown keeps its fill: the cut-out's cover grows with each
   mip level. The crowns keep their bounds (cards past the clumps' box are moved back in), so cover, sight and LF1's leaf
-  counts are unchanged.
+  counts are unchanged. A crown's cards are drawn trimmed to the leaves they hold (WF1, `LeafTrim`, the rectangles in
+  `leaves_trim.tres` from `tools/textures/leaf_trim.py`) and open back out to their whole cell as they shrink on screen,
+  before their cut-out reads a coarser mip, so the same leaves draw at every distance for about half the fill. A new or
+  redrawn cell on the sheet needs the tool run again.
 - **Bark is photo bark** (CC0 ambientCG) with its normal map, tiled round each limb: the pines' plates with the upper
   bole's flaking bark (golden tan, never orange) blended over, the oak's ridges, the birch's own white with dark
   lenticels (made, not fetched); the thicket spruces wear the pine's.

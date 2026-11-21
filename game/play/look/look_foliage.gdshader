@@ -11,6 +11,10 @@
 // LOOK_TRANSLUCENT). Worn as look_vertex (SL2, `wear`: a trunk's foot; the crowns clean). On Low Mesh detail
 // (`look_surface_detail` 0, GraphicsApply.SURFACE_DETAIL) it reads the bark's colour alone: no relief and no second
 // bark (the performance review's advisory). Every preset grows a far leaf's cover by its mip level, from derivatives.
+// A tree crown's cards come trimmed to the leaves they draw (WF1, LeafTrim: each corner's way back out in CUSTOM0 and
+// CUSTOM1): each corner opens back out to the card's whole cell, along the card, as the card's cut-out nears
+// `trim_mip` (LeafTrimSheet.max_mip, the coarsest level the trim holds), so a leaf is drawn where it was at every
+// distance. The sun's shadow passes draw every card whole.
 shader_type spatial;
 render_mode blend_mix, cull_disabled, depth_draw_opaque;
 
@@ -37,6 +41,12 @@ uniform float alpha_edge : hint_range(0.0, 1.0) = 0.3;
 uniform float mip_cover : hint_range(0.0, 1.0) = 0.35;
 // The coarsest mip level a leaf's cut-out is read from (a needle tree's spiky bunches stay spiky far off).
 uniform float alpha_lod : hint_range(0.0, 16.0) = 16.0;
+// The coarsest mip level a trimmed card's rectangle holds (LeafTrimSheet.max_mip); a card is wholly open a level before.
+uniform float trim_mip = 6.0;
+// A trimmed card starts opening this many levels before trim_mip and is wholly open this many before (a trilinear
+// read a level finer than the screen's mip still lies inside the rectangle).
+const float TRIM_OPEN_FROM = 1.5;
+const float TRIM_OPEN_BY = 1.0;
 uniform bool retro_wobble = true;
 // Each instance's custom data paints the parts whose vertex alpha is 1 (PropDress's, DM1; look_vertex.gdshader's).
 uniform bool paint_by_custom = true;
@@ -48,7 +58,32 @@ varying vec3 wear_at;
 varying float wear_foot;
 varying float flake;
 
+// How far a trimmed card's corner opens out (0 trimmed, 1 its whole cell): by the mip level its cut-out would read here
+// (texels of the sheet a pixel, along the card's most foreshortened way), from a level and a half under `trim_mip`.
+float trim_open(vec3 at, vec3 grow, vec2 grow_uv, vec2 facing, mat4 modelview, mat3 normals, mat4 projection,
+		vec2 viewport) {
+	vec3 eye = (modelview * vec4(at, 1.0)).xyz;
+	bool flat_view = projection[3][3] > 0.5;
+	float metres_px = flat_view ? 2.0 / (projection[0][0] * viewport.x)
+			: max(-eye.z, 1e-3) * 2.0 / (projection[1][1] * viewport.y);
+	float texels_metre = length(grow_uv) * float(textureSize(sheet, 0).x) / max(length(mat3(modelview) * grow), 1e-6);
+	vec3 f = vec3(facing.x, 1.0 - abs(facing.x) - abs(facing.y), facing.y);
+	if (f.y < 0.0) {
+		f.xz = (1.0 - abs(f.zx)) * vec2(f.x >= 0.0 ? 1.0 : -1.0, f.z >= 0.0 ? 1.0 : -1.0);
+	}
+	vec3 to_eye = flat_view ? vec3(0.0, 0.0, 1.0) : normalize(-eye);
+	float side_on = max(abs(dot(normalize(normals * f), to_eye)), 1.0 / 256.0);
+	float mip = log2(max(metres_px * texels_metre / side_on, 1e-6));
+	return smoothstep(trim_mip - TRIM_OPEN_FROM, trim_mip - TRIM_OPEN_BY, mip);
+}
+
 void vertex() {
+	if (CUSTOM1.x != 0.0 || CUSTOM1.y != 0.0) {
+		float open = IN_SHADOW_PASS ? 1.0 : trim_open(VERTEX, CUSTOM0.xyz, CUSTOM1.xy, CUSTOM1.zw, MODELVIEW_MATRIX,
+				MODELVIEW_NORMAL_MATRIX, PROJECTION_MATRIX, VIEWPORT_SIZE);
+		VERTEX += CUSTOM0.xyz * open;
+		UV += CUSTOM1.xy * open;
+	}
 	paint = paint_by_custom ? mix(vec3(1.0), INSTANCE_CUSTOM.rgb, COLOR.a) : vec3(1.0);
 	flake = UV2.x;
 	wear_at = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;

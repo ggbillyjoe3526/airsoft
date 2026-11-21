@@ -17,6 +17,8 @@ const LIGHT_LIFT := 0.5
 const MIP_COVER := 0.35
 ## The coarsest mip a leaf card's cut-out is read from where PropDressConfig.model_alpha_lod names none (unlimited).
 const ALPHA_LOD := 16.0
+## A trimmed card's `trim_mip` when it never needs to open out: past any mip level a sheet has.
+const TRIM_NEVER_OPENS := 64.0
 
 ## By roughness (x), wear (y) and full colour (z, 1 or 0): the shared one and each model_roughness, model_wear or
 ## full_colour's.
@@ -48,7 +50,7 @@ static func build(map: MapData, cfg: PropDressConfig, paint: Callable = Callable
 		var mesh := cfg.mesh_of(model) # warns once when it won't load
 		if mesh == null:
 			continue
-		meshes[model] = mesh
+		meshes[model] = cfg.drawn_mesh_of(model)
 		boxes[model] = mesh.get_aabb()
 	var placed := PropLayout.layout(map, cfg, boxes, paint)
 	if placed.is_empty():
@@ -127,6 +129,13 @@ func _material_of(model: StringName) -> ShaderMaterial:
 
 ## Model `model`'s textured material (PropDressConfig.model_barks, WQ1), one for each set of barks, mip cover, alpha
 ## mip, roughness and wear; its maps loaded once a dress.
+## The mip level a model's trimmed cards open out before (look_foliage.gdshader `trim_mip`, WF1, LeafTrim): the sheet's
+## `max_mip`, past which its cut-out would read coarser than the rectangles hold; never, for a model whose cut-out is
+## read no coarser than `alpha_lod` a level inside that (the pines), so its far cards stay trimmed.
+static func trim_mip_of(alpha_lod: float, trim: LeafTrimSheet) -> float:
+	return TRIM_NEVER_OPENS if alpha_lod + 1.0 <= trim.max_mip else trim.max_mip
+
+
 func _foliage_of(model: StringName) -> ShaderMaterial:
 	var barks: PackedStringArray = _cfg.model_barks[model]
 	var rough: float = _cfg.model_roughness.get(model, _cfg.roughness)
@@ -141,6 +150,9 @@ func _foliage_of(model: StringName) -> ShaderMaterial:
 			maps[i * 2 + 1] = _texture("%s/%s_nor.png" % [_cfg.foliage_folder, barks[i]]) as Texture2D
 		_textured[key] = LookMaterials.foliage(_texture(_cfg.foliage_sheet) as Texture2D, maps[0], maps[1], maps[2], maps[3],
 				rough, wear, true, cover, lod)
+		var trim := _cfg.leaf_trim()
+		if trim != null:
+			(_textured[key] as ShaderMaterial).set_shader_parameter(&"trim_mip", trim_mip_of(lod, trim))
 	return _textured[key]
 
 
@@ -298,7 +310,7 @@ func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chu
 		view.name = "%s_%d_%d" % [String(model).capitalize(), cell.x, cell.y]
 		view.multimesh = mm
 		# its foot's grime climbs from the model's floor (its box's bottom), wherever its origin is (SL2)
-		LookMaterials.draw_worn(view, _material_of(model), mesh.get_aabb().position.y, _floors_by_material,
+		LookMaterials.draw_worn(view, _material_of(model), _cfg.mesh_of(model).get_aabb().position.y, _floors_by_material,
 				_floor_copies)
 		if not shadow:
 			view.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
