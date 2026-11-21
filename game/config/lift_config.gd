@@ -11,6 +11,12 @@ extends Resource
 ## starts before its leaves do (owner, 2026-11-20: "should play before doors close"); the leaves then shut in the rest
 ## (`shut_time`). Bodies are kept out of the doorway from the start, as before; BBs pass the leaves standing open.
 @export var shut_lead: float = 0.4
+## A body aboard still in the doorway as the doors start to shut (a press from just inside the door) is eased in at
+## this pace (m/s) until it stands step_in_gap (m) clear of the leaves (LS1, owner 2026-11-21: the doors' sound
+## "should play just after the player presses a button"; before, the car waited silently for that body to step in).
+## Quick enough to clear a body's radius within shut_lead, while the leaves still stand open.
+@export var step_in_speed: float = 1.0
+@export var step_in_gap: float = 0.01
 ## A car takes this long from one stop to the next (s), whatever the floors' height apart.
 @export var floor_time: float = 4.0
 ## Once its doors stand open, a car waits at least this long (s) before it shuts them for a call: time to walk out.

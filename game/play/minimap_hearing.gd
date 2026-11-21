@@ -69,6 +69,10 @@ func on_tick(state: GameState, listener: Character) -> void:
 				var shooter := state.character(e.actor)
 				if shooter != null:
 					_hear(shooter, e.position, _cfg.shot_reach * heard_scale(shooter, e.slot), Sound.SHOT, listener)
+			# Of a lift only its buttons' beeps: a car is heard only from inside it (SimAudio.heard_in_car, LS1), and
+			# whoever rides with you is in sight.
+			GameEvent.Kind.LIFT when e.value != Lifts.Cue.BUTTON:
+				pass
 			GameEvent.Kind.FOOTSTEP, GameEvent.Kind.VAULT, GameEvent.Kind.PROP_KNOCK, GameEvent.Kind.DOOR, \
 					GameEvent.Kind.LIFT:
 				var walker := state.character(e.actor)
