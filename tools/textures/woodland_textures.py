@@ -303,30 +303,41 @@ def needle_shoot(cell: Cell, base: tuple, ang: float, length: float, needle: flo
 
 
 def pine_cell(seed: int, young: bool = False) -> Image.Image:
-    """A pine's spray: a branch end forking into shoots, each a bottlebrush of long paired needles."""
+    """A Scots pine's branch end (owner's photos, 01-pine-tree): a bare twig forking into a clump of dense tufts, each a
+    few short shoots radiating from one point, thick with long paired needles, so the spray reads as dark brushes with
+    spiky edges near and as a lumpy tuft (never a leaf) once mipped far off. A young pine's: upright brushes."""
     c = Cell(seed)
     s = c.s
     rng = c.rng
     base = (s * 0.5, s * 0.97)
     if young:
-        # a young pine's leader and shoots: long upright brushes
-        for k in range(5):
-            a = (k - 2) * 0.32 + rng.uniform(-0.08, 0.08)
-            ln = s * (0.78 if k == 2 else rng.uniform(0.5, 0.66))
-            needle_shoot(c, (base[0] + (k - 2) * s * 0.04, base[1]), a, ln, s * 0.17, 0.45, 0.9,
-                         rng.uniform(-0.1, 0.1), 1.0, forward=0.6, w=4.0)
+        # a young pine's whorl seen from the side: long brushes radiating from its node every way, longest out to the
+        # sides and up, so it reads as a spiky star (the photos' young pines), never a fan or a hand
+        hub = (s * 0.5, s * 0.52)
+        for k in range(18):
+            a = math.tau * k / 18 + rng.uniform(-0.1, 0.1)
+            up = -math.cos(a)  # 1 straight up, -1 straight down
+            ln = s * (0.3 + 0.12 * max(0.0, up) - 0.12 * max(0.0, -up)) * rng.uniform(0.85, 1.05)
+            needle_shoot(c, hub, a, ln, s * 0.1, 0.5, 1.0, rng.uniform(-0.1, 0.1), rng.uniform(0.75, 0.95),
+                         forward=0.45, w=3.0)
         return c.done()
-    # the branch: up the cell, forking twice, each fork a shoot
-    stem_top = (s * 0.5 + rng.uniform(-30, 30), s * 0.6)
-    c.line(base, stem_top, 9, (0.5, 0.4, 0.33))
-    shoots = [(-0.75, 0.45), (-0.3, 0.58), (0.05, 0.62), (0.4, 0.55), (0.8, 0.42)]
-    rng.shuffle(shoots)
-    for a, ln in shoots:
-        a += rng.uniform(-0.12, 0.12)
-        start = (stem_top[0] + rng.uniform(-20, 20), stem_top[1] + rng.uniform(-10, 60))
-        c.line(base if rng.random() < 0.3 else stem_top, start, 6, (0.5, 0.4, 0.33))
-        needle_shoot(c, start, a, s * ln * rng.uniform(0.85, 1.05), s * 0.16, 0.55, 1.1, rng.uniform(-0.3, 0.3),
-                     1.0, forward=0.45, w=4.0)
+    # the twig up the cell to the clump, forking to each tuft spread through an oval
+    hub = (s * 0.5 + rng.uniform(-20, 20), s * 0.66)
+    c.line(base, hub, 10, (0.5, 0.4, 0.33))
+    tufts = []
+    for k in range(10):
+        a = rng.uniform(0.0, math.tau)
+        r = math.sqrt((k + 0.5) / 10.0)
+        tufts.append((s * 0.5 + math.cos(a) * r * s * 0.3, s * 0.4 + math.sin(a) * r * s * 0.24))
+    tufts.sort(key=lambda q: -q[1])
+    for x, y in tufts:
+        c.line(hub, (x, y), 6, (0.48, 0.38, 0.32))
+    for x, y in tufts:
+        out = math.atan2(x - hub[0], -(y - hub[1]))
+        for m in range(7):
+            sa = out + (m - 3) * 0.5 + rng.uniform(-0.2, 0.2)
+            needle_shoot(c, (x, y), sa, s * rng.uniform(0.07, 0.11), s * 0.11, 1.6, 1.3, rng.uniform(-0.2, 0.2),
+                         rng.uniform(0.75, 0.95), forward=0.3, w=5.0)
     return c.done()
 
 
@@ -362,9 +373,12 @@ def spruce_cell(seed: int) -> Image.Image:
     for i in range(2, len(main) - 1):
         for side in (-1.0, 1.0):
             t = i / (len(main) - 1)
-            ln = s * 0.42 * (1.0 - t) ** 0.6 * rng.uniform(0.8, 1.05) + s * 0.06
+            if rng.random() < 0.18:
+                continue  # a gap: the sprig's edge is ragged, never a clean diamond
+            ln = s * 0.42 * (1.0 - t) ** 0.6 * rng.uniform(0.5, 1.1) + s * 0.06
             heading = math.atan2(main[i + 1][0] - main[i][0], -(main[i + 1][1] - main[i][1]))
-            sides.append(bend(main[i], heading + side * rng.uniform(0.75, 1.05), ln, -side * 0.25, 6))
+            # side twigs hang: swept back and curling down (a spruce's drooping sprays)
+            sides.append(bend(main[i], heading + side * rng.uniform(0.9, 1.3), ln, -side * rng.uniform(0.3, 0.6), 6))
     for p in sides:
         comb(p, s * 0.045, 0.95)
     comb(main, s * 0.05, 1.05)
@@ -498,7 +512,7 @@ def fern_cell(seed: int) -> Image.Image:
             ang = heading + side * (1.15 - 0.4 * t)
             pin = bend(rach[i], ang, ln, -side * 0.35, 6)
             depth = rng.random()
-            shade = 0.82 + 0.3 * depth
+            shade = 0.6 + 0.65 * depth  # each pinna its own depth in the clump: dark deep, pale on top
             for a, b in zip(pin, pin[1:]):
                 c.line(a, b, 3, (0.8, 0.8, 0.55))
             # pinnules: rounded lobes along the pinna both sides
@@ -515,7 +529,9 @@ def fern_cell(seed: int) -> Image.Image:
                     pts = [(q[0] - wv[0], q[1] - wv[1]), (q[0] + wv[0], q[1] + wv[1]),
                            (tip[0] + wv[0] * 0.6, tip[1] + wv[1] * 0.6), tip,
                            (tip[0] - wv[0] * 0.6, tip[1] - wv[1] * 0.6)]
-                    c.poly(pts, vary(rng, shade * (0.92 + 0.12 * (1 - f)), 0.07, 0.25))
+                    # the pinnules facing the light paler than those turned from it, so a frond shows its relief
+                    lit = 1.14 if sd > 0.0 else 0.8
+                    c.poly(pts, vary(rng, shade * lit * (0.92 + 0.12 * (1 - f)), 0.07, 0.25))
     return c.done()
 
 
@@ -588,10 +604,10 @@ SURF = 512
 # relief's strength and whether the set's grain runs up it (turned to run along u, a face's longest edge).
 SURFACE_LAYERS = [
     None,                               # 0 plain
-    ("Wood058", 1.2, 0.2, 1.0, True),   # 1 sawn, weathered softwood: its grain along the board
+    ("Wood058", 1.5, 0.2, 1.2, True),   # 1 sawn, weathered softwood: its grain along the board
     ("Bark002", 1.1, 0.25, 1.0, True),  # 2 a log's bark, its furrows along the log
     "end",                              # 3 sawn and split ends: drawn here
-    ("Concrete034", 1.0, 0.15, 0.8, False),  # 4 cast concrete
+    ("Concrete034", 1.8, 0.15, 1.4, False),  # 4 cast concrete: its pits and board marks strong enough to read
     ("Metal038", 1.2, 0.1, 0.6, False),  # 5 galvanised and weathered steel
     ("Ground054", 1.0, 0.3, 1.0, False),  # 6 earth
     ("Moss002", 1.0, 0.4, 1.0, False),  # 7 moss

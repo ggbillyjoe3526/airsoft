@@ -36,7 +36,7 @@ BARK_FURROW = tk.srgb(P["bark"], 0.6)
 BARK_UPPER = tk.srgb(0xB0A472)      # golden tan: the photos' orange upper bark, 30 degrees of hue clear of Beta
 BARK_YOUNG = tk.srgb(0x9C9470)
 STUB = tk.srgb(P["stone"], 0.85)
-NEEDLE_TOP = tk.mix(tk.srgb(P["pine"]), tk.srgb(P["canopy"]), 0.45)
+NEEDLE_TOP = tk.mix(tk.srgb(P["pine"], 0.86), tk.srgb(P["canopy"], 0.86), 0.35)  # WQ1: the photos' dark needles
 NEEDLE_UNDER = tk.srgb(P["forest"], 0.72)
 # How high (m, in the model) anything but the stem may come down: 2.6 m over the ground (WoodsConfig.crown_clear, over
 # a standing player's head) at the smallest scale the map stands each age at (6 m of 8, 12 of 15, 19 of 22).

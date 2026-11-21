@@ -99,7 +99,8 @@ def main() -> None:
         end = start + out * reach + UP * rise
         bend = out * 0.6 - UP * (0.3 if low else 0.7) + out.cross(UP) * rng.uniform(-0.6, 0.6)  # crooked: out, then up
         path = tk.curve(start, end, bend, 5)
-        tree.limb(path, [0.45 * (1.0 - 0.7 * i / 5) for i in range(6)], 8, bark, ridges=0.04, cap=False)
+        # each limb tapers on and closes to a point where it runs out (WQ1: no open, flat end past the leaves)
+        tree.limb(path, [0.45 * (1.0 - 0.7 * i / 5) for i in range(6)], 8, bark, ridges=0.04, cap=True)
         # forks off its outer half, out toward the crown's edge
         forks = 2 if k % 2 == 0 else 1
         for f in range(forks):

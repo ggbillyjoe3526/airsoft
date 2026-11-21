@@ -192,7 +192,8 @@ class Tree:
         `lobe_until`. Its top end closes to a point
         when `cap`. With `reach`, no point stands farther than that from the tree's upright line (x, z 0): a stem
         stays inside its box. Its bark is mapped round it (WQ1): a whole number of the bark map's tiles the way round
-        (each `bark_tile` m), its seam a ring point drawn twice; `flake(t)` is how much of the second bark it takes
+        (each about `bark_tile` m), its seam a ring point drawn twice, and as many tiles along as round by the girth
+        at each ring, so a tapering limb's bark keeps its shape; `flake(t)` is how much of the second bark it takes
         `t` of the way along."""
         n = len(path)
         frames = _frames(path, upright_foot=reach > 0.0)
@@ -201,9 +202,12 @@ class Tree:
         mean_r = sum(radii) / len(radii)
         around = max(1, round(math.tau * mean_r / self.bark_tile))
         run = 0.0
+        v = 0.0  # the bark's tiles along: as many a metre as round (by the girth there), so it is never stretched
         for i in range(n):
             if i > 0:
-                run += (path[i] - path[i - 1]).length
+                seg = (path[i] - path[i - 1]).length
+                run += seg
+                v += seg * around / (math.tau * max(0.5 * (radii[i] + radii[i - 1]), 1e-3))
             t = run / total
             side, other, _axis = frames[i]
             ring = []
@@ -225,11 +229,10 @@ class Tree:
                 if reach > 0.0 and math.hypot(p.x, p.z) > reach:
                     k_in = reach / math.hypot(p.x, p.z)
                     p = Vector((p.x * k_in, p.y, p.z * k_in))
-                ring.append(self.vert(p, bark(t, a), out, (BARK_U + around * k / sides, run / self.bark_tile), fl))
+                ring.append(self.vert(p, bark(t, a), out, (BARK_U + around * k / sides, v), fl))
             # the seam: the ring's first point again, at the bark's far edge
             first = ring[0]
-            ring.append(self.vert(self.verts[first], self.cols[first], self.norms[first],
-                                  (BARK_U + around, run / self.bark_tile), fl))
+            ring.append(self.vert(self.verts[first], self.cols[first], self.norms[first], (BARK_U + around, v), fl))
             rings.append(ring)
         for i in range(n - 1):
             for k in range(sides):
@@ -241,7 +244,7 @@ class Tree:
             q = path[-1] + axis * radii[-1] * 1.5
             if reach > 0.0 and math.hypot(q.x, q.z) > reach:
                 q = Vector((q.x * reach / math.hypot(q.x, q.z), q.y, q.z * reach / math.hypot(q.x, q.z)))
-            tip = self.vert(q, bark(1.0, 0.0), axis, (BARK_U + around * 0.5, (total + radii[-1]) / self.bark_tile),
+            tip = self.vert(q, bark(1.0, 0.0), axis, (BARK_U + around * 0.5, v + 0.25),
                             flake(1.0) if flake else 0.0)
             last = rings[-1]
             for k in range(sides):

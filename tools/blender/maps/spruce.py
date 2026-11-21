@@ -46,14 +46,14 @@ def main() -> None:
     spire = HEIGHT - 0.35
     for k in range(TIERS):
         t = k / (TIERS - 1)
-        foot = 0.22 + (spire - 0.9) * t ** 0.95
+        foot = 0.28 + (spire - 0.96) * t ** 0.95
         r = RADIUS * (1.0 - t) ** 0.7 * (1.0 + 0.04 * math.sin(t * 9.0))  # full to the thicket's core
         r = max(r, 0.16)
         height = 0.95 - 0.35 * t
-        droop = 0.24 * (1.0 - t) + 0.05
+        droop = 0.34 * (1.0 - t) + 0.06  # WQ1: the sprays hang, so the tiers' edges break the cone
         points = 7 if k < TIERS - 3 else 5
         tree.cone_tier(foot, r, height, droop, points, TOP, UNDER, centre, yaw=rng.uniform(0.0, math.tau),
-                       lean=0.55, notch=0.6 + 0.1 * t)
+                       lean=0.55, notch=0.5 + 0.12 * t)
     # the spire
     tree.cone_tier(HEIGHT - 0.6, 0.1, 0.6, 0.05, 3, TOP, UNDER, centre, yaw=0.3, lean=0.4, notch=0.7)
     fit(tree)

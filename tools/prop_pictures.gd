@@ -37,20 +37,23 @@ func _run() -> void:
 	stage.add_child(camera)
 	camera.make_current()
 	for model in args.slice(1):
-		var path: String = model if model.ends_with(".glb") else props.models.get(StringName(model), "")
-		var mesh := PropDressConfig.load_mesh(path)
-		if mesh == null:
-			push_error("prop_pictures: %s won't load" % model)
+		# WQ1: "a+b" draws models together where they stand in one model space (a tree's trunk and its crown)
+		var insts: Array[MeshInstance3D] = []
+		var box := AABB()
+		for part in model.split("+"):
+			var path: String = part if part.ends_with(".glb") else props.models.get(StringName(part), "")
+			var mesh := PropDressConfig.load_mesh(path)
+			if mesh == null:
+				push_error("prop_pictures: %s won't load" % part)
+				continue
+			var inst := MeshInstance3D.new()
+			inst.mesh = mesh
+			inst.material_override = _material_for(props, StringName(part))
+			stage.add_child(inst)
+			box = mesh.get_aabb() if insts.is_empty() else box.merge(mesh.get_aabb())
+			insts.append(inst)
+		if insts.is_empty():
 			continue
-		var inst := MeshInstance3D.new()
-		inst.mesh = mesh
-		# its roughness as the game draws it (PropDressConfig.model_roughness, else the props' shared one)
-		var mat := LookMaterials.vertex_colour(props.model_roughness.get(StringName(model), props.roughness), 0.0)
-		# The props' own perforations and ribs, as PropDress draws them.
-		mat.set_shader_parameter(&"perforations", true)
-		inst.material_override = mat
-		stage.add_child(inst)
-		var box := mesh.get_aabb()
 		var name := model.get_file().get_basename()
 		var mid := box.get_center()
 		var reach := box.size.length() * 0.5 * FILL
@@ -65,9 +68,32 @@ func _run() -> void:
 		var near := maxf(minf(FOOT, box.size.y), minf(box.size.x, 3.0)) * 1.1 / tan(deg_to_rad(camera.fov * 0.5))
 		await _shot(camera, foot + Vector3(0.6, 0.45 * below, 1.0).normalized() * near, foot, folder, name + "_foot")
 		await process_frame
-		inst.queue_free()
+		for inst in insts:
+			inst.queue_free()
 		await process_frame
 	quit()
+
+
+## Model `model`'s material as the game draws it: its leaves and bark or its surfaces (WQ1, PropDressConfig.model_barks
+## and surface_models), else the props' shared vertex colours with their perforations and ribs, its own roughness.
+func _material_for(props: PropDressConfig, model: StringName) -> ShaderMaterial:
+	var rough: float = props.model_roughness.get(model, props.roughness)
+	if props.model_barks.has(model):
+		var barks: PackedStringArray = props.model_barks[model]
+		var maps: Array[Texture2D] = [null, null, null, null]
+		for i in mini(barks.size(), 2):
+			maps[i * 2] = load("%s/%s.png" % [props.foliage_folder, barks[i]]) as Texture2D
+			maps[i * 2 + 1] = load("%s/%s_nor.png" % [props.foliage_folder, barks[i]]) as Texture2D
+		return LookMaterials.foliage(load(props.foliage_sheet) as Texture2D, maps[0], maps[1], maps[2], maps[3], rough,
+				0.0, false, props.model_mip_cover.get(model, PropDress.MIP_COVER))
+	if props.surface_models.has(model):
+		var m := LookMaterials.surfaced(load(props.surface_maps) as TextureLayered,
+				load(props.surface_relief) as TextureLayered, rough)
+		m.set_shader_parameter(&"paint_by_custom", false)
+		return m
+	var mat := LookMaterials.vertex_colour(rough, 0.0)
+	mat.set_shader_parameter(&"perforations", true)
+	return mat
 
 
 func _shot(camera: Camera3D, from: Vector3, at: Vector3, folder: String, file: String) -> void:

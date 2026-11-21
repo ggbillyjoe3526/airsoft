@@ -474,6 +474,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"birch": PackedStringArray(["bark_birch"]), &"birch_crown": PackedStringArray(["bark_birch"]),
 	&"spruce": PackedStringArray(["bark_pine"]),
 }
+## How much a leaf card's cover grows each mip level (look_foliage.gdshader's `mip_cover`, its 0.35 unless named): the
+## needle trees' less, so a far pine's or spruce's tufts keep their spiky edges instead of closing into round lumps.
+@export var model_mip_cover: Dictionary[StringName, float] = {
+	&"pine_young_crown": 0.15, &"pine_grown_crown": 0.15, &"pine_old_crown": 0.15, &"spruce": 0.15,
+}
 @export_dir var foliage_folder: String = "res://assets/textures/woodland"
 @export_file("*.png") var foliage_sheet: String = "res://assets/textures/woodland/leaves.png"
 

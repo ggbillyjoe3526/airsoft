@@ -9,8 +9,8 @@
 //   `bark_relief`, and `bark_b` (a pine's flaking upper bole) blended over it by UV2 x.
 // Leaves lit from behind glow a little where the sun shines through them toward the eye (look_light's
 // LOOK_TRANSLUCENT). Worn as look_vertex (SL2, `wear`: a trunk's foot; the crowns clean). On Low Mesh detail
-// (`look_surface_detail` 0, GraphicsApply.SURFACE_DETAIL) it reads the bark's colour alone and the cut-out's cover as
-// it is: no relief, no second bark, no mip query (the performance review's advisory).
+// (`look_surface_detail` 0, GraphicsApply.SURFACE_DETAIL) it reads the bark's colour alone: no relief and no second
+// bark (the performance review's advisory). Every preset grows a far leaf's cover by its mip level, from derivatives.
 shader_type spatial;
 render_mode blend_mix, cull_disabled, depth_draw_opaque;
 
@@ -31,6 +31,8 @@ uniform float relief_depth : hint_range(0.0, 2.0) = 1.0;
 uniform float roughness : hint_range(0.0, 1.0) = 0.9;
 uniform float specular : hint_range(0.0, 1.0) = 0.3;
 uniform float alpha_cut : hint_range(0.0, 1.0) = 0.5;
+// How soft a leaf's cut edge is under multisampling (alpha to coverage; Godot's ALPHA_ANTIALIASING_EDGE).
+uniform float alpha_edge : hint_range(0.0, 1.0) = 0.3;
 // How much a leaf's cover grows a mip level (so a far crown keeps its fill).
 uniform float mip_cover : hint_range(0.0, 1.0) = 0.35;
 uniform bool retro_wobble = true;
@@ -59,6 +61,11 @@ void fragment() {
 	vec3 relief = vec3(0.5, 0.5, 1.0);
 	// uniform (the look's), so the reads inside take their derivatives as a whole quad's
 	bool fine = look_surface_detail >= 0.5;
+	// the sheet's mip level from the texel footprint (derivatives taken here, outside the branch; cheap on every preset)
+	vec2 texel = UV * vec2(textureSize(sheet, 0));
+	vec2 step_x = dFdx(texel);
+	vec2 step_y = dFdy(texel);
+	float mip = max(0.5 * log2(max(dot(step_x, step_x), dot(step_y, step_y))), 0.0);
 	if (UV.x < -1.0) {
 		vec2 at = UV + vec2(4.0, 0.0);
 		d = texture(bark, at).rgb;
@@ -71,8 +78,10 @@ void fragment() {
 		}
 	} else {
 		vec4 s = texture(sheet, UV);
+		// the cut-out's edge smoothed where the screen is multisampled (alpha to coverage), so leaves don't stair-step
+		ALPHA_ANTIALIASING_EDGE = alpha_edge;
+		ALPHA_TEXTURE_COORDINATE = texel;
 		d = s.rgb;
-		float mip = fine ? max(textureQueryLod(sheet, UV).y, 0.0) : 0.0;
 		cover = s.a * (1.0 + mip * mip_cover);
 		// both sides lit as the crown's one soft shape: undo the engine's flip on a back face
 		if (!FRONT_FACING) {

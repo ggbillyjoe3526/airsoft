@@ -41,9 +41,10 @@ static func printed(sheet: Texture2D, roughness: float, wear: float = 0.0) -> Sh
 ## plain. `roughness` over all of it, worn as `vertex_colour`'s `wear`; with `by_custom` each instance's custom data
 ## paints it as a PropDress model (DM1: look_vertex.gdshader's paint_by_custom).
 static func foliage(sheet: Texture2D, bark: Texture2D, relief: Texture2D, bark_b: Texture2D, relief_b: Texture2D,
-		roughness: float, wear: float = 0.0, by_custom: bool = true) -> ShaderMaterial:
+		roughness: float, wear: float = 0.0, by_custom: bool = true, mip_cover: float = 0.35) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = FOLIAGE_SHADER
+	m.set_shader_parameter(&"mip_cover", mip_cover)
 	m.set_shader_parameter(&"sheet", sheet)
 	m.set_shader_parameter(&"bark", bark)
 	m.set_shader_parameter(&"bark_relief", relief)
