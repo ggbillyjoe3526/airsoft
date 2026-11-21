@@ -30,10 +30,11 @@ BUDGET = 500
 TIERS = 17
 
 # WQ1: a mid green like the photos' sunlit spruces (was near black under the leaf sheet's detail)
-TOP = tk.mix(tk.srgb(P["spruce"], 1.45), tk.srgb(P["sage"]), 0.35)
-UNDER = tk.srgb(P["forest"], 0.8)
+TOP = tk.mix(tk.srgb(P["pine"], 1.2), tk.srgb(P["canopy"]), 0.3)
+UNDER = tk.srgb(P["pine"], 0.62)
 # the opaque cone under each tier stops short of its tips, so the skirt's edge is ragged sprigs, not a sawtooth (WQ1)
 UNDER_REACH = 0.78
+TIP_FLOOR = 0.08  # m: how low a tier's drooping tips may come (over the ground, not lying on it)
 STEM = tk.srgb(P["umber"], 0.7)
 
 
@@ -53,7 +54,8 @@ def main() -> None:
         r = RADIUS * (1.0 - t) ** 0.7 * (1.0 + 0.04 * math.sin(t * 9.0))  # full to the thicket's core
         r = max(r, 0.16)
         height = 0.95 - 0.35 * t
-        droop = 0.34 * (1.0 - t) + 0.06  # WQ1: the sprays hang, so the tiers' edges break the cone
+        # WQ1: the sprays hang, so the tiers' edges break the cone; the lowest's tips stay over the ground (no fins)
+        droop = min(0.34 * (1.0 - t) + 0.06, foot - TIP_FLOOR)
         points = 7 if k < TIERS - 3 else 5
         tree.cone_tier(foot, r, height, droop, points, TOP, UNDER, centre, yaw=rng.uniform(0.0, math.tau),
                        lean=0.55, notch=0.5 + 0.12 * t, under_reach=UNDER_REACH)

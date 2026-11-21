@@ -45,15 +45,17 @@ CLEAR_GROWN = 3.3
 CLEAR_OLD = 3.05
 NEEDLE_YOUNG = tk.mix(tk.srgb(P["canopy"]), tk.srgb(P["olive"]), 0.25)
 # The grown and old pines' needles on the leaf sheet (WQ1): brushes of long-needled shoots standing out of each tuft
-# (tipped out of its surface, so the crown's edge reads spiky), none moved far off its tuft (CARD_SHIFT), over a small
-# needle-textured core.
-LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.6, per_m2=0.55, least=3,
-                 most=9, core=0.42, core_dark=0.15, tilt=(0.45, 0.9), under=0.8)
-CARD_SHIFT = 0.35
+# (tipped out of its surface, so the crown's edge reads spiky), overlapping densely in place of a solid core (no core:
+# NO_CORE), none moved off its tuft (CARD_SHIFT).
+PER_M2 = 1.1
+NO_CORE = 1e9
+LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.6, per_m2=PER_M2 * 1.15, least=6,
+                 most=18, core_min=NO_CORE, tilt=(0.45, 0.9), under=0.8)
+CARD_SHIFT = 0.1
 
 # the old pine's bigger clouds take more sprays each
-LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.7, per_m2=0.6, least=3,
-                     most=16, core=0.42, core_dark=0.15, tilt=(0.45, 0.9), under=0.8)
+LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.7, per_m2=PER_M2,
+                     least=6, most=30, core_min=NO_CORE, tilt=(0.45, 0.9), under=0.8)
 
 
 def flake_from(upper_from: float):
@@ -180,7 +182,7 @@ def grown() -> None:
             size = 1.0 + 1.1 * shape
             # the tip's tuft droops a little under the branch's end; the branch is clothed to the stem
             tree.tuft(bp[-1] - UP * 0.12 * size - out * 0.25, size, out, 2, NEEDLE_TOP, NEEDLE_UNDER, centre,
-                      flat=0.72, spread=0.55)
+                      flat=0.72, spread=0.55, twig=BARK_UPPER)
             if ln > 1.75:
                 tree.tuft(tk.along(bp, 0.45) + UP * 0.15, size * 0.85, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre,
                           flat=0.8)
