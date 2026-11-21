@@ -27,6 +27,9 @@ var calls: PackedInt32Array = PackedInt32Array()
 var heading: PackedInt32Array = PackedInt32Array()
 ## Seconds to its next buzz while too full to leave (LiftConfig.buzz_every).
 var buzz_left: PackedFloat32Array = PackedFloat32Array()
+## Whether its doorway at `stop` is solid to bodies (1), or not yet while it shuts with someone aboard still stepping in
+## out of it (0, LS1: Lifts.step_in).
+var sealed: PackedByteArray = PackedByteArray()
 ## Who last pressed one of its buttons (a character's id, -1 none): its chime and motor are news of them.
 var caller: PackedInt32Array = PackedInt32Array()
 

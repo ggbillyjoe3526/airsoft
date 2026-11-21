@@ -1124,7 +1124,8 @@ func _build_views_rest(ui: CanvasLayer) -> void:
 	_audio = SimAudio.new()
 	_audio.night = _light.night
 	add_child(_audio)
-	_audio.setup(_play.sound, profiles, _tuning.body, _level.query(), _map, _tuning.footsteps, state.characters.size())
+	_audio.setup(_play.sound, profiles, _tuning.body, _level.query(), _map, _tuning.footsteps, state.characters.size(),
+			_tuning.lifts)
 	_hands.inspect_sound.connect(_on_inspect_sound)
 	_mix = SoundMix.new()
 	add_child(_mix)

@@ -181,13 +181,31 @@ func test_a_lone_bot_aboard_presses_on_its_first_tick() -> void:
 	assert_eq(b.lift_press, Vector2i(0, 0), "no teammate outside: it presses at once")
 
 
+## A world with one lift shaft, its 2 m well around (1, 1): enough for SimAudio to tell who rides its car.
+func _shaft() -> BoxWorld:
+	var w := BoxWorld.new(BodyConfig.new())
+	var s := LiftSpec.new()
+	s.name = "test"
+	s.well = Rect2(0.0, 0.0, 2.0, 2.0)
+	s.out = Vector2(0.0, -1.0)
+	s.door_from = 0.5
+	s.door_to = 1.5
+	s.door_height = 2.1
+	s.door_depth = 0.3
+	s.stops = PackedFloat32Array([3.0, 7.0])
+	s.stop_names = PackedStringArray(["Low", "High"])
+	w.add_lift(s, cfg)
+	return w
+
+
 func test_a_lift_motor_voice_rides_with_its_car_and_is_let_go_when_the_lifts_are_gone() -> void:
 	var sound := SoundConfig.new()
 	var audio := SimAudio.new()
 	add_child_autofree(audio)
-	audio.setup(sound, [] as Array[StringName], BodyConfig.new(), null, null, null)
+	# The listener rides the car (LS1: a car's motor is heard only from inside it).
+	audio.setup(sound, [] as Array[StringName], BodyConfig.new(), _shaft(), null, null)
 	var state := GameState.new(1)
-	state.characters.append(Character.new(0, 0, Vector3.ZERO))
+	state.characters.append(Character.new(0, 0, Vector3(1.0, 3.0, 1.0)))
 	state.lifts.y.resize(1)
 	state.lifts.y[0] = 3.0
 	var e := state.events.add(GameEvent.Kind.LIFT)
@@ -213,9 +231,9 @@ func test_a_lift_motor_voice_rides_with_its_car_and_is_let_go_when_the_lifts_are
 func test_a_lift_motor_still_playing_stops_as_the_round_ends() -> void:
 	var audio := SimAudio.new()
 	add_child_autofree(audio)
-	audio.setup(SoundConfig.new(), [] as Array[StringName], BodyConfig.new(), null, null, null)
+	audio.setup(SoundConfig.new(), [] as Array[StringName], BodyConfig.new(), _shaft(), null, null)
 	var state := GameState.new(1)
-	state.characters.append(Character.new(0, 0, Vector3.ZERO))
+	state.characters.append(Character.new(0, 0, Vector3(1.0, 3.0, 1.0)))
 	state.lifts.y.resize(1)
 	state.lifts.y[0] = 3.0
 	var e := state.events.add(GameEvent.Kind.LIFT)

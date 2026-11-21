@@ -5,8 +5,11 @@ extends RefCounted
 ## car stands at a stop with its doors open; called elsewhere it waits LiftConfig.dwell after opening (panel_dwell once
 ## its own panel is pressed), shuts its doors (door_time: heard shut_lead before the leaves move), rides to the nearest
 ## called stop ahead of the way it last went (floor_time a stop), stopping on the way at any stop called meanwhile, and
-## chimes and opens them. Its doors never shut on a body in the doorway, nor with anyone hit aboard (they walk off), nor
-## with more than `capacity` aboard (it buzzes). Its riders rise and fall with its floor (carry). A doorway is a solid
+## chimes and opens them; a stop pressed on its panel while they open shuts them again from where they stand (LS1).
+## Its doors never shut on a body in the doorway from outside the car, nor with anyone hit aboard (they walk off), nor
+## with more than `capacity` aboard (it buzzes); one aboard but still in the doorway steps in as they start to shut
+## (step_in, LS1), and one walking into it from outside before it is sealed opens them again. Its riders rise and fall
+## with its floor (carry). A doorway is a solid
 ## steel leaf to bombs, sight and bodies but while the car stands open at it, and to BBs where its two leaves stand at
 ## that tick while they shut or open (WorldQuery.set_lift_ajar, bb_ray). Each press, chime, door and ride is a LIFT
 ## event, heard out to LiftConfig.heard through walls. Each match and each round starts with every car at its start
@@ -54,6 +57,7 @@ func reset(lifts: LiftState) -> void:
 	lifts.heading.resize(n)
 	lifts.buzz_left.resize(n)
 	lifts.caller.resize(n)
+	lifts.sealed.resize(n)
 	for i in n:
 		var spec := _query.lifts[i]
 		var k := clampi(spec.start, 0, spec.stop_count() - 1)
@@ -69,6 +73,7 @@ func reset(lifts: LiftState) -> void:
 		lifts.heading[i] = 0
 		lifts.buzz_left[i] = 0.0
 		lifts.caller[i] = -1
+		lifts.sealed[i] = 1
 		_query.set_lift_car(i, lifts.y[i])
 		_query.set_lift_ajar(i, -1, 0.0)
 		for s in spec.stop_count():
@@ -85,12 +90,7 @@ func step(state: GameState, dt: float) -> void:
 			LiftState.Phase.OPEN:
 				_wait_open(i, state, dt)
 			LiftState.Phase.SHUTTING:
-				lifts.left[i] = maxf(0.0, lifts.left[i] - dt)
-				# The leaves stand open through the sound's lead (LiftConfig.shut_lead), then meet in shut_time.
-				var span := _cfg.shut_time()
-				lifts.doors[i] = minf(1.0, lifts.left[i] / span) if span > 0.0 else 0.0
-				if lifts.left[i] <= 0.0:
-					_depart(i, state)
+				_shutting(i, state, dt)
 			LiftState.Phase.MOVING:
 				_ride(i, state, dt)
 			LiftState.Phase.OPENING:
@@ -117,6 +117,23 @@ func carry(c: Character, lifts: LiftState) -> void:
 		var from := c.position.y
 		c.position.y = maxf(from + rise, lifts.y[i] + _body.rest_gap)
 		c.lift_rise = c.position.y - from
+		return
+
+
+## Eases `c` in, at LiftConfig.step_in_speed, while it stands in a car whose doors have begun to shut with it still in
+## their doorway (LS1: a press from just inside the door shuts them at once, never later), until it stands clear of
+## them by step_in_gap; the doorway is sealed to bodies once nobody is in it (_shutting). After carry, before `c`
+## moves. Allocates nothing.
+func step_in(c: Character, lifts: LiftState, dt: float) -> void:
+	for i in lifts.count():
+		if lifts.phase[i] != LiftState.Phase.SHUTTING or lifts.sealed[i] != 0:
+			continue
+		var spec := _query.lifts[i]
+		if not spec.holds(c.position, lifts.y[i], _cfg):
+			continue
+		var need := _step_in_need(spec, lifts.stop[i], c.position)
+		if need > 0.0:
+			c.position -= Vector3(spec.out.x, 0.0, spec.out.y) * minf(need, _cfg.step_in_speed * dt)
 		return
 
 
@@ -221,21 +238,49 @@ func aboard(i: int, lifts: LiftState, characters: Array[Character]) -> int:
 	return n
 
 
-## Whether anyone's body stands in lift `i`'s doorway at stop `k`: its doors won't shut.
+## Whether anyone's body stands in lift `i`'s doorway at stop `k`, from either side.
 func doorway_blocked(i: int, k: int, characters: Array[Character]) -> bool:
 	var spec := _query.lifts[i]
-	var c := spec.door_center(k)
-	var h := spec.door_size() * 0.5
-	var r := _body.radius
 	for ch in characters:
-		var p := ch.position
-		if p.y >= c.y + h.y or p.y + _body.height <= c.y - h.y:
-			continue
-		var dx := p.x - clampf(p.x, c.x - h.x, c.x + h.x)
-		var dz := p.z - clampf(p.z, c.z - h.z, c.z + h.z)
-		if dx * dx + dz * dz < r * r:
+		if _in_doorway(spec, k, ch.position):
 			return true
 	return false
+
+
+## The id of a body standing in lift `i`'s doorway at stop `k` from outside its car (on the landing, or in the wall's
+## depth), whose doors then won't shut, or -1. One in the car is stepping in (step_in), not in the way.
+func _blocked_from_outside(i: int, k: int, lifts: LiftState, characters: Array[Character]) -> int:
+	var spec := _query.lifts[i]
+	for ch in characters:
+		if _in_doorway(spec, k, ch.position) and not spec.holds(ch.position, lifts.y[i], _cfg):
+			return ch.id
+	return -1
+
+
+## Whether a body with feet at `p` overlaps lift `spec`'s doorway at stop `k` (its leaves' box, the wall's depth).
+func _in_doorway(spec: LiftSpec, k: int, p: Vector3) -> bool:
+	var c := spec.door_center(k)
+	var h := spec.door_size() * 0.5
+	if p.y >= c.y + h.y or p.y + _body.height <= c.y - h.y:
+		return false
+	var r := _body.radius
+	var dx := p.x - clampf(p.x, c.x - h.x, c.x + h.x)
+	var dz := p.z - clampf(p.z, c.z - h.z, c.z + h.z)
+	return dx * dx + dz * dz < r * r
+
+
+## How far (m) a body with feet at `p`, inside lift `spec`'s car, has to step in, away from the door's face, to stand
+## step_in_gap clear of its doorway at stop `k`; 0 when it already stands clear.
+func _step_in_need(spec: LiftSpec, k: int, p: Vector3) -> float:
+	if not _in_doorway(spec, k, p):
+		return 0.0
+	var r := _body.radius
+	var along := p.x if spec.along_x() else p.z
+	var side := along - clampf(along, spec.door_from, spec.door_to)
+	# How far in from the face the body is (positive in the car), and how far it must be for its edge to miss the box.
+	var depth := (spec.face_at() - (p.z if spec.along_x() else p.x)) * (spec.out.y if spec.along_x() else spec.out.x)
+	var clear := sqrt(maxf(0.0, r * r - side * side)) + _cfg.step_in_gap
+	return maxf(0.0, clear - depth)
 
 
 ## From feet at `feet` to the middle of lift `spec`'s doorway at stop `k` on its landing side, level; Vector2.INF out of
@@ -265,15 +310,19 @@ func _press_button(i: int, k: int, c: Character, state: GameState) -> void:
 		# From inside, standing open: the doors shut now (LiftConfig.panel_dwell), not after the wait for walkers-out.
 		if inside and lifts.phase[i] == LiftState.Phase.OPEN:
 			lifts.left[i] = minf(lifts.left[i], _cfg.panel_dwell)
+		# From inside, opening: they shut again from where they stand, heard on the press, as a press standing open
+		# shuts them at once (docs/records/LS1.md). Not with anyone hit aboard, too many or anyone in the doorway from
+		# outside: those keep it open anyway.
+		elif inside and lifts.phase[i] == LiftState.Phase.OPENING and not _hit_aboard(i, lifts, state.characters) \
+				and aboard(i, lifts, state.characters) <= _cfg.capacity \
+				and _blocked_from_outside(i, lifts.stop[i], lifts, state.characters) < 0:
+			_start_shut(i, state, _cfg.shut_lead + _cfg.shut_time() * lifts.doors[i])
 		return
 	match lifts.phase[i]:
 		LiftState.Phase.OPEN:
 			lifts.left[i] = maxf(lifts.left[i], _cfg.dwell)
 		LiftState.Phase.SHUTTING:
-			# Opened again from as far as they had shut, the stop's call kept for after.
-			lifts.phase[i] = LiftState.Phase.OPENING
-			lifts.left[i] = _cfg.door_time * (1.0 - lifts.doors[i])
-			_event(state, Cue.OPENING, i, k, spec.door_center(k), c.id, _cfg.heard, _through(spec))
+			_reopen(i, k, state, c.id)
 
 
 ## Lift `i` standing open: once its wait is over, with a stop called elsewhere, it shuts its doors, unless a body
@@ -287,7 +336,7 @@ func _wait_open(i: int, state: GameState, dt: float) -> void:
 		lifts.buzz_left[i] = 0.0
 		return
 	var chars := state.characters
-	if doorway_blocked(i, k, chars) or _hit_aboard(i, lifts, chars):
+	if _blocked_from_outside(i, k, lifts, chars) >= 0 or _hit_aboard(i, lifts, chars):
 		return
 	var spec := _query.lifts[i]
 	if aboard(i, lifts, chars) > _cfg.capacity:
@@ -297,10 +346,61 @@ func _wait_open(i: int, state: GameState, dt: float) -> void:
 			_event(state, Cue.BUZZ, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard, _through(spec))
 		return
 	lifts.buzz_left[i] = 0.0
+	_start_shut(i, state, _cfg.door_time)
+
+
+## Lift `i`'s doors start to shut at its stop, `left` seconds from shut (door_time from open; less from ajar), heard
+## now: the leaves stand through the lead, then meet (_shutting). Its doorway is sealed at once if nobody is in it.
+func _start_shut(i: int, state: GameState, left: float) -> void:
+	var lifts := state.lifts
+	var k := lifts.stop[i]
+	var spec := _query.lifts[i]
 	lifts.phase[i] = LiftState.Phase.SHUTTING
-	lifts.left[i] = _cfg.door_time
-	_query.set_lift_door(i, k, true)
+	lifts.left[i] = left
+	lifts.sealed[i] = 0
 	_event(state, Cue.SHUTTING, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard, _through(spec))
+	_seal(i, state)
+
+
+## Lift `i` shutting a tick: its doorway sealed once nobody is in it (_seal); the leaves stand open through the
+## sound's lead (LiftConfig.shut_lead), and past it while someone aboard is still stepping in, then meet in shut_time;
+## shut, it sets off.
+func _shutting(i: int, state: GameState, dt: float) -> void:
+	var lifts := state.lifts
+	if lifts.sealed[i] == 0 and not _seal(i, state):
+		return
+	var span := _cfg.shut_time()
+	var least := 0.0 if lifts.sealed[i] != 0 else span
+	lifts.left[i] = maxf(least, lifts.left[i] - dt)
+	# Never further open than they stood: a shut begun from ajar keeps its leaves still through the lead.
+	lifts.doors[i] = minf(lifts.doors[i], lifts.left[i] / span) if span > 0.0 else 0.0
+	if lifts.left[i] <= 0.0:
+		_depart(i, state)
+
+
+## Lift `i`, shutting with its doorway open to bodies: a body in the doorway from outside the car opens the doors
+## again (false: they open); nobody in it seals it, from then on solid to bodies as before (true: the shut goes on).
+func _seal(i: int, state: GameState) -> bool:
+	var lifts := state.lifts
+	var k := lifts.stop[i]
+	var outside := _blocked_from_outside(i, k, lifts, state.characters)
+	if outside >= 0:
+		_reopen(i, k, state, outside)
+		return false
+	if not doorway_blocked(i, k, state.characters):
+		lifts.sealed[i] = 1
+		_query.set_lift_door(i, k, true)
+	return true
+
+
+## Lift `i`'s doors, shutting at stop `k`, opened again from as far as they had shut (heard), its calls kept for after.
+func _reopen(i: int, k: int, state: GameState, actor: int) -> void:
+	var lifts := state.lifts
+	var spec := _query.lifts[i]
+	lifts.phase[i] = LiftState.Phase.OPENING
+	lifts.left[i] = _cfg.door_time * (1.0 - lifts.doors[i])
+	lifts.sealed[i] = 1
+	_event(state, Cue.OPENING, i, k, spec.door_center(k), actor, _cfg.heard, _through(spec))
 
 
 ## Whether anyone out of play stands in lift `i`'s car.
