@@ -1,6 +1,6 @@
 # TQ1 · Subway's trains in finer detail: what they are made of, padded seats, draft screens and adverts (Beta)
 
-**Review:** critic pending (attempt 3) · qa pending (final head) · performance pending (final head)
+**Review:** critic pending (attempt 3) · qa Pass (079d922) · performance Pass (079d922)
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-21 | 1 | build thread | QA Pass, performance Pass | Retry 6/8 | fidelity to the photos (cab front a black void, moquette and floor tones, poles grey where the photos' are orange, far windows black), the body 4 mm past its bounds, a stale budget comment, the pictures' harness a copy |
 | 2026-11-21 | 2 | build thread | touched tests 79/79; QA and performance not re-run | Retry 6/8 | fidelity (draft screens invisible, far windows flat grey slabs, ceiling's dash slots, seat-end bases read as cabinets), PLAYTEST's pole line and the record's review claims, QA and performance on an older head |
-| 2026-11-21 | 3 | build thread | pending | pending | – |
+| 2026-11-21 | 3 | build thread | QA Pass, performance Pass (079d922) | pending | – |
 
 ## Goal
 
@@ -52,7 +52,7 @@ keep every model's bounds, collision and the layout, and keep Subway's orange st
 ## Verified
 
 - Tests: `tests/unit/test_tq1_trains_qa.gd` (QA, 7 tests), the train and props tests (team hues, lining) pass on the
-  final head; QA's smoke test ran on attempt 1's head (re-run with the final review).
+  final head; QA's re-run on 079d922: 123 tests in 9 files and the smoke test (953 frames, 6 rounds) pass.
 - Bounds: every rebuilt model inside its old box (the body ±1.720 m across, as before).
 - Pictures, before and after (lavapipe, in game): `art/blender/subway-trains/tq1/` in the project files.
 - Performance: about +19k triangles map-wide (seats), screens 6 x 112; MultiMesh, no new draw path.
