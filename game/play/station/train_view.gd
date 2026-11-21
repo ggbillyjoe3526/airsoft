@@ -2,10 +2,11 @@ class_name TrainView
 extends Node3D
 ## A station's trains (SM1; the map's `dressing.trains`, TrainDressing) in Subway's train models (TrainLook,
 ## tools/blender/maps/train.py): each car's body, a shut pair of leaves in every door hole but its open ones, its cab
-## fronts and blank ends, and the open gangways between cars, one MultiMesh a model in the props' vertex-coloured
-## material (its ceiling's cool white lamp strips and its ends' white LED lamps glowing in lamp materials of their own,
-## the owner, 2026-11-12), and the platform side's window glass, see-through, in the clear material (the map's glass
-## blocks in the holes, which MapLevel leaves to it). The models fill the train's walls, slabs and car ends exactly,
+## fronts and blank ends, and the open gangways between cars, its poles, rails and grab handles, one MultiMesh a model
+## in the props' vertex-coloured material (its ceiling's cool white lamp strips and its ends' white LED lamps glowing in
+## lamp materials of their own, the owner, 2026-11-12), the cove's advert cards printed from their sheet (TQ2), and the
+## platform side's window glass, see-through, in the clear material (the map's glass blocks in the holes, which
+## MapLevel leaves to it). The models fill the train's walls, slabs and car ends exactly,
 ## which StationSurface leaves to them; the seats and tool carts are the props' (PropDress, their blocks name them).
 ## Scenery: no collider, no nav cell.
 ## Built once; per frame only a flickering half car's strips (under a flickering station lamp, stepped with its light by
@@ -22,6 +23,9 @@ var _lamps: ShaderMaterial = null
 var _leds: ShaderMaterial = null
 var _glass: ShaderMaterial = null
 var _screen_glass: ShaderMaterial = null
+## The advert cards' printed material (TrainLook.advert_sheet), or the props' when the sheet won't load.
+var _adverts: ShaderMaterial = null
+var _adverts_path: String = ""
 ## The flickering strips: each one's instance in the strips' MultiMesh, the station lamp it flickers with, its level as
 ## last set (64-bit, as RoofView keeps its own), and the roof that steps them.
 var _flicker_strips: PackedInt32Array = PackedInt32Array()
@@ -43,6 +47,7 @@ static func build(map: MapData, look: TrainLook, roof: RoofConfig = null) -> Tra
 			_place_car(look, car, placed)
 		for at in t.gangways:
 			_put(placed, look.gangway, Transform3D(Basis.IDENTITY, at))
+			_put(placed, look.gangway_rails, Transform3D(Basis.IDENTITY, at))
 	var view := TrainView.new()
 	view.name = "Trains"
 	for t in map.trains:
@@ -55,6 +60,9 @@ static func build(map: MapData, look: TrainLook, roof: RoofConfig = null) -> Tra
 	view._glass.set_shader_parameter(&"opacity", look.glass_opacity)
 	view._screen_glass = LookMaterials.clear_colour(look.glass_roughness)
 	view._screen_glass.set_shader_parameter(&"opacity", look.screen_opacity)
+	var sheet := look.advert_picture()
+	view._adverts = LookMaterials.printed(sheet, look.advert_roughness) if sheet != null else view._material
+	view._adverts_path = look.adverts
 	view._placed = placed
 	view._lights_path = look.lights
 	for path: String in placed:
@@ -66,7 +74,7 @@ static func build(map: MapData, look: TrainLook, roof: RoofConfig = null) -> Tra
 
 
 ## Model `path`'s material: the strips' and the LEDs' glow, the windows' glass, the draft screens' (a little more
-## opaque), else the props'.
+## opaque), the advert cards' print, else the props'.
 func _material_of(look: TrainLook, path: String) -> Material:
 	if path == look.lights:
 		return _lamps
@@ -76,6 +84,8 @@ func _material_of(look: TrainLook, path: String) -> Material:
 		return _glass
 	if path == look.screens:
 		return _screen_glass
+	if path == look.adverts:
+		return _adverts
 	return _material
 
 
@@ -160,7 +170,10 @@ func boxes() -> Array[AABB]:
 
 ## The materials drawn, to warm their shaders before play.
 func materials() -> Array[Material]:
-	return [_material, _lamps, _leds, _glass, _screen_glass]
+	var out: Array[Material] = [_material, _lamps, _leds, _glass, _screen_glass]
+	if _adverts != _material:
+		out.append(_adverts)
+	return out
 
 
 ## Where car `car`'s models stand: its middle on its floor, turned about up when it is.
@@ -183,6 +196,11 @@ static func _place_car(look: TrainLook, car: TrainDressing.Car, placed: Dictiona
 	_put(placed, look.body, at)
 	_put(placed, look.windows, at)
 	_put(placed, look.screens, at)
+	_put(placed, look.poles, at)
+	# every other car's advert cards turned about (the cove's frames are the same either way), so neighbours differ
+	var cars_before: int = (placed[look.adverts] as Array).size() if placed.has(look.adverts) else 0
+	var turn := Transform3D(half, Vector3.ZERO) if cars_before % 2 == 1 else Transform3D()
+	_put(placed, look.adverts, at * turn)
 	_put(placed, look.lights, at)
 	_put(placed, look.lights, at * Transform3D(half, Vector3.ZERO))
 	for slot in TrainDressing.SLOTS:
@@ -200,6 +218,8 @@ static func _place_car(look: TrainLook, car: TrainDressing.Car, placed: Dictiona
 		_put(placed, look.ends[kind], end)
 		if look.leds.has(kind):
 			_put(placed, look.leds[kind], end)
+		if look.end_rails.has(kind):
+			_put(placed, look.end_rails[kind], end)
 
 
 static func _put(placed: Dictionary[String, Array], path: String, t: Transform3D) -> void:
@@ -222,7 +242,9 @@ func _add(path: String, mesh: Mesh, transforms: Array, material: Material) -> vo
 	var v := MultiMeshInstance3D.new()
 	v.name = path.get_file().get_basename().capitalize().replace(" ", "")
 	v.multimesh = mm
-	if material == _lamps or material == _leds or material == _glass or material == _screen_glass:
+	if material == _lamps or material == _leds or material == _glass or material == _screen_glass \
+			or path == _adverts_path:
+		# (the advert cards lie a hair off the cove: their shadow would only speckle it)
 		v.material_override = material
 		v.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	else:
