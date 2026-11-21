@@ -8,12 +8,14 @@
 // where they'd be finer than a pixel, so they never shimmer far off.
 
 const float SURFACE_KIND_BASE = 100.0;
+// The rings' colours (linear): dark, mid and light greys and, now and then, the stripe's orange (train.py's "stripe",
+// #c0652f, the owner's colour; the trains' team-hue test exempts it), as the owner's photos' moquette.
 const vec3 SURFACE_RING_COLOURS[5] = vec3[5](
-		vec3(0.24, 0.24, 0.25), vec3(0.11, 0.11, 0.12), vec3(0.42, 0.42, 0.41), vec3(0.45, 0.11, 0.03),
-		vec3(0.20, 0.20, 0.21));
+		vec3(0.025, 0.025, 0.028), vec3(0.13, 0.13, 0.14), vec3(0.3, 0.3, 0.3), vec3(0.527, 0.127, 0.028),
+		vec3(0.06, 0.06, 0.065));
 // How far, as a share of the base, the moquette's and the floor's patterns lighten it on average (their far colour).
-const float SURFACE_RING_AVERAGE = 0.22;
-const float SURFACE_FLECK_AVERAGE = 0.12;
+const float SURFACE_RING_AVERAGE = 0.15;
+const float SURFACE_FLECK_AVERAGE = 0.0;
 
 float surface_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -38,16 +40,16 @@ vec4 surface_rings(vec2 p, float cell, float seed, float pixel) {
 	float h2 = surface_hash(c * 1.7 + seed + 19.1);
 	float h3 = surface_hash(c * 2.3 + seed + 41.7);
 	vec2 mid = (c + 0.5 + (vec2(h2, h3) - 0.5) * 0.3) * cell;
-	float r = cell * mix(0.18, 0.38, h);
+	float r = cell * mix(0.24, 0.4, h);
 	float w = cell * mix(0.055, 0.1, h3);
 	float d = length(p - mid);
 	float ring = 1.0 - smoothstep(w - pixel, w + pixel, abs(d - r));
 	float dot_r = h2 > 0.55 ? r * 0.35 : 0.0;
 	ring = max(ring, 1.0 - smoothstep(dot_r - pixel, dot_r + pixel, d));
 	int k = int(floor(h2 * 4.999));
-	// orange rings rarer than grey (the photos': a few among many)
-	k = (k == 3 && h > 0.45) ? 2 : k;
-	return vec4(SURFACE_RING_COLOURS[k], ring * step(0.2, h));
+	// orange rings rarer than grey (the photos': about one in eight)
+	k = (k == 3 && h > 0.32) ? 1 : k;
+	return vec4(SURFACE_RING_COLOURS[k], ring * step(0.08, h));
 }
 
 // The part of kind `kind` at model point `at` (its model normal `n`): `col` patterned, `rough`, `metal` and `spec` set,
@@ -56,11 +58,14 @@ vec4 surface_rings(vec2 p, float cell, float seed, float pixel) {
 void look_surface(float kind, vec3 at, vec3 n, inout vec3 col, inout float rough, inout float metal, inout float spec,
 		inout float worn) {
 	int k = int(kind + 0.5);
-	// The pattern's plane and a pixel's size on it, outside the branches (fwidth needs every pixel of a quad).
+	// The pattern's plane and a pixel's size on it, before the branches. look_vertex calls this only for a kind, which
+	// is the same over each whole triangle, so every pixel of a quad takes the same way and fwidth is sound.
 	vec2 p = surface_plane(at, n);
-	// a pixel's size on the face: the mean of its two ways (a face seen edge-on is fine across, coarse along)
+	// a pixel's size on the face: the mean of its two ways softens the pattern's edges (a face seen edge-on is fine
+	// across, coarse along); the fade reads the finer way, so a seat's top seen at a glance keeps its pattern
 	vec2 fw = fwidth(p);
 	float pixel = sqrt(max(fw.x * fw.y, 1e-12));
+	float near = max(min(fw.x, fw.y), 1e-6);
 	if (k == 1) {
 		rough = 0.26;
 		spec = 0.55;
@@ -69,23 +74,23 @@ void look_surface(float kind, vec3 at, vec3 n, inout vec3 col, inout float rough
 		metal = 0.35;
 		spec = 0.6;
 	} else if (k == 3) {
-		float fade = smoothstep(0.005, 0.016, pixel);
+		float fade = smoothstep(0.006, 0.02, near);
 		vec3 woven = col * (1.0 + SURFACE_RING_AVERAGE);
 		// far off the rings are under a pixel: their average alone, none of their work
 		if (fade < 1.0) {
-			vec3 near = col;
+			vec3 close = col;
 			vec4 a = surface_rings(p, 0.075, 3.0, pixel);
-			near = mix(near, a.rgb, a.a);
+			close = mix(close, a.rgb, a.a);
 			vec4 b = surface_rings(p + vec2(0.031, 0.047), 0.045, 11.0, pixel);
-			near = mix(near, b.rgb, b.a * 0.85);
-			woven = mix(near, woven, fade);
+			close = mix(close, b.rgb, b.a * 0.85);
+			woven = mix(close, woven, fade);
 		}
 		col = woven;
 		rough = 0.95;
 		spec = 0.25;
 		worn = 0.2;
 	} else if (k == 4) {
-		float fade = smoothstep(0.003, 0.009, pixel);
+		float fade = smoothstep(0.004, 0.012, near);
 		vec3 speckled = col * (1.0 + SURFACE_FLECK_AVERAGE);
 		if (fade < 1.0) {
 			float cell = 0.022;
@@ -93,8 +98,9 @@ void look_surface(float kind, vec3 at, vec3 n, inout vec3 col, inout float rough
 			float h = surface_hash(c + 5.0);
 			vec2 mid = (c + 0.25 + 0.5 * vec2(surface_hash(c + 9.1), surface_hash(c + 13.7))) * cell;
 			float r = cell * mix(0.07, 0.15, surface_hash(c + 17.3));
-			float fleck = (1.0 - smoothstep(r - pixel, r + pixel, length(p - mid))) * step(0.62, h);
-			vec3 tone = h > 0.9 ? vec3(0.36, 0.36, 0.35) : vec3(0.12, 0.12, 0.13);
+			float fleck = (1.0 - smoothstep(r - pixel, r + pixel, length(p - mid))) * step(0.7, h);
+			// faint flecks, a little lighter or darker than the charcoal (the photos' floor)
+			vec3 tone = h > 0.88 ? vec3(0.16, 0.16, 0.16) : vec3(0.035, 0.035, 0.038);
 			speckled = mix(mix(col, tone, fleck), speckled, fade);
 		}
 		col = speckled;

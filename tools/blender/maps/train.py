@@ -104,7 +104,8 @@ BELLOWS = (1.15, 0.1, 2.35, 0.5)  # the folded bellows round the end door: half 
 BELLOWS_IN = 0.055    # its pleats' roots set back into the end sheet (their crests just under its face)
 DOOR_IN = 0.03        # the end door set back into it again
 
-# A car is 22k (the list: 12k outside, 10k inside): its body, its eight door pairs and its seats (up to 1.6k a car).
+# A car is about 27k (TQ1; the list's 22k was 12k outside, 10k inside): its body (18k), its eight door pairs (about
+# 5k) and its seats (about 4.7k a car, drawn by PropDress).
 # A car end is 1.5k, a gangway two of them; the uncoupled end adds its underframe's end (1k, the slack in its car).
 BUDGET = {"train_body": 18000, "train_screens": 120, "train_door": 640, "train_door_glazed": 640, "train_windows": 240, "train_door_glass": 60, "train_gangway": 3000, "train_end": 1500, "train_end_outer": 3700,
           "train_cab": 4200, "train_cab_open": 4200, "train_seat": 620, "train_seat_short": 420, "train_lights": 100,
@@ -112,17 +113,17 @@ BUDGET = {"train_body": 18000, "train_screens": 120, "train_door": 640, "train_d
 
 # Colours (sRGB): clean white paint (the owner, 2026-11-12: "more clean white than the grey"), black rubber, dark glass
 # (the far side's, against the tunnel wall; the platform side's panes are see-through, `pane`, TrainView); inside,
-# off-white panels, a dark speckled floor, steel poles and charcoal moquette. All white, grey or near it but the orange
-# band along the sides, a worn burnt orange (the owner, 2026-11-12: "give the trains an orange stripe"), the one colour
-# near a team's hue.
+# off-white panels, a charcoal speckled floor and grey moquette; the poles and grab rails in the stripe's orange, as the
+# owner's photos (TQ1). All white, grey or near it but the orange band along the sides, a worn burnt orange (the owner,
+# 2026-11-12: "give the trains an orange stripe"), the one colour near a team's hue, and the poles in the same.
 COLOURS = {
-    "body": 0xE6E6E2, "body_lo": 0xD6D6D2, "seam": 0x9A9A96, "rubber": 0x2C2B2E, "glass": 0x3B4449,
-    "glass_hi": 0x46505A, "skirt": 0x3B3936, "under": 0x262523, "steel": 0x8A8A88, "pole": 0xB9B9B5,
+    "body": 0xE6E6E2, "body_lo": 0xD6D6D2, "seam": 0x9A9A96, "rubber": 0x2C2B2E, "glass": 0x6E787E,
+    "glass_hi": 0x46505A, "skirt": 0x3B3936, "under": 0x262523, "steel": 0x8A8A88, "pole": 0xC0652F,
     "inner": 0xDAD6CE, "fleck": 0x9C9A96, "fleck_lo": 0x67666A, "poster_b": 0xB3B891, "poster_c": 0x9A968C,
-    "inner_lo": 0xBDB9B1, "trim": 0x9E9B95, "floor": 0x2A2B30, "light": 0xF4ECDA,
-    "vent": 0x77756F, "poster": 0xE4E1DA, "frame": 0x5B5A5C, "seat": 0x46474D, "seat_dot": 0x7A7D88,
+    "inner_lo": 0xBDB9B1, "trim": 0x9E9B95, "floor": 0x4A4B50, "light": 0xF4ECDA,
+    "vent": 0x77756F, "poster": 0xE4E1DA, "frame": 0x5B5A5C, "seat": 0x5C5D62, "seat_dot": 0x7A7D88,
     "seat_ring": 0x8F8E8A, "plinth": 0x2F2E31, "bellows": 0x262527, "fold_hi": 0x5B5A5C, "gang_in": 0x9C9A95, "lamp": 0xE8E2D2,
-    "mask": 0x1E2022, "yellow": 0xB8A858, "stripe": 0xC0652F, "led": 0xFFFFFF, "pane": 0x58656B,
+    "mask": 0x262C30, "mask_in": 0x4A5054, "mask_lit": 0x8A8E8E, "yellow": 0xB8A858, "stripe": 0xC0652F, "led": 0xFFFFFF, "pane": 0x58656B,
     "cart": 0x6F7174, "cart_lo": 0x5C5E61, "peg": 0x8A877E, "wood": 0x7E776E, "castor": 0x2E2D2F,
     "tool": 0x7D8084, "tape": 0xB8A858, "cable": 0x34363A,
     # TQ1: the cove's adverts (muted, under a team's saturation), their aluminium frames
@@ -137,10 +138,10 @@ COLOURS = {
 KIND_BASE = 100
 KINDS = {
     "body": 1, "body_lo": 1, "stripe": 1,
-    "pole": 2, "steel": 2,
+    "pole": 1, "steel": 2,
     "seat": 3,
     "floor": 4,
-    "glass": 5, "glass_hi": 5, "mask": 5, "screen": 5,
+    "glass": 5, "glass_hi": 5, "mask": 5, "mask_in": 5, "mask_lit": 5, "screen": 5,
     "rubber": 6, "bellows": 6,
     "alu": 7,
 }
@@ -802,13 +803,14 @@ def side_details(m: Model, s: float, doors: list) -> None:
     """The side's small parts outside (TQ1, the owner's photos): the equipment grille low by the car's +x end, its
     louvres dark in a pale frame, and a warning label beside each door hole (a yellow triangle edged black)."""
     x0, x1 = IN_X - 0.95, IN_X - 0.3
-    ys = [0.16, 0.2, 0.26, 0.32, 0.38, 0.44, 0.47]
+    # low on the bilge's round, where the marks stand proud of the skin yet inside the sides' 1.72 m (OUT_Z)
+    ys = [0.13, 0.15, 0.19, 0.23, 0.27, 0.29, 0.3]
     for ya, yb in zip(ys, ys[1:]):
         on_side(m, s, [(x0, ya), (x1, ya), (x1, yb), (x0, yb)], "body_lo", 0.0015)
     for k in range(7):
-        y = 0.19 + k * 0.038
-        on_side(m, s, [(x0 + 0.03, y), (x1 - 0.03, y), (x1 - 0.03, y + 0.022), (x0 + 0.03, y + 0.022)], "under",
-                0.0035)
+        y = 0.155 + k * 0.0205
+        on_side(m, s, [(x0 + 0.03, y), (x1 - 0.03, y), (x1 - 0.03, y + 0.012), (x0 + 0.03, y + 0.012)], "under",
+                0.003)
     for a, b in doors:
         for x in (a - 0.16, b + 0.16):
             y = 1.48
@@ -1473,7 +1475,8 @@ def outside_weather(p: Vector, n: Vector, c: tuple, slot: int) -> tuple:
 
 def cab(open_door: bool) -> None:
     """A cab front (its track side at x = END, facing +x; the car's inside at x = 0): the tall dark glass mask with its
-    rounded corners over most of the face, the centre door in it, lamp strips down its sides, headlamps low in its
+    rounded corners over most of the face, the saloon's pale ceiling and lamp lines seen through it (drawn on it, TQ1),
+    the centre door in it, lamp strips down its sides (about 0.6 of its height, the photos'), headlamps low in its
     corners, the body's grey round it rounding in at the corners; the underframe under it (under_end). Inside, the cab's
     back wall with its door. `open_door`: the centre door stands open, a hole the full height to the ceiling."""
     name = "train_cab_open" if open_door else "train_cab"
@@ -1594,6 +1597,15 @@ def cab(open_door: bool) -> None:
     xg = x - 0.03
     if not open_door:
         m.poly([(xg, y, z) for z, y in inner], (1, 0, 0), "mask")
+        # the saloon seen through the glass (TQ1, 04-cab-front's 113653): its pale ceiling's round under the mask's
+        # head and its two lamp lines running away to the far end. Drawn on the glass, not through it: the cab end is
+        # solid in the field, so a see-through front would show players what neither they nor a bot can shoot at.
+        m.poly([(xg + 0.001, 1.92, sc(-0.95, 1.92)), (xg + 0.001, 1.92, sc(0.95, 1.92)),
+                (xg + 0.001, 2.1, sc(0.82, 2.1)), (xg + 0.001, 2.1, sc(-0.82, 2.1))], (1, 0, 0), "mask_in")
+        for s in (-1, 1):
+            m.poly([(xg + 0.0015, 2.02, sc(s * 0.62, 2.02)), (xg + 0.0015, 2.05, sc(s * 0.6, 2.05)),
+                    (xg + 0.0015, 1.97, sc(s * 0.2, 1.97)), (xg + 0.0015, 1.955, sc(s * 0.21, 1.955))][::s],
+                   (1, 0, 0), "mask_lit")
     else:
         # the glass either side of the doorway, the doorway itself open
         for s in (-1, 1):
@@ -1652,7 +1664,7 @@ def cab(open_door: bool) -> None:
         pts = []
         for k in range(13):
             t = k / 12
-            y = 0.4 + (2.12 - 0.4) * t
+            y = 0.6 + (2.12 - 0.6) * t
             dz = -s * 0.10 * (t ** 3)
             pts.append((sc(s * (mz - 0.13), y) + dz, y))
         for (za, ya), (zb, yb) in zip(pts, pts[1:]):
