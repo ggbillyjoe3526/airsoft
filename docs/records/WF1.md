@@ -52,7 +52,12 @@ each change the look, so neither is used here.
 - `tests/unit/test_wf1_leaf_trim.gd`: every drawn texel of the sheet at mips 2 to 6 lies in its cell's rectangle;
   each crown keeps its triangles, levels, box and material; every trimmed corner opens back to the model's own corner
   and lies in its rectangle; the oak's cards open along their planes; bark before cards; untrimmed models and no
-  sheet drawn as loaded; the dress lays every model as before. Touched tests; gdlint; wiki check.
+  sheet drawn as loaded; the dress lays every model as before; the levels of detail draw solid faces first; a card sharing a corner
+  with another face is kept whole. Touched tests; gdlint; wiki check.
+- QA (`tests/unit/test_wf1_qa.gd`, 12 tests) passed; two of its notes are fixed here: a card whose corner another face
+  also uses is no longer trimmed (the importer splits such corners, so no shipped crown had one), and the importer's
+  levels of detail are put solid first like the main list. Performance passed: the five crowns trim in about 0.1 s
+  once at load, 3.2 MB more memory, nothing a frame.
 
 ## Decisions
 

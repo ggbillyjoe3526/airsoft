@@ -197,3 +197,47 @@ func test_the_dress_draws_the_trimmed_crowns_and_lays_them_as_before() -> void:
 		assert_eq(m.get_shader_parameter(&"trim_mip"), trim.max_mip, "%s opens out before the trim's mip" % model)
 		for view in dress.views_of(model):
 			assert_eq(view.multimesh.mesh, cfg.drawn_mesh_of(model), "%s's every chunk draws it" % model)
+
+
+func test_the_levels_of_detail_draw_their_solid_faces_first_too() -> void:
+	for model in _crowns():
+		var drawn := cfg.drawn_mesh_of(model)
+		var uv: PackedVector2Array = drawn.surface_get_arrays(0)[Mesh.ARRAY_TEX_UV]
+		var lods: Array = RenderingServer.mesh_get_surface(drawn.get_rid(), 0)["lods"]
+		assert_gt(lods.size(), 0, "%s has levels of detail" % model)
+		for lod: Dictionary in lods:
+			var bytes: PackedByteArray = lod["index_data"]
+			var card_seen := false
+			var late := 0
+			for t in bytes.size() / 6:
+				var mid := Vector2.ZERO
+				for k in 3:
+					mid += uv[bytes.decode_u16((t * 3 + k) * 2)] / 3.0
+				var solid := mid.x < LeafTrim.BARK_BELOW or not trim.rect_of(Vector2i(floori(mid.x * trim.grid),
+						floori(mid.y * trim.grid))).has_area()
+				if solid:
+					late += 1 if card_seen else 0
+				else:
+					card_seen = true
+			assert_eq(late, 0, "%s's level at %.2f draws its bark and cores first" % [model, lod["edge_length"]])
+
+
+func test_a_card_sharing_a_corner_with_another_face_is_kept_whole() -> void:
+	var c := 1.0 / float(trim.grid)
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(1, 1, 0),
+			Vector3(0, 1, 0), Vector3(-1, 0, 0), Vector3(-1, -1, 0)])
+	arrays[Mesh.ARRAY_NORMAL] = PackedVector3Array([Vector3.BACK, Vector3.BACK, Vector3.BACK, Vector3.BACK,
+			Vector3.BACK, Vector3.BACK])
+	arrays[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2(0, c), Vector2(c, c), Vector2(c, 0), Vector2(0, 0),
+			Vector2(-3, 0), Vector2(-3, 1)])
+	# the card (cell 0,0) and a bark face that shares its first corner
+	arrays[Mesh.ARRAY_INDEX] = PackedInt32Array([0, 1, 2, 0, 2, 3, 0, 4, 5])
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var out := LeafTrim.trimmed(mesh, trim)
+	var b := out.surface_get_arrays(0)
+	assert_null(b[Mesh.ARRAY_CUSTOM0], "the card isn't trimmed")
+	assert_eq(b[Mesh.ARRAY_VERTEX], arrays[Mesh.ARRAY_VERTEX], "no corner moves")
+	assert_eq((b[Mesh.ARRAY_INDEX] as PackedInt32Array).slice(0, 3), PackedInt32Array([0, 4, 5]), "the bark face first")

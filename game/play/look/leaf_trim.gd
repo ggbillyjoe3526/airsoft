@@ -14,7 +14,8 @@ extends RefCounted
 ## core is in the depth buffer before the cards behind it are tested. Cards of a cell drawn whole, cards that aren't
 ## one flat axis-aligned quad on the sheet (a spruce tier's kites, a fern's fronds) and every other face are kept as they
 ## are. The mesh keeps its box (custom_aabb, as the opened cards reach it), its material and its levels of detail (the
-## importer's, whose cards open the same way). Built once a model (allocates).
+## importer's, whose cards open the same way, solid faces first too). A card sharing a corner with any other face is
+## kept whole (moving the corner would move that face). Built once a model (allocates).
 
 ## What trimming changed in a surface: nothing, only its faces' order (solid first), or its cards too.
 enum Change { NONE, ORDER, TRIMMED }
@@ -49,6 +50,9 @@ static func trimmed(mesh: Mesh, sheet: LeafTrimSheet) -> Mesh:
 		var lods := _lods(mesh, s)
 		var change := _trim_surface(arrays, sheet)
 		any = any or change != Change.NONE
+		if change != Change.NONE:
+			for error: float in lods:
+				lods[error] = _solid_first(lods[error], arrays[Mesh.ARRAY_TEX_UV], sheet)
 		var flags: int = mesh.surface_get_format(s) & Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES
 		if change == Change.TRIMMED:
 			flags |= CUSTOM_FORMAT
@@ -127,28 +131,23 @@ static func _trim_surface(arrays: Array, sheet: LeafTrimSheet) -> Change:
 	grow_uv.resize(count * 4)
 	var moved := PackedByteArray()
 	moved.resize(count)
+	var uses := PackedInt32Array() # the faces each corner is in
+	uses.resize(count)
+	for i in idx:
+		uses[i] += 1
 	var trimmed_any := false
 	for t in tris:
 		var o := partner[t]
-		if o > t and _trim_card(arrays, sheet, _corners(idx, t, o), grow, grow_uv, moved):
+		if o > t and _own_corners(idx, t, o, uses) \
+				and _trim_card(arrays, sheet, _corners(idx, t, o), grow, grow_uv, moved):
 			trimmed_any = true
-	# the solid faces ahead of the cards, each kept in its own order
-	var solid := PackedInt32Array()
-	var cards := PackedInt32Array()
-	var ahead := false # a solid face after a card: the order changes
-	for t in tris:
-		var face := idx.slice(t * 3, t * 3 + 3)
-		if leaf[t] == 1 and not _cell_solid(uv, idx, t, sheet):
-			cards.append_array(face)
-		else:
-			solid.append_array(face)
-			ahead = ahead or not cards.is_empty()
+	var ordered := _solid_first(idx, uv, sheet)
 	if not trimmed_any:
-		if not ahead:
+		if ordered == idx:
 			return Change.NONE
-		arrays[Mesh.ARRAY_INDEX] = solid + cards
+		arrays[Mesh.ARRAY_INDEX] = ordered
 		return Change.ORDER
-	arrays[Mesh.ARRAY_INDEX] = solid + cards
+	arrays[Mesh.ARRAY_INDEX] = ordered
 	arrays[Mesh.ARRAY_CUSTOM0] = grow
 	arrays[Mesh.ARRAY_CUSTOM1] = grow_uv
 	_hold_box(arrays, before)
@@ -185,6 +184,31 @@ static func _hold_box(arrays: Array, before: PackedVector3Array) -> void:
 		for a: int in [Mesh.ARRAY_CUSTOM0, Mesh.ARRAY_CUSTOM1]:
 			arrays[a] = (arrays[a] as PackedFloat32Array) + PackedFloat32Array([0.0, 0.0, 0.0, 0.0])
 	arrays[Mesh.ARRAY_VERTEX] = at
+
+
+## `idx`'s solid faces (bark, cells drawn whole) ahead of its cards, each kept in its own order.
+static func _solid_first(idx: PackedInt32Array, uv: PackedVector2Array, sheet: LeafTrimSheet) -> PackedInt32Array:
+	var solid := PackedInt32Array()
+	var cards := PackedInt32Array()
+	for t in idx.size() / 3:
+		var face := idx.slice(t * 3, t * 3 + 3)
+		if _on_sheet(uv, idx, t) and not _cell_solid(uv, idx, t, sheet):
+			cards.append_array(face)
+		else:
+			solid.append_array(face)
+	return solid + cards
+
+
+## Whether no face but triangles `t` and `o` (a card) uses any of their corners, so moving one moves only that card.
+static func _own_corners(idx: PackedInt32Array, t: int, o: int, uses: PackedInt32Array) -> bool:
+	var own := {}
+	for k in 3:
+		own[idx[t * 3 + k]] = own.get(idx[t * 3 + k], 0) + 1
+		own[idx[o * 3 + k]] = own.get(idx[o * 3 + k], 0) + 1
+	for c: int in own:
+		if uses[c] != own[c]:
+			return false
+	return true
 
 
 ## Whether triangle `t` lies on the leaf sheet (not bark).
