@@ -1962,6 +1962,14 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   with the lamps caught in them; the glass screens by the doors show their black edge and pale band; nothing flickers;
   Low holds 60 FPS inside a car.
 
+## Subway's station props up close (SQ1)
+
+- [ ] **The hall, platforms and tunnels.** Subway on Low and on your usual preset: walk the ticket hall (gates, help
+  points, benches, staff booths, crowd barriers), both platforms, then the works siding and a tunnel mouth. Pass: the
+  gates and booths read as satin-painted panels with steel trims and dark glass screens; the works wagons, trolleys,
+  cable drums, buffer stop and fan housing show their ribs, bolts and frames; nothing flickers or shimmers; no prop
+  sits higher, wider or in a different place than before; Low holds 60 FPS in the hall.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
