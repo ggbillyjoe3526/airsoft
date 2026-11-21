@@ -1,7 +1,7 @@
 extends GutTest
-## TQ1 QA: the subway's trains carry surface kinds (UV y >= 100) only in the train models; no other prop is read as a
-## kind; the draft screens are a car's one clear (a little more opaque than the windows), shadowless instance inside
-## its box; the shader includes its kinds.
+## TQ1 QA: the subway's trains carry surface kinds (UV y >= 100); any other prop with kinds (SQ1) has whole kinds
+## only; the draft screens are a car's one clear (a little more opaque than the windows), shadowless instance inside its
+## box; the shader includes its kinds.
 
 const PROPS := "res://assets/models/props/"
 const KIND_BASE := 100.0
@@ -44,20 +44,34 @@ func test_the_train_models_carry_surface_kinds_one_to_seven_and_no_uv_x() -> voi
 		assert_eq(bad, 0, "%s: every vertex a whole kind, UV x 0 (never perforated or ribbed)" % path)
 
 
-func test_no_prop_outside_the_trains_is_read_as_a_surface_kind() -> void:
+## SQ1: the station props carry kinds too. A vertex with UV x 0 is plain (y 0, or y 100: kind 0) or a whole kind (y 101
+## to 108); one with UV x set is a perforated or ribbed part (map_kit.py) whose y is a coordinate, never read as a kind.
+func test_every_prop_with_kinds_has_whole_kinds_only() -> void:
 	var seen := 0
+	var with_kinds := 0
 	for f in DirAccess.get_files_at(PROPS):
 		if not f.ends_with(".glb"):
-			continue
-		var base := f.get_basename()
-		if base.begins_with("train_") or base == "tool_cart":
 			continue
 		var mesh := PropDressConfig.load_mesh(PROPS + f)
 		if mesh == null:
 			continue
 		seen += 1
-		assert_true(_uv_y_range(mesh).y < KIND_BASE - 0.5, "%s has a UV y of a surface kind" % f)
+		if _uv_y_range(mesh).y < KIND_BASE - 0.5:
+			continue
+		with_kinds += 1
+		var bad := 0
+		for s in mesh.get_surface_count():
+			for uv: Vector2 in (mesh.surface_get_arrays(s)[Mesh.ARRAY_TEX_UV] as PackedVector2Array):
+				if absf(uv.x) > 0.0001:
+					assert_true(uv.y < KIND_BASE - 0.5, "%s: a perforated or ribbed vertex read as a kind" % f)
+					continue
+				var plain := absf(uv.y) < 0.0001
+				var whole := absf(uv.y - roundf(uv.y)) < 0.01 and uv.y > KIND_BASE - 0.5 and uv.y < KIND_BASE + 8.5
+				if not (plain or whole):
+					bad += 1
+		assert_eq(bad, 0, "%s: every vertex plain or a whole kind 0..8" % f)
 	assert_gt(seen, 20, "props were checked")
+	assert_gt(with_kinds, 10, "the station props carry kinds (SQ1)")
 
 
 func test_the_look_loads_with_the_screens_and_lists_their_path() -> void:

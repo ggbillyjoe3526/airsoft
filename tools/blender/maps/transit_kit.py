@@ -36,6 +36,11 @@ CHEQUER = 0x8A8882
 BRONZE = 0x67625A
 FROST = 0xEAE4D4
 GAP = 0x1E1D20
+# What each paint is made of (SQ1, surface_kinds.py): the stainless satin steel, the treads and chequer plate
+# aluminium, the handrails' rubber, the safety yellow and bronze a painted gloss. A paint not here is plain.
+import surface_kinds as sk  # noqa: E402
+KINDS = {STAINLESS: sk.STEEL, STAINLESS_DARK: sk.STEEL, TREAD: sk.ALUMINIUM, CHEQUER: sk.ALUMINIUM,
+         RUBBER: sk.RUBBER, SAFETY: sk.GLOSS, YELLOW: sk.GLOSS}
 # Grime: how dark a face is at a floor (a share of its paint), fading to clean this high (m) over it.
 GRIME = 0.78
 GRIME_UP = 0.6
@@ -61,6 +66,8 @@ def part(name: str, colour: int, verts: list, faces: list, tones: list = None, s
     if outward:
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     ob = mk.mesh_object(name, bm, colour)
+    if KINDS.get(colour, 0):
+        ob["kind"] = KINDS[colour]
     if tones is not None:
         mk.toned(ob, tones)
     if smooth > 0.0:

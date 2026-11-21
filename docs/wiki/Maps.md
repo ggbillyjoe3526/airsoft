@@ -184,7 +184,8 @@ One team starts in the ticket hall at the west end, the other down in the runnin
   doors, adverts along the ceiling and a speckled floor.
 - **The running tunnels** lead east from the platforms, arched round the trains, past works wagons, trolleys and
   cable drums, joined by a cross passage. At their east ends both curve away out of sight behind a locked steel
-  grille.
+  grille. Up close the station's fittings show what they are made of: satin-painted gates and booths with steel trims
+  and dark glass, and works wagons with their ribs, bolts and frames.
 - **Attack / Defend** puts flag **A** in the south train's first car and flag **B** on the north platform; Plant The
   Bomb's sites A and B are on the south and north platforms, just east of the lower hall's passages. In Elimination's
   overtime the flag stands in the lower hall.

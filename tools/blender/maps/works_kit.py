@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import range_kit as rk  # noqa: E402  (brings bpy and hardsurface)
 import weathering as wt  # noqa: E402
+import surface_kinds  # noqa: E402
 from range_kit import hs  # noqa: E402
 
 import bpy  # noqa: E402
@@ -372,6 +373,8 @@ def bake(ob: bpy.types.Object, weather=None, jitter: dict = None, seed: int = 1)
             if rk.reads_as_team(c[:3]):
                 raise SystemExit("%s: a %s corner's colour %s reads as a team's hue" % (ob.name, name, c))
             attr.data[li].color = c
+    # what each paint is made of, by its name (SQ1: galvanised, steel, glass, rubber), as the model's UVs
+    ob["kinds"] = surface_kinds.write(ob, surface_kinds.by_name)
     me.materials.clear()
     plain = bpy.data.materials.get("Prop") or bpy.data.materials.new("Prop")
     me.materials.append(plain)
