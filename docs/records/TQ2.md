@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-21 | 1 | build thread and one worker | touched tests 177/177, gates green in the worker | pending | – |
+| 2026-11-21 | 1 | build thread and one worker | touched tests 177/177, QA Pass, performance Pass | Retry 7/8 | the street never shown (indoor-looking landing), black escalator treads, a dark band read as a gap, a placeholder sign, rails ending in a cushion and in mid-air, doubled tubes into the cove |
+| 2026-11-21 | 2 | build thread and one worker | touched tests 183/183, QA Pass, performance Pass | pending | – |
 
 ## Goal
 
@@ -22,31 +23,38 @@ for example). And can you add adverts/posters to the signs above the windows ins
   (from, to, height); `shell()` leaves the wall out there (with a lintel over it; here the entrance block fills that).
   The hall's west wall opens 4.8 m wide and 3.2 m high on its middle, right behind the street team's start.
 - **The entrance** is one solid `wall` block behind the doorway (x -66.5 to -55, 4.8 x 5 x 11.5 m), drawn as one model
-  (`station_entrance.py`, 4,731 of 5,000 triangles, `PropDressConfig.models`): a tiled passage, a stair of 15 risers
+  (`station_entrance.py`, 4,899 of 5,150 triangles, `PropDressConfig.models`): a tiled passage, a stair of 15 risers
   and an escalator side by side climbing 2.6 m, a glass balustrade, the street exit at the top (pavement, kerb, road,
-  railing, lamp post and a painted street of shop fronts under the sky), a black sign fascia over the doorway and a
-  locked folding lattice gate at the block's face. Look only: spawns, nav, routes and cover are unchanged; the gate
+  railing, lamp post and a painted street of shop fronts under the sky), a lit sign over the doorway (MORRIN STREET over WAY OUT and an
+  up arrow, in stroke letters) and a locked folding lattice gate at the block's face. Look only: spawns, nav, routes and cover are unchanged; the gate
   is the block's face, so nobody walks, climbs or shoots through it.
 - **Its lamps:** two lamps under its ceiling. A plain roof's lamp light reaches to `MapData.floor_under`; with no
   floor block under them it would fall back to the ground (0 m) and light 9 m too far. A lamp may now carry its own
   `floor` in the file (`MapData.roof_lamp_floors`, NAN when left out), which `RoofView.plain_reaches` takes first.
-- **Rails** (`train.py`, worker): 12-sided tubes with bends in steps of 22.5 degrees or less; each seat rail one tube
-  bending up into the cove onto a flat plate, no brackets; door poles with plain plates, no collars; the draft
-  screen frame one arc; every end and gangway handle a single D tube. They moved into their own models
-  (`train_poles`, `train_end_rails`, `train_gangway_rails`), the body's and ends' budgets lowered by what they gave
-  up: a car is about 20.7k triangles (17.8k before).
+- **Rails** (`train.py`, worker): 12-sided tubes with bends in steps of 22.5 degrees or less. After the critic, each
+  bay's rail and its two poles are one bent tube (an inverted U): the poles stand on the floor against the seat-end
+  panels' doorway faces and bend into the rail over the seats' front edge, as the owner's photos
+  (`references/maps/subway/02-train-car-inside/`); at a car's end the rail runs into the end wall. No brackets, no
+  collars, nothing doubled into the cove; the draft screens lose their orange tube and keep a black frame that holds
+  the glass. Every end and gangway handle is a single D tube. The rails are their own models (`train_poles`,
+  `train_end_rails`, `train_gangway_rails`): a car is about 17.4k triangles (17.8k before).
 - **Orange** #c0652f to **#d8692a** (hue 21.7, Beta 28): the train's stripe and poles, the station signs' stripe
   (`signs.png` regenerated), the moquette's rings (`look_surface.gdshaderinc`), and the tests' Subway exemption.
+- **The street's daylight** (after the critic): a new surface kind 9, lit (`surface_kinds.py`,
+  `look_surface.gdshaderinc`), glows by its own colour (`look_vertex.gdshader` `daylight_glow` 0.55): the street up
+  the stair and the sign's letters, so the street reads as sunlit from the hall. Flanking buildings close the
+  street's sides; the escalator's treads are brushed aluminium; the wall band is the hall's lighter green.
 - **Adverts:** `train_adverts.py` draws `assets/textures/station/train_adverts.png` (2048 x 768, twelve invented
   cards, no blue or orange, no real brands); `train_adverts.glb` is the cove panels, drawn by `TrainView` with
   `LookMaterials.printed`, every other car turned about so neighbouring cars differ.
 
 ## Verified
 
-- Tests: `test_se1_entrance.gd` (7: the block solid and facing the hall, the doorway opening only onto it, no floor
+- Tests: `test_se1_entrance.gd` (8: the street and sign lit; the block solid and facing the hall, the doorway opening only onto it, no floor
   past it, the lamps' floors, the file's `floor`, `plain_reaches` taking it, the model filling its block) and
-  `test_tq2_train_rails_adverts.gd` (7) with the train, fixtures, station, props, assets and flicker files, 177/177
-  after the merge; 300 Subway tests before it.
+  `test_tq2_train_rails_adverts.gd` (7) and QA's `test_tq2_qa.gd` (5) with the train, fixtures, station, props,
+  assets and flicker files, 183/183 on attempt 2; 300 Subway tests before the merge. `test_tq1_trains_qa.gd` allows
+  kind 9.
 - Faces: `tools/coplanar_models.py fix` on the entrance and every train model; bounds unchanged.
 - Pictures, before and after (lavapipe, in game): `art/blender/subway-entrance/` and
   `art/blender/subway-trains/tq2/` in the project files.
