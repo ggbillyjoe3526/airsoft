@@ -133,16 +133,17 @@ BUDGET = {"train_body": 15400, "train_poles": 2650, "train_end_rails": 680, "tra
 # (the far side's, against the tunnel wall; the platform side's panes are see-through, `pane`, TrainView); inside,
 # off-white panels, a charcoal speckled floor and grey moquette; the poles and grab rails in the stripe's orange, as the
 # owner's photos (TQ1). All white, grey or near it but the orange band along the sides (the owner, 2026-11-12: "give the
-# trains an orange stripe"; 2026-11-21: "a slightly more vibrant orange", #c0652f to #d8692a, its hue kept at 22
-# degrees, redder than Beta's 28), the one colour near a team's hue, and the poles in the same.
+# trains an orange stripe"; 2026-11-21: "a slightly more vibrant orange", #c0652f to #ea6a22, its hue kept at 22
+# degrees, redder than Beta's 28, and drawn in its whole colour, FULL_COLOUR), the one colour near a team's hue, and
+# the poles in the same.
 COLOURS = {
     "body": 0xE6E6E2, "body_lo": 0xD6D6D2, "seam": 0x9A9A96, "rubber": 0x2C2B2E, "glass": 0x3F484E,
-    "glass_hi": 0x66707A, "glass_lo": 0x30383D, "frost": 0xC8CCCC, "skirt": 0x3B3936, "under": 0x262523, "steel": 0x8A8A88, "pole": 0xD8692A,
+    "glass_hi": 0x66707A, "glass_lo": 0x30383D, "frost": 0xC8CCCC, "skirt": 0x3B3936, "under": 0x262523, "steel": 0x8A8A88, "pole": 0xEA6A22,
     "inner": 0xDAD6CE, "fleck": 0x9C9A96, "fleck_lo": 0x67666A, "poster_b": 0xB3B891, "poster_c": 0x9A968C,
     "inner_lo": 0xBDB9B1, "trim": 0x9E9B95, "floor": 0x4A4B50, "light": 0xF4ECDA,
     "vent": 0x77756F, "poster": 0xE4E1DA, "frame": 0x5B5A5C, "seat": 0x5C5D62, "seat_dot": 0x7A7D88,
     "seat_ring": 0x8F8E8A, "plinth": 0x2F2E31, "bellows": 0x262527, "fold_hi": 0x5B5A5C, "gang_in": 0x9C9A95, "lamp": 0xE8E2D2,
-    "mask": 0x262C30, "mask_in": 0x4A5054, "mask_lit": 0x8A8E8E, "yellow": 0xB8A858, "stripe": 0xD8692A, "led": 0xFFFFFF, "pane": 0x58656B,
+    "mask": 0x262C30, "mask_in": 0x4A5054, "mask_lit": 0x8A8E8E, "yellow": 0xB8A858, "stripe": 0xEA6A22, "led": 0xFFFFFF, "pane": 0x58656B,
     "cart": 0x6F7174, "cart_lo": 0x5C5E61, "peg": 0x8A877E, "wood": 0x7E776E, "castor": 0x2E2D2F,
     "tool": 0x7D8084, "tape": 0xB8A858, "cable": 0x34363A,
     # TQ1: the cove's advert frames' aluminium (their cards are printed, train_adverts.glb), the poles' fixings
@@ -154,6 +155,10 @@ COLOURS = {
 # and fine pattern (the seats' moquette, the floor's speckle) drawn for no triangles. A paint not named keeps the
 # props' roughness (0). Each face's kind goes out as its UV y (KIND_BASE + kind; UV x 0).
 KIND_BASE = 100
+# The paints drawn in their whole colour, not the look's weathered share of it (LookConfig.paint_saturation, 0.6),
+# which drew the orange rust brown (TQ2, the critic; the owner's photos' poles are a clean bright orange): the poles,
+# rails and handles and the stripe. Every other paint is white, grey or near it, which the pull leaves as it is.
+FULL_COLOUR = ("pole", "stripe")
 KINDS = {
     "body": 1, "body_lo": 1, "stripe": 1,
     "pole": 1, "steel": 2,
@@ -248,14 +253,35 @@ class Model:
         ob = self.b.build()
         mk.clean(ob)
         kinds = surface_kinds(ob)
+        full = full_colours(ob)
         mk.bake_vertex_colours(ob)
         if weather is not None:
             wt.weather(ob, weather)
+        if any(full):
+            keep_full_colour(ob, full)
         mk.report(ob, self.name, BUDGET[self.name])
         tris = hs.tris(ob)
         if tris > BUDGET[self.name]:
             raise SystemExit(f"{self.name}: {tris} triangles, over its budget of {BUDGET[self.name]}")
         wt.export(ob, self.name, uvs=kinds)
+
+
+def full_colours(ob) -> list:
+    """Whether each face is painted in FULL_COLOUR (read before the paints are baked away)."""
+    names = [m.name.split(".")[0] for m in ob.data.materials]
+    return [names[p.material_index] in FULL_COLOUR for p in ob.data.polygons]
+
+
+def keep_full_colour(ob, full: list) -> None:
+    """Sets each face corner's alpha: 1 on a FULL_COLOUR face, which keeps its whole colour against the look's pull
+    toward grey (look_vertex.gdshader keep_by_alpha, TrainView's props material), 0 elsewhere (the look's share). Only
+    on a model with such faces, all drawn in TrainView's props material: the glass (whose alpha is its opacity) and the
+    props PropDress draws (whose alpha takes their instance paint) keep theirs."""
+    data = ob.data.color_attributes["Color"].data
+    for p, keep in zip(ob.data.polygons, full):
+        for li in p.loop_indices:
+            r, g, b, _ = data[li].color
+            data[li].color = (r, g, b, 1.0 if keep else 0.0)
 
 
 def surface_kinds(ob) -> bool:

@@ -119,7 +119,7 @@ func test_each_card_is_a_whole_cell_and_a_cars_twelve_differ() -> void:
 
 func test_the_poles_wear_the_stripes_orange() -> void:
 	var look := play.station_look.trains
-	var own := Color("d8692a")
+	var own := Color("ea6a22")
 	var orange := 0
 	for c in look.mesh(look.poles).surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray:
 		var srgb := c.linear_to_srgb()
@@ -162,3 +162,28 @@ func _near_team(c: Color, teams: Array[Color]) -> bool:
 		if minf(d, 360.0 - d) <= FieldStandard.HUE_MARGIN_DEG:
 			return true
 	return false
+
+
+func test_the_orange_keeps_its_whole_colour_and_nothing_else_does() -> void:
+	var look := play.station_look.trains
+	var view := _view(_subway())
+	var props := view.view_of(look.body).material_override as ShaderMaterial
+	assert_true(bool(props.get_shader_parameter(&"keep_by_alpha")), "the train's props material keeps by alpha")
+	var own := Color("ea6a22")
+	for path: String in [look.body, look.poles]:
+		var kept := 0
+		var pulled := 0
+		for c in look.mesh(path).surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray:
+			var srgb := c.linear_to_srgb()
+			var orange := absf(srgb.h - own.h) < 0.03 and srgb.s > 0.4
+			if c.a > 0.5:
+				kept += 1
+				assert_true(orange, "%s: only the orange keeps its whole colour" % path.get_file())
+			else:
+				pulled += 1
+				assert_false(orange, "%s: no orange is pulled toward grey" % path.get_file())
+				if orange:
+					break
+		assert_gt(kept, 0, "%s: its orange kept" % path.get_file())
+		if path == look.body:
+			assert_gt(pulled, 0, "the body's whites and greys take the look's share")
