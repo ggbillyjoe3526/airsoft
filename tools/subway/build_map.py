@@ -876,6 +876,7 @@ def build() -> dict:
                                                    for box, _ in ramp_barrier(bl)]
     m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, holes)
     m["dressing"]["station"]["fixtures"] += fixtures.bend_ends(L.RUN_VAULTS, L.T, LIFT)
+    m["dressing"]["station"]["fixtures"] += fixtures.entrance(L, LIFT)
     m["dressing"]["station"]["trims"] += drop_rods(m["dressing"]["station"]["fixtures"])
     del sx
     return m

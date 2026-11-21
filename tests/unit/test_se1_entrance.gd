@@ -142,3 +142,28 @@ func test_the_street_and_the_sign_are_lit() -> void:
 	assert_gt(kinds, lit, "the rest (steel, glass, aluminium) keep their own kinds")
 	var shader := load("res://game/play/look/look_vertex.gdshader") as Shader
 	assert_true(shader.code.contains("daylight_glow"), "the props' shader makes kind 9 glow")
+
+
+func test_the_entrance_signs_and_posters_are_on_its_fascia_and_stair_wall() -> void:
+	var m := _subway()
+	var b := _entrance(m)
+	if b == null:
+		fail_test("the entrance block is in the file")
+		return
+	var box := AABB(b.center - b.size / 2.0, b.size)
+	var signs := 0
+	var posters := 0
+	for f in m.station.fixtures:
+		if not box.grow(0.1).has_point(f.position):
+			continue
+		if f.model == &"wall_sign_out" or f.model == &"name_board":
+			signs += 1
+			assert_almost_eq(f.position.x, -55.06, 0.001, "%s on the fascia, 6 cm behind the block's face" % f.model)
+			assert_between(f.position.y, C + 3.2, C + 4.5, "%s over the doorway, under the hall's ceiling" % f.model)
+			assert_almost_eq(f.yaw, PI / 2.0, 0.001, "%s faces the hall" % f.model)
+		elif String(f.model).begins_with("poster_"):
+			posters += 1
+			assert_almost_eq(f.position.z, 2.25, 0.001, "%s on the stair's wall" % f.model)
+			assert_almost_eq(absf(f.yaw), PI, 0.001, "%s faces across the stair" % f.model)
+	assert_eq(signs, 2, "the name board over the way-out sign")
+	assert_eq(posters, 3, "three posters up the stair's wall")

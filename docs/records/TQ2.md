@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-21 | 1 | build thread and one worker | touched tests 177/177, QA Pass, performance Pass | Retry 7/8 | the street never shown (indoor-looking landing), black escalator treads, a dark band read as a gap, a placeholder sign, rails ending in a cushion and in mid-air, doubled tubes into the cove |
-| 2026-11-21 | 2 | build thread and one worker | touched tests 183/183, QA Pass, performance Pass | pending | – |
+| 2026-11-21 | 2 | build thread and one worker | touched tests 183/183, QA Pass, performance Pass | Retry 7/8 | placeholder posters, a blockout street (flat windows, square railing, no shop names, no sky), jagged stroke sign, the orange still rust brown in game |
+| 2026-11-21 | 3 | build thread and one worker | pending | pending | – |
 
 ## Goal
 
@@ -23,11 +24,16 @@ for example). And can you add adverts/posters to the signs above the windows ins
   (from, to, height); `shell()` leaves the wall out there (with a lintel over it; here the entrance block fills that).
   The hall's west wall opens 4.8 m wide and 3.2 m high on its middle, right behind the street team's start.
 - **The entrance** is one solid `wall` block behind the doorway (x -66.5 to -55, 4.8 x 5 x 11.5 m), drawn as one model
-  (`station_entrance.py`, 4,899 of 5,150 triangles, `PropDressConfig.models`): a tiled passage, a stair of 15 risers and
-  an escalator side by side climbing 2.6 m, a glass balustrade, the street exit at the top (pavement, kerb, road,
-  railing, lamp post and a painted street of shop fronts under the sky), a lit sign over the doorway (MORRIN STREET over
-  WAY OUT and an up arrow, in stroke letters) and a locked folding lattice gate at the block's face. Look only: spawns,
-  nav, routes and cover are unchanged; the gate is the block's face, so nobody walks, climbs or shoots through it.
+  (`station_entrance.py`, 4,992 of 5,150 triangles, `PropDressConfig.models`): a tiled passage, a stair of 15 risers and
+  an escalator side by side climbing 2.6 m, a glass balustrade, the street exit at the top (pavement, kerb, road, a
+  round railing, a lamp post with its lantern, flanking buildings, a tea room and a newsagent with their names in
+  stroke letters and glazed windows, a pale sky), a black fascia over the doorway and a locked folding lattice gate at
+  the block's face. Look only: spawns, nav, routes and cover are unchanged; the gate is the block's face, so nobody
+  walks, climbs or shoots through it.
+- **Its signs and posters** are the station's own printed fixtures (`fixtures.py` `entrance`, after the critic's
+  attempt 2): the name board over a way-out sign on the fascia, and three posters up the stair's wall. They stand on
+  or in the dressed block, so they skip the room checks, as the tunnels' bend fixtures do; `test_station_fixtures.gd`
+  leaves them to `test_se1_entrance.gd`.
 - **Its lamps:** two lamps under its ceiling. A plain roof's lamp light reaches to `MapData.floor_under`; with no
   floor block under them it would fall back to the ground (0 m) and light 9 m too far. A lamp may now carry its own
   `floor` in the file (`MapData.roof_lamp_floors`, NAN when left out), which `RoofView.plain_reaches` takes first.
