@@ -27,6 +27,11 @@ GLASS = "seafoam*0.5"
 SCREEN = "ink*0.55"
 LABEL = "cream*0.95"
 STICKER = "steel*0.72"
+# What they are made of (SQ1, surface_kinds.py): the stainless satin metal, the glass and screens glossy, the moulded
+# plastic a soft sheen.
+import surface_kinds as kinds  # noqa: E402
+prop.KINDS.update({STAINLESS: kinds.STEEL, STAINLESS_DARK: kinds.STEEL, GLASS: kinds.GLASS, SCREEN: kinds.GLASS,
+                   BLACK: kinds.RUBBER, PLASTIC: kinds.SATIN})
 
 
 def _point(face: str, at: float, u: float, v: float) -> tuple:

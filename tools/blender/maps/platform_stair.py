@@ -38,6 +38,7 @@ RISER = 0x67625B
 NOSE = 0xA4A29C
 SKIRTING = 0x8A918E   # a pale grey-green glazed tile, off the teams' hues (darker read as a gap under the wall)
 RAIL = 0xB4B2AC
+tk.KINDS[RAIL] = tk.sk.STEEL  # the stainless handrails (SQ1, surface_kinds.py)
 SEED = 17
 
 
