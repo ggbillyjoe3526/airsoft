@@ -57,11 +57,69 @@ def paints(names: dict) -> None:
         hs.material(name, (round(srgb[0] * 255) << 16) | (round(srgb[1] * 255) << 8) | round(srgb[2] * 255), 0.7)
 
 
+# Woodland's surfaces (WQ1): the detail layer each palette material is drawn with by look_surface.gdshader (its index
+# in assets/textures/woodland/surfaces*.png; 0 plain), told by the first of these words in its name (lower case), and
+# the metres one tile of the layer spans. A face's UVs run along its longest edge (a board's or a log's grain) and
+# across it, in tiles; its UV2 x is the layer.
+SURFACES = (
+    ("moss", 7), ("earth", 6), ("mud", 6), ("soil", 6), ("galv", 5), ("steel", 5), ("metal", 5), ("iron", 5),
+    ("bolt", 5), ("sheet", 5), ("rust", 5), ("tin", 5), ("concrete", 4), ("stone", 4), ("pier", 4), ("cut", 3),
+    ("end", 3), ("sap", 3), ("heart", 3), ("bark", 2), ("log", 2), ("stake", 2), ("wood", 1), ("timber", 1),
+    ("board", 1), ("plank", 1), ("inside", 1), ("damp", 1), ("shake", 1), ("deck", 1), ("pole", 1),
+)
+SURFACE_TILE = {1: 1.2, 2: 1.0, 3: 0.35, 4: 1.5, 5: 1.0, 6: 1.5, 7: 1.0}
+# Whether the bake writes the surfaces' UVs (Woodland's kits and models set it; a model drawn on look_vertex.gdshader
+# must not have them: its UVs are the perforations' and ribs').
+SURFACED = False
+
+
+def surface_of(material: str) -> int:
+    """The detail layer a palette material `material` is drawn with (SURFACES; 0 plain)."""
+    low = material.lower()
+    for word, layer in SURFACES:
+        if word in low:
+            return layer
+    return 0
+
+
+def map_surfaces(ob: bpy.types.Object) -> None:
+    """Writes `ob`'s face UVs along each face's grain in its layer's tiles (UVMap) and its layer (UV2 x), from its
+    faces' materials (WQ1: SURFACES)."""
+    me = ob.data
+    layers = [surface_of(m.name) if m else 0 for m in me.materials]
+    uv = me.uv_layers.new(name="UVMap")
+    uv2 = me.uv_layers.new(name="UV2")
+    flat, flat2 = [0.0] * (len(me.loops) * 2), [0.0] * (len(me.loops) * 2)
+    for p in me.polygons:
+        layer = layers[p.material_index] if p.material_index < len(layers) else 0
+        tile = SURFACE_TILE.get(layer, 1.0)
+        pts = [me.vertices[me.loops[li].vertex_index].co for li in p.loop_indices]
+        best, along = -1.0, Vector((1.0, 0.0, 0.0))
+        for i in range(len(pts)):
+            e = pts[(i + 1) % len(pts)] - pts[i]
+            if e.length > best:
+                best, along = e.length, e
+        n = p.normal
+        along = (along - n * along.dot(n))
+        along = along.normalized() if along.length > 1e-9 else n.orthogonal().normalized()
+        across = n.cross(along).normalized()
+        for li in p.loop_indices:
+            co = me.vertices[me.loops[li].vertex_index].co
+            flat[li * 2] = co.dot(along) / tile
+            flat[li * 2 + 1] = co.dot(across) / tile
+            flat2[li * 2] = float(layer)
+    uv.data.foreach_set("uv", flat)
+    uv2.data.foreach_set("uv", flat2)
+    me.uv_layers.active = uv
+
+
 def bake_vertex_colours(ob: bpy.types.Object, keep: tuple = ()) -> None:
     """Paints every face corner of `ob` its material's colour (linear, a corner colour attribute named Color), then
     draws every face with one material, `Prop`, except faces whose material is in `keep` (their own surface: a lamp's
     glowing lens)."""
     me = ob.data
+    if SURFACED:
+        map_surfaces(ob)
     attr = me.color_attributes.new("Color", "FLOAT_COLOR", "CORNER")
     me.color_attributes.active_color = attr
     cols = []
@@ -97,7 +155,7 @@ def export_prop(ob: bpy.types.Object, name: str, keep: tuple = ()) -> str:
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
                               export_animations=False, export_yup=True, export_vertex_color="ACTIVE",
                               export_all_vertex_colors=False, export_draco_mesh_compression_enable=False,
-                              export_extras=False, export_cameras=False, export_lights=False, export_texcoords=False,
+                              export_extras=False, export_cameras=False, export_lights=False, export_texcoords=SURFACED,
                               export_materials="EXPORT")
     return path
 

@@ -36,6 +36,9 @@ STEM = tk.srgb(P["umber"], 0.7)
 
 def main() -> None:
     tree = tk.Tree("spruce", 3131)
+    # each tier's skirt drawn as sprigs of the leaf sheet, the cones under them its needle mass (WQ1)
+    tree.leafy = tk.Leafy(["spruce_a", "spruce_b"], "needle_mass")
+    tree.bark_tile = 0.6
     rng = tree.rng
     tree.limb([Vector((0.0, -tk.SINK, 0.0)), Vector((0.0, 0.5, 0.0))], [0.07, 0.06], 5, lambda t, a: STEM,
               cap=False)

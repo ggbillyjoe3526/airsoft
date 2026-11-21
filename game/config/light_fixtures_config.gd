@@ -48,3 +48,7 @@ extends Resource
 ## How worn they are drawn (SL2, look_vertex.gdshader's `wear`; LookConfig.wear scales it), as the site's props
 ## (PropDressConfig.wear).
 @export_range(0.0, 1.0) var wear: float = 1.0
+## The fixtures' surfaces' detail and relief (WQ1, look_surface.gdshader: the campfire's stones and logs, the post's
+## pole, the iron), as PropDressConfig.surface_maps; empty draws them plain.
+@export_file("*.png") var surface_maps: String = "res://assets/textures/woodland/surfaces.png"
+@export_file("*.png") var surface_relief: String = "res://assets/textures/woodland/surfaces_nor.png"

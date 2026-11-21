@@ -20,6 +20,8 @@ import mapkit as mk  # noqa: E402  first: it sets up bpy and the replica helpers
 import hardsurface as hs  # noqa: E402
 from mathutils import Vector, noise  # noqa: E402
 
+mk.SURFACED = True  # Woodland's models carry their surfaces' UVs (WQ1, look_surface.gdshader)
+
 # Woodland's wood and plant colours (sRGB): bark in two shades so its furrows read, the sawn face (pale), its heart
 # (a ring darker), a split face, weathered grey wood, moss, earth, roots and the greens.
 COLOURS = {

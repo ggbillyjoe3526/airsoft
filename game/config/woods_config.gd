@@ -232,6 +232,10 @@ extends Resource
 @export var bush_sides: int = 12
 @export var bush_rings: int = 6
 @export var bush_roughness: float = 0.95
+## The plants' leaves (WQ1): the leaf sheet the fern's fronds and the bush's hazel sprays are cut out of, and the bark
+## of the bush's stems (with its normal map, `<name>_nor.png` beside it), as PropDressConfig.model_barks.
+@export_file("*.png") var bush_sheet: String = "res://assets/textures/woodland/leaves.png"
+@export_file("*.png") var bush_bark: String = "res://assets/textures/woodland/bark_birch.png"
 
 @export_group("Look")
 ## The floor's pieces (leaves, wood, moss) and the tufts take light as this rough.

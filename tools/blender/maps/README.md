@@ -85,6 +85,13 @@ The trees share `treekit.py`: stems, limbs, foliage clumps and spruce tiers with
 and crown are written apart (`export(..., crown=True)`): the game stretches the trunk to its box and scales the
 crown evenly over it.
 
+WQ1 gives Woodland's models texture coordinates. A tree with `leafy` set stands leaf cards on the leaf sheet
+(`treekit.CELLS`, `cell_uv`) out of each clump over a smaller, darker core, kept inside the clumps' box
+(`fit_cards`), and maps its limbs' bark in tiles round and along them (UV x under -1, `BARK_U`; UV2 x the pine's
+flaking bark). A kit script that sets `mapkit.SURFACED` maps each face to a layer of the surfaces array by its
+material's name (`mapkit.SURFACES`: planks, bark, end grain, concrete, steel, ground, moss; UV2 x the layer), along
+its longest edge in `SURFACE_TILE` m tiles. Textures: `tools/textures/README.md`.
+
 Run each with Blender 5.x or pip's `bpy` (`pip install bpy==5.2.3`): `python3 -I tools/blender/maps/<script>.py <repo
 root>`, then `python3 tools/coplanar_models.py fix <the files it wrote>` (faces of one part lying over one another
 in one plane flicker in the game: the fix sinks one of each inside its own rim by a fraction of a millimetre, the
@@ -93,7 +100,7 @@ model's bounds and edges staying where they were, and CI's lint job fails a mode
 `tools/hall_pictures.gd` (Depot) and `tools/woodland_pictures.gd` (Woodland), all under xvfb; `tools/eye_pictures.gd`
 for a field (`night` lights its fires and lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's
 scripts run as `python3 tools/blender/maps/<script>.py`), `docs/records/WG2.md`, `docs/records/WG3.md`,
-`docs/records/WG4.md` (`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`, `docs/records/SM2.md`,
+`docs/records/WG4.md` (`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`, `docs/records/WQ1.md`, `docs/records/SM2.md`,
 `docs/records/SM3.md` (`hallkit.py`: SM3's face decals, shutters, louvres and tubes on `prop.py`'s Prop),
 `docs/records/SM4.md` (`works_kit.py`: the works gear's running rails, underframe, weathering and box fit). Dev only: tools/ never
 ships.

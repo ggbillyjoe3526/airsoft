@@ -44,6 +44,18 @@ CLEAR_YOUNG = 3.5
 CLEAR_GROWN = 3.3
 CLEAR_OLD = 3.05
 NEEDLE_YOUNG = tk.mix(tk.srgb(P["canopy"]), tk.srgb(P["olive"]), 0.25)
+# The grown and old pines' needles on the leaf sheet (WQ1): sprays of long-needled shoots over each tuft.
+LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.7, card_max=1.6, per_m2=0.55, least=3,
+                 most=9, core=0.55, core_dark=0.5, tilt=(0.3, 0.75), under=0.8)
+
+# the old pine's bigger clouds take more sprays each
+LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.7, card_max=1.7, per_m2=0.6, least=3,
+                     most=13, core=0.55, core_dark=0.5, tilt=(0.3, 0.75), under=0.8)
+
+
+def flake_from(upper_from: float):
+    """How much of the flaking upper bark the stem takes `t` of the way up: none under `upper_from`, all 0.18 on."""
+    return lambda t: max(0.0, min(1.0, (t - upper_from) / 0.18))
 
 
 def bark_of(upper_from: float, upper: tuple, foot: tuple, furrow: tuple, rng):
@@ -55,7 +67,7 @@ def bark_of(upper_from: float, upper: tuple, foot: tuple, furrow: tuple, rng):
 
 
 def stem(tree: tk.Tree, height: float, foot_r: float, top_r: float, rings: int, sides: int, lean: Vector,
-         bark, ridges: float) -> list:
+         bark, ridges: float, flake=None) -> list:
     """The stem: `rings` rings from SINK under the ground to the top, tapering from `foot_r` (a little root swell at
     the foot) to `top_r`, curving `lean` at its middle. Returns its path."""
     first = len(tree.verts)
@@ -68,7 +80,7 @@ def stem(tree: tk.Tree, height: float, foot_r: float, top_r: float, rings: int, 
         if p.y < 0.6:
             r = foot_r * (0.86 + 0.14 * (1.0 - max(0.0, p.y) / 0.6))
         radii.append(r)
-    tree.limb(path, radii, sides, bark, ridges=ridges, cap=True, reach=foot_r)
+    tree.limb(path, radii, sides, bark, ridges=ridges, cap=True, reach=foot_r, flake=flake)
     tree.mark_stem(first)
     return path
 
@@ -83,18 +95,22 @@ def axis_at(path: list, y: float) -> Vector:
 
 
 def branch(tree: tk.Tree, start: Vector, out: Vector, length: float, rise: float, r0: float, sides: int, segs: int,
-           col: tuple, droop: float = 0.0) -> list:
+           col: tuple, droop: float = 0.0, flake: float = 0.0) -> list:
     """A branch from `start` out along `out` (level), `length` long, its end `rise` higher (and sagging `droop` at
     its middle), tapering from `r0`; returns its path."""
     end = start + out * length + UP * rise
     path = tk.curve(start, end, UP * (-droop) + out * 0.0, segs)
     radii = [r0 * (1.0 - 0.7 * i / segs) for i in range(segs + 1)]
-    tree.limb(path, radii, sides, lambda t, a: col, cap=False)
+    tree.limb(path, radii, sides, lambda t, a: col, cap=False, flake=(lambda t: flake) if flake else None)
     return path
 
 
 def young() -> None:
     tree = tk.Tree("pine_young", 1101)
+    tree.leafy = tk.Leafy(["pine_young"], "needle_mass", card=1.5, card_min=0.45, card_max=0.9, per_m2=3.0, least=8,
+                          most=12, core=0.6, tilt=(0.1, 0.4), core_min=0.5)
+    tree.bark_tile = 0.8
+    tree.card_floor = CLEAR_YOUNG + 0.02
     rng = tree.rng
     height, foot_r = 8.0, 0.2
     bark = bark_of(2.0, BARK_YOUNG, BARK_YOUNG, tk.srgb(0x9C9470, 0.8), rng)
@@ -129,10 +145,13 @@ def young() -> None:
 
 def grown() -> None:
     tree = tk.Tree("pine_grown", 2202)
+    tree.leafy = LEAFY
+    tree.bark_tile = 1.1
+    tree.card_floor = CLEAR_GROWN + 0.02
     rng = tree.rng
     height, foot_r = 15.0, 0.33
     bark = bark_of(0.42, BARK_UPPER, BARK_FOOT, BARK_FURROW, rng)
-    path = stem(tree, height, foot_r, 0.03, 12, 8, Vector((0.09, 0.0, 0.05)), bark, 0.04)
+    path = stem(tree, height, foot_r, 0.03, 12, 8, Vector((0.09, 0.0, 0.05)), bark, 0.04, flake_from(0.42))
     # dead stubs on the cleared lower stem, over head height
     for y in (CLEAR_GROWN + 0.15, 3.8):
         a = rng.uniform(0.0, math.tau)
@@ -153,7 +172,7 @@ def grown() -> None:
             a = spin + math.tau * k / n + rng.uniform(-0.3, 0.3)
             out = Vector((math.cos(a), 0.0, math.sin(a)))
             ln = reach * rng.uniform(0.7, 1.2)
-            bp = branch(tree, at, out, ln, ln * rng.uniform(0.05, 0.25), 0.06, 3, 1, BARK_UPPER)
+            bp = branch(tree, at, out, ln, ln * rng.uniform(0.05, 0.25), 0.06, 3, 1, BARK_UPPER, flake=1.0)
             size = 1.0 + 1.1 * shape
             # the tip's tuft droops a little under the branch's end; the branch is clothed to the stem
             tree.tuft(bp[-1] - UP * 0.12 * size - out * 0.25, size, out, 2, NEEDLE_TOP, NEEDLE_UNDER, centre,
@@ -176,10 +195,13 @@ def grown() -> None:
 
 def old() -> None:
     tree = tk.Tree("pine_old", 3303)
+    tree.leafy = LEAFY_OLD
+    tree.bark_tile = 1.2
+    tree.card_floor = CLEAR_OLD + 0.02
     rng = tree.rng
     height, foot_r = 22.0, 0.42
     bark = bark_of(0.6, BARK_UPPER, BARK_FOOT, BARK_FURROW, rng)
-    path = stem(tree, height, foot_r, 0.05, 16, 12, Vector((0.2, 0.0, -0.12)), bark, 0.06)
+    path = stem(tree, height, foot_r, 0.05, 16, 12, Vector((0.2, 0.0, -0.12)), bark, 0.06, flake_from(0.6))
     for y in (CLEAR_OLD + 0.2, 4.6, 6.1, 7.8, 9.3, 10.6):
         a = rng.uniform(0.0, math.tau)
         out = Vector((math.cos(a), 0.0, math.sin(a)))
@@ -199,18 +221,18 @@ def old() -> None:
         ln = (3.0 - 1.3 * t) * rng.uniform(0.85, 1.15) * (1.0 + 0.3 * math.cos(a - lop))
         rise = ln * rng.uniform(0.3, 0.5) + (height * 0.88 - y) * 0.15
         at = axis_at(path, y)
-        lp = branch(tree, at, out, ln, rise, 0.14 - 0.05 * t, 5, 3, BARK_UPPER, droop=-0.2 * ln)
+        lp = branch(tree, at, out, ln, rise, 0.14 - 0.05 * t, 5, 3, BARK_UPPER, droop=-0.2 * ln, flake=1.0)
         side = out.cross(UP).normalized() * rng.choice((-1.0, 1.0))
         start = tk.along(lp, 0.6)
         fo = (out + side * rng.uniform(0.6, 1.0)).normalized()
         fl = ln * rng.uniform(0.4, 0.55)
-        fp = branch(tree, start, fo, fl, fl * 0.35, 0.05, 4, 2, BARK_UPPER)
+        fp = branch(tree, start, fo, fl, fl * 0.35, 0.05, 4, 2, BARK_UPPER, flake=1.0)
         tree.tuft(fp[-1] + UP * 0.15, 2.0 + 0.4 * (1.0 - t), fo, 3, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,
                   spread=0.6)
         # a second, shorter fork to the other side, nearer the bole
         fo2 = (out - side * rng.uniform(0.5, 0.9)).normalized()
         fl2 = ln * rng.uniform(0.3, 0.42)
-        fp2 = branch(tree, tk.along(lp, 0.4), fo2, fl2, fl2 * 0.45, 0.045, 4, 2, BARK_UPPER)
+        fp2 = branch(tree, tk.along(lp, 0.4), fo2, fl2, fl2 * 0.45, 0.045, 4, 2, BARK_UPPER, flake=1.0)
         tree.tuft(fp2[-1] + UP * 0.15, 1.7 + 0.3 * (1.0 - t), fo2, 2, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.65,
                   spread=0.55)
         tree.tuft(lp[-1] + UP * 0.2, 2.4 + 0.5 * (1.0 - t), out, 4, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,

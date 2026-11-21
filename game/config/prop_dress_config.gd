@@ -460,6 +460,34 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	# Subway's escalators and stairs, swept daily: full dust drew their steps and decks beige (SM2)
 	&"escalator_lower": 0.08, &"spiral_stair": 0.12, &"platform_stair": 0.12,
 }
+## Woodland's trees and thicket spruces drawn textured (WQ1, look_foliage.gdshader): each model's bark, a map name
+## under `foliage_folder` (`<name>.png` its detail, `<name>_nor.png` its normal map), and a second blended over it
+## where the model's UV2 x says (a pine's flaking upper bole); the faces each model maps onto the leaf sheet
+## (`foliage_sheet`: needles, leaves, fronds, cut out) draw from it. A crown names its trunk's bark for its limbs.
+@export var model_barks: Dictionary[StringName, PackedStringArray] = {
+	&"pine_young": PackedStringArray(["bark_pine"]), &"pine_young_crown": PackedStringArray(["bark_pine"]),
+	&"pine_grown": PackedStringArray(["bark_pine", "bark_flake"]),
+	&"pine_grown_crown": PackedStringArray(["bark_pine", "bark_flake"]),
+	&"pine_old": PackedStringArray(["bark_pine", "bark_flake"]),
+	&"pine_old_crown": PackedStringArray(["bark_pine", "bark_flake"]),
+	&"oak": PackedStringArray(["bark_oak"]), &"oak_crown": PackedStringArray(["bark_oak"]),
+	&"birch": PackedStringArray(["bark_birch"]), &"birch_crown": PackedStringArray(["bark_birch"]),
+	&"spruce": PackedStringArray(["bark_pine"]),
+}
+@export_dir var foliage_folder: String = "res://assets/textures/woodland"
+@export_file("*.png") var foliage_sheet: String = "res://assets/textures/woodland/leaves.png"
+
+## Woodland's structures and props drawn with their surfaces' detail and relief (WQ1, look_surface.gdshader): the
+## layers each face's UV2 x names (tools/blender/maps/mapkit.py SURFACES) of `surface_maps` and `surface_relief`.
+@export var surface_models: Array[StringName] = [
+	&"palisade", &"palisade_rail", &"watch_tower", &"footbridge", &"sawmill_shed", &"hut_roof", &"hut_roof_long",
+	&"log_tunnel_side", &"log_tunnel_roof", &"log_tunnel_mouth", &"log_tunnel_cap", &"culvert_wall",
+	&"culvert_kerb", &"tractor_tyre", &"tractor_tyre_stack", &"fallen_log_5", &"fallen_log_6", &"fallen_log_8",
+	&"root_plate", &"sawbench", &"earth_bank",
+]
+@export_file("*.png") var surface_maps: String = "res://assets/textures/woodland/surfaces.png"
+@export_file("*.png") var surface_relief: String = "res://assets/textures/woodland/surfaces_nor.png"
+
 ## Models whose painted parts keep their whole colour, not the look's weathered share of it (LookConfig
 ## .paint_saturation): Subway's escalators' and stairs' safety yellow, which the pull drew cream (SM2). Their other
 ## paints are steel, rubber and stone greys, which the pull leaves as they are.

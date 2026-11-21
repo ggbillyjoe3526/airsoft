@@ -39,21 +39,22 @@ LEAF_UNDER = tk.srgb(P["green"], 0.7)
 
 
 def bark_paint(rng):
-    """White with dark dashes (a band of them every so often), dark and rough at the foot."""
-    bands = [rng.uniform(0.08, 0.95) for _ in range(9)]
-
+    """White, dark and rough at the foot; the lenticels, black patches and fissures are the bark map's (WQ1)."""
     def paint(t: float, a: float) -> tuple:
         if t < 0.07:
             return tk.mix(FOOT, WHITE, max(0.0, (t - 0.04) / 0.03))
-        for b in bands:
-            if abs(t - b) < 0.05 and rng.random() < 0.8:
-                return DASH
-        return WHITE if rng.random() > 0.1 else DASH
+        return WHITE
     return paint
 
 
 def main() -> None:
     tree = tk.Tree("birch", 9909)
+    # small hanging sprays of leaves on the leaf sheet over each tuft (WQ1)
+    tree.leafy = tk.Leafy(["birch_a", "birch_b"], "leaf_mass", card=1.3, card_min=0.4, card_max=0.8, per_m2=2.0,
+                          least=7, most=12, core=0.6, tilt=(0.2, 0.6), hang=True,
+                          core_min=0.6)
+    tree.card_floor = CLEAR + 0.02
+    tree.bark_tile = 0.7
     rng = tree.rng
     path = tk.curve(Vector((0.0, -tk.SINK, 0.0)), Vector((0.16, HEIGHT - 0.4, 0.06)), Vector((0.05, 0.0, 0.02)), 11)
     # a ring at the ground, the stem's full width, so its round collision hugs it there (not only under the ground)
