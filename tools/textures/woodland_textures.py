@@ -313,28 +313,23 @@ def pine_cell(seed: int, young: bool = False) -> Image.Image:
         # a young pine's whorl seen from the side: long, thin brushes radiating from its node with gaps between, the
         # upper ones longest (the photos' young pines), so it reads as a spiky star, never a fan or a hand
         hub = (s * 0.5, s * 0.56)
-        for k in range(11):
-            a = math.tau * k / 11 + rng.uniform(-0.12, 0.12)
+        for k in range(7):
+            a = math.tau * k / 7 + rng.uniform(-0.12, 0.12)
             up = -math.cos(a)  # 1 straight up, -1 straight down
             ln = s * (0.36 + 0.08 * max(0.0, up) - 0.1 * max(0.0, -up)) * rng.uniform(0.85, 1.05)
-            needle_shoot(c, hub, a, ln, s * 0.075, 0.9, 1.1, -0.35 * math.sin(a), rng.uniform(0.7, 0.95),
+            needle_shoot(c, hub, a, ln, s * 0.065, 0.9, 1.0, -0.35 * math.sin(a), rng.uniform(0.7, 0.95),
                          forward=0.5, w=3.0)
         return c.done()
-    # the twig up the cell, forking into brushes that fan out and turn up at their tips
+    # the twig up the cell, forking low into four long, narrow brushes that turn up at their tips, sky between them
+    # (wide enough apart that the gaps stay open three mip levels down, where a pine draws 10 to 20 m off)
     base = (s * 0.5, s * 0.97)
-    hub = (s * 0.5 + rng.uniform(-15, 15), s * 0.88)  # low: the brushes start at the card's foot, on their tuft
+    hub = (s * 0.5 + rng.uniform(-12, 12), s * 0.86)  # low: the brushes start at the card's foot, on their tuft
     c.line(base, hub, 10, (0.5, 0.4, 0.33))
-    n = 7
+    n = 4
     for k in range(n):
-        a = -1.25 + 2.5 * k / (n - 1) + rng.uniform(-0.1, 0.1)
-        ln = s * rng.uniform(0.42, 0.56) * (1.0 - 0.25 * abs(a) / 1.25)
-        needle_shoot(c, hub, a, ln, s * 0.08, 1.1, 1.1, -0.45 * a, rng.uniform(0.7, 0.95), forward=0.45, w=4.0)
-        # a short side shoot off the brush's middle
-        if rng.random() < 0.6:
-            mid = (hub[0] + math.sin(a) * ln * 0.45, hub[1] - math.cos(a) * ln * 0.45)
-            sa = a + rng.choice((-1.0, 1.0)) * rng.uniform(0.5, 0.8)
-            needle_shoot(c, mid, sa, ln * 0.45, s * 0.07, 1.1, 1.1, -0.3 * sa, rng.uniform(0.65, 0.9),
-                         forward=0.45, w=3.5)
+        a = -1.05 + 2.1 * k / (n - 1) + rng.uniform(-0.08, 0.08)
+        ln = s * rng.uniform(0.5, 0.62) * (1.0 - 0.2 * abs(a) / 1.05)
+        needle_shoot(c, hub, a, ln, s * 0.062, 0.9, 0.95, -0.5 * a, rng.uniform(0.7, 0.95), forward=0.5, w=3.5)
     return c.done()
 
 
@@ -535,15 +530,16 @@ def fern_cell(seed: int) -> Image.Image:
 def mass_cell(seed: int, needles: bool) -> Image.Image:
     """An opaque mass for a crown's core: leaves (or needle brushes) packed over a dark ground, tiling enough that a
     crown's core reads as foliage deep in shade, not as a smooth ball."""
-    c = Cell(seed, opaque=True, ground=0.42)
+    c = Cell(seed, opaque=True, ground=0.5 if needles else 0.42)
     s = c.s
     rng = c.rng
     if needles:
-        for _ in range(260):
+        # packed close, so a pine's core reads as needles all over (WQ1), never a smooth dark plate
+        for _ in range(700):
             p = (rng.uniform(0, s), rng.uniform(0, s))
             ang = rng.uniform(-math.pi, math.pi)
             ln = s * rng.uniform(0.04, 0.09)
-            sh = rng.uniform(0.55, 1.05)
+            sh = rng.uniform(0.6, 1.1)
             for _k in range(9):
                 a = ang + rng.uniform(-0.6, 0.6)
                 c.dc.line((p, (p[0] + math.sin(a) * ln, p[1] - math.cos(a) * ln)), fill=c.rgb(vary(rng, sh, 0.1, 0.1)),

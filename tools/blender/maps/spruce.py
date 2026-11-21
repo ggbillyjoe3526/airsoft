@@ -30,8 +30,10 @@ BUDGET = 500
 TIERS = 17
 
 # WQ1: a mid green like the photos' sunlit spruces (was near black under the leaf sheet's detail)
-TOP = tk.mix(tk.srgb(P["spruce"], 1.3), tk.srgb(P["sage"]), 0.3)
-UNDER = tk.srgb(P["forest"], 0.7)
+TOP = tk.mix(tk.srgb(P["spruce"], 1.45), tk.srgb(P["sage"]), 0.35)
+UNDER = tk.srgb(P["forest"], 0.8)
+# the opaque cone under each tier stops short of its tips, so the skirt's edge is ragged sprigs, not a sawtooth (WQ1)
+UNDER_REACH = 0.78
 STEM = tk.srgb(P["umber"], 0.7)
 
 
@@ -54,7 +56,7 @@ def main() -> None:
         droop = 0.34 * (1.0 - t) + 0.06  # WQ1: the sprays hang, so the tiers' edges break the cone
         points = 7 if k < TIERS - 3 else 5
         tree.cone_tier(foot, r, height, droop, points, TOP, UNDER, centre, yaw=rng.uniform(0.0, math.tau),
-                       lean=0.55, notch=0.5 + 0.12 * t)
+                       lean=0.55, notch=0.5 + 0.12 * t, under_reach=UNDER_REACH)
     # the spire
     tree.cone_tier(HEIGHT - 0.6, 0.1, 0.6, 0.05, 3, TOP, UNDER, centre, yaw=0.3, lean=0.4, notch=0.7)
     fit(tree)

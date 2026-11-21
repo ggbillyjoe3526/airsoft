@@ -44,9 +44,9 @@ were; the woodpiles (RM2) are closed and untouched; Low keeps 60 FPS.
 
 ## Verified
 
-- Every model's bounds and triangles against main's: the crowns inside their old boxes (`test_props`' Woodland dress
-  test), trunks, fern, bush and structures unchanged; budgets young pine 798 of 1,000, grown 1,946 of 2,000, old
-  2,646 of 3,000, oak 7,910 of 8,000, birch 1,528 of 2,000, spruce 474 of 500, fern 400 of 400, bush 1,496 of 1,500.
+- Every model's bounds and triangles against main's: the crowns never over their boxes' tops (`test_props`' Woodland
+  dress test), trunks, fern, bush and structures unchanged; budgets young pine 798 of 1,000, grown 1,940 of 2,000, old
+  2,956 of 3,000, oak 7,966 of 8,000, birch 1,528 of 2,000, spruce 474 of 500, fern 400 of 400, bush 1,496 of 1,500.
 - The bushes' counted cover (LF1) against the drawn leaves, `tools/bush_opacity.gd` now reading the sheet's cut,
   at LF1's shares: fern "unseen" 2.4 % (main 2.1 %), "through" 8.6 % (6.6 %), 433 of 3,000 lines drawn hidden (383);
   bush 2.4 % (2.2 %), 8.0 % (7.2 %), 924 (908). No leaf share changed.
@@ -62,6 +62,14 @@ were; the woodpiles (RM2) are closed and untouched; Low keeps 60 FPS.
   query. Real cards' cost is N47 on the checklist.
 - **The pickup and the tyres keep their paint.** Neither car paint nor rubber is a surfaces layer; they draw plain on
   the surfaces shader.
+- **The trees keep WT1's shapes (DECISIONS):** crowns from 2.6 m up filling their boxes, golden tan (never orange)
+  upper bark, closed thicket cones; measured against the photos only within that (the critic's ratio misses).
+- **Pines' sprays are separate brushes** (four a card, seven on a young whorl), cut so their gaps stay open three mip
+  levels down, over small needle-textured cores; needle crowns grow cover only 0.15 a mip level, and every preset
+  takes that level from derivatives (Low's far crowns keep their fill). Cards are tipped out of their tufts, and none
+  is moved more than 0.35 of half its length to stay in the box (`treekit.fit_cards`, `card_shift`).
+- **Soft leaf edges:** alpha to coverage on the cut-outs (smooth under MSAA, plain scissor without).
+- **The tunnel arch's band is the mound's sun shadow** (gone on Low, which has no sun shadows); the hood is WG4's.
 - **The far wood stays as it was** (`far_tree.py`, WoodsView): out past the fence it is seen only far off.
 
 ## Known issues left

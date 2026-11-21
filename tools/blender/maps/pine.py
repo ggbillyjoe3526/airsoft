@@ -33,7 +33,7 @@ UP = Vector((0.0, 1.0, 0.0))
 # Colours (sRGB): the bark's foot in umber, its upper bole golden tan, the foliage the palette's pine greens.
 BARK_FOOT = tk.mix(tk.srgb(P["bark"], 0.86), tk.srgb(P["stone"], 0.8), 0.3)  # furrowed grey-brown
 BARK_FURROW = tk.srgb(P["bark"], 0.6)
-BARK_UPPER = tk.srgb(0xB0A472)      # golden tan: the photos' orange upper bark, 30 degrees of hue clear of Beta
+BARK_UPPER = tk.srgb(0xBCAE74)      # golden tan: the photos' orange upper bark, bright, as warm as the team rule allows
 BARK_YOUNG = tk.srgb(0x9C9470)
 STUB = tk.srgb(P["stone"], 0.85)
 NEEDLE_TOP = tk.mix(tk.srgb(P["pine"], 0.86), tk.srgb(P["canopy"], 0.86), 0.35)  # WQ1: the photos' dark needles
@@ -45,14 +45,15 @@ CLEAR_GROWN = 3.3
 CLEAR_OLD = 3.05
 NEEDLE_YOUNG = tk.mix(tk.srgb(P["canopy"]), tk.srgb(P["olive"]), 0.25)
 # The grown and old pines' needles on the leaf sheet (WQ1): brushes of long-needled shoots standing out of each tuft
-# (tipped well out of its surface, so the crown's edge reads spiky), none moved far off its tuft (CARD_SHIFT).
+# (tipped out of its surface, so the crown's edge reads spiky), none moved far off its tuft (CARD_SHIFT), over a small
+# needle-textured core.
 LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.6, per_m2=0.55, least=3,
-                 most=9, core=0.5, core_dark=0.3, tilt=(0.75, 1.2), under=0.8)
+                 most=9, core=0.42, core_dark=0.15, tilt=(0.45, 0.9), under=0.8)
 CARD_SHIFT = 0.35
 
 # the old pine's bigger clouds take more sprays each
-LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.7, per_m2=0.75, least=3,
-                     most=16, core=0.5, core_dark=0.3, tilt=(0.75, 1.2), under=0.8)
+LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.7, per_m2=0.6, least=3,
+                     most=16, core=0.42, core_dark=0.15, tilt=(0.45, 0.9), under=0.8)
 
 
 def flake_from(upper_from: float):
@@ -232,15 +233,15 @@ def old() -> None:
         fl = ln * rng.uniform(0.4, 0.55)
         fp = branch(tree, start, fo, fl, fl * 0.35, 0.05, 4, 2, BARK_UPPER, flake=1.0)
         tree.tuft(fp[-1] + UP * 0.15, 2.0 + 0.4 * (1.0 - t), fo, 3, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,
-                  spread=0.6)
+                  spread=0.6, twig=BARK_UPPER)
         # a second, shorter fork to the other side, nearer the bole
         fo2 = (out - side * rng.uniform(0.5, 0.9)).normalized()
         fl2 = ln * rng.uniform(0.3, 0.42)
         fp2 = branch(tree, tk.along(lp, 0.4), fo2, fl2, fl2 * 0.45, 0.045, 4, 2, BARK_UPPER, flake=1.0)
         tree.tuft(fp2[-1] + UP * 0.15, 1.7 + 0.3 * (1.0 - t), fo2, 2, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.65,
-                  spread=0.55)
+                  spread=0.55, twig=BARK_UPPER)
         tree.tuft(lp[-1] + UP * 0.2, 2.4 + 0.5 * (1.0 - t), out, 4, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,
-                  spread=0.6)
+                  spread=0.6, twig=BARK_UPPER)
         tree.tuft(tk.along(lp, 0.35) + UP * 0.3, 1.8, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.7)
     # the top: the leader's own cloud over the middle
     tree.tuft(path[-1] + UP * -0.9, 2.3, Vector((1.0, 0.0, 0.0)), 5, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.65,

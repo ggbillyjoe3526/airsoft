@@ -345,10 +345,11 @@ class Tree:
         bm.free()
 
     def tuft(self, c: Vector, size: float, out: Vector, n: int, top_col: tuple, under_col: tuple, centre: Vector,
-             flat: float = 0.55, lean: float = 0.7, spread: float = 0.75) -> None:
+             flat: float = 0.55, lean: float = 0.7, spread: float = 0.75, twig: tuple = None) -> None:
         """A clump of foliage at a branch's end: `n` lumpy low blobs (20 triangles each), the biggest `size` m
         across at `c`, the rest smaller round it, leaning out along `out` and up, so the clump reads as a ragged mass
-        of needles or leaves rather than one shape."""
+        of needles or leaves rather than one shape. With `twig` (a colour), a thin twig (6 triangles) runs from the
+        main blob's middle out to each lesser one, so none hangs in the air (WQ1)."""
         rng = self.rng
         side = out.cross(Vector((0.0, 1.0, 0.0)))
         side = side.normalized() if side.length > 1e-6 else Vector((1.0, 0.0, 0.0))
@@ -362,6 +363,8 @@ class Tree:
                 d = fwd * math.cos(a) * 1.15 + side * math.sin(a)
                 at = c + d * size * spread * rng.uniform(0.45, 0.7) + Vector((0.0, rng.uniform(-0.12, 0.3), 0.0)) * size
                 s = size * rng.uniform(0.55, 0.8)
+                if twig is not None:
+                    self.limb([c, at], [0.035, 0.02], 3, lambda t, a: twig, cap=False)
             r = Vector((s, s * flat * rng.uniform(0.85, 1.2), s)) * 0.5
             # on the leaf sheet only the tuft's main clump keeps a core under its cards (WQ1)
             self.blob(at, r, top_col, under_col, centre, level=1, lean=lean, rough=0.2, flat_under=0.6,
@@ -369,12 +372,13 @@ class Tree:
 
     def cone_tier(self, y: float, r: float, height: float, droop: float, points: int, top_col: tuple,
                   under_col: tuple, centre: Vector, yaw: float, lean: float = 0.6, notch: float = 0.62,
-                  under: float = 0.35, sprigs: tuple = ("spruce_a", "spruce_b")) -> None:
+                  under: float = 0.35, sprigs: tuple = ("spruce_a", "spruce_b"), under_reach: float = 1.0) -> None:
         """A spruce's tier of branches: a star-shaped skirt round the stem from `y + height` down to tips `points`
         round at radius `r`, drooping `droop` under the tier's foot, notched to `notch` of the radius between tips,
         closed under by a shallow cone rising `under` of the height (so no tier is seen through): 4 x `points`
         triangles. Each tip's kite (the top, its two notches, its tip) is a sprig of the leaf sheet (`sprigs`), its
-        twig at the stem, so the skirt's edge is needles; the cone under it the sheet's needle mass (WQ1)."""
+        twig at the stem, so the skirt's edge is needles; the cone under it the sheet's needle mass (WQ1), reaching
+        `under_reach` of the way out (short of 1: the skirt's rim is the sprigs' ragged needles alone)."""
         rng = self.rng
         top = Vector((0.0, y + height, 0.0))
         top_n = crown_normal(top, Vector((0.0, 1.0, 0.0)), centre, lean)
@@ -405,8 +409,9 @@ class Tree:
         # the cone under it
         foot_id = self.vert(foot, mix(under_col, (0.0, 0.0, 0.0), 0.35), Vector((0.0, -1.0, 0.0)),
                             self.mass_uv(0.0, 0.0, "needle_mass"))
+        inner = [(Vector((p.x * under_reach, p.y, p.z * under_reach)), col, n) for p, col, n in rim]
         under_ids = [self.vert(p, col, n, self.mass_uv(p.x / max(r, 1e-6), p.z / max(r, 1e-6), "needle_mass"))
-                     for p, col, n in rim]
+                     for p, col, n in inner]
         for k in range(m):
             self.face_out(inside, under_ids[(k + 1) % m], foot_id, under_ids[k])
 
