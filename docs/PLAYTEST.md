@@ -1973,15 +1973,15 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 ## Subway's street entrance (TQ2)
 
 - [ ] **Behind the hall's start.** Subway on Low and on your usual preset, on the street team: turn round at the start.
-  Pass: a doorway in the west wall shows a tiled stair and an escalator going up to the street, a black sign over it,
+  Pass: a doorway in the west wall shows a tiled stair and an escalator going up to a daylit street, a lit WAY OUT sign over it,
   and a locked folding gate across it; you can't walk, climb or shoot through the gate; the light up the stair is
   brighter than the hall and doesn't light the hall's floor in a hard square; nothing flickers; Low holds 60 FPS
   looking at it.
 
 ## Subway's train rails and adverts (TQ2)
 
-- [ ] **Inside a car.** Subway on Low and on your usual preset: walk the north train end to end. Pass: the poles and
-  rails are smooth round tubes with rounded bends and no brackets, in a brighter orange that still isn't Beta's; the
+- [ ] **Inside a car.** Subway on Low and on your usual preset: walk the north train end to end. Pass: each seat bay's
+  rail and its two poles are one smooth bent tube standing on the floor, no brackets, in a brighter orange that still isn't Beta's; the
   stripe outside and the station's orange signs match them; every panel above the windows shows an advert, the next
   car's in a different order; the adverts stay sharp without shimmer; nothing flickers; Low holds 60 FPS inside a car.
 
