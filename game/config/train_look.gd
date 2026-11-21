@@ -22,6 +22,23 @@ extends Resource
 @export_range(0.0, 1.0) var screen_opacity: float = 0.45
 @export_range(0.0, 1.0) var glass_roughness: float = 0.1
 @export var gangway: String = "res://assets/models/props/train_gangway.glb"
+## A car's poles and seat rails, one bent tube a bay, and its door-head bars (TQ2, the owner, 2026-11-21: "more smooth
+## and minimalistic"): round, smoothly bent tubes in the stripe's orange, a model of their own over the body, in the props'
+## material; and the grab handles on the end walls (by what stands at the end, as `leds`) and in each gangway.
+@export var poles: String = "res://assets/models/props/train_poles.glb"
+@export var end_rails: Dictionary[StringName, String] = {
+	&"cab": "res://assets/models/props/train_end_rails.glb",
+	&"blank": "res://assets/models/props/train_end_rails.glb",
+	&"outer": "res://assets/models/props/train_end_rails.glb",
+}
+@export var gangway_rails: String = "res://assets/models/props/train_gangway_rails.glb"
+## The cove's printed advert cards, a car's twelve (TQ2, the owner: "add adverts/posters"), their pictures in
+## `advert_sheet` (tools/blender/maps/train_adverts.py: invented adverts, no brands, no team hues), drawn in
+## LookMaterials.printed at `advert_roughness` (a card behind a clear cover), no shadow; every other car's turned about,
+## so the next car's run differently. Without the sheet the cards are drawn blank.
+@export var adverts: String = "res://assets/models/props/train_adverts.glb"
+@export_file("*.png") var advert_sheet: String = "res://assets/textures/station/train_adverts.png"
+@export_range(0.0, 1.0) var advert_roughness: float = 0.4
 ## Half a car's ceiling lamp strips (its +x half), drawn glowing in `lamp_colour` (sRGB) at `lamp_energy`, laid twice
 ## a car (the second turned about); a half under a flickering station lamp (MapData.LAMP_FLICKER) flickers with it.
 ## Cool white (the owner, 2026-11-12); the station's lights inside the cars shine in it too (RoofView.hide_lamps_in).
@@ -60,13 +77,25 @@ var _meshes: Dictionary[String, Mesh] = {}
 
 ## Every model's path.
 func paths() -> PackedStringArray:
-	var out := PackedStringArray([body, door, door_glazed, door_glass, windows, screens, gangway, lights])
+	var out := PackedStringArray([body, door, door_glazed, door_glass, windows, screens, gangway, lights, poles,
+			gangway_rails, adverts])
 	for k: StringName in ends:
 		out.append(ends[k])
 	for k: StringName in leds:
 		if not out.has(leds[k]):
 			out.append(leds[k])
+	for k: StringName in end_rails:
+		if not out.has(end_rails[k]):
+			out.append(end_rails[k])
 	return out
+
+
+## The advert cards' sheet, or null (warned) when it won't load: the cards are then drawn blank.
+func advert_picture() -> Texture2D:
+	var sheet := load(advert_sheet) as Texture2D if ResourceLoader.exists(advert_sheet) else null
+	if sheet == null:
+		push_warning("TrainLook: the advert sheet \"%s\" won't load; the cards are drawn blank" % advert_sheet)
+	return sheet
 
 
 ## Whether every model loads (else the trains are drawn as their boxes, with a warning a model).

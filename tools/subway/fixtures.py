@@ -431,3 +431,33 @@ def bend_ends(vaults: list[dict], floor: float, lift: float) -> list[dict]:
             out.append({"model": "tunnel_lamp", "x": round(x, 3), "y": round(floor + LAMP_Y + lift, 3),
                         "z": round(z, 3), "yaw": round(yaw, 1)})
     return out
+
+
+# The street entrance behind the ticket hall's start (TQ2, layout.ENTRANCE): its signs on the fascia over the doorway
+# (the station's name board over a way-out sign, its words and arrow printed as the platforms' are) and three posters
+# up the stair's wall inside it. The entrance is one dressed block, so none of them stands in a room's air: they skip
+# place()'s checks, their spots following from the block and its model (station_entrance.py: the fascia 6 cm behind
+# the block's face, the stair's wall 2.25 m off its middle, the stair at 30 degrees from 2.6 m in).
+ENTRANCE_FASCIA = 0.06      # the fascia's face behind the block's (hall) face
+# (model, m in, y): up the stair's wall at 0.1, 0.36 and 0.62 of its run, each poster's middle 2.35 m over the
+# stair's pitch line, so its uphill corner stays 1.27 m over it: clear of the wall's band (0.95 to 1.1 m) and the
+# handrail (0.9 m), as the owner asked (2026-11-21: "higher and not clipping under the black stripe/rail"); the top
+# one's top 0.2 m under the passage's ceiling
+ENTRANCE_POSTERS = (("poster_e", 3.05, 2.61), ("poster_h", 4.221, 3.286), ("poster_k", 5.392, 3.962))
+
+
+def entrance(L, lift: float) -> list[dict]:
+    """The entrance's signs and posters; `lift` turns layout heights into the game's."""
+    e = L.ENTRANCE
+    face, mid = e["x1"], (e["z0"] + e["z1"]) * 0.5
+    floor = L.C + lift
+    out = [{"model": "wall_sign_out", "x": round(face - ENTRANCE_FASCIA, 3), "y": round(floor + e["door_h"] + 0.36, 3),
+            "z": round(mid, 3), "yaw": WALL_YAW["w"]},
+           {"model": "name_board", "x": round(face - ENTRANCE_FASCIA, 3), "y": round(floor + e["door_h"] + 0.84, 3),
+            "z": round(mid, 3), "yaw": WALL_YAW["w"]}]
+    wall = e["z1"] - 0.15   # the stair's tiled wall (the block's +z side, in by its tiles' 0.15 m)
+    for model, depth, y in ENTRANCE_POSTERS:
+        out.append({"model": model, "x": round(face - depth, 3), "y": round(floor + y, 3), "z": round(wall, 3),
+                    "yaw": WALL_YAW["s"]})
+    return out
+

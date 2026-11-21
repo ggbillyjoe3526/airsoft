@@ -90,7 +90,11 @@ static func _printed(path: String, cfg: StationFixturesConfig, prop: Material) -
 	if sheet == null:
 		push_warning("StationFixtures: the sign sheet \"%s\" won't load; signs drawn blank" % path)
 		return prop
-	return LookMaterials.printed(sheet, cfg.sign_roughness, cfg.wear)
+	var m := LookMaterials.printed(sheet, cfg.sign_roughness, cfg.wear)
+	# the name boards' orange is the trains' (TQ2): kept whole against the look's pull toward grey, as theirs is
+	m.set_shader_parameter(&"keep_stripe", true)
+	m.set_shader_parameter(&"stripe", cfg.stripe)
+	return m
 
 
 ## Each model's transforms, by its name, in the file's order; a fixture naming a model `cfg` doesn't list is left out

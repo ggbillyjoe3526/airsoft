@@ -341,6 +341,9 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
             sealed = gaps is not None
             if sealed:
                 cuts += [c for g in gaps for c in g[:2]]
+            # A doorway in an outer wall (the street entrance, the owner 2026-11-21): (from, to, height), walled over.
+            doors = rm.get("doors", {}).get(edge, [])
+            cuts += [c for g in doors for c in g[:2]]
             if axis == "x" and is_ramp(rm):
                 n = max(1, round((b - a) / 1.0))
                 cuts += [a + (b - a) * k / n for k in range(1, n)]
@@ -366,7 +369,10 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
                     # top, it showed the void behind the platform's vault, the owner 2026-11-17).
                     boxes.append((wall_box(rm, edge, pa, pb, f_lo + gap[2], top, True, SEAL_T), i, "wall"))
                 if nb is None:
-                    if not sealed:
+                    door = gap_of(doors, pa, pb)
+                    if door is not None:
+                        boxes.append((wall_box(rm, edge, ea, eb, f_lo + door[2], top, False), -1, "wall"))
+                    elif not sealed:
                         boxes.append((wall_box(rm, edge, ea, eb, bottom, top, False), -1, "wall"))
                     continue
                 j = nb[0]
@@ -870,6 +876,7 @@ def build() -> dict:
                                                    for box, _ in ramp_barrier(bl)]
     m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, holes)
     m["dressing"]["station"]["fixtures"] += fixtures.bend_ends(L.RUN_VAULTS, L.T, LIFT)
+    m["dressing"]["station"]["fixtures"] += fixtures.entrance(L, LIFT)
     m["dressing"]["station"]["trims"] += drop_rods(m["dressing"]["station"]["fixtures"])
     del sx
     return m
@@ -1008,6 +1015,10 @@ def lamps() -> list[dict]:
                 if len(rows) == 1 and i in L.FLICKER.get(rm["name"], ()):
                     lamp["state"] = "flicker"
                 out.append(lamp)
+    # The street entrance's own two (its stairs are a model in a block, not a room): under the model's ceiling.
+    e = L.ENTRANCE
+    for x, z in L.ENTRANCE_LAMPS:
+        out.append({"x": r(x), "z": r(z), "y": r(L.C + e["h"] - 0.05 + LIFT), "floor": r(L.C + LIFT)})
     return out
 
 

@@ -320,14 +320,17 @@ static func lamp_place(map: MapData, cfg: RoofConfig, bays: bool, i: int, drop: 
 
 
 ## Each lamp's light's range (m) under a plain roof (MT1): from its lowest point (`spots`) down to the floor under it
-## (MapData.floor_under; the ground without) and `plain_lamp_reach` past it, so it never lights the level under that.
-## None (the roof's own range) under a roof that is not plain.
+## (its own `floor` from the file, MapData.roof_lamp_floors; else MapData.floor_under; the ground without) and
+## `plain_lamp_reach` past it, so it never lights the level under that. None (the roof's own range) under a roof that
+## is not plain.
 static func plain_reaches(map: MapData, spots: Array[Vector3], cfg: RoofConfig) -> PackedFloat32Array:
 	var out := PackedFloat32Array()
 	if not map.roof_plain:
 		return out
-	for at in spots:
-		var under := map.floor_under(at.x, at.z, at.y)
+	for i in spots.size():
+		var at := spots[i]
+		var own := map.roof_lamp_floors[i] if i < map.roof_lamp_floors.size() else NAN
+		var under := own if is_finite(own) else map.floor_under(at.x, at.z, at.y)
 		out.append(at.y - (under if is_finite(under) else 0.0) + cfg.plain_lamp_reach)
 	return out
 

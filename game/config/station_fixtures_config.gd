@@ -57,6 +57,9 @@ extends Resource
 @export_range(0.0, 1.0) var roughness: float = 0.7
 @export_range(0.0, 1.0) var metallic: float = 0.0
 @export_range(0.0, 1.0) var sign_roughness: float = 0.6
+## The signs' orange (sRGB; the stripe's: tools/blender/maps/station_signs.py STRIPE, train.py's "stripe", TQ2): its
+## printed pixels keep their whole colour against the look's pull toward grey, as the trains' orange does.
+@export var stripe: Color = Color("#ea6a22")
 ## How worn they are drawn (LookMaterials.vertex_colour's `wear`: grime, streaks, stains and dust).
 @export_range(0.0, 1.0) var wear: float = 0.5
 ## A lamp's glass: unshaded, this colour (sRGB) times `lens_energy`.

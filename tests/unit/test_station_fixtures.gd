@@ -115,6 +115,14 @@ func _at_a_bend(m: MapData, f: StationDressing.Fixture) -> bool:
 	return false
 
 
+## A fixture on the street entrance's fascia or up its stair's wall (TQ2): on or in its dressed block.
+func _in_the_entrance(m: MapData, f: StationDressing.Fixture) -> bool:
+	for b in m.blocks:
+		if b.dress == &"station_entrance":
+			return AABB(b.center - b.size / 2.0, b.size).grow(0.1).has_point(f.position)
+	return false
+
+
 func _in_block(m: MapData, p: Vector3) -> bool:
 	for b in m.blocks:
 		if _block_box(b).has_point(p):
@@ -190,6 +198,8 @@ func test_each_fixture_stands_in_its_room_on_its_wall_ceiling_or_floor_and_in_no
 	for f in m.station.fixtures:
 		if _at_a_bend(m, f):
 			continue  # past the rooms on purpose (fixtures.bend_ends): test_sw2_subway.gd checks them
+		if _in_the_entrance(m, f):
+			continue  # in the street entrance's dressed block on purpose (fixtures.entrance): test_se1_entrance.gd
 		var t := Transform3D(Basis(Vector3.UP, f.yaw).scaled(Vector3.ONE * f.scale), f.position)
 		var box := t * boxes[f.model]
 		var front := t.basis.z.normalized()
@@ -350,13 +360,14 @@ func _on_rods(m: MapData, p: Vector3) -> bool:
 	return rods >= 2
 
 
-## The trains' stripe, a worn burnt orange, and the station's name signs in it (owner, 2026-11-12): let off the
-## team-hue rule at his word, as in test_trains.gd; within 0.03 of its hue and no more saturated (its blends with the
-## signs' cream words are paler, never stronger; Beta's orange is).
+## The trains' stripe orange (#ea6a22, a little more vivid from 2026-11-21) and the station's name signs in it (owner,
+## 2026-11-12): let off the team-hue rule at his word, as in test_trains.gd; within 0.03 of its hue, no more
+## saturated and no brighter (its blends with the signs' cream words are paler, never stronger; Beta's orange is
+## brighter, its v 0.98 to the stripe's 0.92).
 func _stripe(c: Color) -> bool:
-	var stripe := Color("#c0652f")
+	var stripe := Color("#ea6a22")
 	var dh := absf(c.h - stripe.h)
-	return minf(dh, 1.0 - dh) <= 0.03 and c.s <= stripe.s + 0.02
+	return minf(dh, 1.0 - dh) <= 0.03 and c.s <= stripe.s + 0.02 and c.v <= stripe.v + 0.03
 
 
 func test_no_colour_reads_as_a_team() -> void:

@@ -218,6 +218,9 @@ var roof_lamp_heights: PackedFloat32Array = PackedFloat32Array()
 ## Each roof lamp's turn about up (radians), in roof_lamps' order (`turn` in the file, degrees, SM5: a station's strip
 ## lamp runs along its room, turned a quarter in a room running along z); 0 for a lamp naming none.
 var roof_lamp_turns: PackedFloat32Array = PackedFloat32Array()
+## Each roof lamp's floor (m), in roof_lamps' order: the height its light reaches down to under a plain roof (`floor`
+## in the file: the street entrance's lamps, over no floor of the field's own); NAN, found under it, for one naming none.
+var roof_lamp_floors: PackedFloat32Array = PackedFloat32Array()
 ## A plain roof (`roof.plain` in the file, MT1): its ceiling alone, no bays or trusses under it, and its lamps a
 ## station's strip lights (RoofConfig.plain_lamp_model, SM5) rather than the hall's high-bay model.
 var roof_plain: bool = false
@@ -741,6 +744,7 @@ func _read_roof(raw: Variant) -> void:
 			y = height
 		roof_lamp_heights.append(y)
 		roof_lamp_turns.append(deg_to_rad(_number(at.get("turn"), 0.0)))
+		roof_lamp_floors.append(_number(at.get("floor"), NAN))
 		var state: Variant = at.get("state", "")
 		var kind: int = LAMP_STATES.find(str(state)) if state is String else -1
 		if kind < 0:

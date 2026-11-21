@@ -32,15 +32,17 @@ blocks: list[dict] = []
 
 def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: float, yb: float | None = None,
          h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False,
-         dress: str = "", vault: bool = False, opens: bool = False) -> None:
+         dress: str = "", vault: bool = False, opens: bool = False, doors: dict | None = None) -> None:
     """A room; a ramp room's ceiling follows its floor down in steps, or with `flat` stays level, `h` over its higher
     end (a short flight of steps under a tunnel's roof). A ramp room's `dress` names the model laid over its ramps
     (PropDressConfig, SET; SM2: an escalator bank or a stair), build_map.py writing it on each. A `vault` room has no
     ceiling of its own: its walls stop `h` over its floor, where its platform tunnel's vault (VAULTS) springs. One that
     `opens` (a space under a train's end) opens into its neighbours however low it is, where other rooms are walled off
-    from those they overlap by less than a door."""
+    from those they overlap by less than a door. `doors` are doorways in an outer wall, by edge: (from, to, height),
+    the wall going on over each (the street entrance: what stands in it is a block's)."""
     rooms.append(dict(name=name, area=area, x0=x0, x1=x1, z0=z0, z1=z1, ya=y, yb=y if yb is None else yb, h=h,
-                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat, dress=dress, vault=vault, opens=opens))
+                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat, dress=dress, vault=vault, opens=opens,
+                      doors=doors or {}))
 
 
 def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0,
@@ -63,7 +65,17 @@ def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: fl
 # booking hall and west passage taken into the hall. From the street end, east: the spawns and the ticket office,
 # the lifts' shafts, the gate line, the spiral stair's hole, then the concourse (upper) with the lower escalators.
 HALL_H = 4.5
-room("hall", "Ticket hall", -55, -18, -10, 10, C, h=HALL_H)  # 20 m: seven gates a side
+# The street entrance (the owner, 2026-11-21: "a station entrance/exit door just behind where the players start in the
+# ticket hall ... an escalator/stairs going up to an outside street. The player shouldn't be able to go out to the
+# street so maybe add a gate"): a doorway in the hall's street-end wall behind the Street team's spawns, shut by a
+# folding gate. The stairs and escalator up to the street behind it are one model in a solid block (look only: the
+# gate's plane is the block's face, so nothing passes it), lit by two lamps of its own (build_map.py lamps).
+ENTRANCE = dict(x0=-66.5, x1=-55.0, z0=-2.4, z1=2.4, door_h=3.2, h=5.0)
+room("hall", "Ticket hall", -55, -18, -10, 10, C, h=HALL_H,  # 20 m: seven gates a side
+     doors={"w": [(ENTRANCE["z0"], ENTRANCE["z1"], ENTRANCE["door_h"])]})
+block("wall", C, ENTRANCE["x0"], ENTRANCE["x1"], ENTRANCE["z0"], ENTRANCE["z1"], ENTRANCE["h"],
+      dress="station_entrance", facing="+x")
+ENTRANCE_LAMPS = [(-59.0, 0.0), (-63.9, 0.0)]   # (x, z) under its ceiling: over the stairs, inside the exit
 block("wall", C, -55, -49, -10, -6.5, 3.0, dress="ticket_office")  # closed ticket office
 block("container", C, -49, -46, 7.4, 10, 2.5, 0x8a8478, dress="kiosk")  # shuttered kiosk
 block("cabinet", C, -55.0, -54.4, 2.5, 8.0, 2.0, dress="ticket_machine")

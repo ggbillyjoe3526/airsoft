@@ -16,6 +16,11 @@ uniform bool srgb_colours = false;
 // of its colour it keeps against the look's pull toward grey (look_paint): a treeline's greens, which pulled read
 // olive-grey under the warm sun; Subway's safety yellow, which pulled read cream.
 uniform bool keep_by_alpha = false;
+// With `keep_stripe` (Subway's printed signs, TQ2), a printed pixel of `stripe` 's own hue (the owner's orange, the
+// trains' stripe and poles, kept whole there by keep_by_alpha) keeps its colour too: the station's orange name boards
+// read the same orange as the trains.
+uniform bool keep_stripe = false;
+uniform vec3 stripe : source_color = vec3(0.918, 0.416, 0.133);
 uniform bool paint_by_custom = false;
 uniform bool perforations = false;
 uniform bool use_sheet = false;
@@ -31,6 +36,9 @@ uniform float rib_shade : hint_range(0.0, 1.0) = 0.42;
 // Whether Dev › Retro filter wobbles its corners (RF1): not the level's blocks and ground, whose big faces would tilt
 // through the floors and cladding laid a few cm over them (LookMaterials.vertex_colour's `wobble`).
 uniform bool retro_wobble = true;
+// How much a part of kind 9 (look_surface.gdshaderinc: lit, TQ2's street up Subway's entrance stair) glows by its
+// own colour: the sunlit street seen from underground, brighter than any lamp down there makes it.
+uniform float daylight_glow : hint_range(0.0, 2.0) = 0.55;
 
 #ifdef LOOK_SURFACES
 // Woodland's surfaces (WQ1, look_surface.gdshader): each face's detail layer (UV2 x; 0 plain) of `surfaces` at its
@@ -123,8 +131,17 @@ void fragment() {
 	if (keep_by_alpha) {
 		albedo = mix(albedo, col, COLOR.a);
 	}
+	if (keep_stripe) {
+		// how near the pixel's hue (its share of each channel) is the stripe's: within a few hundredths, all of it
+		vec3 share = col / max(col.r + col.g + col.b, 1e-4);
+		vec3 own_share = stripe / max(stripe.r + stripe.g + stripe.b, 1e-4);
+		albedo = mix(albedo, col, 1.0 - smoothstep(0.025, 0.05, distance(share, own_share)));
+	}
 	ALBEDO = LOOK_ALBEDO(albedo);
 	ROUGHNESS = rough;
 	METALLIC = metal;
 	SPECULAR = spec;
+	if (surface_kind > 8.5 && surface_kind < 9.5) {
+		EMISSION = albedo * daylight_glow;
+	}
 }

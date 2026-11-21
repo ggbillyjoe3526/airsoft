@@ -68,7 +68,7 @@ blocks read from `data/maps/woodland.json` (rerun a structure's script after `to
 | `help_point.py` | `help_point.glb` | Subway's help point and map columns (SM3) |
 | `station_bench.py` | `station_bench.glb`, `station_bench_long.glb` | Subway's benches, three seats and four (SM3) |
 | `crowd_barrier.py` | `crowd_barrier.glb` | Subway's crowd barriers (SM3) |
-| `train.py` | `train_body.glb`, `train_lights.glb`, `train_door.glb`, `train_door_glazed.glb`, `train_door_glass.glb`, `train_windows.glb`, `train_gangway.glb`, `train_end.glb`, `train_end_outer.glb`, `train_cab.glb`, `train_cab_open.glb`, `train_seat.glb`, `train_seat_short.glb`, `tool_cart.glb`, `train_bogie.glb`, `train_cab_leds.glb`, `train_end_leds.glb` | Subway's trains (SM1): each car's body, lamp strips, shut doors (the platform side's glazed) and window glass, its ends and their white LED lamps (cab front shut or open, blank, uncoupled; under a train's end its underframe and coupler) and the gangways, drawn by `TrainView` from the map's `dressing.trains` (where the train's box meets the ground, `StationSurface` lines it in its tunnel's finish); the seats, tool carts and the bogie under each train end are named blocks (FIT). A car is 22k triangles with its doors and seats, a bogie 3k |
+| `train.py` | `train_body.glb`, `train_lights.glb`, `train_door.glb`, `train_door_glazed.glb`, `train_door_glass.glb`, `train_windows.glb`, `train_gangway.glb`, `train_end.glb`, `train_end_outer.glb`, `train_cab.glb`, `train_cab_open.glb`, `train_seat.glb`, `train_seat_short.glb`, `tool_cart.glb`, `train_bogie.glb`, `train_cab_leds.glb`, `train_end_leds.glb`, `train_poles.glb`, `train_end_rails.glb`, `train_gangway_rails.glb`, `train_adverts.glb` | Subway's trains (SM1): each car's body, its poles and rails (round, smoothly bent tubes, TQ2), its cove's printed advert cards (TQ2), lamp strips, shut doors (the platform side's glazed) and window glass, its ends and their white LED lamps (cab front shut or open, blank, uncoupled; under a train's end its underframe and coupler), the end walls' and gangways' grab handles and the gangways, drawn by `TrainView` from the map's `dressing.trains` (where the train's box meets the ground, `StationSurface` lines it in its tunnel's finish); the seats, tool carts and the bogie under each train end are named blocks (FIT). A car is 22k triangles with its doors and seats, a bogie 3k |
 
 Subway's stairs, escalators, lifts and railing (SM2) share `transit_kit.py`: their paints, a mesh builder with boxes,
 sweeps, lathes, tubes round filleted paths, knobs and rings, and `report`, which writes the model and fails it over its
@@ -78,7 +78,9 @@ UV.x under -1 draws ribs 8.5 mm apart).
 Subway's lamps and extras (SM5) share `stationkit.py` (a mesh builder in the game's axes: `Prop`, `Lens` and `Sign`
 faces, a printed face's UVs into the sign sheet) and `station_cells.py` (the sheet's cells); `station_signs.py` draws
 the sheet itself (`assets/textures/station/signs.png`, every word invented) and `station_render.py` renders the
-models for review with their glass lit and their print on.
+models for review with their glass lit and their print on. The trains' advert cards (TQ2) are printed the same way:
+`train_adverts.py` draws their sheet (`assets/textures/station/train_adverts.png`, twelve invented adverts),
+`train_ad_cells.py` holds its cells and `train.py` lays the cards (`train_adverts.glb`).
 
 The trees share `treekit.py`: stems, limbs, foliage clumps and spruce tiers with crown-lit normals, and the build gates
 (budget, no team hue, the trunk inside its foot radius, the crown only over the clearance outside it). A tree's trunk

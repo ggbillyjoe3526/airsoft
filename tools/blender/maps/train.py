@@ -18,9 +18,13 @@ gets (x, -z, y), so the glTF export gives the game's axes back.
     train_cab_leds.glb    a cab front's white LED lamps (headlamps, side strips, marker lamps), drawn glowing over it
     train_end_leds.glb    the uncoupled end's white LED lamps, drawn glowing over train_end_outer
     train_body.glb        a car's sides, floor, ceiling and fittings, every door hole open (x +-7.35, z +-1.72)
+    train_poles.glb       its poles and seat rails (one bent tube a bay) and door-head bars: round, smooth tubes
+    train_adverts.glb     its cove's twelve printed advert cards (the advert sheet, train_adverts.py)
     train_door.glb        a shut pair of door leaves, filling a door hole (x +-0.8, z 1.36..1.705)
     train_gangway.glb     the joint between two coupled cars, an open gangway through it (x +-0.15)
     train_end.glb         a car's blank end with its shut end door (x 0..0.15, the car's inside at x 0)
+    train_end_rails.glb   the grab handles on that end wall, drawn with every end that has it (blank, outer, cab)
+    train_gangway_rails.glb  the gangway's four grab handles
     train_end_outer.glb   the same at the uncoupled end of a train, its outside face and underframe drawn
     train_cab.glb         a cab front, its door shut (x 0..0.15, the track side at x 0.15)
     train_cab_open.glb    the same with its door open: the way out onto the track
@@ -43,6 +47,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import mapkit as mk  # noqa: E402  (brings bpy, hardsurface)
+import stationkit as sk  # noqa: E402  (the printed adverts' mesh and export)
+import train_ad_cells as ad_cells  # noqa: E402
 import weathering as wt  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
@@ -96,6 +102,13 @@ LAMP_Z = (0.97, 1.11)  # the ceiling's two lamp lines, along the coves' top edge
 POLE_R = 0.018
 POLE_Z = 1.22         # the poles stand over the seats' front edge
 RAIL_Y = 1.98
+# The poles and rails (TQ2, the owner, 2026-11-21: "more smooth and minimalistic"): round tubes of TUBE_SIDES, each
+# step round them and round a bend (BEND_STEP) under the shading's split (hardsurface.SHARP_ANGLE, 32 degrees), so
+# they shade smooth; a bend is a radiused curve, never a mitred kink.
+TUBE_SIDES = 12
+BEND_STEP = math.radians(22.5)
+RAIL_BEND = 0.12      # a bay rail's bends down into its poles
+FLANGE = 0.012        # a pole's or rail's flat round fixing, this much wider than the tube
 GANG_HW = 0.6         # the gangway's half width (layout.py's car ends leave 1.2 m between them)
 CAB_DOOR_HW = 0.6     # the cab's door (the south train's way out: 1.2 m)
 END_DOOR_HW = 0.4
@@ -108,28 +121,33 @@ DOOR_IN = 0.03        # the end door set back into it again
 # A car is about 27k (TQ1; the list's 22k was 12k outside, 10k inside): its body (18k), its eight door pairs (about
 # 5k) and its seats (about 4.7k a car, drawn by PropDress).
 # A car end is 1.5k, a gangway two of them; the uncoupled end adds its underframe's end (1k, the slack in its car).
-BUDGET = {"train_body": 18000, "train_screens": 120, "train_door": 640, "train_door_glazed": 640, "train_windows": 240, "train_door_glass": 60, "train_gangway": 3000, "train_end": 1500, "train_end_outer": 3700,
+# TQ2: the poles and rails left the body for a model of their own (train_poles, round and smoothly bent, one tube a
+# bay), as did the end walls' and gangways' grab handles (train_end_rails, train_gangway_rails);
+# the body's budget came down by what it gave up.
+BUDGET = {"train_body": 15400, "train_poles": 2650, "train_end_rails": 680, "train_gangway_rails": 900,
+          "train_adverts": 25, "train_screens": 120, "train_door": 640, "train_door_glazed": 640, "train_windows": 240, "train_door_glass": 60, "train_gangway": 2760, "train_end": 1230, "train_end_outer": 3700,
           "train_cab": 4200, "train_cab_open": 4200, "train_seat": 620, "train_seat_short": 420, "train_lights": 100,
           "tool_cart": 1500, "train_bogie": 3000, "train_cab_leds": 270, "train_end_leds": 180}
 
 # Colours (sRGB): clean white paint (the owner, 2026-11-12: "more clean white than the grey"), black rubber, dark glass
 # (the far side's, against the tunnel wall; the platform side's panes are see-through, `pane`, TrainView); inside,
 # off-white panels, a charcoal speckled floor and grey moquette; the poles and grab rails in the stripe's orange, as the
-# owner's photos (TQ1). All white, grey or near it but the orange band along the sides, a worn burnt orange (the owner,
-# 2026-11-12: "give the trains an orange stripe"), the one colour near a team's hue, and the poles in the same.
+# owner's photos (TQ1). All white, grey or near it but the orange band along the sides (the owner, 2026-11-12: "give the
+# trains an orange stripe"; 2026-11-21: "a slightly more vibrant orange", #c0652f to #ea6a22, its hue kept at 22
+# degrees, redder than Beta's 28, and drawn in its whole colour, FULL_COLOUR), the one colour near a team's hue, and
+# the poles in the same.
 COLOURS = {
     "body": 0xE6E6E2, "body_lo": 0xD6D6D2, "seam": 0x9A9A96, "rubber": 0x2C2B2E, "glass": 0x3F484E,
-    "glass_hi": 0x66707A, "glass_lo": 0x30383D, "frost": 0xC8CCCC, "skirt": 0x3B3936, "under": 0x262523, "steel": 0x8A8A88, "pole": 0xC0652F,
+    "glass_hi": 0x66707A, "glass_lo": 0x30383D, "frost": 0xC8CCCC, "skirt": 0x3B3936, "under": 0x262523, "steel": 0x8A8A88, "pole": 0xEA6A22,
     "inner": 0xDAD6CE, "fleck": 0x9C9A96, "fleck_lo": 0x67666A, "poster_b": 0xB3B891, "poster_c": 0x9A968C,
     "inner_lo": 0xBDB9B1, "trim": 0x9E9B95, "floor": 0x4A4B50, "light": 0xF4ECDA,
     "vent": 0x77756F, "poster": 0xE4E1DA, "frame": 0x5B5A5C, "seat": 0x5C5D62, "seat_dot": 0x7A7D88,
     "seat_ring": 0x8F8E8A, "plinth": 0x2F2E31, "bellows": 0x262527, "fold_hi": 0x5B5A5C, "gang_in": 0x9C9A95, "lamp": 0xE8E2D2,
-    "mask": 0x262C30, "mask_in": 0x4A5054, "mask_lit": 0x8A8E8E, "yellow": 0xB8A858, "stripe": 0xC0652F, "led": 0xFFFFFF, "pane": 0x58656B,
+    "mask": 0x262C30, "mask_in": 0x4A5054, "mask_lit": 0x8A8E8E, "yellow": 0xB8A858, "stripe": 0xEA6A22, "led": 0xFFFFFF, "pane": 0x58656B,
     "cart": 0x6F7174, "cart_lo": 0x5C5E61, "peg": 0x8A877E, "wood": 0x7E776E, "castor": 0x2E2D2F,
     "tool": 0x7D8084, "tape": 0xB8A858, "cable": 0x34363A,
-    # TQ1: the cove's adverts (muted, under a team's saturation), their aluminium frames
-    "alu": 0xB4B6B4, "ad_a": 0x8E9AA6, "ad_b": 0xA8AC92, "ad_c": 0xC2B49A, "ad_d": 0x9C8E9A, "ad_e": 0x8FA39C,
-    "ad_ink": 0x55585E, "screen": 0x2E3337, "button": 0x3E8A5C,
+    # TQ1: the cove's advert frames' aluminium (their cards are printed, train_adverts.glb), the poles' fixings
+    "alu": 0xB4B6B4, "screen": 0x2E3337, "button": 0x3E8A5C,
 }
 
 
@@ -137,6 +155,10 @@ COLOURS = {
 # and fine pattern (the seats' moquette, the floor's speckle) drawn for no triangles. A paint not named keeps the
 # props' roughness (0). Each face's kind goes out as its UV y (KIND_BASE + kind; UV x 0).
 KIND_BASE = 100
+# The paints drawn in their whole colour, not the look's weathered share of it (LookConfig.paint_saturation, 0.6),
+# which drew the orange rust brown (TQ2, the critic; the owner's photos' poles are a clean bright orange): the poles,
+# rails and handles and the stripe. Every other paint is white, grey or near it, which the pull leaves as it is.
+FULL_COLOUR = ("pole", "stripe")
 KINDS = {
     "body": 1, "body_lo": 1, "stripe": 1,
     "pole": 1, "steel": 2,
@@ -202,18 +224,64 @@ class Model:
     def bar(self, a: tuple, c: tuple, r: float, paint: str, sides: int = 8) -> None:
         mk.cylinder(self.b, B(*a), B(*c), r, paint, sides=sides, caps=False)
 
+    def tube(self, path: list, r: float, paint: str, sides: int = TUBE_SIDES) -> None:
+        """A round tube of radius r along `path` (the game's frame; a `filleted` one bends smoothly), open at its ends,
+        each ring square to the path and turned on from the last (no twist), its faces outwards."""
+        n = len(path)
+        dirs = [(Vector(path[k + 1]) - Vector(path[k])).normalized() for k in range(n - 1)]
+        tangents = [dirs[0]] + [(dirs[k - 1] + dirs[k]).normalized() for k in range(1, n - 1)] + [dirs[-1]]
+        t0 = tangents[0]
+        nrm = t0.cross(Vector((0.0, 1.0, 0.0)) if abs(t0.y) < 0.9 else Vector((1.0, 0.0, 0.0))).normalized()
+        bm = self.b.bm
+        rings = []
+        for p, t in zip(path, tangents):
+            nrm = (nrm - t * nrm.dot(t)).normalized()
+            bi = t.cross(nrm)
+            ring = []
+            for i in range(sides):
+                a = 2.0 * math.pi * i / sides
+                q = Vector(p) + (nrm * math.cos(a) + bi * math.sin(a)) * r
+                ring.append(bm.verts.new(Vector(B(q.x, q.y, q.z))))
+            rings.append(ring)
+        mat = self.b.mat(paint)
+        for ra, rb in zip(rings, rings[1:]):
+            for i in range(sides):
+                j = (i + 1) % sides
+                bm.faces.new((ra[i], ra[j], rb[j], rb[i])).material_index = mat
+
     def finish(self, weather=None) -> None:
         ob = self.b.build()
         mk.clean(ob)
         kinds = surface_kinds(ob)
+        full = full_colours(ob)
         mk.bake_vertex_colours(ob)
         if weather is not None:
             wt.weather(ob, weather)
+        if any(full):
+            keep_full_colour(ob, full)
         mk.report(ob, self.name, BUDGET[self.name])
         tris = hs.tris(ob)
         if tris > BUDGET[self.name]:
             raise SystemExit(f"{self.name}: {tris} triangles, over its budget of {BUDGET[self.name]}")
         wt.export(ob, self.name, uvs=kinds)
+
+
+def full_colours(ob) -> list:
+    """Whether each face is painted in FULL_COLOUR (read before the paints are baked away)."""
+    names = [m.name.split(".")[0] for m in ob.data.materials]
+    return [names[p.material_index] in FULL_COLOUR for p in ob.data.polygons]
+
+
+def keep_full_colour(ob, full: list) -> None:
+    """Sets each face corner's alpha: 1 on a FULL_COLOUR face, which keeps its whole colour against the look's pull
+    toward grey (look_vertex.gdshader keep_by_alpha, TrainView's props material), 0 elsewhere (the look's share). Only
+    on a model with such faces, all drawn in TrainView's props material: the glass (whose alpha is its opacity) and the
+    props PropDress draws (whose alpha takes their instance paint) keep theirs."""
+    data = ob.data.color_attributes["Color"].data
+    for p, keep in zip(ob.data.polygons, full):
+        for li in p.loop_indices:
+            r, g, b, _ = data[li].color
+            data[li].color = (r, g, b, 1.0 if keep else 0.0)
 
 
 def surface_kinds(ob) -> bool:
@@ -250,6 +318,27 @@ class Glow(Model):
         for pts, facing in self.faces:
             Model.poly(m, pts, facing, self.paint)
         Model.finish(m)
+
+
+class Kept(Model):
+    """A model's faces and tubes kept while another model is built (as Glow, in their own paints), then built on their
+    own (`finish`): a car's poles and rails (train_poles), drawn by TrainView over the body."""
+
+    def __init__(self, name: str):
+        self.name = name
+        self.parts = []
+
+    def poly(self, pts: list, facing: tuple, paint: str) -> None:
+        self.parts.append((Model.poly, (pts, facing, paint)))
+
+    def tube(self, path: list, r: float, paint: str, sides: int = TUBE_SIDES) -> None:
+        self.parts.append((Model.tube, (path, r, paint, sides)))
+
+    def finish(self, weather=None) -> None:
+        m = Model(self.name)
+        for fn, args in self.parts:
+            fn(m, *args)
+        Model.finish(m, weather)
 
 
 def led_cluster(g: Glow, c: tuple, pitch: float = 0.026, r: float = 0.0105) -> None:
@@ -625,6 +714,48 @@ def dome(m: Model, c: tuple, r: float, paint: str, n: int = 10, rings: int = 3, 
         prev = ring
 
 
+def filleted(corners: list, radius: float, step: float = BEND_STEP) -> list:
+    """The path through `corners` (the game's frame) with each inner corner rounded by an arc of `radius`, in steps of
+    at most `step`: a bent tube's centre line (Model.tube). The legs must be long enough for their arcs."""
+    pts = [Vector(corners[0])]
+    for k in range(1, len(corners) - 1):
+        p = Vector(corners[k])
+        d1 = (Vector(corners[k - 1]) - p).normalized()
+        d2 = (Vector(corners[k + 1]) - p).normalized()
+        inner = d1.angle(d2)
+        turn = math.pi - inner
+        if turn < 1e-4:
+            continue
+        reach = radius / math.tan(inner * 0.5)
+        centre = p + (d1 + d2).normalized() * (radius / math.sin(inner * 0.5))
+        u, w = (p + d1 * reach - centre) / radius, (p + d2 * reach - centre) / radius
+        steps = max(1, math.ceil(turn / step - 1e-6))
+        for i in range(steps + 1):
+            f = i / steps
+            q = centre + (u * math.sin((1.0 - f) * turn) + w * math.sin(f * turn)) * (radius / math.sin(turn))
+            if (q - pts[-1]).length > 1e-5:
+                pts.append(q)
+    if (Vector(corners[-1]) - pts[-1]).length > 1e-5:
+        pts.append(Vector(corners[-1]))
+    return [tuple(q) for q in pts]
+
+
+def flange(m: Model, c: tuple, n: tuple, r: float, paint: str = "alu", sides: int = TUBE_SIDES) -> None:
+    """A pole's or rail's fixing: a flat round plate of radius r at c, facing n (any way)."""
+    nv = Vector(n).normalized()
+    u = nv.cross(Vector((1.0, 0.0, 0.0)) if abs(nv.x) < 0.9 else Vector((0.0, 1.0, 0.0))).normalized()
+    w = nv.cross(u)
+    m.poly([tuple(Vector(c) + (u * math.cos(2 * math.pi * k / sides) + w * math.sin(2 * math.pi * k / sides)) * r)
+            for k in range(sides)], n, paint)
+
+
+def grab_handle(m: Model, x: float, f: float, y0: float, y1: float, z: float, reach: float, r: float) -> None:
+    """A grab handle on a wall in the plane x, standing `reach` off it towards f (+-1 along x) from y0 up to y1 at z:
+    one tube leaving the wall square, bending up (its bends `reach` round, so no straight stub or bracket) and back
+    in (TQ2: smooth and minimal, no collars)."""
+    m.tube(filleted([(x, y0, z), (x + f * reach, y0, z), (x + f * reach, y1, z), (x, y1, z)], reach), r, "pole")
+
+
 # --------------------------------------------------------------------------------------------------------- the body
 
 def bays() -> list:
@@ -681,11 +812,12 @@ def far_pane(m: Model, s: float, a: float, b: float) -> None:
                     at(sb, yb, 0.002)], (0, 0, -s), "glass_hi")
 
 
-def side(m: Model, s: float, screens: "Glow", panes: "Glow | None" = None) -> None:
+def side(m: Model, s: float, screens: "Glow", poles: Model, ads, panes: "Glow | None" = None) -> None:
     """One side, outer skin and inner, the platform's (s = 1) or the far one. With `panes` its windows are see-through
     (the owner, 2026-11-12: "can the player see through them?"): open through the wall, a reveal between the frame and
     the lining, their glass kept in `panes`; else dark glass (the far side's, against the tunnel wall). The draft
-    screens' glass goes in `screens`."""
+    screens' glass goes in `screens`, the poles and rails in `poles` (train_poles), the cove's printed adverts in `ads`
+    (train_adverts, a stationkit.Mesh)."""
     doors = [(c - DOOR_HW, c + DOOR_HW) for c in DOOR_SLOTS]
     wins = windows()
     holes = [(a, b, 0.0, DOOR_H) for a, b in doors] + [(a, b, SILL, HEAD) for a, b in wins]
@@ -802,7 +934,7 @@ def side(m: Model, s: float, screens: "Glow", panes: "Glow | None" = None) -> No
     for i, (a, b) in enumerate(bays()):
         if b - a < 1.6:
             continue
-        cove_adverts(m, s, a, b, i)
+        cove_adverts(m, ads, s, a, b, i)
     # padded backs over the seats, one a sitter (about half a metre), a rounded pad with a seam between each, on a dark
     # backing rail; and the grab rail over them
     prof = [(IN_Z, SEAT_H), (IN_Z - 0.05, SEAT_H + 0.005), (IN_Z - 0.09, SEAT_H + 0.04), (IN_Z - 0.105, 0.62),
@@ -817,22 +949,31 @@ def side(m: Model, s: float, screens: "Glow", panes: "Glow | None" = None) -> No
                 m.poly([(pa, ya, s * za), (pb, ya, s * za), (pb, yb, s * zb), (pa, yb, s * zb)], (0, 0.2, -s), "seat")
             for x, f in ((pa, -1), (pb, 1)):
                 m.poly([(x, y, s * z) for z, y in prof], (f, 0, 0), "seat")
-        m.bar((a + 0.05, RAIL_Y, s * POLE_Z), (b - 0.05, RAIL_Y, s * POLE_Z), POLE_R, "pole", sides=10)
-        # the rail's brackets up into the cove
-        for x in (a + 0.12, b - 0.12):
-            m.bar((x, RAIL_Y, s * POLE_Z), (x, TOP - 0.02, s * (COVE_Z + 0.04)), 0.012, "pole", sides=6)
-    # the poles at the door holes' edges, over the seats' front corners, floor to ceiling
+        bay_rail(poles, s, a, b)
+    # the draft screen beside each door hole at the seat's end (the owner's photos): a white panel to the seat back's
+    # height, a framed glass screen over it, the passenger alarm on its doorway face
     for a, b in doors:
-        for x in (a - 0.09, b + 0.09):
-            m.bar((x, 0.0, s * POLE_Z), (x, TOP, s * POLE_Z), POLE_R, "pole", sides=12)
-            # its round feet on the floor and the ceiling
-            disc(m, (x, 0.003, s * POLE_Z), POLE_R + 0.02, (0, 1, 0), "trim", 12)
-            disc(m, (x, TOP - 0.003, s * POLE_Z), POLE_R + 0.02, (0, -1, 0), "trim", 12)
-        # and the draft screen beside each door hole at the seat's end (the owner's photos): a white panel to the
-        # seat back's height, a glass screen over it in a steel frame curving round its top, the passenger alarm on
-        # its doorway face
         for x, f in ((a - 0.02, -1), (b + 0.02, 1)):
             draft_screen(m, s, x, f, screens)
+
+
+def bay_rail(poles: Model, s: float, a: float, b: float) -> None:
+    """Bay a..b's grab rail and its poles (TQ2, the critic: one tube, never two side by side, none ending in a seat or
+    in the air): at each end against a door hole a pole on the floor at the draft screen's doorway face (the owner's
+    photos, 02-train-car-inside 113845 and 113816), up to RAIL_Y, bending (RAIL_BEND round) into the rail along the bay
+    over the seats' front (113835: the rail bending down into the pole); at an end against the car's end wall, the rail
+    runs straight into that wall. Each pole stands on a flat round plate."""
+    z = s * POLE_Z
+    reach = 0.02 - 0.004 - POLE_R      # from the door hole's edge past the screen's doorway face, a hair clear of it
+    ends = []
+    for x, inward in ((a, 1), (b, -1)):
+        if abs(abs(x) - IN_X) < 1e-6:
+            ends.append([(x, RAIL_Y, z)])
+        else:
+            leg = x + inward * reach
+            ends.append([(leg, 0.0, z), (leg, RAIL_Y, z)])
+            flange(poles, (leg, 0.002, z), (0, 1, 0), POLE_R + FLANGE)
+    poles.tube(filleted(ends[0] + list(reversed(ends[1])), RAIL_BEND), POLE_R, "pole")
 
 
 def on_side(m: Model, s: float, pts: list, paint: str, off: float) -> None:
@@ -859,13 +1000,17 @@ def side_details(m: Model, s: float, doors: list) -> None:
             on_side(m, s, [(x - 0.033, y + 0.008), (x + 0.033, y + 0.008), (x, y + 0.065)], "yellow", 0.004)
 
 
-# The cove's adverts (TQ1, the owner's photos): a brushed aluminium frame a bay, two posters in it, each a white sheet
-# with a picture block and a heading band in muted colours (no words, no brands); over them, under the ceiling's
-# edge, the air-conditioning grille's louvres.
-ADVERTS = (("ad_a", "ad_b"), ("ad_c", "ad_d"), ("ad_b", "ad_e"), ("ad_d", "ad_a"), ("ad_e", "ad_c"))
+# The cove's adverts (TQ1, the owner's photos; TQ2, the owner, 2026-11-21: "add adverts/posters"): a brushed aluminium
+# frame a bay, dark inside, two printed cards in it (train_adverts.glb, their pictures in the advert sheet,
+# train_ad_cells.py; invented, no brands, no team hues); over them, under the ceiling's edge, the air-conditioning
+# grille's louvres. A car's twelve cards are the sheet's twelve adverts, each once, shuffled once (AD_SEED), so no two
+# neighbours match; TrainView turns every other car's about, so the next car's run differently.
+AD_SEED = 11
+AD_ORDER = random.Random(AD_SEED).sample(ad_cells.ADVERTS, len(ad_cells.ADVERTS))
+AD_BAYS = (1, 2, 3)   # the long bays, the ones with a frame (bays() order)
 
 
-def cove_adverts(m: Model, s: float, a: float, b: float, i: int) -> None:
+def cove_adverts(m: Model, ads, s: float, a: float, b: float, i: int) -> None:
     mid, hw = (a + b) * 0.5, min(0.8, (b - a) * 0.5 - 0.15)
 
     def at(t: float, off: float) -> tuple:
@@ -879,14 +1024,19 @@ def cove_adverts(m: Model, s: float, a: float, b: float, i: int) -> None:
     t0, t1 = 0.08, 0.80
     quad(mid - hw, mid + hw, t0, t1, 0.004, "alu")
     quad(mid - hw + 0.025, mid + hw - 0.025, t0 + 0.035, t1 - 0.035, 0.006, "frame")
-    pair = ADVERTS[(i + (0 if s > 0 else 2)) % len(ADVERTS)]
-    for k, paint in enumerate(pair):
+    # the cards, each as tall as the frame's inside leaves and as wide as its picture's shape, in the middle of its half
+    run = math.dist(cove_at(0.0), cove_at(1.0))
+    c0, c1 = t0 + 0.05, t1 - 0.05
+    half_w = (c1 - c0) * run * ad_cells.ASPECT * 0.5
+    for k in range(2):
         x0 = mid - hw + 0.04 + k * (hw - 0.015)
-        x1 = x0 + hw - 0.055
-        quad(x0, x1, t0 + 0.05, t1 - 0.05, 0.008, "poster")
-        quad(x0 + 0.03, x1 - 0.03, t0 + 0.2, t1 - 0.08, 0.010, paint)
-        quad(x0 + 0.03, x0 + (x1 - x0) * 0.62, t0 + 0.09, t0 + 0.15, 0.010, "ad_ink")
-        quad(x0 + 0.03, x0 + (x1 - x0) * 0.4, t0 + 0.165, t0 + 0.185, 0.010, "ad_ink")
+        cx = x0 + (hw - 0.055) * 0.5
+        lo, hi = cx - half_w, cx + half_w
+        (ya, za), (yb, zb) = at(c0, 0.008), at(c1, 0.008)
+        # as seen from the aisle: the card's left is +x on the +z side, -x on the -z side
+        left, right = (hi, lo) if s > 0 else (lo, hi)
+        slot = ((0 if s > 0 else 1) * len(AD_BAYS) + AD_BAYS.index(i)) * 2 + k
+        ads.sign(AD_ORDER[slot], [(left, ya, za), (right, ya, za), (right, yb, zb), (left, yb, zb)], cells=ad_cells)
     # the grille's louvres under the ceiling's edge, the bay's length
     quad(a + 0.1, b - 0.1, 0.84, 0.985, 0.003, "vent")
     for k in range(4):
@@ -917,8 +1067,9 @@ def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow) -> None:
     # its foot, a dark kick strip round the panel's front
     m.poly([(x - f * 0.002, 0.0, s * (front + 0.035)), (x - f * 0.002, 0.0, s * IN_Z), (x - f * 0.002, 0.07, s * IN_Z),
             (x - f * 0.002, 0.07, s * (front + 0.035))], (-f, 0, 0), "plinth")
-    # the glass over it, its top front corner round (radius rr), in a steel frame: a tube up its front and over its
-    # top into the wall, a flat bar along its foot
+    # the glass over it, its top front corner round (radius rr), on a flat steel bar along its foot, held in a black
+    # edge frame up its front and over its top into the wall (TQ2: as the owner's photos' screens, 02-train-car-inside
+    # 113845; the orange tube that ran round it, ending in the air beside the clear glass, is gone)
     top, rr = 1.6, 0.2
     zf, zw = front + 0.03, IN_Z - 0.02
     xm = x + f * t * 0.5
@@ -928,8 +1079,8 @@ def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow) -> None:
         ring.append((zf + rr * (1 - math.cos(u)), top - rr + rr * math.sin(u)))
     ring.append((zw, top))
     screens.poly([(xm, y, s * z) for z, y in ring], (f, 0, 0), "pane")
-    # what makes the glass read (TQ1, the critic): its black edge seal inside the tube along its front and over its
-    # top, and a pale frosted band across it at eye height, each on both faces a hair off the glass
+    # what makes the glass read (TQ1, the critic): its black frame along its front and over its top, a band on both
+    # faces a hair off the glass and a strip across its edge, and a pale frosted band across it at eye height
     cz, cy = zw - 0.2, (low + top) * 0.5
     for d, ff in ((0.002, f), (-0.002, -f)):
         for (za, ya), (zb, yb) in zip(ring[1:-1], ring[2:]):
@@ -940,13 +1091,11 @@ def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow) -> None:
             (ia, ja), (ib, jb) = inward(za, ya), inward(zb, yb)
             m.poly([(xm + d, ya, s * za), (xm + d, yb, s * zb), (xm + d, jb, s * ib), (xm + d, ja, s * ia)],
                    (ff, 0, 0), "rubber")
+            if d > 0.0:
+                m.poly([(xm - 0.006, ya, s * za), (xm + 0.006, ya, s * za), (xm + 0.006, yb, s * zb),
+                        (xm - 0.006, yb, s * zb)], (0, (ya + yb) * 0.5 - cy, s * ((za + zb) * 0.5 - cz)), "rubber")
         m.poly([(xm + d, 1.24, s * (zf + 0.02)), (xm + d, 1.24, s * zw), (xm + d, 1.29, s * zw),
                 (xm + d, 1.29, s * (zf + 0.02))], (ff, 0, 0), "frost")
-    path = [(zf - 0.012, low)] + [(z - 0.012 * (1 - k / (len(ring) - 3)), y + 0.012 * (k / (len(ring) - 3)))
-                                   for k, (z, y) in enumerate(ring[2:])]
-    path[-1] = (IN_Z, top + 0.012)
-    for (za, ya), (zb, yb) in zip(path, path[1:]):
-        m.bar((xm, ya, s * za), (xm, yb, s * zb), 0.014, "pole", sides=8)
     m.box((min(x, x + f * t), low - 0.002, min(s * front, s * IN_Z)), (max(x, x + f * t), low + 0.025,
           max(s * front, s * IN_Z)), "steel", skip="-y")
     # on its doorway face, small as the photos': the passenger alarm (a yellow ring round its push) and the door's
@@ -962,8 +1111,10 @@ def body() -> None:
     m = Model("train_body")
     panes = Glow("train_windows", "pane")
     screens = Glow("train_screens", "pane")
-    side(m, 1.0, screens, panes)
-    side(m, -1.0, screens)
+    poles = Kept("train_poles")
+    ads = sk.Mesh("train_adverts")
+    side(m, 1.0, screens, poles, ads, panes)
+    side(m, -1.0, screens, poles, ads)
     # the floor: dark rubber, its pale and grey flecks drawn by the floor's surface kind (KINDS)
     xs = breaks([], -IN_X, IN_X, 0.5)
     zs = breaks([-0.8, 0.0, 0.8], -IN_Z, IN_Z, 0.4)
@@ -1012,7 +1163,7 @@ def body() -> None:
                 m.poly([(c - hw, ya, za), (c + hw, ya, za), (c + hw, yb, zb), (c - hw, yb, zb)], (0, -0.6, -s), paint)
             yb = DOOR_H - 0.08
             zb = lining_at(yb) - 0.05
-            m.bar((c - DOOR_HW, yb, s * zb), (c + DOOR_HW, yb, s * zb), POLE_R, "pole", sides=10)
+            poles.tube([(c - DOOR_HW, yb, s * zb), (c + DOOR_HW, yb, s * zb)], POLE_R, "pole")
 
     def weather(p: Vector, n: Vector, c: tuple, slot: int) -> tuple:
         x, y, z = p.x, p.z, -p.y     # the game's frame
@@ -1034,6 +1185,8 @@ def body() -> None:
     m.finish(weather)
     panes.finish()
     screens.finish()
+    poles.finish()
+    sk.export(ads, "train_adverts", BUDGET["train_adverts"])
 
 
 # -------------------------------------------------------------------------------------------------------- the doors
@@ -1118,6 +1271,7 @@ def gangway() -> None:
     the gangway's folds lining the passage (pale grey inside, the black bellows showing in the gap outside), two hinged tread plates across its
     floor and a small lamp in its roof."""
     m = Model("train_gangway")
+    rails = Kept("train_gangway_rails")
     rows = breaks([], 0.0, TOP, 0.3)
     for f in (-1, 1):
         x = f * END
@@ -1143,12 +1297,8 @@ def gangway() -> None:
             for k in range(3):
                 y = 1.53 + k * 0.06
                 m.rect_x(s * 1.02, s * 1.28, y, y + 0.012, x + f * 0.006, f, "frame")
-            # the grab pole beside the portal, on its brackets
-            zp = s * (GANG_HW + 0.16)
-            m.bar((x + f * 0.05, 0.8, zp), (x + f * 0.05, 1.8, zp), POLE_R, "pole", sides=10)
-            for y in (0.8, 1.8):
-                m.bar((x, y, zp), (x + f * 0.05, y, zp), 0.012, "pole", sides=6)
-                disc(m, (x + f * 0.002, y, zp), 0.03, (f, 0, 0), "trim", 10)
+            # the grab handle beside the portal (train_gangway_rails)
+            grab_handle(rails, x, f, 0.8, 1.8, s * (GANG_HW + 0.16), 0.05, POLE_R)
         # the gap outside: the car ends' cut edges
         for s in (-1, 1):
             side_cap(m, x, -f, s, 0.09)
@@ -1218,6 +1368,7 @@ def gangway() -> None:
         return wt.mix(c, wt.scale(c, 0.65), CLEAN * (low + 0.15 * wt.fbm(p, 0.3, 37)))
 
     m.finish(weather)
+    rails.finish()
 
 
 class ClipAcross:
@@ -1250,9 +1401,10 @@ class Across:
         self.m.rect_x(u0, u1, y0, y1, d, s, paint)
 
 
-def end_wall(m: Model, door_open: bool = False) -> None:
+def end_wall(m: Model, rails: Model | None = None) -> None:
     """A car's blank end seen from inside (the wall at x = 0, facing -x): panels round a shut end door with a rounded
-    window, an equipment cupboard on one side and a network map's frame on the other, a vent grille along its head."""
+    window, an equipment cupboard on one side and a network map's frame on the other, a vent grille along its head; its
+    grab handles in `rails` (train_end_rails, drawn with every end that has this wall), none without."""
     hw = END_DOOR_HW
     a = ClipAcross(m, ring=inner_outline())
     cup = (0.75, 1.35, 0.35, 1.75)      # the cupboard (z0, z1, y0, y1), on the +z side
@@ -1287,19 +1439,16 @@ def end_wall(m: Model, door_open: bool = False) -> None:
                                                         (0.03, 0.006, "rubber")], "glass", r=0.07, seg=8)
     for y in (0.3, 1.0, 1.7):
         m.box((d - 0.02, y, -hw + 0.01), (d, y + 0.08, -hw + 0.04), "steel", skip="+x")
-    m.bar((d - 0.04, 0.95, hw - 0.08), (d - 0.04, 1.25, hw - 0.08), 0.014, "pole", sides=10)
-    for y in (0.95, 1.25):
-        m.bar((d, y, hw - 0.08), (d - 0.04, y, hw - 0.08), 0.01, "pole", sides=6)
+    if rails is not None:
+        grab_handle(rails, d, -1, 0.95, 1.25, hw - 0.08, 0.04, 0.014)
     m.rect_x(hw - 0.11, hw - 0.05, 1.05, 1.15, d - 0.001, -1, "steel")
     # the emergency lamp over the door: a lens in a grey box
     m.box((-0.05, 2.04, -0.16), (0.0, 2.14, 0.16), "trim", skip="+x")
     m.rect_x(-0.13, 0.13, 2.06, 2.12, -0.051, -1, "lamp")
-    # the grab rail up the wall beside the door
+    # the grab handles up the wall beside the door
     for z in (-hw - 0.16, hw + 0.16):
-        m.bar((-0.05, 0.85, z), (-0.05, 1.75, z), POLE_R, "pole", sides=10)
-        for y in (0.85, 1.75):
-            m.bar((0.0, y, z), (-0.05, y, z), 0.012, "pole", sides=6)
-            disc(m, (-0.002, y, z), 0.03, (-1, 0, 0), "trim", 10)
+        if rails is not None:
+            grab_handle(rails, 0.0, -1, 0.85, 1.75, z, 0.05, POLE_R)
     # the cupboard: a door in a frame, set back, a recessed catch and a yellow strip across it
     z0, z1, y0, y1 = cup
     for (za, zb, ya, yb) in ((z0, z1, y0, y0 + 0.03), (z0, z1, y1 - 0.03, y1), (z0, z0 + 0.03, y0, y1),
@@ -1334,7 +1483,9 @@ def end_piece(outer: bool) -> None:
     underframe and coupler over its bogie's space (under_end)."""
     name = "train_end_outer" if outer else "train_end"
     m = Model(name)
-    end_wall(m)
+    # the wall's grab handles are one model for every end with it (the blank, the outer and the cab's), built once
+    rails = None if outer else Kept("train_end_rails")
+    end_wall(m, rails)
     if not outer:
         for s in (-1, 1):
             # the side's last 15 cm, outside, on its curve: grey, rounding in to a dark seam at the very end (against
@@ -1421,10 +1572,7 @@ def end_piece(outer: bool) -> None:
             "stripe" if STRIPE[0] <= y <= STRIPE[1] else "body_lo"))
         framed(door, *win, xd, 1, [(0, 0, "body_lo"), (0.0, -0.004, "body_lo"), (0.03, 0.006, "rubber")], "glass",
                r=0.07, seg=8)
-        zh = dz - 0.09
-        m.bar((xd + 0.035, 0.95, zh), (xd + 0.035, 1.3, zh), 0.013, "pole", sides=8)
-        for y in (0.95, 1.3):
-            m.bar((xd, y, zh), (xd + 0.035, y, zh), 0.009, "pole", sides=6)
+        grab_handle(m, xd, 1, 0.95, 1.3, dz - 0.09, 0.035, 0.013)
         # the end's white LED lamps low either side, set into the end sheet (its box ends at the sheet): a chrome-lined
         # recess, a thin running-light strip over two round lamps on its dark back
         led = Glow("train_end_leds")
@@ -1443,6 +1591,8 @@ def end_piece(outer: bool) -> None:
                 led_cluster(led, (back + 0.002, 0.375, zc), 0.022, 0.009)
         under_end(m, x)
     m.finish(None if not outer else outside_weather)
+    if rails is not None:
+        rails.finish()
     if outer:
         led.finish()
 
@@ -1771,10 +1921,7 @@ def cab(open_door: bool) -> None:
             framed(a, z0 + 0.12, z1 - 0.12, 0.95, 1.8, d - 0.001, -1, [(0, 0, "inner_lo"), (0.0, -0.004, "inner_lo"),
                                                                        (0.03, 0.006, "rubber")], "glass", r=0.07,
                    seg=5)
-            zh = z0 + 0.07 if s > 0 else z1 - 0.07
-            m.bar((d - 0.04, 0.95, zh), (d - 0.04, 1.25, zh), 0.014, "pole", sides=10)
-            for y in (0.95, 1.25):
-                m.bar((d - 0.001, y, zh), (d - 0.04, y, zh), 0.01, "pole", sides=6)
+            grab_handle(m, d - 0.001, -1, 0.95, 1.25, z0 + 0.07 if s > 0 else z1 - 0.07, 0.04, 0.014)
             # the leaf's catch holding it back, on the wall above it
             m.box((-0.03, END_DOOR_H + 0.01, (z0 + z1) * 0.5 - 0.04), (-0.002, END_DOOR_H + 0.07, (z0 + z1) * 0.5 + 0.04),
                   "steel", skip="+x")

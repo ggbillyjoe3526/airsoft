@@ -4,15 +4,17 @@
 //   1 gloss paint (the cars' clean white sides), 2 satin steel (poles, rails, trims), 3 moquette (the seats' woven
 //   cover: rings and dots over its colour, as the owner's photos), 4 the floor's speckled rubber, 5 dark glass (the far
 //   side's windows, the cab's mask), 6 rubber (seals, bellows), 7 brushed aluminium (frames, thresholds), 8 satin
-//   (powder coat, moulded plastic: the station's cabinets, booths and gates, SQ1).
+//   (powder coat, moulded plastic: the station's cabinets, booths and gates, SQ1), 9 daylight (TQ2: the street seen up
+//   Subway's entrance stair, matt, glowing by its own colour in look_vertex.gdshader, daylight_glow).
 // The patterns lie in the model's own space (`own_at`, `own_n`: the same on every car) and fade to their average
 // where they'd be finer than a pixel, so they never shimmer far off.
 
 const float SURFACE_KIND_BASE = 100.0;
 // The rings' colours (linear): dark, mid and light greys and, now and then, the stripe's orange (train.py's "stripe",
-// #c0652f, the owner's colour; the trains' team-hue test exempts it), as the owner's photos' moquette.
+// #ea6a22, the owner's colour, a little more vivid from 2026-11-21; the trains' team-hue test exempts it), as the
+// owner's photos' moquette.
 const vec3 SURFACE_RING_COLOURS[5] = vec3[5](
-		vec3(0.025, 0.025, 0.028), vec3(0.13, 0.13, 0.14), vec3(0.3, 0.3, 0.3), vec3(0.527, 0.127, 0.028),
+		vec3(0.025, 0.025, 0.028), vec3(0.13, 0.13, 0.14), vec3(0.3, 0.3, 0.3), vec3(0.823, 0.144, 0.016),
 		vec3(0.06, 0.06, 0.065));
 // How far, as a share of the base, the moquette's and the floor's patterns lighten it on average (their far colour).
 const float SURFACE_RING_AVERAGE = 0.15;
@@ -119,5 +121,9 @@ void look_surface(float kind, vec3 at, vec3 n, inout vec3 col, inout float rough
 	} else if (k == 8) {
 		rough = 0.48;
 		spec = 0.5;
+	} else if (k == 9) {
+		rough = 0.9;
+		spec = 0.2;
+		worn = 0.0;
 	}
 }
