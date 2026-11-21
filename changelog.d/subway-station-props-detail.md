@@ -1,6 +1,6 @@
 ### Subway station props look more like the real thing
 - The ticket gates are brushed stainless up to a dark reader head, with the screen posts standing over the paddles.
-- The help point is a red map totem with recessed windows: a network map, a street map, a timetable and a help panel with speaker and buttons.
+- The help point is a crimson map totem with recessed windows: a network map, a street map, a timetable and a help panel with speaker and buttons.
 - The crowd barriers have bridge feet, interlock hooks and a cover sheet tied on.
 - The benches are perforated steel with arm rests.
 - The staff booths are cream with grey-framed glass and a deep roof edge.

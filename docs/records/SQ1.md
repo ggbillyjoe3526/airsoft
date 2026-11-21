@@ -1,13 +1,13 @@
 # SQ1 · Subway's station props in finer detail: gates, booths, benches, works wagons and tunnel parts (Beta)
 
-**Review:** pending
+**Review:** critic Accept 8/8 (attempt 2) · qa Pass (e3096df) · performance Pass (e3096df)
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-21 | 1 | build thread and four workers | touched tests 134/134, QA Pass, performance Pass | Retry 6/8 | fidelity to the photos (the gates' dark body, the booths grey with black panes, the skip's pale spoil and shallow tub, segments, help point and barrier unchanged at range), no changelog note, ASSETS rows missing |
-| 2026-11-21 | 2 | build thread and four workers | touched tests 166/166 | pending | – |
+| 2026-11-21 | 2 | build thread and four workers | touched tests 166/166, QA Pass, performance Pass | Accept 8/8 | – |
 
 ## Goal
 
@@ -38,7 +38,7 @@ model's bounds, collision and the layout, Subway's orange (#c0652f) and no team 
   half the eave's height and a 0.27 m roof fascia. The skip's spoil is shaded flat in about 5 cm facets of darker
   tones, its tub 1.6 times the undercarriage's height (smaller wheels, a lower frame). The tunnel segments are a
   1.34 m bore, so their arc reads at 10 m, with 6 to 8 cm deep bolt pockets. The help point is a red map totem
-  (crimson, the palette's red clear of Beta's orange) with recessed windows, a map, a street map, a timetable and the
+  (crimson, the house red: a true red is within 20 degrees of the high-contrast Beta orange) with recessed windows, a map, a street map, a timetable and the
   help panel. The barrier keeps its cover sheet (its block stops BBs and sight, so open bars would show gaps no shot
   goes through) but gains round corners, bridge feet, hooks and eyes, the sheet tied on with a hem.
 - **Pictures:** close-ups (2.3 m) in game and each model beside its photo in Blender, in the project files.
@@ -57,5 +57,7 @@ model's bounds, collision and the layout, Subway's orange (#c0652f) and no team 
 
 ## Left for the owner
 
+- The help point's crimson reads a dark maroon in game; a true red needs a prop colour exception (his call), and the
+  skip wagon keeps its stubby 2 x 2.7 m block (a longer, lower box would change the layout).
 - The look on his card and Low's frame time in the hall: N49 in the owner's checklist and docs/PLAYTEST.md's
   "Subway's station props up close".
