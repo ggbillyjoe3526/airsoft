@@ -32,6 +32,14 @@ static func _picture(level: MapLevel) -> PackedStringArray:
 		elif n is MeshInstance3D and (n as MeshInstance3D).mesh != null:
 			line += " " + _mesh((n as MeshInstance3D).mesh)
 		out.append(line)
+		# shapes a body holds through its own owners (a thicket's tiers, TV1), not as a node each
+		if n is CollisionObject3D:
+			var body := n as CollisionObject3D
+			for o in body.get_shape_owners():
+				if body.shape_owner_get_owner(o) == body:
+					for k in body.shape_owner_get_shape_count(o):
+						out.append("  owned %s %s" % [body.shape_owner_get_transform(o),
+								_shape(body.shape_owner_get_shape(o, k))])
 		todo.append_array(n.get_children())
 	return out
 

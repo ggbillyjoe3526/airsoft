@@ -243,7 +243,7 @@ func _add_meshes() -> void:
 
 ## Every block's collider, one body a surface, the bodies out of the tree until `_add_rest` (with sloping ground's
 ## shapes and the roof's too, so each joins the physics space whole). A round prop's block (RoundSteps) stands as its
-## stepped boxes.
+## stepped boxes, a tapering one's (TierSteps: a thicket) as its tiers.
 func _add_block_colliders() -> void:
 	for s in RayHit.Surface.size():
 		var sb := StaticBody3D.new()
@@ -258,8 +258,16 @@ func _add_block_colliders() -> void:
 	# A level built without a site look (the tests' and the match guards') steps by the built-in lay, which the
 	# shipped look keeps (test_round_steps), so its BBs meet what the game's do.
 	var props := _props if _props != null else PropDressConfig.new()
+	var tiered := TierSteps.tiered_blocks(map, _style, props)
 	for b in map.blocks:
 		RoundSteps.boxes(b, _style, props, middle, steps)
+		if steps.is_empty() and not tiered.is_empty():
+			TierSteps.boxes(b, _style, props, tiered, steps)
+			# A thicket's tiers (Woodland: about 4,000 boxes) go on its surface's body as shapes of their own, not as a
+			# node each (TV1's performance review: the scene's node count).
+			if not steps.is_empty():
+				_add_owned_boxes(_bodies[b.surface], steps)
+				continue
 		for box in steps:
 			var step := CollisionShape3D.new()
 			step.position = box.get_center()
@@ -285,6 +293,17 @@ func _add_block_colliders() -> void:
 			_own_body(_railing_bodies, b.surface, "Colliders_Railing_%s").add_child(shape)
 		else:
 			_bodies[b.surface].add_child(shape)
+
+
+## `boxes` as `body`'s shapes, each through a shape owner of its own placed at the box's middle (CollisionObject3D's
+## owners: no node a box), the body their owner.
+static func _add_owned_boxes(body: StaticBody3D, boxes: Array[AABB]) -> void:
+	for box in boxes:
+		var shape := BoxShape3D.new()
+		shape.size = box.size
+		var owner_id := body.create_shape_owner(body)
+		body.shape_owner_set_transform(owner_id, Transform3D(Basis.IDENTITY, box.get_center()))
+		body.shape_owner_add_shape(owner_id, shape)
 
 
 ## The rest, once the colliders are in: the indoor roof, the level's rays and query, the railings' mesh, the doors and
@@ -776,15 +795,7 @@ static func core_box(b: MapData.Block, inset: Vector2, cored: Array[MapData.Bloc
 
 ## Whether another of `cored` meets block `b`'s side on `axis` towards `side` (+1 or -1) anywhere along it.
 static func _touched(b: MapData.Block, axis: int, side: float, cored: Array[MapData.Block]) -> bool:
-	var lo := b.center - b.size * 0.5
-	var size := b.size
-	lo[axis] += b.size[axis] if side > 0.0 else -CORE_TOUCH
-	size[axis] = CORE_TOUCH
-	var slab := AABB(lo, size)
-	for o in cored:
-		if o != b and AABB(o.center - o.size * 0.5, o.size).intersects(slab):
-			return true
-	return false
+	return TierSteps.touched(b, axis, side, cored, CORE_TOUCH)
 
 
 ## The greybox's faces for the site's material: white, each vertex carrying its block's box and finish

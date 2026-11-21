@@ -279,7 +279,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			var ps := state.round_state.plant
 			lifts.bomb_rest(ps, Plant.carrier_of(ps, state.characters), state.lifts)
 		# Hit characters come back (RS1) before the round judges who is wiped out.
-		Respawns.step(state.round_state, state.characters, commands, ends, tuning, state.events, dt)
+		Respawns.step(state.round_state, state.characters, commands, ends, tuning, state.events, dt, query, _set_hit)
 		Round.step(state.round_state, state.characters, ends, state.bbs, tuning, state.events, dt)
 		# A new round: the last round's bombs and smoke are gone.
 		if state.events.first(GameEvent.Kind.ROUND_START) != null:

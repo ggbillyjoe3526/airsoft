@@ -112,17 +112,27 @@ static func finish(f: Finder, g: NavGrid, price: float) -> int:
 	var nodes := g.node_count()
 	var start := f.start
 	var to := f.to
+	var drop := PackedByteArray()
 	if not f.drop_from.is_empty():
-		_merge_drops(f, nodes)
+		drop = _merge_drops(f, nodes)
 		start = f.start
 		to = f.to
+	else:
+		drop.resize(to.size())
+		drop.fill(0)
 	g.vault_start = start
 	g.vault_to = to
+	g.vault_drop = drop
 	g.vault_base = nodes
 	for k in nodes:
 		for l in range(start[k], start[k + 1]):
 			_add_point(g, k, to[l], nodes + l, g.astar.get_point_weight_scale(k), price)
 			join(g.vault_region, g.region[k], g.region[to[l]])
+			if drop[l] == 1 and g.region[k] != g.region[to[l]]:
+				var down: PackedInt32Array = g.drop_regions.get(g.region[k], PackedInt32Array())
+				if not down.has(g.region[to[l]]):
+					down.append(g.region[to[l]])
+					g.drop_regions[g.region[k]] = down
 	for r: int in g.vault_region:
 		g.vault_region[r] = root(g.vault_region, r)
 	return to.size()
@@ -130,7 +140,8 @@ static func finish(f: Finder, g: NavGrid, price: float) -> int:
 
 ## Puts the drops `f` found among its links, by their start node (each node's own links first, then its drops in the
 ## order found), and forgets them: the grid's links are then one list by start node, as `is_vault_leg` reads them.
-static func _merge_drops(f: Finder, nodes: int) -> void:
+## Returns, by link, 1 for a drop (NavGrid.vault_drop).
+static func _merge_drops(f: Finder, nodes: int) -> PackedByteArray:
 	# The drops by start node: where each node's begin in `drops` (counted, summed, then filled in the order found).
 	var at := PackedInt32Array()
 	at.resize(nodes + 1)
@@ -149,6 +160,9 @@ static func _merge_drops(f: Finder, nodes: int) -> void:
 	start.resize(nodes + 1)
 	var to := PackedInt32Array()
 	to.resize(f.to.size() + drops.size())
+	var is_drop := PackedByteArray()
+	is_drop.resize(to.size())
+	is_drop.fill(0)
 	var n := 0
 	for k in nodes:
 		start[k] = n
@@ -157,12 +171,14 @@ static func _merge_drops(f: Finder, nodes: int) -> void:
 			n += 1
 		for l in range(at[k], at[k + 1]):
 			to[n] = drops[l]
+			is_drop[n] = 1
 			n += 1
 	start[nodes] = n
 	f.start = start
 	f.to = to
 	f.drop_from.clear()
 	f.drop_to.clear()
+	return is_drop
 
 
 ## The region `r` is joined to, lowest first, in `joins` (a union-find over the few regions vault and lift links

@@ -72,6 +72,12 @@ var astar: AStar3D = null
 var vault_start: PackedInt32Array = PackedInt32Array()
 var vault_to: PackedInt32Array = PackedInt32Array()
 var vault_base: int = -1
+## By link (as vault_to): 1 where it is a climb's drop back down, walked off the edge (NavVaults), so a walk-off may
+## take it (find_route's `drops`).
+var vault_drop: PackedByteArray = PackedByteArray()
+## By region: the regions a drop link (vault_drop) leads down to from it, one way (NavVaults.finish), so a walk-off that
+## no drop could take is refused before any search (find_route's `drops`).
+var drop_regions: Dictionary[int, PackedInt32Array] = {}
 ## Each node's region: the lowest node it is linked to on foot, either way, or -1 for a blocked node. Two nodes in
 ## different regions have no route on foot, so a search between them is refused before it starts (a whole-grid search
 ## that fails took 182 to 202 ms on Woodland).
@@ -271,24 +277,28 @@ func drop_on_line(a: Vector3, b: Vector3, wall_above: float = INF) -> bool:
 ## written into `out` as waypoints on their floors: the start excluded, ending exactly on the goal where it is walkable
 ## and in a straight line on foot from the leg before, else on the node nearest it. With `vaults` (a bot's route) it may
 ## go over a low obstacle by a vault link, a leg of its own from the node before it to the node past it (is_vault_leg),
-## or ride a lift, a leg from one landing's node to another's (lift_leg); without (a walk-off), only on foot. From inside
+## or ride a lift, a leg from one landing's node to another's (lift_leg); without (a walk-off), only on foot, and with
+## `drops` (a walk-off, TV1) down a climb's drop (vault_drop) where there is no way on foot alone and the drops lead
+## to its goal's region (drops_reach; else refused before any search). From inside
 ## a lift's car (no floor of the grid's) it starts at the landing of the stop the car is at, or heading for while it
 ## moves (`lifts`, the round's cars; without, the stop nearest `start`'s height), the first waypoint that landing's
 ## node. False, with `out` emptied, when there is no route.
 func find_route(start: Vector3, goal: Vector3, out: PackedVector3Array, vaults: bool = false,
-		lifts: LiftState = null) -> bool:
+		lifts: LiftState = null, drops: bool = false) -> bool:
 	var landing := car_landing(start, lifts)
 	var a := landing if landing >= 0 else nearest_walkable(start, snap)
 	var b := nearest_walkable(goal, snap)
 	if a < 0 or b < 0:
 		out.clear()
 		return false
-	if not linked(a, b, vaults):
+	# on foot down a drop: only where some link joins the two (one way, so the search says whether it goes)
+	var dropping := drops and not vaults and not linked(a, b) and drops_reach(region[a], region[b])
+	if not dropping and not linked(a, b, vaults):
 		out.clear()
 		return false
 	var off := not vaults and (not vault_to.is_empty() or not lift_to.is_empty())
 	if off:
-		_set_links(false)
+		_set_links(false, dropping)
 	if a != b:
 		searches += 1
 	var ids := PackedInt64Array([a]) if a == b else astar.get_id_path(a, b)
@@ -336,6 +346,23 @@ func car_of(p: Vector3) -> int:
 	return -1
 
 
+## Whether region `to` lies on foot and down drop links (drop_regions, one way) from region `from`: a breadth-first walk
+## over the few regions drops join (Subway's platforms and tracks), the found ones in a list of at most their count.
+func drops_reach(from: int, to: int) -> bool:
+	if drop_regions.is_empty():
+		return false
+	var seen := PackedInt32Array([from])
+	var i := 0
+	while i < seen.size():
+		for r: int in drop_regions.get(seen[i], PackedInt32Array()):
+			if r == to:
+				return true
+			if not seen.has(r):
+				seen.append(r)
+		i += 1
+	return false
+
+
 ## False if nodes `a` and `b` lie in regions no route joins (on foot, or with `vaults` by vault links too). True
 ## doesn't promise a route: a region may be joined only by a one-way step.
 func linked(a: int, b: int, vaults: bool = false) -> bool:
@@ -373,9 +400,9 @@ func lift_leg(a: Vector3, b: Vector3) -> int:
 
 
 ## Turns every vault and lift link in the search on or off.
-func _set_links(on: bool) -> void:
+func _set_links(on: bool, drops: bool = false) -> void:
 	for l in vault_to.size():
-		astar.set_point_disabled(vault_base + l, not on)
+		astar.set_point_disabled(vault_base + l, not (on or (drops and vault_drop[l] == 1)))
 	for l in lift_to.size():
 		astar.set_point_disabled(lift_base + l, not on)
 

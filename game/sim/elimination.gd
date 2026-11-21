@@ -61,7 +61,8 @@ static func _free_spot(victim: Character, characters: Array[Character], spots: A
 ## Plans the walk-off route of at most one victim a tick (the first still waiting, in character order); a victim calls
 ## its hit for HitConfig.call_time first, which covers the wait many times over. Returns whether a route was planned.
 ## With the map's nav grid the route goes round cover in straight legs to the spot (NavGrid.find_route, planned from
-## where the victim stands); without one, or with no route there (the spot off the grid or out of reach), it is one
+## where the victim stands), on foot or, where that has no way, down a climb's drop walked off its edge (TV1: Subway's
+## east end, its dead zone on the track below the platforms); without one, or with no route there (the spot off the grid or out of reach), it is one
 ## straight leg to the spot. A victim hit mid-vault is planned once it lands, from the far side (browser BP5); one in a
 ## lift's car once its doors stand open (`lifts`), from that stop's landing (NavGrid.car_landing). A plan allocates
 ## (the search's path, the route's waypoints), once an elimination.
@@ -71,7 +72,7 @@ static func plan_walk_off_routes(characters: Array[Character], nav: NavGrid = nu
 			continue
 		c.walk_off_route_pending = false
 		c.walk_off_leg = 0
-		if nav == null or not nav.find_route(c.position, c.dead_zone_target, c.walk_off_route, false, lifts):
+		if nav == null or not nav.find_route(c.position, c.dead_zone_target, c.walk_off_route, false, lifts, true):
 			c.walk_off_route.resize(1)
 			c.walk_off_route.set(0, c.dead_zone_target)
 		return true
@@ -152,6 +153,13 @@ static func step(c: Character, hits: HitConfig, dt: float, shut_in: bool = false
 		Character.Status.LEAVING:
 			if c.status_time >= hits.vanish_time:
 				_go_out(c, true)
+
+
+## `c`, walking off, leaves the field now: its figure fades for HitConfig.vanish_time, then it stands on its dead-zone
+## spot, out (step). Respawns: one whose wait is running out.
+static func leave(c: Character) -> void:
+	if c.status == Character.Status.WALKING_OFF:
+		_set_status(c, Character.Status.LEAVING)
 
 
 static func _set_status(c: Character, status: Character.Status) -> void:

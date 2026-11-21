@@ -158,6 +158,17 @@ const ROUND_TRUNK: Array[Vector2] = [Vector2(-1.0, -0.55), Vector2(1.0, 0.55), V
 	&"pine_old": PackedVector2Array(ROUND_TRUNK), &"oak": PackedVector2Array(ROUND_TRUNK),
 	&"birch": PackedVector2Array(ROUND_TRUNK),
 }
+## Prop models laid in a GRID that taper as they rise (TV1: Woodland's thicket spruces, cones of boughs): BBs, sight and
+## bodies meet a GRID block of one as tiers that hug its props as drawn (TierSteps), not as its square box, on each side
+## no other such block touches; the nav grid, the bots' cover, the bake and the minimap still take the box. Each tier
+## a pair (from: share of the box's height its tier starts at, the first 0; reach: share of a prop's drawn half-width
+## it reaches out to on that side). Measured on the model (tools/thicket_opacity.gd): the reach where a level line past
+## the spruce at that height first meets its boughs less than half the time, so the BBs and lines a thicket's box
+## stopped at a body seen past its spruces (about 30 %, the owner's playtest of 0.1 Beta 2, item 3) fly on.
+@export var tier_steps: Dictionary[StringName, PackedVector2Array] = {
+	&"spruce": PackedVector2Array([Vector2(0.0, 0.85), Vector2(0.25, 0.7), Vector2(0.33, 0.6), Vector2(0.42, 0.5),
+			Vector2(0.58, 0.35), Vector2(0.75, 0.15)]),
+}
 ## The ground beyond the field's walls (the palette's grass, SL1), out to `ground_extent` metres each way from the
 ## middle, just below the floor.
 @export var ground_colour: Color = Color8(0x5f, 0x8a, 0x3a)
