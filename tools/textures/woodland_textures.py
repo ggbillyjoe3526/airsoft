@@ -322,12 +322,12 @@ def pine_cell(seed: int, young: bool = False) -> Image.Image:
         return c.done()
     # the twig up the cell, forking into brushes that fan out and turn up at their tips
     base = (s * 0.5, s * 0.97)
-    hub = (s * 0.5 + rng.uniform(-15, 15), s * 0.74)
+    hub = (s * 0.5 + rng.uniform(-15, 15), s * 0.88)  # low: the brushes start at the card's foot, on their tuft
     c.line(base, hub, 10, (0.5, 0.4, 0.33))
     n = 7
     for k in range(n):
         a = -1.25 + 2.5 * k / (n - 1) + rng.uniform(-0.1, 0.1)
-        ln = s * rng.uniform(0.36, 0.5) * (1.0 - 0.25 * abs(a) / 1.25)
+        ln = s * rng.uniform(0.42, 0.56) * (1.0 - 0.25 * abs(a) / 1.25)
         needle_shoot(c, hub, a, ln, s * 0.08, 1.1, 1.1, -0.45 * a, rng.uniform(0.7, 0.95), forward=0.45, w=4.0)
         # a short side shoot off the brush's middle
         if rng.random() < 0.6:

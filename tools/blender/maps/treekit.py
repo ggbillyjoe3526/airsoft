@@ -151,6 +151,7 @@ class Tree:
         self.leafy: Leafy = None  # foliage on the leaf sheet (WQ1), else plain solid clumps
         self.bark_tile = 1.0      # m of bark a tile of its map spans (WQ1)
         self.card_floor = -1e9    # no leaf card hangs lower (m): over head height, as the crown (WQ1)
+        self.card_shift = 1.0     # how far fit_cards may move a card back in, a share of half its length (WQ1)
         self.card_faces: list = []  # the indices in `faces` of the leaf cards (WQ1), kept inside `reach`
         self.reach: list = []       # the box (lo, hi) of the clumps the cards stand on, at their full size (WQ1)
         self.alpha = 1.0      # every vertex colour's alpha: the skyline's mask (vertex_paint.BODY 0: the piece's paint)
@@ -471,8 +472,9 @@ class Tree:
 
     def fit_cards(self) -> None:
         """Keeps the leaf cards inside the box of their clumps at full size and of everything else, and under the
-        top of the rest (WQ1): a card past it is moved back in, or left out when that would move it more than half
-        its length, so the crown keeps its bounds (a tree's top meets its block's top, PropDressConfig Lay.TREE)."""
+        top of the rest (WQ1): a card past it is moved back in, or left out when that would move it more than
+        `card_shift` of half its length (so no card floats off its clump), and the crown keeps its bounds (a tree's top
+        meets its block's top, PropDressConfig Lay.TREE)."""
         if not self.card_faces:
             return
         cards = set(self.card_faces)
@@ -494,7 +496,7 @@ class Tree:
                     shift = None
                     break
                 shift[a] = max(lo[a] - low, 0.0) + min(hi[a] - high, 0.0)
-            if shift is None or shift.length > reach:
+            if shift is None or shift.length > reach * self.card_shift:
                 continue
             for i in f:
                 self.verts[i] = self.verts[i] + shift

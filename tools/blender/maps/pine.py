@@ -44,13 +44,15 @@ CLEAR_YOUNG = 3.5
 CLEAR_GROWN = 3.3
 CLEAR_OLD = 3.05
 NEEDLE_YOUNG = tk.mix(tk.srgb(P["canopy"]), tk.srgb(P["olive"]), 0.25)
-# The grown and old pines' needles on the leaf sheet (WQ1): sprays of long-needled shoots over each tuft.
-LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.7, card_max=1.6, per_m2=0.55, least=3,
-                 most=9, core=0.55, core_dark=0.5, tilt=(0.3, 0.75), under=0.8)
+# The grown and old pines' needles on the leaf sheet (WQ1): brushes of long-needled shoots standing out of each tuft
+# (tipped well out of its surface, so the crown's edge reads spiky), none moved far off its tuft (CARD_SHIFT).
+LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.6, per_m2=0.55, least=3,
+                 most=9, core=0.5, core_dark=0.3, tilt=(0.75, 1.2), under=0.8)
+CARD_SHIFT = 0.35
 
 # the old pine's bigger clouds take more sprays each
-LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.7, card_max=1.7, per_m2=0.6, least=3,
-                     most=13, core=0.55, core_dark=0.5, tilt=(0.3, 0.75), under=0.8)
+LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.7, per_m2=0.75, least=3,
+                     most=16, core=0.5, core_dark=0.3, tilt=(0.75, 1.2), under=0.8)
 
 
 def flake_from(upper_from: float):
@@ -146,6 +148,7 @@ def young() -> None:
 def grown() -> None:
     tree = tk.Tree("pine_grown", 2202)
     tree.leafy = LEAFY
+    tree.card_shift = CARD_SHIFT
     tree.bark_tile = 1.1
     tree.card_floor = CLEAR_GROWN + 0.02
     rng = tree.rng
@@ -172,7 +175,7 @@ def grown() -> None:
             a = spin + math.tau * k / n + rng.uniform(-0.3, 0.3)
             out = Vector((math.cos(a), 0.0, math.sin(a)))
             ln = reach * rng.uniform(0.7, 1.2)
-            bp = branch(tree, at, out, ln, ln * rng.uniform(0.05, 0.25), 0.06, 3, 1, BARK_UPPER, flake=1.0)
+            bp = branch(tree, at, out, ln, ln * rng.uniform(0.05, 0.25), 0.08, 3, 1, BARK_UPPER, flake=1.0)
             size = 1.0 + 1.1 * shape
             # the tip's tuft droops a little under the branch's end; the branch is clothed to the stem
             tree.tuft(bp[-1] - UP * 0.12 * size - out * 0.25, size, out, 2, NEEDLE_TOP, NEEDLE_UNDER, centre,
@@ -196,6 +199,7 @@ def grown() -> None:
 def old() -> None:
     tree = tk.Tree("pine_old", 3303)
     tree.leafy = LEAFY_OLD
+    tree.card_shift = CARD_SHIFT
     tree.bark_tile = 1.2
     tree.card_floor = CLEAR_OLD + 0.02
     rng = tree.rng

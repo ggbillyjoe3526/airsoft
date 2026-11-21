@@ -147,8 +147,8 @@ kept in the vertex colours (a detail texel of 0.5 draws the paint as it is):
   mip level. The crowns keep their bounds (cards past the clumps' box are moved back in), so cover, sight and LF1's leaf
   counts are unchanged.
 - **Bark is photo bark** (CC0 ambientCG) with its normal map, tiled round each limb: the pines' plates with the upper
-  bole's flaking orange bark blended over, the oak's ridges, the birch's own white with dark lenticels (made, not
-  fetched); the thicket spruces wear the pine's.
+  bole's flaking bark (golden tan, never orange) blended over, the oak's ridges, the birch's own white with dark
+  lenticels (made, not fetched); the thicket spruces wear the pine's.
 - **Timber, logs, earth, concrete and steel** (palisade, tower, bridge, shed, roofs, tunnels, culvert, tyres, logs,
   root plates, sawbench, earth bank, campfire, lanterns) take a layer of the surfaces array
   (`look_surface.gdshader`: planks, bark, end grain, concrete, steel, ground, moss), mapped along each face's longest

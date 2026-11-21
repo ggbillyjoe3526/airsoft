@@ -29,8 +29,9 @@ RADIUS = 0.75
 BUDGET = 500
 TIERS = 17
 
-TOP = tk.mix(tk.srgb(P["spruce"], 1.12), tk.srgb(P["sage"]), 0.18)
-UNDER = tk.srgb(P["forest"], 0.55)
+# WQ1: a mid green like the photos' sunlit spruces (was near black under the leaf sheet's detail)
+TOP = tk.mix(tk.srgb(P["spruce"], 1.3), tk.srgb(P["sage"]), 0.3)
+UNDER = tk.srgb(P["forest"], 0.7)
 STEM = tk.srgb(P["umber"], 0.7)
 
 

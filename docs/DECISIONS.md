@@ -264,6 +264,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   ferns and bushes stand alpha-cut leaf cards from one leaf sheet over smaller dark cores, and the limbs and the
   structures take CC0 photo detail (ambientCG) over their palette paint, which replaces the Dev 3 trees' "solid leaf
   clumps, no leaf cards". Every model keeps its bounds, budget and collider, and the bushes keep LF1's measured cover.
+  So the trees' shapes stay WT1's, measured against the photos only where gameplay allows (default, WQ1): the pines'
+  crowns start 2.6 m up (WoodsConfig.crown_clear, over a standing player) and fill their blocks' boxes, so their bare
+  boles are longer and crowns shorter than the photos'; their upper bark stays golden tan, not the photos' orange (no
+  orange outside a team's, ART.md › Team colours); the thicket spruces stay closed cones with no sky between tiers
+  (a thicket stops sight, TV1 and LF1).
 - **Live ray tracing is not planned (owner, 2026-11-09).** Ultra gets baked path-traced light first ("Baked path
   tracing first"), then he dropped live ray tracing ("Never mind the live raytracing").
 - **Ultra keeps its live bounce light; no baked path-traced light (owner, 2026-11-10, PT1).** A path-traced lamp
