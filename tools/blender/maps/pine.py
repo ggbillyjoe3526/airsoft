@@ -39,6 +39,7 @@ STUB = tk.srgb(P["stone"], 0.85)
 TWIG = tk.srgb(P["bark"], 0.55)  # the crown's twigs out to its lesser clumps: dark, so they read as wood in shade
 # the crown's limbs: darker than the bole's golden tan (WQ1), which shows only on the bole under the crown
 LIMB = tk.mix(BARK_UPPER, tk.srgb(P["bark"], 0.65), 0.6)
+LIMB_YOUNG = tk.mix(BARK_YOUNG, tk.srgb(P["bark"], 0.6), 0.6)
 NEEDLE_TOP = tk.mix(tk.srgb(P["pine"], 0.86), tk.srgb(P["canopy"], 0.86), 0.35)  # WQ1: the photos' dark needles
 NEEDLE_UNDER = tk.srgb(P["forest"], 0.72)
 # How high (m, in the model) anything but the stem may come down: 2.6 m over the ground (WoodsConfig.crown_clear, over
@@ -52,13 +53,13 @@ NEEDLE_YOUNG = tk.mix(tk.srgb(P["canopy"]), tk.srgb(P["olive"]), 0.25)
 # NO_CORE), none moved off its tuft (CARD_SHIFT).
 PER_M2 = 1.1
 NO_CORE = 1e9
-LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.6, per_m2=PER_M2 * 1.08, least=6,
+LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.4, card_min=0.8, card_max=2.1, per_m2=PER_M2 * 1.08, least=6,
                  most=18, core_min=NO_CORE, tilt=(0.45, 0.9), under=0.8)
 CARD_SHIFT = 0.1
 CARD_REACH = 1.15  # no card's middle more than this many of its clump's radii from it
 
 # the old pine's bigger clouds take more sprays each
-LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.7, per_m2=PER_M2,
+LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.4, card_min=0.8, card_max=2.2, per_m2=PER_M2,
                      least=6, most=30, core_min=NO_CORE, tilt=(0.45, 0.9), under=0.8)
 
 
@@ -116,8 +117,8 @@ def branch(tree: tk.Tree, start: Vector, out: Vector, length: float, rise: float
 
 def young() -> None:
     tree = tk.Tree("pine_young", 1101)
-    tree.leafy = tk.Leafy(["pine_young"], "needle_mass", card=1.5, card_min=0.45, card_max=0.9, per_m2=3.0, least=8,
-                          most=12, core=0.6, tilt=(0.1, 0.4), core_min=0.5)
+    tree.leafy = tk.Leafy(["pine_young"], "needle_mass", card=1.5, card_min=0.6, card_max=1.1, per_m2=3.8, least=10,
+                          most=16, core=0.6, tilt=(0.1, 0.4), core_min=0.5)
     tree.bark_tile = 0.8
     tree.card_floor = CLEAR_YOUNG + 0.02
     rng = tree.rng
@@ -140,7 +141,7 @@ def young() -> None:
             a = spin + math.tau * k / n + rng.uniform(-0.3, 0.3)
             out = Vector((math.cos(a), 0.0, math.sin(a)))
             ln = reach * rng.uniform(0.85, 1.1)
-            bp = branch(tree, at, out, ln, ln * (0.3 if w < 2 else 0.8), 0.03, 3, 1, BARK_YOUNG)
+            bp = branch(tree, at, out, ln, ln * (0.3 if w < 2 else 0.8), 0.03, 3, 1, LIMB_YOUNG)
             size = 0.4 + 0.2 * (1.0 - t)
             # a narrow upright tuft of long needles at the branch's end (two on the lower whorls' longer branches)
             tree.tuft(bp[-1] + UP * size * (0.15 if w < 2 else 0.4), size, out, 2 if low else 1, NEEDLE_YOUNG,
@@ -161,7 +162,11 @@ def grown() -> None:
     tree.card_floor = CLEAR_GROWN + 0.02
     rng = tree.rng
     height, foot_r = 15.0, 0.33
-    bark = bark_of(0.42, BARK_UPPER, BARK_FOOT, BARK_FURROW, rng)
+    bole = bark_of(0.42, BARK_UPPER, BARK_FOOT, BARK_FURROW, rng)
+
+    def bark(t: float, a: float) -> tuple:
+        # the leader darkens up through the crown (in its shade), so no pale pole shows through it (WQ1)
+        return tk.mix(bole(t, a), LIMB, max(0.0, min(1.0, (t - 0.55) / 0.2)))
     path = stem(tree, height, foot_r, 0.03, 12, 8, Vector((0.09, 0.0, 0.05)), bark, 0.04, flake_from(0.42))
     # dead stubs on the cleared lower stem, over head height
     for y in (CLEAR_GROWN + 0.15, 3.8):

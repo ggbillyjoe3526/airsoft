@@ -305,31 +305,53 @@ def needle_shoot(cell: Cell, base: tuple, ang: float, length: float, needle: flo
     cell.poly([(x - 5, y + 4), (x, y - 14), (x + 5, y + 4)], (1.25, 1.15, 0.85))
 
 
+def fascicle_brush(cell: Cell, base: tuple, ang: float, length: float, needle: float, curl: float,
+                   shade: float) -> None:
+    """A pine brush as bunches (fascicles) of long needles splayed from points along a twig, each bunch a spiky
+    star of 10 to 16 needles: its outline coarse spikes (a needle long), so it stays a spiky tuft mipped far off."""
+    rng = cell.rng
+    path = bend(base, ang, length, curl, 8)
+    for a, b in zip(path, path[1:]):
+        cell.line(a, b, 7.0, (0.42, 0.34, 0.29))
+    bunches = []
+    for i in range(10):
+        t = 0.2 + 0.8 * i / 9
+        k = t * (len(path) - 1)
+        j = min(int(k), len(path) - 2)
+        f = k - j
+        p = (path[j][0] + (path[j + 1][0] - path[j][0]) * f, path[j][1] + (path[j + 1][1] - path[j][1]) * f)
+        heading = ang + curl * t
+        for _n in range(rng.randint(10, 16)):
+            a = heading + rng.uniform(-1.5, 1.5) * (1.0 - 0.4 * t)
+            ln = needle * rng.uniform(0.5, 1.2) * (0.7 + 0.3 * t)
+            depth = rng.random()
+            col = vary(rng, shade * (0.6 + 0.5 * depth + 0.15 * t), 0.08, 0.25 if t > 0.85 else 0.08)
+            bunches.append((depth, p, (p[0] + math.sin(a) * ln, p[1] - math.cos(a) * ln), col))
+    for _d, p, tip, col in sorted(bunches, key=lambda q: q[0]):
+        cell.line(p, tip, 5.0, col)
+
+
 def pine_cell(seed: int, young: bool = False) -> Image.Image:
-    """A Scots pine's branch end (owner's photos, 01-pine-tree): a bare shoot with two or three long, narrow
-    bottlebrushes off it at different heights, turning up and crossing, their needles hair-thin and their ends ragged,
-    so the spray reads as bristly needle brushes near and as a ragged tuft (never a hand or a leaf) once mipped far
-    off. A young pine's: the same, slenderer, two brushes off the leader (its whorls swept up)."""
+    """A Scots pine's branch end (owner's photos, 01-pine-tree): a bare shoot with brushes of needle bunches off it
+    at different heights, pointing up and out and overlapping into one ragged mass, so a crown of them reads as dark
+    spiky clumps (never a hand or a leaf) at play distance. A young pine's: fewer, slenderer brushes."""
     c = Cell(seed)
     s = c.s
     rng = c.rng
-    # a shoot up the cell with two or three brushes off it at different heights, of unequal length, curving up and
-    # crossing (never fanned from one point: that reads as a hand once mipped), their needle ends ragged
+    # a shoot up the cell with brushes off it at different heights (never fanned from one point), pointing up and out
+    # and overlapping into one ragged mass; each brush bunched into fascicles of long, splayed needles, so its outline
+    # is coarse spikes that survive three mip levels (a pine's clump far off), never a smooth leaf
     base = (s * 0.5 + rng.uniform(-20, 20), s * 0.97)
-    lean = rng.uniform(-0.25, 0.25)
-    main = bend(base, lean, s * 0.25, -lean * 0.5, 4)
-    c.line(base, main[-1], 8, (0.5, 0.4, 0.33))
-    slender = 0.85 if young else 1.0
-    # the leading brush on up the shoot
-    needle_shoot(c, main[-1], lean * 0.5, s * rng.uniform(0.55, 0.65), s * 0.085 * slender, 1.2, 1.2, -lean * 0.4,
-                 rng.uniform(0.68, 0.88), forward=0.35, w=1.8, ragged=1.0)
-    # side brushes out of the shoot low down, each its own way, sweeping up across the leader
-    sides = [-1.0, 1.0] + ([rng.choice((-1.0, 1.0))] if not young and rng.random() < 0.7 else [])
-    for n, side in enumerate(sides):
-        at = main[min(len(main) - 1, 1 + n)]
-        a = side * rng.uniform(0.75, 1.05)
-        needle_shoot(c, at, a, s * rng.uniform(0.38, 0.52) * slender, s * 0.08 * slender, 1.2, 1.2,
-                     -a * rng.uniform(0.7, 1.0), rng.uniform(0.62, 0.85), forward=0.35, w=1.8, ragged=1.0)
+    lean = rng.uniform(-0.2, 0.2)
+    main = bend(base, lean, s * 0.3, -lean * 0.5, 6)
+    c.line(base, main[-1], 8, (0.42, 0.34, 0.29))
+    slender = 0.8 if young else 1.0
+    count = 4 if young else 6
+    for n in range(count):
+        at = main[min(len(main) - 1, 2 + n * (len(main) - 3) // max(1, count - 1))]
+        a = (-0.95 + 1.9 * n / (count - 1)) * rng.uniform(0.85, 1.1) if count > 1 else 0.0
+        ln = s * rng.uniform(0.4, 0.55) * slender * (1.0 - 0.25 * abs(a))
+        fascicle_brush(c, at, a, ln, s * 0.12 * slender, -a * 0.6, rng.uniform(0.6, 0.82))
     return c.done()
 
 
