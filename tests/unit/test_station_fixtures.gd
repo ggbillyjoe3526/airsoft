@@ -360,13 +360,14 @@ func _on_rods(m: MapData, p: Vector3) -> bool:
 	return rods >= 2
 
 
-## The trains' stripe orange (#d8692a, a little more vivid from 2026-11-21) and the station's name signs in it (owner,
-## 2026-11-12): let off the team-hue rule at his word, as in test_trains.gd; within 0.03 of its hue and no more
-## saturated (its blends with the signs' cream words are paler, never stronger; Beta's orange is).
+## The trains' stripe orange (#ea6a22, a little more vivid from 2026-11-21) and the station's name signs in it (owner,
+## 2026-11-12): let off the team-hue rule at his word, as in test_trains.gd; within 0.03 of its hue, no more
+## saturated and no brighter (its blends with the signs' cream words are paler, never stronger; Beta's orange is
+## brighter, its v 0.98 to the stripe's 0.92).
 func _stripe(c: Color) -> bool:
-	var stripe := Color("#d8692a")
+	var stripe := Color("#ea6a22")
 	var dh := absf(c.h - stripe.h)
-	return minf(dh, 1.0 - dh) <= 0.03 and c.s <= stripe.s + 0.02
+	return minf(dh, 1.0 - dh) <= 0.03 and c.s <= stripe.s + 0.02 and c.v <= stripe.v + 0.03
 
 
 func test_no_colour_reads_as_a_team() -> void:

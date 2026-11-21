@@ -290,11 +290,11 @@ func test_no_train_colour_reads_as_a_team() -> void:
 	assert_eq(near, [] as Array[String], "worn grey and the orange stripe: no other colour near a team's hue")
 
 
-## Whether `c` (sRGB, as baked and worn) is the orange stripe's (train.py COLOURS "stripe", #d8692a, the owner's asks,
+## Whether `c` (sRGB, as baked and worn) is the orange stripe's (train.py COLOURS "stripe", #ea6a22, the owner's asks,
 ## 2026-11-12 and, a little more vivid, 2026-11-21), its grime darkening it but keeping its hue: the one colour let near
 ## Beta's.
 func _stripe(c: Color) -> bool:
-	var own := Color("d8692a")
+	var own := Color("ea6a22")
 	return absf(c.h - own.h) < 0.03 and c.v <= own.v + 0.02
 
 

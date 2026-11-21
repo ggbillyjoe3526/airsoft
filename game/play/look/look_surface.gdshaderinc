@@ -11,10 +11,10 @@
 
 const float SURFACE_KIND_BASE = 100.0;
 // The rings' colours (linear): dark, mid and light greys and, now and then, the stripe's orange (train.py's "stripe",
-// #d8692a, the owner's colour, a little more vivid from 2026-11-21; the trains' team-hue test exempts it), as the
+// #ea6a22, the owner's colour, a little more vivid from 2026-11-21; the trains' team-hue test exempts it), as the
 // owner's photos' moquette.
 const vec3 SURFACE_RING_COLOURS[5] = vec3[5](
-		vec3(0.025, 0.025, 0.028), vec3(0.13, 0.13, 0.14), vec3(0.3, 0.3, 0.3), vec3(0.687, 0.141, 0.023),
+		vec3(0.025, 0.025, 0.028), vec3(0.13, 0.13, 0.14), vec3(0.3, 0.3, 0.3), vec3(0.823, 0.144, 0.016),
 		vec3(0.06, 0.06, 0.065));
 // How far, as a share of the base, the moquette's and the floor's patterns lighten it on average (their far colour).
 const float SURFACE_RING_AVERAGE = 0.15;

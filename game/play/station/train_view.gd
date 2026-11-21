@@ -54,6 +54,9 @@ static func build(map: MapData, look: TrainLook, roof: RoofConfig = null) -> Tra
 		view._boxes.append(t.box)
 	view._material = LookMaterials.vertex_colour(look.roughness, 0.0, Color.WHITE, false, look.wear)
 	view._material.set_shader_parameter(&"paint_by_custom", true)
+	# the orange poles and stripe (vertex alpha 1, train.py FULL_COLOUR) keep their whole colour against the look's pull
+	# toward grey, which drew them rust brown (TQ2); every other paint (alpha 0) takes the look's share
+	view._material.set_shader_parameter(&"keep_by_alpha", true)
 	view._lamps = _glow(look.lamp_colour * look.lamp_energy)
 	view._leds = _glow(look.led_colour * look.led_energy)
 	view._glass = LookMaterials.clear_colour(look.glass_roughness)
