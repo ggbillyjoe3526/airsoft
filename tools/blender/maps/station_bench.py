@@ -26,7 +26,7 @@ import surface_kinds as kinds  # noqa: E402
 
 H, D = 0.8, 0.6
 SHEET = "grey*0.66"         # the photos' grey steel
-HOLES = "slab*0.18"
+HOLES = "slab*0.31"  # not darker: near-black tints round to a team hue on import (test_props)
 FRAME = "slab*0.3"
 ARM = "yellow*0.92"
 CAP = "concrete*0.85"

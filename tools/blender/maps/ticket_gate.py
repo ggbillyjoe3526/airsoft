@@ -58,8 +58,8 @@ HEAD = "slab*0.6"
 POST_PAINT = "slab*0.46"
 SMOKED = "ink*0.4"
 FROSTED = "cream*0.78"
-LCD = "ink*0.3"
-SEAM = "slab*0.2"
+LCD = "slab*0.3"  # near-black kept above ~4/255 linear: darker tints round to a team hue on import
+SEAM = "slab*0.31"
 SCREW = "concrete*0.6"
 LABEL_BLUE = "ink*1.15"
 prop.KINDS.update({POLISHED: kinds.STEEL, SKIRT_STEEL: kinds.STEEL, TRIM: kinds.STEEL, SCREW: kinds.STEEL,
