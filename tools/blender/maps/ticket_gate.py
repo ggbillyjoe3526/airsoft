@@ -2,14 +2,15 @@
 (art/references/maps/subway/19-ticket-gates/) and his note (0.6 m wide, 1 m tall, 1 to 1.5 m long; lanes one person
 wide). Each block between two lanes is one slim pedestal, as long as a lane, as photos 2 to 7 show it: a polished
 stainless skirt on a shadowed kick, two access doors in each side (dark seams, a key lock, screw heads), a bright
-stainless trim lip, and over it the dark moulded body with a smoked glass sensor band and frosted sensor windows down
-each side; a dark top cap with a polished stainless rail along it. At its street end a round polished stainless
-column with a foot and a head collar carries the angled dark reader head (a bezelled yellow reader pad on its slope,
+stainless trim lip, and over it the brushed stainless body with small smoked sensor windows down each side; a
+stainless top cap with a polished rail along it (SQ1 attempt 2: stainless right up to the reader, as photos 2 to
+4). At its street end a round polished stainless column with a foot and a head collar carries the angled dark reader
+head (a bezelled yellow reader pad on its slope,
 a small blue label and a lit dot, the ticket slot under its brow); behind the head a slim dark screen post, its lit
 screen and lime strip facing each way (a green arrow in, a red cross out), a frosted window and a blue label on it.
 At each side's middle stands the housing the paddle's arm swings from, its slot facing the lane. The ends are
-rounded. SQ1 made the materials read as the photos': stainless (kind steel) on the column, skirt, lip and rail,
-satin moulded plastic on the body, head and posts, glass on the screens and windows.
+rounded. SQ1 made the materials read as the photos': stainless (kind steel) on the column, skirt, lip, body, cap and
+rail, satin moulded plastic on the reader head and the screen post only, glass on the screens and windows.
 
 The paddles are a model of their own (`gate_paddle`), swung by the game (GatePaddles), shut across the lane until
 someone walks up to it: a rounded dark blade, bevelled, on a short neck from the slot, a stainless hub at its root
@@ -40,7 +41,7 @@ COL_R = 0.075        # the street end's slim round column (photos 3 and 4: about
 COL_Y = 0.6          # its middle, at the body's street end
 COL_TOP = 0.8        # floor to the reader head, which sits on it (about 0.73 of the paddle's top, photo 4)
 KICK = 0.03          # the shadowed kick under the skirt
-SKIRT = 0.40         # the stainless skirt's top: the trim lip over it, the dark body above
+SKIRT = 0.40         # the stainless skirt's top: the trim lip over it, the brushed body above
 LIP = 0.014          # the trim lip's height
 TOP = 0.79           # the body's top: the cap and its rail over it, the screen post standing over them
 CAP = 0.81
@@ -48,12 +49,13 @@ POST_Y = 0.36        # the screen post, just behind the reader head
 HEAD_W = 0.095       # the reader head's half-width, a little over the column's
 END_R = 0.1          # the body's rounded ends (plan)
 # The paints (prop.PALETTE names, shades kept apart so each carries its own kind): polished and brushed stainless,
-# the moulded dark body and head (satin), the smoked glass, frosted windows and screens (glass).
+# the brushed body and cap (steel), the moulded dark head and post (satin), the smoked glass, frosted windows and
+# screens (glass).
 POLISHED = "concrete*0.98"
 SKIRT_STEEL = "concrete*0.84"
 TRIM = "concrete*0.94"
-BODY = "slab*0.5"
-CAP_PAINT = "slab*0.42"
+BODY = "concrete*0.88"
+CAP_PAINT = "concrete*0.8"
 HEAD = "slab*0.6"
 POST_PAINT = "slab*0.46"
 SMOKED = "ink*0.4"
@@ -63,9 +65,9 @@ SEAM = "slab*0.31"
 SCREW = "concrete*0.6"
 LABEL_BLUE = "ink*1.15"
 prop.KINDS.update({POLISHED: kinds.STEEL, SKIRT_STEEL: kinds.STEEL, TRIM: kinds.STEEL, SCREW: kinds.STEEL,
-                   BODY: kinds.SATIN, CAP_PAINT: kinds.SATIN, HEAD: kinds.SATIN, POST_PAINT: kinds.SATIN,
+                   BODY: kinds.STEEL, CAP_PAINT: kinds.STEEL, HEAD: kinds.SATIN, POST_PAINT: kinds.SATIN,
                    SMOKED: kinds.GLASS, FROSTED: kinds.GLASS, LCD: kinds.GLASS, LABEL_BLUE: kinds.GLOSS})
-# The paddle (photos 1 to 4): a tall rounded blade, its top a little over the screen posts, on a short arm that
+# The paddle (photos 1 to 4): a tall rounded blade, its top under the screen posts' heads, on a short arm that
 # swings from a slot in the pedestal's side. Its arm's root is its origin (Godot's up the blade's up), the blade
 # reaching PADDLE_REACH m along +X from it, 28 mm thick across Y; GatePaddles stretches it along X to half its lane.
 PADDLE = "slab*0.78"
@@ -74,10 +76,10 @@ PADDLE_HUB = "concrete*0.9"
 prop.KINDS.update({PADDLE: kinds.SATIN, PADDLE_EDGE: kinds.RUBBER, PADDLE_HUB: kinds.STEEL})
 PADDLE_REACH = 0.46
 BLADE_X0 = 0.12      # the blade's near edge: the arm runs from the slot to here
-BLADE_Z0, BLADE_Z1 = 0.53, 1.08   # photo 4: the blade's foot about half its top's height, its top a little over
-                                  # the screen post's
+BLADE_Z0, BLADE_Z1 = 0.47, 0.95   # photo 4: the blade's foot about half its top's height, its top under the
+                                  # screen post's head (H 1.0; GatePaddles stretches only X, so the height is free)
 BLADE_R = 0.11
-ARM_Z = (0.66, 0.78)  # the arm's root in the slot; it widens as it grows into the blade
+ARM_Z = (0.63, 0.75)  # the arm's root in the slot; it widens as it grows into the blade
 
 
 def plan(y0: float, y1: float, hw: float, r: float, seg: int = 6) -> list:
@@ -95,8 +97,8 @@ def column(p: prop.Prop) -> None:
 
 
 def body(p: prop.Prop) -> None:
-    """The body from the column to the platform end: the shadowed kick, the polished skirt, the trim lip, the dark
-    moulded body, its cap and the stainless rail along the top."""
+    """The body from the column to the platform end: the shadowed kick, the polished skirt, the trim lip, the
+    brushed body, its cap and the polished rail along the top."""
     p.prism(plan(-BL + 0.016, COL_Y, BW - 0.014, END_R - 0.014, 3), "z", 0.0, KICK, SEAM)
     p.piece(0.005, 2).prism(plan(-BL + 0.004, COL_Y, BW, END_R), "z", KICK, SKIRT, SKIRT_STEEL)
     p.piece(0.004, 1).prism(plan(-BL - 0.0008, COL_Y + 0.004, BW + 0.0048, END_R + 0.005), "z", SKIRT,
@@ -105,7 +107,7 @@ def body(p: prop.Prop) -> None:
     p.piece(0.007, 2).prism(plan(-BL + 0.006, COL_Y - 0.004, BW - 0.002, END_R - 0.002), "z", TOP, CAP, CAP_PAINT)
     # the polished rail along the cap's top (photo 2), rounded at both ends, stopping short of the screen post
     p.piece(0.008, 2).prism(plan(-BL + 0.05, POST_Y - 0.05, 0.05, 0.05, 5), "z", CAP, CAP + 0.022, POLISHED)
-    # the body's platform end: a vertical seam, a frosted sensor window and a key lock on the dark moulding
+    # the body's platform end: a vertical seam, a frosted sensor window and a key lock on the stainless
     e = -BL + 0.01 - 0.0008
     sk.rect(p, "-y", e, -0.002, 0.002, SKIRT + LIP + 0.02, TOP - 0.02, SEAM)
     sk.rect(p, "-y", e, -0.09, -0.03, 0.62, 0.7, FROSTED)
@@ -133,8 +135,8 @@ def door(p: prop.Prop, face: str, at: float, u0: float, u1: float, v0: float, v1
 
 
 def side(p: prop.Prop, s: float) -> None:
-    """The body's side at +X (s 1) or -X (s -1): two access doors in the skirt, the smoked glass sensor band and
-    frosted windows on the dark body, the paddle's slot housing at its middle."""
+    """The body's side at +X (s 1) or -X (s -1): two access doors in the skirt, a small smoked sensor window
+    each side of the housing on the stainless body (photo 2), the paddle's slot housing at its middle."""
     face = "+x" if s > 0 else "-x"
     sk_at = s * (BW + 0.0008)
     # u runs +y on "+x", -y on "-x"
@@ -142,17 +144,16 @@ def side(p: prop.Prop, s: float) -> None:
         u0, u1 = sorted((s * y0, s * y1))
         door(p, face, sk_at, u0, u1, KICK + 0.035, SKIRT - 0.035)
     at = s * (BW - 0.006 + 0.0008)
-    # the smoked glass band either side of the housing, a frosted sensor window in each, a dark frame round it
-    for y0, y1 in ((-0.56, -0.1), (0.1, 0.5)):
-        u0, u1 = sorted((s * y0, s * y1))
-        sk.rect(p, face, at, u0, u1, 0.47, 0.6, SEAM)
-        sk.rect(p, face, at + s * 0.0008, u0 + 0.008, u1 - 0.008, 0.478, 0.592, SMOKED)
-        cu = (u0 + u1) / 2
-        sk.rect(p, face, at + s * 0.0016, cu - 0.03, cu + 0.03, 0.5, 0.57, FROSTED)
+    # a small smoked sensor window either side of the housing in a dark frame, a frosted lens in each (photo 2)
+    for y in (-0.3, 0.3):
+        cu = s * y
+        sk.rect(p, face, at, cu - 0.045, cu + 0.045, 0.56, 0.65, SEAM)
+        sk.rect(p, face, at + s * 0.0008, cu - 0.038, cu + 0.038, 0.567, 0.643, SMOKED)
+        sk.rect(p, face, at + s * 0.0016, cu - 0.014, cu + 0.014, 0.59, 0.62, FROSTED)
     # a screw head pair under the cap, as the moulding is held
     for y in (-0.45, 0.35):
         sk.disc(p, face, at, s * y, TOP - 0.035, 0.006, SCREW, 6)
-    # the housing the paddle's arm swings from: a dark rounded upright standing out of the body, its slot facing
+    # the housing the paddle's arm swings from: a brushed rounded upright standing out of the body, its slot facing
     # the lane, a polished cover plate round the slot
     ha, hb = sorted((s * (BW - 0.01), s * (W / 2 - 0.002)))
     house = [(y, z) for y, z in hs.rounded_rect(0.055, (TOP + 0.004 - (ARM_Z[0] - 0.12)) / 2, 0.02, 3)]
@@ -250,13 +251,13 @@ def build() -> prop.Prop:
 
 def paddle() -> prop.Prop:
     """One paddle door (photos 1 to 4): a short arm from the pedestal's slot growing into the tall blade, rounded top
-    and bottom, bevelled all round, its top a little over the screen posts; a stainless hub plate each face at its
+    and bottom, bevelled all round, its top under the screen posts' heads; a stainless hub plate each face at its
     root and a rubber edge where it meets its pair. One outline, so the arm is the blade's own neck."""
     p = prop.Prop("gate_paddle")
     outline = hs.fillet([(BLADE_X0, BLADE_Z0, BLADE_R), (PADDLE_REACH, BLADE_Z0, BLADE_R),
                          (PADDLE_REACH, BLADE_Z1, BLADE_R), (BLADE_X0, BLADE_Z1, BLADE_R),
                          (BLADE_X0, ARM_Z[1] + 0.04, 0.03), (0.0, ARM_Z[1], 0.02), (0.0, ARM_Z[0], 0.02),
-                         (BLADE_X0, ARM_Z[0] - 0.02, 0.03)], 7)
+                         (BLADE_X0, ARM_Z[0] - 0.02, 0.03)], 8)
     p.piece(0.005, 1).prism(outline, "y", -0.014, 0.014, PADDLE)
     hub = hs.rounded_rect(0.05, 0.05, 0.016, 3)
     zc = (ARM_Z[0] + ARM_Z[1]) / 2

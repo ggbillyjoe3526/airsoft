@@ -1,15 +1,18 @@
 """Subway's platform staff booths (SM4, model 27): a small prefabricated booth like the owner's photos
-(art/references/maps/subway/27-staff-booth, the car-park attendant's booths): off-white sandwich panels between
+(art/references/maps/subway/27-staff-booth, the car-park attendant's booths): cream sandwich panels between
 aluminium corner posts on a dark steel base, a flat roof overhanging all round (an aluminium capping, a painted fascia
 and a drip bead under it, a grey membrane on top), glazed in its upper half on the front and sides, a half-glazed door
 at one side of the front, a lamp over the door, a through-wall air conditioner on one side (photo 3), a vent high on
-the solid back. Abandoned: roller blinds part down behind grimy glass (the booth is solid cover, so nothing is seen
-inside), dust and grime up from the platform, streaks down from the roof.
+the solid back. Disused: pale roller blinds part down behind clear grey glass with the booth's shaded inside low in
+it (the booth is solid cover, so the glass is painted, not see-through), light dust and grime, faint streaks.
+
+SQ1 attempt 2 (the critic, against ref 27): cream that reads cream in game (the grime's share 0.15 at most), lighter
+glazing in its grey frames, the sill at half the eave's height, a 0.27 m fascia band round the roof.
 
 SQ1 (owner, 2026-11-21: finer detail): the walls were one box with frames drawn on it and striped blinds that read as
 louvres; now each wall is its panels with dark seams between them, every window sits 35 mm back in its opening behind
 an aluminium frame standing proud, on a sloped sill with a drip nose, the blinds are plain roller blinds with a
-bottom bar over dark glass with a sheen, and the door is a real leaf in its frame (stiles and rails, glass, kick
+bottom bar over the glass with a sheen, and the door is a real leaf in its frame (stiles and rails, glass, kick
 plate, lever handle and lock, three hinges, a closer, a threshold). The air conditioner has its sleeve, angled fins
 in a framed grille, knobs and brackets.
 
@@ -37,9 +40,10 @@ HIGH = 2.6
 SIZES = {"staff_booth": (2.0, 2.2), "staff_booth_mid": (1.6, 2.2), "staff_booth_small": (1.6, 1.0)}
 OVER = 0.07          # the roof's overhang all round
 PLINTH = 0.08        # the steel base's height
-SILL = 1.05          # the windows' sill
-HEAD = 2.25          # the windows' and the door's head
-EAVE = 2.42          # the roof's underside
+SILL = 1.19          # the windows' sill: half the eave's height, as ref 27 photo 1
+HEAD = 2.2           # the windows' and the door's head, a panel strip over it under the fascia
+EAVE = 2.37          # the walls' top, the roof slab's underside
+FASCIA = 2.33        # the deep fascia's foot (with its drip): a 0.27 m band round the roof, as ref 27
 FR = 0.045           # a window frame's width
 PT = 0.035           # a wall panel's thickness (the glass sits this far back)
 POST = 0.06          # a corner post's side
@@ -47,11 +51,15 @@ SEAM = 0.004         # half a panel joint's width
 DOOR_W = 0.78
 
 # This script's own paints (sRGB), greys off the teams' hues; their names pick the shader's kind
-# (surface_kinds.by_name): the dark behind the seams, the glass's sheen, the air conditioner's satin casing, the roof
-# membrane, the base's steel, the door's ironmongery, a blank sign.
+# (surface_kinds.by_name): the dark behind the seams, the glass's sheen, the booth's cream panels (ref 27 photo 1's
+# beige), the clear grey glass and the booth's shaded inside seen through it, the air conditioner's satin casing, the
+# roof membrane, the base's steel, the door's ironmongery, a blank sign.
 wk.PAINT.update({
     "seam_dark": 0x34343a,
-    "glass_sheen": 0x4a5052,
+    "glass_sheen": 0xbcc4c4,
+    "satin_cream": 0xd8cfb6,
+    "booth_glass": 0x8a9596,
+    "glass_dim": 0x60686a,
     "cab_ac": 0xc8c6be,
     "roof_felt": 0x5e5c5a,
     "base_steel": 0x4c4c4a,
@@ -125,20 +133,22 @@ class Face:
                     continue
                 zb = z0 + (SEAM if z0 > PLINTH else 0.0)
                 zt = z1 - (SEAM if z1 < EAVE else 0.0)
-                self.box(c0 + SEAM, c1 - SEAM, -PT - 0.002, 0.0, zb, zt, "booth_white", step=0.16,
+                self.box(c0 + SEAM, c1 - SEAM, -PT - 0.002, 0.0, zb, zt, "satin_cream", step=0.15,
                          skip=("-z", "+z", self.back()))
 
 
 def window(f: Face, a0: float, a1: float, z0: float, z1: float, panes: int, transom: bool, blind: float) -> None:
-    """A window in the opening a0..a1, z0..z1: grimy glass at the back of the opening with a roller blind `blind`
-    of the way down and a sheen below it, an aluminium frame standing proud round it and between its panes (a
-    transom across a third down when `transom`), a sloped sill with a drip nose under it."""
+    """A window in the opening a0..a1, z0..z1: clear grey glass at the back of the opening (the booth's shaded
+    inside low down in it) with a pale roller blind `blind` of the way down and a sheen below it, an aluminium frame
+    standing proud round it and between its panes (a transom across a third down when `transom`), a sloped sill with
+    a drip nose under it."""
     g = -PT + 0.001
-    f.rect(a0, a1, z0, z1, g, "glass")
+    f.rect(a0, a1, z0, z1, g, "booth_glass")
     zb = z1 - FR - (z1 - z0 - 2 * FR) * blind  # the blind's foot
     for i in range(panes):
         p0 = a0 + (a1 - a0) * i / panes + (FR if i == 0 else FR * 0.5)
         p1 = a0 + (a1 - a0) * (i + 1) / panes - (FR if i == panes - 1 else FR * 0.5)
+        f.rect(p0, p1, z0 + FR, min(zb, z0 + FR + 0.3 * (z1 - z0)), g + 0.0005, "glass_dim")  # the inside's shade
         f.rect(p0, p1, zb, z1 - FR, g + 0.001, "blind")
         f.rect(p0, p1, zb - 0.025, zb, g + 0.0015, "booth_frame")  # its bottom bar
         h = zb - 0.06 - (z0 + FR + 0.03)
@@ -175,14 +185,15 @@ def door(f: Face, a0: float, a1: float) -> None:
                              (-PT, PLINTH + 0.02)], "steel_bare")
     l0, l1 = a0 + FR + 0.004, a1 - FR - 0.004   # the leaf
     z0, z1 = PLINTH + 0.024, HEAD - FR - 0.004
-    st, mid = 0.06, 1.02
-    f.box(l0, l1, -0.03, -0.014, z0, z1, "booth_white")             # its infill, under the glass and the panel
+    st, mid = 0.06, SILL - 0.07  # the glass from the windows' sill up
+    f.box(l0, l1, -0.03, -0.014, z0, z1, "satin_cream")             # its infill, under the glass and the panel
     f.box(l0, l0 + st, -0.03, -0.004, z0, z1, "booth_frame")         # stiles
     f.box(l1 - st, l1, -0.03, -0.004, z0, z1, "booth_frame")
     for r0, r1 in ((z0, z0 + 0.12), (mid, mid + 0.07), (z1 - st, z1)):  # rails
         f.box(l0 + st, l1 - st, -0.03, -0.004, r0, r1, "booth_frame")
-    f.rect(l0 + st, l1 - st, mid + 0.07, z1 - st, -0.0135, "glass")
-    zb = z1 - st - 0.45
+    f.rect(l0 + st, l1 - st, mid + 0.07, z1 - st, -0.0135, "booth_glass")
+    zb = z1 - st - 0.28
+    f.rect(l0 + st, l1 - st, mid + 0.07, mid + 0.3, -0.01325, "glass_dim")
     f.rect(l0 + st, l1 - st, zb, z1 - st, -0.013, "blind")
     f.rect(l0 + st, l1 - st, zb - 0.025, zb, -0.0125, "booth_frame")
     f.quad([(l0 + st + 0.06, mid + 0.12), (l0 + st + 0.14, mid + 0.12), (l0 + st + 0.32, zb - 0.06),
@@ -273,14 +284,14 @@ def build(name: str, width: float, depth: float) -> object:
     k.mark("body")
     # The roof: a slab overhanging all round, a painted fascia under an aluminium capping, a drip bead under it, the
     # grey membrane on top.
-    k.panel((-hw + 0.01, -hd + 0.01, EAVE), (hw - 0.01, hd - 0.01, HIGH - 0.022), "booth_white", step=0.3,
+    k.panel((-hw + 0.01, -hd + 0.01, EAVE), (hw - 0.01, hd - 0.01, HIGH - 0.022), "satin_cream", step=0.3,
             skip=("+z",))
     k.panel((-hw + 0.03, -hd + 0.03, HIGH - 0.024), (hw - 0.03, hd - 0.03, HIGH - 0.02), "roof_felt", step=0.3,
             skip=("-z",))
     cap = [(-0.03, HIGH - 0.035), (0.0, HIGH - 0.035), (0.0, HIGH - 0.006), (-0.006, HIGH), (-0.03, HIGH)]
-    fascia = [(-0.026, EAVE - 0.03), (-0.008, EAVE - 0.03), (-0.008, HIGH - 0.035), (-0.026, HIGH - 0.035)]
-    drip = [(-0.026, EAVE - 0.042), (-0.002, EAVE - 0.042), (-0.002, EAVE - 0.03), (-0.026, EAVE - 0.03)]
-    for prof, mat in ((cap, "booth_frame"), (fascia, "booth_white"), (drip, "booth_frame")):
+    fascia = [(-0.026, FASCIA + 0.012), (-0.008, FASCIA + 0.012), (-0.008, HIGH - 0.035), (-0.026, HIGH - 0.035)]
+    drip = [(-0.026, FASCIA), (-0.002, FASCIA), (-0.002, FASCIA + 0.012), (-0.026, FASCIA + 0.012)]
+    for prof, mat in ((cap, "booth_frame"), (fascia, "satin_cream"), (drip, "booth_frame")):
         inset = -min(d for d, _ in prof)
         for sy in (-1.0, 1.0):
             k.prism([(sy * (hd + d), z) for d, z in prof], "x", -hw, hw, mat)
@@ -295,11 +306,11 @@ def build(name: str, width: float, depth: float) -> object:
     openings = [(d0, d1, PLINTH, HEAD)]
     if w1 - w0 > 0.35:
         openings.append((w0, w1, SILL, HEAD))
-        window(front, w0, w1, SILL, HEAD, 2 if w1 - w0 > 1.0 else 1, False, 0.55)
+        window(front, w0, w1, SILL, HEAD, 2 if w1 - w0 > 1.0 else 1, False, 0.3)
         front.rect(w1 - 0.2, w1 - 0.08, 0.84, 0.92, 0.0015, "sign_plate")
     front.panels(openings, [])
     door(front, d0, d1)
-    lamp(front, (d0 + d1) * 0.5, HEAD + 0.035)
+    lamp(front, (d0 + d1) * 0.5, HEAD + 0.01)
     k.mark("front")
     # The sides: a window in each (the shallow booth: only on +x), the air conditioner on the -x side.
     for sx in (-1.0, 1.0):
@@ -307,10 +318,10 @@ def build(name: str, width: float, depth: float) -> object:
         openings = []
         if depth > 1.5:
             openings.append((-by + POST + 0.08, by - 0.42, SILL, HEAD))
-            window(side, *openings[0], 2, True, 0.35 if sx > 0 else 0.8)
+            window(side, *openings[0], 2, True, 0.2 if sx > 0 else 0.45)
         elif sx > 0:
-            openings.append((-by + POST + 0.07, by - POST - 0.07, 1.3, HEAD))
-            window(side, *openings[0], 1, False, 0.4)
+            openings.append((-by + POST + 0.07, by - POST - 0.07, SILL, HEAD))
+            window(side, *openings[0], 1, False, 0.25)
         side.panels(openings, [] if openings else [0.0])
         if sx < 0:
             air_conditioner(side, by - 0.45 if depth > 1.5 else 0.0)
@@ -330,15 +341,19 @@ def build(name: str, width: float, depth: float) -> object:
 
 
 def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
-    if paint in ("booth_white", "booth_frame", "cab_ac"):
-        col = wt.mix(c, wk.lin(wk.GRIME), 0.12 + 0.3 * wt.smooth(0.4, 0.8, wt.fbm(p, 0.2, 81)))
+    if paint in ("satin_cream", "booth_frame", "cab_ac"):
+        # light wear only, so the cream still reads cream under the station's light: a little blotching, faint
+        # streaks from the roof, a little grime up from the platform; the grime's share stays at 0.15 or under
+        blot = 0.03 + 0.04 * wt.smooth(0.4, 0.8, wt.fbm(p, 0.2, 81))
         streak = wt.smooth(0.6, 0.85, wt.fbm(Vector((p.x * 7.0, p.y * 7.0, p.z * 0.5)), 0.5, 83)) * (1 - abs(n.z))
-        col = wt.mix(col, wk.lin(wk.GRIME), 0.3 * streak * wt.smooth(1.2, EAVE, p.z))  # streaks from the roof
-        return wk.grime(p, n, col, seed=16)
-    if paint in ("glass", "glass_sheen"):
-        return wt.mix(c, wk.lin(wk.GRIME), 0.3 * wt.fbm(p, 0.15, 85))
+        foot = 1.0 - wt.smooth(0.0, 0.35 + 0.15 * wt.fbm(p, 0.3, 21), p.z)
+        share = min(0.15, blot + 0.05 * streak * wt.smooth(1.4, EAVE, p.z) + 0.07 * foot)
+        col = wt.mix(c, wk.lin(wk.GRIME), share)
+        return wt.mix(col, wk.lin(wk.DUST), max(0.0, n.z) * 0.12)  # dust on what looks up
+    if paint in ("booth_glass", "glass_dim", "glass_sheen", "glass"):
+        return wt.mix(c, wk.lin(wk.GRIME), 0.1 * wt.fbm(p, 0.15, 85))
     if paint == "blind":
-        return wt.mix(c, wk.lin("glass"), 0.35 + 0.2 * wt.fbm(p, 0.2, 87))  # seen through dirty glass
+        return wt.mix(c, wk.lin("booth_glass"), 0.15 + 0.1 * wt.fbm(p, 0.2, 87))  # seen through the glass
     if paint == "roof_felt":
         return wt.mix(c, wk.lin(wk.DUST), 0.2 + 0.35 * wt.fbm(p, 0.3, 89))  # dust settled on the roof
     return wk.grime(p, n, c, seed=4, amount=0.6)

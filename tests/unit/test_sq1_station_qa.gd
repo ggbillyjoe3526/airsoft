@@ -14,7 +14,7 @@ const BEFORE := {
 	"engineering_wagon": AABB(Vector3(-2.000, 0.000, -1.000), Vector3(4.000, 2.600, 2.000)),
 	"escalator_lower": AABB(Vector3(-6.010, -18.000, -3.000), Vector3(16.020, 9.000, 6.000)),
 	"fan_housing": AABB(Vector3(-1.500, 0.000, -1.250), Vector3(3.000, 2.200, 2.500)),
-	"gate_paddle": AABB(Vector3(0.000, 0.530, -0.016), Vector3(0.462, 0.550, 0.032)),
+	"gate_paddle": AABB(Vector3(0.000, 0.470, -0.016), Vector3(0.462, 0.480, 0.032)),
 	"help_point": AABB(Vector3(-0.700, 0.000, -0.700), Vector3(1.399, 2.200, 1.399)),
 	"kiosk": AABB(Vector3(-1.500, 0.000, -1.300), Vector3(3.000, 2.500, 2.600)),
 	"kiosk_long": AABB(Vector3(-2.600, 0.000, -1.000), Vector3(5.200, 2.800, 2.000)),

@@ -10,6 +10,9 @@ and a bent bar of rusty rebar in it. Dark grey with rust coming through; no lett
 
 SQ1 (2026-11-21) rebuilt it finer: the raised frame shows the springs and the wheels, the tub's corners are rounder,
 and the spoil is many small dark facets and varied lumps instead of a few big pale ones (it read as a lump in game).
+Attempt 2: the spoil's facets had been smoothed by angle into broad pale slopes; they are now shaded flat (each about
+5 cm, darker clay, little dry crust), with smaller lumps; the tub is 1.6 times the height of the undercarriage under it
+(the photos'), on smaller wheels and a lower frame.
 
 Its blocks (three on the south track, 2 x 2 m and 2.7 m high, data/maps/subway.json) are centred on the track, so
 its wheels stand on the station's running rails (works_kit.running_rails); the tub's rim is as wide as the box, the
@@ -41,21 +44,35 @@ HL, HD, HIGH = 1.0, 1.0, 2.7   # the box: half its length, half its depth, its h
 wk.PAINT["brick_dull"] = 0x6a5452
 wk.PAINT["stone_pale"] = 0x8a8680
 
-WHEEL_R = 0.3
+WHEEL_R = 0.24                 # small wheels, as the photos' (about a sixth of the tub's height)
 AXLE_X = 0.5
 FRAME_Y = 0.88                 # the frame's half width (outside its channels), outside the wheels
-FRAME_LO, FRAME_HI = 0.16, 0.36   # the solebars' foot and top over the axles (room for the springs)
-PIVOT_Z = 1.62                 # the trunnions
-RIM_Z = 2.26                   # the tub's rim
+FRAME_LO, FRAME_HI = 0.12, 0.28   # the solebars' foot and top over the axles (room for the springs)
+PIVOT_Z = 1.55                 # the trunnions
+TUB_Z0 = 0.9                   # the tub's bottom: the tub is 1.6 times the undercarriage's height under it (photos)
+RIM_Z = 2.32                   # the tub's rim
 RIM_R = 0.032                  # the rolled rim's radius
 CRADLE_X = 0.78                # the cradles' inner face
-SEG = 12
+SEG = 10
+
+
+def tz(f: float) -> float:
+    """The height a part `f` of the way up the tub, from its bottom (0) to its rim (1)."""
+    return TUB_Z0 + f * (RIM_Z - TUB_Z0)
+
+
 # The tub by height: (z, half length, half width) from its rounded bottom to the rim's underside.
-TUB = [(1.0, 0.6, 0.14), (1.015, 0.605, 0.3), (1.045, 0.61, 0.42), (1.1, 0.62, 0.52), (1.17, 0.63, 0.6),
-       (1.26, 0.645, 0.67), (1.42, 0.68, 0.74), (1.8, 0.77, 0.89), (RIM_Z - RIM_R, 0.94, HD - RIM_R)]
+TUB = [(tz(0.0), 0.6, 0.14), (tz(0.012), 0.605, 0.3), (tz(0.036), 0.61, 0.42), (tz(0.079), 0.62, 0.52),
+       (tz(0.135), 0.63, 0.6), (tz(0.206), 0.645, 0.67), (tz(0.333), 0.68, 0.74), (tz(0.635), 0.77, 0.89),
+       (RIM_Z - RIM_R, 0.94, HD - RIM_R)]
+RAIL_F = 0.667                 # the stiffening rail round the tub's middle, as a part of its height
 CORNER = 0.08                  # the tub's corners, rounded in plan
 RIBS = (-0.36, 0.36)           # the side ribs' x (the handles sit between them and the ends)
 LUMPS = 20                     # broken concrete, brick, stones in the spoil
+SPOIL_GRID = 20                # the heap's cells each way (about 9 cm): small facets
+# the spoil's paints, shaded flat (each facet its own tone) so the heap reads as lumps, not one smooth mound
+SPOIL = ("spoil", "spoil_dark", "rust_dark", "concrete", "concrete_dark", "stone_pale", "brick_dull",
+         "ballast_dark")
 
 
 def ring(z: float, hx: float, hy: float, r: float, steps: int = 4) -> list:
@@ -97,20 +114,6 @@ def chunk(k: wk.Kit, centre: tuple, size: tuple, mat: str, rng: random.Random) -
     k._faces(faces, mat)
 
 
-def pebble(k: wk.Kit, centre: tuple, r: float, mat: str, rng: random.Random, squash: float = 0.7) -> None:
-    """A rounded stone: an icosahedron, its corners pushed in and out, flattened by `squash`, turned any way."""
-    bm = k.bm
-    made = bmesh.ops.create_icosphere(bm, subdivisions=1, radius=r)["verts"]
-    for v in made:
-        v.co = Vector((v.co.x * rng.uniform(0.8, 1.15), v.co.y * rng.uniform(0.8, 1.15),
-                       v.co.z * squash * rng.uniform(0.85, 1.1)))
-    faces = list({f for v in made for f in v.link_faces})
-    turn = Euler((rng.uniform(-0.5, 0.5), rng.uniform(-0.5, 0.5), rng.uniform(0.0, math.tau))).to_matrix().to_4x4()
-    k.transform(faces, Matrix.Translation(Vector(centre)) @ turn)
-    bmesh.ops.recalc_face_normals(bm, faces=faces)
-    k._faces(faces, mat)
-
-
 def leaf_spring(k: wk.Kit, x: float, y: float, z_mid: float, z_end: float, half: float, mat: str) -> None:
     """A short leaf spring seen side on (along x, `half` either side of x): three leaves stepping shorter downwards,
     cambered from its buckle at z_mid up to its eyes at z_end, a buckle round its middle."""
@@ -139,7 +142,7 @@ def build() -> object:
             for dx in (-1.0, 1.0):  # the horn guides either side of the box, up to the solebar
                 k.blk((x + dx * 0.075 - 0.015, y - 0.025, zc - 0.1), (x + dx * 0.075 + 0.015, y + 0.025, f0),
                       "frame_black")
-            leaf_spring(k, x, y, zc + 0.095, f0 - 0.03, 0.2, "frame_black")
+            leaf_spring(k, x, y, zc + 0.085, f0 - 0.015, 0.2, "frame_black")
             for dx in (-0.2, 0.2):  # the spring's hangers from the solebar's foot
                 k.blk((x + dx - 0.018, y - 0.03, f0 - 0.05), (x + dx + 0.018, y + 0.03, f0 + 0.01), "frame_black")
     k.mark("wheels")
@@ -224,13 +227,16 @@ def build() -> object:
     k.mark("cradles")
     # The tub: an outer skin lofted up its levels and an inner one, joined over the top.
     outer = [ring(z, hx, hy, CORNER + 0.06 * (1.0 - i / (len(TUB) - 1))) for i, (z, hx, hy) in enumerate(TUB)]
-    inner = [ring(z + 0.03, hx - 0.03, hy - 0.03, CORNER) for z, hx, hy in TUB[3:]]
+    # the inner skin only down past the spoil's edge (the spoil hides the rest)
+    hx, hy = tub_at(RIM_Z - 0.2)
+    inner = [ring(RIM_Z - 0.2, hx - 0.03, hy - 0.03, CORNER),
+             ring(TUB[-1][0] + 0.03, TUB[-1][1] - 0.03, TUB[-1][2] - 0.03, CORNER)]
     k.loft(outer, "skip_grey", cap0=True, cap1=False)
     k.loft(inner, "skip_grey", cap0=True, cap1=False)
     k.loft([outer[-1], [(x, y, RIM_Z + RIM_R) for x, y, _ in outer[-1]], inner[-1]], "skip_grey", cap0=False,
            cap1=False)
     # the rolled rim round the top and the stiffening rail round the middle, each a bar round the tub's corners
-    for z, r in ((RIM_Z, RIM_R), (1.84, 0.024)):
+    for z, r in ((RIM_Z, RIM_R), (tz(RAIL_F), 0.024)):
         hx, hy = tub_at(min(z, RIM_Z - RIM_R))
         w = r * 0.8
         k.loft([ring(z + dz, hx - 0.01 + dw, hy - 0.01 + dw, CORNER) for dz, dw in ((-w, 0.0), (-w, r * 1.3),
@@ -240,30 +246,31 @@ def build() -> object:
     for s in (-1.0, 1.0):
         for x in RIBS:
             pts = []
-            for z in (1.12, 1.26, 1.42, 1.6, 1.8, 2.0, RIM_Z - 0.04):
+            for z in [tz(f) for f in (0.095, 0.206, 0.333, 0.476, 0.635, 0.794)] + [RIM_Z - 0.04]:
                 hx, hy = tub_at(z)
                 pts.append((x * hx / 0.7, s * (hy + 0.012), z))
             k.loft([[(px - 0.03, py - s * 0.012, pz), (px + 0.03, py - s * 0.012, pz), (px + 0.03, py + s * 0.01, pz),
                      (px - 0.03, py + s * 0.01, pz)] for px, py, pz in pts], "skip_grey")
     # Rivets down the four corner seams (on the ends, beside each corner) and along the sides' foot seam.
     seams = []
-    for z in [1.22 + 0.24 * i for i in range(5)]:
+    for z in [tz(0.175 + 0.19 * i) for i in range(5)]:
         hx, hy = tub_at(z)
         for sx in (-1.0, 1.0):
             for s in (-1.0, 1.0):
                 seams.append(((sx * (hx + 0.004), s * (hy - 0.075), z), "x" if sx > 0 else "-x"))
     for s in (-1.0, 1.0):
-        hx, hy = tub_at(1.3)
+        zs = tz(0.238)
+        hx, hy = tub_at(zs)
         for x in (-0.48, -0.24, 0.0, 0.24, 0.48):
             if all(abs(x - r) > 0.06 for r in RIBS):
-                seams.append(((x, s * (hy + 0.004), 1.3), "y" if s > 0 else "-y"))
+                seams.append(((x, s * (hy + 0.004), zs), "y" if s > 0 else "-y"))
     for p, ax in seams:
         k.bolts([p], 0.014, 0.012, ax, "skip_grey", seg=3)
     k.mark("ribs")
     # Grab handles each side; the lifting lugs: a plate at each top corner of the ends, an eye in it and a bail.
     for s in (-1.0, 1.0):
         for x in (-0.6, 0.6):
-            z = 2.06
+            z = tz(0.84)
             hx, hy = tub_at(z)
             yy = s * (hy + 0.012)
             for a, c in (((x - 0.13, yy, z - 0.02), (x - 0.13, yy + s * 0.05, z)),
@@ -287,13 +294,14 @@ def build() -> object:
                 k.bar(a, c, 0.012, "steel_bare", seg=4, cap=False)
     k.mark("lugs")
     # The tipping catch at the +x end: a latch bar across under the rim in two keepers, its chain hanging from it.
-    hx, _ = tub_at(2.0)
-    k.sqbar((hx + 0.03, -0.3, 2.0), (hx + 0.03, 0.3, 2.0), 0.035, "steel_bare")
+    zl = tz(0.794)
+    hx, _ = tub_at(zl)
+    k.sqbar((hx + 0.03, -0.3, zl), (hx + 0.03, 0.3, zl), 0.035, "steel_bare")
     for y in (-0.26, 0.26):
-        hk, _ = tub_at(1.98)
-        k.blk((hk - 0.01, y - 0.025, 1.96), (hk + 0.06, y + 0.025, 2.04), "frame_black")
+        hk, _ = tub_at(zl - 0.02)
+        k.blk((hk - 0.01, y - 0.025, zl - 0.04), (hk + 0.06, y + 0.025, zl + 0.04), "frame_black")
     for i in range(3):
-        z = 1.95 - i * 0.065
+        z = zl - 0.05 - i * 0.065
         hx, _ = tub_at(z)
         k.bar((hx + 0.03, 0.32, z), (hx + 0.03, 0.32, z - 0.055), 0.008, "rust", seg=4)
     k.mark("catch")
@@ -315,27 +323,27 @@ def spoil(k: wk.Kit, rng: random.Random) -> None:
     concrete, brick ends, stones and a bar of rebar lying in it half sunk."""
     hx, hy = TUB[-1][1] - 0.04, HD - 0.07
     z0 = RIM_Z - 0.04
-    k.rubble(-hx, hx, -hy, hy, z0, HIGH, ["spoil", "spoil", "spoil_dark", "spoil_dark", "spoil", "rust_dark"], 15,
-             15, 0.05, 6, shape=heap)
+    k.rubble(-hx, hx, -hy, hy, z0, HIGH, ["spoil_dark", "spoil", "spoil_dark", "spoil_dark", "spoil", "rust_dark"],
+             SPOIL_GRID, SPOIL_GRID, 0.06, 6, shape=heap)
 
     def top(x: float, y: float) -> float:
         return z0 + (HIGH - z0) * heap(x / hx, y / hy)
     for i in range(LUMPS):
-        x = rng.uniform(-hx + 0.12, hx - 0.12)
-        y = rng.uniform(-hy + 0.12, hy - 0.12)
-        kind = i % 8
-        if kind in (0, 1, 2):  # broken concrete
-            s = rng.uniform(0.09, 0.2)
+        x = rng.uniform(-hx + 0.1, hx - 0.1)
+        y = rng.uniform(-hy + 0.1, hy - 0.1)
+        kind = i % 6
+        if kind in (0, 1):  # broken concrete, mostly dark with clay
+            s = rng.uniform(0.07, 0.14)
             size = (s, s * rng.uniform(0.6, 1.0), s * rng.uniform(0.35, 0.6))
-            chunk(k, (x, y, min(top(x, y), HIGH - size[2] * 0.4)), size,
-                  ("concrete_dark", "concrete", "stone_pale")[kind], rng)
-        elif kind in (3, 4):  # brick ends
-            size = (0.11 * rng.uniform(0.8, 1.6), 0.1, 0.065)
+            chunk(k, (x, y, min(top(x, y), HIGH - size[2] * 0.4)), size, ("concrete_dark", "concrete")[i % 4 // 3],
+                  rng)
+        elif kind in (2, 3):  # brick ends
+            size = (0.11 * rng.uniform(0.7, 1.3), 0.1, 0.065)
             chunk(k, (x, y, min(top(x, y) + 0.01, HIGH - 0.03)), size, "brick_dull", rng)
-        else:  # stones and clay clods
-            r = rng.uniform(0.04, 0.09)
-            pebble(k, (x, y, min(top(x, y), HIGH - r * 0.4)), r, ("ballast_dark", "spoil_dark", "stone_pale")[kind - 5],
-                   rng, squash=rng.uniform(0.5, 0.8))
+        else:  # stones and clay clods: rough octahedra
+            r = rng.uniform(0.035, 0.07)
+            k.stone((x, y, min(top(x, y), HIGH - r * 0.4)), r, ("ballast_dark", "spoil_dark", "stone_pale")[i % 3],
+                    rng.randrange(1 << 20), squash=rng.uniform(0.5, 0.8), tilt=True)
     # a bent length of rebar poking out of the heap
     pts = [(-0.3, -0.25, top(-0.3, -0.25) - 0.04), (0.0, -0.1, top(0.0, -0.1) + 0.03), (0.2, 0.05, top(0.2, 0.05)
                                                                                          + 0.12)]
@@ -348,16 +356,16 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
         col = wk.rusty(p, n, c, seed=3, amount=0.6)
         if p.z > RIM_Z - 0.05 and paint == "skip_grey":  # the rim knocked bright
             col = wt.mix(col, wk.lin("steel_bare"), 0.4 * wt.fbm(p, 0.08, 5))
-        if p.z > 1.0 and abs(n.z) < 0.8:  # spoil smeared down the tub from the rim
+        if p.z > TUB_Z0 and abs(n.z) < 0.8:  # spoil smeared down the tub from the rim
             smear = wt.smooth(0.5, 0.75, wt.fbm(Vector((p.x * 5, p.y * 5, p.z * 0.6)), 0.3, 9))
-            col = wt.mix(col, wk.lin("spoil_dark"), 0.5 * smear * wt.smooth(1.4, RIM_Z, p.z))
+            col = wt.mix(col, wk.lin("spoil_dark"), 0.5 * smear * wt.smooth(tz(0.32), RIM_Z, p.z))
         if abs(n.z) < 0.5 and p.z < RIM_Z:  # edges and ribs rubbed paler
             col = wt.mix(col, wk.lin("steel_bare"), 0.12 * wt.smooth(0.6, 0.8, wt.fbm(p, 0.04, 8)))
         return wk.grime(p, n, col, seed=1)
     if paint in ("spoil", "spoil_dark"):  # clay: wet and dark in the hollows, a little dry crust on the tops
         col = wt.mix(c, wk.lin("spoil_dark"), 0.55 * wt.fbm(p, 0.1, 21))
-        col = wt.mix(col, wk.lin(wk.DUST), max(0.0, n.z) * 0.15 * wt.smooth(0.55, 0.8, wt.fbm(p, 0.06, 22)))
-        return wt.scale(col, 0.8 + 0.35 * wt.fbm(p * 6.0, 0.05, 24))
+        col = wt.mix(col, wk.lin(wk.DUST), max(0.0, n.z) * 0.05 * wt.smooth(0.6, 0.85, wt.fbm(p, 0.06, 22)))
+        return wt.scale(col, 0.72 + 0.3 * wt.fbm(p * 6.0, 0.05, 24))
     if paint in ("concrete", "concrete_dark", "stone_pale", "brick_dull", "ballast_dark"):  # lumps: clay on them
         col = wt.mix(c, wk.lin("spoil_dark"), 0.35 * wt.smooth(0.4, 0.75, wt.fbm(p, 0.05, 25)))
         return wt.scale(col, 0.85 + 0.2 * wt.fbm(p, 0.03, 26))
@@ -371,6 +379,10 @@ def main() -> None:
     wk.check_colours(list(wk.PAINT))
     ob = build()
     wk.finish(ob, (-HL, -HD, 0.0), (HL, HD, HIGH))
+    flat = {i for i, m in enumerate(ob.data.materials) if m.name in SPOIL}
+    for p in ob.data.polygons:  # the spoil flat shaded: each small facet its own tone under the lights
+        if p.material_index in flat:
+            p.use_smooth = False
     wk.bake(ob, weather, jitter={"timber": 0.06, "concrete_dark": 0.1, "concrete": 0.08, "spoil_dark": 0.08,
                                  "brick_dull": 0.1, "stone_pale": 0.12, "ballast_dark": 0.12})
     wk.write(ob, NAME, BUDGET)
