@@ -5,9 +5,11 @@ extends RefCounted
 ## car stands at a stop with its doors open; called elsewhere it waits LiftConfig.dwell after opening (panel_dwell once
 ## its own panel is pressed), shuts its doors (door_time: heard shut_lead before the leaves move), rides to the nearest
 ## called stop ahead of the way it last went (floor_time a stop), stopping on the way at any stop called meanwhile, and
-## chimes and opens them. Its doors never shut on a body in the doorway from outside the car, nor with anyone hit
-## aboard (they walk off), nor with more than `capacity` aboard (it buzzes); one aboard but still in the doorway steps
-## in as they start to shut (step_in, LS1), and one walking into it from outside before it is sealed opens them again. Its riders rise and fall with its floor (carry). A doorway is a solid
+## chimes and opens them; a stop pressed on its panel while they open, alone aboard, shuts them again (LS1).
+## Its doors never shut on a body in the doorway from outside the car, nor with anyone hit aboard (they walk off), nor
+## with more than `capacity` aboard (it buzzes); one aboard but still in the doorway steps in as they start to shut
+## (step_in, LS1), and one walking into it from outside before it is sealed opens them again. Its riders rise and fall
+## with its floor (carry). A doorway is a solid
 ## steel leaf to bombs, sight and bodies but while the car stands open at it, and to BBs where its two leaves stand at
 ## that tick while they shut or open (WorldQuery.set_lift_ajar, bb_ray). Each press, chime, door and ride is a LIFT
 ## event, heard out to LiftConfig.heard through walls. Each match and each round starts with every car at its start
@@ -308,6 +310,11 @@ func _press_button(i: int, k: int, c: Character, state: GameState) -> void:
 		# From inside, standing open: the doors shut now (LiftConfig.panel_dwell), not after the wait for walkers-out.
 		if inside and lifts.phase[i] == LiftState.Phase.OPEN:
 			lifts.left[i] = minf(lifts.left[i], _cfg.panel_dwell)
+		# From inside, opening, alone aboard: they shut again from where they stand, heard on the press (owner,
+		# 2026-11-21). With others aboard they open and wait the dwell, so whoever came to get out here can.
+		elif inside and lifts.phase[i] == LiftState.Phase.OPENING and aboard(i, lifts, state.characters) == 1 \
+				and Elimination.is_in_play(c):
+			_start_shut(i, state, _cfg.shut_lead + _cfg.shut_time() * lifts.doors[i])
 		return
 	match lifts.phase[i]:
 		LiftState.Phase.OPEN:
@@ -337,8 +344,17 @@ func _wait_open(i: int, state: GameState, dt: float) -> void:
 			_event(state, Cue.BUZZ, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard, _through(spec))
 		return
 	lifts.buzz_left[i] = 0.0
+	_start_shut(i, state, _cfg.door_time)
+
+
+## Lift `i`'s doors start to shut at its stop, `left` seconds from shut (door_time from open; less from ajar), heard
+## now: the leaves stand through the lead, then meet (_shutting). Its doorway is sealed at once if nobody is in it.
+func _start_shut(i: int, state: GameState, left: float) -> void:
+	var lifts := state.lifts
+	var k := lifts.stop[i]
+	var spec := _query.lifts[i]
 	lifts.phase[i] = LiftState.Phase.SHUTTING
-	lifts.left[i] = _cfg.door_time
+	lifts.left[i] = left
 	lifts.sealed[i] = 0
 	_event(state, Cue.SHUTTING, i, k, spec.door_center(k), lifts.caller[i], _cfg.heard, _through(spec))
 	_seal(i, state)
@@ -354,7 +370,8 @@ func _shutting(i: int, state: GameState, dt: float) -> void:
 	var span := _cfg.shut_time()
 	var least := 0.0 if lifts.sealed[i] != 0 else span
 	lifts.left[i] = maxf(least, lifts.left[i] - dt)
-	lifts.doors[i] = minf(1.0, lifts.left[i] / span) if span > 0.0 else 0.0
+	# Never further open than they stood: a shut begun from ajar keeps its leaves still through the lead.
+	lifts.doors[i] = minf(lifts.doors[i], lifts.left[i] / span) if span > 0.0 else 0.0
 	if lifts.left[i] <= 0.0:
 		_depart(i, state)
 

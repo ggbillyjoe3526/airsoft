@@ -250,3 +250,57 @@ func test_the_minimap_and_the_sound_cues_take_only_a_lifts_buttons() -> void:
 		var heard := 1 if cue == Lifts.Cue.BUTTON else 0
 		assert_eq(map_hear.live_count(), heard, "minimap, cue %d" % cue)
 		assert_eq(cues.live_count(), heard, "sound cues, cue %d" % cue)
+
+
+func test_a_press_from_inside_while_the_doors_open_shuts_them_again_from_where_they_stand() -> void:
+	var m := _match()
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var i := 1
+	var spec := level.query().lifts[i]
+	var k := state.lifts.stop[i]
+	var me := state.characters[0]
+	_stand(me, spec.car_point(spec.stops[k]))
+	_step(sim, state, 1, i, Vector2i(i, 1 - k))
+	var guard := 0
+	while state.lifts.phase[i] != LiftState.Phase.OPENING and guard < roundi(10.0 / DT):
+		_step(sim, state, 1, i)
+		guard += 1
+	assert_eq(state.lifts.phase[i], LiftState.Phase.OPENING, "arrived at the other stop, opening")
+	assert_eq(state.lifts.stop[i], 1 - k)
+	_step(sim, state, roundi(cfg.door_time * 0.5 / DT), i)
+	var ajar := state.lifts.doors[i]
+	assert_between(ajar, 0.2, 0.8, "half open")
+	var ticks := _step(sim, state, 1, i, Vector2i(i, k))
+	assert_eq(_first(ticks, Lifts.Cue.BUTTON), 0)
+	assert_eq(_first(ticks, Lifts.Cue.SHUTTING), 0, "the doors heard shutting on the press, not after opening")
+	assert_eq(state.lifts.phase[i], LiftState.Phase.SHUTTING)
+	# The press comes after the tick's lift step: the leaves stood here when it shut them again.
+	ajar = state.lifts.doors[i]
+	var lead := roundi(cfg.shut_lead / DT)
+	_step(sim, state, lead - 2, i)
+	assert_almost_eq(state.lifts.doors[i], ajar, 1e-4, "the leaves stand where they were through the lead")
+	var rest := _step(sim, state, roundi((cfg.shut_lead + cfg.shut_time() * ajar) / DT) - lead + 8, i)
+	assert_gt(_first(rest, Lifts.Cue.DEPART), -1, "then shut from there and set off")
+	assert_true(spec.holds(me.position, state.lifts.y[i], cfg), "with the presser aboard")
+
+
+func test_with_others_aboard_a_press_while_the_doors_open_lets_them_open_and_wait() -> void:
+	var m := _match(2)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var i := 1
+	var spec := level.query().lifts[i]
+	var k := state.lifts.stop[i]
+	for c in state.characters:
+		_stand(c, spec.car_point(spec.stops[k]))
+	_step(sim, state, 1, i, Vector2i(i, 1 - k))
+	var guard := 0
+	while state.lifts.phase[i] != LiftState.Phase.OPENING and guard < roundi(10.0 / DT):
+		_step(sim, state, 1, i)
+		guard += 1
+	assert_eq(state.lifts.stop[i], 1 - k)
+	var ticks := _step(sim, state, roundi(cfg.door_time / DT) + 2, i, Vector2i(i, k))
+	assert_eq(_first(ticks, Lifts.Cue.SHUTTING), -1, "the other rider may walk out first")
+	assert_eq(state.lifts.phase[i], LiftState.Phase.OPEN)
+	assert_true(state.lifts.called(i, k), "the press kept for after the wait")
