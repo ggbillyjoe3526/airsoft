@@ -36,6 +36,7 @@ BARK_FURROW = tk.srgb(P["bark"], 0.6)
 BARK_UPPER = tk.srgb(0xBCAE74)      # golden tan: the photos' orange upper bark, bright, as warm as the team rule allows
 BARK_YOUNG = tk.srgb(0x9C9470)
 STUB = tk.srgb(P["stone"], 0.85)
+TWIG = tk.srgb(P["bark"], 0.55)  # the crown's twigs out to its lesser clumps: dark, so they read as wood in shade
 NEEDLE_TOP = tk.mix(tk.srgb(P["pine"], 0.86), tk.srgb(P["canopy"], 0.86), 0.35)  # WQ1: the photos' dark needles
 NEEDLE_UNDER = tk.srgb(P["forest"], 0.72)
 # How high (m, in the model) anything but the stem may come down: 2.6 m over the ground (WoodsConfig.crown_clear, over
@@ -52,6 +53,7 @@ NO_CORE = 1e9
 LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.6, per_m2=PER_M2 * 1.15, least=6,
                  most=18, core_min=NO_CORE, tilt=(0.45, 0.9), under=0.8)
 CARD_SHIFT = 0.1
+CARD_REACH = 1.3  # no card's middle more than this many of its clump's radii from it
 
 # the old pine's bigger clouds take more sprays each
 LEAFY_OLD = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.1, card_min=0.55, card_max=1.7, per_m2=PER_M2,
@@ -152,6 +154,7 @@ def grown() -> None:
     tree = tk.Tree("pine_grown", 2202)
     tree.leafy = LEAFY
     tree.card_shift = CARD_SHIFT
+    tree.card_reach = CARD_REACH
     tree.bark_tile = 1.1
     tree.card_floor = CLEAR_GROWN + 0.02
     rng = tree.rng
@@ -182,7 +185,7 @@ def grown() -> None:
             size = 1.0 + 1.1 * shape
             # the tip's tuft droops a little under the branch's end; the branch is clothed to the stem
             tree.tuft(bp[-1] - UP * 0.12 * size - out * 0.25, size, out, 2, NEEDLE_TOP, NEEDLE_UNDER, centre,
-                      flat=0.72, spread=0.55, twig=BARK_UPPER)
+                      flat=0.72, spread=0.55, twig=TWIG)
             if ln > 1.75:
                 tree.tuft(tk.along(bp, 0.45) + UP * 0.15, size * 0.85, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre,
                           flat=0.8)
@@ -203,6 +206,7 @@ def old() -> None:
     tree = tk.Tree("pine_old", 3303)
     tree.leafy = LEAFY_OLD
     tree.card_shift = CARD_SHIFT
+    tree.card_reach = CARD_REACH
     tree.bark_tile = 1.2
     tree.card_floor = CLEAR_OLD + 0.02
     rng = tree.rng
@@ -235,15 +239,15 @@ def old() -> None:
         fl = ln * rng.uniform(0.4, 0.55)
         fp = branch(tree, start, fo, fl, fl * 0.35, 0.05, 4, 2, BARK_UPPER, flake=1.0)
         tree.tuft(fp[-1] + UP * 0.15, 2.0 + 0.4 * (1.0 - t), fo, 3, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,
-                  spread=0.6, twig=BARK_UPPER)
+                  spread=0.6, twig=TWIG)
         # a second, shorter fork to the other side, nearer the bole
         fo2 = (out - side * rng.uniform(0.5, 0.9)).normalized()
         fl2 = ln * rng.uniform(0.3, 0.42)
         fp2 = branch(tree, tk.along(lp, 0.4), fo2, fl2, fl2 * 0.45, 0.045, 4, 2, BARK_UPPER, flake=1.0)
         tree.tuft(fp2[-1] + UP * 0.15, 1.7 + 0.3 * (1.0 - t), fo2, 2, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.65,
-                  spread=0.55, twig=BARK_UPPER)
+                  spread=0.55, twig=TWIG)
         tree.tuft(lp[-1] + UP * 0.2, 2.4 + 0.5 * (1.0 - t), out, 4, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,
-                  spread=0.6, twig=BARK_UPPER)
+                  spread=0.6, twig=TWIG)
         tree.tuft(tk.along(lp, 0.35) + UP * 0.3, 1.8, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.7)
     # the top: the leader's own cloud over the middle
     tree.tuft(path[-1] + UP * -0.9, 2.3, Vector((1.0, 0.0, 0.0)), 5, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.65,

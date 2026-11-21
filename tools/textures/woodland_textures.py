@@ -317,19 +317,20 @@ def pine_cell(seed: int, young: bool = False) -> Image.Image:
             a = math.tau * k / 7 + rng.uniform(-0.12, 0.12)
             up = -math.cos(a)  # 1 straight up, -1 straight down
             ln = s * (0.36 + 0.08 * max(0.0, up) - 0.1 * max(0.0, -up)) * rng.uniform(0.85, 1.05)
-            needle_shoot(c, hub, a, ln, s * 0.065, 0.9, 1.0, -0.35 * math.sin(a), rng.uniform(0.7, 0.95),
-                         forward=0.5, w=3.0)
+            needle_shoot(c, hub, a, ln, s * 0.075, 1.2, 1.3, -0.35 * math.sin(a), rng.uniform(0.7, 0.95),
+                         forward=0.3, w=1.8)
         return c.done()
-    # the twig up the cell, forking low into four long, narrow brushes that turn up at their tips, sky between them
+    # the twig up the cell, forking low into five long, narrow brushes that turn up at their tips, sky between them
     # (wide enough apart that the gaps stay open three mip levels down, where a pine draws 10 to 20 m off)
     base = (s * 0.5, s * 0.97)
     hub = (s * 0.5 + rng.uniform(-12, 12), s * 0.86)  # low: the brushes start at the card's foot, on their tuft
     c.line(base, hub, 10, (0.5, 0.4, 0.33))
-    n = 4
+    n = 5
     for k in range(n):
-        a = -1.05 + 2.1 * k / (n - 1) + rng.uniform(-0.08, 0.08)
-        ln = s * rng.uniform(0.5, 0.62) * (1.0 - 0.2 * abs(a) / 1.05)
-        needle_shoot(c, hub, a, ln, s * 0.062, 0.9, 0.95, -0.5 * a, rng.uniform(0.7, 0.95), forward=0.5, w=3.5)
+        a = -1.1 + 2.2 * k / (n - 1) + rng.uniform(-0.08, 0.08)
+        ln = s * rng.uniform(0.5, 0.62) * (1.0 - 0.2 * abs(a) / 1.1)
+        # hair-thin needles splayed wide off the shoot, so it reads as a bristly brush, never a frond of leaflets
+        needle_shoot(c, hub, a, ln, s * 0.075, 1.2, 1.3, -0.5 * a, rng.uniform(0.62, 0.85), forward=0.3, w=1.8)
     return c.done()
 
 

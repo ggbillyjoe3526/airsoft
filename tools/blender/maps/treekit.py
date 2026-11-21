@@ -152,6 +152,8 @@ class Tree:
         self.bark_tile = 1.0      # m of bark a tile of its map spans (WQ1)
         self.card_floor = -1e9    # no leaf card hangs lower (m): over head height, as the crown (WQ1)
         self.card_shift = 1.0     # how far fit_cards may move a card back in, a share of half its length (WQ1)
+        self.card_reach = 1e9     # how far a card's middle may lie from its clump's, in the clump's radii (WQ1)
+        self.card_homes: dict = {}  # each card's face index: its clump's middle and radii (WQ1)
         self.card_faces: list = []  # the indices in `faces` of the leaf cards (WQ1), kept inside `reach`
         self.reach: list = []       # the box (lo, hi) of the clumps the cards stand on, at their full size (WQ1)
         self.alpha = 1.0      # every vertex colour's alpha: the skyline's mask (vertex_paint.BODY 0: the piece's paint)
@@ -473,12 +475,14 @@ class Tree:
                 col = mix(under_col, top_col, h * (0.75 + 0.25 * (1.0 - v)))
                 ids.append(self.vert(p, col, crown_normal(p, out, centre, lean), cell_uv(cell, u, v)))
             self.card_faces.append(len(self.faces))
+            self.card_homes[len(self.faces)] = (c, r)
             self.faces.append((ids[0], ids[1], ids[2], ids[3]))
 
     def fit_cards(self) -> None:
         """Keeps the leaf cards inside the box of their clumps at full size and of everything else, and under the
         top of the rest (WQ1): a card past it is moved back in, or left out when that would move it more than
-        `card_shift` of half its length (so no card floats off its clump), and the crown keeps its bounds (a tree's top
+        `card_shift` of half its length, and one whose middle then lies over `card_reach` of its clump's radii from the
+        clump's middle is left out too (so no card floats off its clump); the crown keeps its bounds (a tree's top
         meets its block's top, PropDressConfig Lay.TREE)."""
         if not self.card_faces:
             return
@@ -503,11 +507,16 @@ class Tree:
                 shift[a] = max(lo[a] - low, 0.0) + min(hi[a] - high, 0.0)
             if shift is None or shift.length > reach * self.card_shift:
                 continue
+            home, radii = self.card_homes[k]
+            mid = sum(ps, Vector()) / len(ps) + shift - home
+            if Vector((mid.x / radii.x, mid.y / radii.y, mid.z / radii.z)).length > self.card_reach:
+                continue
             for i in f:
                 self.verts[i] = self.verts[i] + shift
             keep.append(f)
         self.faces = keep
         self.card_faces = []
+        self.card_homes = {}
 
     # ------------------------------------------------------------------ export
     def build(self, name: str = "", faces: list = None) -> bpy.types.Object:
