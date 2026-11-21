@@ -725,7 +725,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   anywhere a run (`friendly_mate_speed`) takes it during the flight, since it strafes either way, breaks for cover or
   sets off when its fight ends; the player straight on, as before. A miss flies on 25 m past the target and at least
   60 m from the shooter (`friendly_carry`: a level BB from the eye lands 40 to 53 m out, farther down a slope; the
-  browser's 25 m past the target alone let a near shot hit a teammate 33 m beyond it on Woodland).
+  browser's 25 m past the target alone let a near shot hit a teammate 33 m beyond it on Woodland), 3 m farther a
+  degree the aim points up (`friendly_carry_rise`, TV1: a burst 10° up a slope knocked out a teammate 71 m on).
 
 ## Maps and modes
 

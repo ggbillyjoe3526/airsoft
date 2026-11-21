@@ -365,7 +365,7 @@ static func _line_of_fire_blocked(b: Bot, w: BotWorld, eye: Vector3, dir: Vector
 	_level_in_line = not BotSenses.shot_clear(w.query, eye, _aim_point) or leaves_in_line(w, eye, _aim_point)
 	if _level_in_line:
 		return true
-	var reach := miss_reach(cfg, dist)
+	var reach := miss_reach(cfg, dist, dir)
 	var wall := -1.0
 	if w.query.ray_past_railings(eye, eye + dir * reach, _hit):
 		wall = _hit.fraction * reach
@@ -410,9 +410,10 @@ static func _stray_per_metre(b: Bot, cfg: BotConfig) -> float:
 
 
 ## How far a miss at a target `dist` m off flies on, a wall aside (m from the shooter): friendly_beyond_target past the
-## target, and friendly_carry at least.
-static func miss_reach(cfg: BotConfig, dist: float) -> float:
-	return maxf(dist + cfg.friendly_beyond_target, cfg.friendly_carry)
+## target, and friendly_carry at least, friendly_carry_rise farther a degree that `dir` (the aim) points up.
+static func miss_reach(cfg: BotConfig, dist: float, dir: Vector3 = Vector3.ZERO) -> float:
+	var up := rad_to_deg(asin(clampf(dir.normalized().y, 0.0, 1.0)))
+	return maxf(dist + cfg.friendly_beyond_target, cfg.friendly_carry + cfg.friendly_carry_rise * up)
 
 
 ## How far along `dir` a miss can still hit someone: miss_reach, or friendly_past_wall past a wall in the way (`wall`
@@ -422,7 +423,7 @@ static func miss_reach(cfg: BotConfig, dist: float) -> float:
 static func _friendly_reach(w: BotWorld, eye: Vector3, dir: Vector3, dist: float, wall: float, stray: float,
 		step: float = 0.0) -> float:
 	var cfg := w.cfg
-	var reach := miss_reach(cfg, dist)
+	var reach := miss_reach(cfg, dist, dir)
 	if wall < 0.0:
 		return reach
 	var back := minf(wall, cfg.friendly_wall_probe)

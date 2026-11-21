@@ -12,6 +12,7 @@ trees") and 6 ("i saw a bot disappear right infront of me even though they hadn'
 | 2026-11-20 | 1 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | 6/8 Retry | 6: a walk-off still faded in view; a walk-off needing a climb searched the whole grid. 8: no record, known-issue row or A/D and PTB figures |
 | 2026-11-20 | 2 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | 8: Woodland's figures not in; QA and performance hadn't read the walk-on and drops_reach |
 | 2026-11-20 | 3 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
+| 2026-11-21 | 3, CI fix | Opus 5.5 (build thread) | CI's Woodland night guard (a teammate hit 71 m on) | 7/8 Accept, then the DECISIONS line it asked for | – |
 
 Performance failed once inside attempt 1 (+4,045 CollisionShape3D nodes for the tiers); the tiers became shape owners
 on their surface's body (nodes 1,621 against main's 1,846).
@@ -36,6 +37,10 @@ on their surface's body (nodes 1,621 against main's 1,846).
 - **Walk-offs step down drops (NavGrid.find_route `drops`, drop_regions).** Subway's east platform had no way on foot
   to its dead zone: 59 walk-offs a probe run stalled and faded. Walk-off routes may take a climb's drop down, and are
   refused before any search where no drop leads to the goal's region.
+
+- **A miss aimed up counts farther (BotConfig.friendly_carry_rise, 3 m a degree).** CI's Woodland night guard
+  (Attack / Defend, seed 13) caught a bot's burst 10° up at a target on the slope knocking out a teammate 71 m on,
+  past the 60 m `BotCombat.miss_reach` allowed; an upward aim now holds fire for teammates that far.
 
 ## Balance
 

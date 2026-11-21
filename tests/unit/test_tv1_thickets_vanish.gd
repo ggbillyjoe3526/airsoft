@@ -364,3 +364,14 @@ func test_a_subway_track_walk_off_needing_a_climb_is_refused_without_a_search() 
 	assert_false(r.nav.find_route(dz, platform, route, false, null, true), "no drop goes up")
 	assert_eq(r.nav.searches, before, "refused before any search")
 	r.free_level()
+
+
+func test_a_miss_aimed_up_counts_farther_than_a_level_one() -> void:
+	# TV1's guard: a burst 10.4° up at a near target on Woodland's slope knocked out a teammate 71 m on.
+	var cfg := BotConfig.load_default()
+	var up := Vector3(0.45, 0.18, -0.88)
+	assert_eq(BotCombat.miss_reach(cfg, 10.0, Vector3(1.0, 0.0, 0.0)), cfg.friendly_carry, "level: as before")
+	assert_eq(BotCombat.miss_reach(cfg, 10.0, Vector3(1.0, -0.2, 0.0)), cfg.friendly_carry, "down: as before")
+	assert_gt(BotCombat.miss_reach(cfg, 10.0, up), 71.0, "10° up: past that teammate")
+	assert_eq(BotCombat.miss_reach(cfg, 80.0, up), maxf(80.0 + cfg.friendly_beyond_target,
+			BotCombat.miss_reach(cfg, 10.0, up)), "a far target: whichever is farther")

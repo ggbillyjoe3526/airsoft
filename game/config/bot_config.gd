@@ -162,6 +162,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## unless a wall stops the line first.
 @export var friendly_beyond_target: float = 25.0
 @export var friendly_carry: float = 60.0
+## Aimed up, a miss carries farther: friendly_carry grows this many metres a degree over level (TV1: on Woodland at
+## night a burst 10° up at a target on the slope knocked out a teammate 71 m on).
+@export var friendly_carry_rise: float = 3.0
 ## What the aim line meets is a wall only if it also stands this much higher there (m): BBs sail over low cover.
 @export var friendly_wall_clearance: float = 0.6
 ## That raised check looks from this far (m) before the point, to as far past it.
