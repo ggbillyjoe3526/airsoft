@@ -57,6 +57,12 @@ def bark_paint(rng):
 
 def main() -> None:
     tree = tk.Tree("oak", 4404)
+    # sprays of lobed leaves on the leaf sheet over each clump (WQ1)
+    tree.leafy = tk.Leafy(["oak_a", "oak_b"], "leaf_mass", card=0.8, card_min=0.9, card_max=1.8, per_m2=1.6,
+                          least=12, most=40, core=0.6, core_dark=0.55, tilt=(0.25, 0.75),
+                          under=1.0)
+    tree.card_floor = CLEAR + 0.02
+    tree.bark_tile = 1.1
     rng = tree.rng
     bark = bark_paint(rng)
     # the bole: buttress roots at the foot, a slight twist, swelling where it splits
@@ -93,7 +99,8 @@ def main() -> None:
         end = start + out * reach + UP * rise
         bend = out * 0.6 - UP * (0.3 if low else 0.7) + out.cross(UP) * rng.uniform(-0.6, 0.6)  # crooked: out, then up
         path = tk.curve(start, end, bend, 5)
-        tree.limb(path, [0.45 * (1.0 - 0.7 * i / 5) for i in range(6)], 8, bark, ridges=0.04, cap=False)
+        # each limb tapers on and closes to a point where it runs out (WQ1: no open, flat end past the leaves)
+        tree.limb(path, [0.45 * (1.0 - 0.7 * i / 5) for i in range(6)], 8, bark, ridges=0.04, cap=True)
         # forks off its outer half, out toward the crown's edge
         forks = 2 if k % 2 == 0 else 1
         for f in range(forks):
@@ -137,11 +144,12 @@ def main() -> None:
         h = 0.92 if k == 0 else 0.3 + 0.6 * (k - 0.5) / (N_INNER - 1)
         f = 0.0 if k == 0 else rng.uniform(0.5, 0.75) * dome(h)    # the first caps the crest
         put(tree, CROWN + Vector((math.cos(a) * CROWN_R.x * f, CROWN_R.y * h, math.sin(a) * CROWN_R.z * f)),
-            rng.uniform(2.6, 3.1), rng)
+            rng.uniform(2.6, 3.1), rng, core=True)
     # a dark leaf core behind them all, so what shows between the clumps is shaded leaves, not sky
     tree.blob(CROWN + Vector((0.0, CROWN_R.y * 0.45, 0.0)),
               Vector((CROWN_R.x * 0.64, CROWN_R.y * 0.42, CROWN_R.z * 0.64)), tk.mix(LEAF_UNDER, LEAF_MID, 0.35),
-              LEAF_UNDER, CROWN, level=2, lean=0.72, rough=0.2, flat_top=0.85, lumps=5, lump=0.25, tilt=0.2)
+              LEAF_UNDER, CROWN, level=2, lean=0.72, rough=0.2, flat_top=0.85, lumps=5, lump=0.25, tilt=0.2,
+              cards=False)
     tree.export(BUDGET, FOOT_R, CLEAR, crown=True)
 
 
@@ -152,7 +160,7 @@ def dome(y: float) -> float:
     return math.sqrt(1.0 - y * y) * (1.0 - SHOULDER_IN * max(0.0, (y - 0.3) / 0.7))
 
 
-def put(tree: tk.Tree, at: Vector, size: float, rng) -> None:
+def put(tree: tk.Tree, at: Vector, size: float, rng, core: bool = False) -> None:
     """A rounded foliage clump `size` m across at `at`, its underside kept over CROWN_FLOOR."""
     # uneven across and flatter than tall, knobbly with a few bulges: leafy masses, not balls (owner, 2026-11-09)
     r = Vector((size * rng.uniform(0.9, 1.15), size * rng.uniform(0.7, 0.8), size * rng.uniform(0.9, 1.15))) * 0.62
@@ -160,7 +168,7 @@ def put(tree: tk.Tree, at: Vector, size: float, rng) -> None:
     at.y = max(at.y, CROWN_FLOOR + r.y * 0.6)
     top = at.y > CROWN.y + CROWN_R.y * 0.25
     tree.blob(at, r, LEAF_TOP if top else tk.mix(LEAF_TOP, LEAF_MID, 0.5), LEAF_UNDER, CROWN, level=2, lean=0.72,
-              rough=0.22, flat_top=0.85, lumps=3, lump=0.45)
+              rough=0.22, flat_top=0.85, lumps=3, lump=0.45, core=core)
 
 
 if __name__ == "__main__":

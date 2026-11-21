@@ -23,6 +23,8 @@ import hardsurface as hs  # noqa: E402
 import bmesh  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
+mk.SURFACED = True  # Woodland's models carry their surfaces' UVs (WQ1, look_surface.gdshader)
+
 MAP = os.path.join(mk.ROOT, "data", "maps", "woodland.json")
 
 # Woodland's timber (sRGB), all off the teams' hues: yellow-leaning or dull (tests/unit/test_props.gd). Weathered

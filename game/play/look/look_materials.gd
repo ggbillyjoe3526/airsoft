@@ -5,6 +5,8 @@ class_name LookMaterials
 
 const VERTEX_SHADER := preload("res://game/play/look/look_vertex.gdshader")
 const CLEAR_SHADER := preload("res://game/play/look/look_clear.gdshader")
+const FOLIAGE_SHADER := preload("res://game/play/look/look_foliage.gdshader")
+const SURFACE_SHADER := preload("res://game/play/look/look_surface.gdshader")
 
 
 ## A material drawing a model's vertex colours in the shared light, `roughness` and `metallic` over all of it. With
@@ -30,6 +32,46 @@ static func printed(sheet: Texture2D, roughness: float, wear: float = 0.0) -> Sh
 	var m := vertex_colour(roughness, 0.0, Color.WHITE, false, wear)
 	m.set_shader_parameter(&"use_sheet", true)
 	m.set_shader_parameter(&"sheet", sheet)
+	return m
+
+
+## A material drawing a tree's, spruce's, fern's or bush's vertex colours (WQ1) times its detail maps in the shared
+## light: its leaves from `sheet` (the leaf sheet, cut out), its bark from `bark` and its normal map `relief`, a
+## second bark `bark_b` (with `relief_b`) blended in where the model says (look_foliage.gdshader); null maps draw
+## plain. `roughness` over all of it, worn as `vertex_colour`'s `wear`; with `by_custom` each instance's custom data
+## paints it as a PropDress model (DM1: look_vertex.gdshader's paint_by_custom). A leaf's cover grows `mip_cover` a mip
+## level, its cut-out read from no coarser a mip than `alpha_lod`.
+static func foliage(sheet: Texture2D, bark: Texture2D, relief: Texture2D, bark_b: Texture2D, relief_b: Texture2D,
+		roughness: float, wear: float = 0.0, by_custom: bool = true, mip_cover: float = 0.35,
+		alpha_lod: float = 16.0) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = FOLIAGE_SHADER
+	m.set_shader_parameter(&"mip_cover", mip_cover)
+	m.set_shader_parameter(&"alpha_lod", alpha_lod)
+	m.set_shader_parameter(&"sheet", sheet)
+	m.set_shader_parameter(&"bark", bark)
+	m.set_shader_parameter(&"bark_relief", relief)
+	m.set_shader_parameter(&"bark_b", bark_b)
+	m.set_shader_parameter(&"bark_b_relief", relief_b)
+	m.set_shader_parameter(&"use_bark_b", bark_b != null)
+	m.set_shader_parameter(&"roughness", roughness)
+	m.set_shader_parameter(&"wear", wear)
+	m.set_shader_parameter(&"paint_by_custom", by_custom)
+	return m
+
+
+## A material drawing a model's vertex colours with its surfaces' detail and relief (WQ1, look_surface.gdshader:
+## Woodland's structures and props; `surfaces` and `relief` texture arrays, a layer each), `roughness` over it, worn as
+## `vertex_colour`'s `wear`, each instance painted by its custom data (DM1). Null arrays draw it plain.
+static func surfaced(surfaces: TextureLayered, relief: TextureLayered, roughness: float, wear: float = 0.0) \
+		-> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = SURFACE_SHADER
+	m.set_shader_parameter(&"roughness", roughness)
+	m.set_shader_parameter(&"wear", wear)
+	m.set_shader_parameter(&"paint_by_custom", true)
+	m.set_shader_parameter(&"surfaces", surfaces)
+	m.set_shader_parameter(&"surfaces_relief", relief)
 	return m
 
 

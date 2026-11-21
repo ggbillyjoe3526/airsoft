@@ -34,6 +34,8 @@ import mapkit as mk  # noqa: E402
 import weathering as wt  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
+mk.SURFACED = True  # Woodland's models carry their surfaces' UVs (WQ1, look_surface.gdshader)
+
 hs = mk.hs
 
 ALONG = 1.0            # a section's length along the tunnel
