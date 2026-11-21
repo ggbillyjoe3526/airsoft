@@ -7,7 +7,8 @@ extends SceneTree
 ## how many frames' tick and views together took over Low's whole frame (LOW_FRAME_MS).
 ##   godot --headless --path . -s res://tools/team_bench.gd
 ## Arguments after `--`: `--seconds N` (match time measured, default 120), `--maps a,b` and `--sizes 5,8` (default
-## every field and 5 to 8), `--seed N` (default 1).
+## every field and 5 to 8), `--seed N` (default 1), `--mode <id>` (a MatchOptions mode: elimination, the default,
+## attack_defend or plant_the_bomb, whose respawns, flag and bomb run too).
 
 const SECONDS := 120.0
 ## Match time not counted at the start (the first frames' loads and the bots leaving their spawns).
@@ -36,20 +37,23 @@ func _run() -> void:
 		for s in args[at + 1].split(",", false):
 			sizes.append(s.to_int())
 	var seed_value := roundi(_arg_float(args, "--seed", 1.0))
+	at = args.find("--mode")
+	var mode := args[at + 1] if at >= 0 and at + 1 < args.size() else MatchOptions.MODE_ELIMINATION
 	PlayTuning.load_default().look.push_globals()
-	print("team_bench: %d s of match time a run, ms (mean / p95 / p99 / worst)" % roundi(seconds))
+	print("team_bench: %s, %d s of match time a run, ms (mean / p95 / p99 / worst)" % [mode, roundi(seconds)])
 	for map_id in maps:
 		for size in sizes:
-			await _bench(map_id, size, seed_value, seconds)
+			await _bench(map_id, size, seed_value, seconds, mode)
 	quit()
 
 
-func _bench(map_id: String, size: int, seed_value: int, seconds: float) -> void:
+func _bench(map_id: String, size: int, seed_value: int, seconds: float, mode: String) -> void:
 	var custom := CustomRules.new()
 	custom.team_size = size
 	var session := PlaySession.new()
 	session.settings = Settings.new(PlayTuning.new())
 	session.map_id = map_id
+	session.mode = mode
 	session.match_seed = seed_value
 	session.custom_rules = custom
 	session.autopilot = true

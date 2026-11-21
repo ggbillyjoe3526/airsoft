@@ -29,6 +29,14 @@ extends Resource
 @export var seen_range: float = 40.0
 @export var seen_angle: float = 60.0
 @export var seen_most: float = 3.0
+## A sight line through more than seen_leaves m of bush or seen_smoke m of a smoke bomb's cloud sees nothing (BP12: the
+## bots' own sight rules' depths, BotConfig.foliage_see_through and smoke_see_through), so a walk-off hidden in leaves
+## or smoke leaves on time.
+@export var seen_leaves: float = 0.6
+@export var seen_smoke: float = 0.8
+## Within this far (m, flat) leaves hide nothing, as a bush hides no one from a bot within BotConfig.close_awareness:
+## a walk-off at arm's length beside a bush still walks on out of sight.
+@export var seen_leaves_near: float = 2.5
 ## Crouching lowers everything above the hips this far (m).
 @export var crouch_drop: float = 0.62
 ## The head: a sphere covering head, cap and goggles.
