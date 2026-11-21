@@ -1985,6 +1985,15 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   stripe outside and the station's orange signs match them; every panel above the windows shows an advert, the next
   car's in a different order; the adverts stay sharp without shimmer; nothing flickers; Low holds 60 FPS inside a car.
 
+## Subway's lift sounds start on the press (LS1)
+
+- [ ] **Press by the door.** Step into a Subway lift, stop just inside the doorway and press the other stop at once.
+  Pass: the button beeps and the doors are heard straight after, a moment before they move; you ease back from the
+  doors as they start to shut; the car leaves with you in it.
+- [ ] **Heard only inside.** Call a lift from its landing and wait; then stand by a landing while a bot rides one.
+  Pass: from outside you hear only the buttons' beeps, never the doors, motor or chime; inside a car you hear all of
+  them.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

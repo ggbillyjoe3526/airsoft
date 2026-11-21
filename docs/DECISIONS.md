@@ -1573,6 +1573,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   'kings_cross.wav' should play inside a train. 'gap.wav' should play if the player is near (or inside a train)"). One
   never plays over the other. Timings and "near" (5 m) are defaults in `TrainAnnounceConfig`. Hidden like Dev ›
   Lasers: not on the wiki.
+- **A lift's car is heard only from inside it; its doors start on the press (owner, 2026-11-21, LS1: "should play just
+  after the player presses a button. should also only play when the player is inside the lift").** Its doors, motor,
+  chime and buzzer play only to a listener standing in that car; a button's beep is heard wherever it is in reach, so
+  calling one from its landing beeps and the car arrives quietly. The minimap's hearing and the sound cues take only
+  the beeps too, as they show what you hear. Bots still hear a car out to `LiftConfig.heard` (default: their hearing
+  and Subway's balance unchanged). A press from just inside the door shuts the doors on the next tick and eases the
+  presser in clear of them (`LiftConfig.step_in_speed`) while the leaves stand open for `shut_lead`.
 
 ## Save and settings storage
 

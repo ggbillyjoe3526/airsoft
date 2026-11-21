@@ -151,6 +151,9 @@ var _step: Array[StringName] = []
 ## A noisy prop's cue by NoiseConfig.Sound.
 var _prop: Array[StringName] = []
 var _body: BodyConfig = null
+## The level's lifts and their rules (LS1: a car is heard only from inside it, heard_in_car); null query: no lifts.
+var _query: WorldQuery = null
+var _lift_cfg: LiftConfig = null
 ## The slowest landing that thuds (m/s; FootstepConfig.land_min_speed): a landing's level and pitch grow from it.
 var _land_min: float = 0.0
 ## Kit rustle from the state, once per movement.
@@ -190,11 +193,13 @@ var _call_serial: int = 0
 ## voices and starts the map's ambience (its beds; its calls are timed in play); replica sounds come from the eyes of a
 ## character shaped as `body`. A profile with no power part (the Cyber Pistol's) plays its shot alone. `query` and
 ## `map` are the level's (either may be null: no map plays the default ambience); `footsteps` says how soft a landing
-## still thuds (null: the default).
+## still thuds (null: the default); `lifts` how big a lift's car is (null: the default).
 func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, query: WorldQuery, map: MapData,
-		footsteps: FootstepConfig = null, characters: int = 0) -> void:
+		footsteps: FootstepConfig = null, characters: int = 0, lifts: LiftConfig = null) -> void:
 	_cfg = cfg
 	_body = body
+	_query = query
+	_lift_cfg = lifts if lifts != null else LiftConfig.new()
 	# Each character's bolt cycle (_keep_bolt), sized for the match's characters before it starts.
 	_size_bolts(characters)
 	_land_min = footsteps.land_min_speed if footsteps != null else FootstepConfig.new().land_min_speed
@@ -425,8 +430,9 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 			GameEvent.Kind.DOOR:
 				_play(&"door_shut" if e.value == 1 else &"door_open", e.position, false, _cfg.door_gain, Kind.PROP,
 						BUS_EFFECTS, 1.0, _cfg.door_reach, null, true)
-			# A lift's cue (MT2): from its button, doorway or car, yours too, muffled by the walls between.
-			GameEvent.Kind.LIFT:
+			# A lift's cue (MT2): from its button, doorway or car, yours too, muffled by the walls between. A car's own
+			# sounds (its doors, motor, chime and buzzer) only from inside it (heard_in_car, LS1).
+			GameEvent.Kind.LIFT when heard_in_car(e, _query, _lift_cfg, state.lifts, _listener):
 				if e.value == Lifts.Cue.DEPART:
 					_lift_motor(e)
 				else:
@@ -851,6 +857,18 @@ func _plant_cue(e: GameEvent) -> void:
 	if working and _played_voice >= 0:
 		_plant_voice = _played_voice
 		_plant_serial = _field_pool.serial_of(_played_voice)
+
+
+## Whether `listener` hears lift cue `e`: a button's beep wherever it is in reach, but a car's own sounds (its doors,
+## motor, chime and buzzer) only standing in that car (LS1, owner 2026-11-21: the lift sound "should only play when
+## the player is inside the lift"). Nobody's ears, or no level: none of the car's.
+static func heard_in_car(e: GameEvent, query: WorldQuery, cfg: LiftConfig, lifts: LiftState,
+		listener: Character) -> bool:
+	if e.value == Lifts.Cue.BUTTON:
+		return true
+	if listener == null or query == null or e.target < 0:
+		return false
+	return Lifts.riding(query, cfg, lifts, listener.position) == e.target
 
 
 ## Where a lift's cue `e` plays from for ears at `ear`: a doorway's (UL3: its event's `direction` runs from the

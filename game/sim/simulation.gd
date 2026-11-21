@@ -151,6 +151,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		c.prev_pitch = c.pitch
 		if has_lifts:
 			lifts.carry(c, state.lifts)
+			lifts.step_in(c, state.lifts, dt)
 		_squad_order(c, commands, live, state.events)
 		_mag_hand_off(c, commands, sharing, state)
 		var in_play := Elimination.is_in_play(c)
