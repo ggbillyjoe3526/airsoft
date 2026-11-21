@@ -126,3 +126,77 @@ func test_the_remove_panels_links_sit_evenly_in_it() -> void:
 	await wait_physics_frames(2)
 	row = strip.action(&"keep").get_parent()
 	assert_eq(row.get_child_count(), 3)
+
+
+# --- QA: edges of the hide-in-cover rule ---
+
+
+func _smoke(m: Array, popped: bool, smoking: float) -> void:
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var g := state.grenades[0]
+	g.launch(Grenade.Kind.SMOKE, 0, Vector3(0.0, 0.0, -1.0), Vector3.ZERO)
+	g.resting = true
+	g.popped = popped
+	g.smoking = smoking
+
+
+func test_a_smoke_not_yet_popped_hides_nothing() -> void:
+	var m := _watched()
+	_smoke(m, false, 0.0)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	assert_true(Respawns.seen(m[2], state.characters, sim.tuning, sim.query, RayHit.new(), state.grenades))
+
+
+func test_a_cloud_thinned_away_hides_nothing() -> void:
+	var m := _watched()
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	_smoke(m, true, sim.tuning.grenades.smoke_time - 0.01) # almost gone: density near 0
+	assert_true(Respawns.seen(m[2], state.characters, sim.tuning, sim.query, RayHit.new(), state.grenades),
+			"a wisp is under seen_smoke")
+
+
+func test_a_cloud_still_growing_hides_less_than_a_full_one() -> void:
+	var m := _watched()
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	_smoke(m, true, 0.0) # popped, zero size
+	assert_true(Respawns.seen(m[2], state.characters, sim.tuning, sim.query, RayHit.new(), state.grenades))
+
+
+func test_a_bush_beside_the_line_and_a_map_without_foliage_do_not_hide() -> void:
+	var m := _watched()
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	assert_true(Respawns.seen(m[2], state.characters, sim.tuning, sim.query, RayHit.new()), "no foliage")
+	sim.query.foliage.add(Vector3(5.0, 0.0, -1.0), 1.0, 2.0)
+	assert_true(Respawns.seen(m[2], state.characters, sim.tuning, sim.query, RayHit.new()), "bush off the line")
+
+
+func test_a_bush_the_watcher_stands_at_the_edge_of_does_not_hide() -> void:
+	var m := _watched()
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	# a thin bush right at the watchers' feet, the line barely clips its edge
+	sim.query.foliage.add(Vector3(0.9, 0.0, -6.0), 1.0, 2.0)
+	assert_true(Respawns.seen(m[2], state.characters, sim.tuning, sim.query, RayHit.new()))
+
+
+func test_zero_wait_respawns_at_once_with_smoke_around() -> void:
+	var m := _watched()
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var c: Character = m[2]
+	sim.tuning.rounds.respawn_delay = 0.0
+	sim.tuning.rounds.defender_respawn_delay = 0.0
+	_smoke(m, true, sim.tuning.grenades.smoke_grow + 1.0)
+	var cmds: Array[PlayerCommand] = []
+	for i in 4:
+		cmds.append(PlayerCommand.new())
+	for i in 600:
+		sim.step(state, cmds, DT)
+		if Elimination.is_in_play(c):
+			break
+	assert_true(Elimination.is_in_play(c), "it never sticks")
