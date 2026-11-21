@@ -10,7 +10,8 @@ player presses a button. should also only play when the player is inside the lif
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-21 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | check 1: a press from inside while the doors open waited door_time + dwell |
-| 2026-11-21 | 2 | Opus 5.5 (build thread) | ✓ | – | – |
+| 2026-11-21 | 2 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | check 1: with another rider aboard, a press while opening still waited the dwell |
+| 2026-11-21 | 3 | Opus 5.5 (build thread) | ✓ | – | – |
 
 ## Decisions
 
@@ -24,11 +25,12 @@ player presses a button. should also only play when the player is inside the lif
   until `step_in_gap` 0.01 m clear (`Lifts.step_in`, after carry). The doorway turns solid to bodies once nobody is
   in it (`LiftState.sealed`); with nobody in it that is at the shut's start, as before. Should someone aboard still
   stand in it as the lead ends, the leaves wait for them; someone walking into it from outside before it is sealed
-  opens the doors again (heard), the call kept. The car still leaves door_time after the shut starts.
-- **A press from inside while the doors open, alone aboard, shuts them again from where they stand** (critic,
-  attempt 1): the shut is heard on the press, the leaves stand still through the lead (a shut never opens them
-  further) and meet in the rest. With others aboard the doors open and wait the dwell as before (default), so
-  whoever came to get out there can; the press is kept for after.
+  opens the doors again (heard), the call kept. A shut from fully open still leaves door_time after it starts.
+- **A press from inside while the doors open shuts them again from where they stand** (critic, attempts 1 and 2),
+  whoever else is aboard, as a press standing open shuts them at once (`panel_dwell` 0): the shut is heard on the
+  press, the leaves stand still through the lead (a shut never opens them further) and meet in the rest, so the car
+  leaves `shut_lead + shut_time × open` after the press. Not with anyone hit aboard or too many, who keep it open
+  anyway.
 - **A car is heard only from inside it** (owner ruling, `docs/DECISIONS.md` › Audio): `SimAudio.heard_in_car` plays
   its doors, motor, chime and buzzer only to a listener standing in that car; a button's beep wherever in reach.
   Calling a lift from its landing now beeps, and the car arrives quietly.

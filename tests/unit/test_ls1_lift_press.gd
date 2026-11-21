@@ -285,7 +285,7 @@ func test_a_press_from_inside_while_the_doors_open_shuts_them_again_from_where_t
 	assert_true(spec.holds(me.position, state.lifts.y[i], cfg), "with the presser aboard")
 
 
-func test_with_others_aboard_a_press_while_the_doors_open_lets_them_open_and_wait() -> void:
+func test_with_another_rider_aboard_a_press_while_the_doors_open_shuts_them_again_too() -> void:
 	var m := _match(2)
 	var sim: Simulation = m[0]
 	var state: GameState = m[1]
@@ -300,7 +300,6 @@ func test_with_others_aboard_a_press_while_the_doors_open_lets_them_open_and_wai
 		_step(sim, state, 1, i)
 		guard += 1
 	assert_eq(state.lifts.stop[i], 1 - k)
-	var ticks := _step(sim, state, roundi(cfg.door_time / DT) + 2, i, Vector2i(i, k))
-	assert_eq(_first(ticks, Lifts.Cue.SHUTTING), -1, "the other rider may walk out first")
-	assert_eq(state.lifts.phase[i], LiftState.Phase.OPEN)
-	assert_true(state.lifts.called(i, k), "the press kept for after the wait")
+	var ticks := _step(sim, state, 1, i, Vector2i(i, k))
+	assert_eq(_first(ticks, Lifts.Cue.SHUTTING), 0, "as a press standing open would: heard on the press")
+	assert_eq(state.lifts.phase[i], LiftState.Phase.SHUTTING)

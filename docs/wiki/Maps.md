@@ -178,7 +178,7 @@ One team starts in the ticket hall at the west end, the other down in the runnin
   ordinary stair with a half landing, the spiral stair straight down to the south platform, and the two **lifts**.
   A lift has two stops, the hall and the platforms, and takes 4 seconds. Call it from its landing (**CALL LIFT [G]**), or step in and
   press the stop you want on its panel (**GO TO TICKET HALL [G]**): from inside, the doors start to shut as you press,
-  even standing right by them (you step back from the doors as they shut) or while they open with you alone aboard,
+  even standing right by them (you step back from the doors as they shut) or while they are still opening,
   and they never shut on anyone in the
   doorway from outside. Inside the car you hear the doors start a moment before they move, the motor, and the chime
   and the doors opening as it arrives; outside a car you hear only its buttons.

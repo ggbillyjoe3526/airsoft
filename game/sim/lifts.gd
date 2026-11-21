@@ -5,7 +5,7 @@ extends RefCounted
 ## car stands at a stop with its doors open; called elsewhere it waits LiftConfig.dwell after opening (panel_dwell once
 ## its own panel is pressed), shuts its doors (door_time: heard shut_lead before the leaves move), rides to the nearest
 ## called stop ahead of the way it last went (floor_time a stop), stopping on the way at any stop called meanwhile, and
-## chimes and opens them; a stop pressed on its panel while they open, alone aboard, shuts them again (LS1).
+## chimes and opens them; a stop pressed on its panel while they open shuts them again from where they stand (LS1).
 ## Its doors never shut on a body in the doorway from outside the car, nor with anyone hit aboard (they walk off), nor
 ## with more than `capacity` aboard (it buzzes); one aboard but still in the doorway steps in as they start to shut
 ## (step_in, LS1), and one walking into it from outside before it is sealed opens them again. Its riders rise and fall
@@ -310,10 +310,10 @@ func _press_button(i: int, k: int, c: Character, state: GameState) -> void:
 		# From inside, standing open: the doors shut now (LiftConfig.panel_dwell), not after the wait for walkers-out.
 		if inside and lifts.phase[i] == LiftState.Phase.OPEN:
 			lifts.left[i] = minf(lifts.left[i], _cfg.panel_dwell)
-		# From inside, opening, alone aboard: they shut again from where they stand, heard on the press (owner,
-		# 2026-11-21). With others aboard they open and wait the dwell, so whoever came to get out here can.
-		elif inside and lifts.phase[i] == LiftState.Phase.OPENING and aboard(i, lifts, state.characters) == 1 \
-				and Elimination.is_in_play(c):
+		# From inside, opening: they shut again from where they stand, heard on the press, as a press standing open
+		# shuts them at once (docs/records/LS1.md). Not with anyone hit aboard or too many: those keep it open anyway.
+		elif inside and lifts.phase[i] == LiftState.Phase.OPENING and not _hit_aboard(i, lifts, state.characters) \
+				and aboard(i, lifts, state.characters) <= _cfg.capacity:
 			_start_shut(i, state, _cfg.shut_lead + _cfg.shut_time() * lifts.doors[i])
 		return
 	match lifts.phase[i]:
