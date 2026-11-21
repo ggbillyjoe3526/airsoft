@@ -61,11 +61,10 @@ void look_surface(float kind, vec3 at, vec3 n, inout vec3 col, inout float rough
 	// The pattern's plane and a pixel's size on it, before the branches. look_vertex calls this only for a kind, which
 	// is the same over each whole triangle, so every pixel of a quad takes the same way and fwidth is sound.
 	vec2 p = surface_plane(at, n);
-	// a pixel's size on the face: the mean of its two ways softens the pattern's edges (a face seen edge-on is fine
-	// across, coarse along); the fade reads the finer way, so a seat's top seen at a glance keeps its pattern
+	// a pixel's size on the face: the mean of its two ways (a face seen edge-on is fine across, coarse along); the
+	// pattern softens and fades by it, so it never sparkles far off or at a glance
 	vec2 fw = fwidth(p);
 	float pixel = sqrt(max(fw.x * fw.y, 1e-12));
-	float near = max(min(fw.x, fw.y), 1e-6);
 	if (k == 1) {
 		rough = 0.26;
 		spec = 0.55;
@@ -74,7 +73,7 @@ void look_surface(float kind, vec3 at, vec3 n, inout vec3 col, inout float rough
 		metal = 0.35;
 		spec = 0.6;
 	} else if (k == 3) {
-		float fade = smoothstep(0.006, 0.02, near);
+		float fade = smoothstep(0.007, 0.022, pixel);
 		vec3 woven = col * (1.0 + SURFACE_RING_AVERAGE);
 		// far off the rings are under a pixel: their average alone, none of their work
 		if (fade < 1.0) {
@@ -90,7 +89,7 @@ void look_surface(float kind, vec3 at, vec3 n, inout vec3 col, inout float rough
 		spec = 0.25;
 		worn = 0.2;
 	} else if (k == 4) {
-		float fade = smoothstep(0.004, 0.012, near);
+		float fade = smoothstep(0.003, 0.009, pixel);
 		vec3 speckled = col * (1.0 + SURFACE_FLECK_AVERAGE);
 		if (fade < 1.0) {
 			float cell = 0.022;

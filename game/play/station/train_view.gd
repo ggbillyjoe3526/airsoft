@@ -21,6 +21,7 @@ var _floor_copies: Dictionary = {}
 var _lamps: ShaderMaterial = null
 var _leds: ShaderMaterial = null
 var _glass: ShaderMaterial = null
+var _screen_glass: ShaderMaterial = null
 ## The flickering strips: each one's instance in the strips' MultiMesh, the station lamp it flickers with, its level as
 ## last set (64-bit, as RoofView keeps its own), and the roof that steps them.
 var _flicker_strips: PackedInt32Array = PackedInt32Array()
@@ -52,6 +53,8 @@ static func build(map: MapData, look: TrainLook, roof: RoofConfig = null) -> Tra
 	view._leds = _glow(look.led_colour * look.led_energy)
 	view._glass = LookMaterials.clear_colour(look.glass_roughness)
 	view._glass.set_shader_parameter(&"opacity", look.glass_opacity)
+	view._screen_glass = LookMaterials.clear_colour(look.glass_roughness)
+	view._screen_glass.set_shader_parameter(&"opacity", look.screen_opacity)
 	view._placed = placed
 	view._lights_path = look.lights
 	for path: String in placed:
@@ -62,14 +65,17 @@ static func build(map: MapData, look: TrainLook, roof: RoofConfig = null) -> Tra
 	return view
 
 
-## Model `path`'s material: the strips' and the LEDs' glow, the windows' and the draft screens' glass, else the props'.
+## Model `path`'s material: the strips' and the LEDs' glow, the windows' glass, the draft screens' (a little more
+## opaque), else the props'.
 func _material_of(look: TrainLook, path: String) -> Material:
 	if path == look.lights:
 		return _lamps
 	if look.leds.values().has(path):
 		return _leds
-	if path == look.windows or path == look.screens or path == look.door_glass:
+	if path == look.windows or path == look.door_glass:
 		return _glass
+	if path == look.screens:
+		return _screen_glass
 	return _material
 
 
@@ -154,7 +160,7 @@ func boxes() -> Array[AABB]:
 
 ## The materials drawn, to warm their shaders before play.
 func materials() -> Array[Material]:
-	return [_material, _lamps, _leds, _glass]
+	return [_material, _lamps, _leds, _glass, _screen_glass]
 
 
 ## Where car `car`'s models stand: its middle on its floor, turned about up when it is.
@@ -216,7 +222,7 @@ func _add(path: String, mesh: Mesh, transforms: Array, material: Material) -> vo
 	var v := MultiMeshInstance3D.new()
 	v.name = path.get_file().get_basename().capitalize().replace(" ", "")
 	v.multimesh = mm
-	if material == _lamps or material == _leds or material == _glass:
+	if material == _lamps or material == _leds or material == _glass or material == _screen_glass:
 		v.material_override = material
 		v.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	else:

@@ -92,6 +92,7 @@ SEAT_H = 0.45         # the seat blocks' height and depth (layout.py)
 SEAT_D = 0.52         # the seat cushion's depth, deeper than its back (the owner, 2026-11-12: "slightly longer")
 COVE_Y = 1.95         # the cove of advert frames, from the wall at this height to COVE_Z at the ceiling
 COVE_Z = 1.15
+LAMP_Z = (0.97, 1.11)  # the ceiling's two lamp lines, along the coves' top edges (TQ1: the photos' light lines)
 POLE_R = 0.018
 POLE_Z = 1.22         # the poles stand over the seats' front edge
 RAIL_Y = 1.98
@@ -117,8 +118,8 @@ BUDGET = {"train_body": 18000, "train_screens": 120, "train_door": 640, "train_d
 # owner's photos (TQ1). All white, grey or near it but the orange band along the sides, a worn burnt orange (the owner,
 # 2026-11-12: "give the trains an orange stripe"), the one colour near a team's hue, and the poles in the same.
 COLOURS = {
-    "body": 0xE6E6E2, "body_lo": 0xD6D6D2, "seam": 0x9A9A96, "rubber": 0x2C2B2E, "glass": 0x6E787E,
-    "glass_hi": 0x46505A, "skirt": 0x3B3936, "under": 0x262523, "steel": 0x8A8A88, "pole": 0xC0652F,
+    "body": 0xE6E6E2, "body_lo": 0xD6D6D2, "seam": 0x9A9A96, "rubber": 0x2C2B2E, "glass": 0x3F484E,
+    "glass_hi": 0x66707A, "glass_lo": 0x30383D, "frost": 0xC8CCCC, "skirt": 0x3B3936, "under": 0x262523, "steel": 0x8A8A88, "pole": 0xC0652F,
     "inner": 0xDAD6CE, "fleck": 0x9C9A96, "fleck_lo": 0x67666A, "poster_b": 0xB3B891, "poster_c": 0x9A968C,
     "inner_lo": 0xBDB9B1, "trim": 0x9E9B95, "floor": 0x4A4B50, "light": 0xF4ECDA,
     "vent": 0x77756F, "poster": 0xE4E1DA, "frame": 0x5B5A5C, "seat": 0x5C5D62, "seat_dot": 0x7A7D88,
@@ -141,7 +142,7 @@ KINDS = {
     "pole": 1, "steel": 2,
     "seat": 3,
     "floor": 4,
-    "glass": 5, "glass_hi": 5, "mask": 5, "mask_in": 5, "mask_lit": 5, "screen": 5,
+    "glass": 5, "glass_hi": 5, "glass_lo": 5, "mask": 5, "mask_in": 5, "mask_lit": 5, "screen": 5,
     "rubber": 6, "bellows": 6,
     "alu": 7,
 }
@@ -641,6 +642,45 @@ def windows() -> list:
     return out
 
 
+def far_pane(m: Model, s: float, a: float, b: float) -> None:
+    """A far-side window's dark glass seen from inside (TQ1): in strips across, each on the wall's lean at its own
+    height, so what lies on it follows it; the tunnel's dark low in it, and the car's lamps caught in it as a slanting
+    pale band and a thin one beside it, 2 mm in front. Its outline is framed's last ring (the lining's lip), edge for
+    edge."""
+    inset = 0.04
+    ring = [q for q, _ in rounded(a + inset, b - inset, SILL + inset, HEAD - inset, max(WIN_R + 0.02 - inset, 0.02),
+                                  WIN_SEG)]
+    ys = sorted({round(y, 6) for _, y in ring} | {round(y, 6) for y in breaks([SILL + 0.3], SILL + inset,
+                                                                               HEAD - inset, 0.1)})
+
+    def across(y: float) -> tuple:
+        xs = []
+        for (xa, ya), (xb, yb) in zip(ring, ring[1:] + ring[:1]):
+            if min(ya, yb) - 1e-9 <= y <= max(ya, yb) + 1e-9 and abs(yb - ya) > 1e-9:
+                xs.append(xa + (xb - xa) * (y - ya) / (yb - ya))
+            elif abs(y - ya) < 1e-9:
+                xs.append(xa)
+        return min(xs), max(xs)
+
+    def at(x: float, y: float, d: float) -> tuple:
+        return (x, y, s * (zin(y) - 0.035 - d))
+
+    for ya, yb in zip(ys, ys[1:]):
+        (la, ra), (lb, rb) = across(ya), across(yb)
+        paint = "glass_lo" if (ya + yb) * 0.5 < SILL + 0.3 else "glass"
+        m.poly([at(la, ya, 0.0), at(ra, ya, 0.0), at(rb, yb, 0.0), at(lb, yb, 0.0)], (0, 0, -s), paint)
+    w = b - a
+    y0, y1 = SILL + 0.36, HEAD - 0.12
+    for u0, u1 in ((0.22, 0.36), (0.4, 0.43)):
+        cuts = [y for y in ys if y0 < y < y1]
+        rows = [y0] + cuts + [y1]
+        for ya, yb in zip(rows, rows[1:]):
+            ta, tb = (ya - y0) / (y1 - y0), (yb - y0) / (y1 - y0)
+            sa, sb = a + w * (u0 + 0.14 * ta), a + w * (u0 + 0.14 * tb)
+            m.poly([at(sa, ya, 0.002), at(sa + w * (u1 - u0), ya, 0.002), at(sb + w * (u1 - u0), yb, 0.002),
+                    at(sb, yb, 0.002)], (0, 0, -s), "glass_hi")
+
+
 def side(m: Model, s: float, screens: "Glow", panes: "Glow | None" = None) -> None:
     """One side, outer skin and inner, the platform's (s = 1) or the far one. With `panes` its windows are see-through
     (the owner, 2026-11-12: "can the player see through them?"): open through the wall, a reveal between the frame and
@@ -744,7 +784,8 @@ def side(m: Model, s: float, screens: "Glow", panes: "Glow | None" = None) -> No
     lining = [(0, 0, "inner"), (0.0, -0.01, "inner_lo"), (0.04, -0.035, "trim")]
     for (a, b), ring in zip(wins, outer_rings):
         if panes is None:
-            framed(m, a, b, SILL, HEAD, lambda y: s * zin(y), -s, lining, "glass", r=WIN_R + 0.02)
+            framed(m, a, b, SILL, HEAD, lambda y: s * zin(y), -s, lining, None, r=WIN_R + 0.02)
+            far_pane(m, s, a, b)
             continue
         # see-through: the lining's lip runs on to the frame's inset, the reveal joins them, the glass in the frame
         inner_ring = framed(m, a, b, SILL, HEAD, lambda y: s * zin(y), -s, lining + [(0.05, -0.035, "trim")], None,
@@ -855,23 +896,27 @@ def cove_adverts(m: Model, s: float, a: float, b: float, i: int) -> None:
 
 def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow) -> None:
     """A draft screen at a seat's end, in the plane x (its doorway face) running f * 0.045 thick away from the door."""
-    t = 0.045
+    t = 0.03
     front = IN_Z - SEAT_D + 0.04
     low = 0.95
-    # the white panel: upright from the floor, its top rounding down at the front over the seat's corner
-    panel = [(IN_Z, 0.0), (front, 0.0), (front, low - 0.1)]
-    for k in range(1, 5):
-        u = 0.5 * math.pi * k / 4
-        panel.append((front + 0.1 * (1 - math.cos(u)), low - 0.1 + 0.1 * math.sin(u)))
+    # the slim white base (the photos': a curved panel, not a cabinet): upright from the floor on a chamfered foot,
+    # its front rounding back under the glass
+    rb = 0.12
+    panel = [(IN_Z, 0.0), (front + 0.03, 0.0), (front, 0.08), (front, low - rb)]
+    for k in range(1, 7):
+        u = 0.5 * math.pi * k / 6
+        panel.append((front + rb * (1 - math.cos(u)), low - rb + rb * math.sin(u)))
     panel.append((IN_Z, low))
     for xx, ff in ((x, -f), (x + f * t, f)):
         m.poly([(xx, y, s * z) for z, y in panel], (ff, 0, 0), "inner")
     for (za, ya), (zb, yb) in zip(panel[1:], panel[2:]):
+        # each edge band faces out of the panel: square to its run, away from the wall
+        dz, dy = zb - za, yb - ya
         m.poly([(x, ya, s * za), (x + f * t, ya, s * za), (x + f * t, yb, s * zb), (x, yb, s * zb)],
-               (0, ya + yb - 2 * (low - 0.1), -s * 0.3), "inner")
+               (0, dz, -s * dy), "inner")
     # its foot, a dark kick strip round the panel's front
-    m.poly([(x - f * 0.002, 0.0, s * (front + 0.02)), (x - f * 0.002, 0.0, s * IN_Z), (x - f * 0.002, 0.08, s * IN_Z),
-            (x - f * 0.002, 0.08, s * (front + 0.02))], (-f, 0, 0), "plinth")
+    m.poly([(x - f * 0.002, 0.0, s * (front + 0.035)), (x - f * 0.002, 0.0, s * IN_Z), (x - f * 0.002, 0.07, s * IN_Z),
+            (x - f * 0.002, 0.07, s * (front + 0.035))], (-f, 0, 0), "plinth")
     # the glass over it, its top front corner round (radius rr), in a steel frame: a tube up its front and over its
     # top into the wall, a flat bar along its foot
     top, rr = 1.6, 0.2
@@ -883,6 +928,20 @@ def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow) -> None:
         ring.append((zf + rr * (1 - math.cos(u)), top - rr + rr * math.sin(u)))
     ring.append((zw, top))
     screens.poly([(xm, y, s * z) for z, y in ring], (f, 0, 0), "pane")
+    # what makes the glass read (TQ1, the critic): its black edge seal inside the tube along its front and over its
+    # top, and a pale frosted band across it at eye height, each on both faces a hair off the glass
+    cz, cy = zw - 0.2, (low + top) * 0.5
+    for d, ff in ((0.002, f), (-0.002, -f)):
+        for (za, ya), (zb, yb) in zip(ring[1:-1], ring[2:]):
+            def inward(z: float, y: float) -> tuple:
+                dz, dy = cz - z, cy - y
+                k = 0.016 / max(math.hypot(dz, dy), 1e-6)
+                return (z + dz * k, y + dy * k)
+            (ia, ja), (ib, jb) = inward(za, ya), inward(zb, yb)
+            m.poly([(xm + d, ya, s * za), (xm + d, yb, s * zb), (xm + d, jb, s * ib), (xm + d, ja, s * ia)],
+                   (ff, 0, 0), "rubber")
+        m.poly([(xm + d, 1.24, s * (zf + 0.02)), (xm + d, 1.24, s * zw), (xm + d, 1.29, s * zw),
+                (xm + d, 1.29, s * (zf + 0.02))], (ff, 0, 0), "frost")
     path = [(zf - 0.012, low)] + [(z - 0.012 * (1 - k / (len(ring) - 3)), y + 0.012 * (k / (len(ring) - 3)))
                                    for k, (z, y) in enumerate(ring[2:])]
     path[-1] = (IN_Z, top + 0.012)
@@ -890,15 +949,13 @@ def draft_screen(m: Model, s: float, x: float, f: float, screens: Glow) -> None:
         m.bar((xm, ya, s * za), (xm, yb, s * zb), 0.014, "pole", sides=8)
     m.box((min(x, x + f * t), low - 0.002, min(s * front, s * IN_Z)), (max(x, x + f * t), low + 0.025,
           max(s * front, s * IN_Z)), "steel", skip="-y")
-    # the passenger alarm on its doorway face: a dark panel, its yellow band, the handle and the call button
+    # on its doorway face, small as the photos': the passenger alarm (a yellow ring round its push) and the door's
+    # open button (a green ring round a pale push)
     xp = x - f * 0.003
-    m.rect_x(s * (IN_Z - 0.34), s * (IN_Z - 0.14), 0.52, 0.8, xp, -f, "frame")
-    m.rect_x(s * (IN_Z - 0.32), s * (IN_Z - 0.16), 0.74, 0.78, xp - f * 0.002, -f, "yellow")
-    disc(m, (xp - f * 0.004, 0.64, s * (IN_Z - 0.24)), 0.028, (-f, 0, 0), "rubber", 10)
-    disc(m, (xp - f * 0.006, 0.64, s * (IN_Z - 0.24)), 0.017, (-f, 0, 0), "seat_ring", 10)
-    # and the door's open button over it, a green ring round a pale push
-    disc(m, (xp - f * 0.002, 0.87, s * (IN_Z - 0.24)), 0.032, (-f, 0, 0), "button", 12)
-    disc(m, (xp - f * 0.005, 0.87, s * (IN_Z - 0.24)), 0.022, (-f, 0, 0), "seat_ring", 12)
+    disc(m, (xp, 0.72, s * (IN_Z - 0.16)), 0.03, (-f, 0, 0), "yellow", 12)
+    disc(m, (xp - f * 0.003, 0.72, s * (IN_Z - 0.16)), 0.018, (-f, 0, 0), "rubber", 10)
+    disc(m, (xp, 0.84, s * (IN_Z - 0.16)), 0.03, (-f, 0, 0), "button", 12)
+    disc(m, (xp - f * 0.003, 0.84, s * (IN_Z - 0.16)), 0.02, (-f, 0, 0), "seat_ring", 12)
 
 
 def body() -> None:
@@ -913,24 +970,16 @@ def body() -> None:
     for xa, xb in zip(xs, xs[1:]):
         for za, zb in zip(zs, zs[1:]):
             m.rect_y(xa, xb, za, zb, 0.0, 1, "floor")
-    # the ceiling: panels either side of two lamp strips and a vent strip down the middle
-    zc = [-COVE_Z, -0.62, -0.48, -0.12, 0.12, 0.48, 0.62, COVE_Z]
-    paints = ["inner", "light", "inner", "inner_lo", "inner", "light", "inner"]
+    # the ceiling: one smooth panel between two continuous lamp lines along the coves' top edges (TQ1, the photos)
+    zc = [-COVE_Z, -LAMP_Z[1], -LAMP_Z[0], 0.0, LAMP_Z[0], LAMP_Z[1], COVE_Z]
+    paints = ["inner", "light", "inner", "inner", "light", "inner"]
     for xa, xb in zip(xs, xs[1:]):
         for (za, zb), paint in zip(zip(zc, zc[1:]), paints):
             m.rect_y(xa, xb, za, zb, TOP, -1, paint)
-    # the vent strip's slots, and the air diffusers' slots along the ceiling's edges by the cove
-    for k in range(int(IN_X * 2 / 0.6)):
-        x = -IN_X + 0.3 + k * 0.6
-        m.rect_y(x - 0.16, x + 0.16, -0.07, 0.07, TOP - 0.003, -1, "trim")
-    for k in range(int(IN_X * 2 / 0.3)):
-        x = -IN_X + 0.15 + k * 0.3
-        for z in (-1.0, 1.0):
-            m.rect_y(x - 0.09, x + 0.09, z - 0.015, z + 0.015, TOP - 0.003, -1, "vent")
     # a speaker grille over each bay's middle, between the lamp strip and the cove: a rim round a grille of holes
     for a, b in bays():
         x = (a + b) * 0.5
-        for z in (-0.84, 0.84):
+        for z in (-0.5, 0.5):
             disc(m, (x, TOP - 0.003, z), 0.09, (0, -1, 0), "trim", 14)
             disc(m, (x, TOP - 0.005, z), 0.07, (0, -1, 0), "vent", 14)
             for i in range(-2, 3):
@@ -938,7 +987,7 @@ def body() -> None:
                     if i * i + j * j <= 5:
                         disc(m, (x + i * 0.025, TOP - 0.007, z + j * 0.025), 0.007, (0, -1, 0), "frame", 4)
     # the lamp strips' housings: a sloped aluminium lip down each side of each strip (TQ1)
-    for za, zb in ((-0.62, -0.48), (0.48, 0.62)):
+    for za, zb in ((-LAMP_Z[1], -LAMP_Z[0]), LAMP_Z):
         for z, d in ((za, -1), (zb, 1)):
             m.poly([(-IN_X, TOP - 0.002, z), (IN_X, TOP - 0.002, z), (IN_X, TOP - 0.03, z - d * 0.012),
                     (-IN_X, TOP - 0.03, z - d * 0.012)], (0, -0.5, -d), "alu")
@@ -2024,7 +2073,7 @@ def lights() -> None:
     the body's own; TrainView lays it twice a car, the second turned about, so each half can flicker on its own."""
     m = Model("train_lights")
     xs = breaks([], 0.0, IN_X - 0.05, 2.5)
-    for za, zb in ((-0.62, -0.48), (0.48, 0.62)):
+    for za, zb in ((-LAMP_Z[1], -LAMP_Z[0]), LAMP_Z):
         for xa, xb in zip(xs, xs[1:]):
             m.rect_y(xa + 0.02, xb - 0.02, za + 0.015, zb - 0.015, TOP - 0.004, -1, "light")
     m.finish()

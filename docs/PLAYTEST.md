@@ -1957,8 +1957,10 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
 
 - [ ] **Inside a car.** Subway on Low and on your usual preset: walk the north train end to end, then the south one.
   Pass: the seats read as padded with a woven pattern (grey with a few orange rings) up close and a plain soft grey
-  far off, never shimmering; poles and trims shine like steel, the sides like gloss paint; the floor is speckled;
-  the glass screens by the doors are see-through; nothing flickers; Low holds 60 FPS inside a car.
+  far off, never sparkling as you move; the poles and grab rails are gloss orange as your photos, the trims satin
+  steel, the sides gloss paint; the floor is charcoal with faint flecks; the far side's windows read as dark glass
+  with the lamps caught in them; the glass screens by the doors show their black edge and pale band; nothing flickers;
+  Low holds 60 FPS inside a car.
 
 ## Reporting what you find
 

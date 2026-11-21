@@ -1,6 +1,7 @@
 extends GutTest
 ## TQ1 QA: the subway's trains carry surface kinds (UV y >= 100) only in the train models; no other prop is read as a
-## kind; the draft screens are a car's one clear, shadowless instance inside its box; the shader includes its kinds.
+## kind; the draft screens are a car's one clear (a little more opaque than the windows), shadowless instance inside
+## its box; the shader includes its kinds.
 
 const PROPS := "res://assets/models/props/"
 const KIND_BASE := 100.0
@@ -81,7 +82,14 @@ func test_every_car_gets_one_screens_instance_in_clear_glass_with_no_shadow() ->
 	var v := view.view_of(look.screens)
 	assert_not_null(v)
 	assert_eq(v.cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF)
-	assert_eq(v.material_override, view.view_of(look.windows).material_override, "the windows' clear material")
+	# the windows' clear glass, a little more opaque (attempt 3: the critic found the screens invisible at 0.3)
+	var glass := v.material_override as ShaderMaterial
+	var windows := view.view_of(look.windows).material_override as ShaderMaterial
+	assert_not_null(glass)
+	assert_eq(glass.shader, windows.shader, "the windows' clear shader")
+	assert_almost_eq(float(glass.get_shader_parameter(&"opacity")), look.screen_opacity, 0.001)
+	assert_gt(look.screen_opacity, look.glass_opacity, "the screens read as panes")
+	assert_true(view.materials().has(glass), "warmed before play")
 	assert_ne(v.material_override, view.view_of(look.body).material_override)
 
 

@@ -1,13 +1,14 @@
 # TQ1 · Subway's trains in finer detail: what they are made of, padded seats, draft screens and adverts (Beta)
 
-**Review:** critic pending · qa Pass · performance Pass
+**Review:** critic pending (attempt 3) · qa pending (final head) · performance pending (final head)
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-21 | 1 | build thread | QA Pass, performance Pass | Retry 6/8 | fidelity to the photos (cab front a black void, moquette and floor tones, poles grey where the photos' are orange, far windows black), the body 4 mm past its bounds, a stale budget comment, the pictures' harness a copy |
-| 2026-11-21 | 2 | build thread | as attempt 1, tests re-run | pending | – |
+| 2026-11-21 | 2 | build thread | touched tests 79/79; QA and performance not re-run | Retry 6/8 | fidelity (draft screens invisible, far windows flat grey slabs, ceiling's dash slots, seat-end bases read as cabinets), PLAYTEST's pole line and the record's review claims, QA and performance on an older head |
+| 2026-11-21 | 3 | build thread | pending | pending | – |
 
 ## Goal
 
@@ -38,17 +39,25 @@ keep every model's bounds, collision and the layout, and keep Subway's orange st
   ceiling and two lamp lines) drawn on the glass, not through it: the cab end is solid in the field, so a see-through
   front would show players what neither they nor a bot can shoot. The side grille moved down the bilge so the body
   stays inside its 1.72 m (it stood 4 mm out).
+- **After the critic (attempt 3):** the ceiling one smooth panel with two continuous lamp lines along the coves' top
+  edges (the vent slots and diffusers went; the speakers moved inboard); the far side's windows drawn in strips on
+  the wall's lean, darker low, the car's lamps caught in them as two slanting pale bands; the draft screens a little
+  more opaque than the windows (TrainLook.screen_opacity 0.45) with a black edge seal and a pale frosted band; their
+  white bases slim (30 mm) on a chamfered foot, the alarm and door buttons small rings, not a dark panel. The
+  pattern's fade reads a pixel's mean size again (the finer way kept the work on at a glance and could sparkle).
+  The cove stays a straight slope: its adverts, the door heads, the end walls and the gangways are all cut to it.
 - **Pictures:** a scratch copy of hall_pictures.gd's harness with the trains' and station's shots, kept out of the
   repository (eye_pictures.gd renders named spots the same way).
 
 ## Verified
 
-- Tests: `tests/unit/test_tq1_trains_qa.gd` (QA, 7 tests), the train and props tests (team hues, lining) pass;
-  smoke test clean.
+- Tests: `tests/unit/test_tq1_trains_qa.gd` (QA, 7 tests), the train and props tests (team hues, lining) pass on the
+  final head; QA's smoke test ran on attempt 1's head (re-run with the final review).
 - Bounds: every rebuilt model inside its old box (the body ±1.720 m across, as before).
 - Pictures, before and after (lavapipe, in game): `art/blender/subway-trains/tq1/` in the project files.
 - Performance: about +19k triangles map-wide (seats), screens 6 x 112; MultiMesh, no new draw path.
 
 ## Left for the owner
 
-- The look on his card, and Low's frame time inside a car (seat shadows are the cost to watch): playtest N48.
+- The look on his card, and Low's frame time inside a car (seat shadows are the cost to watch): N48 in the owner's
+  checklist (project files, `playtest/0.1-beta2-checklist.md`) and docs/PLAYTEST.md's "Subway's trains up close".
