@@ -23,11 +23,11 @@ for example). And can you add adverts/posters to the signs above the windows ins
   (from, to, height); `shell()` leaves the wall out there (with a lintel over it; here the entrance block fills that).
   The hall's west wall opens 4.8 m wide and 3.2 m high on its middle, right behind the street team's start.
 - **The entrance** is one solid `wall` block behind the doorway (x -66.5 to -55, 4.8 x 5 x 11.5 m), drawn as one model
-  (`station_entrance.py`, 4,899 of 5,150 triangles, `PropDressConfig.models`): a tiled passage, a stair of 15 risers
-  and an escalator side by side climbing 2.6 m, a glass balustrade, the street exit at the top (pavement, kerb, road,
-  railing, lamp post and a painted street of shop fronts under the sky), a lit sign over the doorway (MORRIN STREET over WAY OUT and an
-  up arrow, in stroke letters) and a locked folding lattice gate at the block's face. Look only: spawns, nav, routes and cover are unchanged; the gate
-  is the block's face, so nobody walks, climbs or shoots through it.
+  (`station_entrance.py`, 4,899 of 5,150 triangles, `PropDressConfig.models`): a tiled passage, a stair of 15 risers and
+  an escalator side by side climbing 2.6 m, a glass balustrade, the street exit at the top (pavement, kerb, road,
+  railing, lamp post and a painted street of shop fronts under the sky), a lit sign over the doorway (MORRIN STREET over
+  WAY OUT and an up arrow, in stroke letters) and a locked folding lattice gate at the block's face. Look only: spawns,
+  nav, routes and cover are unchanged; the gate is the block's face, so nobody walks, climbs or shoots through it.
 - **Its lamps:** two lamps under its ceiling. A plain roof's lamp light reaches to `MapData.floor_under`; with no
   floor block under them it would fall back to the ground (0 m) and light 9 m too far. A lamp may now carry its own
   `floor` in the file (`MapData.roof_lamp_floors`, NAN when left out), which `RoofView.plain_reaches` takes first.
@@ -50,11 +50,11 @@ for example). And can you add adverts/posters to the signs above the windows ins
 
 ## Verified
 
-- Tests: `test_se1_entrance.gd` (8: the street and sign lit; the block solid and facing the hall, the doorway opening only onto it, no floor
-  past it, the lamps' floors, the file's `floor`, `plain_reaches` taking it, the model filling its block) and
-  `test_tq2_train_rails_adverts.gd` (7) and QA's `test_tq2_qa.gd` (5) with the train, fixtures, station, props,
-  assets and flicker files, 183/183 on attempt 2; 300 Subway tests before the merge. `test_tq1_trains_qa.gd` allows
-  kind 9.
+- Tests: `test_se1_entrance.gd` (8: the street and sign lit; the block solid and facing the hall, the doorway opening
+  only onto it, no floor past it, the lamps' floors, the file's `floor`, `plain_reaches` taking it, the model filling
+  its block) and `test_tq2_train_rails_adverts.gd` (7) and QA's `test_tq2_qa.gd` (5) with the train, fixtures, station,
+  props, assets and flicker files, 183/183 on attempt 2; 300 Subway tests before the merge. `test_tq1_trains_qa.gd`
+  allows kind 9.
 - Faces: `tools/coplanar_models.py fix` on the entrance and every train model; bounds unchanged.
 - Pictures, before and after (lavapipe, in game): `art/blender/subway-entrance/` and
   `art/blender/subway-trains/tq2/` in the project files.
