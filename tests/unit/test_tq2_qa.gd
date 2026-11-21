@@ -73,3 +73,16 @@ func test_only_the_entrance_carries_the_lit_kind() -> void:
 					strays.append(f)
 					break
 	assert_eq(strays.size(), 0, "no other prop is lit: %s" % [strays])
+
+
+func test_the_station_signs_keep_the_stripes_orange_whole() -> void:
+	# the owner (2026-11-21): the brighter orange "same for any other orange that appears": the printed name boards'
+	# orange is kept against the look's pull toward grey, as the trains' is
+	var cfg := StationFixturesConfig.new()
+	var m := StationFixtures._printed("res://assets/textures/station/signs.png", cfg, null) as ShaderMaterial
+	assert_not_null(m, "the sign sheet loads")
+	if m == null:
+		return
+	assert_true(m.get_shader_parameter(&"keep_stripe"), "its stripe's orange kept whole")
+	assert_eq(m.get_shader_parameter(&"stripe"), Color("#ea6a22"), "the trains' orange")
+	assert_true((m.shader.code as String).contains("keep_stripe"), "the shader reads it")

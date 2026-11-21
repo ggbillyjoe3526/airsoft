@@ -44,8 +44,13 @@ for example). And can you add adverts/posters to the signs above the windows ins
   collars, nothing doubled into the cove; the draft screens lose their orange tube and keep a black frame that holds
   the glass. Every end and gangway handle is a single D tube. The rails are their own models (`train_poles`,
   `train_end_rails`, `train_gangway_rails`): a car is about 17.4k triangles (17.8k before).
-- **Orange** #c0652f to **#d8692a** (hue 21.7, Beta 28): the train's stripe and poles, the station signs' stripe
-  (`signs.png` regenerated), the moquette's rings (`look_surface.gdshaderinc`), and the tests' Subway exemption.
+- **Orange** #c0652f to **#ea6a22** (hue 21.6, Beta 28): the train's stripe and poles, the station signs' stripe
+  (`signs.png` regenerated), the moquette's rings (`look_surface.gdshaderinc`), and the tests' Subway exemption
+  (`_stripe` also refuses anything brighter than the stripe, so Beta's #fa8c29 stays caught). After the critic's
+  attempt 2 (the poles still read rust brown in game: the look pulls every paint 40 % toward grey) the orange keeps
+  its whole colour: the trains' orange faces by vertex alpha (`train.py` FULL_COLOUR, TrainView's `keep_by_alpha`,
+  as Subway's safety yellow), the printed signs' orange pixels by hue (`look_vertex.gdshader` `keep_stripe`,
+  `StationFixturesConfig.stripe`). A pole's median pixel in render 05 went from 104,49,26 to 149,45,0.
 - **The street's daylight** (after the critic): a new surface kind 9, lit (`surface_kinds.py`,
   `look_surface.gdshaderinc`), glows by its own colour (`look_vertex.gdshader` `daylight_glow` 0.55): the street up
   the stair and the sign's letters, so the street reads as sunlit from the hall. Flanking buildings close the
