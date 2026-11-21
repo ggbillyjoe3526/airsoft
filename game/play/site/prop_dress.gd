@@ -17,6 +17,8 @@ const LIGHT_LIFT := 0.5
 const MIP_COVER := 0.35
 ## The coarsest mip a leaf card's cut-out is read from where PropDressConfig.model_alpha_lod names none (unlimited).
 const ALPHA_LOD := 16.0
+## A trimmed card's `trim_mip` when it never needs to open out: past any mip level a sheet has.
+const TRIM_NEVER_OPENS := 64.0
 
 ## By roughness (x), wear (y) and full colour (z, 1 or 0): the shared one and each model_roughness, model_wear or
 ## full_colour's.
@@ -127,6 +129,13 @@ func _material_of(model: StringName) -> ShaderMaterial:
 
 ## Model `model`'s textured material (PropDressConfig.model_barks, WQ1), one for each set of barks, mip cover, alpha
 ## mip, roughness and wear; its maps loaded once a dress.
+## The mip level a model's trimmed cards open out before (look_foliage.gdshader `trim_mip`, WF1, LeafTrim): the sheet's
+## `max_mip`, past which its cut-out would read coarser than the rectangles hold; never, for a model whose cut-out is
+## read no coarser than `alpha_lod` a level inside that (the pines), so its far cards stay trimmed.
+static func trim_mip_of(alpha_lod: float, trim: LeafTrimSheet) -> float:
+	return TRIM_NEVER_OPENS if alpha_lod + 1.0 <= trim.max_mip else trim.max_mip
+
+
 func _foliage_of(model: StringName) -> ShaderMaterial:
 	var barks: PackedStringArray = _cfg.model_barks[model]
 	var rough: float = _cfg.model_roughness.get(model, _cfg.roughness)
@@ -143,8 +152,7 @@ func _foliage_of(model: StringName) -> ShaderMaterial:
 				rough, wear, true, cover, lod)
 		var trim := _cfg.leaf_trim()
 		if trim != null:
-			# a trimmed card opens out before its cut-out reads coarser than its rectangle holds (WF1, LeafTrim)
-			(_textured[key] as ShaderMaterial).set_shader_parameter(&"trim_mip", trim.max_mip)
+			(_textured[key] as ShaderMaterial).set_shader_parameter(&"trim_mip", trim_mip_of(lod, trim))
 	return _textured[key]
 
 

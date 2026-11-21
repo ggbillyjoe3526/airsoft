@@ -194,7 +194,12 @@ func test_the_dress_draws_the_trimmed_crowns_and_lays_them_as_before() -> void:
 		assert_eq(dress.mesh_of(model), cfg.drawn_mesh_of(model), "%s drawn trimmed" % model)
 		assert_eq(dress.placed()[model].transforms, whole.placed()[model].transforms, "%s laid as before" % model)
 		var m := dress._material_of(model)
-		assert_eq(m.get_shader_parameter(&"trim_mip"), trim.max_mip, "%s opens out before the trim's mip" % model)
+		var lod: float = cfg.model_alpha_lod.get(model, PropDress.ALPHA_LOD)
+		if lod + 1.0 <= trim.max_mip:
+			assert_eq(m.get_shader_parameter(&"trim_mip"), PropDress.TRIM_NEVER_OPENS,
+					"%s (cut-out read no coarser than mip %d) stays trimmed far off" % [model, lod])
+		else:
+			assert_eq(m.get_shader_parameter(&"trim_mip"), trim.max_mip, "%s opens out before the trim's mip" % model)
 		for view in dress.views_of(model):
 			assert_eq(view.multimesh.mesh, cfg.drawn_mesh_of(model), "%s's every chunk draws it" % model)
 

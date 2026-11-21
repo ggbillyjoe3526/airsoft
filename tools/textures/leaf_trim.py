@@ -30,6 +30,7 @@ CUT = 0.5              # look_foliage.gdshader alpha_cut
 MIP_COVER = 0.35       # its mip_cover at the most any model sets it (PropDress.MIP_COVER)
 MAX_MIP = 6            # a cell eight texels across; the shader opens the card out before its cut-out reads coarser
 MARGIN = 4             # full-sheet texels
+UID = "uid://bwqcaehdoqvg"  # the resource's own, kept every run so the editor never rewrites it
 
 
 def mips(a: np.ndarray) -> list:
@@ -94,7 +95,7 @@ def main() -> None:
             print("cell %d,%d: %.2f of the cell" % (cx, cy, r[2] * r[3]))
             rects.append(r)
     lines = [
-        '[gd_resource type="Resource" script_class="LeafTrimSheet" load_steps=2 format=3]',
+        '[gd_resource type="Resource" script_class="LeafTrimSheet" load_steps=2 format=3 uid="%s"]' % UID,
         "",
         '[ext_resource type="Script" path="res://game/play/look/leaf_trim_sheet.gd" id="1"]',
         "",

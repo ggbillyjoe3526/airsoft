@@ -3,13 +3,14 @@
 The owner, 21 November: "also can you try improve performance of woodlands map while keeping as much visual
 detail/quality as possible? i love how it looks but i can fee the performance hit."
 
-**Review:** REVIEW_LINE
+**Review:** 2 critic runs · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-21 | 1 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | CRITIC_1 | |
+| 2026-11-21 | 1 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | 7/8 Retry | 8: the QA and performance reports weren't filed and `leaf_trim.py` wasn't in `tools/textures/README.md` |
+| 2026-11-21 | 2 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | 7/8 Accept | 8: `LeafTrim` and `LeafTrimSheet` weren't in `game/play/README.md` (added) |
 
 ## Goal
 
@@ -43,7 +44,8 @@ each change the look, so neither is used here.
 ## Verified
 
 - Pictures against main at three Woodland views on Low (software Vulkan, 960 x 540): differences over 8 levels on
-  2.5 % of pixels, the shading's interpolation across the moved corners; sky seen through crowns within 0.2 %; a zoom
+  3 to 4.5 % of pixels (over 32 on 0.6 to 1.4 %), the shading's interpolation across the moved corners (a card's
+  normals and colours are read at its trimmed corners, so they spread a little differently over it); sky seen through crowns within 0.2 %; a zoom
   on a far birch matches. Project files `art/woodland-wf1/`.
 - GPU time a frame on Low, two rounds each, main against this branch (software Vulkan, relative only): at 960 x 540
   547 to 497 ms (track by the oak), 306 to 251 (under the pines by a thicket), 787 to 736 (long view); at 1920 x 1080
@@ -63,6 +65,11 @@ each change the look, so neither is used here.
 
 - **Spruces, ferns and bushes stay as they are.** The spruce tiers' kites aren't flat quads and their needle cells
   are near whole; the fern and hazel cells are near whole too. There is nothing to trim.
+- **The pines' cards stay trimmed at every distance** (`PropDress.trim_mip_of`): their cut-out is read no coarser than
+  mip 2 (WQ1's `alpha_lod`), well inside what the rectangles hold, so they never need to open (the critic's note on
+  attempt 2).
+- **The levels of detail are ordered solid first too**; the performance review ran before that change, which touches
+  only the one-off build at load.
 - **Shadows draw the cards whole.** The light's view has no screen mip to open by; trimming them there would need a
   shadow-texel measure of its own (a later lever, Medium and up only).
 - **Thicket spruces' hidden lower tiers kept (considered, dropped).** Spruces deep in a thicket could lose their lower
