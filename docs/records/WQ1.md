@@ -4,13 +4,17 @@ The owner, 21 November: "Also improve the quality of woodland map models. Foliag
 leaves/branches. Trees should have better textures. Give me screenshots", then "I mean all models not just
 foliage/trees".
 
-**Review:** REVIEW_LINE
+**Review:** 9 critic runs · critic Retry 7/8 (the pines), shipped at the owner's call (decision card, 21 November) · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-ATTEMPT_ROWS
+| 2026-11-21 | 1 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | 7/8 Retry | 1: the pine crowns read as solid cores, not needles |
+| 2026-11-21 | 2 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | 7/8 Retry | 1: pine crowns too sparse once the cores went |
+| 2026-11-21 | 3 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | 7/8 Retry | 1: the needle tufts read as one smear, not separate brushes |
+| 2026-11-21 | 4 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | 7/8 Retry | 1: the grown pine read as a cloud, not shelves (massing) |
+| 2026-11-21 | 5 to 9 | Opus 5.5 (build thread) | ✓ (touched tests; CI the rest) | 7/8 Retry | 1: pine cards too large and too even; the critic wants more, smaller bottlebrush cards, 5 to 7 shelves on the grown pine and the leader ending inside the top. Everything else was accepted |
 
 QA failed once inside attempt 1: the surfaces arrays import as `CompressedTexture2DArray`, so the cast to
 `Texture2DArray` gave null and every structure drew plain; they are read as `TextureLayered` now (its 14 tests in
@@ -78,3 +82,7 @@ were; the woodpiles (RM2) are closed and untouched; Low keeps 60 FPS.
 ## Known issues left
 
 - Frame time on a real Low PC is unmeasured (lavapipe only): N47 asks the owner.
+- The pines: the critic's last runs still read the pine cards as broadleaf fans at play distance; the owner shipped them
+  to judge in play (decision card, 21 November). If they read wrong, the next step is the critic's list in Attempts.
+- The pine crowns read their cut-out from mip 2 (alpha_lod) so far cards keep a ragged edge; that can shimmer at
+  20 to 40 m: N47 asks the owner.
