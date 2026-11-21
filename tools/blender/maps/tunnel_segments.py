@@ -3,6 +3,12 @@ owner's photos (art/references/maps/subway/12-tunnel-segments): curved slabs sta
 by side, each on two concrete bearer blocks with timber packers between the layers; each segment's black gasket
 groove round its edges, a recessed bolt pocket at each end and two grout holes. Pale concrete, dusty; no markings.
 
+SQ1 (owner, 2026-11-21: every Subway model in finer detail) gave it the photos' shapes at about twice the
+triangles: each segment is now its real cross-section swept round the arc, its inner face's broad chamfered arrises
+and the outer face's smaller ones, a V groove up each side face with the black gasket in it; a bolt pocket in each
+side face near each end (a dark mouth over a lighter floor, so it reads as a recess), two grout holes and a lifting
+socket with its steel anchor ring on the inner face; the bearers' top edges chamfered under the timber packers.
+
 Its block (the platform's east end, 2 x 1.9 m and 1.3 m high, data/maps/subway.json) holds two stacks of four.
 
 Writes assets/models/props/tunnel_segments.glb, one vertex-coloured mesh filling x -1..1 (the segments' arc),
@@ -22,7 +28,7 @@ from works_kit import wt  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
 NAME = "tunnel_segments"
-BUDGET = 1500
+BUDGET = 3000
 HL, HD, HIGH = 1.0, 0.95, 1.3
 
 RADIUS = 2.6          # the segments' inner radius (a running tunnel's)
@@ -32,80 +38,111 @@ GAP = 0.18            # between the two stacks
 LAYERS = 4
 BEARER = 0.14
 PACKER = 0.075
-N = 11                # steps round each segment's arc
+N = 9                 # steps round each segment's arc
+CHAMFER = 0.022       # the inner face's chamfered edges (the photos' broad arrises)
+CHAMFER_OUT = 0.012   # the outer face's
+GROOVE = (0.58, 0.8)  # the gasket groove up each side face, as parts of the thickness from the inner face
+GROOVE_D = 0.014      # its depth into the side face
+
+wk.PAINT["gasket_rubber"] = 0x262626    # the black gasket in its groove round each segment
+wk.PAINT["pocket_dark"] = 0x5a5852      # the shadow inside a bolt pocket or a grout hole
+
+
+def profile(y0: float, y1: float) -> list:
+    """A segment's cross-section, (y, radius) round it: the inner face with its chamfers, a side face with the
+    gasket's V groove, the outer face, the other side face. Ends with the groove's corners' indices, for the paint."""
+    r0, r1, c, c2 = RADIUS, RADIUS + THICK, CHAMFER, CHAMFER_OUT
+    g0, g1 = RADIUS + THICK * GROOVE[0], RADIUS + THICK * GROOVE[1]
+    gm = (g0 + g1) * 0.5
+    return [(y0 + c, r0), (y1 - c, r0), (y1, r0 + c), (y1, g0), (y1 - GROOVE_D, gm), (y1, g1), (y1, r1 - c2),
+            (y1 - c2, r1), (y0 + c2, r1), (y0, r1 - c2), (y0, g1), (y0 + GROOVE_D, gm), (y0, g0), (y0, r0 + c)]
+
+
+GASKET = ((3, 4), (4, 5), (10, 11), (11, 12))   # the profile's edges in the grooves, painted black
 
 
 def segment(k: wk.Kit, y0: float, y1: float, z_low: float) -> None:
-    """One segment from y0 to y1, its inner face's lowest point at z_low, its ends up to the box's ends."""
+    """One segment from y0 to y1, its inner face's lowest point at z_low, its ends up to the box's ends: the profile
+    swept round the arc (flat facets, one a step), its radial ends flat; the gasket black in its grooves, a bolt
+    pocket in each side face near each end, two grout holes and a lifting socket with its steel anchor in the middle
+    of the inner face."""
     half = math.asin(HL / (RADIUS + THICK))   # the arc's half angle: its outer corners reach x = +-HL
     zc = z_low + RADIUS                         # the arc's middle
-    inner, outer = [], []
-    for i in range(N + 1):
-        a = -half + 2 * half * i / N
-        inner.append((RADIUS * math.sin(a), zc - RADIUS * math.cos(a)))
-        outer.append(((RADIUS + THICK) * math.sin(a), zc - (RADIUS + THICK) * math.cos(a)))
-    bm = k.bm
-    vi0 = [bm.verts.new(Vector((x, y0, z))) for x, z in inner]
-    vi1 = [bm.verts.new(Vector((x, y1, z))) for x, z in inner]
-    vo0 = [bm.verts.new(Vector((x, y0, z))) for x, z in outer]
-    vo1 = [bm.verts.new(Vector((x, y1, z))) for x, z in outer]
-    faces = []
-    for i in range(N):
-        faces.append(bm.faces.new((vi0[i], vi0[i + 1], vi1[i + 1], vi1[i])))    # the inner (top) face
-        faces.append(bm.faces.new((vo1[i], vo1[i + 1], vo0[i + 1], vo0[i])))    # the outer (bottom) face
-        faces.append(bm.faces.new((vo0[i], vo0[i + 1], vi0[i + 1], vi0[i])))    # the side at y0
-        faces.append(bm.faces.new((vi1[i], vi1[i + 1], vo1[i + 1], vo1[i])))    # the side at y1
-    faces.append(bm.faces.new((vi0[0], vi1[0], vo1[0], vo0[0])))
-    faces.append(bm.faces.new((vo0[N], vo1[N], vi1[N], vi0[N])))
-    import bmesh
-    bmesh.ops.recalc_face_normals(bm, faces=faces)
-    k._faces(faces, "concrete")
-    # the gasket groove: a dark band along each side face near the outer edge
+    prof = profile(y0, y1)
+
+    def at(a: float, y: float, rho: float) -> tuple:
+        return (rho * math.sin(a), y, zc - rho * math.cos(a))
+
+    angles = [-half + 2 * half * i / N for i in range(N + 1)]
+    faces = k.loft([[at(a, y, rho) for y, rho in prof] for a in angles], "concrete")
+    n = len(prof)
+    for i in range(N):  # the loft's faces run a ring's edges in order, one ring step at a time
+        for e0, _e1 in GASKET:
+            k._faces([faces[i * n + e0]], "gasket_rubber")
+
+    def on_facet(i: int, u: float, y: float, rho: float) -> tuple:
+        """A point on step i's flat facet, u (0..1) along it, at (y, rho): on the chord, not the arc."""
+        p0, p1 = Vector(at(angles[i], y, rho)), Vector(at(angles[i + 1], y, rho))
+        return tuple(p0.lerp(p1, u))
+
+    # bolt pockets: on each side face, in the step next to each end, between the inner face and the groove; a dark
+    # mouth and a lighter floor set to one side, so the pocket reads as a recess
     for y, sgn in ((y0, -1.0), (y1, 1.0)):
-        yy = y + sgn * 0.002
-        for i in range(N):
-            a0, a1 = -half + 2 * half * i / N, -half + 2 * half * (i + 1) / N
-            r0, r1 = RADIUS + THICK * 0.62, RADIUS + THICK * 0.78
-            pts = [(r0 * math.sin(a0), yy, zc - r0 * math.cos(a0)), (r0 * math.sin(a1), yy, zc - r0 * math.cos(a1)),
-                   (r1 * math.sin(a1), yy, zc - r1 * math.cos(a1)), (r1 * math.sin(a0), yy, zc - r1 * math.cos(a0))]
-            k.quad(pts if sgn > 0 else list(reversed(pts)), "hazard_black")
-    # bolt pockets near each end of the inner face, two grout holes in the middle
-    for sx in (-1.0, 1.0):
-        a = sx * (half - 0.09)
-        rr = RADIUS - 0.002
-        xm, zm = rr * math.sin(a), zc - rr * math.cos(a)
-        tx, tz = math.cos(a), math.sin(a)
-        for ym in (y0 + (y1 - y0) * 0.3, y0 + (y1 - y0) * 0.7):
-            pts = [(xm - tx * 0.06, ym - 0.04, zm - tz * 0.06), (xm + tx * 0.06, ym - 0.04, zm + tz * 0.06),
-                   (xm + tx * 0.06, ym + 0.04, zm + tz * 0.06), (xm - tx * 0.06, ym + 0.04, zm - tz * 0.06)]
-            k.quad(pts, "concrete_dark")
-    for ym in (y0 + (y1 - y0) * 0.35, y0 + (y1 - y0) * 0.65):
-        pts = [(-0.035, ym - 0.035, z_low + 0.002), (0.035, ym - 0.035, z_low + 0.002),
-               (0.035, ym + 0.035, z_low + 0.002), (-0.035, ym + 0.035, z_low + 0.002)]
-        k.quad(pts, "concrete_dark")
+        yy = y + sgn * 0.0015
+        for i in (1, N - 2):
+            for (u0, u1, ra, rb, paint, dy) in ((0.15, 0.85, 0.025, 0.1, "pocket_dark", 0.0),
+                                                (0.24, 0.85, 0.042, 0.1, "concrete_dark", 0.0005)):
+                pts = [on_facet(i, u0, yy + sgn * dy, RADIUS + ra), on_facet(i, u1, yy + sgn * dy, RADIUS + ra),
+                       on_facet(i, u1, yy + sgn * dy, RADIUS + rb), on_facet(i, u0, yy + sgn * dy, RADIUS + rb)]
+                k.quad(pts if sgn > 0 else list(reversed(pts)), paint)
+    # grout holes and the lifting socket on the inner face's middle step, a hair proud of it
+    mid = N // 2
+    rr = RADIUS - 0.0015
+    for ym, r, paint in ((y0 + (y1 - y0) * 0.22, 0.028, "pocket_dark"), (y0 + (y1 - y0) * 0.78, 0.028, "pocket_dark"),
+                         ((y0 + y1) * 0.5, 0.04, "pocket_dark")):
+        c = Vector(on_facet(mid, 0.5, ym, rr))
+        t = (Vector(on_facet(mid, 1.0, ym, rr)) - Vector(on_facet(mid, 0.0, ym, rr))).normalized()
+        ring = [tuple(c + t * r * math.cos(2 * math.pi * j / 6) + Vector((0.0, r * math.sin(2 * math.pi * j / 6), 0.0)))
+                for j in range(6)]
+        k.fan(ring, (0.0, 0.0, 1.0), paint)
+        if r > 0.03:  # the socket's steel anchor ring round its mouth
+            outer = [tuple(c + t * (r + 0.018) * math.cos(2 * math.pi * j / 6) +
+                           Vector((0.0, (r + 0.018) * math.sin(2 * math.pi * j / 6), 0.0))) for j in range(6)]
+            bm = k.bm
+            vi = [bm.verts.new(Vector(p)) for p in ring]
+            vo = [bm.verts.new(Vector(p) + Vector((0.0, 0.0, 0.0005))) for p in outer]
+            ann = [bm.faces.new((vi[j], vi[(j + 1) % 6], vo[(j + 1) % 6], vo[j])) for j in range(6)]
+            for f in ann:
+                f.normal_update()
+                if f.normal.z < 0.0:
+                    f.normal_flip()
+            k._faces(ann, "steel_bare")
 
 
 def build() -> object:
     k = wk.Kit(NAME)
     step = THICK + PACKER
     for sy in (-1.0, 1.0):
-        y0, y1 = sorted((sy * GAP * 0.5, sy * (GAP * 0.5 + RING_W)))
-        # two bearer blocks under the stack, across it, under the segment's ends' lower thirds
+        y0, y1 = sorted((sy * GAP * 0.5, sy * (GAP * 0.5 + RING_W - 0.0025)))  # the pockets' decals inside the box
+        # two bearer blocks under the stack, across it, under the segment's ends' lower thirds, their top edges
+        # chamfered
         for x in (-0.55, 0.55):
-            k.blk((x - 0.12, y0 - 0.0, 0.0), (x + 0.12, y1, BEARER), "concrete_dark")
+            k.prism([(x - 0.12, 0.0), (x + 0.12, 0.0), (x + 0.12, BEARER - 0.02), (x + 0.1, BEARER),
+                     (x - 0.1, BEARER), (x - 0.12, BEARER - 0.02)], "y", y0, y1, "concrete_dark")
         for layer in range(LAYERS):
             z_out = BEARER + layer * step       # the outer face's lowest point
 
             def outer_at(x: float, zo: float = z_out) -> float:
                 return zo + (RADIUS + THICK) - math.sqrt((RADIUS + THICK) ** 2 - x * x)
-            if layer > 0:  # packers on the segment below, under this one's outer face
-                for x in (-0.55, 0.55):
-                    z_top_below = BEARER + (layer - 1) * step + THICK + RADIUS - math.sqrt(RADIUS ** 2 - x * x)
-                    k.blk((x - 0.06, y0 + 0.08, z_top_below), (x + 0.06, y1 - 0.08, outer_at(x)), "timber")
-            else:
-                for x in (-0.55, 0.55):
-                    k.blk((x - 0.06, y0 + 0.08, BEARER), (x + 0.06, y1 - 0.08, outer_at(x)), "timber")
+            # timber packers under this one's outer face, on the segment below (or the bearers), across the stack
+            for x in (-0.55, 0.55):
+                if layer > 0:
+                    zb = BEARER + (layer - 1) * step + THICK + RADIUS - math.sqrt(RADIUS ** 2 - x * x)
+                else:
+                    zb = BEARER
+                k.blk((x - 0.06, y0 + 0.05, zb), (x + 0.06, y1 - 0.05, outer_at(x)), "timber")
             segment(k, y0, y1, z_out + THICK)
+        k.mark("stack")
     return k.build()
 
 

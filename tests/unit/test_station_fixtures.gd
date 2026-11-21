@@ -14,7 +14,7 @@ const BUDGETS: Dictionary[StringName, int] = {
 	&"poster_k": 40, &"poster_l": 40, &"poster_m": 40, &"poster_wide_a": 40, &"poster_wide_b": 40, &"poster_wide_c": 40,
 	&"name_board": 40, &"line_map": 40, &"info_panel": 40, &"notice_smoking": 40, &"notice_handrail": 40,
 	&"notice_cctv": 40, &"wall_sign_out": 40, &"wall_sign_platforms": 40, &"departures_n": 90, &"departures_s": 90,
-	&"tunnel_grille": 1100,
+	&"tunnel_grille": 2200,
 	# Depot's wall extras (DX1, tests/unit/test_dx1_depot_props.gd checks where they stand)
 	&"fire_point": 425, &"call_point": 50, &"pipe_run": 790, &"pipe_run_b": 1100, &"pipe_run_2": 500, &"pipe_run_1": 360,
 	&"depot_sign_assembly": 52, &"depot_sign_fire_action": 52, &"depot_sign_defib": 52, &"depot_sign_no_riding": 52,
