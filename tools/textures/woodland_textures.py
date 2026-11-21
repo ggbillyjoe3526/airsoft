@@ -303,41 +303,38 @@ def needle_shoot(cell: Cell, base: tuple, ang: float, length: float, needle: flo
 
 
 def pine_cell(seed: int, young: bool = False) -> Image.Image:
-    """A Scots pine's branch end (owner's photos, 01-pine-tree): a bare twig forking into a clump of dense tufts, each a
-    few short shoots radiating from one point, thick with long paired needles, so the spray reads as dark brushes with
-    spiky edges near and as a lumpy tuft (never a leaf) once mipped far off. A young pine's: upright brushes."""
+    """A Scots pine's branch end (owner's photos, 01-pine-tree): a bare twig forking into long, narrow bottlebrush
+    shoots that turn up at their ends, sky between them, so the spray reads as spiky needle brushes near and as a
+    ragged tuft (never a round leaf) once mipped far off. A young pine's: a whorl of long brushes from one node."""
     c = Cell(seed)
     s = c.s
     rng = c.rng
-    base = (s * 0.5, s * 0.97)
     if young:
-        # a young pine's whorl seen from the side: long brushes radiating from its node every way, longest out to the
-        # sides and up, so it reads as a spiky star (the photos' young pines), never a fan or a hand
-        hub = (s * 0.5, s * 0.52)
-        for k in range(18):
-            a = math.tau * k / 18 + rng.uniform(-0.1, 0.1)
+        # a young pine's whorl seen from the side: long, thin brushes radiating from its node with gaps between, the
+        # upper ones longest (the photos' young pines), so it reads as a spiky star, never a fan or a hand
+        hub = (s * 0.5, s * 0.56)
+        for k in range(11):
+            a = math.tau * k / 11 + rng.uniform(-0.12, 0.12)
             up = -math.cos(a)  # 1 straight up, -1 straight down
-            ln = s * (0.3 + 0.12 * max(0.0, up) - 0.12 * max(0.0, -up)) * rng.uniform(0.85, 1.05)
-            needle_shoot(c, hub, a, ln, s * 0.1, 0.5, 1.0, rng.uniform(-0.1, 0.1), rng.uniform(0.75, 0.95),
-                         forward=0.45, w=3.0)
+            ln = s * (0.36 + 0.08 * max(0.0, up) - 0.1 * max(0.0, -up)) * rng.uniform(0.85, 1.05)
+            needle_shoot(c, hub, a, ln, s * 0.075, 0.9, 1.1, -0.35 * math.sin(a), rng.uniform(0.7, 0.95),
+                         forward=0.5, w=3.0)
         return c.done()
-    # the twig up the cell to the clump, forking to each tuft spread through an oval
-    hub = (s * 0.5 + rng.uniform(-20, 20), s * 0.66)
+    # the twig up the cell, forking into brushes that fan out and turn up at their tips
+    base = (s * 0.5, s * 0.97)
+    hub = (s * 0.5 + rng.uniform(-15, 15), s * 0.74)
     c.line(base, hub, 10, (0.5, 0.4, 0.33))
-    tufts = []
-    for k in range(10):
-        a = rng.uniform(0.0, math.tau)
-        r = math.sqrt((k + 0.5) / 10.0)
-        tufts.append((s * 0.5 + math.cos(a) * r * s * 0.3, s * 0.4 + math.sin(a) * r * s * 0.24))
-    tufts.sort(key=lambda q: -q[1])
-    for x, y in tufts:
-        c.line(hub, (x, y), 6, (0.48, 0.38, 0.32))
-    for x, y in tufts:
-        out = math.atan2(x - hub[0], -(y - hub[1]))
-        for m in range(7):
-            sa = out + (m - 3) * 0.5 + rng.uniform(-0.2, 0.2)
-            needle_shoot(c, (x, y), sa, s * rng.uniform(0.07, 0.11), s * 0.11, 1.6, 1.3, rng.uniform(-0.2, 0.2),
-                         rng.uniform(0.75, 0.95), forward=0.3, w=5.0)
+    n = 7
+    for k in range(n):
+        a = -1.25 + 2.5 * k / (n - 1) + rng.uniform(-0.1, 0.1)
+        ln = s * rng.uniform(0.36, 0.5) * (1.0 - 0.25 * abs(a) / 1.25)
+        needle_shoot(c, hub, a, ln, s * 0.08, 1.1, 1.1, -0.45 * a, rng.uniform(0.7, 0.95), forward=0.45, w=4.0)
+        # a short side shoot off the brush's middle
+        if rng.random() < 0.6:
+            mid = (hub[0] + math.sin(a) * ln * 0.45, hub[1] - math.cos(a) * ln * 0.45)
+            sa = a + rng.choice((-1.0, 1.0)) * rng.uniform(0.5, 0.8)
+            needle_shoot(c, mid, sa, ln * 0.45, s * 0.07, 1.1, 1.1, -0.3 * sa, rng.uniform(0.65, 0.9),
+                         forward=0.45, w=3.5)
     return c.done()
 
 
