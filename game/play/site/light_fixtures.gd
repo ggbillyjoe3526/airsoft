@@ -274,9 +274,9 @@ func set_motion(motion: MotionScale) -> void:
 
 ## The fixtures' own material: with their surfaces (WQ1) where the config names maps that load, else plain.
 static func _prop_material(cfg: LightFixturesConfig) -> ShaderMaterial:
-	var maps: Array[Texture2DArray] = []
+	var maps: Array[TextureLayered] = []
 	for path: String in [cfg.surface_maps, cfg.surface_relief]:
-		maps.append(load(path) as Texture2DArray if not path.is_empty() and ResourceLoader.exists(path) else null)
+		maps.append(load(path) as TextureLayered if not path.is_empty() and ResourceLoader.exists(path) else null)
 	if maps[0] == null:
 		return LookMaterials.vertex_colour(cfg.roughness, cfg.metallic, Color.WHITE, false, cfg.wear)
 	var m := LookMaterials.surfaced(maps[0], maps[1], cfg.roughness, cfg.wear)

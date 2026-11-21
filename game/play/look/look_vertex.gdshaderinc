@@ -37,6 +37,8 @@ uniform bool retro_wobble = true;
 uniform sampler2DArray surfaces : hint_default_white, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray surfaces_relief : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform float relief_depth : hint_range(0.0, 2.0) = 1.0;
+// The look's surface detail (GraphicsApply.SURFACE_DETAIL): 0 on Low Mesh detail, where the relief isn't read.
+global uniform float look_surface_detail;
 varying float layer;
 #endif
 
@@ -88,8 +90,10 @@ void fragment() {
 	if (layer > 0.5) {
 		vec3 at = vec3(UV, floor(layer + 0.5));
 		own *= texture(surfaces, at).rgb * 2.0;
-		NORMAL_MAP = texture(surfaces_relief, at).rgb;
-		NORMAL_MAP_DEPTH = relief_depth;
+		if (look_surface_detail >= 0.5) {
+			NORMAL_MAP = texture(surfaces_relief, at).rgb;
+			NORMAL_MAP_DEPTH = relief_depth;
+		}
 	}
 #endif
 	vec3 col = own * paint * LOOK_LINEAR(tint.rgb);

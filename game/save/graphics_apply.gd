@@ -29,7 +29,9 @@ const ANISOTROPY: Array[int] = [Viewport.ANISOTROPY_DISABLED, Viewport.ANISOTROP
 ## High, the look before the presets; lower is finer).
 const MESH_LOD: Array[float] = [4.0, 2.0, 1.0, 0.5]
 ## Each MeshDetail as the replica surfaces' detail (replica_surface.gdshaderinc's look_surface_detail): on Low the grain
-## is read from a face's main side alone (MQ1's advisory: 3 reads a fragment, not 7); the project's default is 1.
+## is read from a face's main side alone (MQ1's advisory: 3 reads a fragment, not 7), and Woodland's foliage and
+## surfaces (look_foliage.gdshader, look_surface.gdshader, WQ1) read no relief and no mip query; the project's default
+## is 1.
 const SURFACE_DETAIL: Array[float] = [0.0, 1.0, 1.0, 1.0]
 const SURFACE_DETAIL_GLOBAL := &"look_surface_detail"
 ## From this Mesh detail up your own weapon torch's real spot casts shadows (High and Ultra, data/graphics.md).

@@ -111,7 +111,9 @@ stacks. Bots use all six. Attackers start in the west camp and defenders in the 
 - **The look:** warm afternoon sun over a natural green wood: young, grown and old Scots pines with bare tan trunks
   under their crowns, broad, lumpy oaks, white birches in the Birch stand and Fern hollow, dark spruce thickets, and
   beyond the fence a far wood of spruce spires in uneven clumps and gaps. A grassy floor, the weathered violet pickup wreck and teal crates carry
-  the colour, with nothing near a team's blue or orange. Every crown starts over head height.
+  the colour, with nothing near a team's blue or orange. Every crown starts over head height. Up close the crowns,
+  ferns and bushes are real sprays of leaves and needles that the sun shines through, on photo bark, and the timber,
+  logs, earth and concrete of the huts, tower, bridge, palisade and tunnels show their grain.
 - **Three lanes, three ranges:** no lane is shot from end to end. A hazel hedge on the Ridge's brow, fallen trees
   and a log stack at the North bridge's two heads, the Long road's double bend between two stands of spruce west of
   the Culvert, and two spruce thickets on the Ford's east bank break the long lines. Nothing stands on the road

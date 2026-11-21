@@ -59,7 +59,7 @@ static func foliage(sheet: Texture2D, bark: Texture2D, relief: Texture2D, bark_b
 ## A material drawing a model's vertex colours with its surfaces' detail and relief (WQ1, look_surface.gdshader:
 ## Woodland's structures and props; `surfaces` and `relief` texture arrays, a layer each), `roughness` over it, worn as
 ## `vertex_colour`'s `wear`, each instance painted by its custom data (DM1). Null arrays draw it plain.
-static func surfaced(surfaces: Texture2DArray, relief: Texture2DArray, roughness: float, wear: float = 0.0) \
+static func surfaced(surfaces: TextureLayered, relief: TextureLayered, roughness: float, wear: float = 0.0) \
 		-> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = SURFACE_SHADER

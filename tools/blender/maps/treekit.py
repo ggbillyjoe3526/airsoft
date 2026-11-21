@@ -1,12 +1,13 @@
 """Shared helpers for Woodland's trees (Dev 3, WT1): pines in three ages, the oak, the birch, the thickets' spruce and
 the wood beyond the fence, built from code like the other map models.
 
-A tree is one mesh in metres, painted in vertex colours (linear, glTF's COLOR_0) and drawn by the game in the props'
-one vertex-coloured material. Unlike a hard-surface prop its colours are painted per vertex, not baked from
-materials: bark darkens toward the foot and in its furrows, and every foliage clump is lit from above and shadowed
-inside (a soft gradient between two palette shades), so a tree reads round under the look's flat light. Foliage
-normals lean out from the crown's middle (`crown_normals`), the stylised-tree trick that lights a crown as one soft
-shape rather than a heap of facets (docs/ART.md: solid leaf clumps, Valorant-led, BOTW light; no leaf cards).
+A tree is one mesh in metres, painted in vertex colours (linear, glTF's COLOR_0). Its colours are painted per vertex,
+not baked from materials: bark darkens toward the foot and in its furrows, and every foliage clump is lit from above
+and shadowed inside (a soft gradient between two palette shades), so a tree reads round under the look's light.
+Foliage normals lean out from the crown's middle (`crown_normal`), which lights a crown as one soft shape rather than
+a heap of facets. WQ1 (Beta 2, owner: better leaves, branches and bark) replaced the solid clumps' "no leaf cards"
+look: with `leafy` set, cut-out leaf cards from the leaf sheet stand out of each clump over a smaller, darker core,
+and the limbs carry tiling photo bark (UVs), drawn by game/play/look/look_foliage.gdshader (docs/ART.md › The wood).
 
 Axes while building are the game's (x, y up, z); the export turns them into Blender's and glTF turns them back, so
 what is built here is what the game draws. A tree stands on its origin: y 0 is the ground at the trunk's middle, the

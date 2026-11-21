@@ -144,8 +144,8 @@ func _surfaced_of(model: StringName) -> ShaderMaterial:
 	var wear: float = _cfg.model_wear.get(model, _cfg.wear)
 	var key := "surfaces|%s|%s" % [rough, wear]
 	if not _textured.has(key):
-		_textured[key] = LookMaterials.surfaced(_texture(_cfg.surface_maps) as Texture2DArray,
-				_texture(_cfg.surface_relief) as Texture2DArray, rough, wear)
+		_textured[key] = LookMaterials.surfaced(_texture(_cfg.surface_maps) as TextureLayered,
+				_texture(_cfg.surface_relief) as TextureLayered, rough, wear)
 	return _textured[key]
 
 
