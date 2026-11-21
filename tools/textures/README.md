@@ -13,6 +13,12 @@ Seeded scripts (numpy and Pillow) that write tiling textures to `assets/textures
   compression ties a block's channels together and bands the slopes into visible steps on a smooth slide. It is one
   512 px texture for the whole game (about 1.4 MB of video memory with its mipmaps).
 
+- `leaf_trim.py`: where Woodland's leaf sheet's card cells draw (WF1), `assets/textures/woodland/leaves_trim.tres`
+  (`LeafTrimSheet`): each card cell's smallest rectangle holding every texel the foliage shader can draw from it at
+  mip 6 or finer, read from `leaves.png`. `LeafTrim` cuts the tree crowns' cards down to it. Run it again whenever
+  `woodland_textures.py` redraws the sheet; `tests/unit/test_wf1_leaf_trim.gd` fails if a drawn texel falls outside
+  its rectangle.
+
 Run: `python3 -I tools/textures/<script>.py <repo root>`, then `godot --headless --path . --import`. Dev only.
 
 # Fetched textures

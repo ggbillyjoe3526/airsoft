@@ -43,6 +43,10 @@ uniform float mip_cover : hint_range(0.0, 1.0) = 0.35;
 uniform float alpha_lod : hint_range(0.0, 16.0) = 16.0;
 // The coarsest mip level a trimmed card's rectangle holds (LeafTrimSheet.max_mip); a card is wholly open a level before.
 uniform float trim_mip = 6.0;
+// A trimmed card starts opening this many levels before trim_mip and is wholly open this many before (a trilinear
+// read a level finer than the screen's mip still lies inside the rectangle).
+const float TRIM_OPEN_FROM = 1.5;
+const float TRIM_OPEN_BY = 1.0;
 uniform bool retro_wobble = true;
 // Each instance's custom data paints the parts whose vertex alpha is 1 (PropDress's, DM1; look_vertex.gdshader's).
 uniform bool paint_by_custom = true;
@@ -70,7 +74,7 @@ float trim_open(vec3 at, vec3 grow, vec2 grow_uv, vec2 facing, mat4 modelview, m
 	vec3 to_eye = flat_view ? vec3(0.0, 0.0, 1.0) : normalize(-eye);
 	float side_on = max(abs(dot(normalize(normals * f), to_eye)), 1.0 / 256.0);
 	float mip = log2(max(metres_px * texels_metre / side_on, 1e-6));
-	return smoothstep(trim_mip - 1.5, trim_mip - 1.0, mip);
+	return smoothstep(trim_mip - TRIM_OPEN_FROM, trim_mip - TRIM_OPEN_BY, mip);
 }
 
 void vertex() {
