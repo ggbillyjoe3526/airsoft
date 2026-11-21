@@ -1,6 +1,6 @@
 # TQ2 · Subway's street entrance, smooth train rails in a brighter orange, and adverts in the cars (Beta)
 
-**Review:** pending
+**Review:** critic Accept 8/8 (attempt 3) · qa Pass (197897e) · performance Pass (197897e)
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-21 | 1 | build thread and one worker | touched tests 177/177, QA Pass, performance Pass | Retry 7/8 | the street never shown (indoor-looking landing), black escalator treads, a dark band read as a gap, a placeholder sign, rails ending in a cushion and in mid-air, doubled tubes into the cove |
 | 2026-11-21 | 2 | build thread and one worker | touched tests 183/183, QA Pass, performance Pass | Retry 7/8 | placeholder posters, a blockout street (flat windows, square railing, no shop names, no sky), jagged stroke sign, the orange still rust brown in game |
-| 2026-11-21 | 3 | build thread and one worker | pending | pending | – |
+| 2026-11-21 | 3 | build thread and one worker | touched tests 237/237, QA Pass, performance Pass | Accept 8/8 | – |
 
 ## Goal
 
