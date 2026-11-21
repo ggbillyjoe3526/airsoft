@@ -27,7 +27,7 @@ static func build(map: MapData, cfg: WoodsConfig, fern_tallest: float) -> BushVi
 		return _ellipsoids(map, cfg)
 	var view := BushView.new()
 	view.name = "Bushes"
-	var material := LookMaterials.vertex_colour(cfg.bush_roughness, 0.0)
+	var material := _leaf_material(cfg)
 	view._materials.append(material)
 	var turns := turns_of(map)
 	var shades := shades_of(map, cfg)
@@ -63,6 +63,18 @@ static func build(map: MapData, cfg: WoodsConfig, fern_tallest: float) -> BushVi
 				part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			view.add_child(part)
 	return view
+
+
+## The plants' material (WQ1): their leaves cut out of the leaf sheet, their stems' bark (look_foliage.gdshader); a map
+## that won't load is drawn plain (warned).
+static func _leaf_material(cfg: WoodsConfig) -> ShaderMaterial:
+	var maps: Array[Texture2D] = []
+	for path: String in [cfg.bush_sheet, cfg.bush_bark, cfg.bush_bark.get_basename() + "_nor.png"]:
+		var tex := load(path) as Texture2D if ResourceLoader.exists(path) else null
+		if tex == null:
+			push_warning("BushView: the texture \"%s\" won't load; drawn plain" % path)
+		maps.append(tex)
+	return LookMaterials.foliage(maps[0], maps[1], maps[2], null, null, cfg.bush_roughness, 0.0, false)
 
 
 ## Each part's draw (a MultiMeshInstance3D: ferns, then shrubs, a square of the field each, or the ellipsoids).

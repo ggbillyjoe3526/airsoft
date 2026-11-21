@@ -21,3 +21,12 @@ Run: `python3 -I tools/textures/<script>.py <repo root>`, then `godot --headless
   from a pinned GitHub mirror into a cache folder and baked into `assets/textures/station/station_col.jpg` and
   `station_srf.png` (one 512 px layer a set; adding a set means its layer count in both `.import` files too). Run:
   `godot --headless --path . -s res://tools/textures/station_textures.gd -- <cache folder>`, then import.
+- `woodland_fetch.gd` and `woodland_textures.py`: Woodland's detail textures (WQ1). The fetch script takes the CC0
+  ambientCG sets it names (barks, planks, concrete, steel, ground, moss) from the same pinned mirror into a cache
+  folder as PNGs; the Python script composes `assets/textures/woodland/`: the barks and their normal maps
+  (`bark_pine`, `bark_flake`, `bark_oak`, and `bark_birch` drawn whole), the 2,048 px leaf sheet `leaves.png`
+  (16 cells, drawn: needle shoots, sprays, fronds, masses and twigs, `treekit.CELLS` order), and the surfaces array
+  `surfaces.png` with `surfaces_nor.png` (8 layers of 512 px in a row, `mapkit.SURFACES` order; their `.import` files
+  are 2D arrays of 8 slices). Every map is stored at half strength (0.5 draws the paint as it is). Run:
+  `godot --headless --path . -s res://tools/textures/woodland_fetch.gd -- <cache>`, then
+  `python3 -I tools/textures/woodland_textures.py <repo root> <cache>`, then import.

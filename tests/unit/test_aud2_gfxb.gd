@@ -48,8 +48,11 @@ func test_the_site_doors_and_models_hand_their_linear_colours_over_through_look_
 	assert_string_contains(inc, "#define LOOK_LINEAR(c) (OUTPUT_IS_SRGB ? look_srgb_to_linear(c) : (c))")
 	var light := FileAccess.get_file_as_string("res://game/play/look/look_light.gdshaderinc")
 	assert_string_contains(light, '#include "res://game/play/look/look_colour.gdshaderinc"')
+	# look_vertex.gdshader's body is look_vertex.gdshaderinc (WQ1, shared with look_surface.gdshader).
+	assert_string_contains(FileAccess.get_file_as_string("res://game/play/look/look_vertex.gdshader"),
+			'#include "res://game/play/look/look_vertex.gdshaderinc"')
 	for path: String in ["res://game/play/site/site_surface.gdshader", "res://game/play/door_leaf.gdshader",
-			"res://game/play/look/look_vertex.gdshader", "res://game/play/flag_cloth.gdshader"]:
+			"res://game/play/look/look_vertex.gdshaderinc", "res://game/play/flag_cloth.gdshader"]:
 		var code := FileAccess.get_file_as_string(path)
 		var albedo := 0
 		for line: String in code.split("\n"):

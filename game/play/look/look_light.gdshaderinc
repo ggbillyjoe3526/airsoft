@@ -32,6 +32,11 @@ void light() {
 	// the sun's far side takes the shade colour; a lamp's or torch's reach ends in the dark, as light does
 	vec3 fill = LIGHT_IS_DIRECTIONAL ? look_shade.rgb : vec3(0.0);
 	DIFFUSE_LIGHT += mix(fill, vec3(1.0), tone) * LIGHT_COLOR / PI;
+#ifdef LOOK_TRANSLUCENT
+	// a leaf (BACKLIGHT, look_foliage.gdshader's leaf_translucency) glows where the light shines through it at the eye
+	float shine = pow(clamp(dot(-LIGHT, VIEW), 0.0, 1.0), 3.0);
+	DIFFUSE_LIGHT += BACKLIGHT * shine * ATTENUATION * LIGHT_COLOR / PI;
+#endif
 	// the warm rim: strongest on an edge seen against the light, on the side the light reaches
 	float edge = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), look_rim_power);
 	float against = 0.4 + 0.6 * clamp(dot(LIGHT, -VIEW) * 0.5 + 0.5, 0.0, 1.0);

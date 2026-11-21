@@ -249,6 +249,35 @@ https://creativecommons.org/publicdomain/zero/1.0/
 No credit is required; we give it anyway. Thank you, ambientCG.
 
 ================================================================================
+ambientCG materials (Woodland's trees and props; CC0, credited by choice)
+================================================================================
+
+ambientCG materials (Woodland's trees, structures and props, WQ1)
+
+bark_pine.png, bark_pine_nor.png: "Bark002" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Bark002
+bark_flake.png, bark_flake_nor.png: "Bark014" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Bark014
+bark_oak.png, bark_oak_nor.png: "Bark001" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Bark001
+leaves.png (its twig bark cell): "Bark002", as above
+surfaces.png, surfaces_nor.png (one 512 px layer each, in this order):
+   1. "Wood058" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Wood058
+   2. "Bark002" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Bark002
+   4. "Concrete034" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Concrete034
+   5. "Metal038" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Metal038
+   6. "Ground054" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Ground054
+   7. "Moss002" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Moss002
+The birch's bark, the leaves, needles, sprigs and fronds of leaves.png and layer 3 (sawn ends) were drawn for Airsoft
+by tools/textures/woodland_textures.py.
+
+Fetched from the CC0 mirror https://github.com/Papyszoo/CC0-Public-Domain-Textures
+(packs/ambientcg-textures, commit fcc4ff97a5a843dc2e242ec9e195389bc46ed7d2) as 1K KTX2 files, as the build machine
+could not reach ambientcg.com; tools/textures/woodland_fetch.gd decodes them and woodland_textures.py turns each
+photo into detail (its relief, not its colour: the models keep the look's palette) and its normal map.
+
+Licence: CC0 1.0 Universal (public domain dedication),
+https://creativecommons.org/publicdomain/zero/1.0/
+No credit is required; we give it anyway. Thank you, ambientCG.
+
+================================================================================
 Godot Engine 4.7.2-stable (official)
 ================================================================================
 

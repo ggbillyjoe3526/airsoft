@@ -90,8 +90,8 @@ def export(ob: bpy.types.Object, name: str, uvs: bool = False) -> str:
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
                               export_animations=False, export_yup=True, export_vertex_color="ACTIVE",
                               export_all_vertex_colors=False, export_draco_mesh_compression_enable=False,
-                              export_extras=False, export_cameras=False, export_lights=False, export_texcoords=uvs,
-                              export_materials="EXPORT")
+                              export_extras=False, export_cameras=False, export_lights=False,
+                              export_texcoords=uvs or mk.SURFACED, export_materials="EXPORT")
     return path
 
 

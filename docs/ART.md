@@ -136,6 +136,24 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
   what is behind it. Shade is dark but never black: the ambient and bounce light fill it. Night and golden hour tint
   the light, never a team colour.
 
+**Leaves, bark and timber (WQ1, Beta 2).** Woodland's models are drawn in photo detail over their paint, the palette
+kept in the vertex colours (a detail texel of 0.5 draws the paint as it is):
+
+- **Leaves are cut-out cards** on one leaf sheet (`assets/textures/woodland/leaves.png`, 16 cells: pine and spruce
+  needle shoots, oak, birch and hazel sprays, fern fronds, leaf and needle masses, twigs), standing out of each clump's
+  surface over a smaller, darker solid core, so a crown reads as leaves and still fills. Both sides lit as the
+  crown's one soft shape; the sun through a leaf toward the eye glows a little (`look_foliage.gdshader`,
+  `leaf_translucency` 0.35). A far crown keeps its fill: the cut-out's cover grows with each
+  mip level. The crowns keep their bounds (cards past the clumps' box are moved back in), so cover, sight and LF1's leaf
+  counts are unchanged.
+- **Bark is photo bark** (CC0 ambientCG) with its normal map, tiled round each limb: the pines' plates with the upper
+  bole's flaking bark (golden tan, never orange) blended over, the oak's ridges, the birch's own white with dark
+  lenticels (made, not fetched); the thicket spruces wear the pine's.
+- **Timber, logs, earth, concrete and steel** (palisade, tower, bridge, shed, roofs, tunnels, culvert, tyres, logs,
+  root plates, sawbench, earth bank, campfire, lanterns) take a layer of the surfaces array
+  (`look_surface.gdshader`: planks, bark, end grain, concrete, steel, ground, moss), mapped along each face's longest
+  edge so the grain runs with the timber. The woodpiles' cordwood keeps its own (RM2).
+
 ## Surfaces
 
 Every surface is paint or material in the shared light, drawn weathered (The target). A material gives a colour (or a vertex colour), a roughness and a

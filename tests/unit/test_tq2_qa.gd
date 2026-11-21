@@ -85,7 +85,8 @@ func test_the_station_signs_keep_the_stripes_orange_whole() -> void:
 		return
 	assert_true(m.get_shader_parameter(&"keep_stripe"), "its stripe's orange kept whole")
 	assert_eq(m.get_shader_parameter(&"stripe"), Color("#ea6a22"), "the trains' orange")
-	assert_true((m.shader.code as String).contains("keep_stripe"), "the shader reads it")
+	assert_true(FileAccess.get_file_as_string("res://game/play/look/look_vertex.gdshaderinc").contains("keep_stripe"),
+			"the shader reads it")
 
 
 func test_no_train_face_but_the_orange_keeps_its_whole_colour() -> void:

@@ -140,8 +140,8 @@ func test_the_street_and_the_sign_are_lit() -> void:
 	root.free()
 	assert_gt(lit, 0, "the street's faces are lit")
 	assert_gt(kinds, lit, "the rest (steel, glass, aluminium) keep their own kinds")
-	var shader := load("res://game/play/look/look_vertex.gdshader") as Shader
-	assert_true(shader.code.contains("daylight_glow"), "the props' shader makes kind 9 glow")
+	var body := FileAccess.get_file_as_string("res://game/play/look/look_vertex.gdshaderinc")
+	assert_true(body.contains("daylight_glow"), "the props' shader makes kind 9 glow")
 
 
 func test_the_entrance_signs_and_posters_are_on_its_fascia_and_stair_wall() -> void:

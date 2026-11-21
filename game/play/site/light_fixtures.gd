@@ -72,7 +72,7 @@ static func build(map: MapData, cfg: LightFixturesConfig, light: LightingConfig)
 	fixtures._cfg = cfg
 	fixtures._placed = placed
 	var night := light != null and light.night
-	var prop := LookMaterials.vertex_colour(cfg.roughness, cfg.metallic, Color.WHITE, false, cfg.wear)
+	var prop := _prop_material(cfg)
 	# by day the globe is glass (the props' own) and the coals are cold: dimmed to charcoal in the props' light
 	var glow: Material = null
 	var coals: Material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic, cfg.cold_tint, false, cfg.wear)
@@ -270,3 +270,16 @@ func set_motion(motion: MotionScale) -> void:
 	var on := motion.dust > 0.0
 	_flame.set_shader_parameter(&"rate", _cfg.flicker_rate if on else 0.0)
 	_flame.set_shader_parameter(&"sway", _cfg.flame_sway if on else 0.0)
+
+
+## The fixtures' own material: with their surfaces (WQ1) where the config names maps that load, else plain.
+static func _prop_material(cfg: LightFixturesConfig) -> ShaderMaterial:
+	var maps: Array[TextureLayered] = []
+	for path: String in [cfg.surface_maps, cfg.surface_relief]:
+		maps.append(load(path) as TextureLayered if not path.is_empty() and ResourceLoader.exists(path) else null)
+	if maps[0] == null:
+		return LookMaterials.vertex_colour(cfg.roughness, cfg.metallic, Color.WHITE, false, cfg.wear)
+	var m := LookMaterials.surfaced(maps[0], maps[1], cfg.roughness, cfg.wear)
+	m.set_shader_parameter(&"metallic", cfg.metallic)
+	m.set_shader_parameter(&"paint_by_custom", false)
+	return m

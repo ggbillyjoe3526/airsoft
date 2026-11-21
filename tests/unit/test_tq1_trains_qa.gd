@@ -134,7 +134,10 @@ func test_the_seat_cushions_are_the_props_alone_not_the_trains() -> void:
 func test_the_vertex_shader_compiles_with_the_surface_kinds() -> void:
 	var sh := load("res://game/play/look/look_vertex.gdshader") as Shader
 	assert_not_null(sh)
-	assert_true(sh.code.contains("look_surface("), "the kinds are applied")
+	# The body is in look_vertex.gdshaderinc since WQ1 (shared with look_surface.gdshader).
+	var body := FileAccess.get_file_as_string("res://game/play/look/look_vertex.gdshaderinc")
+	assert_true(sh.code.contains("look_vertex.gdshaderinc"), "the body is included")
+	assert_true(body.contains("look_surface("), "the kinds are applied")
 	var mat := LookMaterials.vertex_colour(0.8, 0.0, Color.WHITE, false, play.station_look.trains.wear)
 	assert_not_null(mat)
 	assert_eq(mat.shader.get_mode(), Shader.MODE_SPATIAL)

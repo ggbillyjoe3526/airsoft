@@ -13,10 +13,17 @@ extends Node3D
 
 ## A prop takes the baked light near this far (m) over its foot, from faces facing any way (BakedLightNear.at).
 const LIGHT_LIFT := 0.5
+## A leaf card's cover growth a mip level where PropDressConfig.model_mip_cover names none (look_foliage's default).
+const MIP_COVER := 0.35
+## The coarsest mip a leaf card's cut-out is read from where PropDressConfig.model_alpha_lod names none (unlimited).
+const ALPHA_LOD := 16.0
 
 ## By roughness (x), wear (y) and full colour (z, 1 or 0): the shared one and each model_roughness, model_wear or
 ## full_colour's.
 var _materials: Dictionary[Vector3, ShaderMaterial] = {}
+## The textured materials (WQ1: Woodland's trees and spruces), by their barks, roughness and wear, and their maps.
+var _textured: Dictionary[String, ShaderMaterial] = {}
+var _textures: Dictionary[String, Texture] = {}
 ## Where each model's floor goes (LookMaterials.draw_worn), and the materials copied to carry one.
 var _floors_by_material: bool = LookMaterials.floors_by_material()
 var _floor_copies: Dictionary = {}
@@ -99,17 +106,63 @@ func materials() -> Array[Material]:
 	var out: Array[Material] = []
 	for key: Vector3 in _materials:
 		out.append(_materials[key])
+	for key: String in _textured:
+		out.append(_textured[key])
 	return out
 
 
 ## Model `model`'s material: its own roughness's, wear's and full colour's (PropDressConfig.model_roughness,
 ## model_wear, full_colour), else the shared one.
 func _material_of(model: StringName) -> ShaderMaterial:
+	if _cfg.model_barks.has(model):
+		return _foliage_of(model)
+	if _cfg.surface_models.has(model):
+		return _surfaced_of(model)
 	var key := Vector3(_cfg.model_roughness.get(model, _cfg.roughness), _cfg.model_wear.get(model, _cfg.wear),
 			1.0 if _cfg.full_colour.has(model) else 0.0)
 	if not _materials.has(key):
 		_materials[key] = _new_material(key.x, _cfg.metallic, key.y, key.z > 0.5)
 	return _materials[key]
+
+
+## Model `model`'s textured material (PropDressConfig.model_barks, WQ1), one for each set of barks, mip cover, alpha
+## mip, roughness and wear; its maps loaded once a dress.
+func _foliage_of(model: StringName) -> ShaderMaterial:
+	var barks: PackedStringArray = _cfg.model_barks[model]
+	var rough: float = _cfg.model_roughness.get(model, _cfg.roughness)
+	var wear: float = _cfg.model_wear.get(model, _cfg.wear)
+	var cover: float = _cfg.model_mip_cover.get(model, MIP_COVER)
+	var lod: float = _cfg.model_alpha_lod.get(model, ALPHA_LOD)
+	var key := "%s|%s|%s|%s|%s" % [",".join(barks), rough, wear, cover, lod]
+	if not _textured.has(key):
+		var maps: Array[Texture2D] = [null, null, null, null]
+		for i in mini(barks.size(), 2):
+			maps[i * 2] = _texture("%s/%s.png" % [_cfg.foliage_folder, barks[i]]) as Texture2D
+			maps[i * 2 + 1] = _texture("%s/%s_nor.png" % [_cfg.foliage_folder, barks[i]]) as Texture2D
+		_textured[key] = LookMaterials.foliage(_texture(_cfg.foliage_sheet) as Texture2D, maps[0], maps[1], maps[2], maps[3],
+				rough, wear, true, cover, lod)
+	return _textured[key]
+
+
+## Model `model`'s material with its surfaces (PropDressConfig.surface_models, WQ1), one for each roughness and wear.
+func _surfaced_of(model: StringName) -> ShaderMaterial:
+	var rough: float = _cfg.model_roughness.get(model, _cfg.roughness)
+	var wear: float = _cfg.model_wear.get(model, _cfg.wear)
+	var key := "surfaces|%s|%s" % [rough, wear]
+	if not _textured.has(key):
+		_textured[key] = LookMaterials.surfaced(_texture(_cfg.surface_maps) as TextureLayered,
+				_texture(_cfg.surface_relief) as TextureLayered, rough, wear)
+	return _textured[key]
+
+
+## The texture at `path`, loaded once a dress (null, warned once, when it won't load: drawn plain).
+func _texture(path: String) -> Texture:
+	if not _textures.has(path):
+		var tex := load(path) as Texture if ResourceLoader.exists(path) else null
+		if tex == null:
+			push_warning("PropDress: the texture \"%s\" won't load; drawn plain" % path)
+		_textures[path] = tex
+	return _textures[path]
 
 
 ## A prop material drawn `rough` and `metallic` and worn `wear` (SL2), each instance painted by its custom data (DM1)

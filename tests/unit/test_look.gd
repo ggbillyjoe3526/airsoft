@@ -124,7 +124,8 @@ func test_woodland_is_drawn_in_the_shared_light() -> void:
 	if bushes != null:
 		add_child_autofree(bushes)
 		for mat in bushes.materials():
-			assert_eq((mat as ShaderMaterial).shader, LookMaterials.VERTEX_SHADER, "the bushes")
+			# WQ1: the ferns and shrubs are leaf cards on the leaf sheet, in the foliage shader (the shared light's)
+			assert_eq((mat as ShaderMaterial).shader, LookMaterials.FOLIAGE_SHADER, "the bushes")
 
 
 func test_a_palette_name_it_lacks_warns_and_shows_magenta() -> void:
@@ -173,8 +174,9 @@ func test_the_shared_materials_draw_in_the_shared_light() -> void:
 	assert_true(include.contains("vec3 look_paint(vec3"), "the include defines look_paint")
 	assert_true(include.contains("global uniform float look_paint_saturation"), "from the paint's global")
 	for path: String in ["res://game/play/look/look_vertex.gdshader", "res://game/play/look/look_clear.gdshader",
-			"res://game/play/site/site_surface.gdshader", "res://game/play/door_leaf.gdshader"]:
-		var code := (load(path) as Shader).code
+			"res://game/play/site/site_surface.gdshader", "res://game/play/door_leaf.gdshader",
+			"res://game/play/look/look_surface.gdshader", "res://game/play/look/look_foliage.gdshader"]:
+		var code := _code(path)
 		assert_true(code.contains("look_light.gdshaderinc"), "%s includes the light" % path)
 		# handed over linear on either renderer (look_colour.gdshaderinc's LOOK_ALBEDO) where the shader sums in linear
 		assert_true(code.contains("ALBEDO = look_paint(") or code.contains("ALBEDO = LOOK_ALBEDO(look_paint(")
@@ -192,7 +194,9 @@ func test_a_model_is_worn_only_when_its_material_asks() -> void:
 	var worn := LookMaterials.vertex_colour(0.4, 0.0, Color.WHITE, false, 0.7)
 	assert_almost_eq(worn.get_shader_parameter(&"wear") as float, 0.7, 0.0001)
 	# The wear is one include the models' shader and the doors' share (AUD1).
-	assert_true(LookMaterials.VERTEX_SHADER.code.contains("look_wear.gdshaderinc"), "the models' shader includes the wear")
+	for path: String in ["res://game/play/look/look_vertex.gdshader", "res://game/play/look/look_surface.gdshader",
+			"res://game/play/look/look_foliage.gdshader"]:
+		assert_true(_code(path).contains("look_wear.gdshaderinc"), "%s includes the wear" % path)
 	var code := FileAccess.get_file_as_string("res://game/play/look/look_wear.gdshaderinc")
 	for global: String in ["look_wear", "look_grime", "look_dust"]:
 		assert_true(code.contains("global uniform") and code.contains(global), "the shader reads %s" % global)
@@ -370,3 +374,11 @@ func test_team_cloth_is_not_muted_by_the_paint_grade() -> void:
 	var src := FileAccess.get_file_as_string("res://game/play/flag_cloth.gdshader")
 	assert_false(src.contains("look_paint"), "flag cloth keeps its team colour")
 	assert_false(src.contains("look_light"), "and does not take the shared light")
+
+
+## A shader's code with its body's include (WQ1: look_vertex and look_surface share look_vertex.gdshaderinc).
+func _code(path: String) -> String:
+	var code := (load(path) as Shader).code
+	if code.contains("look_vertex.gdshaderinc"):
+		code += FileAccess.get_file_as_string("res://game/play/look/look_vertex.gdshaderinc")
+	return code
