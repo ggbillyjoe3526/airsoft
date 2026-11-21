@@ -86,3 +86,45 @@ func test_the_station_signs_keep_the_stripes_orange_whole() -> void:
 	assert_true(m.get_shader_parameter(&"keep_stripe"), "its stripe's orange kept whole")
 	assert_eq(m.get_shader_parameter(&"stripe"), Color("#ea6a22"), "the trains' orange")
 	assert_true((m.shader.code as String).contains("keep_stripe"), "the shader reads it")
+
+
+func test_no_train_face_but_the_orange_keeps_its_whole_colour() -> void:
+	# keep_by_alpha reads vertex alpha: a pane's alpha is its opacity and PropDress's props' their paint, so any
+	# non-orange vertex with alpha above half would be drawn at its whole colour (or wrongly kept)
+	var own := Color("ea6a22")
+	var strays := PackedStringArray()
+	for f in DirAccess.get_files_at("res://assets/models/props"):
+		# the models drawn in TrainView's props material (the panes, lamps, screens and PropDress's seats and bogies
+		# are drawn in their own, their alpha theirs)
+		if not f.begins_with("train_") or not f.ends_with(".glb") or f.contains("glass") and not f.contains("glazed"):
+			continue
+		if f.contains("led") or f.contains("light") or f.contains("screen") or f.contains("window") or f.contains("advert") or f.contains("seat") or f.contains("bogie"):
+			continue
+		var mesh := PropDressConfig.load_mesh("res://assets/models/props/" + f)
+		if mesh == null:
+			continue
+		for s in mesh.get_surface_count():
+			var cols: Variant = mesh.surface_get_arrays(s)[Mesh.ARRAY_COLOR]
+			if cols == null:
+				continue
+			for c: Color in cols as PackedColorArray:
+				var srgb := c.linear_to_srgb()
+				if c.a > 0.5 and not (absf(srgb.h - own.h) < 0.03 and srgb.s > 0.4):
+					strays.append(f)
+					break
+	assert_eq(strays.size(), 0, "alpha kept only on orange: %s" % [strays])
+
+
+func test_only_the_entrances_own_fixtures_stand_in_its_grown_block() -> void:
+	# the entrance exemption of test_station_fixtures grows the block 0.1 m: nothing else may hide in it
+	var m := MapData.parse(FileAccess.get_file_as_string("res://data/maps/subway.json"), MapStyle.new(), 1)
+	var inside := PackedStringArray()
+	for b in m.blocks:
+		if b.dress != &"station_entrance":
+			continue
+		var box := AABB(b.center - b.size / 2.0, b.size).grow(0.1)
+		for f in m.station.fixtures:
+			if box.has_point(f.position):
+				inside.append(str(f.model))
+	inside.sort()
+	assert_eq(inside, PackedStringArray(["name_board", "poster_e", "poster_h", "poster_k", "wall_sign_out"]))
