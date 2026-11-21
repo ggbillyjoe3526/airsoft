@@ -70,25 +70,34 @@ void look_surface(float kind, vec3 at, vec3 n, inout vec3 col, inout float rough
 		spec = 0.6;
 	} else if (k == 3) {
 		float fade = smoothstep(0.005, 0.016, pixel);
-		vec3 woven = col;
-		vec4 a = surface_rings(p, 0.075, 3.0, pixel);
-		woven = mix(woven, a.rgb, a.a);
-		vec4 b = surface_rings(p + vec2(0.031, 0.047), 0.045, 11.0, pixel);
-		woven = mix(woven, b.rgb, b.a * 0.85);
-		col = mix(woven, col * (1.0 + SURFACE_RING_AVERAGE), fade);
+		vec3 woven = col * (1.0 + SURFACE_RING_AVERAGE);
+		// far off the rings are under a pixel: their average alone, none of their work
+		if (fade < 1.0) {
+			vec3 near = col;
+			vec4 a = surface_rings(p, 0.075, 3.0, pixel);
+			near = mix(near, a.rgb, a.a);
+			vec4 b = surface_rings(p + vec2(0.031, 0.047), 0.045, 11.0, pixel);
+			near = mix(near, b.rgb, b.a * 0.85);
+			woven = mix(near, woven, fade);
+		}
+		col = woven;
 		rough = 0.95;
 		spec = 0.25;
 		worn = 0.2;
 	} else if (k == 4) {
-		float cell = 0.022;
-		vec2 c = floor(p / cell);
-		float h = surface_hash(c + 5.0);
-		vec2 mid = (c + 0.25 + 0.5 * vec2(surface_hash(c + 9.1), surface_hash(c + 13.7))) * cell;
-		float r = cell * mix(0.07, 0.15, surface_hash(c + 17.3));
-		float fleck = (1.0 - smoothstep(r - pixel, r + pixel, length(p - mid))) * step(0.62, h);
-		vec3 tone = h > 0.9 ? vec3(0.36, 0.36, 0.35) : vec3(0.12, 0.12, 0.13);
-		vec3 speckled = mix(col, tone, fleck);
-		col = mix(speckled, col * (1.0 + SURFACE_FLECK_AVERAGE), smoothstep(0.003, 0.009, pixel));
+		float fade = smoothstep(0.003, 0.009, pixel);
+		vec3 speckled = col * (1.0 + SURFACE_FLECK_AVERAGE);
+		if (fade < 1.0) {
+			float cell = 0.022;
+			vec2 c = floor(p / cell);
+			float h = surface_hash(c + 5.0);
+			vec2 mid = (c + 0.25 + 0.5 * vec2(surface_hash(c + 9.1), surface_hash(c + 13.7))) * cell;
+			float r = cell * mix(0.07, 0.15, surface_hash(c + 17.3));
+			float fleck = (1.0 - smoothstep(r - pixel, r + pixel, length(p - mid))) * step(0.62, h);
+			vec3 tone = h > 0.9 ? vec3(0.36, 0.36, 0.35) : vec3(0.12, 0.12, 0.13);
+			speckled = mix(mix(col, tone, fleck), speckled, fade);
+		}
+		col = speckled;
 		rough = 0.62;
 		worn = 0.25;
 	} else if (k == 5) {
