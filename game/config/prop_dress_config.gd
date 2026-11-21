@@ -479,6 +479,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 @export var model_mip_cover: Dictionary[StringName, float] = {
 	&"pine_young_crown": 0.15, &"pine_grown_crown": 0.15, &"pine_old_crown": 0.15, &"spruce": 0.15,
 }
+## The coarsest mip level a leaf card's cut-out is read from (look_foliage.gdshader's `alpha_lod`, unlimited unless
+## named): the pines' needle bunches keep their spiky outline far off instead of averaging into smooth lozenges.
+@export var model_alpha_lod: Dictionary[StringName, float] = {
+	&"pine_young_crown": 2.0, &"pine_grown_crown": 2.0, &"pine_old_crown": 2.0,
+}
 @export_dir var foliage_folder: String = "res://assets/textures/woodland"
 @export_file("*.png") var foliage_sheet: String = "res://assets/textures/woodland/leaves.png"
 

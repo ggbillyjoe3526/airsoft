@@ -77,12 +77,12 @@ class Leafy:
     `tilt` radians out of the surface (so they stand out of it as sprays, not lie on it), the lower half's hanging
     when `hang`; the core an icosphere of at most `core_level` (1: 20 triangles), none under a clump
     less than `core_min` m across its mean radius (an airy crown's small tufts: cards alone); cards reach `under`
-    of the way down the clump's underside (1: all of it, seen from below)."""
+    of the way down the clump's underside (1: all of it, seen from below); each card `aspect` as wide as it is long."""
 
     def __init__(self, cells: list, mass: str, card: float = 0.9, card_min: float = 0.3, card_max: float = 1.6,
                  per_m2: float = 0.8, least: int = 3, most: int = 24, core: float = 0.72, core_dark: float = 0.35,
                  tilt: tuple = (0.35, 0.8), hang: bool = False, core_level: int = 1,
-                 core_min: float = 0.0, under: float = 0.45):
+                 core_min: float = 0.0, under: float = 0.45, aspect: float = 1.0):
         self.cells = cells
         self.mass = mass
         self.card = card
@@ -98,6 +98,7 @@ class Leafy:
         self.core_level = core_level
         self.core_min = core_min
         self.under = under
+        self.aspect = aspect
 
 
 def srgb(hex_colour: int, shade: float = 1.0) -> tuple:
@@ -460,8 +461,9 @@ class Tree:
             side = out.cross(up).normalized()
             ln = size * rng.uniform(0.8, 1.15)
             base = surf - up * ln * 0.45
-            corners = [(base - side * ln * 0.5, 0.0, 1.0), (base + side * ln * 0.5, 1.0, 1.0),
-                       (base + side * ln * 0.5 + up * ln, 1.0, 0.0), (base - side * ln * 0.5 + up * ln, 0.0, 0.0)]
+            half = ln * 0.5 * lf.aspect
+            corners = [(base - side * half, 0.0, 1.0), (base + side * half, 1.0, 1.0),
+                       (base + side * half + up * ln, 1.0, 0.0), (base - side * half + up * ln, 0.0, 0.0)]
             low = min(p.y for p, _u, _v in corners)
             if low < self.card_floor:
                 lift = self.card_floor - low

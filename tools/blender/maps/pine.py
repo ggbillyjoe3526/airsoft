@@ -53,8 +53,8 @@ NEEDLE_YOUNG = tk.mix(tk.srgb(P["canopy"]), tk.srgb(P["olive"]), 0.25)
 # NO_CORE), none moved off its tuft (CARD_SHIFT).
 PER_M2 = 1.1
 NO_CORE = 1e9
-LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.4, card_min=0.8, card_max=2.1, per_m2=PER_M2 * 1.08, least=6,
-                 most=18, core_min=NO_CORE, tilt=(0.45, 0.9), under=0.8)
+LEAFY = tk.Leafy(["pine_a", "pine_b"], "needle_mass", card=1.4, card_min=0.8, card_max=2.1, per_m2=PER_M2 * 1.3,
+                 least=6, most=18, core_min=NO_CORE, tilt=(0.45, 0.9), under=0.8)
 CARD_SHIFT = 0.1
 CARD_REACH = 1.15  # no card's middle more than this many of its clump's radii from it
 
@@ -117,13 +117,18 @@ def branch(tree: tk.Tree, start: Vector, out: Vector, length: float, rise: float
 
 def young() -> None:
     tree = tk.Tree("pine_young", 1101)
+    # long, narrow upright brushes (no core blobs) up each whorl branch's end, as the photos' young pines
     tree.leafy = tk.Leafy(["pine_young"], "needle_mass", card=1.5, card_min=0.6, card_max=1.1, per_m2=3.8, least=10,
-                          most=16, core=0.6, tilt=(0.1, 0.4), core_min=0.5)
+                          most=16, tilt=(0.1, 0.4), core_min=NO_CORE, aspect=0.45)
     tree.bark_tile = 0.8
     tree.card_floor = CLEAR_YOUNG + 0.02
     rng = tree.rng
     height, foot_r = 8.0, 0.2
-    bark = bark_of(2.0, BARK_YOUNG, BARK_YOUNG, tk.srgb(0x9C9470, 0.8), rng)
+    pale = bark_of(2.0, BARK_YOUNG, BARK_YOUNG, tk.srgb(0x9C9470, 0.8), rng)
+
+    def bark(t: float, a: float) -> tuple:
+        # the leader darkens up through the whorls (in their shade), so no pale pole shows through them
+        return tk.mix(pale(t, a), LIMB_YOUNG, max(0.0, min(1.0, (t - 0.45) / 0.15)))
     path = stem(tree, height, foot_r, 0.02, 8, 8, Vector((0.04, 0.0, -0.03)), bark, 0.03)
     centre = Vector((0.0, height * 0.7, 0.0))
     # a slim, open cone (about 0.3 as wide as tall): whorls of short up-swept branches, each tipped with a long
@@ -148,7 +153,7 @@ def young() -> None:
                       NEEDLE_UNDER, centre, flat=2.1, lean=0.6, spread=0.55)
     # the leader: a tall tuft round the top bud and the ring of shoots under it
     top = path[-1]
-    tree.tuft(top + UP * -0.45, 0.55, Vector((1.0, 0.0, 0.0)), 3, NEEDLE_YOUNG, NEEDLE_UNDER, centre, flat=2.1,
+    tree.tuft(top + UP * -0.3, 0.55, Vector((1.0, 0.0, 0.0)), 2, NEEDLE_YOUNG, NEEDLE_UNDER, centre, flat=2.1,
               spread=0.4, lean=0.6)
     tree.export(1000, foot_r, CLEAR_YOUNG, crown=True)
 
@@ -166,7 +171,7 @@ def grown() -> None:
 
     def bark(t: float, a: float) -> tuple:
         # the leader darkens up through the crown (in its shade), so no pale pole shows through it (WQ1)
-        return tk.mix(bole(t, a), LIMB, max(0.0, min(1.0, (t - 0.55) / 0.2)))
+        return tk.mix(bole(t, a), LIMB, max(0.0, min(1.0, (t - 0.4) / 0.15)))
     path = stem(tree, height, foot_r, 0.03, 12, 8, Vector((0.09, 0.0, 0.05)), bark, 0.04, flake_from(0.42))
     # dead stubs on the cleared lower stem, over head height
     for y in (CLEAR_GROWN + 0.15, 3.8):
@@ -192,14 +197,13 @@ def grown() -> None:
             size = 1.0 + 1.1 * shape
             # the tip's tuft droops a little under the branch's end; the branch is clothed to the stem
             tree.tuft(bp[-1] - UP * 0.12 * size - out * 0.25, size, out, 2, NEEDLE_TOP, NEEDLE_UNDER, centre,
-                      flat=0.72, spread=0.55, twig=TWIG)
+                      flat=0.55, spread=0.7, twig=TWIG)
             if ln > 1.75:
                 tree.tuft(tk.along(bp, 0.45) + UP * 0.15, size * 0.85, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre,
                           flat=0.8)
-    # the crown's core round the stem, so it never reads as a stack of plates, and the top
-    for y in (0.37, 0.56, 0.7, 0.82):
-        tree.tuft(axis_at(path, height * y), 2.4 - 0.9 * y, Vector((1.0, 0.0, 0.0)), 2, NEEDLE_TOP, NEEDLE_UNDER,
-                  centre, flat=0.9, spread=0.6)
+    # no core round the stem (WQ1): the whorls stand as tufted shelves with sky between them, as the photos'
+    # the leader's tip clothed in a last tuft, so no bare pole stands over the crown
+    tree.tuft(path[-1] + UP * -0.35, 0.8, Vector((1.0, 0.0, 0.0)), 1, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=1.4)
     # a ragged top whorl round the leader, not a ball
     for k in range(4):
         a = math.tau * k / 4 + rng.uniform(-0.4, 0.4)
@@ -220,7 +224,11 @@ def old() -> None:
     tree.card_floor = CLEAR_OLD + 0.02
     rng = tree.rng
     height, foot_r = 22.0, 0.42
-    bark = bark_of(0.6, BARK_UPPER, BARK_FOOT, BARK_FURROW, rng)
+    bole = bark_of(0.6, BARK_UPPER, BARK_FOOT, BARK_FURROW, rng)
+
+    def bark(t: float, a: float) -> tuple:
+        # the leader darkens into its top cloud, so no pale tip stands over the crown (WQ1)
+        return tk.mix(bole(t, a), LIMB, max(0.0, min(1.0, (t - 0.85) / 0.1)))
     path = stem(tree, height, foot_r, 0.05, 16, 12, Vector((0.2, 0.0, -0.12)), bark, 0.06, flake_from(0.6))
     for y in (CLEAR_OLD + 0.2, 4.6, 6.1, 7.8, 9.3, 10.6):
         a = rng.uniform(0.0, math.tau)
@@ -261,6 +269,7 @@ def old() -> None:
     # the top: the leader's own cloud over the middle
     tree.tuft(path[-1] + UP * -0.9, 2.3, Vector((1.0, 0.0, 0.0)), 5, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.65,
               spread=0.8)
+    tree.tuft(path[-1] + UP * -0.3, 0.9, Vector((1.0, 0.0, 0.0)), 1, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=1.4)
     tree.export(3000, foot_r, CLEAR_OLD, crown=True)
 
 

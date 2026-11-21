@@ -15,6 +15,8 @@ extends Node3D
 const LIGHT_LIFT := 0.5
 ## A leaf card's cover growth a mip level where PropDressConfig.model_mip_cover names none (look_foliage's default).
 const MIP_COVER := 0.35
+## The coarsest mip a leaf card's cut-out is read from where PropDressConfig.model_alpha_lod names none (unlimited).
+const ALPHA_LOD := 16.0
 
 ## By roughness (x), wear (y) and full colour (z, 1 or 0): the shared one and each model_roughness, model_wear or
 ## full_colour's.
@@ -123,21 +125,22 @@ func _material_of(model: StringName) -> ShaderMaterial:
 	return _materials[key]
 
 
-## Model `model`'s textured material (PropDressConfig.model_barks, WQ1), one for each set of barks, mip cover,
-## roughness and wear; its maps loaded once a dress.
+## Model `model`'s textured material (PropDressConfig.model_barks, WQ1), one for each set of barks, mip cover, alpha
+## mip, roughness and wear; its maps loaded once a dress.
 func _foliage_of(model: StringName) -> ShaderMaterial:
 	var barks: PackedStringArray = _cfg.model_barks[model]
 	var rough: float = _cfg.model_roughness.get(model, _cfg.roughness)
 	var wear: float = _cfg.model_wear.get(model, _cfg.wear)
 	var cover: float = _cfg.model_mip_cover.get(model, MIP_COVER)
-	var key := "%s|%s|%s|%s" % [",".join(barks), rough, wear, cover]
+	var lod: float = _cfg.model_alpha_lod.get(model, ALPHA_LOD)
+	var key := "%s|%s|%s|%s|%s" % [",".join(barks), rough, wear, cover, lod]
 	if not _textured.has(key):
 		var maps: Array[Texture2D] = [null, null, null, null]
 		for i in mini(barks.size(), 2):
 			maps[i * 2] = _texture("%s/%s.png" % [_cfg.foliage_folder, barks[i]]) as Texture2D
 			maps[i * 2 + 1] = _texture("%s/%s_nor.png" % [_cfg.foliage_folder, barks[i]]) as Texture2D
 		_textured[key] = LookMaterials.foliage(_texture(_cfg.foliage_sheet) as Texture2D, maps[0], maps[1], maps[2], maps[3],
-				rough, wear, true, cover)
+				rough, wear, true, cover, lod)
 	return _textured[key]
 
 

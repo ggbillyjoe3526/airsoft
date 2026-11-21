@@ -327,8 +327,11 @@ def fascicle_brush(cell: Cell, base: tuple, ang: float, length: float, needle: f
             depth = rng.random()
             col = vary(rng, shade * (0.6 + 0.5 * depth + 0.15 * t), 0.08, 0.25 if t > 0.85 else 0.08)
             bunches.append((depth, p, (p[0] + math.sin(a) * ln, p[1] - math.cos(a) * ln), col))
+    # each needle streaked: dark at its base in the bunch, pale toward its tip, so a card never reads as one flat leaf
     for _d, p, tip, col in sorted(bunches, key=lambda q: q[0]):
-        cell.line(p, tip, 5.0, col)
+        mid = ((p[0] + tip[0]) * 0.5, (p[1] + tip[1]) * 0.5)
+        cell.line(p, mid, 5.0, tuple(v * 0.72 for v in col))
+        cell.line(mid, tip, 4.2, tuple(v * 1.22 for v in col))
 
 
 def pine_cell(seed: int, young: bool = False) -> Image.Image:

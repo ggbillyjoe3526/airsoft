@@ -85,7 +85,8 @@ func _material_for(props: PropDressConfig, model: StringName) -> ShaderMaterial:
 			maps[i * 2] = load("%s/%s.png" % [props.foliage_folder, barks[i]]) as Texture2D
 			maps[i * 2 + 1] = load("%s/%s_nor.png" % [props.foliage_folder, barks[i]]) as Texture2D
 		return LookMaterials.foliage(load(props.foliage_sheet) as Texture2D, maps[0], maps[1], maps[2], maps[3], rough,
-				0.0, false, props.model_mip_cover.get(model, PropDress.MIP_COVER))
+				0.0, false, props.model_mip_cover.get(model, PropDress.MIP_COVER),
+				props.model_alpha_lod.get(model, PropDress.ALPHA_LOD))
 	if props.surface_models.has(model):
 		var m := LookMaterials.surfaced(load(props.surface_maps) as TextureLayered,
 				load(props.surface_relief) as TextureLayered, rough)

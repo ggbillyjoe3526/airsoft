@@ -39,12 +39,15 @@ static func printed(sheet: Texture2D, roughness: float, wear: float = 0.0) -> Sh
 ## light: its leaves from `sheet` (the leaf sheet, cut out), its bark from `bark` and its normal map `relief`, a
 ## second bark `bark_b` (with `relief_b`) blended in where the model says (look_foliage.gdshader); null maps draw
 ## plain. `roughness` over all of it, worn as `vertex_colour`'s `wear`; with `by_custom` each instance's custom data
-## paints it as a PropDress model (DM1: look_vertex.gdshader's paint_by_custom).
+## paints it as a PropDress model (DM1: look_vertex.gdshader's paint_by_custom). A leaf's cover grows `mip_cover` a mip
+## level, its cut-out read from no coarser a mip than `alpha_lod`.
 static func foliage(sheet: Texture2D, bark: Texture2D, relief: Texture2D, bark_b: Texture2D, relief_b: Texture2D,
-		roughness: float, wear: float = 0.0, by_custom: bool = true, mip_cover: float = 0.35) -> ShaderMaterial:
+		roughness: float, wear: float = 0.0, by_custom: bool = true, mip_cover: float = 0.35,
+		alpha_lod: float = 16.0) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = FOLIAGE_SHADER
 	m.set_shader_parameter(&"mip_cover", mip_cover)
+	m.set_shader_parameter(&"alpha_lod", alpha_lod)
 	m.set_shader_parameter(&"sheet", sheet)
 	m.set_shader_parameter(&"bark", bark)
 	m.set_shader_parameter(&"bark_relief", relief)

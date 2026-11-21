@@ -35,6 +35,8 @@ uniform float alpha_cut : hint_range(0.0, 1.0) = 0.5;
 uniform float alpha_edge : hint_range(0.0, 1.0) = 0.3;
 // How much a leaf's cover grows a mip level (so a far crown keeps its fill).
 uniform float mip_cover : hint_range(0.0, 1.0) = 0.35;
+// The coarsest mip level a leaf's cut-out is read from (a needle tree's spiky bunches stay spiky far off).
+uniform float alpha_lod : hint_range(0.0, 16.0) = 16.0;
 uniform bool retro_wobble = true;
 // Each instance's custom data paints the parts whose vertex alpha is 1 (PropDress's, DM1; look_vertex.gdshader's).
 uniform bool paint_by_custom = true;
@@ -82,7 +84,10 @@ void fragment() {
 		ALPHA_ANTIALIASING_EDGE = alpha_edge;
 		ALPHA_TEXTURE_COORDINATE = texel;
 		d = s.rgb;
-		cover = s.a * (1.0 + mip * mip_cover);
+		if (mip > alpha_lod) {
+			s.a = textureLod(sheet, UV, alpha_lod).a;
+		}
+		cover = s.a * (1.0 + min(mip, alpha_lod) * mip_cover);
 		// both sides lit as the crown's one soft shape: undo the engine's flip on a back face
 		if (!FRONT_FACING) {
 			NORMAL = -NORMAL;
