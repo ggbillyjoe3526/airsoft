@@ -1,6 +1,6 @@
 extends GutTest
-## BP12, the third pass before 0.1 Beta 2: a walk-off hidden in leaves or smoke is not seen (Respawns.seen), so it leaves
-## the field on time instead of walking on.
+## BP12, the third pass before 0.1 Beta 2: a walk-off hidden in leaves or smoke is not seen (Respawns.seen), so it
+## leaves the field on time instead of walking on.
 
 const DT := 1.0 / 60.0
 
@@ -200,3 +200,24 @@ func test_zero_wait_respawns_at_once_with_smoke_around() -> void:
 		if Elimination.is_in_play(c):
 			break
 	assert_true(Elimination.is_in_play(c), "it never sticks")
+
+
+# --- Critic, attempt 1: within the bots' close range leaves hide nothing ---
+
+
+func test_a_bush_hides_nothing_at_arms_length() -> void:
+	var m := _watched()
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var c: Character = m[2]
+	# the watchers stand 2 m off it (inside seen_leaves_near), a full bush between
+	for i: int in [0, 2, 3]:
+		state.characters[i].position = Vector3(0.0, sim.tuning.body.rest_gap, 2.0)
+	sim.query.foliage.add(Vector3(0.0, 0.0, 3.0), 0.6, 2.0)
+	assert_lt(2.0, sim.tuning.hits.seen_leaves_near)
+	assert_true(Respawns.seen(c, state.characters, sim.tuning, sim.query, RayHit.new()),
+			"at arm's length a bush hides no one, as from the bots")
+	# just past that reach, the same bush hides it
+	for i: int in [0, 2, 3]:
+		state.characters[i].position = Vector3(0.0, sim.tuning.body.rest_gap, 4.0 - sim.tuning.hits.seen_leaves_near - 1.0)
+	assert_false(Respawns.seen(c, state.characters, sim.tuning, sim.query, RayHit.new()))

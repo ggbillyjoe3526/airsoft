@@ -84,7 +84,8 @@ static func resolve(c: Character, rs: RoundState, ends: Array[MapEnd], character
 ## off leaves the field as its wait's last HitConfig.vanish_time starts once nobody in play sees it (seen, through
 ## `query` with `hit` for its rays and the round's `grenades` for their smoke; none given, nobody does) or it has
 ## walked HitConfig.seen_most past it, and a wait run out brings it back (a RESPAWNED event) once it is out (still
-## calling its hit, it calls, walks off and leaves first). Once respawns are shut (Plant The Bomb's bomb armed), every wait is dropped.
+## calling its hit, it calls, walks off and leaves first). Once respawns are shut (Plant The Bomb's bomb armed), every
+## wait is dropped.
 static func step(rs: RoundState, characters: Array[Character], commands: Array[PlayerCommand], ends: Array[MapEnd],
 		tuning: SimTuning, events: SimEvents, dt: float, query: WorldQuery = null, hit: RayHit = null,
 		grenades: Array[Grenade] = []) -> void:
@@ -119,7 +120,8 @@ static func step(rs: RoundState, characters: Array[Character], commands: Array[P
 
 ## Whether anyone in play sees `c` (HitConfig.seen_range, seen_angle): faces it, near enough, with a clear sight line
 ## (`query`'s sight_ray, into `hit`) from their eye to its chest, through no more than seen_leaves of bush (`query`'s
-## foliage) and seen_smoke of `grenades`' smoke. False with no `query`.
+## foliage; any within seen_leaves_near, as the bots' close_awareness) and seen_smoke of `grenades`' smoke. False with
+## no `query`.
 static func seen(c: Character, characters: Array[Character], tuning: SimTuning, query: WorldQuery,
 		hit: RayHit, grenades: Array[Grenade] = []) -> bool:
 	if query == null or hit == null:
@@ -128,6 +130,7 @@ static func seen(c: Character, characters: Array[Character], tuning: SimTuning, 
 	var chest := c.position + Vector3(0.0, (hits.torso_bottom + hits.torso_top) * 0.5, 0.0)
 	var reach := hits.seen_range * hits.seen_range
 	var cone := cos(deg_to_rad(hits.seen_angle))
+	var near := hits.seen_leaves_near * hits.seen_leaves_near
 	for o in characters:
 		if o == c or not Elimination.is_in_play(o):
 			continue
@@ -141,7 +144,8 @@ static func seen(c: Character, characters: Array[Character], tuning: SimTuning, 
 			continue
 		if query.sight_ray(eye, chest, hit):
 			continue
-		if query.foliage != null and query.foliage.depth(eye, chest, hits.seen_leaves) > hits.seen_leaves:
+		if query.foliage != null and flat.length_squared() > near \
+				and query.foliage.depth(eye, chest, hits.seen_leaves) > hits.seen_leaves:
 			continue
 		if not grenades.is_empty() \
 				and Grenades.smoke_depth(grenades, tuning.grenades, eye, chest, hits.seen_smoke) > hits.seen_smoke:
