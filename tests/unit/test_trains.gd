@@ -127,7 +127,8 @@ func test_the_view_draws_every_car_door_end_and_gangway() -> void:
 		assert_gt(leds[path], 0, "%s has ends to light" % path)
 		assert_eq(view.count(path), leds[path], "white LEDs at every cab and uncoupled end: %s" % path)
 	assert_eq(view.count(look.leds[&"cab"]), 3, "the north train's two cabs and the south train's open one")
-	assert_eq(view.materials().size(), 5, "the props', the strips', the LEDs', the windows' and the draft screens' glass")
+	assert_eq(view.materials().size(), 6,
+			"the props', the strips', the LEDs', the windows' and the draft screens' glass, the advert cards' print")
 	for path: String in [look.windows, look.door_glass]:
 		var g := view.view_of(path)
 		assert_eq(g.material_override, view.materials()[3], "%s is see-through" % path)
@@ -289,10 +290,11 @@ func test_no_train_colour_reads_as_a_team() -> void:
 	assert_eq(near, [] as Array[String], "worn grey and the orange stripe: no other colour near a team's hue")
 
 
-## Whether `c` (sRGB, as baked and worn) is the orange stripe's (train.py COLOURS "stripe", #c0652f, the owner's ask,
-## 2026-11-12), its grime darkening it but keeping its hue: the one colour let near Beta's.
+## Whether `c` (sRGB, as baked and worn) is the orange stripe's (train.py COLOURS "stripe", #d8692a, the owner's asks,
+## 2026-11-12 and, a little more vivid, 2026-11-21), its grime darkening it but keeping its hue: the one colour let near
+## Beta's.
 func _stripe(c: Color) -> bool:
-	var own := Color("c0652f")
+	var own := Color("d8692a")
 	return absf(c.h - own.h) < 0.03 and c.v <= own.v + 0.02
 
 

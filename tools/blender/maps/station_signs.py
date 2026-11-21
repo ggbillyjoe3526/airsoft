@@ -42,9 +42,10 @@ SIGN_BLACK = (0x1E, 0x1E, 0x20)
 SIGN_YELLOW = (0xE4, 0xCA, 0x46)   # the palette's yellow, the station's one safety colour
 CREAM = (0xF4, 0xEC, 0xDA)
 SLATE = (0x3B, 0x40, 0x3E)         # dark grey-green, no network's colour
-# The station's name signs (owner, 2026-11-12): the trains' stripe, a worn burnt orange (train.py COLOURS "stripe");
-# like the stripe, let off the team-hue rule at the owner's word (tests/unit/test_station_fixtures.gd).
-STRIPE = (0xC0, 0x65, 0x2F)
+# The station's name signs (owner, 2026-11-12): the trains' stripe orange (train.py COLOURS "stripe"; a little more
+# vivid from 2026-11-21, the owner: #d8692a); like the stripe, let off the team-hue rule at the owner's word
+# (tests/unit/test_station_fixtures.gd).
+STRIPE = (0xD8, 0x69, 0x2A)
 TEAL = (0x2A, 0x9C, 0x90)
 GREEN = (0x58, 0x90, 0x4E)
 FOREST = (0x2B, 0x5C, 0x48)
