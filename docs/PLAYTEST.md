@@ -1978,6 +1978,13 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   brighter than the hall and doesn't light the hall's floor in a hard square; nothing flickers; Low holds 60 FPS
   looking at it.
 
+## Subway's train rails and adverts (TQ2)
+
+- [ ] **Inside a car.** Subway on Low and on your usual preset: walk the north train end to end. Pass: the poles and
+  rails are smooth round tubes with rounded bends and no brackets, in a brighter orange that still isn't Beta's; the
+  stripe outside and the station's orange signs match them; every panel above the windows shows an advert, the next
+  car's in a different order; the adverts stay sharp without shimmer; nothing flickers; Low holds 60 FPS inside a car.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

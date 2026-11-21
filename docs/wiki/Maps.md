@@ -182,8 +182,8 @@ One team starts in the ticket hall at the west end, the other down in the runnin
   works hoardings, crates and benches break the 100 m platforms into short lanes. The tracks lie 0.9 m below the
   platform edge, low enough to climb in and out of anywhere. The north train stands at its platform with five doors
   open; the south train stands half in its running tunnel, and its open cab door at the east end is a way through. Look
-  through a car's platform-side windows and you see right into it: patterned padded seats, glass screens by the
-  doors, adverts along the ceiling and a speckled floor.
+  through a car's platform-side windows and you see right into it: patterned padded seats, smooth orange grab rails,
+  glass screens by the doors, adverts in the panels above the windows and a speckled floor.
 - **The running tunnels** lead east from the platforms, arched round the trains, past works wagons, trolleys and
   cable drums, joined by a cross passage. At their east ends both curve away out of sight behind a locked steel
   grille. Up close the station's fittings show what they are made of: satin-painted gates and booths with steel trims
