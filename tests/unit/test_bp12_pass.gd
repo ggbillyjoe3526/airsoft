@@ -219,5 +219,6 @@ func test_a_bush_hides_nothing_at_arms_length() -> void:
 			"at arm's length a bush hides no one, as from the bots")
 	# just past that reach, the same bush hides it
 	for i: int in [0, 2, 3]:
-		state.characters[i].position = Vector3(0.0, sim.tuning.body.rest_gap, 4.0 - sim.tuning.hits.seen_leaves_near - 1.0)
+		var z := 4.0 - sim.tuning.hits.seen_leaves_near - 1.0
+		state.characters[i].position = Vector3(0.0, sim.tuning.body.rest_gap, z)
 	assert_false(Respawns.seen(c, state.characters, sim.tuning, sim.query, RayHit.new()))
