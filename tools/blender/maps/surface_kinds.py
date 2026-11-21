@@ -9,7 +9,9 @@ Dev tool: tools/ never ships.
 """
 
 KIND_BASE = 100
-GLOSS, STEEL, MOQUETTE, FLOOR, GLASS, RUBBER, ALUMINIUM, SATIN = 1, 2, 3, 4, 5, 6, 7, 8
+GLOSS, STEEL, MOQUETTE, FLOOR, GLASS, RUBBER, ALUMINIUM, SATIN, LIT = 1, 2, 3, 4, 5, 6, 7, 8, 9
+# 9 lit (TQ2): the street's daylight up Subway's entrance stair and its way-out sign, glowing by their own colour
+# (look_vertex.gdshader).
 
 # Paint-name words and their kind, the first found winning (a paint's own name, its "*shade" left off).
 WORDS = (

@@ -11,7 +11,7 @@ Look only: the block's face is the gate's plane, so nothing passes it; the lamps
 (build_map.py lamps, ENTRANCE_LAMPS).
 
 Blender space: front (into the hall) -Y, width X, up Z; the front at Y = -5.75.
-Budget 5,000 triangles.
+Budget 5,150 triangles.
 
 Usage: python3 tools/blender/maps/station_entrance.py
 """
@@ -22,6 +22,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import prop  # noqa: E402
 import hallkit as sk  # noqa: E402
+import surface_kinds as kinds  # noqa: E402
 
 W, D, H = 4.8, 11.5, 5.0
 HW = W / 2
@@ -43,33 +44,46 @@ ESC_X = (0.05, WALL_IN)          # the escalator, its balustrades either side
 
 TILE = "plaster*0.97"
 GROUT = "plaster*0.84"
-BAND = "green*0.46"            # the station's dark green tile band
+BAND = "green*0.6"            # the station's dark green tile band
 FLOOR = "slab*0.78"
 FLOOR_TOP = "slab*0.7"
 NOSING = "yellow*0.9"
 CEILING = "concrete*0.86"
 SEAM = "concrete*0.7"
-STEP = "slab*0.46"             # the escalator's treads: dark ribbed aluminium
-STEP_RISE = "slab*0.36"
+STEP = "concrete*0.6"          # the escalator's treads: ribbed aluminium, its grooves darker
+STEP_RISE = "slab*0.5"
 RAIL = "rubber*1.05"           # the escalator's handrail
 FASCIA = "slab*0.34"
 SIGN = "slab*0.31"
 GATE = "steel*1.25"
 GATE_DARK = "steel*0.95"
 # the street, daylight: paler than anything in the station
-PAVING = "concrete*1.08"
-KERB = "concrete*0.9"
-ROAD = "slab*0.85"
-ROAD_LINE = "cream*0.98"
-SKY = "plaster*1.06"
-FACADE = "sand*1.2"
-FACADE_B = "heartwood*1.0"
-WINDOW = "grey*1.15"
-SHOP = "sage*0.8"
-AWNING = "teal*0.62"
-POST = "slab*0.4"
+# the street's paints, each its own string ("*1" on the end) so the daylight kind below is theirs alone
+PAVING = "concrete*1.0*1"
+KERB = "concrete*0.86*1"
+ROAD = "slab*0.8*1"
+ROAD_LINE = "cream*0.98*1"
+SKY = "plaster*1.0*1"
+FACADE = "sand*1.1*1"
+FACADE_B = "heartwood*0.95*1"
+WINDOW = "grey*0.9*1"
+SHOP = "sage*0.8*1"
+SHOP_B = "crimson*0.55*1"
+AWNING = "teal*0.62*1"
+AWNING_TEXT = "cream*0.9*1"
+POST = "slab*0.45*1"
+SIGN_WORDS = "yellow*0.95"     # the way-out sign's letters, yellow on black as a station's
+SIGN_NAME = "cream*0.97"       # the station's name over them
 prop.KINDS.update({GATE: sk.kinds.STEEL, GATE_DARK: sk.kinds.STEEL, STEP: sk.kinds.ALUMINIUM, RAIL: sk.kinds.RUBBER,
                    WINDOW: sk.kinds.GLASS, AWNING: sk.kinds.SATIN, FASCIA: sk.kinds.SATIN, SIGN: sk.kinds.GLOSS})
+
+
+# The street lies in daylight: its faces glow by their own colour (surface kind 9, lit: look_vertex.gdshader), so from
+# the hall it reads as the sunlit street up the stair, not a room lit by the passage's lamps; so do the way-out sign's
+# letters, as a lit sign's. The escalator's treads are brushed aluminium.
+prop.KINDS.update({k: kinds.LIT for k in (PAVING, KERB, ROAD, ROAD_LINE, SKY, FACADE, FACADE_B, WINDOW, SHOP,
+                                          SHOP_B, AWNING, AWNING_TEXT, POST, SIGN_WORDS, SIGN_NAME)})
+prop.KINDS[STEP] = kinds.ALUMINIUM
 
 
 def floor_z(y: float) -> float:
@@ -89,6 +103,7 @@ def walls(p: prop.Prop) -> None:
         face = "+x" if side < 0 else "-x"
         at = side * WALL_IN
         p.box((min(at, side * HW), FRONT + 0.15, 0.0), (max(at, side * HW), EXIT_Y + 0.15, CEIL), TILE)
+
         # u along the face: +y on "+x", -y on "-x"
         def u(y: float) -> float:
             return y if face == "+x" else -y
@@ -120,8 +135,8 @@ def walls(p: prop.Prop) -> None:
             y += 0.6
         # posters up the stair's side: three in stainless frames, colour blocks (no words)
         if side < 0:
-            for k, cols in enumerate((("crimson*0.72", "cream*0.92"), ("teal*0.66", "butter*0.9"),
-                                      ("violet*0.7", "plaster*0.95"))):
+            for k, cols in enumerate((("crimson*0.95", "cream*0.92"), ("teal*0.92", "butter*0.9"),
+                                      ("violet*0.95", "plaster*0.95"))):
                 yc = FOOT_Y + RUN * (0.2 + 0.3 * k)
                 zc = floor_z(yc) + 1.75
                 a, b = u(yc - 0.5), u(yc + 0.5)
@@ -231,6 +246,50 @@ def escalator(p: prop.Prop) -> None:
     balustrade(p, *DIVIDE_X, False)
 
 
+# A stroke font for the sign's few letters: each a list of strokes, each stroke (x, y) points in a cell 0.6 wide (the
+# I narrower) and 1 high, drawn as flat bars.
+GLYPHS = {
+    "W": (0.7, [[(0, 1), (0.17, 0), (0.35, 0.62), (0.53, 0), (0.7, 1)]]),
+    "A": (0.6, [[(0, 0), (0.3, 1), (0.6, 0)], [(0.13, 0.38), (0.47, 0.38)]]),
+    "Y": (0.6, [[(0, 1), (0.3, 0.52), (0.6, 1)], [(0.3, 0.52), (0.3, 0)]]),
+    "O": (0.6, [[(0.18, 0), (0.42, 0), (0.6, 0.2), (0.6, 0.8), (0.42, 1), (0.18, 1), (0, 0.8), (0, 0.2), (0.18, 0)]]),
+    "U": (0.6, [[(0, 1), (0, 0.2), (0.15, 0), (0.45, 0), (0.6, 0.2), (0.6, 1)]]),
+    "T": (0.6, [[(0, 1), (0.6, 1)], [(0.3, 1), (0.3, 0)]]),
+    "M": (0.7, [[(0, 0), (0, 1), (0.35, 0.45), (0.7, 1), (0.7, 0)]]),
+    "R": (0.6, [[(0, 0), (0, 1), (0.42, 1), (0.6, 0.86), (0.6, 0.64), (0.42, 0.5), (0, 0.5)], [(0.3, 0.5), (0.6, 0)]]),
+    "I": (0.12, [[(0.06, 0), (0.06, 1)]]),
+    "N": (0.6, [[(0, 0), (0, 1), (0.6, 0), (0.6, 1)]]),
+    "S": (0.6, [[(0.6, 0.84), (0.44, 1), (0.16, 1), (0, 0.84), (0, 0.66), (0.16, 0.52), (0.44, 0.48), (0.6, 0.34),
+                 (0.6, 0.16), (0.44, 0), (0.16, 0), (0, 0.16)]]),
+    "E": (0.55, [[(0.55, 1), (0, 1), (0, 0), (0.55, 0)], [(0, 0.5), (0.45, 0.5)]]),
+    " ": (0.35, []),
+}
+
+
+def lettering(p: prop.Prop, at: float, text: str, cu: float, v0: float, size: float, stroke: float, paint: str) -> None:
+    """`text` on the front face at depth `at`, centred on u = cu, its baseline at v0, letters `size` high, strokes
+    `stroke` thick: each stroke's bars squared off half a stroke past their ends, so their corners close."""
+    gap = 0.22
+    width = sum(GLYPHS[ch][0] for ch in text) + gap * (len(text) - 1)
+    u = cu - width * size / 2
+    for ch in text:
+        w, strokes = GLYPHS[ch]
+        for line in strokes:
+            for (xa, ya), (xb, yb) in zip(line, line[1:]):
+                a = (u + xa * size, v0 + ya * size)
+                b = (u + xb * size, v0 + yb * size)
+                dx, dy = b[0] - a[0], b[1] - a[1]
+                n = math.hypot(dx, dy)
+                tx, ty = dx / n * stroke / 2, dy / n * stroke / 2
+                nx, ny = -ty, tx
+                pts = [(a[0] - tx + nx, a[1] - ty + ny), (a[0] - tx - nx, a[1] - ty - ny),
+                       (b[0] + tx - nx, b[1] + ty - ny), (b[0] + tx + nx, b[1] + ty + ny)]
+                # counter-clockwise seen from the front (-y): u runs to the right
+                area = sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in zip(pts, pts[1:] + pts[:1]))
+                sk.poly(p, "-y", at, pts if area > 0 else pts[::-1], paint)
+        u += (w + gap) * size
+
+
 def portal(p: prop.Prop) -> None:
     """The doorway's stainless portal in the hall's wall, the dark fascia over it with its way-out sign, and the
     folding gate drawn shut across it."""
@@ -238,16 +297,16 @@ def portal(p: prop.Prop) -> None:
     p.box((WALL_IN, FRONT, 0.0), (HW, FRONT + 0.15, H), sk.STAINLESS)
     p.box((-WALL_IN, FRONT, DOOR_H - 0.1), (WALL_IN, FRONT + 0.15, DOOR_H + 0.08), sk.STAINLESS)
     p.box((-WALL_IN, FRONT + 0.06, DOOR_H + 0.08), (WALL_IN, FRONT + 0.15, H), FASCIA)
-    # the sign: a black lightbox standing out of the fascia (inside the block's face), an up arrow and a band of
-    # yellow 'words' (blocks, none spelled)
-    sk.slab(p, "-y", FRONT + 0.06, 0.05, -1.5, 1.5, DOOR_H + 0.25, DOOR_H + 0.9, SIGN)
+    # the sign: a black lightbox standing out of the fascia (inside the block's face): the station's name in cream
+    # over WAY OUT in yellow, an up arrow beside it, as a station's way-out signs
+    sk.slab(p, "-y", FRONT + 0.06, 0.05, -1.7, 1.7, DOOR_H + 0.22, DOOR_H + 1.12, SIGN)
     f = FRONT + 0.0095
-    sk.poly(p, "-y", f, [(-1.32, DOOR_H + 0.5), (-1.12, DOOR_H + 0.75), (-0.92, DOOR_H + 0.5), (-1.06, DOOR_H + 0.5),
-                         (-1.06, DOOR_H + 0.34), (-1.18, DOOR_H + 0.34), (-1.18, DOOR_H + 0.5)], NOSING)
-    sk.rect(p, "-y", f, -0.75, 0.55, DOOR_H + 0.47, DOOR_H + 0.66, NOSING)
-    sk.rect(p, "-y", f, -0.75, 0.15, DOOR_H + 0.34, DOOR_H + 0.42, "yellow*0.7")
-    sk.rect(p, "-y", f, 0.9, 1.35, DOOR_H + 0.36, DOOR_H + 0.79, "green*0.9")
-    sk.rect(p, "-y", f - 0.0005, 1.02, 1.2, DOOR_H + 0.44, DOOR_H + 0.7, "cream*0.95")
+    lettering(p, f, "MORRIN STREET", 0.0, DOOR_H + 0.82, 0.2, 0.034, SIGN_NAME)
+    lettering(p, f, "WAY OUT", 0.22, DOOR_H + 0.32, 0.36, 0.058, SIGN_WORDS)
+    # the up arrow: its head, then its shaft (each counter-clockwise from the front)
+    sk.poly(p, "-y", f, [(-1.44, DOOR_H + 0.5), (-0.96, DOOR_H + 0.5), (-1.2, DOOR_H + 0.74)], SIGN_WORDS)
+    sk.poly(p, "-y", f, [(-1.27, DOOR_H + 0.3), (-1.13, DOOR_H + 0.3), (-1.13, DOOR_H + 0.5), (-1.27, DOOR_H + 0.5)],
+            SIGN_WORDS)
     # the gate: its track at the head, a guide at the foot, pickets every 0.3 m with a lattice of scissor bars
     g0, g1 = -WALL_IN, WALL_IN
     p.box((g0, GATE_Y - 0.04, DOOR_H - 0.22), (g1, GATE_Y + 0.04, DOOR_H - 0.1), GATE_DARK)
@@ -300,6 +359,16 @@ def street(p: prop.Prop) -> None:
     # a lamp post at the kerb, its arm over the road
     lx = -1.4
     p.box((lx - 0.05, ry + 0.15, RISE), (lx + 0.05, ry + 0.25, H - 0.05), POST)
+    # the buildings either side of the exit, along the pavement: plain flanks with a window each, so the street's edges
+    # are its buildings wherever it shows
+    for side, face in ((-1.0, "+x"), (1.0, "-x")):
+        at = side * (HW - 0.001)
+
+        def span(ya: float, yb: float) -> tuple:
+            return (ya, yb) if face == "+x" else (-yb, -ya)
+        sk.rect(p, face, at, *span(y0, BACK), RISE - 0.3, H, FACADE_B if side < 0 else FACADE)
+        a, b = span(y0 + 0.5, y0 + 1.2)
+        sk.rect(p, face, at - side * 0.001, a, b, 3.5, 4.3, WINDOW)
     # the far side: shopfronts at street level, upper floors, the sky over them, on the block's back
     f = BACK
     sk.rect(p, "-y", f, -HW, HW, RISE - 0.3, H, SKY)
@@ -310,10 +379,10 @@ def street(p: prop.Prop) -> None:
         sk.rect(p, "-y", f - 0.002, x0, x1, 3.6, 3.78 if x1 < 0.6 else 3.95, WINDOW)
     sk.rect(p, "-y", f - 0.002, -2.3, 0.4, RISE - 0.3, 3.4, SHOP)
     sk.rect(p, "-y", f - 0.003, -2.1, 0.2, RISE - 0.25, 3.1, WINDOW)
-    sk.rect(p, "-y", f - 0.002, 0.8, 2.3, RISE - 0.3, 3.3, "crimson*0.55")
+    sk.rect(p, "-y", f - 0.002, 0.8, 2.3, RISE - 0.3, 3.3, SHOP_B)
     sk.rect(p, "-y", f - 0.003, 0.95, 2.15, RISE - 0.25, 3.05, WINDOW)
     sk.slab(p, "-y", f - 0.003, 0.25, -2.4, 0.5, 3.42, 3.6, AWNING)
-    sk.rect(p, "-y", f - 0.004, -1.9, -0.1, 3.47, 3.56, "cream*0.9")
+    sk.rect(p, "-y", f - 0.004, -1.9, -0.1, 3.47, 3.56, AWNING_TEXT)
 
 
 def build() -> prop.Prop:
@@ -327,4 +396,4 @@ def build() -> prop.Prop:
 
 
 if __name__ == "__main__":
-    build().export("station_entrance.glb", budget=5000)
+    build().export("station_entrance.glb", budget=5150)

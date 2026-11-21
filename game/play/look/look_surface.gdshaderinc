@@ -4,7 +4,8 @@
 //   1 gloss paint (the cars' clean white sides), 2 satin steel (poles, rails, trims), 3 moquette (the seats' woven
 //   cover: rings and dots over its colour, as the owner's photos), 4 the floor's speckled rubber, 5 dark glass (the far
 //   side's windows, the cab's mask), 6 rubber (seals, bellows), 7 brushed aluminium (frames, thresholds), 8 satin
-//   (powder coat, moulded plastic: the station's cabinets, booths and gates, SQ1).
+//   (powder coat, moulded plastic: the station's cabinets, booths and gates, SQ1), 9 daylight (TQ2: the street seen up
+//   Subway's entrance stair, matt, glowing by its own colour in look_vertex.gdshader, daylight_glow).
 // The patterns lie in the model's own space (`own_at`, `own_n`: the same on every car) and fade to their average
 // where they'd be finer than a pixel, so they never shimmer far off.
 
@@ -120,5 +121,9 @@ void look_surface(float kind, vec3 at, vec3 n, inout vec3 col, inout float rough
 	} else if (k == 8) {
 		rough = 0.48;
 		spec = 0.5;
+	} else if (k == 9) {
+		rough = 0.9;
+		spec = 0.2;
+		worn = 0.0;
 	}
 }

@@ -113,5 +113,32 @@ func test_the_model_fills_its_block() -> void:
 	# the model's front (-Y in Blender, -Z here) to the hall: 4.8 wide, 5 high, 11.5 deep from its floor up
 	assert_almost_eq(box.size, Vector3(4.8, 5.0, 11.5), Vector3.ONE * 0.002)
 	assert_almost_eq(box.position.y, 0.0, 0.002)
-	assert_between(tris, 4500, 5000, "about 95 % of its 5,000 triangle budget")
+	assert_between(tris, 4800, 5150, "about 95 % of its 5,150 triangle budget")
 	assert_true(PropDressConfig.new().models.has(&"station_entrance"), "PropDress knows the model")
+
+
+func test_the_street_and_the_sign_are_lit() -> void:
+	# the street up the stair and the way-out sign's letters are kind 9 (lit): they glow by their own colour
+	var scene := load(MODEL) as PackedScene
+	if scene == null:
+		fail_test("the entrance model loads")
+		return
+	var root := scene.instantiate()
+	var lit := 0
+	var kinds := 0
+	for mi in root.find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		for s in mesh.get_surface_count():
+			var uvs: Variant = mesh.surface_get_arrays(s)[Mesh.ARRAY_TEX_UV]
+			if uvs == null:
+				continue
+			for uv: Vector2 in uvs as PackedVector2Array:
+				if uv.y >= 100.5:
+					kinds += 1
+					if absf(uv.y - 109.0) < 0.01:
+						lit += 1
+	root.free()
+	assert_gt(lit, 0, "the street's faces are lit")
+	assert_gt(kinds, lit, "the rest (steel, glass, aluminium) keep their own kinds")
+	var shader := load("res://game/play/look/look_vertex.gdshader") as Shader
+	assert_true(shader.code.contains("daylight_glow"), "the props' shader makes kind 9 glow")

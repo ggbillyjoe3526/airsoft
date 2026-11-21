@@ -45,7 +45,8 @@ func test_the_train_models_carry_surface_kinds_one_to_seven_and_no_uv_x() -> voi
 
 
 ## SQ1: the station props carry kinds too. A vertex with UV x 0 is plain (y 0, or y 100: kind 0) or a whole kind (y 101
-## to 108); one with UV x set is a perforated or ribbed part (map_kit.py) whose y is a coordinate, never read as a kind.
+## to 109; TQ2 added 9, lit); one with UV x set is a perforated or ribbed part (map_kit.py) whose y is a coordinate,
+## never read as a kind.
 func test_every_prop_with_kinds_has_whole_kinds_only() -> void:
 	var seen := 0
 	var with_kinds := 0
@@ -66,10 +67,10 @@ func test_every_prop_with_kinds_has_whole_kinds_only() -> void:
 					assert_true(uv.y < KIND_BASE - 0.5, "%s: a perforated or ribbed vertex read as a kind" % f)
 					continue
 				var plain := absf(uv.y) < 0.0001
-				var whole := absf(uv.y - roundf(uv.y)) < 0.01 and uv.y > KIND_BASE - 0.5 and uv.y < KIND_BASE + 8.5
+				var whole := absf(uv.y - roundf(uv.y)) < 0.01 and uv.y > KIND_BASE - 0.5 and uv.y < KIND_BASE + 9.5
 				if not (plain or whole):
 					bad += 1
-		assert_eq(bad, 0, "%s: every vertex plain or a whole kind 0..8" % f)
+		assert_eq(bad, 0, "%s: every vertex plain or a whole kind 0..9" % f)
 	assert_gt(seen, 20, "props were checked")
 	assert_gt(with_kinds, 10, "the station props carry kinds (SQ1)")
 

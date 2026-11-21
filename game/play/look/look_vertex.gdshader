@@ -46,6 +46,9 @@ uniform float rib_shade : hint_range(0.0, 1.0) = 0.42;
 // Whether Dev › Retro filter wobbles its corners (RF1): not the level's blocks and ground, whose big faces would tilt
 // through the floors and cladding laid a few cm over them (LookMaterials.vertex_colour's `wobble`).
 uniform bool retro_wobble = true;
+// How much a part of kind 9 (look_surface.gdshaderinc: daylight, TQ2's street up Subway's entrance stair) glows by
+// its own colour: the sunlit street seen from underground, brighter than any lamp down there makes it.
+uniform float daylight_glow : hint_range(0.0, 2.0) = 0.55;
 
 varying vec3 paint;
 varying vec2 perforation;
@@ -118,4 +121,7 @@ void fragment() {
 	ROUGHNESS = rough;
 	METALLIC = metal;
 	SPECULAR = spec;
+	if (surface_kind > 8.5 && surface_kind < 9.5) {
+		EMISSION = albedo * daylight_glow;
+	}
 }
