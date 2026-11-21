@@ -31,16 +31,16 @@ model's bounds, collision and the layout, Subway's orange (#c0652f) and no team 
   hinges and vents; the wagons' underframes (shared by the ballast and engineering wagons), axleboxes, ribs and
   stanchions; the buffer stop's beams and buffers; the trolleys' wheels and decks; the drums' flanges and cable
   turns; the tunnel segments' bolt pockets, the fan housing's blades and guard, the grille's bars.
-- **After the critic (attempt 1):** the gate's pedestal is brushed stainless up to the reader head (dark share of
-  the pillar 0.18, the photos' 0.19), with two small sensor windows a side; the paddle blade lowered to 0.47-0.95 m so
-  the screen posts stand over it as in the photos (GatePaddles reads only the paddle's length, so its height is
-  free). The booths are cream (`satin_cream`, grime at most 0.15) with clear grey glass in grey frames, the sill at
-  half the eave's height and a 0.27 m roof fascia. The skip's spoil is shaded flat in about 5 cm facets of darker
-  tones, its tub 1.6 times the undercarriage's height (smaller wheels, a lower frame). The tunnel segments are a
-  1.34 m bore, so their arc reads at 10 m, with 6 to 8 cm deep bolt pockets. The help point is a red map totem
-  (crimson, the house red: a true red is within 20 degrees of the high-contrast Beta orange) with recessed windows, a map, a street map, a timetable and the
-  help panel. The barrier keeps its cover sheet (its block stops BBs and sight, so open bars would show gaps no shot
-  goes through) but gains round corners, bridge feet, hooks and eyes, the sheet tied on with a hem.
+- **After the critic (attempt 1):** the gate's pedestal is brushed stainless up to the reader head (dark share of the
+  pillar 0.18, the photos' 0.19), with two small sensor windows a side; the paddle blade lowered to 0.47-0.95 m so the
+  screen posts stand over it as in the photos (GatePaddles reads only the paddle's length, so its height is free). The
+  booths are cream (`satin_cream`, grime at most 0.15) with clear grey glass in grey frames, the sill at half the
+  eave's height and a 0.27 m roof fascia. The skip's spoil is shaded flat in about 5 cm facets of darker tones, its
+  tub 1.6 times the undercarriage's height (smaller wheels, a lower frame). The tunnel segments are a 1.34 m bore, so
+  their arc reads at 10 m, with 6 to 8 cm deep bolt pockets. The help point is a red map totem (crimson, the house
+  red: a true red is within 20 degrees of the high-contrast Beta orange) with recessed windows, a map, a street map, a
+  timetable and the help panel. The barrier keeps its cover sheet (its block stops BBs and sight, so open bars would
+  show gaps no shot goes through) but gains round corners, bridge feet, hooks and eyes, the sheet tied on with a hem.
 - **Pictures:** close-ups (2.3 m) in game and each model beside its photo in Blender, in the project files.
 - **Near-black paints** stay at or above `slab*0.3`: darker tints round on import to a team hue (test_props found
   the gate's screen and the bench's holes).
