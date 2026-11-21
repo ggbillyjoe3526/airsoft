@@ -48,7 +48,7 @@ static func build(map: MapData, cfg: PropDressConfig, paint: Callable = Callable
 		var mesh := cfg.mesh_of(model) # warns once when it won't load
 		if mesh == null:
 			continue
-		meshes[model] = mesh
+		meshes[model] = cfg.drawn_mesh_of(model)
 		boxes[model] = mesh.get_aabb()
 	var placed := PropLayout.layout(map, cfg, boxes, paint)
 	if placed.is_empty():
@@ -141,6 +141,10 @@ func _foliage_of(model: StringName) -> ShaderMaterial:
 			maps[i * 2 + 1] = _texture("%s/%s_nor.png" % [_cfg.foliage_folder, barks[i]]) as Texture2D
 		_textured[key] = LookMaterials.foliage(_texture(_cfg.foliage_sheet) as Texture2D, maps[0], maps[1], maps[2], maps[3],
 				rough, wear, true, cover, lod)
+		var trim := _cfg.leaf_trim()
+		if trim != null:
+			# a trimmed card opens out before its cut-out reads coarser than its rectangle holds (WF1, LeafTrim)
+			(_textured[key] as ShaderMaterial).set_shader_parameter(&"trim_mip", trim.max_mip)
 	return _textured[key]
 
 
@@ -298,7 +302,7 @@ func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chu
 		view.name = "%s_%d_%d" % [String(model).capitalize(), cell.x, cell.y]
 		view.multimesh = mm
 		# its foot's grime climbs from the model's floor (its box's bottom), wherever its origin is (SL2)
-		LookMaterials.draw_worn(view, _material_of(model), mesh.get_aabb().position.y, _floors_by_material,
+		LookMaterials.draw_worn(view, _material_of(model), _cfg.mesh_of(model).get_aabb().position.y, _floors_by_material,
 				_floor_copies)
 		if not shadow:
 			view.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

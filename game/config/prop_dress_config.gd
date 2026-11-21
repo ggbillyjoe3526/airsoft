@@ -489,6 +489,10 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 }
 @export_dir var foliage_folder: String = "res://assets/textures/woodland"
 @export_file("*.png") var foliage_sheet: String = "res://assets/textures/woodland/leaves.png"
+## Where the leaf sheet's cells draw (WF1, LeafTrimSheet from tools/textures/leaf_trim.py): the `model_barks` models'
+## leaf cards are cut down to it as they load (LeafTrim), and their cut-out read from no coarser a mip than it holds.
+## Empty: the cards drawn whole.
+@export_file("*.tres") var foliage_trim: String = "res://assets/textures/woodland/leaves_trim.tres"
 
 ## Woodland's structures and props drawn with their surfaces' detail and relief (WQ1, look_surface.gdshader): the
 ## layers each face's UV2 x names (tools/blender/maps/mapkit.py SURFACES) of `surface_maps` and `surface_relief`.
@@ -508,6 +512,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.
 var _meshes: Dictionary[String, Mesh] = {}
+## Each model's mesh as drawn (drawn_mesh_of), and the leaf sheet's outlines as loaded.
+var _drawn: Dictionary[StringName, Mesh] = {}
+var _trim: LeafTrimSheet = null
 ## This config with no kind dressed (`named_only`), made once.
 var _named: PropDressConfig = null
 
@@ -601,6 +608,24 @@ func mesh_of(model: StringName) -> Mesh:
 		if _meshes[path] == null:
 			push_warning("PropDressConfig: %s's model \"%s\" won't load; its blocks stay boxes" % [model, path])
 	return _meshes[path]
+
+
+## Model `model`'s mesh as it is drawn: a `model_barks` model's leaf cards cut down to `foliage_trim` (WF1, LeafTrim;
+## the same box), any other as mesh_of. Cut once a config.
+func drawn_mesh_of(model: StringName) -> Mesh:
+	var mesh := mesh_of(model)
+	if mesh == null or not model_barks.has(model):
+		return mesh
+	if not _drawn.has(model):
+		_drawn[model] = LeafTrim.trimmed(mesh, leaf_trim())
+	return _drawn[model]
+
+
+## The leaf sheet's outlines (`foliage_trim`), or null (none named, or it won't load).
+func leaf_trim() -> LeafTrimSheet:
+	if _trim == null and not foliage_trim.is_empty() and ResourceLoader.exists(foliage_trim):
+		_trim = load(foliage_trim) as LeafTrimSheet
+	return _trim
 
 
 ## The first mesh of the model at `path` (a .glb scene), or null.
