@@ -8,7 +8,7 @@ const K := GameEvent.Kind
 var session: PlaySession = null
 
 
-func _session(difficulty: StringName, setting: Settings.WhatGotYou = Settings.WhatGotYou.AUTO) -> PlaySession:
+func _session(difficulty: StringName, setting: bool = true) -> PlaySession:
 	var s := PlaySession.new()
 	s.bots_active = false
 	s.difficulty = difficulty
@@ -162,7 +162,7 @@ func test_the_summary_follows_the_last_rounds_table_with_everyones_match_numbers
 	assert_string_starts_with(summary.table().lines()[0], "You | 0 | 2 | ", "you first: no hits, hit twice")
 	assert_eq(summary.hits().entries().size(), 2)
 	assert_eq(summary.hits().entries()[0].number, 1)
-	assert_true(summary.hits().visible, "Auto against Hard bots")
+	assert_true(summary.hits().visible, "What got you On (the default)")
 	assert_eq(summary.tip_text(), tr(HudScoreboard.tip_for(session.state.round_state.number + 1)))
 	assert_eq(summary.foot_text(), "A NEW MATCH STARTS SHORTLY · CLICK TO START NOW")
 	assert_false(hud._replica.visible, "the replica panel makes way")
@@ -171,8 +171,8 @@ func test_the_summary_follows_the_last_rounds_table_with_everyones_match_numbers
 	assert_null(hud.what_got_you(), "the last card makes way")
 
 
-func test_against_normal_bots_auto_leaves_out_what_got_you_and_the_tip() -> void:
-	session = _session(&"easy")
+func test_against_easy_bots_off_leaves_out_what_got_you_and_there_is_no_tip() -> void:
+	session = _session(&"easy", false)
 	await wait_physics_frames(2)
 	session.counts = false
 	_hit_you()
@@ -180,8 +180,8 @@ func test_against_normal_bots_auto_leaves_out_what_got_you_and_the_tip() -> void
 	var summary := session.hud().summary()
 	assert_true(session.hud().summary_up())
 	assert_eq(session.hud().banner_text().get_slice(" / ", 0), "WON")
-	assert_false(summary.hits().visible)
-	assert_eq(summary.tip_text(), "")
+	assert_false(summary.hits().visible, "What got you Off")
+	assert_eq(summary.tip_text(), "", "the tips stay Hard's")
 	assert_false(summary.records().visible, "no records for a match that isn't counted")
 
 

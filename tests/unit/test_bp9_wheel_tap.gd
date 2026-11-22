@@ -61,7 +61,7 @@ func test_a_tap_with_the_mouse_moving_spots_whatever_button_the_pointer_reached(
 			assert_false(cmd.ping_move or cmd.ping_watch or cmd.mag_hand_off, "nor that button's ping or hand-off")
 
 
-func test_a_tap_turns_the_view_by_what_the_mouse_moved_and_a_hold_does_not() -> void:
+func test_a_tap_turns_the_view_as_the_mouse_moves_and_past_a_tap_only_the_pointer_moves() -> void:
 	var counts := Vector2(120.0, -40.0)
 	_move(counts.x, counts.y)
 	var free_yaw := input.view_yaw
@@ -70,10 +70,10 @@ func test_a_tap_turns_the_view_by_what_the_mouse_moved_and_a_hold_does_not() -> 
 	input.face(0.0)
 	_event(&"order_wheel", true)
 	_move(counts.x * 0.5, counts.y * 0.5)
+	assert_almost_eq(input.view_yaw, free_yaw * 0.5, 1e-6, "the key down: the view turns at once (no hitch, 2026-11-22)")
 	_move(counts.x * 0.5, counts.y * 0.5)
-	assert_almost_eq(input.view_yaw, 0.0, 1e-6, "the key down: the view waits")
 	_event(&"order_wheel", false)
-	assert_almost_eq(input.view_yaw, free_yaw, 1e-6, "a tap: the view catches up, as if the key was never down")
+	assert_almost_eq(input.view_yaw, free_yaw, 1e-6, "a tap: the view as if the key was never down")
 	assert_almost_eq(input.view_pitch, free_pitch, 1e-6)
 	input.fill(cmd)
 	assert_almost_eq(cmd.yaw, free_yaw, 1e-6, "and the Spotted goes out along it")
@@ -84,8 +84,8 @@ func test_a_tap_turns_the_view_by_what_the_mouse_moved_and_a_hold_does_not() -> 
 	_hold_past_a_tap()
 	_move(counts.x, counts.y)
 	_event(&"order_wheel", false)
-	assert_almost_eq(input.view_yaw, 0.0, 1e-6, "held: the mouse was the wheel's, the view stays")
-	assert_almost_eq(input.view_pitch, 0.0, 1e-6)
+	assert_almost_eq(input.view_yaw, free_yaw, 1e-6, "held: only the tap's motion turned the view, never a jump back")
+	assert_almost_eq(input.view_pitch, free_pitch, 1e-6)
 
 
 func test_a_tap_with_the_trigger_held_stops_no_burst() -> void:

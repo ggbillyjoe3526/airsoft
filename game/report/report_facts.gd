@@ -420,8 +420,6 @@ static func _enum_names(key: String) -> Array:
 			return TeamColours.Set.keys()
 		"window_mode", "last_fullscreen":
 			return Settings.WindowMode.keys()
-		"what_got_you":
-			return Settings.WhatGotYou.keys()
 		"renderer":
 			return Settings.Renderer.keys()
 		"wheel_pick":

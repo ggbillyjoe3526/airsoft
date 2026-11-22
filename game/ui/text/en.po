@@ -2311,9 +2311,6 @@ msgstr "Simulate skipped rounds"
 msgid "SETTINGS_SIMULATE_SKIPS_NOTE"
 msgstr "On: a skip offers SIMULATE, which decides the round at once."
 
-msgid "SETTINGS_AUTO"
-msgstr "Auto"
-
 msgid "WGY_TITLE"
 msgstr "What got you"
 
@@ -2935,9 +2932,6 @@ msgstr "HUD size"
 
 msgid "SETTINGS_HUD_SIZE_NOTE"
 msgstr "Everything but the crosshair, hit marker and cue ring. %d to %d %%."
-
-msgid "SETTINGS_WHAT_GOT_YOU_NOTE"
-msgstr "Auto: against Hard bots only."
 
 msgid "SETTINGS_MINIMAP"
 msgstr "Minimap"

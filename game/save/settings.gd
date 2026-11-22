@@ -15,8 +15,11 @@ const KIND := "settings"
 ## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1), 4 made Volumetric haze four levels (VF1), 5 moved
 ## the field of view's and the volumes' defaults (FV1, with the Power source's scale), 6 turned the gauge patterns off
 ## and the HUD opacity to 60 % by default (owner, 2026-11-17), 7 made Volumetric haze one switch again (owner,
-## 2026-11-20); an older file is brought over once by `migrate_defaults`.
-const VERSION := 7
+## 2026-11-20), 8 made What got you a switch, On by default (owner, 2026-11-22: "no auto option"); an older file is
+## brought over once by `migrate_defaults`.
+const VERSION := 8
+## What got you's saved choice in a version 1 to 7 file (Auto, On, Off then): Off stays off, Auto and On are now On.
+const WHAT_GOT_YOU_OFF_V7 := 2
 ## A Custom Volumetric haze row saved by a version 4 to 6 file, when it had levels (VF1), and the value each of them
 ## is now: On (High's haze). A version 3 file's "on" and every "off" are as they were.
 const FOG_ROW := "volumetric_fog"
@@ -35,8 +38,6 @@ const KNOWN_KEYS: Array[String] = [
 ## Windowed leaves the window as it is (the project starts maximised); the other two are the DisplayServer's
 ## borderless and exclusive fullscreen. The first start is Exclusive (WINDOW_MODE_DEFAULT).
 enum WindowMode { WINDOWED, BORDERLESS, EXCLUSIVE }
-## When the "What got you" card shows: against Hard bots, always, or never.
-enum WhatGotYou { AUTO, ON, OFF }
 ## The renderer the next start asks for: Auto (Forward+, falling back by itself) or the simpler Compatibility one.
 enum Renderer { AUTO, COMPATIBILITY }
 ## Reduced motion: follow the system's "reduce animation" (never written to the file), or the player's Off or On.
@@ -157,8 +158,9 @@ var first_start_seen: bool = false
 var realistic_colours: bool = false
 ## The interface's colour (Settings › Display, UA2): the accent of the main buttons and the selection.
 var ui_colour: UiColours.Pick = UiColours.DEFAULT
-## The "What got you" card once you are hit: Auto shows it against Hard bots only.
-var what_got_you: WhatGotYou = WhatGotYou.AUTO
+## The "What got you" card once you are hit, and its part of the match summary (owner, 2026-11-22: On or Off, On by
+## default).
+var what_got_you: bool = true
 ## Simulate skipped rounds (BP8, owner: off by default): a skip's cover offers SIMULATE, which decides the rest of the
 ## round at once by a roll (Round.simulate) instead of playing it out.
 var simulate_skips: bool = false
@@ -244,14 +246,19 @@ static func custom_rows_now(custom: Variant) -> void:
 
 ## `data` as a version `version` file's, with every value still at the old default moved to the new one (a value the
 ## player changed is kept): the gauge patterns and the HUD opacity (from version 1 to 5), the volumes and the field of
-## view (from version 1 to 4), Windowed and V-Sync (from version 1); and a Custom Volumetric haze level (version 4 to 6)
-## as On. A Power source volume the player set before version 5 is scaled by its new
+## view (from version 1 to 4), Windowed and V-Sync (from version 1); a Custom Volumetric haze level (version 4 to 6)
+## as On; and What got you's Auto, On or Off (version 1 to 7) as a switch, Off only if it was Off. A Power source volume the player set before version 5 is scaled by its new
 ## gain, so it sounds as it did. The current version or later is returned as it is. A new dictionary; `data` is not
 ## changed.
 static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	if version >= VERSION:
 		return data
 	var moved := data.duplicate(true)
+	var got: Variant = moved.get("what_got_you")
+	if got is float or got is int:
+		moved["what_got_you"] = roundi(float(got)) != WHAT_GOT_YOU_OFF_V7
+	if version >= 7:
+		return moved
 	custom_rows_now(moved.get("graphics_custom"))
 	if version >= 6:
 		return moved
@@ -336,7 +343,7 @@ func to_dict() -> Dictionary:
 		"crouch_toggle": crouch_toggle, "aim_toggle": aim_toggle, "auto_reload": auto_reload,
 		"wheel_pick": int(wheel_pick), "mouse_dpi": mouse_dpi,
 		"bindings": bindings.to_dict(), "volumes": vol, "window_mode": int(window_mode), "vsync": vsync,
-		"fov": fov, "show_fps": show_fps, "realistic_colours": realistic_colours, "what_got_you": int(what_got_you),
+		"fov": fov, "show_fps": show_fps, "realistic_colours": realistic_colours, "what_got_you": what_got_you,
 		"simulate_skips": simulate_skips, "ui_colour": int(ui_colour),
 		"hud": hud.to_dict(), "custom_rules": custom_rules.to_dict(), "practice_challenge": practice_challenge,
 		"dev": dev.to_dict(), "graphics_base": String(graphics_base),
@@ -384,7 +391,7 @@ func from_dict(data: Dictionary) -> void:
 	var colours := UiColours.Pick.size() - 1.0
 	ui_colour = roundi(_number(data, "ui_colour", UiColours.DEFAULT, 0.0, colours)) as UiColours.Pick
 	realistic_colours = _flag(data, "realistic_colours", false)
-	what_got_you = roundi(_number(data, "what_got_you", WhatGotYou.AUTO, 0.0, WhatGotYou.size() - 1.0)) as WhatGotYou
+	what_got_you = _flag(data, "what_got_you", true)
 	var saved_hud: Variant = data.get("hud")
 	hud.from_dict(saved_hud if saved_hud is Dictionary else {})
 	var saved_rules: Variant = data.get("custom_rules")

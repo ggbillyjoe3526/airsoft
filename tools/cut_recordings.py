@@ -419,10 +419,12 @@ WATER_RUN_S = 0.45
 WATER_SPRINT_S = 0.32
 WATER_LAND_S = 0.9
 # His lift (2026-11-11): how long (s) of a door's slide plays, from where it comes within LIFT_DOORS_WITHIN_DB of its
-# loudest; where (s) in up_down each ride's motor starts, and how long (s) of each ride plays as the car sets off (its
-# stop comes about 3.4 s after the start).
+# loudest (4 dB since 2026-11-22, owner: the lift's sound "still too late"; at 12 dB each take began with ~0.3 s of
+# soft swell and peaked 0.7 to 1.2 s in, now it starts on the slide and peaks 0.2 to 0.4 s in); where (s) in up_down
+# each ride's motor starts, and how long (s) of each ride plays as the car sets off (its stop comes about 3.4 s after
+# the start).
 LIFT_DOORS_S = 1.7
-LIFT_DOORS_WITHIN_DB = 12.0
+LIFT_DOORS_WITHIN_DB = 4.0
 LIFT_RIDE_STARTS = [0.56, 8.72]
 LIFT_RIDE_S = 3.2
 # Subway's background (2026-11-11): his tunnel's phone rumble sits under this (Hz).
@@ -772,7 +774,7 @@ def build(folder):
 
     # Subway's lifts (MT2): his lift (2026-11-11, elevator/): its doors sliding (door_opening, three takes) for both the
     # doors opening and shutting, each from where its slide comes within LIFT_DOORS_WITHIN_DB of its loudest, so the
-    # loud part of the slide lands inside the game's 1.5 s door (LiftConfig.door_time), LIFT_DOORS_S of it; and the car
+    # loud part of the slide is heard as the doors start (LiftConfig.shut_lead), LIFT_DOORS_S of it; and the car
     # setting off: each of his two rides (up_down) from its motor's start (LIFT_RIDE_STARTS, after the first ride's
     # chime), LIFT_RIDE_S of it, faded out before the car's stop. The chime, the button and the buzzer stay
     # tools/lift_sounds.py's (his chime sits only ~10 dB over the car's hum).
