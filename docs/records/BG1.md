@@ -1,6 +1,6 @@
 # BG1 + AIM3 · Bots spread out into solos, pairs and trios; Normal locks on more slowly
 
-**Review:** 1 attempt · critic CRITIC_PENDING · qa Pass · performance Pass
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 The owner's 2026-11-22 playtest, items 7 and 8: "bots stay too close together mostly in depot/subway ... they can
 group up as a full team but it should be rare (unless the game mode/objective suits it). they can go solo or in duos
@@ -11,7 +11,7 @@ good to play. make sure the game still feels balanced in all maps/modes/difficul
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-22 | 1 | Opus 5.5 (build thread) | ✓ | CRITIC_PENDING | – |
+| 2026-11-22 | 1 | Opus 5.5 (build thread) | ✓ | Accept 7/8 | – |
 
 ## What was found
 
@@ -59,7 +59,7 @@ is the median time from a bot's first sight of someone to its hit, as the "What 
 | Woodland Plant The Bomb | – | 4.5 % | – | 2.13 s | 48.7 % |
 | Subway Elimination | 8.2 % | 5.3 % | 1.15 s | 1.52 s | 48.8 % |
 | Subway Attack / Defend | 21.2 % | 23.0 % | 1.22 s | 1.58 s | 60.0 % |
-| Subway Plant The Bomb | – | 25.8 % | – | 1.52 s | SUBWAY_PTB |
+| Subway Plant The Bomb | – | 26.7 % | – | 1.54 s | 59.4 % (3 s wait, 32 seeds) |
 
 - Over every map and mode the median "seen" went from 1.28 s to 1.73 s (quartiles 1.38 and 2.32 s). On the indoor
   fields, where the owner measured, it is 1.5 to 1.65 s.
@@ -68,8 +68,12 @@ is the median time from a bot's first sight of someone to its hit, as the "What 
 - Subway's Attack / Defend and Plant The Bomb still gather at the pole or site: the objective, as the owner allowed.
 - The aim bench, a still target in the open (median seconds to the hit at 10, 20 and 30 m): Easy 1.77, 2.03, 2.30;
   Normal 1.25, 1.70, 2.10 on main, now 1.57, 1.93, 2.25; Hard 0.65, 1.43, 1.80.
-- Easy (4 seeds): EASY_LINE
-- Hard (4 seeds): HARD_LINE
+- Easy (4 seeds unless said), attackers or first team: Depot 43.3 / 42.9 (16 seeds) / 62.5 % (Elimination, Attack /
+  Defend, Plant The Bomb), Woodland 50.0 / 57.5 (16 seeds) / 62.1 %, Subway 53.6 / 44.4 / 55.2 % (3 s wait, 8 seeds).
+  Median "seen" 1.88 s.
+- Hard (4 seeds unless said): Depot 60.6 / 55.6 / 44.8 %, Woodland 50.0 / 56.7 / 46.2 %, Subway 54.8 / 59.6 (16 seeds) /
+  60.7 % (its 5 s wait). Median "seen" 1.32 s (Hard's held angles).
+- Woodland was measured before WH1 (#409, its trees' and thickets' new collision) merged; WH1 measured its own.
 
 ## Decisions
 
@@ -80,12 +84,15 @@ is the median time from a bot's first sight of someone to its hit, as the "What 
   objective is what gathers them, as the owner allowed.
 - **Normal reacts as Easy does, rather than reacting slower than Easy.** A Normal reaction above Easy's would turn the
   levels' order upside down (`test_bot_difficulty`); the rest of the slowdown is the aim's settling.
-- **Subway's bomb defenders wait 3 s (Claude's default).** At Normal, 16 seeds: 5 s 66.1 % (32 seeds 67 %), 4 s
-  63.9 %, 3 s 62.3 %. Turning the spreading off gave 63.8 % and the old aim 58.7 %: the slower aim is most of it, and
-  the bomb never goes off there, so the fuse is no lever. Hard was 60.7 % at 5 s (4 seeds), so it keeps 5 s.
+- **Subway's bomb defenders wait 3 s (Claude's default).** At Normal, 16 seeds: 5 s 66.1 % (32 seeds 67 %), 4 s 63.9 %,
+  3 s 62.3 %, and 56.4 % on 16 more through the new column (59.4 % on 32). Turning the spreading off gave 63.8 % and the
+  old aim 58.7 %: the slower aim is most of it, and the bomb never goes off there, so the fuse is no lever. Hard was
+  60.7 % at 5 s (4 seeds), so it keeps 5 s.
 - **Easy and Hard were checked on 4 seeds a mode, Normal on 16 (Claude's default).** The cloud runs about 3 matches
   a core an hour; Easy changed only by the spreading, Hard by the spreading and its surprised reaction.
 
 ## Known issues left
 
-- None.
+- Subway's Attack / Defend and Plant The Bomb still gather most of a team at the pole or the site (groups of 4 or more
+  about a quarter of the time), as the objective asks. A wider guard ring round them is the next lever if the owner
+  finds it crowded.

@@ -44,8 +44,8 @@ warning; a map with no row is not listed.
 - **Bomb defender respawn (s)** is the seconds a defender hit there waits to come back in Plant The Bomb, until the bomb
   is armed, at every level (BG1): a whole or decimal number from 2 to 30, or blank for the game's 5
   (`game/config/round_config.gd`). Subway's is 3: once Normal bots locked on more slowly its sites fell too often at 5 s
-  (the attackers took 67 %, 32 seeds; 4 s 63.9 %, 3 s 62.3 %, 16 seeds). Hard plays it too unless the field sets the
-  column at Hard, so Subway's Hard one is 5, the wait Hard was measured at.
+  (the attackers took 67 %, 32 seeds; 4 s 63.9 %, 16 seeds; 3 s 59.4 %, 32 seeds). Hard plays it too unless the field
+  sets the column at Hard, so Subway's Hard one is 5, the wait Hard was measured at.
 - **Bomb defender respawn at Hard (s)** is the seconds a defender hit there waits to come back in Plant The Bomb, until
   the bomb is armed, against Hard bots (BP10): a whole or decimal number from 2 to 30, or blank for the column above's
   wait (else the game's 5, `game/config/round_config.gd`). Depot's is 8: its sites are close to the defenders' start, and at 5 s Hard bots

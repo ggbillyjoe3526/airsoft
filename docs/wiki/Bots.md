@@ -44,7 +44,7 @@ one; "Follow opponents" puts them back.
 | Level | How it plays |
 | --- | --- |
 | **Easy** | A fair fight to learn on: its first BBs up close can miss. |
-| **Normal** | Reacts as Easy does, but its aim settles sooner and steadier, leads moving targets more, takes cover more and flanks more often. |
+| **Normal** | Reacts as Easy does, but settles to a steadier aim, tracks and leads moving targets more, takes cover more and flanks more often. |
 | **Hard** | Careful, not twitchier: aims at the corners, doorways and bush edges you would step out of, and plays as a team. |
 
 **Hard bots** in more detail:
