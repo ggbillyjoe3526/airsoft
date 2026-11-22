@@ -19,7 +19,7 @@ fire, a miss's flight past the target included. Hit calls are the simulation's: 
 
 ## How it plays
 
-Each round the `RoundPlanner` gives each team a plan (split over the map's lanes, a pair on one, or all stacked) and
+Each round the `RoundPlanner` gives each team a plan (split over the map's lanes, a pair on one, or, rarely, all stacked) and
 each bot a lane to walk from its end, holding at its points and keeping with its team; past the lane it hunts the
 sectors its team checked longest ago, never a spot in wading water (BP9). In sight of an enemy it fights (strafing), or
 first gets behind close crouch cover and peeks over it, or round a tall corner by leaning; it never fires with a
@@ -29,6 +29,12 @@ as to someone out of sight (BQ1). Within `close_awareness` a bush hides no one a
 couldn't get through (BU1). Shot at, reloading or empty, it takes cover. With the enemy gone it searches where it was
 last seen or heard, sometimes flanking. At night it holds its lane points, hunts and takes hold cover out of the light
 pools.
+
+Bots play as solos, pairs and trios (BG1, `BotSpread`): a bot on its plan goes after a noise or a teammate's call only
+while fewer than `BotConfig.search_crowd_max` teammates are at that spot or on their way there; otherwise it watches
+that way from its plan and takes the call up once there is room (one already near the spot always goes, one that was
+fighting goes after its own). Hunters score spots near a teammate, or near where a hunting teammate is going, staler
+by `hunt_crowd_penalty`, so they fan out. The pole and the bomb site still draw the team together.
 
 On Normal and Hard the team keeps a radio (BQ3, `BotRadio`): a bot that sees someone afresh tells its teammates within
 `BotSkill.share_radius` of them after `share_delay`, each taking it as a teammate's call heard there (not one fighting or

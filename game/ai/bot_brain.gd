@@ -178,6 +178,12 @@ static func _choose_mode(b: Bot, w: BotWorld, target: Character, dt: float) -> v
 	# Coming along to its player's ping (CW1) it leaves its post for it.
 	var watch_from_post := fresh and holds_post and not b.joins_ping(w.time, cfg) and (_flat(b.last_known, post) > leash \
 			or absf(b.last_known.y - post.y) > cfg.anchor_search_rise)
+	# Spreading out (BG1): a bot on its plan goes after a noise or a call only while the spot isn't crowded with its
+	# teammates; otherwise it watches that way from its plan (taking it up once there is room). One that was fighting
+	# goes after its own threat.
+	if fresh and not watch_from_post and b.mode == Bot.Mode.ADVANCE and not b.joins_ping(w.time, cfg) \
+			and BotSpread.crowded(b, w, b.last_known):
+		watch_from_post = true
 	if seeing:
 		# Back in sight: any watch for them is over.
 		b.watch_until = -INF

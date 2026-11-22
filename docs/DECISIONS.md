@@ -605,6 +605,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Bots and balance
 
+- **Bots play as solos, pairs and trios; the whole team together is rare (owner, 2026-11-22, BG1; the numbers are
+  Claude's defaults).** "They can group up as a full team but it should be rare (unless the game mode/objective suits
+  it)". A noise or a teammate's call draws at most two teammates to one spot (`search_crowd_max`), hunters fan out,
+  and a team stacks one lane in 5 % of rounds (was 20 %). The pole and the bomb site still gather a team: that is the
+  objective. Same at every level and for every personality.
+- **Normal locks on more slowly (owner, 2026-11-22, AIM3).** He measured 0.9 to 1.4 s in a Normal bot's view before
+  its hit and asked for about 1.5 to 2 s; Easy stays as it is. Normal reacts as Easy does (0.35 to 0.6 s) and settles
+  its aim more slowly (0.95 s); it keeps its steadier settled aim, tracking and lead. Hard's surprised reaction is
+  Normal's ("careful, not twitchier", 2026-10-04): its edge stays the angle it already holds (0.18 to 0.28 s).
 - **Bot teams vary how they carry out their plan (owner, 2026-11-15, RV1; Claude's defaults).** The plan (split, pair,
   stack over the authored lanes) is drawn as before; each round adds a team tempo, shorter pauses in a bot's own half,
   a per-bot lane shift and the odd lane crossing, and in Attack / Defend and Plant The Bomb sometimes a defender held

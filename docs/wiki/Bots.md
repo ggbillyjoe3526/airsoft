@@ -44,7 +44,7 @@ one; "Follow opponents" puts them back.
 | Level | How it plays |
 | --- | --- |
 | **Easy** | A fair fight to learn on: its first BBs up close can miss. |
-| **Normal** | Reacts faster, aims steadier, leads moving targets more, takes cover more and flanks more often. |
+| **Normal** | Reacts as Easy does, but its aim settles sooner and steadier, leads moving targets more, takes cover more and flanks more often. |
 | **Hard** | Careful, not twitchier: aims at the corners, doorways and bush edges you would step out of, and plays as a team. |
 
 **Hard bots** in more detail:
@@ -107,7 +107,7 @@ each round. A bot carrying the Compact SMG is the one exception: indoors it goes
 
 ## How a team plays a round
 
-Each round a bot team follows a plan: spread one to a lane, move up in pairs, or stack on one lane, with each lane
+Each round a bot team follows a plan: spread one to a lane, move up in pairs, or now and then stack on one lane, with each lane
 walked in its own order. The plan is the same kind of thing every round, but how they carry it out changes, so you
 can't learn one route and wait for it:
 
@@ -121,6 +121,9 @@ can't learn one route and wait for it:
   once a round at most and never back towards its own end: on Woodland that's a flank through the trees.
 - **A forward defender.** In Attack / Defend and Plant The Bomb, in some rounds one defender holds well up its lane,
   towards the middle, to catch attackers on their way in.
+- **Spread out.** Bots move alone, in pairs or in threes. A shot or a teammate's call brings at most <!-- wiki:config bot_config.search_crowd_max -->
+  more teammates to that spot; the rest watch that way and keep to their plan until there is room. Bots hunting for you spread out across the field instead of trailing each other.
+  Only the pole or the bomb site gathers a whole team.
 
 ## Bots in Attack / Defend
 
