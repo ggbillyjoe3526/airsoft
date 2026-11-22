@@ -1114,7 +1114,7 @@ func _build_views_rest(ui: CanvasLayer) -> void:
 	first_use.append(_lasers.draws().multimesh.mesh.surface_get_material(0))
 	# the sky (by night its own shader) is no speck: it is the background of the prewarm's frames, so it compiles there
 	var warm := ShaderPrewarm.new()
-	warm.setup(_eyes.camera, first_use, FigureView.make_sign(sign_font, Color.WHITE), figure_materials)
+	warm.setup(_eyes.camera, first_use, FigureView.make_sign(sign_font), figure_materials)
 	warm.tree_exited.connect(_on_shaders_warmed, CONNECT_ONE_SHOT)
 	var profiles: Array[StringName] = []
 	for c in state.characters:
@@ -2084,14 +2084,9 @@ func _hit_called(shooter_id: int) -> void:
 		_hud.show_what_got_you(facts, who, colour, note)
 
 
-## Whether What got you shows, on the card and in the summary: On, or Auto against Hard bots (MatchOptions.TIPS_LEVEL).
+## Whether What got you shows, on the card and in the summary: its switch in the settings (On by default).
 func what_got_you_shown() -> bool:
-	match settings.what_got_you:
-		Settings.WhatGotYou.ON:
-			return true
-		Settings.WhatGotYou.AUTO:
-			return difficulty == MatchOptions.TIPS_LEVEL
-	return false
+	return settings.what_got_you
 
 
 ## Practice's pause menu: the range's name, the Timed challenge's switch and its best so far.

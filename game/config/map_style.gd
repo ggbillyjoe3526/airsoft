@@ -158,16 +158,34 @@ const ROUND_TRUNK: Array[Vector2] = [Vector2(-1.0, -0.55), Vector2(1.0, 0.55), V
 	&"pine_old": PackedVector2Array(ROUND_TRUNK), &"oak": PackedVector2Array(ROUND_TRUNK),
 	&"birch": PackedVector2Array(ROUND_TRUNK),
 }
+## Tree trunks that taper as they rise (WH1, the owner's playtest of 0.1 Beta 2, item 5): a tree whose model is listed
+## stands as tiers of its round_steps, each drawn in to where its trunk reaches at that height, so a BB or a sight line
+## past a trunk's narrower bole (at chest height a young pine's is about four fifths of its root flare) flies on where
+## the flare's width stopped it. Each tier a pair (from: share of the height from the ground under the tree to its
+## box's top, the first 0 and its tier from the box's foot; reach: share of the trunk's foot half-width): the widest
+## the trunk's faces reach in that band, rounded up (tools/sight_truth.gd `trunks`; test_round_steps checks that every
+## face is still held). A birch's knots reach its foot's width all the way up, so it keeps its one tier.
+@export var round_trunk_tiers: Dictionary[StringName, PackedVector2Array] = {
+	&"pine_young": PackedVector2Array([Vector2(0.0, 1.0), Vector2(0.05, 0.89), Vector2(0.12, 0.83), Vector2(0.25, 0.76),
+			Vector2(0.5, 0.58)]),
+	&"pine_grown": PackedVector2Array([Vector2(0.0, 1.0), Vector2(0.05, 0.87), Vector2(0.08, 0.83), Vector2(0.25, 0.75),
+			Vector2(0.5, 0.64)]),
+	&"pine_old": PackedVector2Array([Vector2(0.0, 1.0), Vector2(0.05, 0.9)]),
+	&"oak": PackedVector2Array([Vector2(0.0, 1.0), Vector2(0.05, 0.77), Vector2(0.12, 0.96)]),
+}
 ## Prop models laid in a GRID that taper as they rise (TV1: Woodland's thicket spruces, cones of boughs): BBs, sight and
 ## bodies meet a GRID block of one as tiers that hug its props as drawn (TierSteps), not as its square box, on each side
 ## no other such block touches; the nav grid, the bots' cover, the bake and the minimap still take the box. Each tier
 ## a pair (from: share of the box's height its tier starts at, the first 0; reach: share of a prop's drawn half-width
-## it reaches out to on that side). Measured on the model (tools/thicket_opacity.gd): the reach where a level line past
-## the spruce at that height first meets its boughs less than half the time, so the BBs and lines a thicket's box
-## stopped at a body seen past its spruces (about 30 %, the owner's playtest of 0.1 Beta 2, item 3) fly on.
+## it reaches out to round each prop). Measured on the model as drawn, its leaf cards cut out of their sheet
+## (tools/sight_truth.gd `profile`, WH1, after WQ1's cards): the reach where a level line past the spruce at that
+## height first meets its boughs less than half the time. Its foot (under 0.08 of its height) is a bare trunk with a
+## few low boughs, so legs show under the skirt; its top draws in to the leader, a spire a tenth wide (a line over a
+## row's tips meets it, so a spawn behind a thicket stays hidden), and a reach of 0 at the tip itself.
 @export var tier_steps: Dictionary[StringName, PackedVector2Array] = {
-	&"spruce": PackedVector2Array([Vector2(0.0, 0.85), Vector2(0.25, 0.7), Vector2(0.33, 0.6), Vector2(0.42, 0.5),
-			Vector2(0.58, 0.35), Vector2(0.75, 0.15)]),
+	&"spruce": PackedVector2Array([Vector2(0.0, 0.15), Vector2(0.08, 0.8), Vector2(0.25, 0.6), Vector2(0.42, 0.5),
+			Vector2(0.5, 0.4), Vector2(0.58, 0.3), Vector2(0.67, 0.2), Vector2(0.83, 0.1),
+			Vector2(0.92, 0.0)]),
 }
 ## The ground beyond the field's walls (the palette's grass, SL1), out to `ground_extent` metres each way from the
 ## middle, just below the floor.

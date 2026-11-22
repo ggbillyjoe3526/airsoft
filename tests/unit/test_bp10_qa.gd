@@ -23,7 +23,7 @@ func _session() -> PlaySession:
 	s.bots_active = false
 	s.difficulty = &"easy"
 	s.settings = Settings.new()
-	s.settings.what_got_you = Settings.WhatGotYou.ON
+	s.settings.what_got_you = true
 	add_child_autofree(s)
 	return s
 

@@ -83,7 +83,7 @@ func test_every_level_keeps_out_of_the_light_and_holds_fire_through_leaves() -> 
 	for level: String in MatchOptions.BOT_LEVELS:
 		var s := cfg.skill_for(StringName(level))
 		assert_false("keeps_dark" in s or "fires_into_leaves" in s, "%s: the old Easy's habits are gone" % level)
-	assert_eq(MatchOptions.TIPS_LEVEL, &"hard", "the Pro tips and What got you's Auto follow Pro to Hard")
+	assert_eq(MatchOptions.TIPS_LEVEL, &"hard", "the Pro tips follow Pro to Hard")
 
 
 func test_an_attack_defend_record_survives_a_save_and_a_load() -> void:

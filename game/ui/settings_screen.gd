@@ -90,7 +90,7 @@ var _crouch: MenuChoice = null
 var _aim: MenuChoice = null
 var _wheel_pick: MenuChoice = null
 var _auto_reload: MenuChoice = null
-## Gameplay's After a hit: the card of what got you (Auto, On, Off).
+## Gameplay's After a hit: the card of what got you (Off, On; owner, 2026-11-22: a switch, On by default).
 var _what_got_you: MenuChoice = null
 ## Gameplay's Skipped rounds: Simulate skipped rounds (Off, On; BP8).
 var _simulate_skips: MenuChoice = null
@@ -369,11 +369,9 @@ func _build_gameplay() -> void:
 		settings.auto_reload = i == 1
 		_applied(SettingsApply.apply_controls, true))
 	add_section(page, tr("SETTINGS_AFTER_A_HIT"))
-	_what_got_you = add_choice_row(page, "SETTINGS_WHAT_GOT_YOU", ["SETTINGS_AUTO", "SETTINGS_ON", "SETTINGS_OFF"])
-	# what Auto means would surprise: said beside it
-	add_note(_what_got_you.get_parent() as Control, tr("SETTINGS_WHAT_GOT_YOU_NOTE"))
+	_what_got_you = add_choice_row(page, "SETTINGS_WHAT_GOT_YOU", ["SETTINGS_OFF", "SETTINGS_ON"])
 	_what_got_you.picked.connect(func(i: int) -> void:
-		settings.what_got_you = i as Settings.WhatGotYou
+		settings.what_got_you = i == 1
 		_changed(true))
 	add_section(page, tr("SETTINGS_SKIPPED_ROUNDS"))
 	_simulate_skips = add_choice_row(page, "SETTINGS_SIMULATE_SKIPS", ["SETTINGS_OFF", "SETTINGS_ON"])
@@ -680,7 +678,7 @@ func _refresh() -> void:
 	_crouch.put(int(settings.crouch_toggle))
 	_aim.put(int(settings.aim_toggle))
 	_auto_reload.put(int(settings.auto_reload))
-	_what_got_you.put(settings.what_got_you)
+	_what_got_you.put(int(settings.what_got_you))
 	_simulate_skips.put(int(settings.simulate_skips))
 	_wheel_pick.put(int(settings.wheel_pick == ControlsConfig.WheelPick.CLICK))
 	_keys.refresh()

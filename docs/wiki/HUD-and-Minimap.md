@@ -102,8 +102,7 @@ everything, so it stays down over them.
 
 When your hit is called, a card on the left shows the shooter's name and side, how far away they were and a dial of the
 shot's line, whether they were holding that angle, how long you were in their view and whether you were moving, then
-that bot's personality note. **Settings › Gameplay › What got you** is Auto (only against Hard bots, the default), On or
-Off.
+that bot's personality note. **Settings › Gameplay › What got you** turns it On (the default) or Off.
 
 ## The match summary
 

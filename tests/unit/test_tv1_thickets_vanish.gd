@@ -1,8 +1,8 @@
 extends GutTest
 ## TV1 (the owner's playtest of 0.1 Beta 2, items 3 and 6). Woodland's thickets stand as tiers that narrow with their
-## spruces as drawn (TierSteps, MapStyle.tier_steps), each in its box, touching rows with no slot between them, so a
-## line grazing a thicket's end past its spruces flies on and one through its middle still stops; only thickets stand
-## so. A hit character walking off as its respawn wait runs out leaves the field (its fade) before it comes back, never
+## spruces as drawn (TierSteps, MapStyle.tier_steps), each in its box and round each spruce (WH1: a line through the
+## gap between two spruces' tops flies on), a thicket closed on every side standing as its box, so a line grazing a
+## thicket's end past its spruces flies on and one through its middle still stops; only thickets stand so. A hit character walking off as its respawn wait runs out leaves the field (its fade) before it comes back, never
 ## drawn at its spawn in a blink, and its team counts it coming through the fade; one still calling its hit calls
 ## first. A walk-off with no way on foot steps down a climb's drop: Subway's east end, whose dead zone is on the track
 ## below the platforms, walks there instead of into a wall.
@@ -13,9 +13,11 @@ const GRAZE_IN := 0.1
 const CHEST := 1.3
 ## Room (m) beyond the end, and either side, that no other block may take for the grazing test's thicket.
 const CLEAR := 2.5
-## A share of a box's height and a side's length to look along for slots, and how far in from the face (m).
-const SAMPLES := 6
-const FACE_IN := 0.01
+## A share of a thicket's height through its spruces' upper boughs, where their tops stand apart.
+const TOPS := 0.62
+## A line from the owner's circled bank (WH1): an eye at the stream to a chest past the thicket at (18.5, -0.5).
+const CIRCLED_FROM := Vector3(2.263365, 1.61, 15.13224)
+const CIRCLED_TO := Vector3(22.42001, 2.890888, 4.714402)
 
 var play: PlayTuning = PlayTuning.load_default()
 var tuning: SimTuning = SimTuning.new()
@@ -56,6 +58,7 @@ func test_only_woodland_s_thickets_stand_as_tiers() -> void:
 func test_each_thicket_s_tiers_lie_in_its_box_and_draw_in_as_they_rise() -> void:
 	var m := _woodland.map
 	var others := TierSteps.tiered_blocks(m, play.map_style, play.site_look.props)
+	var steps: PackedVector2Array = play.map_style.tier_steps[&"spruce"]
 	var with_tiers := 0
 	for b in others:
 		var tiers := _tiers(b, others)
@@ -63,73 +66,70 @@ func test_each_thicket_s_tiers_lie_in_its_box_and_draw_in_as_they_rise() -> void
 			continue
 		with_tiers += 1
 		var box := AABB(b.center - b.size * 0.5, b.size).grow(1e-4)
-		var corners := TierSteps.CORNERS.size()
-		var tier_count: int = play.map_style.tier_steps[&"spruce"].size()
+		var by_tier: Array[Array] = []
+		by_tier.resize(steps.size())
+		for k in steps.size():
+			by_tier[k] = []
 		for t in tiers:
 			assert_true(box.encloses(t), "a tier of %s lies in its box" % b.center)
-		# the tiers' boxes come CORNERS a tier, from the foot up: none reaches further out than the one under it
-		for k in range(1, tier_count):
-			for c in corners:
-				var low := tiers[(k - 1) * corners + c]
-				var high := tiers[k * corners + c]
-				assert_almost_eq(high.position.y, low.end.y, 1e-4, "tier %d stands on the one below" % k)
-				assert_true(high.position.x >= low.position.x - 1e-4 and high.end.x <= low.end.x + 1e-4
-						and high.position.z >= low.position.z - 1e-4 and high.end.z <= low.end.z + 1e-4,
-						"tier %d of %s draws in" % [k, b.center])
+			var k := _tier_of(b, t, steps)
+			assert_gt(k, -1, "a box of %s spans one tier's height (%s)" % [b.center, t])
+			if k > -1:
+				by_tier[k].append(t)
+		# a tier reaching 0 (the spruces' tips) stands as nothing
+		for k in steps.size():
+			if steps[k].y <= 0.0:
+				assert_eq(by_tier[k].size(), 0, "tier %d of %s reaches nowhere" % [k, b.center])
+		# from the boughs' widest tier up, each tier's boxes lie over the one's below (each prop draws in)
+		for k in range(2, steps.size()):
+			for t: AABB in by_tier[k]:
+				assert_true(_over(by_tier[k - 1], t), "tier %d of %s draws in (%s)" % [k, b.center, t])
 	assert_gt(with_tiers, 50, "most thickets have an open side")
 
 
-func test_touching_thickets_leave_no_slot_between_them() -> void:
-	var m := _woodland.map
-	var others := TierSteps.tiered_blocks(m, play.map_style, play.site_look.props)
-	var looked := 0
-	for b in others:
-		var tiers := _tiers(b, others)
-		if tiers.is_empty():
-			continue
-		var b_box := AABB(b.center - b.size * 0.5, b.size)
-		var lo := b.center - b.size * 0.5
-		var hi := b.center + b.size * 0.5
-		for axis: int in [0, 2]:
-			for side: float in [-1.0, 1.0]:
-				var along := 2 - axis
-				for o in others:
-					if o == b:
-						continue
-					var face := hi[axis] if side > 0.0 else lo[axis]
-					var o_face := (o.center - o.size * 0.5)[axis] if side > 0.0 else (o.center + o.size * 0.5)[axis]
-					if absf(face - o_face) > TierSteps.TOUCH:
-						continue
-					var from := maxf(lo[along], o.center[along] - o.size[along] * 0.5)
-					var to := minf(hi[along], o.center[along] + o.size[along] * 0.5)
-					if to - from < 0.1:
-						continue
-					var o_tiers := _tiers(o, others)
-					var o_box := AABB(o.center - o.size * 0.5, o.size)
-					for i in SAMPLES:
-						for j in SAMPLES:
-							# on the seam, up to the lower of the two tops, through the lower half of the box (where
-							# bodies are): just inside this block or just inside the other
-							var p := Vector3.ZERO
-							p[axis] = face - side * FACE_IN
-							p[along] = lerpf(from, to, (i + 0.5) / SAMPLES)
-							p.y = lo.y + b.size.y * 0.5 * (j + 0.5) / SAMPLES
-							if p.y > minf(b_box.end.y, o_box.end.y) or p.y < maxf(lo.y, o_box.position.y):
-								continue
-							var q := p
-							q[axis] = face + side * FACE_IN
-							looked += 1
-							var shut := _inside(tiers, p) or (o_tiers.is_empty() and o_box.has_point(q)) \
-									or _inside(o_tiers, q)
-							assert_true(shut, "the seam between %s and %s is closed at %s" % [b.center, o.center, p])
-	assert_gt(looked, 1000, "the faces between touching rows were looked along")
+## The tier of `steps` whose height `t` spans in block `b`, or -1.
+func _tier_of(b: MapData.Block, t: AABB, steps: PackedVector2Array) -> int:
+	var lo := b.center.y - b.size.y * 0.5
+	for k in steps.size():
+		var to := steps[k + 1].x if k + 1 < steps.size() else 1.0
+		if absf(t.position.y - (lo + b.size.y * steps[k].x)) < 1e-3 and absf(t.end.y - (lo + b.size.y * to)) < 1e-3:
+			return k
+	return -1
 
 
-static func _inside(boxes: Array[AABB], p: Vector3) -> bool:
-	for box in boxes:
-		if box.grow(1e-4).has_point(p):
+## Whether one of `boxes` holds `t` in plan.
+static func _over(boxes: Array, t: AABB) -> bool:
+	for o: AABB in boxes:
+		if t.position.x >= o.position.x - 1e-4 and t.end.x <= o.end.x + 1e-4 and t.position.z >= o.position.z - 1e-4 \
+				and t.end.z <= o.end.z + 1e-4:
 			return true
 	return false
+
+
+func test_a_thicket_other_rows_close_on_every_side_stands_as_its_box() -> void:
+	var others := TierSteps.tiered_blocks(_woodland.map, play.map_style, play.site_look.props)
+	var b: MapData.Block = null
+	for o in others:
+		if not _tiers(o, others).is_empty():
+			b = o
+			break
+	assert_not_null(b, "a thicket with tiers")
+	if b == null:
+		return
+	# the same thicket with a copy of itself against each side: nothing sees past its spruces, so it is its box
+	var ring: Array[MapData.Block] = [b]
+	for axis: int in [0, 2]:
+		for side: float in [-1.0, 1.0]:
+			var n := MapData.Block.new()
+			n.kind = b.kind
+			n.dress = b.dress
+			n.size = b.size
+			n.center = b.center
+			n.center[axis] += side * b.size[axis]
+			ring.append(n)
+	assert_eq(_tiers(b, ring).size(), 0, "a thicket shut in on every side stands as its box")
+	ring.pop_back()
+	assert_gt(_tiers(b, ring).size(), 0, "one open side and it stands as tiers")
 
 
 ## A thicket whose -x end is open with CLEAR m of nothing else beyond it and to either side.
@@ -172,6 +172,58 @@ func test_a_line_grazing_a_thicket_s_end_flies_on_and_one_through_it_stops() -> 
 	var mid := Vector3(b.center.x, m.terrain.height_clamped(b.center.x, b.center.z) + CHEST, 0.0)
 	assert_true(query.sight_ray(Vector3(mid.x, mid.y, lo.z - CLEAR * 0.8), Vector3(mid.x, mid.y, hi.z + CLEAR * 0.8),
 			hit), "a line through its middle stops")
+
+
+func test_a_line_between_two_spruces_tops_flies_on() -> void:
+	var m := _woodland.map
+	var others := TierSteps.tiered_blocks(m, play.map_style, play.site_look.props)
+	var b := _open_end(m, others)
+	assert_not_null(b, "a thicket with an open end in the clear")
+	if b == null:
+		return
+	var tiers := _tiers(b, others)
+	var lo := b.center - b.size * 0.5
+	var hi := b.center + b.size * 0.5
+	# a level line across the block (along z) through the upper boughs, where no tier box stands: between two tops
+	var y := lo.y + b.size.y * TOPS
+	var x: float = NAN
+	for i in 200:
+		var at := lerpf(lo.x + 0.3, hi.x - 0.3, (i + 0.5) / 200.0)
+		if not _meets(tiers, at, y):
+			x = at
+			break
+	assert_false(is_nan(x), "the tops of %s's spruces stand apart" % b.center)
+	if is_nan(x):
+		return
+	var hit := RayHit.new()
+	var from := Vector3(x, y, lo.z - CLEAR * 0.8)
+	var to := Vector3(x, y, hi.z + CLEAR * 0.8)
+	var query := _woodland.level.query()
+	assert_false(query.sight_ray(from, to, hit) and AABB(lo, b.size).grow(0.01).has_point(hit.position),
+			"a line between the tops of %s's spruces flies on" % b.center)
+	assert_false(query.ray(from, to, hit) and AABB(lo, b.size).grow(0.01).has_point(hit.position), "a BB too")
+
+
+## Whether a line along z at `x`, `y` meets one of `boxes`.
+static func _meets(boxes: Array[AABB], x: float, y: float) -> bool:
+	for t in boxes:
+		if x >= t.position.x and x <= t.end.x and y >= t.position.y and y <= t.end.y:
+			return true
+	return false
+
+
+func test_the_line_from_the_owner_s_circled_bank_misses_the_thicket_it_used_to_stop_on() -> void:
+	# WH1 (the owner's playtest, item 5): a chest seen past the bank's thicket west of Hut row, its spruces half sunk
+	# in the slope; TV1's tiers ran out to the block's face there and stopped the line on nothing drawn
+	var hit := RayHit.new()
+	var query := _woodland.level.query()
+	var met := query.ray(CIRCLED_FROM, CIRCLED_TO, hit)
+	var in_thicket := false
+	if met:
+		for b in _woodland.map.blocks:
+			if b.kind == &"thicket" and AABB(b.center - b.size * 0.5, b.size).grow(0.01).has_point(hit.position):
+				in_thicket = true
+	assert_false(in_thicket, "the line flies past the thicket (stopped at %s)" % (hit.position if met else Vector3.ZERO))
 
 
 # --- item 6: no bot drawn at its spawn in a blink ---
