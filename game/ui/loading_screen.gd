@@ -71,6 +71,8 @@ func _init() -> void:
 	_picture.name = "Backdrop"
 	_picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	# Its mipmaps drawn (BP13): in a window smaller than the picture it shrinks smoothly instead of shimmering.
+	_picture.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	_picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_picture.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(_picture)
