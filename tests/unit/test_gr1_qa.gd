@@ -286,7 +286,7 @@ func test_an_old_file_without_the_graphics_fields_loads_and_keeps_its_values() -
 	assert_eq(got.renderer, Settings.Renderer.AUTO)
 	assert_false(got.first_start_seen)
 	assert_eq(got.load_message, "", "no complaint")
-	assert_eq(Settings.VERSION, 7, "7 since Volumetric haze became one switch again (owner, 2026-11-20)")
+	assert_eq(Settings.VERSION, 8, "8 since What got you became a switch (owner, 2026-11-22)")
 	var raw := SaveFile.read(path, Settings.KIND)
 	assert_eq(int(raw.version), Settings.VERSION)
 

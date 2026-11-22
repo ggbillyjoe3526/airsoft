@@ -31,7 +31,7 @@ func _facts(shooter_at: Vector3, yaw: float) -> HitFacts:
 	return f
 
 
-func _session(setting: Settings.WhatGotYou, difficulty: StringName = &"easy") -> PlaySession:
+func _session(setting: bool, difficulty: StringName = &"easy") -> PlaySession:
 	var s := PlaySession.new()
 	s.bots_active = false
 	s.difficulty = difficulty
@@ -120,14 +120,10 @@ func test_the_line_you_were_hit_in_stays_until_the_round_ends() -> void:
 # --- in a match ---
 
 func test_the_card_shows_as_the_setting_says() -> void:
-	session = _session(Settings.WhatGotYou.AUTO)
+	session = _session(true)
 	await wait_physics_frames(2)
 	_hit_you()
-	assert_null(session.hud().what_got_you(), "Auto: not against Easy bots")
-	session = _session(Settings.WhatGotYou.ON)
-	await wait_physics_frames(2)
-	_hit_you()
-	assert_not_null(session.hud().what_got_you(), "On: always")
+	assert_not_null(session.hud().what_got_you(), "On: against Easy bots too (no Auto since 2026-11-22)")
 	var state := session.state
 	state.events.clear()
 	state.events.add(K.ROUND_START).value = 2
@@ -136,19 +132,16 @@ func test_the_card_shows_as_the_setting_says() -> void:
 	assert_null(session.hud().what_got_you(), "gone when the next round starts")
 
 
-func test_auto_shows_the_card_against_pro_bots_and_off_never() -> void:
-	session = _session(Settings.WhatGotYou.AUTO, &"hard")
-	await wait_physics_frames(2)
-	_hit_you()
-	assert_not_null(session.hud().what_got_you())
-	session = _session(Settings.WhatGotYou.OFF, &"hard")
-	await wait_physics_frames(2)
-	_hit_you()
-	assert_null(session.hud().what_got_you())
+func test_off_never_shows_the_card_against_any_bots() -> void:
+	for level: StringName in [&"easy", &"hard"]:
+		session = _session(false, level)
+		await wait_physics_frames(2)
+		_hit_you()
+		assert_null(session.hud().what_got_you(), String(level))
 
 
 func test_out_a_click_skips_the_round_with_the_hud_hidden() -> void:
-	session = _session(Settings.WhatGotYou.OFF)
+	session = _session(false)
 	await wait_physics_frames(2)
 	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	assert_false(session.can_skip(), "not while you are in play")
@@ -174,7 +167,7 @@ func test_out_a_click_skips_the_round_with_the_hud_hidden() -> void:
 
 
 func test_the_trigger_held_through_the_hit_does_not_skip_until_pressed_again() -> void:
-	session = _session(Settings.WhatGotYou.OFF)
+	session = _session(false)
 	await wait_physics_frames(2)
 	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session._input.active = true
@@ -193,7 +186,7 @@ func test_the_trigger_held_through_the_hit_does_not_skip_until_pressed_again() -
 
 
 func test_the_pause_menu_offers_skip_only_while_you_are_out() -> void:
-	session = _session(Settings.WhatGotYou.OFF)
+	session = _session(false)
 	await wait_physics_frames(2)
 	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	var menu := session.find_child("PauseMenu", true, false) as PauseMenu

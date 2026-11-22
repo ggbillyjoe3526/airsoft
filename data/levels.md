@@ -31,21 +31,21 @@ typo never stops the game from starting.
 | Level | XP | Unlocks |
 |---|---|---|
 | 0 | 0 | GBB Pistol, AEG Rifle, Standard Battery, Green Gas, Weapon Torch |
-| 1 | 100 | Red Dot |
-| 2 | 300 | Vertical Grip, Red Laser |
-| 3 | 400 | Hi-Cap Magazine, Extended Magazine |
-| 4 | 500 | Silencer |
-| 5 | 600 | Sniper Rifle, M130 Spring, 2x Scope |
-| 6 | 700 | Tight-Bore Barrel |
-| 7 | 800 | Angled Grip, Low-Cap Magazine |
-| 8 | 900 | Red Gas |
-| 9 | 1000 | M140 Spring |
-| 10 | 1200 | Pump Shotgun, Variable Scope |
-| 11 | 1400 | 11.1 V LiPo Battery |
-| 12 | 1500 | Long Barrel, Compact SMG |
-| 13 | 1600 | Black Gas |
-| 14 | 1700 | M150 Spring |
-| 15 | 1800 | Cyber Pistol |
+| 1 | 150 | Red Dot |
+| 2 | 450 | Vertical Grip, Red Laser |
+| 3 | 600 | Hi-Cap Magazine, Extended Magazine |
+| 4 | 750 | Silencer |
+| 5 | 900 | Sniper Rifle, M130 Spring, 2x Scope |
+| 6 | 1050 | Tight-Bore Barrel |
+| 7 | 1200 | Angled Grip, Low-Cap Magazine |
+| 8 | 1350 | Red Gas |
+| 9 | 1500 | M140 Spring |
+| 10 | 1800 | Pump Shotgun, Variable Scope |
+| 11 | 2100 | 11.1 V LiPo Battery |
+| 12 | 2250 | Long Barrel, Compact SMG |
+| 13 | 2400 | Black Gas |
+| 14 | 2550 | M150 Spring |
+| 15 | 2700 | Cyber Pistol |
 
 - **The order.** The first levels give the parts that help straight away (a clear sight, a steadier aim, more BBs),
   the middle ones the trade-offs (a quiet muzzle, quick handling or a tighter barrel), and the last ones the strongest
@@ -58,10 +58,11 @@ typo never stops the game from starting.
   10 and the M150 follows at 14; the SMG's red dot, laser and silencer unlock before it. The LiPo battery comes at
   11, before the SMG; the stronger springs follow as the stronger gases do (M140 at 9, Red Gas at 8; M150 at 14 after Black Gas
   at 13).
-- **The pace** (LV15, 2026-11-10). A first-to-5 match on Normal gives about 250 XP. Levels 1 to 10 take the XP they
-  took when 10 was the cap (each 100 more than the last, so nobody's level changed when the cap went up): level 1
-  after the first match, level 10 after about 26 matches on Normal (about 17 on Hard). Levels 11 to 15 take about 6
-  to 7 matches each: level 15 after about 58 matches on Normal (about 39 on Hard).
+- **The pace** (LV16, owner 2026-11-22: "the XP earned is fair but maybe increase the amount of XP required per
+  level ... a little slower"). A first-to-5 match on Normal gives about 250 XP, as before; every level takes 1.5 times
+  what it took at LV15 (2026-11-10), so the steps keep their shape: level 1 after the first match, level 2 after
+  about 3, level 10 after about 39 matches on Normal (about 26 on Hard) and level 15, the cap, after about 87 (about
+  58 on Hard; 21,750 XP in all). A save keeps its XP and everything it unlocked; its level number may read lower.
 - **The Progression Update** raises the cap again (to 20 or more), with skins in the new levels' Unlocks.
 - **At the cap,** XP stops counting until the cap goes up: the Armory and the match summary say so.
 

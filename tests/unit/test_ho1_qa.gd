@@ -207,8 +207,8 @@ func test_what_got_you_on_the_gameplay_tab_sets_the_setting() -> void:
 	var s := Settings.new(PlayTuning.new())
 	var screen := _screen(s)
 	screen.open()
-	screen._what_got_you.button(Settings.WhatGotYou.OFF).pressed.emit()
-	assert_eq(s.what_got_you, Settings.WhatGotYou.OFF)
+	screen._what_got_you.button(0).pressed.emit()
+	assert_eq(s.what_got_you, false)
 	assert_false(s.dirty, "saved at once")
 
 

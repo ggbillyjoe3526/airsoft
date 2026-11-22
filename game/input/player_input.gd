@@ -135,9 +135,10 @@ var _wheel: OrderWheelPointer = OrderWheelPointer.new()
 ## The open wheel is past a tap (_wheel_held): the trigger, aim and the mouse wheel are its own from then. Until then
 ## its key may still be a tap (a Spotted), which stops no burst (BP9).
 var _wheel_taken: bool = false
-## What the mouse moved while the wheel's key might still be a tap (counts): a tap turns the view by it after all, so
-## spotting someone you are following with the sight doesn't drop the sight behind them (BP9).
-var _tap_motion: Vector2 = Vector2.ZERO
+## The sprint key is held while moving forward (fill): it wins over walk, crouch, aim and lean (owner, 2026-11-22:
+## "ALT should always let the player run"; before, a held Shift, a crouch, a sight up or a lean each quietly kept the
+## run, and AltGr, which Windows sends as Ctrl with Alt, crouched). A crouch or aim toggled on is let go.
+var _sprint_first: bool = false
 ## The full-screen map's pointer, and whether there is a map to open (allow_map).
 var _map: MapPointer = MapPointer.new()
 var _map_allowed: bool = false
@@ -327,6 +328,8 @@ func scoreboard_held() -> bool:
 
 ## Whether the sight is up, held or toggled, as the aimed sensitivity reads it.
 func _aiming() -> bool:
+	if _sprint_first:
+		return false
 	return _aimed if _controls.aim_toggle else Input.is_action_pressed(AIM) and not _aim_held_back
 
 
@@ -457,7 +460,6 @@ func _open_wheel() -> void:
 		return
 	_wheel.start(Time.get_ticks_msec())
 	_wheel_taken = false
-	_tap_motion = Vector2.ZERO
 
 
 ## Whether the open wheel's key is held past a tap (ControlsConfig.wheel_tap), so the wheel is up: from that moment the
@@ -469,18 +471,20 @@ func _wheel_held() -> bool:
 	return _wheel_taken
 
 
-## An event while the wheel is open: true if the wheel took it. The mouse moves its pointer from the first count. Its
-## key let go within a tap spots, wherever the pointer went (CW1; BP9: a tap with the mouse moving gave a side order),
-## and the view turns by what the mouse moved meanwhile; until then the trigger, aim and the mouse wheel go on as
-## usual. Past a tap the wheel is up: a click on a button gives its order, on Spotted spots; letting go of the key gives
-## what the pointer is on (Hover); aim waits for a fresh press; the mouse wheel switches nothing. Everything else (the
-## keys that move you) goes on as usual.
+## An event while the wheel is open: true if the wheel took it. While its key may still be a tap the mouse turns the
+## view as ever (owner, 2026-11-22: spotting with Z "hitched": the view stood still for the tap and then jumped), so
+## spotting someone you are following keeps the sight on them; its key let go within a tap spots along the view (CW1;
+## BP9: a tap with the mouse moving gave a side order); until then the trigger, aim and the mouse wheel go on as
+## usual; the pointer moves too, unseen, so a flick made at once still lands. Past a tap the wheel is up and the view
+## stays where the tap left it (never moved as the wheel comes up: critic, PC1), the mouse moving only the pointer; Go
+## there and Watching here ping along that view. A click on a button gives its order, on Spotted spots; letting go of the key gives what the pointer is on (Hover); aim waits for a fresh press; the
+## mouse wheel switches nothing. Everything else (the keys that move you) goes on as usual.
 func _wheel_input(event: InputEvent) -> bool:
 	var held := _wheel_held()
 	var motion := event as InputEventMouseMotion
 	if motion != null:
 		if not held:
-			_tap_motion += motion.screen_relative
+			_turn_view(motion.screen_relative)
 		_wheel.move(motion.screen_relative * _controls.wheel_gain * _controls.sensitivity)
 		return true
 	if event.is_echo():
@@ -522,15 +526,12 @@ func _give_from_wheel(pick: int) -> void:
 
 ## Closes the wheel; if it was up (past a tap), fire stays held back until it is let go (a click that picked an order
 ## is not a shot). Shut inside a tap (the key let go, a pause, the window losing it), the mouse was never the wheel's:
-## the view turns by what it moved meanwhile.
+## it turned the view all along.
 func _close_wheel() -> void:
 	_wheel.close()
 	if _wheel_taken:
 		hold_fire()
-	else:
-		_turn_view(_tap_motion)
 	_wheel_taken = false
-	_tap_motion = Vector2.ZERO
 
 
 ## The mouse wheel's items: the replicas' two slots (SLOTS), then a smoke and a flash bomb.
@@ -561,23 +562,29 @@ func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null, ho
 		cmd.reset(view_yaw, view_pitch)
 		cmd.manual_reload = not _controls.auto_reload
 		_clear_latches()
+		_sprint_first = false
 		return
 	cmd.forward = Input.get_action_strength(FORWARD) - Input.get_action_strength(BACK)
 	cmd.right = Input.get_action_strength(RIGHT) - Input.get_action_strength(LEFT)
 	cmd.yaw = view_yaw
 	cmd.pitch = view_pitch
-	cmd.walk = Input.is_action_pressed(WALK)
 	cmd.sprint = Input.is_action_pressed(SPRINT)
+	_sprint_first = cmd.sprint and cmd.forward > 0.0
+	cmd.walk = Input.is_action_pressed(WALK) and not _sprint_first
+	if _sprint_first:
+		_crouched = false
+		_aimed = false
 	# Toggle switched to Hold in the settings forgets the toggled state, so switching back starts standing and the
 	# sight down (BP2).
 	if not _controls.crouch_toggle:
 		_crouched = false
 	if not _controls.aim_toggle:
 		_aimed = false
-	cmd.crouch = crouch_chosen()
+	cmd.crouch = crouch_chosen() and not _sprint_first
 	cmd.aim = _aiming()
-	# Lean is held, whatever crouch and aim do (owner, 2026-10-03).
-	cmd.lean = Input.get_action_strength(LEAN_RIGHT) - Input.get_action_strength(LEAN_LEFT)
+	# Lean is held, whatever crouch and aim do (owner, 2026-10-03); a sprint lets it go.
+	var lean := Input.get_action_strength(LEAN_RIGHT) - Input.get_action_strength(LEAN_LEFT)
+	cmd.lean = 0.0 if _sprint_first else lean
 	if _map.open and not Input.is_action_pressed(FIELD_MAP):
 		# its key let go unseen: closed
 		_close_map()
@@ -699,6 +706,7 @@ func release() -> void:
 	active = false
 	_clear_latches()
 	_inspect_latch = false
+	_sprint_first = false
 	if _wheel.open:
 		_close_wheel()
 	if _map.open:

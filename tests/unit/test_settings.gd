@@ -382,7 +382,7 @@ func test_a_file_from_before_the_graphics_fields_loads_unchanged() -> void:
 		"show_fps": true, "volumes": {"Master": 0.7},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 7, "7 since Volumetric haze became one switch again; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 8, "8 since What got you became a switch; adding fields does not bump it")
 	assert_eq(t.load_message, "", "an older file is not a damaged one")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_eq(t.window_mode, Settings.WindowMode.BORDERLESS)
@@ -558,7 +558,7 @@ func test_a_file_from_before_the_accessibility_fields_loads_unchanged() -> void:
 		"sensitivity": 1.5, "fov": 95.0, "realistic_colours": true, "hud": {"colour": 2},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 7, "7 since Volumetric haze became one switch again; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 8, "8 since What got you became a switch; adding fields does not bump it")
 	assert_eq(t.load_message, "")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_almost_eq(t.fov, 95.0, 1e-6)

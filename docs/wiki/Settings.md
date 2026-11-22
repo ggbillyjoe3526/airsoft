@@ -18,7 +18,7 @@ more your sight zooms, through a scope's glass too), invert vertical look, two k
 
 - **Crouch, aim and reload:** Crouch and Aim down sights as Hold or Toggle, and Reload: Manual (the default: you
   press the Reload key) or Automatic (an empty trigger pull reloads).
-- **After a hit:** **What got you**, Auto, On or Off ([HUD and Minimap](HUD-and-Minimap#what-got-you)).
+- **After a hit:** **What got you**, On (the default) or Off ([HUD and Minimap](HUD-and-Minimap#what-got-you)).
 - **Skipped rounds:** **Simulate skipped rounds**, Off (the default) or On. On, skipping a round offers a **SIMULATE**
   button that decides the round at once ([How to Play](How-to-Play#skipping-the-rest-of-the-round)).
 

@@ -63,7 +63,7 @@ func test_levelling_off_fits_and_opens_on_last() -> void:
 
 
 func test_huge_window_cards_do_not_overflow() -> void:
-	var page := _page(920, false, false, Vector2(3840.0, 2160.0))
+	var page := _page(1380, false, false, Vector2(3840.0, 2160.0))
 	await wait_process_frames(3)
 	var margin := page.get_child(1) as Control
 	assert_lte(margin.get_combined_minimum_size().y, 2160.0)
@@ -99,12 +99,12 @@ func test_level_zero_dots_and_cards() -> void:
 
 func test_exact_level_boundary_fraction() -> void:
 	# xp exactly at level 1 threshold: into 0
-	var page := _page(100)
+	var page := _page(150)
 	assert_eq(page.summary().bar().fraction(), 0.0)
 
 
 func test_arrow_focus_when_it_becomes_disabled() -> void:
-	var page := _page(920)
+	var page := _page(1380)
 	await wait_process_frames(2)
 	var on := page.on_arrow()
 	on.grab_focus()
@@ -119,14 +119,14 @@ func test_arrow_focus_when_it_becomes_disabled() -> void:
 
 
 func test_arrows_and_the_dots_are_keyboard_focusable() -> void:
-	var page := _page(920)
+	var page := _page(1380)
 	assert_ne(page.back_arrow().focus_mode, Control.FOCUS_NONE)
 	# BP6: the track takes focus too, left and right picking a level (test_bp6_menus)
 	assert_eq(page.summary().bar().focus_mode, Control.FOCUS_ALL, "the dots have a keyboard path")
 
 
 func test_dot_click_ignores_right_button_and_release() -> void:
-	var page := _page(920)
+	var page := _page(1380)
 	await wait_process_frames(2)
 	var dots := page.summary().bar()
 	var before := page.track().first()
@@ -143,7 +143,7 @@ func test_dot_click_ignores_right_button_and_release() -> void:
 
 func test_no_orphans_after_free() -> void:
 	var before := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
-	var page := _page(920)
+	var page := _page(1380)
 	await wait_process_frames(2)
 	page.get_parent().queue_free()
 	await wait_process_frames(3)
