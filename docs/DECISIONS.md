@@ -992,6 +992,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   `Foliage.count_leaves`), measured against the models with `tools/bush_opacity.gd`; walking through and drawing keep
   the whole size. A new fern or bush model re-measures its shares. A thicket draws no core box at its spruces' feet
   (`PropDressConfig.model_cores` empty): the owner asked why the trees had boxes, and the spruces close it alone.
+- **Woodland's thickets and trunks stop where their plants are drawn (HD1, from the owner's playtest 2026-11-22, item
+  5: hits and spots on Woodland, his circled bank west of Hut row, still stopped on nothing).** A thicket's tiers
+  (`TierSteps`, `MapStyle.tier_steps`) stand round each spruce, neighbours' boxes running on as one where they meet,
+  so a line between two spruces' tops flies on; a thicket other rows close on every side stands as its box. TV1's
+  rule that a touched side keeps the box's face (and its seam walls) is gone: it stopped lines on nothing drawn. Tree
+  trunks taper in tiers from the ground under them (`MapStyle.round_trunk_tiers`). The reaches are the 50 % contour
+  of the models as drawn, leaf cards cut out of their sheet (`tools/sight_truth.gd profile` and `trunks`); a new or
+  rebuilt spruce or tree model re-measures them, and a change to Woodland's plants or colliders re-runs the probe.
 - **Plant The Bomb is the third mode (owner, 2026-11-12, PB1).** His rules: the attackers plant a bomb at Site A or
   Site B on the defenders' side; the defenders keep it from being planted or make it safe. The attackers win when it
   goes off or the defenders are all out; the defenders win by making it safe or by getting every attacker out before
