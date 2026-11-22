@@ -139,11 +139,6 @@ var _wheel_taken: bool = false
 ## "ALT should always let the player run"; before, a held Shift, a crouch, a sight up or a lean each quietly kept the
 ## run, and AltGr, which Windows sends as Ctrl with Alt, crouched). A crouch or aim toggled on is let go.
 var _sprint_first: bool = false
-## The view as the wheel opened: while its key may still be a tap the mouse turns the view (and moves the hidden
-## pointer, so a flick made at once still lands); held past a tap the view goes back to it, as the mouse was the
-## wheel's all along.
-var _wheel_yaw: float = 0.0
-var _wheel_pitch: float = 0.0
 ## The full-screen map's pointer, and whether there is a map to open (allow_map).
 var _map: MapPointer = MapPointer.new()
 var _map_allowed: bool = false
@@ -465,8 +460,6 @@ func _open_wheel() -> void:
 		return
 	_wheel.start(Time.get_ticks_msec())
 	_wheel_taken = false
-	_wheel_yaw = view_yaw
-	_wheel_pitch = view_pitch
 
 
 ## Whether the open wheel's key is held past a tap (ControlsConfig.wheel_tap), so the wheel is up: from that moment the
@@ -474,8 +467,6 @@ func _open_wheel() -> void:
 func _wheel_held() -> bool:
 	if not _wheel_taken and _wheel.held(Time.get_ticks_msec(), _controls.wheel_tap):
 		_wheel_taken = true
-		view_yaw = _wheel_yaw
-		view_pitch = _wheel_pitch
 		hold_fire()
 	return _wheel_taken
 
@@ -484,9 +475,9 @@ func _wheel_held() -> bool:
 ## view as ever (owner, 2026-11-22: spotting with Z "hitched": the view stood still for the tap and then jumped), so
 ## spotting someone you are following keeps the sight on them; its key let go within a tap spots along the view (CW1;
 ## BP9: a tap with the mouse moving gave a side order); until then the trigger, aim and the mouse wheel go on as
-## usual; the pointer moves too, unseen, so a flick made at once still lands. Past a tap the wheel is up, the view goes
-## back to where it was as the key went down (_wheel_held) and the mouse moves only the pointer: a click on a button
-## gives its order, on Spotted spots; letting go of the key gives what the pointer is on (Hover); aim waits for a fresh press; the
+## usual; the pointer moves too, unseen, so a flick made at once still lands. Past a tap the wheel is up and the view
+## stays where the tap left it (never moved as the wheel comes up: critic, PC1), the mouse moving only the pointer; Go
+## there and Watching here ping along that view. A click on a button gives its order, on Spotted spots; letting go of the key gives what the pointer is on (Hover); aim waits for a fresh press; the
 ## mouse wheel switches nothing. Everything else (the keys that move you) goes on as usual.
 func _wheel_input(event: InputEvent) -> bool:
 	var held := _wheel_held()

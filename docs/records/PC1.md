@@ -1,6 +1,6 @@
 # PC1 · Playtest fixes: lift doors sooner, What got you switch, Z spot without a hitch, slower levels, ALT always runs, red HIT!
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 2 attempts · critic pending · qa Pass · performance Pass
 
 The owner's 0.1 Beta 2 playtest notes (2026-11-22), items 1, 2, 3, 4, 9 and 10 (the others went to other threads).
 
@@ -8,7 +8,8 @@ The owner's 0.1 Beta 2 playtest notes (2026-11-22), items 1, 2, 3, 4, 9 and 10 (
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-22 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-22 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | check 6: held past a tap, the view snapped back as the wheel appeared |
+| 2026-11-22 | 2 | Opus 5.5 (build thread) | ✓ | pending | – |
 
 ## Decisions
 
@@ -24,8 +25,9 @@ The owner's 0.1 Beta 2 playtest notes (2026-11-22), items 1, 2, 3, 4, 9 and 10 (
 - **3, the hitch on Z.** Cause: while the order wheel's key might still be a tap (`wheel_tap`, 0.3 s since UB3) the
   mouse went only to the hidden pointer and the view caught up on release, so the view stood still and then jumped.
   Now the view turns live through the tap; the hidden pointer still moves (so a flick made at once still lands on its
-  button); held past a tap, the view goes back to where it was as the key went down (`_wheel_yaw`, `_wheel_pitch`)
-  and the mouse is the wheel's, so Go there and Watching here still ping where you looked. The simulation's side
+  button); held past a tap, the view stays where the tap left it and the mouse is the wheel's (attempt 1 snapped it
+  back to the at-open view, a jump as the wheel appeared: critic). Go there and Watching here ping along that view,
+  at most a tap's turn (0.3 s of mouse) from where you looked as the key went down. The simulation's side
   was measured and is not a stall: `Spots.place` with its share took a median 0.15 to 0.21 ms (max 0.65 ms) in one
   Attack / Defend match a field, and the three ticks after a spot had medians 0.3 to 0.4 ms above every other tick's,
   their worst under every other tick's p99 (Woodland 9.1 vs 22.1 ms max; probe in the run's reports). Sounds are

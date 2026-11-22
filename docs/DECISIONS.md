@@ -1512,7 +1512,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **What got you is a switch, On by default (owner, 2026-11-22, PC1: "no auto option. toggle on or off").** It replaces
   Auto (Hard bots only), On and Off; settings version 8 brings Auto and On over as On and keeps Off. A Z tap turns the
   view as the mouse moves (owner, 2026-11-22: spotting "hitched": the view stood still for the 0.3 s tap and then
-  jumped); held past a tap, the view goes back to where it was as the key went down and the mouse is the wheel's.
+  jumped); held past a tap, the view stays where it is (never moved as the wheel comes up) and the mouse is the
+  wheel's.
 
 ## Audio
 

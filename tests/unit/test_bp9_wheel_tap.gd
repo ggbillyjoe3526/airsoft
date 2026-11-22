@@ -61,7 +61,7 @@ func test_a_tap_with_the_mouse_moving_spots_whatever_button_the_pointer_reached(
 			assert_false(cmd.ping_move or cmd.ping_watch or cmd.mag_hand_off, "nor that button's ping or hand-off")
 
 
-func test_a_tap_turns_the_view_as_the_mouse_moves_and_past_a_tap_the_pointer_takes_it() -> void:
+func test_a_tap_turns_the_view_as_the_mouse_moves_and_past_a_tap_only_the_pointer_moves() -> void:
 	var counts := Vector2(120.0, -40.0)
 	_move(counts.x, counts.y)
 	var free_yaw := input.view_yaw
@@ -84,8 +84,8 @@ func test_a_tap_turns_the_view_as_the_mouse_moves_and_past_a_tap_the_pointer_tak
 	_hold_past_a_tap()
 	_move(counts.x, counts.y)
 	_event(&"order_wheel", false)
-	assert_almost_eq(input.view_yaw, 0.0, 1e-6, "held: the mouse was the wheel's, the view is back where it was")
-	assert_almost_eq(input.view_pitch, 0.0, 1e-6)
+	assert_almost_eq(input.view_yaw, free_yaw, 1e-6, "held: only the tap's motion turned the view, never a jump back")
+	assert_almost_eq(input.view_pitch, free_pitch, 1e-6)
 
 
 func test_a_tap_with_the_trigger_held_stops_no_burst() -> void:

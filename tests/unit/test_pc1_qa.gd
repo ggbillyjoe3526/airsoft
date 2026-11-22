@@ -66,20 +66,23 @@ func test_the_view_turns_live_during_the_tap() -> void:
 	assert_ne(input.view_pitch, 0.0)
 
 
-func test_held_past_a_tap_the_view_goes_back_and_stays_back_to_the_release() -> void:
+func test_held_past_a_tap_the_view_stays_where_the_tap_left_it_to_the_release() -> void:
 	input.view_yaw = 0.4
 	input.view_pitch = -0.2
 	_event(&"order_wheel", true)
 	_move(80.0, 30.0)
+	var yaw := input.view_yaw
+	var pitch := input.view_pitch
+	assert_ne(yaw, 0.4, "turned during the tap")
 	_hold_past_a_tap()
 	input.fill(cmd)
-	assert_almost_eq(input.view_yaw, 0.4, 0.0001)
-	assert_almost_eq(input.view_pitch, -0.2, 0.0001)
+	assert_almost_eq(input.view_yaw, yaw, 0.0001, "no jump as the wheel comes up")
+	assert_almost_eq(input.view_pitch, pitch, 0.0001)
 	_move(500.0, 500.0)
-	assert_almost_eq(input.view_yaw, 0.4, 0.0001, "the mouse is the wheel's now")
+	assert_almost_eq(input.view_yaw, yaw, 0.0001, "the mouse is the wheel's now")
 	_event(&"order_wheel", false)
-	assert_almost_eq(input.view_yaw, 0.4, 0.0001, "no jump on release")
-	assert_almost_eq(input.view_pitch, -0.2, 0.0001)
+	assert_almost_eq(input.view_yaw, yaw, 0.0001, "no jump on release")
+	assert_almost_eq(input.view_pitch, pitch, 0.0001)
 
 
 func test_a_first_motion_event_after_the_tap_time_does_not_turn_the_view() -> void:
@@ -101,15 +104,16 @@ func test_a_pause_mid_tap_keeps_the_turn_and_leaves_no_wheel() -> void:
 	assert_eq(input.view_yaw, yaw, "an unseen release does not restore anything")
 
 
-func test_release_after_the_wheel_was_taken_keeps_the_restored_view() -> void:
+func test_release_after_the_wheel_was_taken_keeps_the_view_as_the_tap_left_it() -> void:
 	input.view_yaw = -0.3
 	_event(&"order_wheel", true)
 	_move(60.0, 0.0)
+	var yaw := input.view_yaw
 	_hold_past_a_tap()
 	input.fill(cmd)
 	input.release()
 	assert_false(input.wheel().open)
-	assert_almost_eq(input.view_yaw, -0.3, 0.0001)
+	assert_almost_eq(input.view_yaw, yaw, 0.0001)
 
 
 func test_the_wheel_key_let_go_unseen_mid_tap_keeps_the_live_view() -> void:

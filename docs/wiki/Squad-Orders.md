@@ -62,7 +62,7 @@ where they are, at once and again every second. Each one goes after them or watc
 plays. Teammates further off, in a fight or with someone else in sight carry on. Nobody under your crosshair spots
 nobody. A tap never shows the wheel, and it spots however the mouse is moving: the trigger, your aim and the mouse
 wheel stay yours through it, so you can spot someone while you follow them or fire at them. Your view keeps turning
-while the key is down; hold it past a tap and the wheel comes up with your view back where it was as you pressed.
+while the key is down; hold it past a tap and the wheel comes up with your view left where it is.
 
 ## Pings
 

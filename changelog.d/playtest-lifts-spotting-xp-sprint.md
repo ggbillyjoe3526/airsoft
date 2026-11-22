@@ -7,7 +7,7 @@
 
 ### Tapping Z spots without a stall
 - Tapping Z to spot no longer stalls your view: it keeps turning while you tap, so you can track and spot smoothly.
-- Holding Z for the spot wheel works as before.
+- Holding Z still brings up the wheel; your view stays where it was as the wheel appears, and the mouse then moves only the wheel's pointer.
 
 ### Levels need more XP
 - Each level takes 1.5 times as much XP. A match still gives the same XP.
