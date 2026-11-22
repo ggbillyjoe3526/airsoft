@@ -614,6 +614,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   its hit and asked for about 1.5 to 2 s; Easy stays as it is. Normal reacts as Easy does (0.35 to 0.6 s) and settles
   its aim more slowly (0.95 s); it keeps its steadier settled aim, tracking and lead. Hard's surprised reaction is
   Normal's ("careful, not twitchier", 2026-10-04): its edge stays the angle it already holds (0.18 to 0.28 s).
+  Slower Normal defenders let Subway's bomb sites fall too often (67 %), so a Subway defender in Plant The Bomb waits
+  3 s to come back, 5 s against Hard (`data/maps.md` Bomb defender respawn, Claude's default).
 - **Bot teams vary how they carry out their plan (owner, 2026-11-15, RV1; Claude's defaults).** The plan (split, pair,
   stack over the authored lanes) is drawn as before; each round adds a team tempo, shorter pauses in a bot's own half,
   a per-bot lane shift and the odd lane crossing, and in Attack / Defend and Plant The Bomb sometimes a defender held

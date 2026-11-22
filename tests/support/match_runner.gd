@@ -267,7 +267,7 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 ## The round tuning a match on `map_id` plays in the guards and the balance report: `base` (the loaded tuning by
 ## default) where the map offers its team size and has no round length of its own, else a copy at the map's standard
 ## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game), its round length, its flag raise time and
-## its bomb fuse and its defenders' respawn (RS1, and at Hard, BP11, and Plant The Bomb's at Hard, BP10), as a
+## its bomb fuse and its defenders' respawn (RS1, and at Hard, BP11, and Plant The Bomb's, BG1, and at Hard, BP10), as a
 ## Skirmish there plays (MatchOptions.match_tuning): Woodland at 6 a side, 3:00, a 9 s raise and its own fuse. With
 ## `picked` (a Custom size, TS1), that size where the map offers it, else its standard.
 static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -> SimTuning:
@@ -282,9 +282,11 @@ static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -
 	var back := MatchOptions.defender_respawn(entry, t.rounds.defender_respawn_delay)
 	var back_hard := MatchOptions.defender_respawn_hard(entry, t.rounds.defender_respawn_hard)
 	var bomb_back := MatchOptions.bomb_respawn_hard(entry, t.rounds.plant_defender_respawn_hard)
+	var bomb_field := MatchOptions.bomb_respawn(entry, t.rounds.plant_defender_respawn_delay)
 	if size == t.rounds.team_size and t.rounds.round_time == length and t.flag.raise_time == raise \
 			and t.plant.fuse_time == fuse and t.rounds.defender_respawn_delay == back \
-			and t.rounds.defender_respawn_hard == back_hard and t.rounds.plant_defender_respawn_hard == bomb_back:
+			and t.rounds.defender_respawn_hard == back_hard and t.rounds.plant_defender_respawn_hard == bomb_back \
+			and t.rounds.plant_defender_respawn_delay == bomb_field:
 		return t
 	var sized := t.duplicate() as SimTuning
 	sized.rounds = t.rounds.duplicate() as RoundConfig
@@ -293,6 +295,7 @@ static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -
 	sized.rounds.defender_respawn_delay = back
 	sized.rounds.defender_respawn_hard = back_hard
 	sized.rounds.plant_defender_respawn_hard = bomb_back
+	sized.rounds.plant_defender_respawn_delay = bomb_field
 	sized.flag = t.flag.duplicate() as FlagConfig
 	sized.flag.raise_time = raise
 	sized.plant = t.plant.duplicate() as PlantConfig

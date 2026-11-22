@@ -40,6 +40,10 @@ const DEFENDER_RESPAWN_RANGE := Vector2(2.0, 30.0)
 ## The defenders' respawn column at Hard, optional (BP11): the seconds from a hit to a defender coming back there in
 ## Attack / Defend against Hard bots (RoundConfig.defender_respawn_hard). Blank plays the field's times the Hard scale.
 const DEFENDER_RESPAWN_HARD_COLUMN := "Defender respawn at Hard (s)"
+## The bomb defenders' respawn column, optional (BG1): the seconds from a hit to a defender coming back there in Plant
+## The Bomb, until the bomb is armed, at every level (RoundConfig.plant_defender_respawn_delay). Blank keeps the round
+## tuning's.
+const BOMB_RESPAWN_COLUMN := "Bomb defender respawn (s)"
 ## The bomb defenders' respawn column at Hard, optional (BP10): the seconds from a hit to a defender coming back there
 ## in Plant The Bomb, until the bomb is armed, against Hard bots (RoundConfig.plant_defender_respawn_hard). Blank keeps
 ## the round tuning's, as every other level does.
@@ -88,6 +92,9 @@ class Entry:
 	## The seconds a defender hit here waits to come back in Attack / Defend against Hard bots (BP11: Subway's poles held
 	## too well at the Hard scale's wait), 0 for the field's times the Hard scale (RoundConfig.defender_respawn_scale).
 	var defender_respawn_hard: float = 0.0
+	## The seconds a defender hit here waits to come back in Plant The Bomb (BG1: Subway's sites fell too often once Normal
+	## locked on more slowly), 0 for the round tuning's own (RoundConfig.plant_defender_respawn_delay).
+	var bomb_respawn: float = 0.0
 	## The seconds a defender hit here waits to come back in Plant The Bomb against Hard bots (BP10: Depot's close sites
 	## let Hard defenders hold them at the game's 5 s), 0 for the round tuning's own (RoundConfig.plant_defender_respawn_delay).
 	var bomb_respawn_hard: float = 0.0
@@ -170,6 +177,8 @@ static func parse(text: String) -> MapCatalog:
 					m.problems, table)
 			e.defender_respawn_hard = _read_number(row, DEFENDER_RESPAWN_HARD_COLUMN, DEFENDER_RESPAWN_RANGE,
 					e.defender_respawn_hard, at, m.problems, table)
+			e.bomb_respawn = _read_number(row, BOMB_RESPAWN_COLUMN, DEFENDER_RESPAWN_RANGE, e.bomb_respawn, at,
+					m.problems, table)
 			e.bomb_respawn_hard = _read_number(row, BOMB_RESPAWN_HARD_COLUMN, DEFENDER_RESPAWN_RANGE, e.bomb_respawn_hard, at,
 					m.problems, table)
 			m.entries.append(e)
