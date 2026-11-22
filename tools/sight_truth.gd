@@ -1,5 +1,5 @@
 extends SceneTree
-## BBs and sight against Woodland as drawn (HD1; dev only, never exported). Seeded lines from a standing eye 6 to 40 m
+## BBs and sight against Woodland as drawn (WH1; dev only, never exported). Seeded lines from a standing eye 6 to 40 m
 ## off to points up a standing body (knee, hip, chest, head) on open ground, kept where they pass a plant: a thicket, a
 ## tree, a fern or a shrub. Each line is asked twice:
 ## - the game: does a BB stop on it (WorldQuery.bb_ray, or leaf_stop_depth of counted leaves) and does sight stop on it

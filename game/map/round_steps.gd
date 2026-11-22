@@ -12,7 +12,7 @@ extends RefCounted
 ## ROW, CLUSTER or TREE, or it is a ramp. `props` is how the props are laid (the site look's); `middle` is the field's
 ## middle (PropLayout.field_middle), which a fitted prop's front faces; `ground` the ground under the block's middle
 ## (PropLayout.ground_under, where a tree stands), NAN for its foot. A tree whose model MapStyle.round_trunk_tiers
-## lists stands as tiers of its steps, each drawn in to its trunk's reach at that height (HD1).
+## lists stands as tiers of its steps, each drawn in to its trunk's reach at that height (WH1).
 static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, middle: Vector3,
 		out: Array[AABB], ground: float = NAN) -> void:
 	out.clear()

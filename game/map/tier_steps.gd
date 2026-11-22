@@ -4,7 +4,7 @@ extends RefCounted
 ## thickets, rows of spruces that narrow as they rise, met as boxes stacked up the block that draw in, tier by tier, to
 ## where the drawn spruces' boughs reach, so a BB or a sight line past a body seen beside a thicket flies on where the
 ## square box stopped it (the owner's playtest of 0.1 Beta 2, item 3), each prop's tiers its own where the gap to its
-## neighbour opens (HD1, item 5). A block other rows close on every side is met as its box. MapLevel makes them its
+## neighbour opens (WH1, item 5). A block other rows close on every side is met as its box. MapLevel makes them its
 ## colliders, as RoundSteps' boxes; the block itself (its box) is still what the nav grid, the bots' cover, the noisy
 ## props, the bake and the minimap take. How each prop is drawn is PropLayout's (PropLayout.grid_drawn). Pure: no
 ## node, and no model is loaded.
@@ -14,9 +14,9 @@ extends RefCounted
 const CORNERS: Array[Vector2] = [Vector2(1.0, 0.55), Vector2(0.55, 1.0), Vector2(0.883, 0.883)]
 ## A side counts as touched by another tiered block within this many metres of it (MapLevel.CORE_TOUCH's rule).
 const TOUCH := 0.05
-## Two neighbours' boxes in a tier run on as one where they meet within this many metres (HD1).
+## Two neighbours' boxes in a tier run on as one where they meet within this many metres (WH1).
 const MEET := 0.01
-## A tier reaching under this share of a prop's half-width stands as one square box a prop (SQUARE), not three (HD1).
+## A tier reaching under this share of a prop's half-width stands as one square box a prop (SQUARE), not three (WH1).
 const SQUARE_UNDER := 0.5
 const SQUARE: Array[Vector2] = [Vector2(0.883, 0.883)]
 
@@ -44,9 +44,9 @@ static func tiered_blocks(m: MapData, style: MapStyle, props: PropDressConfig) -
 ## Block `b`'s tiers into `out` (cleared first): none when it isn't tiered or another of `others` (the tiered blocks:
 ## tiered_blocks) covers every side, where its box is what stops. Each tier spans its share of the box's height and
 ## reaches, round each prop PropLayout stands in the box (PropLayout.grid_spots), its share of the prop's drawn
-## half-width, neighbours that meet running on as one box (HD1: where the tier draws in past the gap between two, a
+## half-width, neighbours that meet running on as one box (WH1: where the tier draws in past the gap between two, a
 ## line flies through it). Touching rows meet where their props as drawn meet: a slot between them shows in the drawn
-## boughs too (HD1; TV1 ran a touched side's tiers out to its face, stopping lines that met no bough).
+## boughs too (WH1; TV1 ran a touched side's tiers out to its face, stopping lines that met no bough).
 static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, others: Array[MapData.Block],
 		out: Array[AABB]) -> void:
 	out.clear()
@@ -81,7 +81,7 @@ static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, oth
 		var reach := clampf(tiers[k].y, 0.0, 1.0)
 		# three boxes a prop a tier, as RoundSteps' round props: its round ends cut at the square's corners; the
 		# boxes of neighbours that meet run on as one (their bounds), and where a tier draws in past the gap between
-		# two (HD1: the upper tiers, and props scattered apart) each stands alone, so a line through the gap flies on
+		# two (WH1: the upper tiers, and props scattered apart) each stands alone, so a line through the gap flies on
 		# as it does past the drawn props
 		if reach <= 0.0:
 			continue

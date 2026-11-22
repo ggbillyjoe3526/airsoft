@@ -1,5 +1,5 @@
 extends GutTest
-## HD1 (the owner's playtest item 5): QA's hunt over the tier bodies, TierSteps' merge and RoundSteps' trunk tiers.
+## WH1 (the owner's playtest item 5): QA's hunt over the tier bodies, TierSteps' merge and RoundSteps' trunk tiers.
 
 var play: PlayTuning = PlayTuning.load_default()
 var tuning: SimTuning = SimTuning.new()

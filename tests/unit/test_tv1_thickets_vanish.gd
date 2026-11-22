@@ -1,6 +1,6 @@
 extends GutTest
 ## TV1 (the owner's playtest of 0.1 Beta 2, items 3 and 6). Woodland's thickets stand as tiers that narrow with their
-## spruces as drawn (TierSteps, MapStyle.tier_steps), each in its box and round each spruce (HD1: a line through the
+## spruces as drawn (TierSteps, MapStyle.tier_steps), each in its box and round each spruce (WH1: a line through the
 ## gap between two spruces' tops flies on), a thicket closed on every side standing as its box, so a line grazing a
 ## thicket's end past its spruces flies on and one through its middle still stops; only thickets stand so. A hit character walking off as its respawn wait runs out leaves the field (its fade) before it comes back, never
 ## drawn at its spawn in a blink, and its team counts it coming through the fade; one still calling its hit calls
@@ -15,7 +15,7 @@ const CHEST := 1.3
 const CLEAR := 2.5
 ## A share of a thicket's height through its spruces' upper boughs, where their tops stand apart.
 const TOPS := 0.62
-## A line from the owner's circled bank (HD1): an eye at the stream to a chest past the thicket at (18.5, -0.5).
+## A line from the owner's circled bank (WH1): an eye at the stream to a chest past the thicket at (18.5, -0.5).
 const CIRCLED_FROM := Vector3(2.263365, 1.61, 15.13224)
 const CIRCLED_TO := Vector3(22.42001, 2.890888, 4.714402)
 
@@ -213,7 +213,7 @@ static func _meets(boxes: Array[AABB], x: float, y: float) -> bool:
 
 
 func test_the_line_from_the_owner_s_circled_bank_misses_the_thicket_it_used_to_stop_on() -> void:
-	# HD1 (the owner's playtest, item 5): a chest seen past the bank's thicket west of Hut row, its spruces half sunk
+	# WH1 (the owner's playtest, item 5): a chest seen past the bank's thicket west of Hut row, its spruces half sunk
 	# in the slope; TV1's tiers ran out to the block's face there and stopped the line on nothing drawn
 	var hit := RayHit.new()
 	var query := _woodland.level.query()

@@ -158,7 +158,7 @@ const ROUND_TRUNK: Array[Vector2] = [Vector2(-1.0, -0.55), Vector2(1.0, 0.55), V
 	&"pine_old": PackedVector2Array(ROUND_TRUNK), &"oak": PackedVector2Array(ROUND_TRUNK),
 	&"birch": PackedVector2Array(ROUND_TRUNK),
 }
-## Tree trunks that taper as they rise (HD1, the owner's playtest of 0.1 Beta 2, item 5): a tree whose model is listed
+## Tree trunks that taper as they rise (WH1, the owner's playtest of 0.1 Beta 2, item 5): a tree whose model is listed
 ## stands as tiers of its round_steps, each drawn in to where its trunk reaches at that height, so a BB or a sight line
 ## past a trunk's narrower bole (at chest height a young pine's is about four fifths of its root flare) flies on where
 ## the flare's width stopped it. Each tier a pair (from: share of the height from the ground under the tree to its
@@ -178,7 +178,7 @@ const ROUND_TRUNK: Array[Vector2] = [Vector2(-1.0, -0.55), Vector2(1.0, 0.55), V
 ## no other such block touches; the nav grid, the bots' cover, the bake and the minimap still take the box. Each tier
 ## a pair (from: share of the box's height its tier starts at, the first 0; reach: share of a prop's drawn half-width
 ## it reaches out to round each prop). Measured on the model as drawn, its leaf cards cut out of their sheet
-## (tools/sight_truth.gd `profile`, HD1, after WQ1's cards): the reach where a level line past the spruce at that
+## (tools/sight_truth.gd `profile`, WH1, after WQ1's cards): the reach where a level line past the spruce at that
 ## height first meets its boughs less than half the time. Its foot (under 0.08 of its height) is a bare trunk with a
 ## few low boughs, so legs show under the skirt; its top draws in to the leader, a spire a tenth wide (a line over a
 ## row's tips meets it, so a spawn behind a thicket stays hidden), and a reach of 0 at the tip itself.

@@ -25,7 +25,7 @@ var _clear_surfaces: PackedInt32Array = PackedInt32Array()
 var _railing_bodies: Array[RID] = []
 var _railing_surfaces: PackedInt32Array = PackedInt32Array()
 var _past_cast: RayCast3D = null
-## The tapering props' tiers' bodies (HD1: thickets and trunks, a body a surface beside the surface's own) and each
+## The tapering props' tiers' bodies (WH1: thickets and trunks, a body a surface beside the surface's own) and each
 ## one's RayHit.Surface: solid to everything, as the surface's own body.
 var _tier_surfaces: Dictionary[RID, int] = {}
 var _body: BodyConfig = null

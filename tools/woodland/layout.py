@@ -291,7 +291,7 @@ FLAGS = [FLAG_A, FLAG_B]
 # hollow, B at Log stacks).
 BOMB_SITES = [(FLAG_A[0], FLAG_A[1], 0), (FLAG_B[0], FLAG_B[1], 0)]
 
-# West camp: a log palisade with three gates; a screen inside each gate so no line reaches a spawn point. HD1: its
+# West camp: a log palisade with three gates; a screen inside each gate so no line reaches a spawn point. WH1: its
 # front (east) wall stands 3.4 m, so a line from the high ground round (-35, -40) over the west thicket's spruce tops
 # (which BBs and sight now meet as drawn, not as their square boxes) still finds no spawn.
 walls("palisade", [(-88, -14), (-72, -14), (-72, 20), (-88, 20)],

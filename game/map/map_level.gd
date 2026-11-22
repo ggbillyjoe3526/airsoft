@@ -112,7 +112,7 @@ var _body: BodyConfig = null
 var _lifts: LiftConfig = null
 var _clear_bodies: Dictionary[int, StaticBody3D] = {}
 var _railing_bodies: Dictionary[int, StaticBody3D] = {}
-## The tapering props' tiers (thickets' TierSteps, trunks' RoundSteps tiers; HD1), on a body a surface of their own: a
+## The tapering props' tiers (thickets' TierSteps, trunks' RoundSteps tiers; WH1), on a body a surface of their own: a
 ## few thousand boxes to a body beside the ground's faces would overrun Jolt's sub-shape bits on one.
 var _tier_bodies: Dictionary[int, StaticBody3D] = {}
 ## The squares (m) the tiers' bodies split the field into, and the stride of their keys (a surface, then each square's
@@ -268,7 +268,7 @@ func _add_block_colliders() -> void:
 	var tiered := TierSteps.tiered_blocks(map, _style, props)
 	for b in map.blocks:
 		RoundSteps.boxes(b, _style, props, middle, steps, PropLayout.ground_under(map, b))
-		# A tapering trunk's tiers (HD1: Woodland, about 9,000 boxes) are shapes of their body's own, as a thicket's.
+		# A tapering trunk's tiers (WH1: Woodland, about 9,000 boxes) are shapes of their body's own, as a thicket's.
 		if not steps.is_empty() and _style.round_trunk_tiers.has(props.model_of(b)):
 			_add_owned_boxes(_tier_body(b), steps)
 			continue
@@ -757,7 +757,7 @@ func _own_body(bodies: Dictionary[int, StaticBody3D], surface: int, name_format:
 	return bodies[surface]
 
 
-## The tiers' body for block `b` (HD1): one a surface a square of TIER_CHUNK m of the field, so a ray's broad phase
+## The tiers' body for block `b` (WH1): one a surface a square of TIER_CHUNK m of the field, so a ray's broad phase
 ## passes the squares it doesn't cross; made the first time it is asked for (it joins the tree in `_add_rest`).
 func _tier_body(b: MapData.Block) -> StaticBody3D:
 	var cell := Vector2i(floori(b.center.x / TIER_CHUNK), floori(b.center.z / TIER_CHUNK))

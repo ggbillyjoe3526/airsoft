@@ -992,7 +992,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   `Foliage.count_leaves`), measured against the models with `tools/bush_opacity.gd`; walking through and drawing keep
   the whole size. A new fern or bush model re-measures its shares. A thicket draws no core box at its spruces' feet
   (`PropDressConfig.model_cores` empty): the owner asked why the trees had boxes, and the spruces close it alone.
-- **Woodland's thickets and trunks stop where their plants are drawn (HD1, from the owner's playtest 2026-11-22, item
+- **Woodland's thickets and trunks stop where their plants are drawn (WH1, from the owner's playtest 2026-11-22, item
   5: hits and spots on Woodland, his circled bank west of Hut row, still stopped on nothing).** A thicket's tiers
   (`TierSteps`, `MapStyle.tier_steps`) stand round each spruce, neighbours' boxes running on as one where they meet,
   so a line between two spruces' tops flies on; a thicket other rows close on every side stands as its box. TV1's
