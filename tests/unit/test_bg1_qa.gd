@@ -94,3 +94,69 @@ func test_hunt_crowded_ignores_the_bot_itself_and_its_own_goal() -> void:
 	me.hunt_goal = SPOT
 	me.character.position = SPOT
 	assert_false(BotSpread.hunt_crowded(me, world, SPOT), "not crowded by itself")
+
+
+func _maps(bomb: String, hard: String) -> MapCatalog:
+	var head := "# Maps\n\n## Maps\n\n| Id | Name | Kind | Tag | Min | Standard | Max | Bomb defender respawn (s) " \
+			+ "| Bomb defender respawn at Hard (s) | Blurb |\n|---|---|---|---|---|---|---|---|---|---|\n"
+	return MapCatalog.parse(head + "| f | F | field | public | 5 | 6 | 8 | %s | %s | A field. |\n" % [bomb, hard])
+
+
+func test_crowd_counts_a_teammate_between_10_and_12_m_of_the_spot() -> void:
+	_world()
+	assert_gte(config.search_crowd_radius, 12.0)
+	var b := world.bots[0]
+	b.character.position = Vector3(-60.0, 0.0, -40.0)
+	for i in range(1, 1 + config.search_crowd_max):
+		world.characters[i].position = SPOT + Vector3(11.0, 0.0, 0.0)
+	assert_true(BotSpread.crowded(b, world, SPOT), "11 m away still counts")
+	for i in range(1, 1 + config.search_crowd_max):
+		world.characters[i].position = SPOT + Vector3(config.search_crowd_radius + 1.0, 0.0, 0.0)
+	assert_false(BotSpread.crowded(b, world, SPOT), "beyond the radius does not")
+
+
+func test_a_field_setting_only_the_bomb_wait_keeps_it_at_hard() -> void:
+	var f := _maps("3", "").find("f")
+	var t := MatchOptions.match_tuning(SimTuning.load_default(), f, null)
+	for level: StringName in [&"easy", &"normal", &"hard"]:
+		assert_eq(MatchOptions.level_tuning(t, level).rounds.plant_defender_respawn_delay, 3.0, str(level))
+
+
+func test_a_field_setting_only_the_hard_bomb_wait_leaves_other_levels_the_games() -> void:
+	var base := SimTuning.load_default()
+	var f := _maps("", "7").find("f")
+	var t := MatchOptions.match_tuning(base, f, null)
+	assert_eq(MatchOptions.level_tuning(t, &"normal").rounds.plant_defender_respawn_delay,
+			base.rounds.plant_defender_respawn_delay)
+	assert_eq(MatchOptions.level_tuning(t, &"hard").rounds.plant_defender_respawn_delay, 7.0)
+
+
+func test_level_tuning_never_writes_its_input_and_copies_rounds() -> void:
+	var f := _maps("3", "6").find("f")
+	var t := MatchOptions.match_tuning(SimTuning.load_default(), f, null)
+	var before := t.rounds.plant_defender_respawn_delay
+	var out := MatchOptions.level_tuning(t, &"hard")
+	assert_eq(out.rounds.plant_defender_respawn_delay, 6.0)
+	assert_ne(out.rounds, t.rounds)
+	assert_eq(t.rounds.plant_defender_respawn_delay, before, "input untouched")
+
+
+func test_the_range_and_no_map_keep_the_games_bomb_wait() -> void:
+	var base := SimTuning.load_default()
+	var r := MapCatalog.shared().find("range")
+	assert_not_null(r)
+	assert_eq(MatchOptions.match_tuning(base, r, null).rounds.plant_defender_respawn_delay,
+			base.rounds.plant_defender_respawn_delay)
+	assert_eq(MatchOptions.match_tuning(base, null, CustomRules.new()).rounds.plant_defender_respawn_delay,
+			base.rounds.plant_defender_respawn_delay)
+
+
+func test_respawn_delay_after_arming_is_still_the_bomb_wait() -> void:
+	var rounds := RoundConfig.new()
+	rounds.plant_defender_respawn_delay = 3.0
+	var rs := RoundState.new()
+	rs.attackers = 0
+	rs.mode = RoundState.Mode.PLANT_THE_BOMB
+	assert_eq(Respawns.delay(rs, rounds, 1), 3.0)
+	rounds.plant_defender_respawn_delay = -2.0
+	assert_eq(Respawns.delay(rs, rounds, 1), 0.0, "never negative")
