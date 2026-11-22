@@ -132,10 +132,10 @@ func test_a_built_woodland_puts_tier_bodies_in_the_tree_and_reports_their_surfac
 		assert_true(sb.is_inside_tree())
 		assert_lt(sb.get_child_count(), 6000, "shapes owned, not nodes")
 	var enumerated := 0
-	for s in q._tier_bodies.size():
+	for rid: RID in q._tier_surfaces:
 		enumerated += 1
-		assert_between(q._tier_surfaces[s], 0, RayHit.Surface.size() - 1, "a real surface")
-		assert_eq(q._surface_of(q._tier_bodies[s]), q._tier_surfaces[s] as RayHit.Surface)
+		assert_between(q._tier_surfaces[rid], 0, RayHit.Surface.size() - 1, "a real surface")
+		assert_eq(q._surface_of(rid), q._tier_surfaces[rid] as RayHit.Surface)
 	assert_eq(enumerated, tiers.size(), "each body registered once")
 
 
@@ -163,7 +163,7 @@ func test_depot_and_subway_have_no_tier_bodies() -> void:
 		level.build(m, play.map_style, tuning.body)
 		for c: Node in level.get_children():
 			assert_false(String(c.name).begins_with("Colliders_Tiers_"), "%s has no tier body" % id)
-		assert_eq(level.query()._tier_bodies.size(), 0)
+		assert_eq(level.query()._tier_surfaces.size(), 0)
 
 
 func test_a_tier_key_keeps_its_surface_for_every_chunk_the_field_can_hold() -> void:

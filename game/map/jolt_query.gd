@@ -27,8 +27,7 @@ var _railing_surfaces: PackedInt32Array = PackedInt32Array()
 var _past_cast: RayCast3D = null
 ## The tapering props' tiers' bodies (HD1: thickets and trunks, a body a surface beside the surface's own) and each
 ## one's RayHit.Surface: solid to everything, as the surface's own body.
-var _tier_bodies: Array[RID] = []
-var _tier_surfaces: PackedInt32Array = PackedInt32Array()
+var _tier_surfaces: Dictionary[RID, int] = {}
 var _body: BodyConfig = null
 var _under: RayHit = RayHit.new()
 ## Each door's leaf (DO1), by door: the one shape of a wooden static body of its own, disabled while the door is open.
@@ -75,8 +74,9 @@ func set_railing_bodies(bodies: Array[RID], surfaces: PackedInt32Array, sight: R
 
 ## The tapering props' tiers' bodies as the level built them (MapLevel), each made of `surfaces`' RayHit.Surface.
 func set_tier_bodies(bodies: Array[RID], surfaces: PackedInt32Array) -> void:
-	_tier_bodies = bodies
-	_tier_surfaces = surfaces
+	_tier_surfaces.clear()
+	for t in bodies.size():
+		_tier_surfaces[bodies[t]] = surfaces[t]
 
 
 ## The clear bodies as the level built them (MapLevel), each made of `surfaces`' RayHit.Surface, and `sight`: a ray in
@@ -155,9 +155,8 @@ func _surface_of(rid: RID) -> RayHit.Surface:
 	for s in _surface_bodies.size():
 		if _surface_bodies[s] == rid:
 			return s as RayHit.Surface
-	for t in _tier_bodies.size():
-		if _tier_bodies[t] == rid:
-			return _tier_surfaces[t] as RayHit.Surface
+	if _tier_surfaces.has(rid):
+		return _tier_surfaces[rid] as RayHit.Surface
 	for c in _clear_bodies.size():
 		if _clear_bodies[c] == rid:
 			return _clear_surfaces[c] as RayHit.Surface
