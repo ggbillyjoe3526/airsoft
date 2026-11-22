@@ -106,6 +106,20 @@ func test_a_bot_goes_after_a_noise_with_room_and_watches_it_when_crowded() -> vo
 	assert_eq(b.mode, Bot.Mode.SEARCH, "room again: it goes")
 
 
+func test_a_defender_goes_after_a_noise_near_its_pole_however_crowded() -> void:
+	_world()
+	world.mode = RoundState.Mode.ATTACK_DEFEND
+	world.attackers = 1
+	world.flag.position = SPOT
+	world.characters[1].position = SPOT + Vector3(1.0, 0.0, 0.0)
+	world.characters[2].position = SPOT + Vector3(-1.0, 0.0, 0.0)
+	var b := _hears(0)
+	b.lane_goal = SPOT + Vector3(0.0, 0.0, -14.0)
+	b.character.position = b.lane_goal
+	BotBrain._choose_mode(b, world, null, DT)
+	assert_eq(b.mode, Bot.Mode.SEARCH, "the objective gathers its defenders")
+
+
 func test_a_searching_bot_keeps_its_search_however_crowded() -> void:
 	_world()
 	var b := _hears(0)
