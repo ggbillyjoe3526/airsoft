@@ -5,3 +5,4 @@
 - Normal bots take longer to lock on: they react as Easy bots do and their aim settles more slowly, so you have about 1.5 to 2 s in their sights before they hit indoors.
 - Easy bots are unchanged. Hard bots keep their edge on the angles they hold, but are no quicker than Normal when surprised.
 - On Subway in Plant The Bomb, a defender who is hit comes back after 3 s (was 5 s) against Easy and Normal bots, so the sites fall less often; against Hard bots it stays 5 s.
+- Two bots crawling side by side through Woodland's Badger run no longer get stuck under its logs.

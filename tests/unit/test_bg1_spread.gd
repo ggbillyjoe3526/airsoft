@@ -165,3 +165,39 @@ func test_normal_locks_on_no_quicker_than_easy_and_hard_stays_sharpest() -> void
 	assert_lt(normal.aim_error_settled_deg, easy.aim_error_settled_deg, "and ends steadier than Easy")
 	assert_eq(hard.reaction_time, normal.reaction_time, "Hard, surprised, is no quicker than Normal (careful, not twitchier)")
 	assert_lt(hard.pre_aim_reaction_time.y, normal.reaction_time.x, "its edge is the angle it already holds")
+
+
+## A nav grid whose every point is a low node (a crawl only a crouched body fits).
+class CrawlNav:
+	extends NavGrid
+
+	func _init() -> void:
+		low = PackedByteArray([1])
+
+	func node_at(_p: Vector3) -> int:
+		return 0
+
+
+## BG1: two teammates side by side in a crawl file through it rather than push each other apart onto its sides (CI:
+## pushed apart in Woodland's Badger run they rode up its curved lining and stuck under its logs). In the open the push
+## still bends the walk.
+func test_teammates_in_a_crawl_file_through_without_pushing_apart() -> void:
+	var tuning := SimTuning.new()
+	var cfg := BotConfig.load_default()
+	var loadout := ReplicaStats.default_loadout()
+	var me := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
+	var mate := Character.new(1, 0, Vector3(-cfg.separation_distance * 0.5, 0.0, 0.0), 0.0, loadout)
+	var w := BotWorld.new()
+	w.tuning = tuning
+	w.cfg = cfg
+	var chars: Array[Character] = [me, mate]
+	w.characters = chars
+	var b := Bot.new(me, 3, cfg.skill_for(&"normal"), 3)
+	for crawl: bool in [false, true]:
+		w.nav = CrawlNav.new() if crawl else null
+		b.move_dir = Vector3(0.0, 0.0, -1.0)
+		assert_true(BotMovement.keep_apart(b, w, true, PlayerCommand.new()), "still walking")
+		if crawl:
+			assert_eq(b.move_dir, Vector3(0.0, 0.0, -1.0), "in a crawl: straight on, no push to the side")
+		else:
+			assert_gt(b.move_dir.x, 0.0, "in the open: off the teammate (east)")

@@ -43,6 +43,12 @@ good to play. make sure the game still feels balanced in all maps/modes/difficul
   sites lost their quicker first shot. A defender hit there now waits 3 s (5 s before), at every level but Hard, which
   keeps 5 s (the column at Hard). `MatchOptions.match_tuning` and `MatchRunner.sized_for` carry it.
 
+- **Teammates file through a crawl (`BotMovement.keep_apart`).** CI's Woodland Attack / Defend match (seed 3) found two
+  teammates crawling side by side through the Badger run held up for good: keeping apart pushed each off the middle,
+  up the tunnel's curved lining, where a crouched body no longer fits under its logs. On a low node (a roof only a
+  crouched body fits under, `NavGrid.low`) a bot now keeps its line and no longer pushes away from anyone. Already so
+  on main; the spreading only changed who went in together.
+
 ## The numbers
 
 Bot against bot, 6 a side, at Normal on 16 seeds a map and mode (4 on main and for Easy and Hard unless said).
