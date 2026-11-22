@@ -602,6 +602,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   shot, so a bot firing just over cover pushed its barrel into it. While a shot holds it, the wall ray may still lift
   the shouldered replica up to `FigureConfig.raise_fire_most` (0.12 of the raise, about 9°); never the full high ready
   while firing. Presentation only: the BB and the hit volume are unchanged.
+- **The sprint key always runs (owner, 2026-11-22, PC1: "ALT should always let the player run"; there is no
+  stamina).** Held while moving forward, it wins over walk, a held or toggled crouch, a held or toggled sight and a lean;
+  a toggled crouch or sight is let go. The rule lives in the player's input, so bots keep the movement's own order
+  (walk before sprint). Only a roof too low to stand under still keeps you down. Default taken: no sprint sideways or
+  backwards, as before. The HIT! sign over a hit player is red, the same for both teams, for as long as it stands
+  (owner, 2026-11-22; before, white with an outline in the team's colour).
 
 ## Bots and balance
 
@@ -1325,6 +1331,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the M140 the middle one, the M150 the long shot with the slowest bolt, the hardest kick and the loudest crack (a
   Heard from column on the power sources). The numbers above this entry (the Long Barrel's 10 % tighter groups, the
   gases' and springs' +10 % and +20 % recoil, the scopes' 1.9 and 1.6) are as ruled then; stats.md has today's.
+- **Every level takes 1.5 times the XP it took at LV15 (owner, 2026-11-22, PC1: "the XP earned is fair but maybe
+  increase the amount of XP required per level").** XP per match is unchanged; level 15 is 21,750 XP, about 87 Normal
+  matches (58 on Hard). A save keeps its XP and unlocks; its level number may read lower.
 
 ## Menus, HUD, settings and accessibility
 
@@ -1500,6 +1509,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   version 7. Defaults taken: On draws VF1's High (80 m, 128 x 128, smoothed) and is on from the High preset up.
 - **A UI redesign, a Visual redesign, an Audio redesign and a Performance update are planned for later, their versions
   not set (owner, 2026-10-13 and 2026-10-16).** Parked in `docs/IDEAS.md` until he places them, with no work before.
+- **What got you is a switch, On by default (owner, 2026-11-22, PC1: "no auto option. toggle on or off").** It replaces
+  Auto (Hard bots only), On and Off; settings version 8 brings Auto and On over as On and keeps Off. A Z tap turns the
+  view as the mouse moves (owner, 2026-11-22: spotting "hitched": the view stood still for the 0.3 s tap and then
+  jumped); held past a tap, the view goes back to where it was as the key went down and the mouse is the wheel's.
 
 ## Audio
 
@@ -1580,6 +1593,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the beeps too, as they show what you hear. Bots still hear a car out to `LiftConfig.heard` (default: their hearing
   and Subway's balance unchanged). A press from just inside the door shuts the doors on the next tick and eases the
   presser in clear of them (`LiftConfig.step_in_speed`) while the leaves stand open for `shut_lead`.
+- **The lift's doors are cut to start on their slide (owner, 2026-11-22, PC1: "elevator sound still too late. maybe
+  trim some silence").** His three takes had no silence but about 0.3 s of soft swell, peaking 0.7 to 1.2 s in;
+  `tools/cut_recordings.py` now starts each where it comes within 4 dB of its loudest (was 12), so the slide is heard
+  about half a second sooner. Same recording, length and level.
 
 ## Save and settings storage
 

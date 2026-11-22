@@ -77,7 +77,7 @@ func test_a_saved_file_loads_into_the_gameplay_tab_with_nothing_lost() -> void:
 	saved.crouch_toggle = true
 	saved.aim_toggle = true
 	saved.auto_reload = true
-	saved.what_got_you = Settings.WhatGotYou.OFF
+	saved.what_got_you = false
 	saved.sensitivity = 1.7
 	saved.hud.minimap_zoom = 1.5
 	var path := ROOT.path_join("before.save")
@@ -88,14 +88,14 @@ func test_a_saved_file_loads_into_the_gameplay_tab_with_nothing_lost() -> void:
 	assert_eq(shown._crouch.selected(), 1, "crouch: toggle")
 	assert_eq(shown._aim.selected(), 1, "aim: toggle")
 	assert_eq(shown._auto_reload.selected(), 1, "reload: automatic")
-	assert_eq(shown._what_got_you.selected(), Settings.WhatGotYou.OFF)
+	assert_eq(shown._what_got_you.selected(), 0)
 	assert_eq(back.to_dict(), saved.to_dict(), "every setting as saved")
 	# and a change on the new tab is saved where the old one was
-	shown._what_got_you.button(Settings.WhatGotYou.ON).pressed.emit()
+	shown._what_got_you.button(1).pressed.emit()
 	shown._crouch.button(0).pressed.emit()
 	var again := Settings.new(PlayTuning.new())
 	again.load_file(shown.save_path)
-	assert_eq(again.what_got_you, Settings.WhatGotYou.ON)
+	assert_eq(again.what_got_you, true)
 	assert_false(again.crouch_toggle)
 	assert_true(again.aim_toggle and again.auto_reload, "the rest kept")
 
@@ -129,6 +129,6 @@ func test_each_choice_is_named_and_takes_focus_in_order() -> void:
 
 
 func test_picking_what_got_you_saves_at_once() -> void:
-	screen._what_got_you.button(Settings.WhatGotYou.OFF).pressed.emit()
-	assert_eq(s.what_got_you, Settings.WhatGotYou.OFF)
+	screen._what_got_you.button(0).pressed.emit()
+	assert_eq(s.what_got_you, false)
 	assert_false(s.dirty, "saved at once")

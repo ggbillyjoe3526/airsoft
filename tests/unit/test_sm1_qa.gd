@@ -9,7 +9,7 @@ const PLAYER := PlaySession.PLAYER_ID
 var session: PlaySession = null
 
 
-func _session(difficulty: StringName, setting: Settings.WhatGotYou = Settings.WhatGotYou.AUTO) -> PlaySession:
+func _session(difficulty: StringName, setting: bool = true) -> PlaySession:
 	var s := PlaySession.new()
 	s.bots_active = false
 	s.difficulty = difficulty
@@ -80,11 +80,11 @@ func test_a_drawn_round_one_replayed_keeps_the_hits_on_you() -> void:
 
 
 func test_the_setting_changed_mid_match_lists_every_hit_with_the_setting_at_the_end() -> void:
-	session = _session(&"easy", Settings.WhatGotYou.OFF)
+	session = _session(&"easy", false)
 	await wait_physics_frames(2)
 	session.counts = false
 	_hit_you()
-	session.settings.what_got_you = Settings.WhatGotYou.ON
+	session.settings.what_got_you = true
 	_hit_you()
 	_end_match(1)
 	var hits := session.hud().summary().hits()

@@ -15,7 +15,7 @@ func after_each() -> void:
 	get_tree().paused = false
 
 
-func _session(setting: Settings.WhatGotYou = Settings.WhatGotYou.ON) -> PlaySession:
+func _session(setting: bool = true) -> PlaySession:
 	var s := PlaySession.new()
 	s.bots_active = false
 	s.difficulty = &"easy"
@@ -226,7 +226,7 @@ static func _click() -> InputEventMouseButton:
 # --- the card ---
 
 func test_a_teammates_or_a_bounced_bb_shows_the_card_and_your_own_does_not() -> void:
-	session = _session(Settings.WhatGotYou.ON)
+	session = _session(true)
 	await wait_physics_frames(2)
 	var mate := -1
 	for c in session.state.characters:
@@ -258,7 +258,7 @@ func test_a_teammates_or_a_bounced_bb_shows_the_card_and_your_own_does_not() -> 
 
 
 func test_the_card_and_the_kept_line_go_when_a_new_match_starts_with_no_orphans() -> void:
-	session = _session(Settings.WhatGotYou.ON)
+	session = _session(true)
 	await wait_physics_frames(2)
 	var foe := -1
 	for c in session.state.characters:
@@ -328,24 +328,35 @@ func test_a_cleared_feed_keeps_nothing_kept() -> void:
 
 # --- the setting ---
 
-func test_the_setting_saves_loads_and_falls_back_to_auto() -> void:
+func test_the_setting_saves_loads_and_falls_back_to_on() -> void:
 	var s := Settings.new()
-	s.what_got_you = Settings.WhatGotYou.OFF
+	assert_true(s.what_got_you, "On by default (owner, 2026-11-22)")
+	s.what_got_you = false
 	var back := Settings.new()
 	back.from_dict(s.to_dict())
-	assert_eq(back.what_got_you, Settings.WhatGotYou.OFF)
+	assert_false(back.what_got_you)
 	var old := s.to_dict()
 	old.erase("what_got_you")
 	back.from_dict(old)
-	assert_eq(back.what_got_you, Settings.WhatGotYou.AUTO, "an older save")
-	for junk: Variant in ["on", 7, -1, NAN, true, null]:
+	assert_true(back.what_got_you, "a save without it")
+	for junk: Variant in ["on", 7, -1, NAN, null]:
 		old["what_got_you"] = junk
-		back.what_got_you = Settings.WhatGotYou.OFF
+		back.what_got_you = false
 		back.from_dict(old)
-		assert_eq(back.what_got_you, Settings.WhatGotYou.AUTO, "junk %s" % str(junk))
-	old["what_got_you"] = 1.0
-	back.from_dict(old)
-	assert_eq(back.what_got_you, Settings.WhatGotYou.ON, "a float from JSON")
+		assert_true(back.what_got_you, "junk %s" % str(junk))
+
+
+func test_a_version_7_saves_auto_on_and_off_come_over_as_the_switch() -> void:
+	for pair: Array in [[0, true], [1, true], [2, false], [0.0, true], [2.0, false]]:
+		var moved := Settings.migrate_defaults({"what_got_you": pair[0]}, 7)
+		var back := Settings.new()
+		back.from_dict(moved)
+		assert_eq(back.what_got_you, pair[1], "version 7's %s" % str(pair[0]))
+	var older := Settings.new()
+	older.from_dict(Settings.migrate_defaults({"what_got_you": 2}, 3))
+	assert_false(older.what_got_you, "an older file's Off too")
+	var now := Settings.migrate_defaults({"what_got_you": false}, Settings.VERSION)
+	assert_eq(now["what_got_you"], false, "the current version is left as it is")
 
 
 func test_the_settings_screen_maps_its_options_to_the_setting() -> void:
@@ -354,14 +365,13 @@ func test_the_settings_screen_maps_its_options_to_the_setting() -> void:
 	screen.settings = s
 	screen.save_path = "user://test-wg1-qa-settings.save"
 	add_child_autofree(screen)
-	s.what_got_you = Settings.WhatGotYou.OFF
+	s.what_got_you = false
 	screen.open()
 	var choice: MenuChoice = screen._what_got_you # on Gameplay since BP7
-	assert_eq(choice.get_child_count(), Settings.WhatGotYou.size())
-	assert_eq(choice.selected(), Settings.WhatGotYou.OFF)
-	assert_eq(choice.button(Settings.WhatGotYou.AUTO).text, tr("SETTINGS_AUTO").to_upper())
-	assert_eq(choice.button(Settings.WhatGotYou.ON).text, tr("SETTINGS_ON").to_upper())
-	assert_eq(choice.button(Settings.WhatGotYou.OFF).text, tr("SETTINGS_OFF").to_upper())
-	choice.button(Settings.WhatGotYou.ON).pressed.emit()
-	assert_eq(s.what_got_you, Settings.WhatGotYou.ON)
+	assert_eq(choice.get_child_count(), 2, "Off and On, no Auto")
+	assert_eq(choice.selected(), 0)
+	assert_eq(choice.button(0).text, tr("SETTINGS_OFF").to_upper())
+	assert_eq(choice.button(1).text, tr("SETTINGS_ON").to_upper())
+	choice.button(1).pressed.emit()
+	assert_true(s.what_got_you)
 	DirAccess.remove_absolute("user://test-wg1-qa-settings.save")

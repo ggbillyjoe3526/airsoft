@@ -61,8 +61,8 @@ While they are spotted, your bot teammates within <!-- wiki:config ping_config.s
 where they are, at once and again every second. Each one goes after them or watches them from its post, the way it
 plays. Teammates further off, in a fight or with someone else in sight carry on. Nobody under your crosshair spots
 nobody. A tap never shows the wheel, and it spots however the mouse is moving: the trigger, your aim and the mouse
-wheel stay yours through it, so you can spot someone while you follow them or fire at them. Your view waits while the
-key is down and takes the whole turn as you let go.
+wheel stay yours through it, so you can spot someone while you follow them or fire at them. Your view keeps turning
+while the key is down; hold it past a tap and the wheel comes up with your view back where it was as you pressed.
 
 ## Pings
 
