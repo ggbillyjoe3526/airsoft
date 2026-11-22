@@ -5,14 +5,14 @@ in woodland map. the highlighted area i previously uploaded a screenshot of is s
 the tree placement? make sure the map is still balanced if the map is changed. also, make sure to go over hit/spot
 detection again to get it more accurate."
 
-**Review:** 2 attempts · critic CRITIC · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-22 | 1 | Opus 5.5 (build thread) | ✓ (touched tests, 318 in 24 files, and QA's; CI green on a17f32f) | 7/8 Retry | 1: Plant The Bomb not yet measured |
-| 2026-11-22 | 2 | Opus 5.5 (build thread) | ✓ (CI on the head with main merged in) | CRITIC2 | – |
+| 2026-11-22 | 2 | Opus 5.5 (build thread) | ✓ (CI on the head with main merged in) | 8/8 Accept | – |
 
 ## How it was measured
 
