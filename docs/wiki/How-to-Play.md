@@ -42,7 +42,7 @@ A card on the left says **What got you**: who hit you, from how far, whether the
 you were in their view ([HUD and Minimap](HUD-and-Minimap#what-got-you)).
 
 Bots call their hits honestly, every time, exactly as you do. When you hit someone you hear the tick, see the hit
-marker round the crosshair, and they raise a hand with "HIT!" and walk off. The hit feed in the corner shows who hit
+marker round the crosshair, and they raise a hand with a red "HIT!" over their head and walk off. The hit feed in the corner shows who hit
 whom.
 
 Once a round is decided it is a cease-fire: nobody can fire, and BBs still in the air hit no one. If both teams are

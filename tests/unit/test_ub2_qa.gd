@@ -222,7 +222,7 @@ func test_the_defaults_are_the_new_ones() -> void:
 	assert_true(s.tooltips)
 	assert_eq(s.frame_limit, Settings.UNLIMITED)
 	assert_eq(s.frame_limit_pick, 240)
-	assert_eq(Settings.VERSION, 7, "UB3 made the haze one switch")
+	assert_eq(Settings.VERSION, 8, "UB3 made the haze one switch (7), PC1 What got you (8)")
 
 
 func test_the_frame_limit_pick_is_saved_read_and_clamped() -> void:

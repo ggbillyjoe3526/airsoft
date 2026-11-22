@@ -38,7 +38,7 @@ func _shown(page: ArmoryPage) -> Array[int]:
 
 
 func test_four_cards_show_from_your_level_and_the_next_is_edged() -> void:
-	var page := _page(920)
+	var page := _page(1380)
 	assert_eq(_shown(page), [3, 4, 5, 6] as Array[int])
 	var next := page.track().row(4).get_theme_stylebox("panel") as StyleBoxFlat
 	assert_eq(next.border_color, GameTheme.accent, "the next level is edged in teal")
@@ -51,7 +51,7 @@ func test_four_cards_show_from_your_level_and_the_next_is_edged() -> void:
 
 
 func test_the_arrows_browse_and_stop_at_the_ends() -> void:
-	var page := _page(920)
+	var page := _page(1380)
 	page.on_arrow().pressed.emit()
 	assert_eq(_shown(page), [4, 5, 6, 7] as Array[int])
 	for i in 20:
@@ -66,7 +66,7 @@ func test_the_arrows_browse_and_stop_at_the_ends() -> void:
 
 
 func test_a_click_on_a_dot_shows_that_level_first() -> void:
-	var page := _page(920)
+	var page := _page(1380)
 	await wait_process_frames(2)
 	var dots := page.summary().bar()
 	var click := InputEventMouseButton.new()
@@ -82,9 +82,9 @@ func test_a_click_on_a_dot_shows_that_level_first() -> void:
 
 
 func test_the_dots_fill_to_your_level_and_on_by_the_xp_earned() -> void:
-	var page := _page(920)
+	var page := _page(1380)
 	var dots := page.summary().bar()
-	assert_almost_eq(dots.fraction(), 120.0 / 500.0, 0.001)
+	assert_almost_eq(dots.fraction(), 180.0 / 750.0, 0.001)
 	await wait_process_frames(2)
 	assert_eq(dots.dot_at(dots.dot_position(4).x + 2.0), 4)
 	assert_eq(dots.dot_at(-100.0), 0)

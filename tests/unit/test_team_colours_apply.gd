@@ -50,8 +50,10 @@ func _assert_drawn(figures: Array[Color], hud: Array[Color], glow: float) -> voi
 		var team := session.state.character(f.character_id).team
 		var paint := _paint(f)
 		_assert_colour(paint.albedo_color, figures[team], "figure %d" % f.character_id)
-		_assert_colour(f._sign.outline_modulate, figures[team].darkened(FigureView.SIGN_OUTLINE_DARKEN),
-				"sign %d" % f.character_id)
+		# The HIT! sign is red whatever the team or the colours (owner, 2026-11-22).
+		_assert_colour(f._sign.modulate, FigureView.SIGN_COLOUR, "sign %d" % f.character_id)
+		_assert_colour(f._sign.outline_modulate, FigureView.SIGN_COLOUR.darkened(FigureView.SIGN_OUTLINE_DARKEN),
+				"sign %d's edge" % f.character_id)
 		assert_eq(paint.emission_enabled, glow > 0.0, "glows only with a glow")
 		if glow > 0.0:
 			assert_almost_eq(paint.emission_energy_multiplier, glow, 0.001)

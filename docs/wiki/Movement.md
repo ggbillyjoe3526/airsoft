@@ -12,8 +12,10 @@ stand and how quietly you get there win more fights than fast hands.
 - **Crouch** (hold C or Ctrl) makes you a small target and hides you behind waist-high cover. Moving crouched is
   silent too, so you can sneak up on a bot that hasn't seen you. Crouched you fit through low tunnels (Woodland's are
   1.4 m high); under one you stay down until you're out, whatever you hold, and bots crouch through them too.
-- **Sprint** (hold Alt) is fastest and loudest. You can still fire, but your shots spread wide; your replica comes up
-  out of the carry, pointing where you aim, while you fire.
+- **Sprint** (hold Alt) is fastest and loudest. Held while you move forward it always runs: it stands you up from a
+  crouch, lowers your sight and lets go of walk and lean (a crouch or aim toggled on stays let go). You can still
+  fire, but your shots spread wide; your replica comes up out of the carry, pointing where you aim, while you fire.
+  There is no stamina: you can sprint as long as you like.
 - **Holstered** (press 3) you run a little faster than with your replica out, never faster than a sprint, and your
   sprint is a little faster too.
 

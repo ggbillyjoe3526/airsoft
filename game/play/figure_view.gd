@@ -18,6 +18,9 @@ const SIGN_HEIGHT := 2.25
 const SIGN_FONT_SIZE := 96
 const SIGN_PIXEL := 0.004
 const SIGN_OUTLINE_DARKEN := 0.5
+## The "HIT!" sign's red, the same for both teams and for as long as it stands (owner, 2026-11-22: "the hit text above
+## their head should be in red ... it should always be red"), with a darker red edge.
+const SIGN_COLOUR := Color("ff2b22")
 const MODEL_DIR := "res://assets/models/replicas/"
 ## The contact shadow's shader: its fade by instance, which both renderers draw (BP7 row: Compatibility ignores
 ## GeometryInstance3D.transparency).
@@ -107,7 +110,7 @@ var _bomb_meshes: Array[Mesh] = []
 var _grenade_config: GrenadeConfig = null
 
 
-## Draws `c` in `team_colour` (the body's Team* paint, set_body, and the sign's outline), glowing with `glow` of it
+## Draws `c` in `team_colour` (the body's Team* paint, set_body; the HIT! sign is red for everyone), glowing with `glow` of it
 ## (High contrast by day, TeamColours), holding its replicas in its team's paints (`realistic`: each bold scheme as its
 ## plain colour) with `parts[i]` on replica `i` (Kit.parts; bots carry theirs as they come); `figures` gives the hit
 ## flinch's numbers (the built-in ones when null).
@@ -138,7 +141,7 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 			add_child(held)
 		if _magazines[i] != null:
 			add_child(_magazines[i])
-	_sign = make_sign(font, team_colour)
+	_sign = make_sign(font)
 	_sign.position = Vector3(0.0, SIGN_HEIGHT, 0.0)
 	add_child(_sign)
 
@@ -503,8 +506,8 @@ func contact_shadow() -> MeshInstance3D:
 	return _contact
 
 
-## The "HIT!" sign, hidden until the hit is called.
-static func make_sign(font: Font, team_colour: Color) -> Label3D:
+## The "HIT!" sign, red (SIGN_COLOUR) whoever wears it, hidden until the hit is called.
+static func make_sign(font: Font) -> Label3D:
 	var s := Label3D.new()
 	s.text = TranslationServer.translate(&"HUD_HIT_SIGN")
 	s.font = font
@@ -512,8 +515,8 @@ static func make_sign(font: Font, team_colour: Color) -> Label3D:
 	s.pixel_size = SIGN_PIXEL
 	s.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	s.outline_size = SIGN_FONT_SIZE / 6
-	s.modulate = Color.WHITE
-	s.outline_modulate = team_colour.darkened(SIGN_OUTLINE_DARKEN)
+	s.modulate = SIGN_COLOUR
+	s.outline_modulate = SIGN_COLOUR.darkened(SIGN_OUTLINE_DARKEN)
 	s.visible = false
 	return s
 
