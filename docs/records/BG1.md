@@ -1,6 +1,6 @@
 # BG1 + AIM3 · Bots spread out into solos, pairs and trios; Normal locks on more slowly
 
-**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner's 2026-11-22 playtest, items 7 and 8: "bots stay too close together mostly in depot/subway ... they can
 group up as a full team but it should be rare (unless the game mode/objective suits it). they can go solo or in duos
@@ -12,6 +12,7 @@ good to play. make sure the game still feels balanced in all maps/modes/difficul
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-22 | 1 | Opus 5.5 (build thread) | ✓ | Accept 7/8 | – |
+| 2026-11-22 | 2 | Opus 5.5 (build thread) | ✓ | Accept 8/8 | CI's held-up guard: two bots stuck in the Badger run |
 
 ## What was found
 

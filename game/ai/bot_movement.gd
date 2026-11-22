@@ -274,8 +274,8 @@ static func keep_apart(b: Bot, w: BotWorld, moving: bool, cmd: PlayerCommand) ->
 	var me := b.character
 	if w.query != null and w.lifts != null and Lifts.riding(w.query, w.tuning.lifts, w.lifts, me.position) >= 0:
 		return moving
-	# Under a roof only a crouched body fits it files through (BG1): pushed off the middle of a crawl, two teammates side
-	# by side in Woodland's Badger run rode up its curved sides and stuck crouched under its logs.
+	# In a crawl (a roof only a crouched body fits under) a bot keeps its line (BG1): pushed off the middle, two teammates
+	# side by side in Woodland's Badger run rode up its curved sides and stuck crouched under its logs.
 	var here := w.nav.node_at(me.position) if w.nav != null else -1
 	if here >= 0 and w.nav.low[here] != 0:
 		return moving
