@@ -715,6 +715,7 @@ func release() -> void:
 	active = false
 	_clear_latches()
 	_inspect_latch = false
+	_sprint_first = false
 	if _wheel.open:
 		_close_wheel()
 	if _map.open:
