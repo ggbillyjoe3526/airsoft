@@ -11,9 +11,9 @@ const MAPS: Array[String] = ["depot", "woodland"]
 const MAX_MATCH_SECONDS := 30.0 * 60.0
 const LEVEL := &"normal"
 ## The kit rows added after the Sniper row (Normal weight 8 each, so about 32 of every 126 bots carry a Sniper Rifle).
-const SNIPER_ROWS := """| Sniper M140 | Sniper Rifle | M140 Spring | GBB Pistol | | anchor, careful | 0 | 8 | 0 |
-| Sniper M150 | Sniper Rifle | M150 Spring | GBB Pistol | | anchor, careful | 0 | 8 | 0 |
-| Sniper Variable | Sniper Rifle | Variable Scope, M150 Spring | GBB Pistol | | anchor, careful | 0 | 8 | 0 |
+const SNIPER_ROWS := """| Sniper M140 | Sniper Rifle | M140 Spring | GBB Pistol | | anchor, careful | Smoke, Smoke | | 0 | 8 | 0 |
+| Sniper M150 | Sniper Rifle | M150 Spring | GBB Pistol | | anchor, careful | Smoke, Smoke | | 0 | 8 | 0 |
+| Sniper Variable | Sniper Rifle | Variable Scope, M150 Spring | GBB Pistol | | anchor, careful | Smoke, Smoke | | 0 | 8 | 0 |
 """
 const SNIPER_ROW_START := "| Sniper | Sniper Rifle |"
 

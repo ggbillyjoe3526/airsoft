@@ -239,6 +239,9 @@ var _running: bool = false
 ## Staged: the worker thread task building the nav grid (-1: none under way), and where it puts the grid.
 var _nav_task: int = -1
 var _nav_out: Array[NavGrid] = []
+## Whether the build waits on the nav grid's task: from the teams step on. The task itself starts as the map is read, so
+## it runs beside the level's build (BP13: Woodland's loading screen sat 4 to 5 s on it after the level).
+var _nav_waiting: bool = false
 ## Staged, the bots' groundwork before the views step's frame: the vault links' search, spread over frames (null before
 ## it starts) and the map's bot tuning it runs by (worked out once, BotConfig.for_map), the worker thread task finding
 ## the cover (-1: none under way), where it puts it, and the cover found.
@@ -391,7 +394,7 @@ func _build_step() -> void:
 			_build_level()
 		2:
 			_build_teams()
-			if _nav_task >= 0:
+			if _nav_waiting:
 				return
 		3:
 			_build_views_and_start()
@@ -429,6 +432,8 @@ func _load_map() -> void:
 		push_error("PlaySession: map %s refused: %s" % [map_id, "; ".join(_map.problems)])
 		_refuse(_ui, _map)
 		_step = STEP_KEYS.size() - 1
+	elif staged:
+		_start_nav(_map)
 
 
 func _build_level() -> void:
@@ -616,7 +621,7 @@ func _bot_kit_rules() -> LoadoutRules:
 func _advance_build() -> void:
 	if _step >= STEP_KEYS.size():
 		return
-	if _nav_task >= 0:
+	if _nav_waiting:
 		if not WorkerThreadPool.is_task_completed(_nav_task):
 			return
 		_take_nav()
@@ -703,10 +708,20 @@ static func _build_nav(out: Array[NavGrid], map: MapData, tuning: SimTuning) -> 
 	out.append(NavGrid.build(map, tuning.nav, tuning.body))
 
 
+## `map`'s nav grid started on a worker thread (once a build): it reads only the map and the tuning, which nothing
+## writes from here on.
+func _start_nav(map: MapData) -> void:
+	if _nav_task >= 0:
+		return
+	_nav_out.clear()
+	_nav_task = WorkerThreadPool.add_task(_build_nav.bind(_nav_out, map, _tuning), false, "Nav grid")
+
+
 ## The worker thread's nav grid, once its task is done, handed to the simulation.
 func _take_nav() -> void:
 	WorkerThreadPool.wait_for_task_completion(_nav_task)
 	_nav_task = -1
+	_nav_waiting = false
 	if _nav_out.is_empty():
 		push_error("PlaySession: the nav grid task left no grid; building it here")
 		_sim.nav = NavGrid.build(_map, _tuning.nav, _tuning.body)
@@ -717,8 +732,8 @@ func _take_nav() -> void:
 func _start_simulation(map: MapData) -> void:
 	_sim = Simulation.new(_tuning, _level.query(), _level.mover(_tuning.body), map.ends, map.kill_y)
 	if staged:
-		_nav_out.clear()
-		_nav_task = WorkerThreadPool.add_task(_build_nav.bind(_nav_out, map, _tuning), false, "Nav grid")
+		_start_nav(map)
+		_nav_waiting = true
 	else:
 		_sim.nav = NavGrid.build(map, _tuning.nav, _tuning.body)
 	state = GameState.new(match_seed, _tuning)

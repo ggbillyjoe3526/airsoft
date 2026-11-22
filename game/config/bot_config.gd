@@ -145,9 +145,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var bolt_settle_share: float = 1.0
 @export var scoped_error_scale: float = 0.5
 ## With a replica that sends several BBs a pull (the Pump Shotgun, SH1), holds its pull while its target is so far that
-## each BB would land further than this off the line (m; BotCombat.pattern_too_wide): 0.6 is 29 m at a 1.2° pattern,
-## past where the shotgun stays on target.
-@export var pattern_hold_radius: float = 0.6
+## each BB would land further than this off the line (m; BotCombat.pattern_too_wide): 0.5 is 24 m at a 1.2° pattern,
+## the shotgun's reach at its factory hop (BP13: at 0.6, 29 m, its pulls past 26 m landed only by scatter).
+@export var pattern_hold_radius: float = 0.5
 ## Swaps a magazine below this share of a full one when nobody is in sight.
 @export var tactical_reload_fraction: float = 0.35
 ## Never fires with a teammate this close to the line of fire (m, beyond their hit volume), widened by this many of the

@@ -82,7 +82,10 @@ static func apply_display(s: Settings, place: bool = false) -> void:
 				ds.set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 				if at >= 0 and ds.current() != at:
 					_move(ds, at)
-	var want := DisplayServer.VSYNC_ENABLED if s.vsync else DisplayServer.VSYNC_DISABLED
+	# V-Sync on is Mailbox (BP13): no tearing, and the newest frame is shown at each refresh instead of a queue of two or
+	# three waiting their turn (FIFO, 33 to 50 ms behind the mouse at 60 Hz). Where the driver has no Mailbox it
+	# falls back to FIFO by itself.
+	var want := DisplayServer.VSYNC_MAILBOX if s.vsync else DisplayServer.VSYNC_DISABLED
 	if ds.vsync() != want:
 		ds.set_vsync(want)
 	apply_frame_rate(s)

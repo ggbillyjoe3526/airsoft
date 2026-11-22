@@ -5,7 +5,8 @@ extends SettingsApply.Screens
 ## call that changes them, in order, in `calls`.
 
 var window_mode: DisplayServer.WindowMode = DisplayServer.WINDOW_MODE_MAXIMIZED
-var vsync_mode: DisplayServer.VSyncMode = DisplayServer.VSYNC_ENABLED
+## V-Sync as the game sets it on (Mailbox, BP13).
+var vsync_mode: DisplayServer.VSyncMode = DisplayServer.VSYNC_MAILBOX
 var sizes: Array[Vector2i] = [Vector2i(2560, 1440)]
 var rates: Array[float] = [144.0]
 var primary_screen: int = 0
