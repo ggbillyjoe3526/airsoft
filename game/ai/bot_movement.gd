@@ -276,7 +276,8 @@ static func keep_apart(b: Bot, w: BotWorld, moving: bool, cmd: PlayerCommand) ->
 		return moving
 	# Under a roof only a crouched body fits it files through (BG1): pushed off the middle of a crawl, two teammates side
 	# by side in Woodland's Badger run rode up its curved sides and stuck crouched under its logs.
-	if w.nav != null and w.nav.low_ahead(me.position, b.move_dir, 0.0):
+	var here := w.nav.node_at(me.position) if w.nav != null else -1
+	if here >= 0 and w.nav.low[here] != 0:
 		return moving
 	var reach := w.cfg.separation_distance
 	var lift := Vector3(0.0, w.cfg.separation_line_height, 0.0)
