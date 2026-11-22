@@ -350,7 +350,7 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## keeps to its plan, taking the call up once there is room; one already that near the spot always goes. A fight
 ## draws a trio, not the team.
 @export var search_crowd_max: int = 2
-@export var search_crowd_radius: float = 10.0
+@export var search_crowd_radius: float = 12.0
 
 @export_group("Held angles and slicing")
 ## Held angles (BotSkill.holds_angles): a fan of this many rays over this many degrees across the enemy side at
