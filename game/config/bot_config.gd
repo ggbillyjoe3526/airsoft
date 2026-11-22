@@ -179,10 +179,11 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var foliage_fire_through: float = 0.25
 
 @export_group("Lanes and holds")
-## Each round a team splits its bots one to a lane, pairs two on one, or stacks them all on one, by these weights.
-@export var plan_split_weight: float = 0.4
+## Each round a team splits its bots one to a lane, pairs two on one, or stacks them all on one, by these weights: the
+## whole team on one lane is rare (BG1, owner 2026-11-22: solos, pairs and trios, a full team only now and then).
+@export var plan_split_weight: float = 0.55
 @export var plan_pair_weight: float = 0.4
-@export var plan_stack_weight: float = 0.2
+@export var plan_stack_weight: float = 0.05
 ## Bots sharing a lane set off this long apart (s).
 @export var lane_follow_delay: Vector2 = Vector2(0.8, 1.6)
 ## Lane points move up to this far at random (m, onto walkable ground on their floor), in this many tries.
@@ -343,6 +344,13 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var flank_min_distance: float = 8.0
 @export var flank_offset: float = 4.0
 @export var flank_back: float = 2.0
+## Spreading out (BG1): a bot on its lane or hunting that hears or is told of an enemy goes after them only while fewer
+## than search_crowd_max teammates are already there or on their way: in play within search_crowd_radius (m) of the
+## spot, or searching, fighting or in cover with their own threat within that of it. Otherwise it watches that way and
+## keeps to its plan, taking the call up once there is room; one already that near the spot always goes. A fight
+## draws a trio, not the team.
+@export var search_crowd_max: int = 2
+@export var search_crowd_radius: float = 12.0
 
 @export_group("Held angles and slicing")
 ## Held angles (BotSkill.holds_angles): a fan of this many rays over this many degrees across the enemy side at
@@ -532,6 +540,10 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var hunt_middle_bias: float = 1.0
 ## A sector counts as checked once a bot sees a spot in it empty within this range (m).
 @export var hunt_clear_range: float = 19.0
+## A spot within hunt_crowd_gap (m) of a teammate in play, or of the spot a hunting teammate is making for, counts this
+## many seconds staler less checked (BG1): hunters fan out instead of trailing each other.
+@export var hunt_crowd_gap: float = 12.0
+@export var hunt_crowd_penalty: float = 40.0
 
 @export_group("Smoke and flash bombs")
 ## When a bot throws its bombs (SF2, BotBombs; the rules are the simulation's GrenadeConfig). It rolls the skill's chance

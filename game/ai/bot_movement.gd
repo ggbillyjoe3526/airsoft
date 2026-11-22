@@ -267,12 +267,17 @@ static func glance(b: Bot, w: BotWorld) -> void:
 
 ## Steers `b` off anyone in play close by (bodies pass through each other in the physics), harder the closer: an enemy
 ## only with nothing solid between (BP6), so none is nudged through a thin wall. Walking, the push bends the walk;
-## standing with nothing else to do, it walks out of the way, never off a floor. Returns whether it walks now. Not
-## aboard a lift's car: each rider stands on its own spot there (BotLifts), and one pushed into the doorway would hold
-## the doors open.
+## standing with nothing else to do, it walks out of the way, never off a floor. Returns whether it walks now. Not in a
+## crawl (a low node, NavGrid.low), nor aboard a lift's car: each rider stands on its own spot there (BotLifts), and one
+## pushed into the doorway would hold the doors open.
 static func keep_apart(b: Bot, w: BotWorld, moving: bool, cmd: PlayerCommand) -> bool:
 	var me := b.character
 	if w.query != null and w.lifts != null and Lifts.riding(w.query, w.tuning.lifts, w.lifts, me.position) >= 0:
+		return moving
+	# In a crawl (a roof only a crouched body fits under) a bot keeps its line (BG1): pushed off the middle, two teammates
+	# side by side in Woodland's Badger run rode up its curved sides and stuck crouched under its logs.
+	var here := w.nav.node_at(me.position) if w.nav != null else -1
+	if here >= 0 and w.nav.low[here] != 0:
 		return moving
 	var reach := w.cfg.separation_distance
 	var lift := Vector3(0.0, w.cfg.separation_line_height, 0.0)

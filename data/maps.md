@@ -41,9 +41,14 @@ warning; a map with no row is not listed.
   for the field's wait times the Hard scale. Subway's is 15.2: at the scale's 13.3 s Hard defenders held its poles (the
   attackers took 41.7 %, 32 seeds) and 15.2 s gave 53.7 %, while moving the field's own wait to 8 s (the same 15.2 s at
   Hard) took Normal from 48.5 % to 54.1 %.
+- **Bomb defender respawn (s)** is the seconds a defender hit there waits to come back in Plant The Bomb, until the bomb
+  is armed, at every level (BG1): a whole or decimal number from 2 to 30, or blank for the game's 5
+  (`game/config/round_config.gd`). Subway's is 3: once Normal bots locked on more slowly its sites fell too often at 5 s
+  (the attackers took 67 %, 32 seeds; 4 s 63.9 %, 16 seeds; 3 s 59.4 %, 32 seeds). Hard plays it too unless the field
+  sets the column at Hard, so Subway's Hard one is 5, the wait Hard was measured at.
 - **Bomb defender respawn at Hard (s)** is the seconds a defender hit there waits to come back in Plant The Bomb, until
-  the bomb is armed, against Hard bots (BP10): a whole or decimal number from 2 to 30, or blank for the game's 5 at every
-  level (`game/config/round_config.gd`). Depot's is 8: its sites are close to the defenders' start, and at 5 s Hard bots
+  the bomb is armed, against Hard bots (BP10): a whole or decimal number from 2 to 30, or blank for the column above's
+  wait (else the game's 5, `game/config/round_config.gd`). Depot's is 8: its sites are close to the defenders' start, and at 5 s Hard bots
   held them (the attackers took 35 %, at Normal 52 %). The same wait at every level put Depot's Normal at 62 %, and a
   longer wait at Hard on every field put Subway's attackers at 70 %. One that isn't such a number keeps the game's with
   a warning.
@@ -65,9 +70,9 @@ warning; a map with no row is not listed.
 
 ## Maps
 
-| Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Fuse (s) | Defender respawn (s) | Defender respawn at Hard (s) | Bomb defender respawn at Hard (s) | Start mode | Wind (×) | Air (°C) | Blurb |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 |  | 8 | burst | 0 | 20 | An indoor airsoft hall: five lanes, two dark tunnels. |
-| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 26 | 5 |  |  |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
-| subway | Subway | field | public | 5 | 6 | 8 |  |  | 22 | 7 | 15.2 |  | burst | 0 | 14 | A closed metro station on two levels, from the ticket hall and concourse down to the trains. |
-| range | Range | range | public | 1 | 1 | 1 |  |  |  |  |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |
+| Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Fuse (s) | Defender respawn (s) | Defender respawn at Hard (s) | Bomb defender respawn (s) | Bomb defender respawn at Hard (s) | Start mode | Wind (×) | Air (°C) | Blurb |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 |  |  | 8 | burst | 0 | 20 | An indoor airsoft hall: five lanes, two dark tunnels. |
+| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 26 | 5 |  |  |  |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
+| subway | Subway | field | public | 5 | 6 | 8 |  |  | 22 | 7 | 15.2 | 3 | 5 | burst | 0 | 14 | A closed metro station on two levels, from the ticket hall and concourse down to the trains. |
+| range | Range | range | public | 1 | 1 | 1 |  |  |  |  |  |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |

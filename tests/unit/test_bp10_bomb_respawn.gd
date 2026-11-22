@@ -29,8 +29,10 @@ func test_every_field_carries_its_hard_bomb_wait_in_skirmish_custom_and_the_meas
 				MatchOptions.match_tuning(base, e, CustomRules.new()), MatchRunner.sized_for(e.id)]
 		for t in played:
 			assert_eq(t.rounds.plant_defender_respawn_hard, hard, "%s carries its Hard wait" % e.id)
-			# Before the level is applied every field plays the game's wait, and Attack / Defend's is the other column's.
-			assert_eq(t.rounds.plant_defender_respawn_delay, base.rounds.plant_defender_respawn_delay, e.id)
+			# Before the level is applied every field plays its own wait or the game's (BG1), and Attack / Defend's is the
+			# other column's.
+			var field := e.bomb_respawn if e.bomb_respawn > 0.0 else base.rounds.plant_defender_respawn_delay
+			assert_eq(t.rounds.plant_defender_respawn_delay, field, e.id)
 			var ad := e.defender_respawn if e.defender_respawn > 0.0 else base.rounds.defender_respawn_delay
 			assert_eq(t.rounds.defender_respawn_delay, ad, "%s, Attack / Defend" % e.id)
 	assert_gt(own, 0, "a field has its own, or this test proves nothing")

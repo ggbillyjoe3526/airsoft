@@ -32,7 +32,7 @@ func test_the_field_mode_comes_back_after_the_range_through_menus_built_again() 
 
 func test_a_typed_minus_sign_reads_as_a_cold_field_s_air() -> void:
 	var text := FileAccess.get_file_as_string(MapCatalog.PATH)
-	var row := "| depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 |  | 8 | burst | 0 | 20 |"
+	var row := "| depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 |  |  | 8 | burst | 0 | 20 |"
 	assert_string_contains(text, row, "the test's row is the shipped one")
 	var cold := MapCatalog.parse(text.replace(row, row.replace("| 0 | 20 |", "| 0 | −5 |")))
 	assert_eq(cold.find("depot").air, -5.0, "−5 as the other tables read it")

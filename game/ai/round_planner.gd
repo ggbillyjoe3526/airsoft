@@ -282,6 +282,9 @@ func hunt_point(b: Bot, w: BotWorld) -> bool:
 		found += 1
 		var score := maxf(w.visited_at(team, spot), stale) + Vector2(spot.x - mid.x, spot.z - mid.z).length() \
 				* cfg.hunt_middle_bias
+		# Spreading out (BG1): away from teammates and their own hunt spots.
+		if BotSpread.hunt_crowded(b, w, spot):
+			score += cfg.hunt_crowd_penalty
 		if cfg.hunt_clear_range > 0.0 and BotSenses.sees_spot(b.character, spot, cfg.hunt_clear_range, w):
 			w.mark_visited(team, spot)
 			if best == INF and score < in_view:

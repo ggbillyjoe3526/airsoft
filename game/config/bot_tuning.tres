@@ -10,12 +10,12 @@ script = ExtResource("2_bskl1")
 
 [sub_resource type="Resource" id="Resource_hard1"]
 script = ExtResource("2_bskl1")
-reaction_time = Vector2(0.25, 0.45)
+reaction_time = Vector2(0.35, 0.6)
 turn_rate = 5.5
-aim_error_start_deg = 4.0
+aim_error_start_deg = 4.4
 aim_error_settled_deg = 0.9
-aim_settle_time = 0.6
-aim_error_start_metres = 0.6
+aim_settle_time = 0.95
+aim_error_start_metres = 0.7
 aim_error_moving_deg = 1.2
 aim_error_tracking = 0.073
 lead_factor = 0.7
@@ -28,7 +28,7 @@ contact_cover_min_distance = 5.0
 search_walk_distance = 20.0
 flank_chance = 0.7
 hunt_memory = 50.0
-pre_aim_reaction_time = Vector2(0.25, 0.45)
+pre_aim_reaction_time = Vector2(0.35, 0.6)
 reacquire_time = Vector2(0.2, 0.32)
 reacquire_settled = 0.4
 overtime_reaction = Vector2(0.3, 0.7)
@@ -43,7 +43,7 @@ kneels_to_fire = true
 
 [sub_resource type="Resource" id="Resource_pro01"]
 script = ExtResource("2_bskl1")
-reaction_time = Vector2(0.25, 0.45)
+reaction_time = Vector2(0.35, 0.6)
 turn_rate = 6.0
 aim_error_start_deg = 3.5
 aim_error_settled_deg = 0.75
