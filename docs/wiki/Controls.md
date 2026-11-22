@@ -10,7 +10,8 @@ so W A S D stays W A S D on any keyboard layout.
 <!-- wiki:controls -->
 
 - **Crouch** and **Aim** are held by default: let go to stand up or lower the replica. Either can be set to toggle
-  in Settings › Gameplay; a toggled crouch stands you up when you sprint or jump.
+  in Settings › Gameplay; a toggled crouch stands you up when you run forward or jump (Alt pressed standing still,
+  as in Alt+Tab, leaves you down).
 - **Lean** and **Sprint** are always held.
 - **Inspect replica** (Y) turns the replica in your hands side on, its muzzle to the left, your arms reaching to it
   from your shoulders, to look it over while its parts move: the AEG's
@@ -61,7 +62,9 @@ F4 and F5 are views for checking how the game works; they are off by default and
 - Pick an action in **Settings › Controls** and press the new key or mouse button.
 - Taking a key another action already uses swaps the two, so nothing is left without a key by accident.
 - Punctuation keys show the mark they print (`[`, `;`, `/`), the minus key shows as "Minus", and the number pad's
-  keys as "Num 5", "Num Enter" and so on.
+  keys as "Num 5", "Num 8" and so on.
+- Esc, Enter (both of them: Alt+Enter switches fullscreen, and Alt is the sprint), F11, F3 to F5, Print Screen, Pause
+  and the Windows and menu keys stay as they are and can't be bound.
 - Fire and the four move keys can never be left without a key.
 - Mouse sensitivity can be set for the hip and for aiming, also as centimetres per 360° turn at your mouse's DPI.
   You can invert vertical look too.

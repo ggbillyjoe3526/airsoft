@@ -2001,6 +2001,18 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   Pass: each picture looks like the field you walk into (Depot's Chrono hall, Woodland's Log stacks track, Subway's north
   platform with its train), sharp full screen.
 
+## The fourth Beta 2 pass (BP13)
+
+- [ ] **Alt+Tab behind cover.** Set Crouch to toggle, crouch, Alt+Tab out and back, Resume; then crouch and run
+  forward with Alt. Pass: still crouched after Resume; running stands you up as before.
+- [ ] **Ping during a Z tap.** Tap Z on an enemy and click the middle button straight after. Pass: both the Spotted
+  mark and the ping go out.
+- [ ] **V-Sync on.** Turn V-Sync on and flick the view in a match. Pass: no tearing, and the view keeps up with the mouse
+  as with V-Sync off.
+- [ ] **Loading.** Start Woodland. Pass: the loading screen finishes sooner than before (about 1.5 to 2.5 s on a
+  machine like the cloud's); the bots move as ever.
+- [ ] **A small window.** In Windowed, drag the window's corner inward. Pass: it stops at 960 x 540.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
