@@ -1,6 +1,6 @@
 # PC1 · Playtest fixes: lift doors sooner, What got you switch, Z spot without a hitch, slower levels, ALT always runs, red HIT!
 
-**Review:** 2 attempts · critic pending · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner's 0.1 Beta 2 playtest notes (2026-11-22), items 1, 2, 3, 4, 9 and 10 (the others went to other threads).
 
@@ -9,7 +9,7 @@ The owner's 0.1 Beta 2 playtest notes (2026-11-22), items 1, 2, 3, 4, 9 and 10 (
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-22 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | check 6: held past a tap, the view snapped back as the wheel appeared |
-| 2026-11-22 | 2 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-22 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – (left for play: a flick made at once may turn Go there's view by up to a tap's mouse) |
 
 ## Decisions
 
