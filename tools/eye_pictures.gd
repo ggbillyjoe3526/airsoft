@@ -153,9 +153,17 @@ func _run() -> void:
 		port.add_child(site)
 		level.set_detail(GraphicsQuality.MeshDetail.HIGH)
 		SiteDress.dress_sky(lighting, play.site_look)
+	# A station's trains in their models (SM1), as play_session dresses them, and the roof's lamps inside their cars
+	# hidden for the cars' own strips.
+	var trains := TrainView.build(map, play.station_look.trains, play.roof) \
+			if site == null and level.station_material() != null else null
+	if trains != null:
+		port.add_child(trains)
 	var roof := RoofView.build(map, play.roof)
 	if roof != null:
 		port.add_child(roof)
+		if trains != null:
+			roof.hide_lamps_in(trains.boxes(), play.station_look.trains.lamp_colour, StationSurface.LAYER)
 	# An outdoor field's props, wood and bushes as a match draws them on High (WR3: Woodland's pictures).
 	add_woods(port, map, play, level.station_material() != null)
 	# What its lights stand on or hang from (WG4), and with `night` their pools of light.
@@ -316,7 +324,8 @@ func _capture_probes(port: SubViewport, camera: Camera3D, spots: PackedStringArr
 
 ## The map's wood as a match draws it on High by day (WoodsView: crowns, the forest, tufts, puddles and the floor), its
 ## bushes (BushView) and, with no site dress, its CC0 props (PropDress, WR3) in their paints, each if it has them; on
-## a station (`station`) only the models its blocks name (SD1), as PlaySession dresses it (not yet its trains, SM1).
+## a station (`station`) only the models its blocks name (SD1), as PlaySession dresses it (its trains are
+## `_run`'s, TrainView).
 static func add_woods(port: Node, map: MapData, play: PlayTuning, station: bool = false) -> void:
 	var cfg := play.site_look.props.named_only() if station else play.site_look.props
 	var props := PropDress.build(map, cfg, play.site_look.prop_paint) if map.site == null else null
