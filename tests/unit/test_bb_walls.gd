@@ -33,7 +33,7 @@ func test_no_bb_passes_a_thin_wall_on_depot_or_woodland() -> void:
 		var lo: Array[Vector3] = []
 		var hi: Array[Vector3] = []
 		# What is solid, for "ends inside a block": each block's box, a round prop's its stepped boxes (BP7), a thicket's its
-		# tiers (TV1).
+		# tiers (TV1), a tapered trunk its tiers over the ground under it (HD1).
 		var solid_lo: Array[Vector3] = []
 		var solid_hi: Array[Vector3] = []
 		var middle := PropLayout.field_middle(m)
@@ -43,7 +43,7 @@ func test_no_bb_passes_a_thin_wall_on_depot_or_woodland() -> void:
 			# Ramps are wedges: their boxes hold air above the slope.
 			lo.append(b.center - b.size * 0.5 if b.rise == MapData.Rise.NONE else Vector3.INF)
 			hi.append(b.center + b.size * 0.5 if b.rise == MapData.Rise.NONE else -Vector3.INF)
-			RoundSteps.boxes(b, style, PropDressConfig.new(), middle, steps)
+			RoundSteps.boxes(b, style, PropDressConfig.new(), middle, steps, PropLayout.ground_under(m, b))
 			if steps.is_empty():
 				# a thicket's tiers (TV1)
 				TierSteps.boxes(b, style, PropDressConfig.new(), tiered, steps)

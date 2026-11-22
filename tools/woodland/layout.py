@@ -221,9 +221,11 @@ def circ(kind, cx, cz, r, top=None, walk=True, tag=""):
 WALL_T = 0.25
 
 
-def walls(kind, pts, openings=(), top=None, tag=""):
-    """A wall along a polyline of (x, z) points; openings = (segment index, from m, to m, 'gap'|'window'|'door')."""
+def walls(kind, pts, openings=(), top=None, tag="", tops=None):
+    """A wall along a polyline of (x, z) points; openings = (segment index, from m, to m, 'gap'|'window'|'door');
+    tops = {segment index: top} for segments standing higher or lower than `top`."""
     for k, ((ax, az), (bx, bz)) in enumerate(zip(pts, pts[1:])):
+        seg_top = (tops or {}).get(k, top)
         L = math.hypot(bx - ax, bz - az)
         rot = math.degrees(math.atan2(bz - az, bx - ax))
         cuts = sorted((a, b, w) for (s, a, b, w) in openings if s == k)
@@ -247,7 +249,7 @@ def walls(kind, pts, openings=(), top=None, tag=""):
             if w == "window":
                 rect("window", cx, cz, b - a, WALL_T, rot, top=1.0, tag=tag)
             else:
-                rect(kind, cx, cz, b - a + (WALL_T if w == "solid" else 0), WALL_T, rot, top=top, tag=tag)
+                rect(kind, cx, cz, b - a + (WALL_T if w == "solid" else 0), WALL_T, rot, top=seg_top, tag=tag)
 
 
 DOORWAYS: list[tuple] = []
@@ -289,9 +291,11 @@ FLAGS = [FLAG_A, FLAG_B]
 # hollow, B at Log stacks).
 BOMB_SITES = [(FLAG_A[0], FLAG_A[1], 0), (FLAG_B[0], FLAG_B[1], 0)]
 
-# West camp: a log palisade with three gates; a screen inside each gate so no line reaches a spawn point
+# West camp: a log palisade with three gates; a screen inside each gate so no line reaches a spawn point. HD1: its
+# front (east) wall stands 3.4 m, so a line from the high ground round (-35, -40) over the west thicket's spruce tops
+# (which BBs and sight now meet as drawn, not as their square boxes) still finds no spawn.
 walls("palisade", [(-88, -14), (-72, -14), (-72, 20), (-88, 20)],
-      [(0, 9.0, 14.0, "gap"), (1, 15.0, 20.5, "gap"), (2, 9.0, 14.0, "gap")], top=2.8)
+      [(0, 9.0, 14.0, "gap"), (1, 15.0, 20.5, "gap"), (2, 9.0, 14.0, "gap")], top=2.8, tops={1: 3.4})
 rect("logstack", -76.0, 3.0, 1.2, 9.0, 0, top=2.8)           # screen inside the mid gate
 rect("logstack", -79.0, -11.5, 9.0, 1.2, 0, top=2.8)          # north gate screen, past the gate's east post
 rect("logstack", -81.25, 17.5, 10.5, 1.2, 0, top=2.8)         # south gate screen, past the gate's west post

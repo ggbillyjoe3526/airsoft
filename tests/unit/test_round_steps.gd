@@ -15,6 +15,12 @@ const SLACK := 2e-3
 ## Each side of a step lies within this share of the step's width of a vertex of the props it holds (the hug; the
 ## three steps share their inner corner's figure, so one side of a pair can stand a little off, about 0.1).
 const HUG := 0.12
+## A tapering trunk's tier (MapStyle.round_trunk_tiers) hugs the trunk's vertices within this far (m) over or under it:
+## its rings of vertices stand apart, and a tier between two holds the faces between them.
+const TIER_RING := 0.6
+## A tapering trunk's tier hugs within this share: it reaches the widest face in its band, rounded up, so a band
+## whose faces narrow up it stands a little off them at its top.
+const HUG_TIER := 0.2
 
 var play: PlayTuning = PlayTuning.load_default()
 var tuning: SimTuning = SimTuning.new()
@@ -28,7 +34,8 @@ func _map(id: String) -> MapData:
 
 func _steps(m: MapData, b: MapData.Block) -> Array[AABB]:
 	var out: Array[AABB] = []
-	RoundSteps.boxes(b, play.map_style, play.site_look.props, PropLayout.field_middle(m), out)
+	RoundSteps.boxes(b, play.map_style, play.site_look.props, PropLayout.field_middle(m), out,
+			PropLayout.ground_under(m, b))
 	return out
 
 
@@ -112,8 +119,10 @@ func test_every_step_s_sides_hug_the_props_it_holds() -> void:
 			# The steps' outline (above a pallet) reaches no further than the props' own, on every side.
 			var outline := AABB()
 			var first := true
+			# (a tapering trunk's tiers: its first, from the box's foot, which holds the flare, the trunk's widest)
 			for s in steps:
-				if s.size.y >= b.size.y * 0.5:
+				var low := b.center.y - b.size.y * 0.5
+				if (s.position.y <= low + SLACK) if b.kind == &"tree" else s.size.y >= b.size.y * 0.5:
 					outline = s if first else outline.merge(s)
 					first = false
 			var reach := AABB()
@@ -127,7 +136,13 @@ func test_every_step_s_sides_hug_the_props_it_holds() -> void:
 						or absf(outline.end[axis] - reach.end[axis]) > SLACK:
 					wide.append("a %s at %s" % [b.kind, b.center])
 					break
+			var tree := b.kind == &"tree"
+			var clear_to := PropLayout.ground_under(m, b) + play.woods.crown_clear
 			for s in steps:
+				# a tapering trunk's tiers reaching near crown_clear hold faces the test doesn't take (only those under
+				# it, and their rings within TIER_RING)
+				if tree and s.end.y > clear_to - TIER_RING:
+					continue
 				# Each of the step's four sides: how far in from it the nearest vertex along its span is, as a share
 				# of the step's width across that side.
 				for side in 4:
@@ -135,11 +150,16 @@ func test_every_step_s_sides_hug_the_props_it_holds() -> void:
 					var across := 2 - axis
 					var plane := s.position[axis] if side % 2 == 0 else s.end[axis]
 					var gap := INF
+					# a trunk's tier holds the faces running to it from the trunk's next rings of vertices too
+					var reach_y := TIER_RING if tree else SLACK
 					for v in laid[i]:
 						if v[across] >= s.position[across] - SLACK and v[across] <= s.end[across] + SLACK \
-								and v.y >= s.position.y - SLACK and v.y <= s.end.y + SLACK:
+								and v.y >= s.position.y - reach_y and v.y <= s.end.y + reach_y:
 							gap = minf(gap, absf(v[axis] - plane))
-					var share := gap / maxf(s.size[axis], 1e-6)
+					# (one with no ring that near, under crown_clear's cut, holds only faces: the first test holds them)
+					if tree and gap == INF:
+						continue
+					var share := gap / maxf(s.size[axis], 1e-6) * (HUG / HUG_TIER if tree else 1.0)
 					if share > worst:
 						worst = share
 						worst_at = "a %s at %s, side %d, %.3f m" % [b.kind, b.center, side, gap]
@@ -157,7 +177,7 @@ func test_a_level_without_a_site_look_steps_as_the_game_s() -> void:
 		var plain: Array[AABB] = []
 		for b in m.blocks:
 			var game := _steps(m, b)
-			RoundSteps.boxes(b, play.map_style, built_in, middle, plain)
+			RoundSteps.boxes(b, play.map_style, built_in, middle, plain, PropLayout.ground_under(m, b))
 			stepped += 1 if not game.is_empty() else 0
 			differ += 0 if game == plain else 1
 		assert_eq(differ, 0, "%s: MatchRunner's level (no site look) steps every round prop as the game's" % id)

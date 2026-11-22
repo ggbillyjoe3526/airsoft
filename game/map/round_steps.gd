@@ -10,9 +10,11 @@ extends RefCounted
 
 ## Block `b`'s stepped boxes into `out` (cleared first); none when its model is not round, it is laid other than FIT,
 ## ROW, CLUSTER or TREE, or it is a ramp. `props` is how the props are laid (the site look's); `middle` is the field's
-## middle (PropLayout.field_middle), which a fitted prop's front faces.
+## middle (PropLayout.field_middle), which a fitted prop's front faces; `ground` the ground under the block's middle
+## (PropLayout.ground_under, where a tree stands), NAN for its foot. A tree whose model MapStyle.round_trunk_tiers
+## lists stands as tiers of its steps, each drawn in to its trunk's reach at that height (HD1).
 static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, middle: Vector3,
-		out: Array[AABB]) -> void:
+		out: Array[AABB], ground: float = NAN) -> void:
 	out.clear()
 	if b.rise != MapData.Rise.NONE:
 		return
@@ -34,7 +36,11 @@ static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, mid
 			if props.models.has(props.pallet) and props.pallet_height < b.size.y:
 				foot = props.pallet_height
 				out.append(AABB(low, Vector3(b.size.x, foot, b.size.z)))
-		PropDressConfig.Lay.ROW, PropDressConfig.Lay.TREE:
+		PropDressConfig.Lay.TREE:
+			if style.round_trunk_tiers.has(model):
+				_trunk_tiers(b, steps, style.round_trunk_tiers[model], ground, out)
+				return
+		PropDressConfig.Lay.ROW:
 			pass # a tree is one round trunk filling its square box: a row of one
 		_:
 			return
@@ -61,6 +67,29 @@ static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, mid
 				var lo := at + steps[k] * half
 				var hi := at + steps[k + 1] * half
 				out.append(AABB(Vector3(lo.x, y0, lo.y), Vector3(hi.x - lo.x, height, hi.y - lo.y)))
+
+
+## A tree's trunk (one round prop filling its square box, PropLayout.tree_fit) as `tiers` of its `steps` (pairs:
+## from, a share of the height from `ground` to the box's top; reach, a share of the trunk's foot half-width): the
+## first from the box's foot, each up to the next's from, the last to the top. NAN `ground` measures from the foot,
+## which only ever widens a tier (a lower share is a wider one).
+static func _trunk_tiers(b: MapData.Block, steps: PackedVector2Array, tiers: PackedVector2Array, ground: float,
+		out: Array[AABB]) -> void:
+	var low := b.center.y - b.size.y * 0.5
+	var top := low + b.size.y
+	var from := low if is_nan(ground) else clampf(ground, low, top)
+	var half := minf(b.size.x, b.size.z) * 0.5
+	var at := Vector2(b.center.x, b.center.z)
+	for t in tiers.size():
+		var y0 := low if t == 0 else from + (top - from) * tiers[t].x
+		var y1 := top if t + 1 == tiers.size() else from + (top - from) * tiers[t + 1].x
+		if y1 <= y0:
+			continue
+		var reach := half * clampf(tiers[t].y, 0.0, 1.0)
+		for k in range(0, steps.size() - 1, 2):
+			var lo := at + steps[k] * reach
+			var hi := at + steps[k + 1] * reach
+			out.append(AABB(Vector3(lo.x, y0, lo.y), Vector3(hi.x - lo.x, y1 - y0, hi.y - lo.y)))
 
 
 ## One prop fitted to the whole block (PropLayout's FIT): its u along the block's long side, its front (+v) across it
