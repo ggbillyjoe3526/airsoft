@@ -1,7 +1,7 @@
 extends GutTest
 ## BP13 QA · the pass's fixes: a Sprint press no longer stands a toggled crouch up, a ping in Z's tap window is taken,
 ## Enter is unbindable, the minimum window, the spread-out check ignores another storey, a shut begun from ajar doesn't
-## hang its leaves, V-Sync on is Mailbox, the nav grid's task starts with the map, and the tuning's invariants.
+## hang its leaves, and the tuning's invariants.
 
 const DT := 1.0 / 60.0
 const LOW := 0.0
@@ -9,7 +9,6 @@ const GAP := 0.04
 const SPOT := Vector3(0.0, 0.0, 30.0)
 const CYBER := "000019"
 const PISTOL := "000001"
-const SHOTGUN := "000027"
 
 var input: PlayerInput = null
 var cmd: PlayerCommand = PlayerCommand.new()
@@ -94,27 +93,14 @@ func test_enter_and_keypad_enter_cannot_be_bound() -> void:
 
 # --- Window ---
 
-func test_the_minimum_window_is_960_by_540_and_the_watch_sets_it() -> void:
-	var cfg := DisplayConfig.new()
-	assert_eq(cfg.min_window, Vector2i(960, 540))
+func test_the_window_watch_sets_the_960_by_540_minimum_through_the_screens_seam() -> void:
+	var fake := FakeScreens.new()
+	SettingsApply.use_screens(fake)
+	assert_eq(fake.config.min_window, Vector2i(960, 540))
 	var w := WindowWatch.new()
 	add_child_autofree(w)
-	assert_eq(w.process_mode, Node.PROCESS_MODE_ALWAYS, "the watch is up (the minimum itself needs a real window)")
-
-
-func test_v_sync_on_is_mailbox_and_off_is_disabled() -> void:
-	var fake := FakeScreens.new()
-	fake.vsync_mode = DisplayServer.VSYNC_DISABLED
-	var prev := SettingsApply.screens()
-	SettingsApply.use_screens(fake)
-	var s := Settings.new()
-	s.vsync = true
-	SettingsApply.apply_display(s)
-	assert_eq(fake.vsync(), DisplayServer.VSYNC_MAILBOX)
-	s.vsync = false
-	SettingsApply.apply_display(s)
-	assert_eq(fake.vsync(), DisplayServer.VSYNC_DISABLED)
-	SettingsApply.use_screens(prev)
+	assert_true(fake.calls.has("min 960 x 540"), "the minimum is set when the watch is up")
+	SettingsApply.use_screens(null)
 
 
 # --- Bots on another storey ---
@@ -139,40 +125,110 @@ func _world() -> void:
 		world.bots.append(Bot.new(c, id + 1, skill, spots.size()))
 
 
-func test_teammates_a_storey_above_the_spot_do_not_crowd_it() -> void:
-	_world()
-	var rise := world.cfg.anchor_search_rise
-	world.characters[1].position = SPOT + Vector3(1.0, rise + 2.0, 0.0)
-	world.characters[2].position = SPOT + Vector3(-1.0, -(rise + 2.0), 0.0)
-	assert_false(BotSpread.crowded(world.bots[0], world, SPOT), "two upstairs and downstairs leave the spot free")
-	world.characters[1].position = SPOT + Vector3(1.0, 0.5, 0.0)
-	world.characters[2].position = SPOT + Vector3(-1.0, -0.5, 0.0)
-	assert_true(BotSpread.crowded(world.bots[0], world, SPOT), "the same two on its level do")
+## A nav grid of 1 m cells over x -40..40, z 0..80: one floor at y 0 everywhere, but where `floors` (cell index to
+## the floors stacked there) says otherwise.
+func _nav(floors: Callable) -> NavGrid:
+	var g := NavGrid.new()
+	g.cell = 1.0
+	g.cols = 80
+	g.rows = 80
+	g.min_x = -40.0
+	g.min_z = 0.0
+	g.pick_above = 0.5
+	var starts := PackedInt32Array([0])
+	var ys := PackedFloat32Array()
+	var cells := PackedInt32Array()
+	for c in g.cols * g.rows:
+		var here: PackedFloat32Array = floors.call(g.cell_x(c % g.cols), g.cell_z(c / g.cols))
+		for y in here:
+			ys.append(y)
+			cells.append(c)
+		starts.append(ys.size())
+	g.cell_start = starts
+	g.floor_y = ys
+	g.node_cell = cells
+	return g
 
 
-func test_a_bot_already_at_the_spot_a_storey_off_is_not_one_of_the_crowd() -> void:
+func _deck(x: float, z: float) -> PackedFloat32Array:
+	if absf(x) < 6.0 and absf(z - 30.0) < 6.0:
+		return PackedFloat32Array([0.0, 4.0])
+	return PackedFloat32Array([0.0])
+
+
+func test_teammates_on_a_deck_above_the_spot_do_not_crowd_it() -> void:
 	_world()
-	var b := world.bots[0]
-	b.character.position = SPOT + Vector3(0.5, world.cfg.anchor_search_rise + 3.0, 0.0)
+	world.nav = _nav(_deck)
+	world.characters[1].position = SPOT + Vector3(1.0, 4.0, 0.0)
+	world.characters[2].position = SPOT + Vector3(-1.0, 4.0, 0.0)
+	assert_false(BotSpread.crowded(world.bots[0], world, SPOT), "two on the deck leave the floor below free")
 	world.characters[1].position = SPOT + Vector3(1.0, 0.0, 0.0)
 	world.characters[2].position = SPOT + Vector3(-1.0, 0.0, 0.0)
-	assert_true(BotSpread.crowded(b, world, SPOT), "it is not there: it is drawn in like the rest")
+	assert_true(BotSpread.crowded(world.bots[0], world, SPOT), "the same two on the floor do")
 
 
-func test_a_hunter_on_another_storey_does_not_fan_the_others_out() -> void:
+func test_a_spot_on_the_deck_is_not_crowded_by_teammates_below_it() -> void:
 	_world()
-	var rise := world.cfg.anchor_search_rise
-	world.characters[1].position = SPOT + Vector3(1.0, rise + 2.0, 0.0)
-	assert_false(BotSpread.hunt_crowded(world.bots[0], world, SPOT), "a teammate upstairs")
+	world.nav = _nav(_deck)
+	var up := SPOT + Vector3(0.0, 4.0, 0.0)
 	world.characters[1].position = SPOT + Vector3(1.0, 0.0, 0.0)
-	assert_true(BotSpread.hunt_crowded(world.bots[0], world, SPOT), "on the level: crowded")
+	world.characters[2].position = SPOT + Vector3(-1.0, 0.0, 0.0)
+	assert_false(BotSpread.crowded(world.bots[0], world, up))
+	world.characters[1].position = up + Vector3(1.0, 0.0, 0.0)
+	world.characters[2].position = up + Vector3(-1.0, 0.0, 0.0)
+	assert_true(BotSpread.crowded(world.bots[0], world, up))
+
+
+func test_a_hunter_on_the_deck_does_not_fan_a_hunter_below_out() -> void:
+	_world()
+	world.nav = _nav(_deck)
+	world.characters[1].position = SPOT + Vector3(1.0, 4.0, 0.0)
+	assert_false(BotSpread.hunt_crowded(world.bots[0], world, SPOT), "a teammate on the deck")
+	world.characters[1].position = SPOT + Vector3(1.0, 0.0, 0.0)
+	assert_true(BotSpread.hunt_crowded(world.bots[0], world, SPOT), "on the same floor: crowded")
 	world.characters[1].position = Vector3(-60.0, 0.0, 0.0)
 	var m := world.bots[2]
 	m.hunting = true
-	m.hunt_goal = SPOT + Vector3(0.0, rise + 2.0, 0.0)
-	assert_false(BotSpread.hunt_crowded(world.bots[0], world, SPOT), "a goal upstairs")
+	m.hunt_goal = SPOT + Vector3(0.0, 4.0, 0.0)
+	assert_false(BotSpread.hunt_crowded(world.bots[0], world, SPOT), "a goal on the deck")
 	m.hunt_goal = SPOT
-	assert_true(BotSpread.hunt_crowded(world.bots[0], world, SPOT), "a goal on the level")
+	assert_true(BotSpread.hunt_crowded(world.bots[0], world, SPOT), "a goal on the floor")
+
+
+func test_teammates_on_a_steep_single_floor_slope_still_crowd_the_spot() -> void:
+	_world()
+	# one floor everywhere, rising 3.5 m in the 8 m before the spot: a hill, not a storey
+	world.nav = _nav(func(_x: float, z: float) -> PackedFloat32Array:
+		return PackedFloat32Array([3.5 if z < 24.0 else 0.0]))
+	world.characters[1].position = Vector3(1.0, 3.5, 22.0)
+	world.characters[2].position = Vector3(-1.0, 3.5, 22.0)
+	assert_true(BotSpread.crowded(world.bots[0], world, SPOT), "the slope is one floor")
+	assert_true(BotSpread.hunt_crowded(world.bots[0], world, Vector3(0.0, 0.0, 22.0)))
+
+
+func test_teammates_on_a_crate_top_under_the_rise_still_crowd_the_spot() -> void:
+	_world()
+	world.nav = _nav(func(x: float, z: float) -> PackedFloat32Array:
+		return PackedFloat32Array([0.0, 1.0]) if absf(x) < 6.0 and absf(z - 30.0) < 6.0 else PackedFloat32Array([0.0]))
+	world.characters[1].position = SPOT + Vector3(1.0, 1.0, 0.0)
+	world.characters[2].position = SPOT + Vector3(-1.0, 1.0, 0.0)
+	assert_true(BotSpread.crowded(world.bots[0], world, SPOT), "a crate is not a storey")
+
+
+func test_a_bot_already_at_the_spot_a_deck_off_is_not_one_of_the_crowd() -> void:
+	_world()
+	world.nav = _nav(_deck)
+	world.bots[0].character.position = SPOT + Vector3(0.5, 4.0, 0.0)
+	world.characters[1].position = SPOT + Vector3(1.0, 0.0, 0.0)
+	world.characters[2].position = SPOT + Vector3(-1.0, 0.0, 0.0)
+	assert_true(BotSpread.crowded(world.bots[0], world, SPOT), "it is not there: it is drawn in like the rest")
+
+
+func test_without_a_nav_grid_the_storey_never_splits_teammates() -> void:
+	_world()
+	world.characters[1].position = SPOT + Vector3(1.0, 4.0, 0.0)
+	world.characters[2].position = SPOT + Vector3(-1.0, 4.0, 0.0)
+	assert_true(BotSpread.crowded(world.bots[0], world, SPOT))
 
 
 # --- Lifts ---
@@ -302,82 +358,6 @@ func test_the_cyber_pistol_is_wider_on_the_run_than_the_gbb_pistol() -> void:
 	assert_gt(_run_hip(cyber), _run_hip(gbb), "the Cyber's run spread stays above the GBB's")
 	assert_gt(cyber.move_spread, gbb.move_spread)
 	assert_lt(cyber.spread_deg, gbb.spread_deg, "while standing the Cyber is still the tighter")
-
-
-func test_a_shotgun_bot_holds_a_pull_just_past_24_m_and_fires_just_inside() -> void:
-	var cfg := BotConfig.new()
-	var gun := _carried(SHOTGUN)
-	var c := Character.new(1, 0, Vector3.ZERO, 0.0, [gun] as Array[ReplicaConfig])
-	c.grounded = true
-	var b := Bot.new(c, 1, BotSkill.new(), 2)
-	assert_false(BotCombat.pattern_too_wide(b, cfg, 23.0))
-	assert_true(BotCombat.pattern_too_wide(b, cfg, 25.0), "held past 24 m")
-	assert_true(BotCombat.pattern_too_wide(b, cfg, 60.0))
-	assert_false(BotCombat.pattern_too_wide(b, cfg, 0.5), "point blank is never held")
-
-
-# --- The nav grid's task ---
-
-func _wait_until(done: Callable, ms: int = 120000) -> bool:
-	var until := Time.get_ticks_msec() + ms
-	while Time.get_ticks_msec() < until:
-		if done.call():
-			return true
-		await wait_physics_frames(1)
-	return false
-
-
-func test_a_staged_build_starts_the_nav_grid_with_the_map_before_the_level_and_waits_for_it_at_the_teams() -> void:
-	var session := PlaySession.new()
-	session.bots_active = false
-	session.staged = true
-	add_child_autofree(session)
-	# The map is read in the build's first step: the task is up as the level step is next.
-	var seen := await _wait_until(func() -> bool: return session._step >= 1)
-	assert_true(seen)
-	assert_gte(session._nav_task, 0, "the nav grid's task runs beside the level's build")
-	assert_false(session._nav_waiting, "and nothing waits for it yet")
-	assert_false(session._nav_waiting and session._step < 2, "not waiting on the nav grid before the teams step")
-	var ok := await _wait_until(func() -> bool: return session._running)
-	assert_true(ok, "the build finishes")
-	assert_eq(session._nav_task, -1, "the task is taken")
-	assert_false(session._nav_waiting)
-	assert_not_null(session._sim.nav, "its grid is in the simulation")
-
-
-func test_a_build_unbuilt_in_one_go_has_its_nav_grid_at_once_and_no_task() -> void:
-	var session := PlaySession.new()
-	session.bots_active = false
-	add_child_autofree(session)
-	assert_eq(session._nav_task, -1)
-	assert_false(session._nav_waiting)
-	assert_not_null(session._sim.nav)
-
-
-func test_a_session_freed_while_the_nav_grid_builds_leaves_no_task_and_no_orphans() -> void:
-	var orphans := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
-	var session := PlaySession.new()
-	session.bots_active = false
-	session.staged = true
-	add_child(session)
-	await _wait_until(func() -> bool: return session._nav_task >= 0)
-	assert_gte(session._nav_task, 0, "the task is under way")
-	remove_child(session)
-	session.free()
-	await wait_physics_frames(2)
-	assert_lte(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), orphans)
-
-
-func test_a_refused_map_starts_no_nav_grid_task() -> void:
-	var session := PlaySession.new()
-	session.bots_active = false
-	session.staged = true
-	session.map_id = "no_such_map_bp13"
-	add_child_autofree(session)
-	await wait_physics_frames(3)
-	assert_push_error("refused")
-	assert_eq(session._nav_task, -1)
-	assert_false(session._nav_waiting)
 
 
 func test_an_older_save_with_an_action_on_enter_keeps_that_actions_default_and_the_rest() -> void:

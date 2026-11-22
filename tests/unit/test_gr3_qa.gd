@@ -90,6 +90,7 @@ func test_alt_enter_does_not_press_the_focused_button() -> void:
 
 func test_modified_or_repeated_presses_never_switch_the_window() -> void:
 	_watch()
+	var sent := ds.calls.size()  # the watch's own minimum-size call at start
 	var presses: Array[InputEventKey] = [
 		_key(KEY_F11, false, false, true), _key(KEY_F11, false, false, false, true), _key(KEY_F11, true),
 		_key(KEY_F11, false, true), _key(KEY_ENTER, true, true), _key(KEY_ENTER, true, false, true),
@@ -97,7 +98,7 @@ func test_modified_or_repeated_presses_never_switch_the_window() -> void:
 	for e in presses:
 		get_viewport().push_input(e)
 	assert_eq(s.window_mode, Settings.WindowMode.WINDOWED)
-	assert_eq(ds.calls.size(), 0, "nothing was sent to the window")
+	assert_eq(ds.calls.size(), sent, "nothing more was sent to the window")
 	get_viewport().push_input(_key(KEY_F11))
 	assert_eq(s.window_mode, Settings.WindowMode.BORDERLESS, "a clean press does")
 
