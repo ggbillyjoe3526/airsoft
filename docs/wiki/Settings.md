@@ -39,8 +39,7 @@ is from a long way off; a silenced replica carries half as far.
   **F11** or **Alt+Enter** switches between windowed and your last fullscreen mode. A window can't be made smaller
   than 960 x 540, where the words stay readable.
 - **Monitor:** with two screens or more, the screen the window opens on.
-- **V-Sync** (off by default; on, it shows the newest frame at each refresh rather than a queue of them, so the mouse
-  feels as quick as it can without tearing) and a **Frame-rate limit**: a slider from 30 to 360 frames a second, with **Off** beside
+- **V-Sync** (off by default) and a **Frame-rate limit**: a slider from 30 to 360 frames a second, with **Off** beside
   it for no limit (Off is the default; moving the slider turns it off). In the background
   the game drops to 30 frames a second. The menus never draw more frames than your screen shows, whatever
   the limit.

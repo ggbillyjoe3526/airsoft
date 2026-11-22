@@ -531,7 +531,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   BB's path less the body's own step, which is also what the interpolated figure and BB show; before, the body stood
   at its tick's end for the whole of the BB's travel (up to 11 cm out on a sprinter).
 - **Crouch and aim are both held by default (owner, 2026-10-18, replacing crouch toggled from 2026-10-03).** Each has a
-  toggle setting; a toggled crouch stands up on a sprint or jump press. Lean and sprint are held.
+  toggle setting; a toggled crouch stands up on a sprint or jump press. Lean and sprint are held. **Since BP13
+  (2026-11-22):** a toggled crouch stands up on a jump press or on running forward (PC1's sprint-first), never on a
+  sprint press alone, so Alt+Tab and Alt+Enter behind cover leave you down; and Enter and keypad Enter can't be bound
+  while Alt is the sprint and Alt+Enter the fullscreen key.
 - **Hold Q / E to lean around cover (owner, 2026-10-01); replicas switch with 1, 2 and the mouse wheel (owner,
   2026-10-02).** One geometry drives the eye, BB origin, hit volume, camera, drawn figure and bot vision, so you are hit
   only where you appear and never through walls.

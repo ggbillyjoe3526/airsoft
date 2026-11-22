@@ -2007,10 +2007,8 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   forward with Alt. Pass: still crouched after Resume; running stands you up as before.
 - [ ] **Ping during a Z tap.** Tap Z on an enemy and click the middle button straight after. Pass: both the Spotted
   mark and the ping go out.
-- [ ] **V-Sync on.** Turn V-Sync on and flick the view in a match. Pass: no tearing, and the view keeps up with the mouse
-  as with V-Sync off.
-- [ ] **Loading.** Start Woodland. Pass: the loading screen finishes a little sooner than before (about half a second
-  in the cloud); the bots move as ever.
+- [ ] **Bots upstairs.** On Subway, 6v6 Normal, stand on the concourse over a platform fight with a teammate. Pass:
+  teammates on the platform level still go to the fight below.
 - [ ] **A small window.** In Windowed, drag the window's corner inward. Pass: it stops at 960 x 540.
 
 ## Reporting what you find

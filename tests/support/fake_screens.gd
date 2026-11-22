@@ -5,8 +5,7 @@ extends SettingsApply.Screens
 ## call that changes them, in order, in `calls`.
 
 var window_mode: DisplayServer.WindowMode = DisplayServer.WINDOW_MODE_MAXIMIZED
-## V-Sync as the game sets it on (Mailbox, BP13).
-var vsync_mode: DisplayServer.VSyncMode = DisplayServer.VSYNC_MAILBOX
+var vsync_mode: DisplayServer.VSyncMode = DisplayServer.VSYNC_ENABLED
 var sizes: Array[Vector2i] = [Vector2i(2560, 1440)]
 var rates: Array[float] = [144.0]
 var primary_screen: int = 0
@@ -37,6 +36,10 @@ func vsync() -> DisplayServer.VSyncMode:
 func set_vsync(m: DisplayServer.VSyncMode) -> void:
 	vsync_mode = m
 	calls.append("vsync %d" % m)
+
+
+func set_min_size(size: Vector2i) -> void:
+	calls.append("min %d x %d" % [size.x, size.y])
 
 
 func count() -> int:

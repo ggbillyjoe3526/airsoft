@@ -82,10 +82,7 @@ static func apply_display(s: Settings, place: bool = false) -> void:
 				ds.set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 				if at >= 0 and ds.current() != at:
 					_move(ds, at)
-	# V-Sync on is Mailbox (BP13): no tearing, and the newest frame is shown at each refresh instead of a queue of two or
-	# three waiting their turn (FIFO, 33 to 50 ms behind the mouse at 60 Hz). Where the driver has no Mailbox it
-	# falls back to FIFO by itself.
-	var want := DisplayServer.VSYNC_MAILBOX if s.vsync else DisplayServer.VSYNC_DISABLED
+	var want := DisplayServer.VSYNC_ENABLED if s.vsync else DisplayServer.VSYNC_DISABLED
 	if ds.vsync() != want:
 		ds.set_vsync(want)
 	apply_frame_rate(s)
@@ -224,6 +221,10 @@ class Screens:
 
 	func set_vsync(m: DisplayServer.VSyncMode) -> void:
 		DisplayServer.window_set_vsync_mode(m)
+
+	## The smallest the window can be dragged (BP13).
+	func set_min_size(size: Vector2i) -> void:
+		DisplayServer.window_set_min_size(size)
 
 	## The number of screens (none headless).
 	func count() -> int:
