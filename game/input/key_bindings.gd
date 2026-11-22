@@ -85,9 +85,11 @@ const LAYOUT_1_MOVED: Dictionary = {
 	&"throw_flash": [KEY_Y],
 	&"use_door": [KEY_U],
 }
-## Keys that can't be bound: Esc (menus), PrintScreen, Pause, F11 (fullscreen), the debug keys (F3 the overlay, F4 BB
-## paths, F5 hit areas; they stay reserved) and the OS keys. A test checks every `debug_*` action's key is here.
-const UNBINDABLE: Array[int] = [KEY_ESCAPE, KEY_PRINT, KEY_PAUSE, KEY_F11, KEY_F3, KEY_F4, KEY_F5, KEY_META, KEY_MENU]
+## Keys that can't be bound: Esc (menus), PrintScreen, Pause, F11 and Enter (fullscreen, Alt+Enter: with Alt the
+## sprint, an action on Enter pressed on the run would switch the window instead, BP13), the debug keys (F3 the overlay,
+## F4 BB paths, F5 hit areas; they stay reserved) and the OS keys. A test checks every `debug_*` action's key is here.
+const UNBINDABLE: Array[int] = [KEY_ESCAPE, KEY_PRINT, KEY_PAUSE, KEY_F11, KEY_ENTER, KEY_KP_ENTER, KEY_F3, KEY_F4, KEY_F5,
+		KEY_META, KEY_MENU]
 ## The mouse buttons that can be bound (the wheel's sideways turns can't).
 const MOUSE_BUTTONS: Array[int] = [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_WHEEL_UP,
 		MOUSE_BUTTON_WHEEL_DOWN, MOUSE_BUTTON_XBUTTON1, MOUSE_BUTTON_XBUTTON2]

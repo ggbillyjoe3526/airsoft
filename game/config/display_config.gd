@@ -18,6 +18,8 @@ extends Resource
 @export var toggle_key: Key = KEY_F11
 ## The keys that do the same with Alt held (Alt+Enter, the other habit; the keypad's Enter too).
 @export var alt_toggle_keys: Array[Key] = [KEY_ENTER, KEY_KP_ENTER]
+## The smallest the window can be dragged (BP13): below it the HUD's and menus' words shrink past reading.
+@export var min_window: Vector2i = Vector2i(960, 540)
 
 @export_group("Automatic step-down")
 ## The browser game's QUALITY_STEP_DOWN (docs/DECISIONS.md 2026-10-04): while the graphics are the automatic pick, frame

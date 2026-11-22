@@ -250,8 +250,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			_jump_latch = true
 	elif event.is_action(CROUCH) and _controls.crouch_toggle:
 		_crouched = not _crouched
-	elif event.is_action(SPRINT):
-		_crouched = false
 	elif event.is_action(RELOAD):
 		_reload_latch = true
 	elif event.is_action(FIRE_MODE):
@@ -277,8 +275,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action(HOP_UP_MORE):
 		_hop_steps += 1
 	elif event.is_action(PING):
-		# Not while the wheel is open: it holds the view still, so a ping would land where the view was left.
-		if _orders_allowed and not _wheel.open:
+		# Not once the wheel is up: it holds the view still, so a ping would land where the view was left. Within Z's
+		# tap the view still turns (PC1), so a ping there lands where you look (BP13: it was dropped).
+		if _orders_allowed and not (_wheel.open and _wheel_held()):
 			_latch_ping(false)
 	elif event.is_action(NEXT_SLOT):
 		_slot_steps += 1

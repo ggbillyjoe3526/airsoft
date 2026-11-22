@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The review gate (pipeline/README.md › Pull request description). Passes for a draft, for a docs-only change (every
 # changed file is Markdown and none is under data/), or when the description has the line
-#   Review: critic Accept <score>/8 · qa Pass · performance Pass     (or "critic auto-accept <score>/8")
+#   Review: critic Accept 8/8 · qa Pass · performance Pass     (only 8/8 is an Accept since 2026-11-22, owner)
 # Reads PR_BODY, PR_DRAFT, BASE_SHA and HEAD_SHA (set by .github/workflows/review.yml).
 # Usage: PR_BODY="$(cat body.md)" BASE_SHA=origin/main HEAD_SHA=HEAD tools/review_line.sh
 set -euo pipefail
@@ -17,8 +17,8 @@ if [ -n "$files" ] && [ -z "$code" ] && [ -z "$data" ]; then
 fi
 line=$(printf '%s\n' "${PR_BODY:-}" | tr -d '\r' | grep -E '^Review:' | tail -1 || true)
 if printf '%s\n' "$line" \
-  | grep -qE '^Review: critic (Accept|auto-accept) [0-8]/8 · qa Pass · performance Pass[[:space:]]*$'; then
+  | grep -qE '^Review: critic Accept 8/8 · qa Pass · performance Pass[[:space:]]*$'; then
   echo "PASS: $line"; exit 0
 fi
-echo "::error::This pull request changes code, scenes, config, assets or data, so its description needs the line 'Review: critic Accept <score>/8 · qa Pass · performance Pass' (pipeline/README.md › Pull request description). Found: '${line:-nothing}'"
+echo "::error::This pull request changes code, scenes, config, assets or data, so its description needs the line 'Review: critic Accept 8/8 · qa Pass · performance Pass' (pipeline/README.md › Pull request description). Found: '${line:-nothing}'"
 exit 1

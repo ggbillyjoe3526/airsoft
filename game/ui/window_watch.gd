@@ -19,6 +19,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if settings == null:
 		settings = Settings.shared()
+	DisplayServer.window_set_min_size(SettingsApply.screens().config.min_window)
 
 
 func _input(event: InputEvent) -> void:

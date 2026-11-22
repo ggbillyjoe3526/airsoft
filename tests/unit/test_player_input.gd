@@ -111,20 +111,24 @@ func _toggle_crouch() -> void:
 	input.setup(toggled, 1.5)
 
 
-func test_crouch_toggles_with_the_setting_and_a_sprint_stands_you_up() -> void:
+func test_crouch_toggles_with_the_setting_and_a_sprint_press_standing_still_keeps_you_down() -> void:
 	_toggle_crouch()
 	_press(&"crouch")
 	input.fill(cmd)
 	assert_true(cmd.crouch, "down after one press, the key already up")
 	input.fill(cmd)
 	assert_true(cmd.crouch, "still down a tick later")
+	# Alt is the sprint: Alt+Tab or Alt+Enter behind cover must not stand you up (BP13). Running forward does (PC1).
 	_press(&"sprint")
 	input.fill(cmd)
-	assert_false(cmd.crouch, "a sprint press stands you up")
-	_press(&"crouch")
+	assert_true(cmd.crouch, "a sprint press standing still keeps you down")
 	_press(&"crouch")
 	input.fill(cmd)
 	assert_false(cmd.crouch, "a second press stands you up")
+	_press(&"crouch")
+	_press(&"crouch")
+	input.fill(cmd)
+	assert_false(cmd.crouch, "two presses in one tick leave you as you were")
 
 
 func test_a_jump_press_while_toggled_down_only_stands_you_up() -> void:

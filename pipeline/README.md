@@ -77,15 +77,13 @@ The table with its evidence rules is `.claude/agents/critic.md`; in short:
 
 ### Verdict and attempts
 
-- **Accept** when every blocking check passes, at most one non-blocking check fails, and QA and performance both say
-  Pass; the score is the checks passed, out of 8. Otherwise **Retry** with only the failed checks and their evidence.
-- **Near miss.** A verdict one check short of Accept is re-run once before the task goes back when its failed check
-  is a judgment (checks 5 to 8, or one of 1 to 4 decided by reading). A check failed on a measured number (a budget, a
-  count) goes straight back, or to the owner when only a changed criterion can pass it: a re-run can't change a number.
-- **Four attempts** per task: one build plus three targeted retries. After the fourth, checks green and at least 6 of
-  8 with checks 1 and 2 passing is an **auto-accept** (owner, 2026-10-04; the `Review:` line reads `critic auto-accept
-  <score>/8`), and every failed check goes to `docs/KNOWN_ISSUES.md`. Otherwise stop, keep the best attempt on its
-  branch and report to the owner what failed and what each attempt tried.
+- **Accept** only when all eight checks pass and QA and performance both say Pass (owner, 2026-11-22: "make the
+  critic agent harsher"); the score is the checks passed, out of 8. Otherwise **Retry** with only the failed checks
+  and their evidence. A check the critic could not settle fails; `.claude/agents/critic.md` lists the hard fails and
+  the five edge cases it traces.
+- **No near-miss re-run, no auto-accept** (owner, 2026-11-22; replaces the 2026-10-04 auto-accept at 6 of 8). A Retry
+  goes back to the worker, and a task keeps being fixed until the critic accepts it (the owner's review-cap ruling).
+  After four attempts the thread tells the owner in one line what keeps failing and carries on fixing.
 - **Ask the owner at once** when a check can only pass by changing an acceptance criterion (a budget the build can't
   meet, a target his ruling set); don't spend attempts on it.
 
@@ -103,7 +101,7 @@ result) and prints failures and totals only. Run it before QA, after QA's commit
 | `guards` | `tools/match_guards.sh`: every `tests/guards/test_*.gd`, whole bot matches over 16 seeds a field (MG1; CI jobs of their own, six for the night guards, WL10; locally `tools/check.sh --guards`, about two hours) | no failed test, no script error | CI; locally on request |
 | `notices` | `godot --headless --path . -s res://tools/make_notices.gd` | `THIRD_PARTY_NOTICES.txt` is current | both |
 | `changelog` | `tools/changelog.sh check` | every note in `changelog.d/` is a `### Title` and `- ` bullets | both |
-| `review` | `tools/review_line.sh` on the pull request's description (`.github/workflows/review.yml`) | a docs-only change or a draft skips it; otherwise the `Review:` line gives `critic Accept` (or `auto-accept`), `qa Pass` and `performance Pass` | CI |
+| `review` | `tools/review_line.sh` on the pull request's description (`.github/workflows/review.yml`) | a docs-only change or a draft skips it; otherwise the `Review:` line gives `critic Accept 8/8`, `qa Pass` and `performance Pass` | CI |
 
 The `review` check re-runs on `edited` and `ready_for_review`, so it sees the final description; it has its own
 workflow, so editing a description doesn't re-run Godot. The exit-time leak warnings at the end of a headless run
@@ -173,12 +171,11 @@ How: <a short paragraph>
 
 Pipeline: attempts <n> · checks <lint ✓ unit ✓ smoke ✓ notices ✓ changelog ✓> · critic <score> · <link to the run folder>
 
-Review: critic Accept <score>/8 · qa Pass · performance Pass
+Review: critic Accept 8/8 · qa Pass · performance Pass
 ```
 
 The `Pipeline:` line is for pipeline tasks only. The `Review:` line is on every pull request: a code one writes the
-three verdicts exactly as above (after four attempts, `Review: critic auto-accept <score>/8 · qa Pass · performance
-Pass`), and a docs-only one writes `Review: docs only`. CI's `review` check fails without it once the pull request is
+three verdicts exactly as above (the score is always 8/8 since 2026-11-22), and a docs-only one writes `Review: docs only`. CI's `review` check fails without it once the pull request is
 out of draft. Each agent's blocking findings and how they were fixed go in the description's Verified section or the
 task's record. Open the pull request ready once the agents passed; the thread merges it when CI is green.
 
