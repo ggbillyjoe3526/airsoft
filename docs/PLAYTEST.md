@@ -1994,6 +1994,13 @@ On the Range on High, then from 10 m and 40 m on Low; on Woodland at the west ca
   Pass: from outside you hear only the buttons' beeps, never the doors, motor or chime; inside a car you hear all of
   them.
 
+## The fields' pictures (FPC1)
+
+- [ ] **Pictures match the fields.** Open Match and look at the field cards, then start a match on Depot, Woodland and
+  Subway and watch each loading screen.
+  Pass: each picture looks like the field you walk into (Depot's Chrono hall, Woodland's Log stacks track, Subway's north
+  platform with its train), sharp full screen.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
