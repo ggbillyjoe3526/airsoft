@@ -84,7 +84,7 @@ thick of a plant counts), unchanged.
 - **Woodland's one-life bomb guard wants 30 % of rounds armed** (`test_plant_guards.gd`, others keep 40 %): with
   respawns off it now arms 20 of 56 (36 %; main 36 of 56) because holding defenders see attackers through the trees;
   as the game plays it, with respawns until armed, 75 % are armed (96 of 128). Who wins stays in band either way (one
-  life 45 %, as played 50 %). Put to the owner on a card; taken as the default meanwhile.
+  life 45 %, as played 50 %). The owner's choice on a card, 23 November.
 - **Older tests now judge by the drawn faces:** `test_bb_walls` checks no tick's path crosses a drawn wall's face
   (shots from inside the field: a drawn wall's end abutting the next is open only from outside); the hollow-marker
   test looks past one crate rather than the seam between two; the stripped Woodland keeps its prop seed; the
