@@ -97,7 +97,7 @@ thick of a plant counts), unchanged.
 - **Depot's follow-me guard allows catch_up + 0.5 m** (`test_match_guards.gd`, FOLLOW_SLACK): with smokes flying by
   the drawn faces seed 2 plays differently, and a follower rounding a corner as its leader ran off was 8.05 m behind
   for a few ticks while it sprinted back (8.0 m before: a follower only sprints from catch_up, 8 m). Following itself
-  is unchanged. Put to the owner on a card; taken as the default meanwhile.
+  is unchanged. The owner's choice on a card, 23 November.
 - **Older tests now judge by the drawn faces:** `test_bb_walls` checks no tick's path crosses a drawn wall's face
   (shots from inside the field: a drawn wall's end abutting the next is open only from outside); the hollow-marker
   test looks past one crate rather than the seam between two; the stripped Woodland keeps its prop seed; the
