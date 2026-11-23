@@ -38,9 +38,9 @@ warning; a map with no row is not listed.
   0.75 and 1.9, a scaled wait 25 s at most), as bot matches measured them. One that isn't such a number keeps the game's with a warning.
 - **Defender respawn at Hard (s)** is the seconds a defender hit there waits to come back in Attack / Defend against
   Hard bots (BP11): a whole or decimal number from 2 to 30 (the scaled wait's 25 s ceiling doesn't hold it), or blank
-  for the field's wait times the Hard scale. Subway's is 15.2: at the scale's 13.3 s Hard defenders held its poles (the
-  attackers took 41.7 %, 32 seeds) and 15.2 s gave 53.7 %, while moving the field's own wait to 8 s (the same 15.2 s at
-  Hard) took Normal from 48.5 % to 54.1 %.
+  for the field's wait times the Hard scale. No field sets one now. Subway had 15.2 (BP11: at the scale's 13.3 s Hard
+  defenders held its poles, the attackers taking 41.7 %, 32 seeds), but once its bots spread out (BG1) and split by
+  storey (BP13) 15.2 s gave the attackers 63.2 % and the scale's 13.3 s 51.5 % (32 seeds each, BP13).
 - **Bomb defender respawn (s)** is the seconds a defender hit there waits to come back in Plant The Bomb, until the bomb
   is armed, at every level (BG1): a whole or decimal number from 2 to 30, or blank for the game's 5
   (`game/config/round_config.gd`). Subway's is 3: once Normal bots locked on more slowly its sites fell too often at 5 s
@@ -74,5 +74,5 @@ warning; a map with no row is not listed.
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 |  |  | 8 | burst | 0 | 20 | An indoor airsoft hall: five lanes, two dark tunnels. |
 | woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 26 | 5 |  |  |  |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
-| subway | Subway | field | public | 5 | 6 | 8 |  |  | 22 | 7 | 15.2 | 3 | 5 | burst | 0 | 14 | A closed metro station on two levels, from the ticket hall and concourse down to the trains. |
+| subway | Subway | field | public | 5 | 6 | 8 |  |  | 22 | 7 |  | 3 | 5 | burst | 0 | 14 | A closed metro station on two levels, from the ticket hall and concourse down to the trains. |
 | range | Range | range | public | 1 | 1 | 1 |  |  |  |  |  |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |
