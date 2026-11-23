@@ -95,7 +95,8 @@ thick of a plant counts), unchanged.
   eye's, the railings' boxes and the glass (as before). A bot checks its throw's arc on the same line. The dropped bomb
   (it must lie where a body can reach it) keeps the boxes. The same line carries where a tossed magazine is drawn
   landing and what a held replica pulls back from (`ReplicaView`, a figure's raise), so neither meets the air over a
-  trolley's tray; a torch's spot lands where the eye sees a surface (`sight_ray`). Those are the look only. A toss's
+  trolley's tray; a torch's spot lands where the eye sees a surface (`sight_ray`: through a window it now lights the
+  wall behind, where it sat on the pane before). Those are the look only. A toss's
   own path (`MagShare`, whether it is clear and where it stops in flight) keeps the level ray: it is a rule the bots
   play by, and the balance below was measured on it.
 - **Depot's follow-me guard allows catch_up + 0.5 m** (`test_match_guards.gd`, FOLLOW_SLACK): with smokes flying by
