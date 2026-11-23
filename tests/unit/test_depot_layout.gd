@@ -8,8 +8,10 @@ const DT := 1.0 / 60.0
 ## The Box (its area in depot.json): its walls' outer faces, x then z.
 const BOX_X := Vector2(-1.4, 1.0)
 const BOX_Z := Vector2(-4.2, 2.6)
-## Its roof's underside (m).
+## Its roof's underside (m): the block's; a BB meets the container model drawn over it (DG1), whose ceiling is up to
+## ROOF_DRAWN higher.
 const BOX_HEADROOM := 2.4
+const ROOF_DRAWN := 0.1
 ## How far past a port's far face a standing eye's line through its middle must run clear (m): room for a body and
 ## more, so no port looks straight into cover (the Crate yard's north port sat 1.4 m from a barrier in the concept).
 const SEE_OUT := 1.5
@@ -157,7 +159,7 @@ func test_a_bb_fired_up_inside_the_box_stops_on_its_roof() -> void:
 			break
 	assert_not_null(impact, "the BB landed")
 	if impact != null:
-		assert_almost_eq(impact.position.y, BOX_HEADROOM, 0.05, "on the roof's underside")
+		assert_between(impact.position.y, BOX_HEADROOM - 0.05, BOX_HEADROOM + ROOF_DRAWN, "on the roof's underside")
 		assert_eq(impact.value2, RayHit.Surface.METAL)
 		assert_between(impact.position.x, BOX_X.x, BOX_X.y)
 		assert_between(impact.position.z, BOX_Z.x, BOX_Z.y)

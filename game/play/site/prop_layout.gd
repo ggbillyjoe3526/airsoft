@@ -18,6 +18,8 @@ class Placed:
 	var transforms: Array[Transform3D] = []
 	var shades: PackedFloat32Array = PackedFloat32Array()
 	var paints: PackedColorArray = PackedColorArray()
+	## The index in the map's blocks of the block each was laid for (a SET's: the first of its set; DG1, DrawnRays).
+	var blocks: PackedInt32Array = PackedInt32Array()
 
 	func add(t: Transform3D, shade: float, paint: Color = Color.WHITE) -> void:
 		transforms.append(t)
@@ -39,7 +41,9 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 	var features_laid := 0
 	var turns := Turns.new(out, boxes, map.dressing_seed)
 	var sets_laid: Dictionary[StringName, bool] = {}
-	for b in map.blocks:
+	for i in map.blocks.size():
+		_tag(out, i - 1)
+		var b := map.blocks[i]
 		if not cfg.dresses(b):
 			continue
 		var model := cfg.model_of(b)
@@ -103,7 +107,15 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 				if cfg.grounded.has(model):
 					t = grounded(t, boxes[model], b, map)
 				_placed(out, model).add(t, 1.0)
+	_tag(out, map.blocks.size() - 1)
 	return out
+
+
+## Each Placed's props laid since the last call as block `block`'s.
+static func _tag(out: Dictionary[StringName, Placed], block: int) -> void:
+	for p: Placed in out.values():
+		while p.blocks.size() < p.transforms.size():
+			p.blocks.append(block)
 
 
 ## The transform that stretches a model of bounds `model` to `size` (in the model's own axes, before its turn),

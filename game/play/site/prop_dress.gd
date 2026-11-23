@@ -8,8 +8,9 @@ extends Node3D
 ## drum, barrel or sofa casts its own shadow (its box draws nothing, SiteSurface.core_of, and leaves MapLevel's shadow
 ## caster); shelving casts none, its rack's backing box still does. Depot's crate walls, plywood walls and containers
 ## are map models of the game's own (DM1, tools/blender/maps). Each prop is drawn in its own shade times its paint (a
-## container's unit colour, DM1) times, while a bake is drawn, the baked light near it (`relight`, BP7). Scenery only: no collider, no nav cell; the blocks' boxes
-## are what BBs and bodies meet, a round prop's (a trunk, a drum, a barrel) as its stepped boxes (RoundSteps).
+## container's unit colour, DM1) times, while a bake is drawn, the baked light near it (`relight`, BP7). No collider or
+## nav cell of its own: BBs and sight meet its faces as drawn (DrawnRays, DG1), bodies and the bots' cover the blocks'
+## boxes, a round prop's (a trunk, a drum, a barrel) as its stepped boxes (RoundSteps).
 
 ## A prop takes the baked light near this far (m) over its foot, from faces facing any way (BakedLightNear.at).
 const LIGHT_LIFT := 0.5
@@ -46,7 +47,7 @@ static func build(map: MapData, cfg: PropDressConfig, paint: Callable = Callable
 		return null
 	var meshes: Dictionary[StringName, Mesh] = {}
 	var boxes: Dictionary[StringName, AABB] = {}
-	for model: StringName in _models_used(map, cfg):
+	for model: StringName in models_used(map, cfg):
 		var mesh := cfg.mesh_of(model) # warns once when it won't load
 		if mesh == null:
 			continue
@@ -224,7 +225,7 @@ func light_of(model: StringName, i: int) -> Color:
 ## (PropDressConfig.grid_ends), the pallet too when a cluster stands on one, the earth bank when a prop stands on the
 ## ground (GROUND), a palisade's rail with its stakes, and a lined model's cap and mouth (PropDressConfig.lined_caps,
 ## lined_mouths).
-static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName]:
+static func models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName]:
 	var used: Array[StringName] = []
 	for b in map.blocks:
 		if not cfg.dresses(b):

@@ -264,6 +264,7 @@ common/physics_ticks_per_second=60
 common/max_physics_steps_per_frame=10
 common/physics_jitter_fix=0.0
 common/physics_interpolation=true
+jolt_physics_3d/queries/enable_ray_cast_face_index=true
 
 [rendering]
 

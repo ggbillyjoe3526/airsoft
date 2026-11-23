@@ -125,6 +125,8 @@ extends Resource
 @export var railing: RailingConfig = RailingConfig.new()
 ## How they are drawn (SM2): modelled pieces fitted to the bars and rails.
 @export var railing_look: RailingLook = RailingLook.new()
+## How BBs and sight meet the props drawn in place of their blocks' boxes (DG1, DrawnRays).
+@export var drawn_rays: DrawnRayConfig = DrawnRayConfig.new()
 ## Kinds whose box hides what stands behind it from the renderer (MapOccluders; Settings › Graphics › Occlusion
 ## culling): solid and opaque, drawn as their own box. A block of one of them is an occluder when it is no ramp, names
 ## no prop (a prop's model is not its box), stands at least `occluder_height` m tall and `occluder_length` m long across

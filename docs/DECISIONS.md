@@ -1022,6 +1022,16 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   trunks taper in tiers from the ground under them (`MapStyle.round_trunk_tiers`). The reaches are the 50 % contour
   of the models as drawn, leaf cards cut out of their sheet (`tools/sight_truth.gd profile` and `trunks`); a new or
   rebuilt spruce or tree model re-measures them, and a change to Woodland's plants or colliders re-runs the probe.
+- **BBs and sight meet the props as they are drawn (DG1, from the owner's message 2026-11-23: "ricochet should only
+  happen against surfaces not empty spaces ... a bb should be able to go through it (think firing between branches of
+  a tree). make sure all models in the game are updated").** Every prop PropDress lays (map models, Woodland's trees,
+  thickets and logs, Subway's train fittings) is a ray body of its own faces where it is laid (`DrawnRays`); a leaf
+  card stops a line only where its sheet's alpha passes the shader's cut. A BB's path, sight and a bot's shot check
+  (`bb_ray`, `sight_ray`, `ray_past_railings`) meet those faces; a block its props stand in for keeps its box, on
+  `DrawnRays.BOX_LAYER`, for the movers, the level ray (underfoot, vaults, leans, the bomb, magazines), the bots'
+  cover, the nav grid and the minimap. A new or rebuilt prop model needs nothing more; `tools/prop_ray_audit.gd`
+  compares the game's rays with the drawn faces on every map. It replaces WH1's tiers and RoundSteps as what BBs and
+  sight meet (they remain the bodies' collision).
 - **Plant The Bomb is the third mode (owner, 2026-11-12, PB1).** His rules: the attackers plant a bomb at Site A or
   Site B on the defenders' side; the defenders keep it from being planted or make it safe. The attackers win when it
   goes off or the defenders are all out; the defenders win by making it safe or by getting every attacker out before
