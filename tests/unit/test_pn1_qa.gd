@@ -18,6 +18,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	Input.action_release(&"order_wheel")
+	controls.wheel_tap = ControlsConfig.new().wheel_tap
 
 
 func _press(action: StringName, pressed: bool = true) -> void:
@@ -28,6 +29,8 @@ func _press(action: StringName, pressed: bool = true) -> void:
 
 
 func test_a_middle_click_with_the_wheel_open_is_no_ping_no_order_and_no_shot() -> void:
+	# Held past its tap at once: inside the tap the view turns and a ping is taken (BP13, test_bp13_qa.gd).
+	controls.wheel_tap = 0.0
 	Input.action_press(&"order_wheel")
 	_press(&"order_wheel")
 	assert_true(input.wheel().open, "the wheel is up")
@@ -35,7 +38,7 @@ func test_a_middle_click_with_the_wheel_open_is_no_ping_no_order_and_no_shot() -
 	assert_true(input.wheel().open, "a ping press leaves the wheel as it is")
 	var c := PlayerCommand.new()
 	input.fill(c)
-	# The wheel holds the view still, so a ping would land where the view was left (KI1).
+	# Past the tap the wheel holds the view still, so a ping would land where the view was left (KI1).
 	assert_false(c.ping, "no ping while the wheel is open")
 	assert_eq(c.squad_order, SquadOrder.Kind.NONE, "no order given")
 	assert_false(c.fire, "no shot")
