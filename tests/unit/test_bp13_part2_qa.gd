@@ -27,4 +27,6 @@ func test_subway_hard_attack_defend_defenders_wait_the_fields_wait_times_the_har
 func test_subway_normal_and_easy_waits_are_the_fields_own() -> void:
 	var field := MapCatalog.read_file().find("subway").defender_respawn
 	assert_almost_eq(_delay(&"normal", RoundState.Mode.ATTACK_DEFEND, 1), field, 0.001)
-	assert_lt(_delay(&"easy", RoundState.Mode.ATTACK_DEFEND, 1), field + 0.001)
+	var easy: float = field * SimTuning.load_default().rounds.defender_respawn_scale[&"easy"]
+	assert_almost_eq(easy, 5.25, 0.001, "7 s x 0.75")
+	assert_almost_eq(_delay(&"easy", RoundState.Mode.ATTACK_DEFEND, 1), easy, 0.001)
