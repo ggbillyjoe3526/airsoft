@@ -140,10 +140,11 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  # 20 to 28 min on main's runners (2026-11-23), 30+ on a slow one: 45 like the respawn guards.
   flag-guards:
     name: Match guards, Attack / Defend (16 seeds a field)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
 

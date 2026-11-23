@@ -85,6 +85,8 @@ thick of a plant counts), unchanged.
   respawns off it now arms 20 of 56 (36 %; main 36 of 56) because holding defenders see attackers through the trees;
   as the game plays it, with respawns until armed, 75 % are armed (96 of 128). Who wins stays in band either way (one
   life 45 %, as played 50 %). The owner's choice on a card, 23 November.
+- **The Attack / Defend guard job's limit is 45 min** (was 30): it ran 20 to 28 min on main's runners on 23 November and
+  was stopped at 30 on a slow one.
 - **Older tests now judge by the drawn faces:** `test_bb_walls` checks no tick's path crosses a drawn wall's face
   (shots from inside the field: a drawn wall's end abutting the next is open only from outside); the hollow-marker
   test looks past one crate rather than the seam between two; the stripped Woodland keeps its prop seed; the
