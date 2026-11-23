@@ -420,13 +420,9 @@ WATER_SPRINT_S = 0.32
 WATER_LAND_S = 0.9
 # His lift (2026-11-11): how long (s) of a door's slide plays, from where it comes within LIFT_DOORS_WITHIN_DB of its
 # loudest (4 dB since 2026-11-22, owner: the lift's sound "still too late"; at 12 dB each take began with ~0.3 s of
-# soft swell and peaked 0.7 to 1.2 s in, now it starts on the slide and peaks 0.2 to 0.4 s in); where (s) in up_down
-# each ride's motor starts, and how long (s) of each ride plays as the car sets off (its stop comes about 3.4 s after
-# the start).
+# soft swell and peaked 0.7 to 1.2 s in, now it starts on the slide and peaks 0.2 to 0.4 s in).
 LIFT_DOORS_S = 1.7
 LIFT_DOORS_WITHIN_DB = 4.0
-LIFT_RIDE_STARTS = [0.56, 8.72]
-LIFT_RIDE_S = 3.2
 # Subway's background (2026-11-11): his tunnel's phone rumble sits under this (Hz).
 TUNNEL_RUMBLE_HZ = 60.0
 BOLT_READY = 1.25
@@ -774,10 +770,10 @@ def build(folder):
 
     # Subway's lifts (MT2): his lift (2026-11-11, elevator/): its doors sliding (door_opening, three takes) for both the
     # doors opening and shutting, each from where its slide comes within LIFT_DOORS_WITHIN_DB of its loudest, so the
-    # loud part of the slide is heard as the doors start (LiftConfig.shut_lead), LIFT_DOORS_S of it; and the car
-    # setting off: each of his two rides (up_down) from its motor's start (LIFT_RIDE_STARTS, after the first ride's
-    # chime), LIFT_RIDE_S of it, faded out before the car's stop. The chime, the button and the buzzer stay
-    # tools/lift_sounds.py's (his chime sits only ~10 dB over the car's hum).
+    # loud part of the slide is heard as the doors start (LiftConfig.shut_lead), LIFT_DOORS_S of it. The car's motor,
+    # lift_motor_1, is a fixed file now (LM1, owner 2026-11-23: its second take and its source, up_down, removed; it
+    # was 3.2 s of his first ride from 0.56 s in, faded out before the car's stop); this script leaves it as it is. The
+    # chime and the buzzer stay tools/lift_sounds.py's (his chime sits only ~10 dB over the car's hum).
     door = Source.get(folder, "elevator/door_opening.wav")
     slides = []
     for start, end in door.takes:
@@ -785,8 +781,6 @@ def build(folder):
         at = int((start + lead_in(take, LIFT_DOORS_WITHIN_DB)) * RATE)
         slides.append(shape(door.a[at:at + int(LIFT_DOORS_S * RATE)].copy(), 0.25))
     put("lift_doors", variants(slides, 3), -17.5)
-    ride = Source.get(folder, "elevator/up_down.wav").a
-    put("lift_motor", from_onsets(ride, LIFT_RIDE_STARTS, LIFT_RIDE_S, 0.25), -16.1)
 
     # The referee's pea whistle; a digital thermometer's beep (6.3 kHz) an octave down as the shot timer's, and lower
     # and shorter as your ping's pip (about 1.7 kHz, under the timer).

@@ -6,6 +6,8 @@ extends GutTest
 
 func test_every_lift_cue_the_sim_audio_plays_exists() -> void:
 	for cue: StringName in SimAudio.LIFT_CUES:
+		if cue == &"":
+			continue
 		assert_true(ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, cue]), String(cue))
 
 

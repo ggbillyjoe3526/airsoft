@@ -48,9 +48,9 @@ extends Resource
 @export var call_height: float = 1.1
 ## Where a body waits for a car and walks out to: this far out from the door's face, on the landing (m).
 @export var landing_out: float = 0.8
-## How far a car's chime, doors and motor are heard (m), walls or none.
+## How far a car's chime, doors and buzzer are heard (m), walls or none.
 @export var heard: float = 24.0
-## How far a button's beep carries (m): the caller's hand, not the car.
+## How far a button pressed carries (m): the caller's hand, not the car (its motor since LM1, the beep before).
 @export var button_heard: float = 6.0
 
 

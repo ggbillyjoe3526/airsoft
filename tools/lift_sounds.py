@@ -1,8 +1,9 @@
 """Synthesises the lifts' sounds (MT2) into assets/audio/cues/ that the owner's lift recording (2026-11-11) doesn't
-cover: the arrival chime (lift_chime), a button's beep (lift_button) and the too-full buzzer (lift_buzz). Placeholders,
-toy-like, each written at the peak level SoundConfig's gains expect (PEAK). The same bytes each run. The doors
-(lift_doors) and the car setting off (lift_motor) are his, cut by tools/cut_recordings.py; the synthesised doors and
-motor that stood in before are in git history.
+cover: the arrival chime (lift_chime) and the too-full buzzer (lift_buzz). Placeholders, toy-like, each written at the
+peak level SoundConfig's gains expect (PEAK). The same bytes each run. The doors (lift_doors) are his, cut by
+tools/cut_recordings.py; the motor (lift_motor_1, played on a button's press) is his first ride, a fixed file since LM1
+(assets/audio/README.md). The synthesised doors and motor that stood in before, and the button's beep (removed in LM1,
+owner 2026-11-23), are in git history.
 
     python3 tools/lift_sounds.py            # then: godot --headless --path . --import
 """
@@ -57,13 +58,6 @@ def chime() -> np.ndarray:
     return a + b
 
 
-def button() -> np.ndarray:
-    """A short square-ish beep."""
-    t = t_of(0.12)
-    tone = np.tanh(3.0 * np.sin(2 * np.pi * 1046.5 * t))
-    return tone * np.minimum(1.0, t / 0.003) * np.clip((0.12 - t) / 0.02, 0.0, 1.0) * 0.6
-
-
 def buzz() -> np.ndarray:
     """A flat buzzer: the car is too full to go."""
     t = t_of(0.5)
@@ -84,7 +78,6 @@ def write(name: str, x: np.ndarray) -> None:
 
 def main() -> None:
     write("lift_chime_1", chime())
-    write("lift_button_1", button())
     write("lift_buzz_1", buzz())
 
 
