@@ -36,7 +36,8 @@ is from a long way off; a silenced replica carries half as far.
 
 - **Window mode:** Windowed, Borderless (a borderless fullscreen window) or Fullscreen (exclusive). A new game opens in
   Fullscreen, on the screen the game starts on; after that it opens in the mode you left.
-  **F11** or **Alt+Enter** switches between windowed and your last fullscreen mode.
+  **F11** or **Alt+Enter** switches between windowed and your last fullscreen mode. A window can't be made smaller
+  than 960 x 540, where the words stay readable.
 - **Monitor:** with two screens or more, the screen the window opens on.
 - **V-Sync** (off by default) and a **Frame-rate limit**: a slider from 30 to 360 frames a second, with **Off** beside
   it for no limit (Off is the default; moving the slider turns it off). In the background

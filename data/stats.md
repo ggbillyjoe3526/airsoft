@@ -61,7 +61,7 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 | Key | Name | Class | Energy (J) | BB (g) | Fire rate (BBs/s) | Magazine (BBs) | Magazines | Reload (s) | Draw (s) | Spread (°) | Recoil (°) | Hip spread (×) | Pace (×) | Moving spread (×) | BBs per shot | Pattern (°) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | aeg | AEG Rifle | rifle | 0.97 | 0.25 | 13 | 60 | 4 | 1.8 | 0.45 | 0.45 | 0.18 | 1 | 1 | 1 | 1 | 0 |
-| pistol | GBB Pistol | pistol | 0.7 | 0.2 | 7 | 18 | 4 | 1.0 | 0.22 | 0.65 | 0.5 | 0.8 | 1.04 | 1 | 1 | 0 |
+| pistol | GBB Pistol | pistol | 0.7 | 0.2 | 7 | 18 | 4 | 1.0 | 0.22 | 0.65 | 0.5 | 0.8 | 1.04 | 0.8 | 1 | 0 |
 | cyber | Cyber Pistol | pistol | 1.0 | 0.25 | 14 | 30 | 3 | 1.1 | 0.28 | 0.3 | 0.06 | 1 | 1.04 | 2 | 1 | 0 |
 | sniper | Sniper Rifle | sniper | 1.9 | 0.3 | 0.8 | 25 | 4 | 2.2 | 0.65 | 0.1 | 0.4 | 10 | 0.95 | 1 | 1 | 0 |
 | smg | Compact SMG | rifle | 0.85 | 0.2 | 18 | 45 | 5 | 1.4 | 0.32 | 0.6 | 0.14 | 0.75 | 1.08 | 0.5 | 1 | 0 |
@@ -250,7 +250,8 @@ barrel.
 
 ## Muzzle parts
 
-Screwed onto a replica tagged `muzzle-thread` in pool.md (the GBB Pistol, the AEG Rifle and the Sniper Rifle).
+Screwed onto a replica tagged `muzzle-thread` in pool.md (the GBB Pistol, the AEG Rifle, the Sniper Rifle and the
+Compact SMG).
 
 | Key | Name | Energy % | Handling (×) | Heard from (×) |
 |---|---|---|---|---|

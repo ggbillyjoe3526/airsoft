@@ -25,8 +25,8 @@ reading logs, condensing output) to Haiku agents, several at once where it split
 5. **Review agents**, in this order, each told the task id, the head the checks passed on and `tools/check.sh`'s
    summary (a docs-only `tier: trivial` task gets `triage`'s diff summary instead, checked by you against the task):
    - `performance`; on Unexplained, again on Opus.
-   - `critic` (Opus). On Retry: `pipeline/README.md` › Verdict and attempts (near misses, the attempt
-     count), fix only the failed checks and findings, go to 2.
+   - `critic` (Opus, high effort). On Retry (any failed check: only 8/8 is an Accept): `pipeline/README.md` › Verdict
+     and attempts; fix only the failed checks and findings, go to 2.
    - A check only a changed acceptance criterion can pass: ask the owner at once on a decision card and stop there.
 6. **Changelog**: spawn `changelog` with the task id and title, the pull request title, a player-words summary, the
    kind (new, changed, fixed, internal), the FEATURES heading or none, and the task's decisions. It writes one

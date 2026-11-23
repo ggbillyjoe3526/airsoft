@@ -144,14 +144,16 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   criterion goes to the owner at once (owner, 2026-10-06).
 - **Every task runs through scripted gates and a binary critic (owner's design, 2026-10-04).** The gates (`tools/check.sh`
   locally, the same checks on CI) decide; the critic judges only on green gates, with eight pass/fail checks. Four
-  attempts, then auto-accept at 6 of 8 with checks 1 and 2 passing, else a report to the owner.
+  attempts, then auto-accept at 6 of 8 with checks 1 and 2 passing, else a report to the owner. **Replaced
+  (owner, 2026-11-22: "make the critic agent harsher"):** the critic accepts only at 8 of 8, traces five edge cases
+  and has hard fails (`.claude/agents/critic.md`); no near-miss re-run, no auto-accept, a task is fixed until it passes.
 - **Every code change gets all three review agents: critic, QA and performance (owner, 2026-10-16: "I need everything
   to go through a critic agent, qa agent, and performance agent").** Any pull request touching code, config, assets or
   gameplay data is marked ready and merged only once each says Pass and its description's `Review:` line gives the
   verdicts (CI checks it). Docs-only changes skip them.
 - **Agents run only where they can change the outcome, from the gate's own summaries (owner, 2026-10-06, to save
-  tokens).** The triage agent runs only for a failure the summary can't place; a near miss is re-run on Opus only when
-  its failed check is a judgment, never a measured number. The triage and changelog agents run on Haiku 5.5, pinned by
+  tokens).** The triage agent runs only for a failure the summary can't place; a near miss was re-run on Opus only when
+  its failed check was a judgment (no near-miss re-run since 2026-11-22). The triage and changelog agents run on Haiku 5.5, pinned by
   full id (`claude-haiku-5-5`; owner, 2026-10-08).
 - **A bug pass follows each batch of feature pull requests, before the owner's playtest (owner, 2026-10-04).** Claude
   starts it only when he says go (`BP<n>`; `docs/PROCESS.md`).
@@ -529,7 +531,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   BB's path less the body's own step, which is also what the interpolated figure and BB show; before, the body stood
   at its tick's end for the whole of the BB's travel (up to 11 cm out on a sprinter).
 - **Crouch and aim are both held by default (owner, 2026-10-18, replacing crouch toggled from 2026-10-03).** Each has a
-  toggle setting; a toggled crouch stands up on a sprint or jump press. Lean and sprint are held.
+  toggle setting; a toggled crouch stands up on a sprint or jump press. Lean and sprint are held. **Since BP13
+  (2026-11-22):** a toggled crouch stands up on a jump press or on running forward (PC1's sprint-first), never on a
+  sprint press alone, so Alt+Tab and Alt+Enter behind cover leave you down; and Enter and keypad Enter can't be bound
+  while Alt is the sprint and Alt+Enter the fullscreen key.
 - **Hold Q / E to lean around cover (owner, 2026-10-01); replicas switch with 1, 2 and the mouse wheel (owner,
   2026-10-02).** One geometry drives the eye, BB origin, hit volume, camera, drawn figure and bot vision, so you are hit
   only where you appear and never through walls.

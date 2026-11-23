@@ -38,6 +38,10 @@ func set_vsync(m: DisplayServer.VSyncMode) -> void:
 	calls.append("vsync %d" % m)
 
 
+func set_min_size(size: Vector2i) -> void:
+	calls.append("min %d x %d" % [size.x, size.y])
+
+
 func count() -> int:
 	return sizes.size()
 

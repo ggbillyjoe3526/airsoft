@@ -248,8 +248,8 @@ acceptance criteria, and `.claude/agents/` the agents (worker, qa, performance, 
 - **Three review agents on every code change** (owner, 2026-10-16): the critic (the quality bar), QA (bugs) and
   performance (frame time, allocations, freeing nodes and resources, budgets). A docs-only `tier: trivial` task is
   accepted by green gates plus a Haiku diff check.
-- **Four attempts, then auto-accept or the owner** (owner, 2026-10-04): a task stops after four, so a hard one reaches
-  the owner instead of looping.
+- **Accept only at 8 of 8** (owner, 2026-11-22, replacing the 2026-10-04 auto-accept): no near-miss re-run, no
+  auto-accept; after four attempts the thread tells the owner what keeps failing and keeps fixing.
 - **The owner's playtest wins.** The critic cannot play the game: it lists checks for the owner
   (`docs/PLAYTEST.md`), whose playtest overrides it.
 - **Records.** Each task writes `docs/records/<id>.md` (format in `docs/records/README.md`).

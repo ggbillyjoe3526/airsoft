@@ -222,6 +222,10 @@ class Screens:
 	func set_vsync(m: DisplayServer.VSyncMode) -> void:
 		DisplayServer.window_set_vsync_mode(m)
 
+	## The smallest the window can be dragged (BP13).
+	func set_min_size(size: Vector2i) -> void:
+		DisplayServer.window_set_min_size(size)
+
 	## The number of screens (none headless).
 	func count() -> int:
 		return DisplayServer.get_screen_count()

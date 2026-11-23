@@ -20,4 +20,5 @@ hop_up_dial = 0.75
 spread_deg = 0.65
 recoil_deg = 0.5
 hip_spread = 0.8
+move_spread = 0.8
 pace = 1.04

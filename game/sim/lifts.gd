@@ -370,7 +370,9 @@ func _shutting(i: int, state: GameState, dt: float) -> void:
 	if lifts.sealed[i] == 0 and not _seal(i, state):
 		return
 	var span := _cfg.shut_time()
-	var least := 0.0 if lifts.sealed[i] != 0 else span
+	# While someone aboard still stands in the doorway the leaves hold where they stand, ready to meet from there (a shut
+	# begun from ajar would otherwise wait out the whole shut_time with its leaves still: BP13).
+	var least := 0.0 if lifts.sealed[i] != 0 else span * lifts.doors[i]
 	lifts.left[i] = maxf(least, lifts.left[i] - dt)
 	# Never further open than they stood: a shut begun from ajar keeps its leaves still through the lead.
 	lifts.doors[i] = minf(lifts.doors[i], lifts.left[i] / span) if span > 0.0 else 0.0
