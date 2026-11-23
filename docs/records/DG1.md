@@ -31,8 +31,11 @@ nothing); **through** flies on past a drawn face. 300 lines a model.
 The worst before: Woodland's root plates 95 % phantom, the pickup 72 %, the sawbench 67 %, the palisade 28 %, the
 spruces 25 % (and 8 % through: their tiers missed boughs); Subway's crowd barriers 47 %, station benches 40 %, ticket
 gates 16 %, the train's tool cart 16 % (the owner's "ricochet above the cart"); the Range's shooting benches 51 %.
-What is left: Depot's roof sheeting and the Subway street entrance's ceiling, which are boxes over no prop (the
-audit's drawn side has no roof), and a few hut roofs on Woodland.
+Subway's spiral stair, 3.3 % through (main 3.3 %): every one is a line past the stairwell's top railing (blocks 68 to
+72, at 9 to 10 m): the audit's drawn side takes a railing as its box, while a BB's path (`bb_ray`) meets its bars
+(`Railings.first_bar`), so a BB between the bars flies on as drawn. What is left: Depot's roof sheeting and the Subway
+street entrance's ceiling, which are boxes over no prop (the audit's drawn side has no roof), and a few hut roofs on
+Woodland.
 
 `tools/sight_truth.gd` (WH1's probe; 120 bodies, 12 lines a body, the four body points):
 
@@ -54,7 +57,7 @@ thick of a plant counts), unchanged.
 
 - **Every prop is a ray body of its own faces (`DrawnRays`).** BBs' paths, sight and a bot's shot check meet each
   prop PropDress lays as drawn; a block its props stand in for keeps its box on `DrawnRays.BOX_LAYER` for the movers,
-  the level ray (underfoot, vaults, leans, the bomb, magazines, grenades), the bots' cover, the nav grid and the
+  the level ray (underfoot, vaults, leans, the dropped bomb, magazines), the bots' cover, the nav grid and the
   minimap. A lined block (TILE) or a cored one keeps its box for every ray: its box is drawn. `docs/DECISIONS.md` ›
   BBs and sight meet the props as they are drawn.
 - **Leaf cards are tested against their sheet where a ray meets them.** The cards are a body layer of their own;
@@ -87,6 +90,10 @@ thick of a plant counts), unchanged.
   life 45 %, as played 50 %). The owner's choice on a card, 23 November.
 - **The Attack / Defend guard job's limit is 45 min** (was 30): it ran 20 to 28 min on main's runners on 23 November and
   was stopped at 30 on a slow one.
+- **Smokes and flashes fly by the drawn faces too** (`WorldQuery.throw_ray`, the owner's "ricochet only against
+  surfaces"): a thrown bomb's line meets the props' faces and their leaf cards where solid, and, unlike a BB's or the
+  eye's, the railings' boxes and the glass (as before). A bot checks its throw's arc on the same line. The dropped bomb
+  (it must lie where a body can reach it) and tossed magazines keep the boxes.
 - **Older tests now judge by the drawn faces:** `test_bb_walls` checks no tick's path crosses a drawn wall's face
   (shots from inside the field: a drawn wall's end abutting the next is open only from outside); the hollow-marker
   test looks past one crate rather than the seam between two; the stripped Woodland keeps its prop seed; the
@@ -126,8 +133,8 @@ and Hard (28 to 29 %, within noise of the 25 % line, as main's Hard was): the on
 
 ## Known issues left
 
-- Grenades, the bomb and dropped magazines still bounce off the blocks' boxes (the level ray), so a smoke thrown over
-  the train's tool cart can still bounce where a BB flies on; bodies keep the boxes too. `docs/KNOWN_ISSUES.md` (the
+- The dropped bomb and tossed magazines still bounce off the blocks' boxes (the level ray), so a magazine tossed over
+  the train's tool cart can still bounce where a BB or a smoke flies on; bodies keep the boxes too. `docs/KNOWN_ISSUES.md` (the
   row replaces WH1's and BP7's on the tiers and steps).
 - A sight or BB line costs about 15 to 21 µs on Woodland against about 6 µs on a box: about 0.3 ms a bot tick at 8v8.
 - How it feels: the playtest checklist's N69.

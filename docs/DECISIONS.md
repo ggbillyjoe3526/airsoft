@@ -1026,10 +1026,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   happen against surfaces not empty spaces ... a bb should be able to go through it (think firing between branches of
   a tree). make sure all models in the game are updated").** Every prop PropDress lays (map models, Woodland's trees,
   thickets and logs, Subway's train fittings) is a ray body of its own faces where it is laid (`DrawnRays`); a leaf
-  card stops a line only where its sheet's alpha passes the shader's cut. A BB's path, sight and a bot's shot check
-  (`bb_ray`, `sight_ray`, `ray_past_railings`) meet those faces; a block its props stand in for keeps its box, on
-  `DrawnRays.BOX_LAYER`, for the movers, the level ray (underfoot, vaults, leans, the bomb, magazines), the bots'
-  cover, the nav grid and the minimap. A new or rebuilt prop model needs nothing more; `tools/prop_ray_audit.gd`
+  card stops a line only where its sheet's alpha passes the shader's cut. A BB's path, sight, a bot's shot check and a
+  thrown smoke or flash (`bb_ray`, `sight_ray`, `ray_past_railings`, `throw_ray`) meet those faces; a block its props
+  stand in for keeps its box, on `DrawnRays.BOX_LAYER`, for the movers, the level ray (underfoot, vaults, leans, the
+  dropped bomb, magazines), the bots' cover, the nav grid and the minimap. A new or rebuilt prop model needs nothing more; `tools/prop_ray_audit.gd`
   compares the game's rays with the drawn faces on every map. It replaces WH1's tiers and RoundSteps as what BBs and
   sight meet (they remain the bodies' collision).
 - **Plant The Bomb is the third mode (owner, 2026-11-12, PB1).** His rules: the attackers plant a bomb at Site A or

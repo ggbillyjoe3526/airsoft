@@ -72,6 +72,14 @@ func ray_past_railings(from: Vector3, to: Vector3, hit: RayHit) -> bool:
 	return ray(from, to, hit)
 
 
+## As `ray`, for a thrown smoke or flash (DG1): the level as it is drawn, a prop's faces rather than the box it stands
+## in for, and its leaf cards where their sheet is solid, so a bomb flies on through a prop's gaps (over a trolley's
+## tray, between a tree's boughs) where a BB does. Railings' boxes, glass, doors and lifts stop it as `ray`. A level
+## without drawn props answers as `ray`.
+func throw_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	return ray(from, to, hit)
+
+
 ## The nearest surface a BB flying the segment from `from` to `to` meets, written into `hit`: the level past the
 ## railings' boxes (ray_past_railings), or the first of their bars and rails it actually crosses (Railings.first_bar);
 ## false if there is none. Allocates nothing.

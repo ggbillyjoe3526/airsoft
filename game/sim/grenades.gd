@@ -528,13 +528,13 @@ func _fly(g: Grenade, index: int, characters: Array[Character], events: SimEvent
 		return
 	var dir := move / length
 	var reach := length + cfg.radius
-	var met := _query.ray(g.position, g.position + dir * reach, _hit)
+	var met := _query.throw_ray(g.position, g.position + dir * reach, _hit)
 	var on_body := _body_hit(g, dir, (_hit.fraction * reach - cfg.radius) if met else length, characters)
 	met = met or on_body
 	if not met:
 		g.position += move
 		met = g.velocity.y <= 0.0 \
-				and _query.ray(g.position, g.position + Vector3.DOWN * (cfg.radius + GROUND_PROBE), _hit)
+				and _query.throw_ray(g.position, g.position + Vector3.DOWN * (cfg.radius + GROUND_PROBE), _hit)
 	if not met:
 		return
 	g.position = _hit.position + _hit.normal * cfg.radius

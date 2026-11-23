@@ -56,7 +56,7 @@ var _own_shapes: Array[ConcavePolygonShape3D] = []
 ## The leaf sheet's alpha (FORMAT_LA8), read where a ray meets a card; null on a map with no leaf cards.
 var _sheet: Image = null
 var _sheet_size: Vector2i = Vector2i.ZERO
-## While the bodies are made (`begin` to `build_some`'s end): the map, its dress and the space, the props as laid by
+## While the bodies are made (`begin` to the last `build_step`): the map, its dress and the space, the props as laid by
 ## model, the models in turn and the model and prop being made, each open body by its key and how many shapes it holds.
 var _map: MapData = null
 var _dress: PropDressConfig = null
@@ -77,8 +77,8 @@ static func build(map: MapData, props: PropDressConfig, space: RID, cfg: DrawnRa
 	return rays
 
 
-## As `build`, the props laid but no body made yet: `build_some` makes them a few props a call (a loading screen keeps
-## drawing, MapLevel's staged build), the same rays either way.
+## As `build`, the props laid but no body made yet: `build_step` makes them a few props a call (MapLevel's staged
+## build, one a loading-screen frame), the same rays either way.
 static func begin(map: MapData, props: PropDressConfig, space: RID, cfg: DrawnRayConfig) -> DrawnRays:
 	var rays := DrawnRays.new()
 	rays._cfg = cfg
@@ -106,7 +106,7 @@ func build_some(until_usec: int) -> bool:
 	return done()
 
 
-## Whether every body is made (`build`, or `build_some` to the end).
+## Whether every body is made (`build`, or `build_step` until it says so).
 func done() -> bool:
 	return _map == null
 

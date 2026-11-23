@@ -66,6 +66,22 @@ func test_a_bb_over_the_train_s_tool_trolley_flies_on_where_its_box_stood() -> v
 		assert_eq(_hit.surface, b.surface, "made of its block's stuff")
 
 
+func test_a_smoke_thrown_over_the_trolley_flies_on_and_one_into_it_meets_it() -> void:
+	var q := _subway.level.query()
+	for b in _carts():
+		var foot := b.center.y - b.size.y * 0.5
+		var lo := b.center - b.size * 0.5
+		var box := AABB(lo, b.size).grow(0.01)
+		var a := Vector3(lo.x - 1.0, foot + OVER_TRAY, b.center.z)
+		var c := Vector3(lo.x + b.size.x + 1.0, a.y, b.center.z)
+		assert_false(q.throw_ray(a, c, _hit) and box.has_point(_hit.position),
+				"a smoke over %s's top tray flies on (it stopped at %s)" % [b.center, _hit.position])
+		var low := Vector3(a.x, foot + THROUGH_DRAWERS, a.z)
+		assert_true(q.throw_ray(low, Vector3(c.x, low.y, c.z), _hit) and box.has_point(_hit.position),
+				"one thrown into %s's drawers meets the trolley" % b.center)
+		assert_eq(_hit.surface, b.surface, "made of its block's stuff")
+
+
 func test_a_body_walking_into_the_trolley_still_meets_its_box() -> void:
 	var b := _carts()[0]
 	var mover := _subway.level.mover(_subway.tuning.body)
@@ -138,6 +154,7 @@ func test_a_leaf_card_stops_a_line_where_its_sheet_is_solid_and_lets_it_through_
 	var spruces: PropLayout.Placed = placed[&"spruce"]
 	var agree := Vector2i.ZERO
 	var tried := Vector2i.ZERO
+	var leafy := 0
 	var guard := 0
 	while (tried.x < CARD_POINTS or tried.y < CARD_POINTS) and guard < 20000:
 		guard += 1
@@ -164,11 +181,13 @@ func test_a_leaf_card_stops_a_line_where_its_sheet_is_solid_and_lets_it_through_
 		var stopped_there := met and _hit.position.distance_to(at) < 0.005
 		if stopped_there == solid:
 			agree[k] += 1
+		if solid and stopped_there and _hit.surface == RayHit.Surface.LEAVES:
+			leafy += 1
 	assert_eq(tried, Vector2i(CARD_POINTS, CARD_POINTS), "points on the spruces' cards, solid and cut away")
 	assert_gte(agree.x, CARD_AGREE, "a line through a card where its sheet is solid stops there (%d of %d)" % [
 			agree.x, CARD_POINTS])
 	assert_gte(agree.y, CARD_AGREE, "and flies on where it is cut away (%d of %d)" % [agree.y, CARD_POINTS])
-	assert_eq(_hit.surface if agree.x > 0 else RayHit.Surface.LEAVES, RayHit.Surface.LEAVES)
+	assert_eq(leafy, agree.x, "every line stopped on a card stops on leaves")
 
 
 func test_every_prop_the_game_draws_stands_for_its_block_and_no_other() -> void:

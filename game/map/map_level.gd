@@ -407,7 +407,8 @@ func _add_rest() -> void:
 				_railings.material_override = _material
 			add_child(_railings)
 		if drawn:
-			_query.set_drawn(_drawn, past if past != null else _level_ray("PastRailingsRay", DRAWN_MASK))
+			_query.set_drawn(_drawn, past if past != null else _level_ray("PastRailingsRay", DRAWN_MASK),
+					_level_ray("ThrowRay", DRAWN_MASK))
 	_clear_bodies.clear()
 	_railing_bodies.clear()
 	_tier_bodies.clear()
