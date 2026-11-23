@@ -164,7 +164,8 @@ func update(characters: Array[Character], watched: Character, fraction: float, f
 			var g := GLARE_STRENGTH * flare
 			glares.set_instance_color(glare_n, Color(COLOUR.r * g, COLOUR.g * g, COLOUR.b * g))
 			glare_n += 1
-		if _query != null and _query.ray(origin, origin + dir * light.reach, _hit):
+		# Its spot lands where the eye sees a surface (DG1): on bark and needles, never on a box between the boughs.
+		if _query != null and _query.sight_ray(origin, origin + dir * light.reach, _hit):
 			var dist := light.reach * _hit.fraction
 			var size := 2.0 * dist * tan(deg_to_rad(light.spill_deg * 0.5))
 			var s := SPOT_STRENGTH * clampf(1.0 - _hit.fraction, 0.0, 1.0)

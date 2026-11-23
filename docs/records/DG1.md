@@ -57,7 +57,7 @@ thick of a plant counts), unchanged.
 
 - **Every prop is a ray body of its own faces (`DrawnRays`).** BBs' paths, sight and a bot's shot check meet each
   prop PropDress lays as drawn; a block its props stand in for keeps its box on `DrawnRays.BOX_LAYER` for the movers,
-  the level ray (underfoot, vaults, leans, the dropped bomb, magazines), the bots' cover, the nav grid and the
+  the level ray (underfoot, vaults, leans, the dropped bomb), the bots' cover, the nav grid and the
   minimap. A lined block (TILE) or a cored one keeps its box for every ray: its box is drawn. `docs/DECISIONS.md` ›
   BBs and sight meet the props as they are drawn.
 - **Leaf cards are tested against their sheet where a ray meets them.** The cards are a body layer of their own;
@@ -93,7 +93,11 @@ thick of a plant counts), unchanged.
 - **Smokes and flashes fly by the drawn faces too** (`WorldQuery.throw_ray`, the owner's "ricochet only against
   surfaces"): a thrown bomb's line meets the props' faces and their leaf cards where solid, and, unlike a BB's or the
   eye's, the railings' boxes and the glass (as before). A bot checks its throw's arc on the same line. The dropped bomb
-  (it must lie where a body can reach it) and tossed magazines keep the boxes.
+  (it must lie where a body can reach it) keeps the boxes. The same line carries where a tossed magazine is drawn
+  landing and what a held replica pulls back from (`ReplicaView`, a figure's raise), so neither meets the air over a
+  trolley's tray; a torch's spot lands where the eye sees a surface (`sight_ray`). Those are the look only. A toss's
+  own path (`MagShare`, whether it is clear and where it stops in flight) keeps the level ray: it is a rule the bots
+  play by, and the balance below was measured on it.
 - **Depot's follow-me guard allows catch_up + 0.5 m** (`test_match_guards.gd`, FOLLOW_SLACK): with smokes flying by
   the drawn faces seed 2 plays differently, and a follower rounding a corner as its leader ran off was 8.05 m behind
   for a few ticks while it sprinted back (8.0 m before: a follower only sprints from catch_up, 8 m). Following itself
@@ -137,8 +141,9 @@ and Hard (28 to 29 %, within noise of the 25 % line, as main's Hard was): the on
 
 ## Known issues left
 
-- The dropped bomb and tossed magazines still bounce off the blocks' boxes (the level ray), so a magazine tossed over
-  the train's tool cart can still bounce where a BB or a smoke flies on; bodies keep the boxes too. `docs/KNOWN_ISSUES.md` (the
+- Bodies, the dropped bomb and a tossed magazine's flight keep the blocks' boxes (the level ray): a body can't step
+  into the air over the train's tool cart, a bomb dropped on it rests on its box, and a magazine tossed over it stops
+  there. `docs/KNOWN_ISSUES.md` (the
   row replaces WH1's and BP7's on the tiers and steps).
 - A sight or BB line costs about 15 to 21 µs on Woodland against about 6 µs on a box: about 0.3 ms a bot tick at 8v8.
 - How it feels: the playtest checklist's N69.

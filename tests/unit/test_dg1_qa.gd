@@ -426,7 +426,7 @@ func test_a_body_key_has_room_for_every_surface_layer_and_square_the_maps_use() 
 			assert_lt(absf(b.center.z) / chunk, DrawnRays.KEY_CELLS, "%s: row in range" % id)
 
 
-## A bomb with gravity off, flown through `q` along +x from `from` at `speed` m/s for `ticks` ticks.
+## A bomb flown through `q` from `from` at `vel` for `ticks` ticks, under `gravity` (0: off).
 func _fly_bomb(q: WorldQuery, from: Vector3, vel: Vector3, ticks: int, gravity: float = 0.0) -> Grenade:
 	var tuning := SimTuning.new()
 	tuning.grenades.gravity = gravity
@@ -510,16 +510,30 @@ func test_throw_ray_is_ray_where_a_level_draws_nothing_and_on_a_plain_world_quer
 		assert_eq(plain.throw_ray(a, c, _hit), plain.ray(a, c, other), "BoxWorld: throw_ray answers as ray")
 		if plain.ray(a, c, other):
 			assert_eq(_hit.position, other.position, "same place")
-	var rng_q := _query("range")
-	if _rays("range").prop_count() == 0:
-		for i in 40:
-			var a := Vector3(rng.randf_range(-8, 8), rng.randf_range(0.2, 2), rng.randf_range(-8, 8))
-			var c := Vector3(rng.randf_range(-8, 8), rng.randf_range(0.2, 2), rng.randf_range(-8, 8))
-			var h1 := rng_q.throw_ray(a, c, _hit)
-			var h2 := rng_q.ray(a, c, other)
-			assert_eq(h1, h2, "range: throw_ray as ray")
-			if h1:
-				assert_almost_eq(_hit.fraction, other.fraction, 0.001)
+	# A JoltQuery with no drawn props (a level that draws none: set_drawn never called) over one box of its own.
+	var world := _own_world()
+	var box := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	(shape.shape as BoxShape3D).size = Vector3(2, 2, 2)
+	box.add_child(shape)
+	world.add_child(box)
+	var cast := RayCast3D.new()
+	cast.enabled = false
+	world.add_child(cast)
+	await wait_physics_frames(2)
+	var undrawn := JoltQuery.new(cast, [box.get_rid()] as Array[RID], BodyConfig.new())
+	var met := 0
+	for i in 40:
+		var a := Vector3(rng.randf_range(-4, 4), rng.randf_range(-2, 2), -4.0)
+		var c := Vector3(rng.randf_range(-4, 4), rng.randf_range(-2, 2), 4.0)
+		var h1 := undrawn.throw_ray(a, c, _hit)
+		var h2 := undrawn.ray(a, c, other)
+		assert_eq(h1, h2, "no drawn props: throw_ray as ray")
+		if h1 and h2:
+			met += 1
+			assert_almost_eq(_hit.fraction, other.fraction, 0.001, "at the same place")
+	assert_gt(met, 0, "some lines meet the box, or this proves nothing")
 
 
 func test_throw_ray_of_no_length_is_no_hit_on_every_map() -> void:
@@ -528,7 +542,7 @@ func test_throw_ray_of_no_length_is_no_hit_on_every_map() -> void:
 		assert_false(_query(id).throw_ray(p, p, _hit), "%s: a zero-length throw ray is no hit" % id)
 
 
-## A query that answers a bomb's line as a BB's: Grenades using `ray` again.
+## A query that answers a bomb's line as the level ray (the blocks' boxes): Grenades using `ray` again.
 class BoxedThrow extends WorldQuery:
 	var inner: JoltQuery = null
 

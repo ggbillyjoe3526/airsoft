@@ -354,9 +354,9 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 			rot += Vector3(_cfg.bolt_tilt, _cfg.bolt_turn, _cfg.bolt_roll) * bell
 			pos += Vector3(-_cfg.bolt_inward, _cfg.bolt_lift, 0.0) * bell
 
-	# Pulled back from a wall in front, at the hip.
+	# Pulled back from a wall in front, at the hip: the level as drawn (DG1), so never against the air over a prop.
 	var pull := 0.0
-	if _query.ray(eye, eye + look * _cfg.reach, _wall):
+	if _query.throw_ray(eye, eye + look * _cfg.reach, _wall):
 		pull = minf(_cfg.pull_back_max, _cfg.reach * (1.0 - _wall.fraction))
 	_pull = lerpf(_pull, pull, follow)
 	# Aimed, the sight stays at the eye (pulled back it would pass behind it); the pressed depth keeps it over the wall.

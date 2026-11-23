@@ -82,6 +82,22 @@ func test_a_smoke_thrown_over_the_trolley_flies_on_and_one_into_it_meets_it() ->
 		assert_eq(_hit.surface, b.surface, "made of its block's stuff")
 
 
+func test_a_replica_held_over_the_trolley_is_not_pulled_back_against_the_air_over_its_tray() -> void:
+	# ReplicaView pulls the replica back along throw_ray from the eye, ViewModelConfig.reach long; standing at the
+	# trolley's end, eyes at stand_eye_height (under the 1.7 m box's top), looking along it over the trays.
+	var q := _subway.level.query()
+	var reach := ViewModelConfig.new().reach
+	var eye_up := _subway.tuning.body.stand_eye_height
+	for b in _carts():
+		var foot := b.center.y - b.size.y * 0.5
+		var lo := b.center - b.size * 0.5
+		assert_lt(eye_up, b.size.y, "the eye is under the box's top, or this proves nothing")
+		var eye := Vector3(lo.x - 0.2, foot + eye_up, b.center.z)
+		var ahead := eye + Vector3(reach, 0.0, 0.0)
+		assert_true(q.ray(eye, ahead, _hit), "the box would pull it back")
+		assert_false(q.throw_ray(eye, ahead, _hit), "nothing drawn within reach over %s: no pull" % b.center)
+
+
 func test_a_body_walking_into_the_trolley_still_meets_its_box() -> void:
 	var b := _carts()[0]
 	var mover := _subway.level.mover(_subway.tuning.body)
