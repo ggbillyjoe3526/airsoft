@@ -131,7 +131,9 @@ func test_bot_matches_with_ricochets_counting_stay_playable() -> void:
 	var friendly_bounces := 0
 	var self_hits := 0
 	var won := 0
-	for seed_value: int in [1, 2, 3, 4, 5, 6, 7, 8]:
+	# 16 seeds (DG1): on 8 the share swung between 20 % and 25 % from one set of seeds to the next, so a guard at 25 %
+	# judged noise; on both sets together it is about 23 %.
+	for seed_value: int in range(1, 17):
 		_start(seed_value)
 		var finished := false
 		for t in roundi(tuning.rounds.round_time / DT) * 14:
@@ -156,9 +158,9 @@ func test_bot_matches_with_ricochets_counting_stay_playable() -> void:
 	tuning.hits.ricochets_count = false
 	gut.p("ricochets counting: %d hits, %d off a bounce, %d on a teammate, %d on the shooter" % [hits, bounced,
 			friendly_bounces, self_hits])
-	assert_eq(won, 8, "every match was won")
+	assert_eq(won, 16, "every match was won")
 	assert_eq(direct_friendly, 0, "no bot shot a teammate directly")
-	# A share of the hits, like the shooter's own below: a count over 8 seeded matches swings with any change to the
+	# A share of the hits, like the shooter's own below: a count over the seeded matches swings with any change to the
 	# hit volumes (3 of 224 hits before GA1 re-made the legs, 7 of 242 after; the cap was 6).
 	assert_lt(float(friendly_bounces) / maxi(1, hits), 0.035, "a bounce catches a teammate only rarely")
 	assert_lt(float(self_hits) / maxi(1, hits), 0.05, "a bounce catches its own shooter only rarely")

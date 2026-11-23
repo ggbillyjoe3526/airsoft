@@ -203,9 +203,10 @@ func test_a_teammate_crouched_behind_low_cover_gets_a_hollow_marker() -> void:
 	add_child_autofree(camera)
 	var hud := session.hud()
 	var markers := hud.team_markers()
-	# A crate in Depot's Chrono hall (1.1 m high, z 4.5 to 5.5 at x -4), seen from a few metres off at a low aim.
-	var behind := Vector3(-4.0, 0.0, 6.2)
-	camera.global_position = Vector3(-4.0, 1.3, 0.0)
+	# A crate in Depot's Chrono hall (1.1 m high, z 4.5 to 5.5 at x -5.3 to -2.7), seen from a few metres off at a low
+	# aim, past one crate of its two (sight meets them as drawn, DG1: the seam between them at x -4 is open).
+	var behind := Vector3(-4.6, 0.0, 6.2)
+	camera.global_position = Vector3(-4.6, 1.3, 0.0)
 	camera.look_at(behind + Vector3.UP)
 	mate.position = behind
 	mate.prev_position = behind
