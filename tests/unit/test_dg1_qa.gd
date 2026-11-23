@@ -424,3 +424,127 @@ func test_a_body_key_has_room_for_every_surface_layer_and_square_the_maps_use() 
 		for b in _runners[id].map.blocks:
 			assert_lt(absf(b.center.x) / chunk, DrawnRays.KEY_CELLS, "%s: column in range" % id)
 			assert_lt(absf(b.center.z) / chunk, DrawnRays.KEY_CELLS, "%s: row in range" % id)
+
+
+## A bomb with gravity off, flown through `q` along +x from `from` at `speed` m/s for `ticks` ticks.
+func _fly_bomb(q: WorldQuery, from: Vector3, vel: Vector3, ticks: int, gravity: float = 0.0) -> Grenade:
+	var tuning := SimTuning.new()
+	tuning.grenades.gravity = gravity
+	var bombs := Grenades.new(tuning, q)
+	var g := Grenade.new()
+	g.launch(Grenade.Kind.SMOKE, 0, from, vel)
+	var events := SimEvents.new()
+	var none: Array[Character] = []
+	for i in ticks:
+		bombs._fly(g, 0, none, events, 1.0 / 60.0)
+	return g
+
+
+func _trolley() -> MapData.Block:
+	for b in _runners["subway"].map.blocks:
+		if b.dress == &"tool_cart":
+			return b
+	return null
+
+
+func test_a_smoke_flown_through_the_trolley_s_top_tray_gap_is_not_bounced_and_one_through_the_drawers_is() -> void:
+	var b := _trolley()
+	var q := _query("subway")
+	var foot := b.center.y - b.size.y * 0.5
+	var lo := b.center - b.size * 0.5
+	var start := Vector3(lo.x - 1.0, foot + 1.45, b.center.z)
+	var over := _fly_bomb(q, start, Vector3(8.0, 0.0, 0.0), 60)
+	assert_gt(over.position.x, lo.x + b.size.x, "over the tray the smoke flew past the trolley's whole box")
+	assert_gt(over.velocity.x, 7.0, "and was not bounced or slowed")
+	var low := _fly_bomb(q, Vector3(start.x, foot + 0.85, start.z), Vector3(8.0, 0.0, 0.0), 60)
+	assert_lt(low.position.x, lo.x + b.size.x * 0.5, "through the drawers it met the trolley")
+
+
+func test_a_smoke_dropped_on_the_trolley_lands_on_its_drawn_tray_not_the_box_top() -> void:
+	var b := _trolley()
+	var q := _query("subway")
+	var foot := b.center.y - b.size.y * 0.5
+	var g := _fly_bomb(q, Vector3(b.center.x, foot + 1.9, b.center.z), Vector3(0.0, -1.0, 0.0), 600, 9.8)
+	assert_true(is_finite(g.position.y), "a finite place")
+	assert_lt(g.position.y, foot + b.size.y - 0.1, "it fell past the box top and did not rest on the box's top where nothing is drawn")
+	assert_gt(g.position.y, foot - 0.01, "and did not fall through the floor")
+
+
+func test_a_smoke_started_inside_a_hollow_prop_stays_finite_and_in_the_level() -> void:
+	var b := _trolley()
+	var q := _query("subway")
+	var foot := b.center.y - b.size.y * 0.5
+	var g := _fly_bomb(q, Vector3(b.center.x, foot + 0.9, b.center.z), Vector3(0.5, 0.0, 0.3), 600, 9.8)
+	assert_true(is_finite(g.position.x) and is_finite(g.position.y) and is_finite(g.position.z), "finite")
+	assert_gt(g.position.y, foot - 0.5, "it did not drop through the floor")
+
+
+func test_a_thrown_bomb_still_stops_on_glass_railing_and_door_boxes_on_every_map() -> void:
+	var tried := 0
+	for id in MAPS:
+		var q := _query(id)
+		for b in _runners[id].map.blocks:
+			var kind := String(b.kind)
+			if not (kind.contains("glass") or kind.contains("rail") or kind.contains("door")):
+				continue
+			if b.size.y < 0.6 or b.size.x < 0.05:
+				continue
+			var thin_x := b.size.x < b.size.z
+			var off := Vector3(1.0, 0.0, 0.0) if thin_x else Vector3(0.0, 0.0, 1.0)
+			var mid := b.center
+			tried += 1
+			assert_true(q.throw_ray(mid - off, mid + off, _hit), "%s: a bomb into %s at %s stops" % [id, kind, mid])
+			if tried > 60:
+				return
+	assert_gt(tried, 0, "some glass, railing or door block exists")
+
+
+func test_throw_ray_is_ray_where_a_level_draws_nothing_and_on_a_plain_world_query() -> void:
+	var plain := BoxWorld.new()
+	var other := RayHit.new()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	for i in 40:
+		var a := Vector3(rng.randf_range(-5, 5), rng.randf_range(0, 3), rng.randf_range(-5, 5))
+		var c := Vector3(rng.randf_range(-5, 5), rng.randf_range(0, 3), rng.randf_range(-5, 5))
+		assert_eq(plain.throw_ray(a, c, _hit), plain.ray(a, c, other), "BoxWorld: throw_ray answers as ray")
+		if plain.ray(a, c, other):
+			assert_eq(_hit.position, other.position, "same place")
+	var rng_q := _query("range")
+	if _rays("range").prop_count() == 0:
+		for i in 40:
+			var a := Vector3(rng.randf_range(-8, 8), rng.randf_range(0.2, 2), rng.randf_range(-8, 8))
+			var c := Vector3(rng.randf_range(-8, 8), rng.randf_range(0.2, 2), rng.randf_range(-8, 8))
+			var h1 := rng_q.throw_ray(a, c, _hit)
+			var h2 := rng_q.ray(a, c, other)
+			assert_eq(h1, h2, "range: throw_ray as ray")
+			if h1:
+				assert_almost_eq(_hit.fraction, other.fraction, 0.001)
+
+
+func test_throw_ray_of_no_length_is_no_hit_on_every_map() -> void:
+	for id in MAPS:
+		var p := _runners[id].map.blocks[0].center + Vector3(0, 3, 0)
+		assert_false(_query(id).throw_ray(p, p, _hit), "%s: a zero-length throw ray is no hit" % id)
+
+
+## A query that answers a bomb's line as a BB's: Grenades using `ray` again.
+class BoxedThrow extends WorldQuery:
+	var inner: JoltQuery = null
+
+	func ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+		return inner.ray(from, to, hit)
+
+	func throw_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+		return inner.ray(from, to, hit)
+
+
+func test_the_same_flight_over_the_tray_is_stopped_by_the_box_when_a_bomb_casts_as_a_bb() -> void:
+	var b := _trolley()
+	var foot := b.center.y - b.size.y * 0.5
+	var lo := b.center - b.size * 0.5
+	var start := Vector3(lo.x - 1.0, foot + 1.45, b.center.z)
+	var boxed := BoxedThrow.new()
+	boxed.inner = _query("subway")
+	var g := _fly_bomb(boxed, start, Vector3(8.0, 0.0, 0.0), 60)
+	assert_lt(g.position.x, lo.x + b.size.x * 0.5, "cast as a BB the bomb stops at the box (the harness can tell the two)")
