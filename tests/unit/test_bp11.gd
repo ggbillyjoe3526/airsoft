@@ -126,15 +126,17 @@ func test_a_field_s_hard_wait_is_read_and_blank_or_bad_keeps_the_scale() -> void
 		assert_eq(bad.problems.size(), 1, "%s warns" % cell)
 
 
-func test_subway_s_defenders_wait_their_own_time_only_against_hard_bots() -> void:
+func test_subway_s_defenders_wait_the_scaled_time_against_hard_bots_in_every_way_it_is_played() -> void:
+	# BP13: Subway's own 15.2 s gave Hard attackers 63.2 % once its bots spread out; the scale's 13.3 s gives 51.5 %.
 	var base := SimTuning.load_default()
 	var subway := MapCatalog.shared().find("subway")
-	assert_gt(subway.defender_respawn_hard, 0.0, "Subway sets its own Hard wait")
+	assert_eq(subway.defender_respawn_hard, 0.0, "Subway sets no Hard wait of its own")
+	var hard: float = subway.defender_respawn * base.rounds.defender_respawn_scale[&"hard"]
 	var played: Array[SimTuning] = [MatchOptions.match_tuning(base, subway, null),
 			MatchOptions.match_tuning(base, subway, CustomRules.new()), MatchRunner.sized_for("subway")]
 	for t in played:
-		assert_eq(t.rounds.defender_respawn_hard, subway.defender_respawn_hard)
-		assert_eq(MatchOptions.level_tuning(t, &"hard").rounds.defender_respawn_delay, subway.defender_respawn_hard)
+		assert_eq(t.rounds.defender_respawn_hard, 0.0)
+		assert_almost_eq(MatchOptions.level_tuning(t, &"hard").rounds.defender_respawn_delay, hard, 0.001)
 		assert_eq(MatchOptions.level_tuning(t, &"normal").rounds.defender_respawn_delay, subway.defender_respawn)
 		var easy: float = subway.defender_respawn * base.rounds.defender_respawn_scale[&"easy"]
 		assert_almost_eq(MatchOptions.level_tuning(t, &"easy").rounds.defender_respawn_delay, easy, 0.001)

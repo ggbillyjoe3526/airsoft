@@ -1,7 +1,3 @@
-### Subway defenders wait longer against Hard bots
-- On Subway in Attack / Defend, defenders now wait about 15 seconds to come back against Hard bots, up from about 13.
-- Hard defenders held the poles too well there. Easy and Normal are unchanged.
-
 ### Bots keep their jobs
 - On Subway in Plant The Bomb, a defender guarding the far site keeps guarding it after being hit and coming back.
 - Bots told to Regroup or Follow Me try again after a blocked route, instead of standing still for good.
