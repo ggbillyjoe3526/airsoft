@@ -223,11 +223,30 @@ func test_rays_through_the_woods_allocate_nothing_once_warm() -> void:
 
 
 func test_the_bodies_go_with_the_rays() -> void:
-	var rays := DrawnRays.build(_subway.map, PropDressConfig.new().named_only(), _subway.level.get_world_3d().space,
+	# in a world of their own, so only these rays' bodies are there to meet
+	var view := SubViewport.new()
+	view.own_world_3d = true
+	view.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child_autofree(view)
+	var cast := RayCast3D.new()
+	cast.enabled = false
+	cast.collision_mask = DrawnRays.DRAWN_LAYER
+	view.add_child(cast)
+	var rays := DrawnRays.build(_subway.map, PropDressConfig.new().named_only(), view.find_world_3d().space,
 			DrawnRayConfig.new())
 	assert_gt(rays.body_count(), 0)
+	await wait_physics_frames(1)
+	var b := _carts()[0]
+	var low := b.center + Vector3(0.0, THROUGH_DRAWERS - b.size.y * 0.5, 0.0)
+	cast.position = low - Vector3(b.size.x * 0.5 + 1.0, 0.0, 0.0)
+	cast.target_position = Vector3(b.size.x + 2.0, 0.0, 0.0)
+	cast.force_raycast_update()
+	assert_true(cast.is_colliding(), "control: the trolley's faces are met")
 	rays.free_bodies()
 	assert_eq(rays.body_count(), 0, "freed")
+	await wait_physics_frames(1)
+	cast.force_raycast_update()
+	assert_false(cast.is_colliding(), "and gone from the space")
 
 
 ## Each model's props as the built-in look lays them on `m`.

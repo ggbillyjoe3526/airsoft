@@ -16,6 +16,10 @@ extends RefCounted
 const BOX_LAYER := 4
 const DRAWN_LAYER := 8
 const LEAF_LAYER := 16
+## A body's key (`_add`): a square's column and row each under this either side of the field's middle, and a surface's
+## and a layer's value each under KEY_SLOTS.
+const KEY_CELLS := 2048
+const KEY_SLOTS := 32
 ## A prop's axes are square to one another within this (the cosine between them): a geometric tolerance.
 const SQUARE := 1e-4
 
@@ -92,11 +96,11 @@ static func begin(map: MapData, props: PropDressConfig, space: RID, cfg: DrawnRa
 	return rays
 
 
-## Makes the props' bodies, DrawnRayConfig.props_a_step props at a time, until the clock passes `until_usec` (0: to
-## the end); whether they are all made (and in their space).
+## Makes the props' bodies, a step (`build_step`) at a time, until the clock passes `until_usec` (0: to the end);
+## whether they are all made (and in their space).
 func build_some(until_usec: int) -> bool:
 	while not done():
-		_build_step()
+		build_step()
 		if until_usec > 0 and Time.get_ticks_usec() >= until_usec:
 			break
 	return done()
@@ -107,17 +111,19 @@ func done() -> bool:
 	return _map == null
 
 
-## The model being made's shapes, else its next DrawnRayConfig.props_a_step props, or, past the last model, the sets
-## and the bodies' space.
-func _build_step() -> void:
+## One step of the build `begin` started: the model being made's shapes, else its next DrawnRayConfig.props_a_step
+## props, or, past the last model, the sets and the bodies' space; whether every body is made.
+func build_step() -> bool:
+	if done():
+		return true
 	if _model_at >= _models.size():
 		_finish()
-		return
+		return true
 	var model := _models[_model_at]
 	if not _shapes.has(model):
 		# a model's shapes are a step of their own
 		_shapes_of(model, _dress)
-		return
+		return false
 	var shapes := _shapes_of(model, _dress)
 	var p := _laid[model]
 	var end := p.transforms.size() if shapes.solid == null and shapes.leaves == null \
@@ -148,6 +154,7 @@ func _build_step() -> void:
 	if _prop_at >= p.transforms.size():
 		_prop_at = 0
 		_model_at += 1
+	return false
 
 
 ## A structure laid once over its set of blocks (SET) stands in for every block of the set; the bodies go into their
@@ -255,8 +262,8 @@ func _placed(shape: ConcavePolygonShape3D, xf: Transform3D, sheared: bool) -> Co
 ## the body.
 func _add(at: Vector3, xf: Transform3D, shape: Shape3D, layer: int, surface: int) -> RID:
 	var cell := Vector2i(floori(at.x / _cfg.chunk), floori(at.z / _cfg.chunk))
-	# a key a layer, a surface and a square (each square's column and row under 2^12 either side)
-	var key := (((cell.x + 2048) * 4096 + cell.y + 2048) * 32 + surface) * 32 + layer
+	# a key a layer, a surface and a square
+	var key := (((cell.x + KEY_CELLS) * 2 * KEY_CELLS + cell.y + KEY_CELLS) * KEY_SLOTS + surface) * KEY_SLOTS + layer
 	var body: RID = _open.get(key, RID())
 	if not body.is_valid() or _counts[key] >= _cfg.most_a_body:
 		body = PhysicsServer3D.body_create()
@@ -293,17 +300,17 @@ func _shapes_of(model: StringName, props: PropDressConfig) -> Shapes:
 	for surface in mesh.get_surface_count():
 		var arrays := mesh.surface_get_arrays(surface)
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-		var uvs: Variant = arrays[Mesh.ARRAY_TEX_UV]
+		var has_uvs := arrays[Mesh.ARRAY_TEX_UV] != null
+		var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV] if has_uvs else PackedVector2Array()
 		var index: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 		var count := index.size() if not index.is_empty() else verts.size()
 		for k in range(0, count - 2, 3):
 			var a := index[k] if not index.is_empty() else k
 			var b := index[k + 1] if not index.is_empty() else k + 1
 			var c := index[k + 2] if not index.is_empty() else k + 2
-			var leaf := uvs != null and (uvs as PackedVector2Array)[a].x >= LeafTrim.BARK_BELOW
+			var leaf := has_uvs and uvs[a].x >= LeafTrim.BARK_BELOW
 			if leaf:
-				_append_card(s, verts[a], verts[b], verts[c], (uvs as PackedVector2Array)[a],
-						(uvs as PackedVector2Array)[b], (uvs as PackedVector2Array)[c])
+				_append_card(s, verts[a], verts[b], verts[c], uvs[a], uvs[b], uvs[c])
 			else:
 				solid.append(verts[a])
 				solid.append(verts[b])

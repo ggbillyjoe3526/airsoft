@@ -27,6 +27,8 @@ const EARLY := 0.25
 const GRID := 10
 const ALPHA_CUT := 0.5
 const GROUND_STEP := 0.1
+## A game stop this near (m) over the ground is on the ground (the game's terrain faces, not a prop).
+const ON_GROUND := 0.12
 
 
 class Model:
@@ -126,6 +128,7 @@ func _audit(id: String, lines: int, rows: Array[String]) -> void:
 		var insts: Array = _by_model[name]
 		var n := Vector3i.ZERO # lines, phantom, through
 		var early := 0
+		var early_ground := 0
 		var tries := 0
 		while n.x < lines and tries < lines * 30:
 			tries += 1
@@ -151,6 +154,10 @@ func _audit(id: String, lines: int, rows: Array[String]) -> void:
 					print("  phantom %s -> %s: game %.2f m, drawn %.2f m" % [a, b, g, d])
 			elif g < d - AGREE:
 				early += 1
+				# on the ground, which the drawn side samples a GROUND_STEP at a time
+				if map.terrain != null and _hit.position.y < map.terrain.height_clamped(_hit.position.x,
+						_hit.position.z) + ON_GROUND:
+					early_ground += 1
 			elif g > d + AGREE:
 				n.z += 1
 				if OS.get_environment("TRUTH_SHOW") == String(name) and shown < 10:
@@ -158,8 +165,9 @@ func _audit(id: String, lines: int, rows: Array[String]) -> void:
 					print("  through %s -> %s: game %.2f m, drawn %.2f m" % [a, b, g, d])
 		total += n
 		total_early += early
-		var row := "%-26s %4d props %5d lines: phantom %5.1f %%, early %5.1f %%, through %5.1f %%" % [name,
-				insts.size(), n.x, 100.0 * n.y / maxi(n.x, 1), 100.0 * early / maxi(n.x, 1), 100.0 * n.z / maxi(n.x, 1)]
+		var row := "%-26s %4d props %5d lines: phantom %5.1f %%, early %5.1f %% (%5.1f %% on the ground), through %5.1f %%" \
+				% [name, insts.size(), n.x, 100.0 * n.y / maxi(n.x, 1), 100.0 * early / maxi(n.x, 1),
+				100.0 * early_ground / maxi(n.x, 1), 100.0 * n.z / maxi(n.x, 1)]
 		print("  " + row)
 		rows.append("%f|%s %s" % [float(n.y) / maxi(n.x, 1), id, row])
 	print("%s all: %d lines, phantom %.1f %%, early %.1f %%, through %.1f %%" % [id, total.x,

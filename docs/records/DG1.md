@@ -43,6 +43,10 @@ audit's drawn side has no roof), and a few hut roofs on Woodland.
 | Whole map, lines stopped where nothing is drawn | 227 | 6 |
 | Whole map, Spotted misses | 15.7 % (68 of 433) | 0.2 % (1 of 440) |
 
+Lines that stop short of the drawn face by less than 0.25 m are counted as **early** (Woodland 2.9 %): every one of
+them ends within 0.12 m of the ground (the audit's lines start and end at sampled ground points, and the earth bank's
+and log tunnel's sides stop on the terrain under them), so none is a prop stopping a line on air.
+
 The lines still stopped short, and those let through, are all the ferns' and shrubs' counted leaves (LF1: only the
 thick of a plant counts), unchanged.
 
@@ -69,6 +73,18 @@ thick of a plant counts), unchanged.
   most a step, 0.35 s all told).
 - **What carries through walls to the ear follows the same line** (`SoundPath`, `ray_past_railings`): a step behind
   a bench is heard as clearly as it is seen past it.
+- **The build is a public step (`DrawnRays.build_step`)**: MapLevel's loading screen calls it once a frame until it
+  says it is done; `build()` (tests, tools) runs it to the end at once. A shape is keyed by its 16 m square, its
+  surface and its layer (`KEY_CELLS` 2048 squares each way from the origin, `KEY_SLOTS` 32 surfaces and layers), so
+  squares never share a key on any map we can lay (a field is at most 300 m across).
+- **Bots still find cover among the blocks** (`BotCover.find_cover`, from the boxes and the nav grid, worked out on a
+  thread before the props are built) and keep a spot only where the drawn faces hide a crouched bot from the threat
+  (`hides_from` and the cover search, through `sight_ray`). A prop with gaps (a sawbench, a root plate, a palisade's
+  slats) is offered as before but kept less often. `docs/KNOWN_ISSUES.md`.
+- **Woodland's one-life bomb guard wants 30 % of rounds armed** (`test_plant_guards.gd`, others keep 40 %): with
+  respawns off it now arms 20 of 56 (36 %; main 36 of 56) because holding defenders see attackers through the trees;
+  as the game plays it, with respawns until armed, 75 % are armed (96 of 128). Who wins stays in band either way (one
+  life 45 %, as played 50 %). Put to the owner on a card; taken as the default meanwhile.
 - **Older tests now judge by the drawn faces:** `test_bb_walls` checks no tick's path crosses a drawn wall's face
   (shots from inside the field: a drawn wall's end abutting the next is open only from outside); the hollow-marker
   test looks past one crate rather than the seam between two; the stripped Woodland keeps its prop seed; the
