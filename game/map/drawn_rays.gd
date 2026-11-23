@@ -16,10 +16,6 @@ extends RefCounted
 const BOX_LAYER := 4
 const DRAWN_LAYER := 8
 const LEAF_LAYER := 16
-## What became of a piece of a leaf card being cut (DrawnRays._piece).
-const NONE := 0
-const PART := 1
-const WHOLE := 2
 ## A prop's axes are square to one another within this (the cosine between them): a geometric tolerance.
 const SQUARE := 1e-4
 
@@ -56,10 +52,6 @@ var _own_shapes: Array[ConcavePolygonShape3D] = []
 ## The leaf sheet's alpha (FORMAT_LA8), read where a ray meets a card; null on a map with no leaf cards.
 var _sheet: Image = null
 var _sheet_size: Vector2i = Vector2i.ZERO
-## The card being cut (`_add_card`): its solid samples, its first corner and two edges, in the model and on the sheet.
-var _solid: PackedByteArray = PackedByteArray()
-var _card_p: Array[Vector3] = []
-var _card_u: Array[Vector2] = []
 
 
 ## The drawn props of `map` as `props` lays them (the game's look: a station's named props only, as PlaySession draws
@@ -106,7 +98,7 @@ static func build(map: MapData, props: PropDressConfig, space: RID, cfg: DrawnRa
 	for bi in map.blocks.size():
 		var b := map.blocks[bi]
 		if rays.drawn[bi] == 0 and props.lay_of(b) == PropDressConfig.Lay.SET and props.dresses(b) \
-				and placed.has(props.model_of(b)) and rays._shapes.has(props.model_of(b)):
+				and placed.has(props.model_of(b)) and rays._has_faces(props.model_of(b)):
 			rays.drawn[bi] = 1
 	for body: RID in rays.surfaces:
 		PhysicsServer3D.body_set_space(body, space)
@@ -133,7 +125,13 @@ func config() -> DrawnRayConfig:
 
 ## Whether block `index`'s props stand in for its box to BBs and sight.
 func draws(index: int) -> bool:
-	return index < drawn.size() and drawn[index] == 1
+	return index >= 0 and index < drawn.size() and drawn[index] == 1
+
+
+## Whether `model`'s shapes were made with faces to stand in for its blocks.
+func _has_faces(model: StringName) -> bool:
+	var s: Shapes = _shapes.get(model, null)
+	return s != null and (s.solid != null or s.leaves != null)
 
 
 ## Whether `body` is one of the props' leaf bodies.
@@ -242,7 +240,7 @@ func _shapes_of(model: StringName, props: PropDressConfig) -> Shapes:
 			var c := index[k + 2] if not index.is_empty() else k + 2
 			var leaf := uvs != null and (uvs as PackedVector2Array)[a].x >= LeafTrim.BARK_BELOW
 			if leaf:
-				_add_card(s, verts[a], verts[b], verts[c], (uvs as PackedVector2Array)[a],
+				_append_card(s, verts[a], verts[b], verts[c], (uvs as PackedVector2Array)[a],
 						(uvs as PackedVector2Array)[b], (uvs as PackedVector2Array)[c])
 			else:
 				solid.append(verts[a])
@@ -255,91 +253,8 @@ func _shapes_of(model: StringName, props: PropDressConfig) -> Shapes:
 	return s
 
 
-## Leaf card `p0 p1 p2` (on the sheet at `u0 u1 u2`) into `s`'s cards, halved along its edges DrawnRayConfig.leaf_halvings
-## times (each time into four), leaving out the pieces the sheet is cut away all over (solid at none of their corners,
-## their edges' middles or their middle, read on a grid twice as fine as the smallest pieces), so fewer rays meet a card
-## only to pass its cut-away parts; four kept pieces of one go back in as their whole. The card whole when the sheet
-## won't read.
-func _add_card(s: Shapes, p0: Vector3, p1: Vector3, p2: Vector3, u0: Vector2, u1: Vector2, u2: Vector2) -> void:
-	var levels := _cfg.leaf_halvings
-	if _sheet == null or levels <= 0:
-		_append_card(s, p0, p1, p2, u0, u1, u2)
-		return
-	# the solid samples on the fine grid (row i, column j, i + j <= fine), each at barycentric (i, j) / fine
-	var fine := 2 << levels
-	var row := fine + 1
-	_solid.resize(row * row)
-	for i in row:
-		for j in row - i:
-			_solid[i * row + j] = 1 if _solid_at(u0 + (u1 - u0) * (float(i) / fine) + (u2 - u0) * (float(j) / fine)) \
-					else 0
-	_card_p = [p0, p1 - p0, p2 - p0]
-	_card_u = [u0, u1 - u0, u2 - u0]
-	if _piece(s, 0, 0, 0, 1) == WHOLE:
-		_append_card(s, p0, p1, p2, u0, u1, u2)
-
-
-## The piece of the card being cut (`_add_card`) halved `level` times, its right angle at (`i`, `j`) of that level's grid
-## and its legs `d` (1 pointing up, -1 down): WHOLE when it is kept whole (left to the caller to add), PART when some of
-## it was added, NONE when it is left out.
-func _piece(s: Shapes, level: int, i: int, j: int, d: int) -> int:
-	if level == _cfg.leaf_halvings:
-		# on the fine grid, twice as fine, its legs are two long
-		return WHOLE if _piece_solid(i * 2, j * 2, d, 2 << level, _card_u[0], _card_u[0] + _card_u[1],
-				_card_u[0] + _card_u[2]) else NONE
-	# its four halves: three pointing its way at its corners, the middle one the other way
-	var kids: Array[Vector3i] = [Vector3i(2 * i, 2 * j, d), Vector3i(2 * i + d, 2 * j, d), Vector3i(2 * i, 2 * j + d, d),
-			Vector3i(2 * i + d, 2 * j + d, -d)]
-	var got: Array[int] = []
-	var whole := 0
-	for k in kids:
-		var r := _piece(s, level + 1, k.x, k.y, k.z)
-		got.append(r)
-		whole += 1 if r == WHOLE else 0
-	if whole == 4:
-		return WHOLE
-	var any := false
-	for n in 4:
-		if got[n] == WHOLE:
-			_append_piece(s, level + 1, kids[n])
-		any = any or got[n] != NONE
-	return PART if any else NONE
-
-
-## The piece at `at` (right angle and legs, as _piece) of the grid halved `level` times, added to `s`'s cards.
-func _append_piece(s: Shapes, level: int, at: Vector3i) -> void:
-	var size := float(1 << level)
-	var a := Vector2(at.x, at.y) / size
-	var b := Vector2(at.x + at.z, at.y) / size
-	var c := Vector2(at.x, at.y + at.z) / size
-	var p0: Vector3 = _card_p[0]
-	var e1: Vector3 = _card_p[1]
-	var e2: Vector3 = _card_p[2]
-	var u0: Vector2 = _card_u[0]
-	var f1: Vector2 = _card_u[1]
-	var f2: Vector2 = _card_u[2]
-	_append_card(s, p0 + e1 * a.x + e2 * a.y, p0 + e1 * b.x + e2 * b.y, p0 + e1 * c.x + e2 * c.y,
-			u0 + f1 * a.x + f2 * a.y, u0 + f1 * b.x + f2 * b.y, u0 + f1 * c.x + f2 * c.y)
-
-
-## Whether the piece with its right angle at fine grid point (`i`, `j`), its legs `d` (1 up, -1 down) of the coarse
-## grid along each axis, is solid at any of its corners and edges' middles (fine grid points) or its middle.
-func _piece_solid(i: int, j: int, d: int, fine: int, u0: Vector2, u1: Vector2, u2: Vector2) -> bool:
-	var row := fine + 1
-	for q: Vector2i in [Vector2i(0, 0), Vector2i(2, 0), Vector2i(0, 2), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]:
-		if _solid[(i + q.x * d) * row + j + q.y * d] == 1:
-			return true
-	var mid := Vector2(i + d * 2.0 / 3.0, j + d * 2.0 / 3.0) / fine
-	return _solid_at(u0 + (u1 - u0) * mid.x + (u2 - u0) * mid.y)
-
-
-## Whether the sheet is solid at `uv`.
-func _solid_at(uv: Vector2) -> bool:
-	var x := clampi(int(uv.x * _sheet_size.x), 0, _sheet_size.x - 1)
-	var y := clampi(int(uv.y * _sheet_size.y), 0, _sheet_size.y - 1)
-	return _sheet.get_pixel(x, y).a >= _cfg.leaf_alpha_cut
-
-
+## Leaf card `p0 p1 p2` (on the sheet at `u0 u1 u2`) into `s`'s cards, whole: `opaque` reads its sheet where a ray
+## meets it (cut into pieces, a piece the sheet's samples missed would let a line through drawn leaves).
 static func _append_card(s: Shapes, p0: Vector3, p1: Vector3, p2: Vector3, u0: Vector2, u1: Vector2,
 		u2: Vector2) -> void:
 	s.leaf_corners.append(p0)

@@ -322,9 +322,7 @@ func test_a_ray_with_no_tries_set_still_stops_on_a_wall() -> void:
 	cfg.leaf_tries = 0
 	var found := q.sight_ray(a, c, _hit)
 	cfg.leaf_tries = kept
-	if not found:
-		pending("DG1 advisory: leaf_tries 0 makes JoltQuery._cast_drawn return no hit for every line (its loop never runs)")
-	assert_true(true)
+	assert_true(found, "a wall still stops sight with leaf_tries 0 (at least one cast)")
 
 
 func test_a_long_line_through_the_woods_allocates_nothing_in_the_cast() -> void:

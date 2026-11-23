@@ -98,7 +98,8 @@ func _cast_drawn(cast: RayCast3D, from: Vector3, to: Vector3, hit: RayHit) -> bo
 	var way := (to - from) / length
 	var cfg := _drawn.config()
 	var start := from
-	for t in cfg.leaf_tries:
+	var tries := maxi(cfg.leaf_tries, 1)
+	for t in tries:
 		cast.position = start
 		cast.target_position = to - start
 		cast.force_raycast_update()
@@ -106,7 +107,7 @@ func _cast_drawn(cast: RayCast3D, from: Vector3, to: Vector3, hit: RayHit) -> bo
 			return false
 		var at := cast.get_collision_point()
 		var rid := cast.get_collider_rid()
-		var past_card := _drawn.is_leaf(rid) and t + 1 < cfg.leaf_tries \
+		var past_card := _drawn.is_leaf(rid) and t + 1 < tries \
 				and not _drawn.opaque(rid, cast.get_collider_shape(), cast.get_collision_face_index(), at)
 		if not past_card:
 			hit.position = at
