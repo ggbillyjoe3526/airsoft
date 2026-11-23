@@ -864,8 +864,8 @@ func _plant_cue(e: GameEvent) -> void:
 
 
 ## Whether `listener` hears lift cue `e`: a button pressed (its motor, LM1) wherever it is in reach, but a car's own
-## sounds (its doors, chime and buzzer) only standing in that car (LS1, owner 2026-11-21: the lift sound "should only play when
-## the player is inside the lift"). Nobody's ears, or no level: none of the car's.
+## sounds (its doors, chime and buzzer) only standing in that car (LS1, owner 2026-11-21: the lift sound "should only
+## play when the player is inside the lift"). Nobody's ears, or no level: none of the car's.
 static func heard_in_car(e: GameEvent, query: WorldQuery, cfg: LiftConfig, lifts: LiftState,
 		listener: Character) -> bool:
 	if e.value == Lifts.Cue.BUTTON:

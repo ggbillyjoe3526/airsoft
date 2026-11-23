@@ -1,6 +1,6 @@
 extends GutTest
 ## LM1 QA: the lift button's motor at the edges (no world, a missing presser, a bad lift index, two lifts, inside
-## then landing presses, a press out of reach, a voice taken by another play).
+## then landing presses, a press out of reach, a motor voice taken by another play).
 
 var cfg: LiftConfig = SimTuning.new().lifts
 
@@ -146,7 +146,7 @@ func test_a_press_on_one_lift_leaves_the_other_lifts_motor_playing() -> void:
 	assert_eq(_playing(audio), 2, "each lift its own motor")
 
 
-func test_a_press_never_stops_a_voice_another_sound_has_taken() -> void:
+func test_a_motor_voice_taken_by_another_play_is_let_go_not_stopped() -> void:
 	var rig := _rig(Vector3(1.0, 3.0, 1.0))
 	var audio: SimAudio = rig[0]
 	var state: GameState = rig[1]

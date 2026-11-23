@@ -77,9 +77,10 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## out to the event's reach (LiftConfig.heard).
 @export var lift_gain: float = 0.7
 ## A lift's button pressed (BUTTON; LM1, owner 2026-11-23: the motor "should play as soon as the player presses a
-## button", its beep removed): the car's motor at this level from the button, out to its reach (LiftConfig.button_heard);
-## pressed from inside the car, from this far over the car's floor and carried with the car as it rides, so a rider
-## hears it all the way (owner, 2026-11-17: "make the elevator sound of it moving louder. I can't hear it").
+## button", its beep removed): the car's motor at this level from the button, out to its reach
+## (LiftConfig.button_heard); pressed from inside the car, from this far over the car's floor and carried with the car
+## as it rides, so a rider hears it all the way (owner, 2026-11-17: "make the elevator sound of it moving louder. I
+## can't hear it").
 @export var lift_motor_gain: float = 1.4
 @export var lift_motor_rise: float = 1.2
 ## Plant The Bomb's prop (BOMB, PB1), from where it is, yours too, muffled by the walls between: taken up and put down
