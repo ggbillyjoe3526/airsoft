@@ -149,9 +149,9 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   and replaced by the owner's recordings (the pin, bounce and pop in AU5, the bang in AU6); the renderer only drafts
   now. No outside source; same licence as the code. To re-render: `godot --headless --path . -s
   res://tools/render_grenades.gd`, then `godot --headless --path . --import`.
-- **The lifts' sounds (MT2):** `assets/audio/cues/lift_chime_1.wav`, `lift_button_1` and `lift_buzz_1`, synthesised
-  by our own `tools/lift_sounds.py` (numpy) as toy-like placeholders (the doors and the car setting off are the
-  owner's lift since AU10, above). No outside source; same licence as the code. To re-render: `python3
+- **The lifts' sounds (MT2):** `assets/audio/cues/lift_chime_1.wav` and `lift_buzz_1`, synthesised by our own
+  `tools/lift_sounds.py` (numpy) as toy-like placeholders (the doors and the motor are the owner's lift since AU10,
+  above; the button's beep was removed in LM1). No outside source; same licence as the code. To re-render: `python3
   tools/lift_sounds.py`, then `godot --headless --path . --import`.
 - **Plant The Bomb's sounds (PB1):** `assets/audio/cues/plant_pickup_1.wav`, `plant_drop_1`, `plant_arming_1`,
   `plant_armed_1`, `plant_beep_1`, `plant_defusing_1`, `plant_defused_1` and `plant_went_off_1`, synthesised by our

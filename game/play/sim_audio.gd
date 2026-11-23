@@ -72,10 +72,10 @@ const STEP_NAMES: PackedStringArray = ["run", "sprint", "land"]
 ## the bang, which plays as a shot).
 const OWN_CAP_CUES: Array[StringName] = [&"smoke_pop"]
 ## A lift's cue by its LIFT event's value (Lifts.Cue: a button, the doors opening, shutting, the car setting off,
-## arriving, too full): the doors and the car setting off the owner's lift (AU10, tools/cut_recordings.py), the rest
-## from tools/lift_sounds.py (MT2).
-const LIFT_CUES: Array[StringName] = [&"lift_button", &"lift_doors", &"lift_doors", &"lift_motor", &"lift_chime",
-		&"lift_buzz"]
+## arriving, too full; &"": silent): a button pressed plays the car's motor, the car setting off nothing (LM1, owner
+## 2026-11-23: lift_motor_1 "should play as soon as the player presses a button", the button's beep removed). The
+## doors and the motor are the owner's lift (AU10), the chime and the buzzer from tools/lift_sounds.py (MT2).
+const LIFT_CUES: Array[StringName] = [&"lift_motor", &"lift_doors", &"lift_doors", &"", &"lift_chime", &"lift_buzz"]
 ## Plant The Bomb's sounds by Plant.Cue (&"": the cue only stops the keys or the kit): the owner's recordings (AU11,
 ## tools/cut_recordings.py), armed still a placeholder from tools/plant_sounds.py (PB1).
 const PLANT_CUES: Array[StringName] = [&"plant_pickup", &"plant_drop", &"plant_arming", &"", &"plant_armed",
@@ -120,10 +120,11 @@ var _bolt_own: PackedByteArray = PackedByteArray()
 var _bolt_slot: PackedInt32Array = PackedInt32Array()
 ## The voice the keyed code or the defusal kit plays on (-1: neither plays) and its serial in the pool (PB1).
 var _plant_voice: int = -1
-## Each lift's motor voice while it plays (-1 none) and its play's serial: the voice rides with the car
-## (_carry_motors).
+## Each lift's motor voice while it plays (-1 none), its play's serial and whether it rides with the car (1: pressed
+## from inside it, _carry_motors) or stays at the call button (0).
 var _motor_voice: PackedInt32Array = PackedInt32Array()
 var _motor_serial: PackedInt64Array = PackedInt64Array()
+var _motor_rides: PackedByteArray = PackedByteArray()
 var _plant_serial: int = 0
 ## The voice the last `_play` took (-1: it played nothing) and whether it was in your ear.
 var _played_voice: int = -1
@@ -237,7 +238,8 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE, DRY_CUE, LASER_CUE]:
 		_load(cue)
 	for cue: StringName in LIFT_CUES:
-		_load(String(cue))
+		if cue != &"":
+			_load(String(cue))
 	for cue: StringName in PLANT_CUES:
 		if cue != &"":
 			_load(String(cue))
@@ -431,15 +433,14 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_play(&"door_shut" if e.value == 1 else &"door_open", e.position, false, _cfg.door_gain, Kind.PROP,
 						BUS_EFFECTS, 1.0, _cfg.door_reach, null, true)
 			# A lift's cue (MT2): from its button, doorway or car, yours too, muffled by the walls between. A car's own
-			# sounds (its doors, motor, chime and buzzer) only from inside it (heard_in_car, LS1).
+			# sounds (its doors, chime and buzzer) only from inside it (heard_in_car, LS1); a button pressed plays its
+			# motor (LM1), heard wherever the button is in reach; the car setting off is silent.
 			GameEvent.Kind.LIFT when heard_in_car(e, _query, _lift_cfg, state.lifts, _listener):
-				if e.value == Lifts.Cue.DEPART:
-					_lift_motor(e)
-				else:
-					var button := e.value == Lifts.Cue.BUTTON
+				if e.value == Lifts.Cue.BUTTON:
+					_lift_motor(e, state)
+				elif e.value != Lifts.Cue.DEPART:
 					_play(LIFT_CUES[clampi(e.value, 0, LIFT_CUES.size() - 1)], doorway_face(e, _ear), false,
-							_cfg.lift_button_gain if button else _cfg.lift_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach,
-							null, true)
+							_cfg.lift_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach, null, true)
 			GameEvent.Kind.PLANT:
 				_plant_cue(e)
 			GameEvent.Kind.FLAG_ROPE:
@@ -859,8 +860,8 @@ func _plant_cue(e: GameEvent) -> void:
 		_plant_serial = _field_pool.serial_of(_played_voice)
 
 
-## Whether `listener` hears lift cue `e`: a button's beep wherever it is in reach, but a car's own sounds (its doors,
-## motor, chime and buzzer) only standing in that car (LS1, owner 2026-11-21: the lift sound "should only play when
+## Whether `listener` hears lift cue `e`: a button pressed (its motor, LM1) wherever it is in reach, but a car's own
+## sounds (its doors, chime and buzzer) only standing in that car (LS1, owner 2026-11-21: the lift sound "should only play when
 ## the player is inside the lift"). Nobody's ears, or no level: none of the car's.
 static func heard_in_car(e: GameEvent, query: WorldQuery, cfg: LiftConfig, lifts: LiftState,
 		listener: Character) -> bool:
@@ -880,27 +881,49 @@ static func doorway_face(e: GameEvent, ear: Vector3) -> Vector3:
 	return e.position + e.direction * signf(e.direction.dot(ear - e.position))
 
 
-## A lift's car setting off (MT2): its motor from inside the car (SoundConfig.lift_motor_rise over the floor it left,
-## `e.position`), kept to ride with it (_carry_motors).
-func _lift_motor(e: GameEvent) -> void:
-	var at := e.position + Vector3.UP * _cfg.lift_motor_rise
-	_play(LIFT_CUES[Lifts.Cue.DEPART], at, false, _cfg.lift_motor_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach, null,
-			true)
+## A lift's button pressed (LM1): the car's motor, at once. Pressed from inside the car it plays from the button's
+## side, SoundConfig.lift_motor_rise over the car's floor, and rides with the car (_carry_motors); from a landing it
+## plays at the call button. A press while that lift's motor still plays starts it again, so presses never stack.
+func _lift_motor(e: GameEvent, state: GameState) -> void:
 	var i := e.target
+	var lifts := state.lifts
+	var rides := false
+	var at := e.position
+	if i >= 0 and i < lifts.count() and _query != null and i < _query.lift_count():
+		var presser := state.character(e.actor)
+		rides = presser != null and _query.lifts[i].holds(presser.position, lifts.y[i], _lift_cfg)
+		if rides:
+			at.y = lifts.y[i] + _cfg.lift_motor_rise
+	if i >= 0:
+		_stop_motor(i)
+	_play(LIFT_CUES[Lifts.Cue.BUTTON], at, false, _cfg.lift_motor_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach, null,
+			true)
 	if i < 0 or _played_voice < 0:
 		return
 	if _motor_voice.size() <= i:
 		var was := _motor_voice.size()
 		_motor_voice.resize(i + 1)
 		_motor_serial.resize(i + 1)
+		_motor_rides.resize(i + 1)
 		for k in range(was, i + 1):
 			_motor_voice[k] = -1
 	_motor_voice[i] = _played_voice
 	_motor_serial[i] = _field_pool.serial_of(_played_voice)
+	_motor_rides[i] = 1 if rides else 0
 
 
-## Moves each lift's motor still playing with its car, lift_motor_rise over its floor. A voice since taken by another
-## play is let go.
+## Stops lift `i`'s motor if it still plays (its voice not since taken by another play).
+func _stop_motor(i: int) -> void:
+	if i >= _motor_voice.size():
+		return
+	var v := _motor_voice[i]
+	if v >= 0 and _field_pool.serial_of(v) == _motor_serial[i] and _field[v].playing:
+		_field[v].stop()
+	_motor_voice[i] = -1
+
+
+## Moves each lift's motor still playing, pressed from inside its car, with the car, lift_motor_rise over its floor. A
+## voice since taken by another play is let go.
 func _carry_motors(lifts: LiftState) -> void:
 	for i in _motor_voice.size():
 		var v := _motor_voice[i]
@@ -908,6 +931,8 @@ func _carry_motors(lifts: LiftState) -> void:
 			continue
 		if i >= lifts.count() or _field_pool.serial_of(v) != _motor_serial[i] or not _field[v].playing:
 			_motor_voice[i] = -1
+			continue
+		if _motor_rides[i] == 0:
 			continue
 		var p := _field[v].global_position
 		p.y = lifts.y[i] + _cfg.lift_motor_rise
@@ -918,10 +943,7 @@ func _carry_motors(lifts: LiftState) -> void:
 ## stop, and a motor carried there would jump with it.
 func _stop_motors() -> void:
 	for i in _motor_voice.size():
-		var v := _motor_voice[i]
-		if v >= 0 and _field_pool.serial_of(v) == _motor_serial[i] and _field[v].playing:
-			_field[v].stop()
-		_motor_voice[i] = -1
+		_stop_motor(i)
 
 
 ## Cuts the keys or the kit short (the hands came off, the work was done or the round ended), if they still play.

@@ -47,8 +47,8 @@ func test_every_recorded_cue_has_its_variants_and_no_more() -> void:
 		assert_eq(_variants(cue), 3, cue)
 	for cue: String in ["count_beep", "ping_pip"]:
 		assert_eq(_variants(cue), 1, cue)
-	# His lift's two rides (2026-11-11), each the car setting off.
-	assert_eq(_variants("lift_motor"), 2, "lift_motor")
+	# His lift's first ride (2026-11-11) only, played as a button is pressed (LM1: the second removed at his word).
+	assert_eq(_variants("lift_motor"), 1, "lift_motor")
 
 
 func _length(cue: String, n: int) -> float:

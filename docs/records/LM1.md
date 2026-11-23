@@ -1,0 +1,35 @@
+# LM1 · A lift's button plays its motor at once
+
+**Review:** REVIEW_LINE
+
+The owner, 2026-11-23, after hearing the lift's files: "remove lift_motor_2.wav and up_down.wav. use lift_motor_1.wav
+only. it should play as soon as the player presses a button. this means also remove the placeholder
+lift_button_1.wav". Ruling in `docs/DECISIONS.md` (Audio).
+
+## Attempts
+
+| Date | Attempt | Worker model | checks | Critic | Retry reason |
+|---|---|---|---|---|---|
+ATTEMPT_ROWS
+
+## Decisions
+
+- **The press is the motor's cue.** `SimAudio.LIFT_CUES` maps BUTTON to `lift_motor` and DEPART to none; the
+  simulation's events are unchanged, so the bots' hearing, the minimap and the sound cues hear a press as before
+  (default: balance untouched).
+- **Where it plays.** Pressed from inside the car (the presser stands in it, `LiftSpec.holds`), over the car's floor
+  (`SoundConfig.lift_motor_rise`) and carried with the car as the rider was used to; from a landing, at the call
+  button, not carried, as the car may be on the other floor. Heard out to the button's reach
+  (`LiftConfig.button_heard`, 6 m), at `lift_motor_gain`, by anyone in reach as the beep was (default: the press is
+  the presser's own feedback, wherever they stand).
+- **A press while that lift's motor plays starts it again** (default): presses never stack into a roar, and every
+  press is heard at once.
+- **The files.** `lift_motor_2` and `lift_button_1` (and their `.import`) deleted at his word (git history keeps
+  them); `SoundConfig.lift_button_gain` and `tools/lift_sounds.py`'s beep removed. `lift_motor_1` is a fixed file now:
+  `tools/cut_recordings.py` no longer reads `elevator/up_down.wav`. His `up_down.wav` was moved out of the raw
+  folder to `audio/william/removed/elevator/` in the shared files rather than deleted (default: a recording can't
+  be made again; he can ask for it gone for good).
+
+## Known issues left
+
+- None. Play check N68 on the Beta 2 checklist.

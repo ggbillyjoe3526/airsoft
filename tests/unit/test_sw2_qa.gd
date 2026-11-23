@@ -202,14 +202,15 @@ func test_a_lift_motor_voice_rides_with_its_car_and_is_let_go_when_the_lifts_are
 	var sound := SoundConfig.new()
 	var audio := SimAudio.new()
 	add_child_autofree(audio)
-	# The listener rides the car (LS1: a car's motor is heard only from inside it).
+	# The listener rides the car and presses its button (LM1: the motor plays on the press and rides with the car).
 	audio.setup(sound, [] as Array[StringName], BodyConfig.new(), _shaft(), null, null)
 	var state := GameState.new(1)
 	state.characters.append(Character.new(0, 0, Vector3(1.0, 3.0, 1.0)))
 	state.lifts.y.resize(1)
 	state.lifts.y[0] = 3.0
 	var e := state.events.add(GameEvent.Kind.LIFT)
-	e.value = Lifts.Cue.DEPART
+	e.value = Lifts.Cue.BUTTON
+	e.actor = 0
 	e.target = 0
 	e.position = Vector3(1.0, 0.0, 1.0)
 	e.reach = 40.0
@@ -237,7 +238,8 @@ func test_a_lift_motor_still_playing_stops_as_the_round_ends() -> void:
 	state.lifts.y.resize(1)
 	state.lifts.y[0] = 3.0
 	var e := state.events.add(GameEvent.Kind.LIFT)
-	e.value = Lifts.Cue.DEPART
+	e.value = Lifts.Cue.BUTTON
+	e.actor = 0
 	e.target = 0
 	e.position = Vector3(1.0, 0.0, 1.0)
 	e.reach = 40.0

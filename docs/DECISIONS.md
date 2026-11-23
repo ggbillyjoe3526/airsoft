@@ -1622,6 +1622,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   trim some silence").** His three takes had no silence but about 0.3 s of soft swell, peaking 0.7 to 1.2 s in;
   `tools/cut_recordings.py` now starts each where it comes within 4 dB of its loudest (was 12), so the slide is heard
   about half a second sooner. Same recording, length and level.
+- **A lift's button plays its motor, at once (owner, 2026-11-23, LM1: "remove lift_motor_2.wav and up_down.wav. use
+  lift_motor_1.wav only. it should play as soon as the player presses a button. this means also remove the
+  placeholder lift_button_1.wav").** Every press of a lift's button, a call button or the car's panel, plays
+  `lift_motor_1` where the beep played, heard wherever the button is in reach (`LiftConfig.button_heard`); pressed
+  from inside, it plays over the car's floor and rides with the car. The car setting off is silent, a press while
+  that lift's motor plays starts it again, and the beep, the second motor take and his `up_down` recording are gone
+  (`lift_motor_1` is a fixed file; `tools/cut_recordings.py` leaves it). The rest of LS1 stands: doors, chime and
+  buzzer only inside the car; the minimap and sound cues take the presses.
 
 ## Save and settings storage
 
