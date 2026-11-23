@@ -103,13 +103,15 @@ from the bots).
 
 - **How long you wait.** The attackers wait <!-- wiki:config round_config.respawn_delay --> seconds. The defenders'
   wait in Attack / Defend is set for each field so both sides win about as often: 15 s on **Depot**, whose poles are
-  close to the defenders' start, 5 s on **Woodland**, whose two poles are far apart, and 7 s on **Subway**, against
+  close to the defenders' start, 11 s on **Woodland**, whose two poles are far apart and whose defenders see
+  between the trees, and 7 s on **Subway**, against
   Normal bots. Better defenders hold a pole longer, so against **Hard** bots the defenders wait 1.9 times as long but
   never more than <!-- wiki:config round_config.defender_respawn_most --> seconds (Depot's is that most, Woodland's
-  about 10 s and Subway's about 13 s), and against **Easy** bots three
-  quarters as long (about 11 s, 4 s and 5 s). In Plant
+  about 21 s and Subway's about 13 s), and against **Easy** bots three
+  quarters as long (about 11 s, 8 s and 5 s). In Plant
   The Bomb they wait <!-- wiki:config round_config.plant_defender_respawn_delay -->
-  seconds, but 3 s on **Subway**, whose sites the attackers reach quickly (5 s there against Hard bots), and against
+  seconds, but 3 s on **Subway**, whose sites the attackers reach quickly (5 s there against Hard bots), 9 s on
+  **Woodland**, whose defenders see the attackers coming between the trees, and against
   **Hard** bots 8 s on **Depot**, whose bomb sites are close to the defenders' start.
 - **Where you come back.** While you wait, a **RESPAWN IN** panel at the bottom of the screen lists your **start
   area** and your end's two **forward spawns**, nearer the fight. Pick one with **1**, **2** or **3** (the first two

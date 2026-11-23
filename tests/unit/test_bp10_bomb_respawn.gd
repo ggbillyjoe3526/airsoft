@@ -61,7 +61,9 @@ func test_a_field_without_one_waits_the_game_s_at_hard_too() -> void:
 			continue
 		checked += 1
 		var hard := MatchOptions.level_tuning(MatchOptions.match_tuning(base, e, null), &"hard")
-		assert_eq(hard.rounds.plant_defender_respawn_delay, base.rounds.plant_defender_respawn_delay, e.id)
+		# its own wait at every level where it sets one (BG1: Subway 3, Woodland 9 since DG1), else the game's
+		var own := e.bomb_respawn if e.bomb_respawn > 0.0 else base.rounds.plant_defender_respawn_delay
+		assert_eq(hard.rounds.plant_defender_respawn_delay, own, e.id)
 	assert_gt(checked, 0, "a field without one, or this test proves nothing")
 
 
