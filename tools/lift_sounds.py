@@ -1,8 +1,9 @@
 """Synthesises the lifts' sounds (MT2) into assets/audio/cues/ that the owner's lift recording (2026-11-11) doesn't
 cover: the arrival chime (lift_chime) and the too-full buzzer (lift_buzz). Placeholders, toy-like, each written at the
-peak level SoundConfig's gains expect (PEAK). The same bytes each run. The doors (lift_doors) and the motor (lift_motor,
-played on a button's press since LM1) are his, from tools/cut_recordings.py; the synthesised doors, motor and button
-beep (removed LM1, owner 2026-11-23) that stood in before are in git history.
+peak level SoundConfig's gains expect (PEAK). The same bytes each run. The doors (lift_doors) are his, cut by
+tools/cut_recordings.py; the motor (lift_motor_1, played on a button's press) is his first ride, a fixed file since LM1
+(assets/audio/README.md). The synthesised doors and motor that stood in before, and the button's beep (removed in LM1,
+owner 2026-11-23), are in git history.
 
     python3 tools/lift_sounds.py            # then: godot --headless --path . --import
 """
