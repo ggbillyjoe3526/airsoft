@@ -120,11 +120,14 @@ var _bolt_own: PackedByteArray = PackedByteArray()
 var _bolt_slot: PackedInt32Array = PackedInt32Array()
 ## The voice the keyed code or the defusal kit plays on (-1: neither plays) and its serial in the pool (PB1).
 var _plant_voice: int = -1
-## Each lift's motor voice while it plays (-1 none), its play's serial and whether it rides with the car (1: pressed
-## from inside it, _carry_motors) or stays at the call button (0).
+## Each lift's motor voice pressed from inside its car while it plays (-1 none) and its play's serial: the voice rides
+## with the car (_carry_motors).
 var _motor_voice: PackedInt32Array = PackedInt32Array()
 var _motor_serial: PackedInt64Array = PackedInt64Array()
-var _motor_rides: PackedByteArray = PackedByteArray()
+## Each lift's motor voice pressed at a call button while it plays (-1 none) and its serial: it stays at the button, and
+## never takes over the one riding the car (LM1).
+var _landing_voice: PackedInt32Array = PackedInt32Array()
+var _landing_serial: PackedInt64Array = PackedInt64Array()
 var _plant_serial: int = 0
 ## The voice the last `_play` took (-1: it played nothing) and whether it was in your ear.
 var _played_voice: int = -1
@@ -883,7 +886,8 @@ static func doorway_face(e: GameEvent, ear: Vector3) -> Vector3:
 
 ## A lift's button pressed (LM1): the car's motor, at once. Pressed from inside the car it plays from the button's
 ## side, SoundConfig.lift_motor_rise over the car's floor, and rides with the car (_carry_motors); from a landing it
-## plays at the call button. A press while that lift's motor still plays starts it again, so presses never stack.
+## plays at the call button. A press heard (given a voice) starts that lift's motor of its kind again, so presses never
+## stack; a press out of reach, or one at a call button, never cuts the motor riding the car.
 func _lift_motor(e: GameEvent, state: GameState) -> void:
 	var i := e.target
 	var lifts := state.lifts
@@ -894,32 +898,35 @@ func _lift_motor(e: GameEvent, state: GameState) -> void:
 		rides = presser != null and _query.lifts[i].holds(presser.position, lifts.y[i], _lift_cfg)
 		if rides:
 			at.y = lifts.y[i] + _cfg.lift_motor_rise
-	if i >= 0:
-		_stop_motor(i)
 	_play(LIFT_CUES[Lifts.Cue.BUTTON], at, false, _cfg.lift_motor_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach, null,
 			true)
-	if i < 0 or _played_voice < 0:
+	var v := _played_voice
+	if i < 0 or v < 0:
 		return
 	if _motor_voice.size() <= i:
 		var was := _motor_voice.size()
 		_motor_voice.resize(i + 1)
 		_motor_serial.resize(i + 1)
-		_motor_rides.resize(i + 1)
+		_landing_voice.resize(i + 1)
+		_landing_serial.resize(i + 1)
 		for k in range(was, i + 1):
 			_motor_voice[k] = -1
-	_motor_voice[i] = _played_voice
-	_motor_serial[i] = _field_pool.serial_of(_played_voice)
-	_motor_rides[i] = 1 if rides else 0
+			_landing_voice[k] = -1
+	var serial := _field_pool.serial_of(v)
+	if rides:
+		_stop_voice(_motor_voice[i], _motor_serial[i], v)
+		_motor_voice[i] = v
+		_motor_serial[i] = serial
+	else:
+		_stop_voice(_landing_voice[i], _landing_serial[i], v)
+		_landing_voice[i] = v
+		_landing_serial[i] = serial
 
 
-## Stops lift `i`'s motor if it still plays (its voice not since taken by another play).
-func _stop_motor(i: int) -> void:
-	if i >= _motor_voice.size():
-		return
-	var v := _motor_voice[i]
-	if v >= 0 and _field_pool.serial_of(v) == _motor_serial[i] and _field[v].playing:
+## Stops field voice `v` if it still plays the play of `serial` (not since taken by another) and is not `keep`.
+func _stop_voice(v: int, serial: int, keep: int = -1) -> void:
+	if v >= 0 and v != keep and _field_pool.serial_of(v) == serial and _field[v].playing:
 		_field[v].stop()
-	_motor_voice[i] = -1
 
 
 ## Moves each lift's motor still playing, pressed from inside its car, with the car, lift_motor_rise over its floor. A
@@ -932,18 +939,19 @@ func _carry_motors(lifts: LiftState) -> void:
 		if i >= lifts.count() or _field_pool.serial_of(v) != _motor_serial[i] or not _field[v].playing:
 			_motor_voice[i] = -1
 			continue
-		if _motor_rides[i] == 0:
-			continue
 		var p := _field[v].global_position
 		p.y = lifts.y[i] + _cfg.lift_motor_rise
 		_field[v].global_position = p
 
 
-## Cuts each lift's motor short as the round ends, if it still plays: the next round puts every car back at its start
-## stop, and a motor carried there would jump with it.
+## Cuts each lift's motors short as the round ends, if they still play: the next round puts every car back at its
+## start stop, and a motor carried there would jump with it.
 func _stop_motors() -> void:
 	for i in _motor_voice.size():
-		_stop_motor(i)
+		_stop_voice(_motor_voice[i], _motor_serial[i])
+		_stop_voice(_landing_voice[i], _landing_serial[i])
+		_motor_voice[i] = -1
+		_landing_voice[i] = -1
 
 
 ## Cuts the keys or the kit short (the hands came off, the work was done or the round ended), if they still play.

@@ -22,8 +22,17 @@ ATTEMPT_ROWS
   button, not carried, as the car may be on the other floor. Heard out to the button's reach
   (`LiftConfig.button_heard`, 6 m), at `lift_motor_gain`, by anyone in reach as the beep was (default: the press is
   the presser's own feedback, wherever they stand).
-- **A press while that lift's motor plays starts it again** (default): presses never stack into a roar, and every
-  press is heard at once.
+- **A press heard while that lift's motor plays starts it again** (default): presses never stack into a roar, and every
+  press is heard at once. Each lift keeps two motors apart (critic, attempt 1): the one pressed inside, riding the car,
+  and the one pressed at a call button. A call-button press, or any press out of the listener's reach (no voice),
+  never cuts or takes over the motor you ride with; a press only replaces the earlier motor of its own kind, after it
+  has its own voice.
+- **The timing, as asked** (default: his words, "as soon as the player presses a button"). Pressing inside with the
+  doors open, the doors shut over `door_time` 1.5 s (the next tick) and the car rides `floor_time` 4.0 s; the 3.2 s
+  clip covers the doors and the first ~1.7 s of the ride, so its last ~2.3 s are quiet (before LM1 the motor started
+  as the car set off and covered 3.2 s of it). Calling a car from the other floor plays the motor at your call button
+  and the car arrives with only its chime and doors to those inside. Both put to him on N68: if he wants the ride
+  covered, the lever is to play the clip again as the car sets off.
 - **The files.** `lift_motor_2` and `lift_button_1` (and their `.import`) deleted at his word (git history keeps
   them); `SoundConfig.lift_button_gain` and `tools/lift_sounds.py`'s beep removed. `lift_motor_1` is a fixed file now:
   `tools/cut_recordings.py` no longer reads `elevator/up_down.wav`. His `up_down.wav` was moved out of the raw

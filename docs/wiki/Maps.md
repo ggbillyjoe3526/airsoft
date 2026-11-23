@@ -184,7 +184,7 @@ One team starts in the ticket hall at the west end, the other down in the runnin
   and they never shut on anyone in the
   doorway from outside. Pressing a button, on a landing or inside, starts the lift's motor sound at once. Inside the car you
   also hear the doors start a moment before they move, and the chime and the doors opening as it arrives; outside a
-  car you hear only its buttons being pressed.
+  car you hear its motor only when someone near you presses one of its buttons.
 - **The platforms** run level from end to end, each under its own tiled, curved tunnel beside its track: staff booths,
   works hoardings, crates and benches break the 100 m platforms into short lanes. The tracks lie 0.9 m below the
   platform edge, low enough to climb in and out of anywhere. The north train stands at its platform with five doors

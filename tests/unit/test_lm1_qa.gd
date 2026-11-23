@@ -1,6 +1,6 @@
 extends GutTest
 ## LM1 QA: the lift button's motor at the edges (no world, a missing presser, a bad lift index, two lifts, inside
-## then landing presses, a voice taken by another play).
+## then landing presses, a press out of reach, a voice taken by another play).
 
 var cfg: LiftConfig = SimTuning.new().lifts
 
@@ -90,24 +90,48 @@ func test_a_press_for_a_lift_out_of_range_never_errors() -> void:
 	assert_gt(_playing(audio), 0, "still sounds, nothing carried")
 
 
-func test_a_press_from_inside_then_one_from_a_landing_stops_riding() -> void:
+func test_a_press_from_inside_then_one_from_a_landing_leaves_the_riding_motor_on_the_car() -> void:
 	var rig := _rig(Vector3(1.0, 3.0, 1.0))
 	var audio: SimAudio = rig[0]
 	var state: GameState = rig[1]
 	_press(state, 0, Vector3(1.5, 4.2, 0.0))
 	audio.on_tick(state, 0, state.characters[0])
+	var riding := audio._motor_voice[0]
+	assert_gte(riding, 0, "the inside press rides")
 	state.events.clear()
-	state.characters[0].position = Vector3(1.0, 7.0, -1.0)
-	var button := Vector3(1.8, 8.2, -0.3)
-	_press(state, 0, button)
+	# Someone on the landing, in reach of your ears, calls the same lift (critic, LM1 attempt 1).
+	state.characters.append(Character.new(1, 1, Vector3(1.0, 3.0, -1.0)))
+	var button := Vector3(1.8, 4.2, -0.3)
+	_press(state, 0, button, 1)
 	audio.on_tick(state, 0, state.characters[0])
-	assert_eq(_playing(audio), 1, "one voice only")
+	assert_eq(_playing(audio), 2, "the call plays beside the riding motor, never in its place")
+	assert_eq(audio._motor_voice[0], riding)
 	state.events.clear()
 	state.lifts.y[0] = 5.0
 	audio.on_tick(state, 0, state.characters[0])
-	for v: AudioStreamPlayer3D in audio._field:
-		if v.playing:
-			assert_almost_eq(v.global_position.y, button.y, 1e-3, "left at the call button")
+	var rise := SoundConfig.new().lift_motor_rise
+	assert_almost_eq(audio._field[riding].global_position.y, 5.0 + rise, 1e-3, "still carried with the car")
+	var call := audio._landing_voice[0]
+	assert_gte(call, 0)
+	assert_almost_eq(audio._field[call].global_position.distance_to(button), 0.0, 1e-3, "the call stays at its button")
+
+
+func test_a_press_out_of_reach_never_cuts_the_motor_you_ride_with() -> void:
+	var rig := _rig(Vector3(1.0, 3.0, 1.0))
+	var audio: SimAudio = rig[0]
+	var state: GameState = rig[1]
+	_press(state, 0, Vector3(1.5, 4.2, 0.0))
+	audio.on_tick(state, 0, state.characters[0])
+	var riding := audio._motor_voice[0]
+	assert_gte(riding, 0)
+	state.events.clear()
+	# A bot calls the lift from a landing far beyond the button's reach.
+	state.characters.append(Character.new(1, 1, Vector3(1.0, 40.0, -1.0)))
+	_press(state, 0, Vector3(1.8, 41.2, -0.3), 1)
+	audio.on_tick(state, 0, state.characters[0])
+	assert_true(audio._field[riding].playing, "your motor plays on")
+	assert_eq(audio._motor_voice[0], riding, "and still rides")
+	assert_eq(_playing(audio), 1, "the far press is not heard")
 
 
 func test_a_press_on_one_lift_leaves_the_other_lifts_motor_playing() -> void:

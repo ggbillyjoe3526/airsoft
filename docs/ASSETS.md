@@ -127,8 +127,8 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   His batch of 2026-11-11 (AU10, 17 recordings: walking, running and jumping on soil, metal and in a stream, a spring
   rifle's shot, a small motor and a stapler tray with their room tone, a lift's doors and two rides, a tunnel) gives
   the steps on soil (in place of gravel softened), metal (one new set; his first metal walk set aside) and water, the
-  landings on soil and metal, the lifts' doors and the car setting off, the Compact SMG's motor with his toothbrush's
-  whir under it, and Subway's background (`tunnel`). His
+  landings on soil and metal, the lifts' doors and the car's motor (his first ride, played on a button's press since
+  LM1), the Compact SMG's motor with his toothbrush's whir under it, and Subway's background (`tunnel`). His
   rifle shot, SMG motor and tray are kept in the raw folder, unused (owner, 2026-11-11: he kept the Sniper Rifle's
   first shot and the SMG's stand-ins).
   His batch of 2026-11-13 (AU11, 7 recordings: a pump stroke, a shell popped off and clicked home, a box set down, a
