@@ -89,7 +89,7 @@ thick of a plant counts), unchanged.
   as the game plays it, with respawns until armed, 75 % are armed (96 of 128). Who wins stays in band either way (one
   life 45 %, as played 50 %). The owner's choice on a card, 23 November.
 - **The Attack / Defend guard job's limit is 45 min** (was 30): it ran 20 to 28 min on main's runners on 23 November and
-  was stopped at 30 on a slow one.
+  was stopped at 30 on a slow one; unit tests part 1's is 30 (was 20: 13 to 19 min, stopped at 20 on a slow one).
 - **Smokes and flashes fly by the drawn faces too** (`WorldQuery.throw_ray`, the owner's "ricochet only against
   surfaces"): a thrown bomb's line meets the props' faces and their leaf cards where solid, and, unlike a BB's or the
   eye's, the railings' boxes and the glass (as before). A bot checks its throw's arc on the same line. The dropped bomb
