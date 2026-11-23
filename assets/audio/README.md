@@ -47,8 +47,9 @@ woods at night, which leaves the street's night bed to the street ambience).
 **The batch of 2026-11-11** (AU10): 17 more give the steps on soil (`step_earth_*`, in place of gravel softened), metal
 (`step_metal_*`, a new walk, run and jumps in place of his first walk) and water (`step_water_*`, in place of the
 synthesised splashes: his wading cut where each step starts, his jumps in as takes, at the splashes' levels), the lifts'
-doors (`lift_doors`: 1.7 s of each slide, its loud part inside the 1.5 s door) and the car setting off (`lift_motor`:
-each of his two rides from its motor's start, 3.2 s, faded before its stop), and `loops/tunnel.wav`, Subway's background
+doors (`lift_doors`: 1.7 s of each slide, its loud part inside the 1.5 s door) and the car's motor (`lift_motor`: his
+first ride from its motor's start, 3.2 s, faded before its stop; his second ride and the recording removed at his word
+on 2026-11-23, LM1, so `lift_motor_1` is a fixed file now), and `loops/tunnel.wav`, Subway's background
 (his tunnel, its rumble under 60 Hz taken out). The Sniper Rifle keeps his first shot (his pick over his new one, which
 is kept unused), and the Compact SMG keeps its stand-ins (his pick over his own SMG recording), its motor now with his
 toothbrush's whir 4 dB under it (`power_smg`).
@@ -95,12 +96,12 @@ seeds the browser game used, so they sound as they did.
   (above), and the flash's bang too since AU6 (all re-cut in AU7), so this renderer only drafts.
 - `cues/door_open_<n>.wav` and `door_shut_<n>.wav` (1 to 5): recorded since AU2, 4 and 5 since AU5; the synthesised draft (DO1)
   renders with `tools/render_doors.gd` to a folder named after `--`.
-- `cues/lift_chime_1.wav`, `lift_doors_1` to `_3`, `lift_motor_1` and `_2`, `lift_button_1`, `lift_buzz_1` (MT2):
-  Subway's lifts (the car's arrival, its doors sliding, setting off, a button's beep, the too-full buzzer); the doors
-  and the car setting off are the owner's lift since AU10 (`tools/cut_recordings.py`, levelled to the placeholders'
-  loudness), the chime, the button and the buzzer still synthesised placeholders from `tools/lift_sounds.py` at a 0.7
-  peak; their levels are SoundConfig's `lift_gain` and `lift_button_gain`. To re-render the placeholders: `python3
-  tools/lift_sounds.py`, then `godot --headless --path . --import`.
+- `cues/lift_chime_1.wav`, `lift_doors_1` to `_3`, `lift_motor_1`, `lift_buzz_1` (MT2): Subway's lifts (the car's
+  arrival, its doors sliding, its motor as a button is pressed (LM1), the too-full buzzer); the doors and the motor are
+  the owner's lift since AU10 (the doors cut by `tools/cut_recordings.py`, levelled to the placeholders' loudness; the
+  motor a fixed file since LM1), the chime and the buzzer still synthesised placeholders from `tools/lift_sounds.py` at
+  a 0.7 peak; their levels are SoundConfig's `lift_gain` and `lift_motor_gain`. The button's beep was removed (LM1).
+  To re-render the placeholders: `python3 tools/lift_sounds.py`, then `godot --headless --path . --import`.
 - `cues/plant_pickup_1.wav` to `_3`, `plant_drop_1` to `_3`, `plant_arming_1`, `plant_armed_1`, `plant_beep_1`,
   `plant_defusing_1`, `plant_defused_1`, `plant_went_off_1` (PB1): Plant The Bomb's bomb (taken up, put down, its code
   keyed in for the 3.5 s a plant takes, armed, the fuse's beep, the kit at work for the 6 s a defuse takes, made safe,
