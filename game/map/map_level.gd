@@ -216,8 +216,10 @@ func _build_piece() -> void:
 				_plan = null
 				_piece = Piece.DRAWN
 		Piece.DRAWN:
-			_drawn = DrawnRays.build(map, _ray_props(), get_world_3d().space, _style.drawn_rays)
-			_piece = Piece.COLLIDERS
+			if _drawn == null:
+				_drawn = DrawnRays.begin(map, _ray_props(), get_world_3d().space, _style.drawn_rays)
+			elif _drawn.build_some(1):
+				_piece = Piece.COLLIDERS
 		Piece.COLLIDERS:
 			_add_block_colliders()
 			_piece = Piece.FACES if t != null else Piece.REST

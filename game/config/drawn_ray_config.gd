@@ -10,6 +10,9 @@ extends Resource
 ## The most props' shapes one body holds (each a body's sub-shape: Jolt's sub-shape ids must hold a prop's faces and
 ## its place among the body's shapes).
 @export var most_a_body: int = 64
+## How many props' bodies a staged build makes between looks at the clock (MapLevel.build_some: a loading screen keeps
+## drawing).
+@export var props_a_step: int = 256
 ## A leaf card is solid where its sheet's alpha is at least this: look_foliage.gdshader's alpha_cut.
 @export_range(0.0, 1.0) var leaf_alpha_cut: float = 0.5
 ## How many cut-out leaf cards one ray passes through before it counts as stopped in the leaves (a line through a

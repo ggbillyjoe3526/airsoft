@@ -52,57 +52,120 @@ var _own_shapes: Array[ConcavePolygonShape3D] = []
 ## The leaf sheet's alpha (FORMAT_LA8), read where a ray meets a card; null on a map with no leaf cards.
 var _sheet: Image = null
 var _sheet_size: Vector2i = Vector2i.ZERO
+## While the bodies are made (`begin` to `build_some`'s end): the map, its dress and the space, the props as laid by
+## model, the models in turn and the model and prop being made, each open body by its key and how many shapes it holds.
+var _map: MapData = null
+var _dress: PropDressConfig = null
+var _space: RID = RID()
+var _laid: Dictionary[StringName, PropLayout.Placed] = {}
+var _models: Array[StringName] = []
+var _model_at: int = 0
+var _prop_at: int = 0
+var _open: Dictionary[int, RID] = {}
+var _counts: Dictionary[int, int] = {}
 
 
 ## The drawn props of `map` as `props` lays them (the game's look: a station's named props only, as PlaySession draws
-## them), their bodies in `space`, with `cfg`. A model that won't load leaves its blocks as boxes.
+## them), their bodies in `space`, with `cfg`, built whole. A model that won't load leaves its blocks as boxes.
 static func build(map: MapData, props: PropDressConfig, space: RID, cfg: DrawnRayConfig) -> DrawnRays:
+	var rays := DrawnRays.begin(map, props, space, cfg)
+	rays.build_some(0)
+	return rays
+
+
+## As `build`, the props laid but no body made yet: `build_some` makes them a few props a call (a loading screen keeps
+## drawing, MapLevel's staged build), the same rays either way.
+static func begin(map: MapData, props: PropDressConfig, space: RID, cfg: DrawnRayConfig) -> DrawnRays:
 	var rays := DrawnRays.new()
 	rays._cfg = cfg
+	rays._map = map
+	rays._dress = props
+	rays._space = space
 	rays.drawn.resize(map.blocks.size())
 	var boxes: Dictionary[StringName, AABB] = {}
 	for model: StringName in PropDress.models_used(map, props):
 		var mesh := props.mesh_of(model)
 		if mesh != null:
 			boxes[model] = mesh.get_aabb()
-	var placed := PropLayout.layout(map, props, boxes)
-	var open: Dictionary[int, RID] = {}
-	var counts: Dictionary[int, int] = {}
-	for model: StringName in placed:
-		var shapes := rays._shapes_of(model, props)
-		if shapes.solid == null and shapes.leaves == null:
-			continue
-		var p := placed[model]
-		for i in p.transforms.size():
-			var bi := p.blocks[i]
-			var b := map.blocks[bi]
-			if not _stands_in(b, props):
-				continue
-			rays.drawn[bi] = 1
-			rays._props += 1
-			var xf := p.transforms[i]
-			# Jolt places a shape by a turn and a scale along its own axes: a prop bent to its joint (LINED, a log
-			# tunnel's sections) has its faces moved where they are drawn instead, a shape of its own.
-			var sheared := _sheared(xf.basis)
-			var placed_at := Transform3D.IDENTITY if sheared else xf
-			if shapes.solid != null:
-				rays._add(open, counts, xf.origin, placed_at, rays._placed(shapes.solid, xf, sheared), DRAWN_LAYER,
-						b.surface)
-			if shapes.leaves != null:
-				var body := rays._add(open, counts, xf.origin, placed_at, rays._placed(shapes.leaves, xf, sheared),
-						LEAF_LAYER, RayHit.Surface.LEAVES)
-				var lb: LeafBody = rays._leaf_bodies[body]
-				lb.shapes.append(shapes)
-				lb.inverses.append(xf.affine_inverse())
-	# A structure laid once over its set of blocks (SET) stands in for every block of the set.
-	for bi in map.blocks.size():
-		var b := map.blocks[bi]
-		if rays.drawn[bi] == 0 and props.lay_of(b) == PropDressConfig.Lay.SET and props.dresses(b) \
-				and placed.has(props.model_of(b)) and rays._has_faces(props.model_of(b)):
-			rays.drawn[bi] = 1
-	for body: RID in rays.surfaces:
-		PhysicsServer3D.body_set_space(body, space)
+	rays._laid = PropLayout.layout(map, props, boxes)
+	rays._models.assign(rays._laid.keys())
 	return rays
+
+
+## Makes the props' bodies, DrawnRayConfig.props_a_step props at a time, until the clock passes `until_usec` (0: to
+## the end); whether they are all made (and in their space).
+func build_some(until_usec: int) -> bool:
+	while not done():
+		_build_step()
+		if until_usec > 0 and Time.get_ticks_usec() >= until_usec:
+			break
+	return done()
+
+
+## Whether every body is made (`build`, or `build_some` to the end).
+func done() -> bool:
+	return _map == null
+
+
+## The model being made's shapes, else its next DrawnRayConfig.props_a_step props, or, past the last model, the sets
+## and the bodies' space.
+func _build_step() -> void:
+	if _model_at >= _models.size():
+		_finish()
+		return
+	var model := _models[_model_at]
+	if not _shapes.has(model):
+		# a model's shapes are a step of their own
+		_shapes_of(model, _dress)
+		return
+	var shapes := _shapes_of(model, _dress)
+	var p := _laid[model]
+	var end := p.transforms.size() if shapes.solid == null and shapes.leaves == null \
+			else mini(_prop_at + _cfg.props_a_step, p.transforms.size())
+	for i in range(_prop_at, end):
+		if shapes.solid == null and shapes.leaves == null:
+			break
+		var bi := p.blocks[i]
+		var b := _map.blocks[bi]
+		if not _stands_in(b, _dress):
+			continue
+		drawn[bi] = 1
+		_props += 1
+		var xf := p.transforms[i]
+		# Jolt places a shape by a turn and a scale along its own axes: a prop bent to its joint (LINED, a log
+		# tunnel's sections) has its faces moved where they are drawn instead, a shape of its own.
+		var sheared := _sheared(xf.basis)
+		var placed_at := Transform3D.IDENTITY if sheared else xf
+		if shapes.solid != null:
+			_add(xf.origin, placed_at, _placed(shapes.solid, xf, sheared), DRAWN_LAYER, b.surface)
+		if shapes.leaves != null:
+			var body := _add(xf.origin, placed_at, _placed(shapes.leaves, xf, sheared), LEAF_LAYER,
+					RayHit.Surface.LEAVES)
+			var lb: LeafBody = _leaf_bodies[body]
+			lb.shapes.append(shapes)
+			lb.inverses.append(xf.affine_inverse())
+	_prop_at = end
+	if _prop_at >= p.transforms.size():
+		_prop_at = 0
+		_model_at += 1
+
+
+## A structure laid once over its set of blocks (SET) stands in for every block of the set; the bodies go into their
+## space, and what the build held goes.
+func _finish() -> void:
+	for bi in _map.blocks.size():
+		var b := _map.blocks[bi]
+		if drawn[bi] == 0 and _dress.lay_of(b) == PropDressConfig.Lay.SET and _dress.dresses(b) \
+				and _laid.has(_dress.model_of(b)) and _has_faces(_dress.model_of(b)):
+			drawn[bi] = 1
+	for body: RID in surfaces:
+		PhysicsServer3D.body_set_space(body, _space)
+	_map = null
+	_dress = null
+	_laid.clear()
+	_models.clear()
+	_open.clear()
+	_counts.clear()
 
 
 ## Whether `basis` is more than a turn and a scale along its own axes (its axes not square to one another).
@@ -190,13 +253,12 @@ func _placed(shape: ConcavePolygonShape3D, xf: Transform3D, sheared: bool) -> Co
 
 ## A body on `layer` for `surface` in the chunk under `at` with room for one more shape, `shape` added to it at `xf`;
 ## the body.
-func _add(open: Dictionary[int, RID], counts: Dictionary[int, int], at: Vector3, xf: Transform3D, shape: Shape3D,
-		layer: int, surface: int) -> RID:
+func _add(at: Vector3, xf: Transform3D, shape: Shape3D, layer: int, surface: int) -> RID:
 	var cell := Vector2i(floori(at.x / _cfg.chunk), floori(at.z / _cfg.chunk))
 	# a key a layer, a surface and a square (each square's column and row under 2^12 either side)
 	var key := (((cell.x + 2048) * 4096 + cell.y + 2048) * 32 + surface) * 32 + layer
-	var body: RID = open.get(key, RID())
-	if not body.is_valid() or counts[key] >= _cfg.most_a_body:
+	var body: RID = _open.get(key, RID())
+	if not body.is_valid() or _counts[key] >= _cfg.most_a_body:
 		body = PhysicsServer3D.body_create()
 		PhysicsServer3D.body_set_mode(body, PhysicsServer3D.BODY_MODE_STATIC)
 		PhysicsServer3D.body_set_collision_layer(body, layer)
@@ -204,10 +266,10 @@ func _add(open: Dictionary[int, RID], counts: Dictionary[int, int], at: Vector3,
 		surfaces[body] = surface
 		if layer == LEAF_LAYER:
 			_leaf_bodies[body] = LeafBody.new()
-		open[key] = body
-		counts[key] = 0
+		_open[key] = body
+		_counts[key] = 0
 	PhysicsServer3D.body_add_shape(body, shape.get_rid(), xf)
-	counts[key] += 1
+	_counts[key] += 1
 	return body
 
 
