@@ -562,3 +562,41 @@ func test_the_same_flight_over_the_tray_is_stopped_by_the_box_when_a_bomb_casts_
 	boxed.inner = _query("subway")
 	var g := _fly_bomb(boxed, start, Vector3(8.0, 0.0, 0.0), 60)
 	assert_lt(g.position.x, lo.x + b.size.x * 0.5, "cast as a BB the bomb stops at the box (the harness can tell the two)")
+
+
+## A query overriding only `ray`, as older doubles do: the other casts answer as it through WorldQuery's defaults.
+class RayOnly extends WorldQuery:
+	var floor_y := 0.0
+
+	func ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+		if from.y < floor_y or to.y > floor_y:
+			return false
+		hit.fraction = (from.y - floor_y) / (from.y - to.y)
+		hit.position = from.lerp(to, hit.fraction)
+		hit.normal = Vector3.UP
+		return true
+
+
+func test_a_magazine_lands_on_a_floor_found_by_a_query_that_overrides_only_ray() -> void:
+	var t := ThrownMagazines.new()
+	t.setup(2)
+	add_child_autofree(t)
+	var q := RayOnly.new()
+	q.floor_y = -0.5
+	t.set_world(q, 2.0, 0.5)
+	assert_almost_eq(t.landing_height(Vector3(0, 3, 0), Vector3(1, 0, 0), 0.0, 9.8), -0.5, 0.001,
+			"throw_ray falls back to ray: it lands on the floor the double knows")
+
+
+func test_a_held_line_meets_glass_as_a_bb_does_and_the_torch_s_sight_line_passes_it() -> void:
+	# ReplicaView pulls back along throw_ray, TorchBeams lands its spot along sight_ray: on a BoxWorld (no drawn
+	# props) a pane stops the first as before, and the spot now lands on what is behind the glass (main: on it).
+	var w := BoxWorld.new()
+	w.add_clear_box(Vector3(0, 1, -1), Vector3(4, 2, 0.1))
+	w.add_box(Vector3(0, 1, -3), Vector3(4, 2, 0.1), RayHit.Surface.EARTH)
+	var from := Vector3(0, 1, 0)
+	var to := Vector3(0, 1, -5)
+	assert_true(w.throw_ray(from, to, _hit), "the pane stops the held line")
+	assert_lt(_hit.fraction, 0.3, "at the glass, so the replica is pulled back as on main")
+	assert_true(w.sight_ray(from, to, _hit), "the spot finds the wall")
+	assert_gt(_hit.fraction, 0.5, "behind the glass")
