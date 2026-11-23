@@ -1,6 +1,6 @@
 # LM1 · A lift's button plays its motor at once
 
-**Review:** REVIEW_LINE
+**Review:** 4 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner, 2026-11-23, after hearing the lift's files: "remove lift_motor_2.wav and up_down.wav. use lift_motor_1.wav
 only. it should play as soon as the player presses a button. this means also remove the placeholder
@@ -10,7 +10,10 @@ lift_button_1.wav". Ruling in `docs/DECISIONS.md` (Audio).
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-ATTEMPT_ROWS
+| 2026-11-23 | 1 | Opus 5.5 (build thread) | ✓ | 6/8 Retry | check 1: any press, even out of reach or at a call button, cut the motor riding the car; check 8: timing not on record, ASSETS and wiki stale |
+| 2026-11-23 | 2 | Opus 5.5 (build thread) | ✓ | 6/8 Retry | check 7: three lines over 120 columns, a test name; check 8: KNOWN_ISSUES row stale |
+| 2026-11-23 | 3 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | check 7: lift_sounds.py said cut_recordings.py still made the motor |
+| 2026-11-23 | 4 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
