@@ -351,9 +351,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## draws a trio, not the team.
 @export var search_crowd_max: int = 2
 @export var search_crowd_radius: float = 12.0
-## Spreading out (BotSpread): a teammate counts at a spot only on its storey. Where the nav grid stacks floors under
-## the teammate (Subway's concourse over a platform), the floor they stand on lying more than this (m) above or below
-## the floor under the spot's height is another storey; a slope or a crate top is not (BP13).
+## Spreading out (BotSpread): a teammate counts at a spot only on its storey. Their floor and the spot's lying more
+## than this (m) apart, with a drop or climb of more than this from one cell to the next on the line between them
+## (Subway's concourse edge over a platform), is another storey; a slope or a crate top is not (BP13).
 @export var spread_storey_rise: float = 2.0
 
 @export_group("Held angles and slicing")

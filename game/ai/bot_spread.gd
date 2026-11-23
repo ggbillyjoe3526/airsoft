@@ -3,9 +3,9 @@ class_name BotSpread
 ## noise or a teammate's call draws at most BotConfig.search_crowd_max teammates to one spot (the rest watch it from
 ## their plan), and hunters fan out away from one another. Same at every level. Allocates nothing. A teammate on another
 ## storey is not at the spot (BP13: Subway's concourse stands over its platforms, so two upstairs kept the rest from a
-## fight below): where the nav grid has floors stacked under the teammate, the one they stand on lies more than
-## BotConfig.spread_storey_rise from the one under the spot's height. A slope is one floor, however steep, so Woodland's
-## hills count as ever.
+## fight below): the floor a teammate stands on and the floor under the spot lie more than
+## BotConfig.spread_storey_rise apart, and the straight line between them meets a drop or a climb of more than that from
+## one cell to the next (`_one_floor`). A slope rises a little a cell, however steep, so Woodland's hills count as ever.
 
 
 ## True if `spot` already has search_crowd_max of `b`'s teammates at it or on their way: in play within
@@ -58,19 +58,43 @@ static func hunt_crowded(b: Bot, w: BotWorld, spot: Vector3) -> bool:
 
 ## Whether `a` lies within the square root of `reach_sq` of `b` across the ground, on the same storey (`_same_storey`).
 static func _near(w: BotWorld, a: Vector3, b: Vector3, reach_sq: float) -> bool:
-	return Vector2(a.x - b.x, a.z - b.z).length_squared() < reach_sq and _same_storey(w, a, b.y)
+	return Vector2(a.x - b.x, a.z - b.z).length_squared() < reach_sq and _same_storey(w, a, b)
 
 
-## False only where the nav grid stacks floors under `a` and the one `a` stands on lies more than
-## BotConfig.spread_storey_rise from the one under height `y` (the spot's): true off the grid, without one, and on a
-## single floor of any slope.
-static func _same_storey(w: BotWorld, a: Vector3, y: float) -> bool:
+## False only where `a`'s floor and `b`'s floor on the nav grid lie more than BotConfig.spread_storey_rise apart and
+## they are not one floor along the line between them (`_one_floor`): true off the grid and without one.
+static func _same_storey(w: BotWorld, a: Vector3, b: Vector3) -> bool:
 	var nav := w.nav
 	if nav == null:
 		return true
-	var c := nav.cell_index(a.x, a.z)
-	if c < 0 or nav.cell_start[c + 1] - nav.cell_start[c] < 2:
+	var ka := nav.node_at(a)
+	var kb := nav.node_at(b)
+	var rise := w.cfg.spread_storey_rise
+	if ka < 0 or kb < 0 or absf(nav.floor_y[ka] - nav.floor_y[kb]) <= rise:
 		return true
-	var mine := nav.pick_node(c, a.y)
-	var spot := nav.pick_node(c, y)
-	return absf(nav.floor_y[mine] - nav.floor_y[spot]) <= w.cfg.spread_storey_rise
+	return _one_floor(nav, a, nav.floor_y[ka], b, nav.floor_y[kb], rise)
+
+
+## Whether the floor at height `ay` under `a` runs on to the one at `by` under `b` along the straight line: cell by cell,
+## the floor nearest the last one's height never more than `rise` above or below it. Cells with no floor (inside a
+## block) are passed over; what is under them is unknown, not a storey.
+static func _one_floor(nav: NavGrid, a: Vector3, ay: float, b: Vector3, by: float, rise: float) -> bool:
+	var dx := b.x - a.x
+	var dz := b.z - a.z
+	# Half a cell a sample: no cell on the line is stepped over.
+	var samples := maxi(1, ceili(sqrt(dx * dx + dz * dz) / (nav.cell * 0.5)))
+	var y := ay
+	var last := nav.cell_index(a.x, a.z)
+	for s in range(1, samples + 1):
+		var t := float(s) / float(samples)
+		var c := nav.cell_index(a.x + dx * t, a.z + dz * t)
+		if c < 0 or c == last:
+			continue
+		last = c
+		var k := nav.nearest_node(c, y)
+		if k < 0:
+			continue
+		if absf(nav.floor_y[k] - y) > rise:
+			return false
+		y = nav.floor_y[k]
+	return absf(y - by) <= rise
