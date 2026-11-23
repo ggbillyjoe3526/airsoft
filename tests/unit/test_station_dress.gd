@@ -235,12 +235,15 @@ func _vertices(mesh: ArrayMesh) -> int:
 
 func _shapes(level: MapLevel) -> Array[String]:
 	var out: Array[String] = []
-	for body in level.find_children("*", "StaticBody3D", true, false):
-		for c in body.get_children():
-			if c is CollisionShape3D:
-				var s := c as CollisionShape3D
-				out.append("%s %s %s" % [body.name, s.position, (s.shape as BoxShape3D).size if s.shape is BoxShape3D
-						else s.shape.get_class()])
+	for body: StaticBody3D in level.find_children("*", "StaticBody3D", true, false):
+		# its shapes through their owners: a CollisionShape3D's, and those a body owns itself (a block its drawn props
+		# stand in for keeps its box on a body of its own, DG1)
+		var named := String(body.name).replace("Colliders_Box_", "Colliders_")
+		for o in body.get_shape_owners():
+			for k in body.shape_owner_get_shape_count(o):
+				var shape := body.shape_owner_get_shape(o, k)
+				out.append("%s %s %s" % [named, body.shape_owner_get_transform(o).origin,
+						(shape as BoxShape3D).size if shape is BoxShape3D else shape.get_class()])
 	out.sort()
 	return out
 
