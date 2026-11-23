@@ -355,3 +355,72 @@ func _placed(m: MapData, props: PropDressConfig) -> Dictionary[StringName, PropL
 		if props.mesh_of(model) != null:
 			boxes[model] = props.mesh_of(model).get_aabb()
 	return PropLayout.layout(m, props, boxes)
+
+
+func _begun(id: String, world: SubViewport) -> DrawnRays:
+	var play := PlayTuning.load_default()
+	return DrawnRays.begin(_runners[id].map, _runners[id].level._ray_props(), world.find_world_3d().space,
+			play.map_style.drawn_rays)
+
+
+func _own_world() -> SubViewport:
+	var world := SubViewport.new()
+	world.own_world_3d = true
+	world.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child_autofree(world)
+	return world
+
+
+func test_build_step_returns_true_once_at_the_end_and_is_safe_after() -> void:
+	var world := _own_world()
+	var rays := _begun("subway", world)
+	assert_false(rays.done(), "begun, not done")
+	var trues := 0
+	var calls := 0
+	while not rays.done() and calls < 5000:
+		calls += 1
+		if rays.build_step():
+			trues += 1
+			assert_true(rays.done(), "true means every body is made")
+	assert_eq(trues, 1, "true exactly once, on the last step")
+	var bodies := rays.body_count()
+	assert_true(rays.build_step(), "a step after the end says done")
+	assert_true(rays.build_step(), "and again")
+	assert_eq(rays.body_count(), bodies, "and makes nothing more")
+	rays.free_bodies()
+
+
+func test_build_step_on_a_map_with_no_props_finishes_at_once() -> void:
+	var world := _own_world()
+	var rays := DrawnRays.begin(MapData.new(), PropDressConfig.new(), world.find_world_3d().space, DrawnRayConfig.new())
+	var calls := 0
+	while not rays.build_step() and calls < 10:
+		calls += 1
+	assert_lt(calls, 10, "ends")
+	assert_true(rays.done(), "done")
+	assert_eq(rays.body_count(), 0, "no body")
+	rays.free_bodies()
+
+
+func test_freeing_the_bodies_mid_build_leaves_none() -> void:
+	var world := _own_world()
+	var rays := _begun("woodland", world)
+	for n in 3:
+		rays.build_step()
+	rays.free_bodies()
+	assert_eq(rays.body_count(), 0, "freed mid-build")
+	# Freeing ends the build: a step after it does nothing, and no shape goes into a freed body.
+	assert_true(rays.build_step(), "a step after the free is done")
+	assert_true(rays.done(), "done")
+	assert_eq(rays.body_count(), 0, "still none")
+
+
+func test_a_body_key_has_room_for_every_surface_layer_and_square_the_maps_use() -> void:
+	assert_lt(RayHit.Surface.WATER, DrawnRays.KEY_SLOTS, "every surface fits its slot")
+	for layer: int in [DrawnRays.BOX_LAYER, DrawnRays.DRAWN_LAYER, DrawnRays.LEAF_LAYER]:
+		assert_lt(layer, DrawnRays.KEY_SLOTS, "layer %d fits its slot" % layer)
+	var chunk := DrawnRayConfig.new().chunk
+	for id in MAPS:
+		for b in _runners[id].map.blocks:
+			assert_lt(absf(b.center.x) / chunk, DrawnRays.KEY_CELLS, "%s: column in range" % id)
+			assert_lt(absf(b.center.z) / chunk, DrawnRays.KEY_CELLS, "%s: row in range" % id)

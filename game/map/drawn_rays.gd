@@ -167,6 +167,11 @@ func _finish() -> void:
 			drawn[bi] = 1
 	for body: RID in surfaces:
 		PhysicsServer3D.body_set_space(body, _space)
+	_drop_build()
+
+
+## What the build held goes: the build is done (a step after it does nothing).
+func _drop_build() -> void:
 	_map = null
 	_dress = null
 	_laid.clear()
@@ -239,13 +244,14 @@ func opaque(body: RID, shape: int, face: int, at: Vector3) -> bool:
 	return _sheet.get_pixel(x, y).a >= _cfg.leaf_alpha_cut
 
 
-## Frees every body (before the shapes they hold go).
+## Frees every body (before the shapes they hold go) and ends a build still under way.
 func free_bodies() -> void:
 	for body: RID in surfaces:
 		PhysicsServer3D.free_rid(body)
 	surfaces.clear()
 	_leaf_bodies.clear()
 	_own_shapes.clear()
+	_drop_build()
 
 
 ## `shape` as a prop placed at `xf` stands: itself (placed at `xf`), or, `sheared`, its faces moved to where they are
