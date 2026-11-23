@@ -197,13 +197,52 @@ func test_a_hunter_on_the_deck_does_not_fan_a_hunter_below_out() -> void:
 
 func test_teammates_on_a_steep_single_floor_slope_still_crowd_the_spot() -> void:
 	_world()
-	# one floor everywhere, rising 3.5 m in the 8 m before the spot: a hill, not a storey
+	# one floor everywhere, rising 3.5 m over the 8 m before the spot: a hill, not a storey
+	world.nav = _nav(func(_x: float, z: float) -> PackedFloat32Array:
+		return PackedFloat32Array([clampf((30.0 - z) * 3.5 / 8.0, 0.0, 3.5)]))
+	world.characters[1].position = Vector3(1.0, 3.5, 22.0)
+	world.characters[2].position = Vector3(-1.0, 3.5, 22.0)
+	assert_true(BotSpread.crowded(world.bots[0], world, SPOT), "the slope is one floor")
+	assert_true(BotSpread.hunt_crowded(world.bots[0], world, Vector3(0.0, 0.0, 22.0) + Vector3(0.0, 3.5, 0.0)))
+
+
+func test_a_ledge_one_cell_high_with_one_floor_each_side_is_another_storey() -> void:
+	_world()
 	world.nav = _nav(func(_x: float, z: float) -> PackedFloat32Array:
 		return PackedFloat32Array([3.5 if z < 24.0 else 0.0]))
 	world.characters[1].position = Vector3(1.0, 3.5, 22.0)
 	world.characters[2].position = Vector3(-1.0, 3.5, 22.0)
-	assert_true(BotSpread.crowded(world.bots[0], world, SPOT), "the slope is one floor")
-	assert_true(BotSpread.hunt_crowded(world.bots[0], world, Vector3(0.0, 0.0, 22.0)))
+	assert_false(BotSpread.crowded(world.bots[0], world, SPOT), "a cliff is a storey")
+
+
+## The deck at 4 m runs on past the stacked area (z 24..36) to z 36..42, where it is the only floor. Counting a
+## teammate's own cell as stacked would call them level with the ground there; the walk along the line finds the climb.
+func _wide_deck(x: float, z: float) -> PackedFloat32Array:
+	if absf(x) < 6.0 and absf(z - 30.0) < 6.0:
+		return PackedFloat32Array([0.0, 4.0])
+	if absf(x) < 6.0 and z >= 36.0 and z < 44.0:
+		return PackedFloat32Array([4.0])
+	return PackedFloat32Array([0.0])
+
+
+func test_teammates_on_the_decks_single_floor_part_do_not_crowd_a_spot_below() -> void:
+	_world()
+	world.nav = _nav(_wide_deck)
+	world.characters[1].position = Vector3(1.0, 4.0, 39.0)
+	world.characters[2].position = Vector3(-1.0, 4.0, 39.0)
+	assert_false(BotSpread.crowded(world.bots[0], world, SPOT), "7 to 11 m off, on the deck alone")
+
+
+func test_a_spot_on_the_decks_single_floor_part_is_not_crowded_from_the_ground() -> void:
+	_world()
+	world.nav = _nav(_wide_deck)
+	var up := Vector3(0.0, 4.0, 39.0)
+	world.characters[1].position = Vector3(1.0, 0.0, 32.0)
+	world.characters[2].position = Vector3(-1.0, 0.0, 32.0)
+	assert_false(BotSpread.crowded(world.bots[0], world, up), "ground teammates 7 m off")
+	world.characters[1].position = up + Vector3(1.0, 0.0, 0.0)
+	world.characters[2].position = up + Vector3(-1.0, 0.0, 0.0)
+	assert_true(BotSpread.crowded(world.bots[0], world, up), "teammates on the deck do")
 
 
 func test_teammates_on_a_crate_top_under_the_rise_still_crowd_the_spot() -> void:
@@ -348,16 +387,26 @@ func _carried(id: String) -> ReplicaConfig:
 	return rules.carried(l).replicas[0]
 
 
-func _run_hip(r: ReplicaConfig) -> float:
-	return r.spread_deg * r.hip_spread * (1.0 + (tuning.accuracy.run - 1.0) * r.move_spread)
+func _run_hip(r: ReplicaConfig, run: bool) -> float:
+	var cfg := MovementConfig.new()
+	var c := Character.new(1, 0, Vector3.ZERO, 0.0, [r] as Array[ReplicaConfig])
+	c.grounded = true
+	c.still_time = 0.0
+	c.velocity = Vector3(cfg.run_speed, 0.0, 0.0) if run else Vector3.ZERO
+	return r.spread_deg * Accuracy.target_spread_scale(c, cfg, tuning.accuracy)
 
 
 func test_the_cyber_pistol_is_wider_on_the_run_than_the_gbb_pistol() -> void:
 	var cyber := _carried(CYBER)
 	var gbb := _carried(PISTOL)
-	assert_gt(_run_hip(cyber), _run_hip(gbb), "the Cyber's run spread stays above the GBB's")
+	assert_gt(_run_hip(cyber, true), _run_hip(gbb, true), "the Cyber's run spread stays above the GBB's")
 	assert_gt(cyber.move_spread, gbb.move_spread)
-	assert_lt(cyber.spread_deg, gbb.spread_deg, "while standing the Cyber is still the tighter")
+	assert_lt(_run_hip(cyber, false), _run_hip(gbb, false), "while standing the Cyber is still the tighter")
+
+
+func test_the_fullscreen_toggle_keys_cannot_be_bound() -> void:
+	for code in DisplayConfig.new().alt_toggle_keys:
+		assert_false(KeyBindings.bindable(code), "key %s" % code)
 
 
 func test_an_older_save_with_an_action_on_enter_keeps_that_actions_default_and_the_rest() -> void:
