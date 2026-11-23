@@ -159,3 +159,30 @@ func test_a_motor_voice_taken_by_another_play_is_let_go_not_stopped() -> void:
 	audio.on_tick(state, 0, state.characters[0])
 	assert_true(audio._field[v].playing, "a taken voice is let go, not stopped")
 	assert_eq(audio._motor_voice[0], -1)
+
+
+func test_two_presses_in_one_tick_leave_one_riding_voice() -> void:
+	var rig := _rig(Vector3(1.0, 3.0, 1.0))
+	var audio: SimAudio = rig[0]
+	var state: GameState = rig[1]
+	_press(state, 0, Vector3(1.5, 4.2, 0.0))
+	_press(state, 0, Vector3(1.5, 4.3, 0.0))
+	audio.on_tick(state, 0, state.characters[0])
+	assert_eq(_playing(audio), 1, "the first press is cut by the second")
+
+
+func test_the_round_ending_cuts_both_the_riding_and_the_landing_motor() -> void:
+	var rig := _rig(Vector3(1.0, 3.0, 1.0))
+	var audio: SimAudio = rig[0]
+	var state: GameState = rig[1]
+	_press(state, 0, Vector3(1.5, 4.2, 0.0))
+	audio.on_tick(state, 0, state.characters[0])
+	state.events.clear()
+	state.characters[0].position = Vector3(1.0, 7.0, -1.0)
+	_press(state, 0, Vector3(1.8, 8.2, -0.3))
+	audio.on_tick(state, 0, state.characters[0])
+	assert_eq(_playing(audio), 2, "both play")
+	state.events.clear()
+	state.events.add(GameEvent.Kind.ROUND_OVER)
+	audio.on_tick(state, 0, state.characters[0])
+	assert_eq(_playing(audio), 0, "both cut")
