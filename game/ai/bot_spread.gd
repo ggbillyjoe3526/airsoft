@@ -81,7 +81,7 @@ static func _same_storey(w: BotWorld, a: Vector3, b: Vector3) -> bool:
 static func _one_floor(nav: NavGrid, a: Vector3, ay: float, b: Vector3, by: float, rise: float) -> bool:
 	var dx := b.x - a.x
 	var dz := b.z - a.z
-	# Half a cell a sample: no cell on the line is stepped over.
+	# Half a cell a sample: every cell the line crosses is read, bar a corner it only clips.
 	var samples := maxi(1, ceili(sqrt(dx * dx + dz * dz) / (nav.cell * 0.5)))
 	var y := ay
 	var last := nav.cell_index(a.x, a.z)
