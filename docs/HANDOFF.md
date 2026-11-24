@@ -28,7 +28,7 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
   (`/mnt/project-files/playtest/0.1-beta3-checklist.md`, new checks from N70). At the Beta 2 tag the archive check moved
   `docs/PLAYTEST.md`'s pre-Beta 1 task lists to `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` (170 KB to 119 KB);
   `docs/DECISIONS.md` (183 KB) holds rulings in force, and sorting out the ones later rulings replaced is a task of its
-  own: task AR1 in `docs/TASKS.md` (`docs/PROCESS.md` › Releases, step 6).
+  own: task DA1 in `docs/TASKS.md` (`docs/PROCESS.md` › Releases, step 6).
 
 ## Where to look
 
