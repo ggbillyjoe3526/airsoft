@@ -62,11 +62,11 @@ of rounds armed stays where it was on every field.
 - **A defending player still has time.** Within BotConfig.plant_player_claim (15 m) of the bomb no bot defuses until the
   fuse leaves the defuse plus plant_takeover_margin (4 s): on Depot's 16 s that is 6 s to come and start, against a
   2.4 s sprint from 15 m (`test_pb4_fuse` holds every field to it).
-- **A defender at the far site has a race, not a sure thing.** On Depot the sites are 53 m apart in a straight line:
-  a sprint there takes about 9 to 10 s of the 16 s, leaving the 6 s defuse with nothing to spare unless they set off
-  while the bomb is being keyed in (3.5 s, heard within the bots' hearing of it). That is the same bargain as a
-  rotate in any bomb game, and it is the first play check (docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md › PB4). Woodland's sites are 77 m apart:
-  about 13 s of its 23 s.
+- **A defender at the far site has a race, not a sure thing.** On Depot the sites are 53 m apart in a straight line: a
+  sprint there takes about 9 to 10 s of the 16 s, leaving the 6 s defuse with nothing to spare unless they set off while
+  the bomb is being keyed in (3.5 s, heard within the bots' hearing of it). That is the same bargain as a rotate in any
+  bomb game, and it is the first play check (docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md › PB4). Woodland's sites are 77
+  m apart: about 13 s of its 23 s.
 - **What moved:** the share of rounds armed barely changed (Depot 70 % to 67 %); the attackers now win more of the
   rounds they arm (Depot 53 % to 76 %, with 46 bombs going off in 239 rounds where 1 did). The balance comes from a
   plant being harder to undo, not from reaching the site more often: the map redesign work is where reaching it

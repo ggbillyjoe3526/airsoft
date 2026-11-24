@@ -104,7 +104,8 @@ hand and the menus' pictures draw them on those surfaces in their own colours:
   menu pictures on their surfaces with the label's colour; `own_surface` leaves glass alone and keeps what it
   builds out of the shared store. `test_grenade_arms.gd`'s depth check reads a surfaced material's uniform.
 - **Docs:** `docs/CC0_ASSETS.md` (Surfaces, Power-source models, Grenade models), `docs/ART.md`, `docs/ASSETS.md`,
-  `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › What the bombs and power sources are made of (MQ2B), the wiki's Grenades page.
+  `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › What the bombs and power sources are made of (MQ2B), the wiki's
+  Grenades page.
 - **Pictures:** `art/model-quality/mq2b/` in the project files: each model alone before and after, and each bomb in
   first person; the `mq2b-pass2` sheets show the second attempt, the `mq2b-pass3` sheets the third and the
   `mq2b-pass4` sheets the fourth (1 the bombs alone, 2 in your hand, 3 the gas bottle and its label close up, 4

@@ -502,10 +502,10 @@ file's grid and asserts (the critic's note).
 - Flicker was measured on the cloud's software renderer, whose depth is the game's own (32-bit, reversed). A real
   card draws the same planes, but what William saw is his to confirm (`docs/PLAYTEST.md`, checklist N22).
 - Thin lines shimmer with Edge smoothing Off (FB2): a cage's wire, far rails, a cordwood stack's edges.
-- Light was pictured on the cloud's software renderer (part 3): how bright Depot reads on William's screen and
-  whether the softer edges read soft or blurred are his to say (N23 on his Beta 1 checklist,
-  `/mnt/project-files/playtest/0.1-beta1-checklist.md`; the checks are `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › The pass before 0.1
-  Beta 1).
+- Light was pictured on the cloud's software renderer (part 3): how bright Depot reads on William's screen and whether
+  the softer edges read soft or blurred are his to say (N23 on his Beta 1 checklist,
+  `/mnt/project-files/playtest/0.1-beta1-checklist.md`; the checks are `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` ›
+  The pass before 0.1 Beta 1).
 - Depot on Ultra is as bright as it was (part 3; William kept its look): its open hall reads 161 of 255 against 118
   on High. If the brightness he saw was on Ultra it is still there; the thread asks him where.
 - Woodland on Medium is about half as bright as on High in deep shade, where High's eyes open up (UG3); not changed.

@@ -39,5 +39,5 @@ roughly be same scale/angle as rifle" and "when inspecting rifles the player can
 
 ## Known issues left
 
-- None. How it feels in the hands is on the owner's checklist (N13) and `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › HA2; pictures in the
-  shared files under `art/fp-arms-ha2/`.
+- None. How it feels in the hands is on the owner's checklist (N13) and `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` ›
+  HA2; pictures in the shared files under `art/fp-arms-ha2/`.
