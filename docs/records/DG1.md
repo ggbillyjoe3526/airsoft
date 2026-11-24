@@ -5,7 +5,7 @@ happen against surfaces not empty spaces. for example, if there is an empty spac
 through it (think firing between branches of a tree). make sure all models in the game are updated especially the
 woodlands map because i feel that might be what is causing hit/spot detection issues which is still present."
 
-**Review:** 3 attempts · critic CRITIC_PENDING · qa Pass · performance Pass
+**Review:** 4 attempts · critic CRITIC_PENDING · qa Pass · performance Pass
 
 ## Attempts
 
@@ -13,7 +13,8 @@ woodlands map because i feel that might be what is causing hit/spot detection is
 |---|---|---|---|---|---|
 | 2026-11-23 | 1 | Opus 5.5 (build thread) | ✓ (touched tests; CI on the head) | Retry | Balance on 16 seeds and old waits; throws on boxes |
 | 2026-11-23 | 2 | Opus 5.5 (build thread) | ✓ (touched tests; CI 31 of 32) | 4/8 Retry | The held replica and the torch spot on boxes; the waits without final figures; three stale tests; the record |
-| 2026-11-24 | 3 | Opus 5.5 (build thread) | ✓ (touched tests; CI on the head) | CRITIC_PENDING | |
+| 2026-11-24 | 3 | Opus 5.5 (build thread) | ✓ (touched tests; CI on the head) | 5/8 Retry | No test in the classes that cast the new rays; `throw_ray` named for half its callers; one stale figure; no review on the head |
+| 2026-11-24 | 4 | Opus 5.5 (build thread) | ✓ (touched tests; CI on the head) | CRITIC_PENDING | |
 
 ## How it was measured
 

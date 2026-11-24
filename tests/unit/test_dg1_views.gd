@@ -8,6 +8,9 @@ const DT := 1.0 / 60.0
 const EYE := Vector3(0.0, 1.6, 0.0)
 
 var body: BodyConfig = null
+var figures: FigureConfig = null
+## Loaded once, as test_figure_raise does.
+var models: FigureModels = null
 
 
 ## A level whose boxes answer `ray` while `drawn` (the level as drawn) answers the sight and drawn rays: a box with
@@ -33,6 +36,9 @@ class DrawnWorld:
 
 func before_all() -> void:
 	body = BodyConfig.new()
+	figures = FigureConfig.new()
+	models = FigureModels.new(figures)
+	models.load_kinds()
 
 
 ## A level with a stand-in box 2 m wide and 3 m high, its face `distance` m ahead (-Z), drawn as `drawn`'s boxes.
@@ -68,14 +74,11 @@ func test_a_held_replica_is_not_pulled_back_against_a_box_with_nothing_drawn_in_
 
 
 func _raised(world: WorldQuery) -> float:
-	var config := FigureConfig.new()
-	var models := FigureModels.new(config)
-	models.load_kinds()
 	var c := _character()
 	var v := FigureView.new()
 	add_child_autofree(v)
 	v.setup(c, Color.RED, HitConfig.new(), null)
-	v.set_body(models, FigureMix.HUMAN, config.lod_high)
+	v.set_body(models, FigureMix.HUMAN, figures.lod_high)
 	v.set_world(world, body)
 	for i in 40:
 		v.update(c, 1.0)
@@ -110,8 +113,8 @@ func test_a_torch_spot_lands_on_the_drawn_face_behind_a_box_with_nothing_drawn_i
 		lights.append(light)
 	c.armament.lights = lights
 	c.torch_on = true
-	var figures: Array[FigureView] = []
-	beams.update([c] as Array[Character], null, 1.0, figures, camera)
+	var none: Array[FigureView] = []
+	beams.update([c] as Array[Character], null, 1.0, none, camera)
 	var spots := (beams.get_node("Spots") as MultiMeshInstance3D).multimesh
 	assert_eq(spots.visible_instance_count, 1, "one spot")
 	# A headless multimesh keeps no transforms, so the line itself is judged: the eye's, which passes the box.
