@@ -1,6 +1,7 @@
 # RD5 · The 0.1 Beta 2 release notes, ready before the tag
 
-**Review:** first pull request docs only, no review agents (CLAUDE.md §6)
+**Review:** first pull request docs only, no review agents (CLAUDE.md §6); the second (after the tag) see its pull
+request's Review line
 
 ## Decisions
 
@@ -27,3 +28,30 @@
 - **No changelog note of its own:** this pull request is the one that empties `changelog.d/`.
 - **Archive check** (step 6) goes to the post-tag pull request, as at Dev 3 and Beta 1.
 - **The owner's open checks** do not hold the tag (51 open on `0.1-beta2-checklist.md`: N25 to N69 and A1 to A6).
+
+## After the tag (2026-11-24)
+
+The owner published `0.1-beta.2` on 05ef266 on 2026-11-24 at 12:51 UTC and named the next build 0.1 Beta 3 (his
+decision card, 12:50). This second pull request is `docs/PROCESS.md` › Releases, steps 4 to 6:
+
+- **`config/version` reads "0.1 Beta 3"** (step 4), so a source run names the build being made. This touches
+  `project.godot`, so the release workflow runs as a dry run on the pull request and the three review agents run.
+- **The release itself** (step 5): Release run 45397613237 green; the release has
+  `Airsoft-0.1-beta.2-Windows-Setup.exe` (140 MB), `-Windows-Portable.zip` (163 MB) and `-Linux.zip` (154 MB) and the
+  full notes, as a pre-release. The run's steps "Check the Linux build starts, runs and shows its version" and "Check
+  the installed game starts, plays and shows its version" passed; both compare the version the game prints at start
+  with the tag's name, so the build names 0.1 Beta 2 (read from the workflow's checks, not seen on screen).
+- **README and ROADMAP** already name 0.1 Beta 2 and the tag's date (the fold and the tag fell on the same day);
+  ROADMAP, HANDOFF and the wiki's Roadmap now name 0.1 Beta 3 as next.
+- **The owner's checklist moves on:** the 51 checks still open on `0.1-beta2-checklist.md` (N25 to N69, A1 to A6) are
+  carried word for word to `0.1-beta3-checklist.md` in the shared files, new checks from N70; the Beta 2 list is marked
+  closed and keeps its Done section. `docs/PLAYTEST.md`, HANDOFF and project memory point at the new list.
+- **Archive check** (step 6), its third time (deferred at Dev 3 and Beta 1): `docs/PLAYTEST.md`'s 36 task sections
+  merged before the Beta 1 tag (BP8 to BP9; 622 lines) move word for word to
+  `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md`, named in `docs/archive/README.md`. Their checks were carried into the
+  owner's checklists and cleared or kept there (BC1). PLAYTEST goes from 170 KB to 119 KB; what stays is the standing
+  checks per system and the Beta 2 tasks' lists (OB1, VF1 and UB3 on, kept). The eleven records that pointed at a moved
+  heading (`docs/PLAYTEST.md` › ...) now name the archive file; nothing outside `docs/records/` pointed at one.
+  `docs/DECISIONS.md` (183 KB) is left: it holds the rulings in force, and finding the ones later rulings replaced
+  means reading every ruling against the game, a task of its own named in HANDOFF for a Beta 3 pass.
+  `docs/ASSETS.md` (82 KB) is the live asset register and `docs/KNOWN_ISSUES.md` (53 KB) the live issue list.
