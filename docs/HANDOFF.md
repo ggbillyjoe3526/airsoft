@@ -1,13 +1,14 @@
 # Handoff
 
-What is happening now (as of 2026-11-16), for a session picking up the work. The plan is `docs/ROADMAP.md`, the
+What is happening now (as of 2026-11-24), for a session picking up the work. The plan is `docs/ROADMAP.md`, the
 rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 
 ## Now
 
-- **0.1 Beta 1 is out (2026-11-16)** (tag `0.1-beta.1`), the first Beta build. 0.1 Beta 2 is being built:
-  `config/version` reads "0.1 Beta 2". Beta is fixing, balance, performance and polish (`docs/PROCESS.md` › Placing
-  work), from the owner's Beta 1 playtest and `docs/KNOWN_ISSUES.md`.
+- **0.1 Beta 2 is out (2026-11-24)** (tag `0.1-beta.2`), the second Beta build; its notes are `CHANGELOG.md` ›
+  0.1 Beta 2 (RD5). The owner names the next build; until the post-tag pull request sets it, `config/version` reads
+  "0.1 Beta 2". Beta is fixing, balance, performance and polish (`docs/PROCESS.md` › Placing work), from the owner's
+  playtests and `docs/KNOWN_ISSUES.md`.
   The browser game is frozen at `0.1-beta.1`, removed from the repository on 2026-11-05 (owner) and read from git at
   the tag `0.1-dev.1`.
 - **Fields.** Woodland and the Depot are redesigned (WR1, DR1). The Street was removed (owner, 2026-11-09, SX1).
@@ -22,12 +23,12 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
   and sleeves are painted at 2K, and the replica has a life of its own in the hands (HandsMotion).
 - **Sound.** The owner's recordings are in (AU2 to AU8).
 - **UI.** The menus and HUD are redesigned (UR1 to UR7), with fixes after (UF1, UF2).
-- **Bug passes.** BP2 to BP9 are merged; BP8 fixed the owner's thorough Dev 2 playtest, BP9 was the full pass before
-  0.1 Beta 1.
-- **Next.** 0.1 Beta 2, from the owner's Beta 1 playtest. The first Beta 2 bug pass also runs the archive check
-  deferred at Dev 3 and Beta 1: `docs/PLAYTEST.md` (162 KB) and `docs/DECISIONS.md` (169 KB) are over 50 KB
-  (`docs/PROCESS.md` › Releases, step 6). His open checks are carried over to his Beta 2
-  list (`/mnt/project-files/playtest/0.1-beta2-checklist.md`).
+- **Bug passes.** BP2 to BP13 are merged; BP8 fixed the owner's thorough Dev 2 playtest, BP9 was the full pass before
+  0.1 Beta 1, BP10 to BP13 the four passes before 0.1 Beta 2.
+- **Next.** The build after 0.1 Beta 2, from the owner's Beta 2 playtest. The post-tag pull request runs the archive
+  check (`docs/PROCESS.md` › Releases, step 6): `docs/PLAYTEST.md` (170 KB) and `docs/DECISIONS.md` (183 KB) are over
+  50 KB. His open checks are on his Beta 2 list (`/mnt/project-files/playtest/0.1-beta2-checklist.md`) until that
+  pull request carries them on.
 
 ## Where to look
 
