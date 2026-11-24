@@ -10,12 +10,14 @@ perf: skip
 touches: docs/DECISIONS.md, docs/archive/, docs/records/
 contract: none
 acceptance:
-  1. Every ruling `docs/DECISIONS.md` marks as replaced, superseded or overtaken is moved word for word to
-     `docs/archive/0.1-beta/DECISIONS.md`; one only partly replaced keeps its part in force and a one-line pointer to
-     the moved text. The markers are found with this command (30 hits at the 0.1 Beta 2 tag, each judged: lines 15 to
-     17 are the file's own policy, and a hit inside a ruling still in force, such as "Loading replaces the whole save",
-     moves nothing):
-     `grep -n -i -E "replac(ed|es)|supersede|overtaken|no longer holds" docs/DECISIONS.md`
+  1. Every ruling `docs/DECISIONS.md` marks as replaced, superseded, overtaken, overridden, dropped or scrapped (removed
+     by a later ruling), and every ruling about a build or step already finished (such as "No Blender step in 0.1 Dev
+     1"), is moved word for word to `docs/archive/0.1-beta/DECISIONS.md`; one only partly out of force keeps its part in
+     force and a one-line pointer to the moved text. The markers are found with this command (41 hits at the 0.1 Beta 2
+     tag, each judged: lines 15 to 17 are the file's own policy; whole rulings that move include AD1's adaptive
+     difficulty at line 672 and TT2's tutorial at 1525, and line 876 is partial; a hit inside a ruling still in force,
+     such as "Loading replaces the whole save" at 1651 or the dropped bomb at 1032, moves nothing):
+     `grep -n -i -E "replac(ed|es)|supersede|overtaken|no longer holds|dropped|overrid|scrapped" docs/DECISIONS.md`
   2. Each moved ruling is checked against the game and `data/` first: nothing still in force moves (tier core, so the
      critic judges it, not a diff check).
   3. Every heading reference to moved text outside `docs/archive/` names the archive file; they are found with:

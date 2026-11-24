@@ -52,10 +52,10 @@ decision card, 12:50). This second pull request is `docs/PROCESS.md` › Release
   owner's checklists and cleared or kept there (BC1). PLAYTEST goes from 170 KB to 119 KB; what stays is the standing
   checks per system and the Beta 2 tasks' lists (OB1, VF1 and UB3 on, kept). The eleven records that pointed at a moved
   heading (`docs/PLAYTEST.md` › ...) now name the archive file; nothing outside `docs/records/` pointed at one.
-  `docs/DECISIONS.md` (183 KB) is not cut here: DA1's search finds 30 lines that mark a ruling as replaced, superseded
-  or overtaken (3 of them the file's own policy, lines 15 to 17), but most sit inside rulings still in force (MQ1's "no
-  wooden sniper" stands while its shades gave way to MQ4), so each needs checking against the game before it moves. That
-  is task DA1 in `docs/TASKS.md` (every marked ruling moved word for word to `docs/archive/0.1-beta/DECISIONS.md`, the
-  file under 120 KB), a default taken so this pull request stays steps 4 to 6 (CLAUDE.md §7: small defaults noted in the
-  record); HANDOFF names it. `docs/ASSETS.md` (82 KB) is the live asset register and `docs/KNOWN_ISSUES.md` (53 KB) the
-  live issue list.
+  `docs/DECISIONS.md` (183 KB) is not cut here: DA1's search finds 41 lines that mark a ruling as replaced, superseded,
+  overtaken, overridden, dropped or scrapped (3 of them the file's own policy, lines 15 to 17), but most sit inside
+  rulings still in force (MQ1's "no wooden sniper" stands while its shades gave way to MQ4), so each needs checking
+  against the game before it moves. That is task DA1 in `docs/TASKS.md` (every marked ruling moved word for word to
+  `docs/archive/0.1-beta/DECISIONS.md`, the file under 120 KB), a default taken so this pull request stays steps 4 to 6
+  (CLAUDE.md §7: small defaults noted in the record); HANDOFF names it. `docs/ASSETS.md` (82 KB) is the live asset
+  register and `docs/KNOWN_ISSUES.md` (53 KB) the live issue list.
