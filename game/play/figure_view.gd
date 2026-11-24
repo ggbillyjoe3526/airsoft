@@ -613,7 +613,7 @@ func _raise_share(cfg: FigureConfig) -> float:
 	var way := Vector3(-sin(yaw) * cp, sin(_pose.pitch), -cos(yaw) * cp)
 	var reach := lerpf(cfg.raise_reach_rifle, cfg.raise_reach_pistol, _pose.pistol)
 	var lead := maxf(0.0, _pose.velocity.dot(way)) * cfg.raise_lead
-	if not _world.throw_ray(from, from + way * (reach + lead), _wall):
+	if not _world.drawn_ray(from, from + way * (reach + lead), _wall):
 		return 0.0
 	var near := _wall.fraction * (reach + lead) - lead
 	# Eased out: the box round the replica tilts out ahead before it rises clear, so most of the raise comes early.

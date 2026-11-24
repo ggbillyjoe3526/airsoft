@@ -356,7 +356,7 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 
 	# Pulled back from a wall in front, at the hip: the level as drawn (DG1), so never against the air over a prop.
 	var pull := 0.0
-	if _query.throw_ray(eye, eye + look * _cfg.reach, _wall):
+	if _query.drawn_ray(eye, eye + look * _cfg.reach, _wall):
 		pull = minf(_cfg.pull_back_max, _cfg.reach * (1.0 - _wall.fraction))
 	_pull = lerpf(_pull, pull, follow)
 	# Aimed, the sight stays at the eye (pulled back it would pass behind it); the pressed depth keeps it over the wall.

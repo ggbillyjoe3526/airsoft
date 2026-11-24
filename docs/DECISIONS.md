@@ -1028,7 +1028,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   thickets and logs, Subway's train fittings) is a ray body of its own faces where it is laid (`DrawnRays`); a leaf
   card stops a line only where its sheet's alpha passes the shader's cut. A BB's path, sight, a bot's shot check, a
   torch's spot, a thrown smoke or flash, where a tossed magazine lands and a held replica's pull-back (`bb_ray`, `sight_ray`,
-  `ray_past_railings`, `throw_ray`) meet those faces; a block its props stand in for keeps its box, on
+  `ray_past_railings`, `drawn_ray`) meet those faces; a block its props stand in for keeps its box, on
   `DrawnRays.BOX_LAYER`, for the movers, the level ray (underfoot, vaults, leans, the dropped bomb, a magazine's toss), the bots' cover,
   the nav grid and the minimap. A new or rebuilt prop model needs nothing more; `tools/prop_ray_audit.gd`
   compares the game's rays with the drawn faces on every map. It replaces WH1's tiers and RoundSteps as what BBs and

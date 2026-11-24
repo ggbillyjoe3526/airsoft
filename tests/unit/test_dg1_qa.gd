@@ -493,13 +493,13 @@ func test_a_thrown_bomb_still_stops_on_glass_railing_and_door_boxes_on_every_map
 			var off := Vector3(1.0, 0.0, 0.0) if thin_x else Vector3(0.0, 0.0, 1.0)
 			var mid := b.center
 			tried += 1
-			assert_true(q.throw_ray(mid - off, mid + off, _hit), "%s: a bomb into %s at %s stops" % [id, kind, mid])
+			assert_true(q.drawn_ray(mid - off, mid + off, _hit), "%s: a bomb into %s at %s stops" % [id, kind, mid])
 			if tried > 60:
 				return
 	assert_gt(tried, 0, "some glass, railing or door block exists")
 
 
-func test_throw_ray_is_ray_where_a_level_draws_nothing_and_on_a_plain_world_query() -> void:
+func test_drawn_ray_is_ray_where_a_level_draws_nothing_and_on_a_plain_world_query() -> void:
 	var plain := BoxWorld.new()
 	var other := RayHit.new()
 	var rng := RandomNumberGenerator.new()
@@ -507,7 +507,7 @@ func test_throw_ray_is_ray_where_a_level_draws_nothing_and_on_a_plain_world_quer
 	for i in 40:
 		var a := Vector3(rng.randf_range(-5, 5), rng.randf_range(0, 3), rng.randf_range(-5, 5))
 		var c := Vector3(rng.randf_range(-5, 5), rng.randf_range(0, 3), rng.randf_range(-5, 5))
-		assert_eq(plain.throw_ray(a, c, _hit), plain.ray(a, c, other), "BoxWorld: throw_ray answers as ray")
+		assert_eq(plain.drawn_ray(a, c, _hit), plain.ray(a, c, other), "BoxWorld: drawn_ray answers as ray")
 		if plain.ray(a, c, other):
 			assert_eq(_hit.position, other.position, "same place")
 	# A JoltQuery with no drawn props (a level that draws none: set_drawn never called) over one box of its own.
@@ -527,19 +527,19 @@ func test_throw_ray_is_ray_where_a_level_draws_nothing_and_on_a_plain_world_quer
 	for i in 40:
 		var a := Vector3(rng.randf_range(-4, 4), rng.randf_range(-2, 2), -4.0)
 		var c := Vector3(rng.randf_range(-4, 4), rng.randf_range(-2, 2), 4.0)
-		var h1 := undrawn.throw_ray(a, c, _hit)
+		var h1 := undrawn.drawn_ray(a, c, _hit)
 		var h2 := undrawn.ray(a, c, other)
-		assert_eq(h1, h2, "no drawn props: throw_ray as ray")
+		assert_eq(h1, h2, "no drawn props: drawn_ray as ray")
 		if h1 and h2:
 			met += 1
 			assert_almost_eq(_hit.fraction, other.fraction, 0.001, "at the same place")
 	assert_gt(met, 0, "some lines meet the box, or this proves nothing")
 
 
-func test_throw_ray_of_no_length_is_no_hit_on_every_map() -> void:
+func test_drawn_ray_of_no_length_is_no_hit_on_every_map() -> void:
 	for id in MAPS:
 		var p := _runners[id].map.blocks[0].center + Vector3(0, 3, 0)
-		assert_false(_query(id).throw_ray(p, p, _hit), "%s: a zero-length throw ray is no hit" % id)
+		assert_false(_query(id).drawn_ray(p, p, _hit), "%s: a zero-length drawn ray is no hit" % id)
 
 
 ## A query that answers a bomb's line as the level ray (the blocks' boxes): Grenades using `ray` again.
@@ -549,7 +549,7 @@ class BoxedThrow extends WorldQuery:
 	func ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
 		return inner.ray(from, to, hit)
 
-	func throw_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	func drawn_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
 		return inner.ray(from, to, hit)
 
 
@@ -585,18 +585,18 @@ func test_a_magazine_lands_on_a_floor_found_by_a_query_that_overrides_only_ray()
 	q.floor_y = -0.5
 	t.set_world(q, 2.0, 0.5)
 	assert_almost_eq(t.landing_height(Vector3(0, 3, 0), Vector3(1, 0, 0), 0.0, 9.8), -0.5, 0.001,
-			"throw_ray falls back to ray: it lands on the floor the double knows")
+			"drawn_ray falls back to ray: it lands on the floor the double knows")
 
 
 func test_a_held_line_meets_glass_as_a_bb_does_and_the_torch_s_sight_line_passes_it() -> void:
-	# ReplicaView pulls back along throw_ray, TorchBeams lands its spot along sight_ray: on a BoxWorld (no drawn
+	# ReplicaView pulls back along drawn_ray, TorchBeams lands its spot along sight_ray: on a BoxWorld (no drawn
 	# props) a pane stops the first as before, and the spot now lands on what is behind the glass (main: on it).
 	var w := BoxWorld.new()
 	w.add_clear_box(Vector3(0, 1, -1), Vector3(4, 2, 0.1))
 	w.add_box(Vector3(0, 1, -3), Vector3(4, 2, 0.1), RayHit.Surface.EARTH)
 	var from := Vector3(0, 1, 0)
 	var to := Vector3(0, 1, -5)
-	assert_true(w.throw_ray(from, to, _hit), "the pane stops the held line")
+	assert_true(w.drawn_ray(from, to, _hit), "the pane stops the held line")
 	assert_lt(_hit.fraction, 0.3, "at the glass, so the replica is pulled back as on main")
 	assert_true(w.sight_ray(from, to, _hit), "the spot finds the wall")
 	assert_gt(_hit.fraction, 0.5, "behind the glass")

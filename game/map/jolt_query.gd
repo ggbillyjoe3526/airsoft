@@ -28,8 +28,9 @@ var _clear_surfaces: PackedInt32Array = PackedInt32Array()
 var _railing_bodies: Array[RID] = []
 var _railing_surfaces: PackedInt32Array = PackedInt32Array()
 var _past_cast: RayCast3D = null
-## The ray a thrown bomb casts (throw_ray), on the drawn props' faces and leaf cards, blind to nothing; null: `_cast`.
-var _throw_cast: RayCast3D = null
+## The ray a solid thing casts (drawn_ray: a thrown bomb, a held replica), on the drawn props' faces and leaf cards,
+## blind to nothing; null: `_cast`.
+var _drawn_cast: RayCast3D = null
 ## The drawn props (DG1; null on a level with none).
 var _drawn: DrawnRays = null
 ## The tapering props' tiers' bodies (WH1: thickets and trunks, a body a surface beside the surface's own) and the
@@ -66,8 +67,8 @@ func ray_past_railings(from: Vector3, to: Vector3, hit: RayHit) -> bool:
 	return _cast_drawn(_past_cast if _past_cast != null else _cast, from, to, hit)
 
 
-func throw_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
-	return _cast_on(_cast, from, to, hit) if _throw_cast == null else _cast_drawn(_throw_cast, from, to, hit)
+func drawn_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	return _cast_on(_cast, from, to, hit) if _drawn_cast == null else _cast_drawn(_drawn_cast, from, to, hit)
 
 
 ## The railings' bodies as the level built them (MapLevel), each made of `surfaces`' RayHit.Surface; `sight` (the ray
@@ -86,12 +87,12 @@ func set_railing_bodies(bodies: Array[RID], surfaces: PackedInt32Array, sight: R
 ## The drawn props (DG1) as the level built them (MapLevel), after set_clear_bodies (and set_railing_bodies on a level
 ## with railings): `past` the ray past the railings (in the level's tree with DrawnRays' masks; the one
 ## set_railing_bodies took on a level with railings). The sight ray and `past` meet the drawn props' faces and their
-## leaf cards; `throw` (in the level's tree with the same masks, blind to nothing: glass and railings' boxes stop a
-## bomb) is throw_ray's.
-func set_drawn(drawn: DrawnRays, past: RayCast3D, throw: RayCast3D) -> void:
+## leaf cards; `whole` (in the level's tree with the same masks, blind to nothing: glass and railings' boxes stop a
+## solid thing) is drawn_ray's.
+func set_drawn(drawn: DrawnRays, past: RayCast3D, whole: RayCast3D) -> void:
 	_drawn = drawn
 	_past_cast = past
-	_throw_cast = throw
+	_drawn_cast = whole
 
 
 ## As _cast_on along `cast`, through the drawn props' leaf cards (DG1) where their cut-out is cut away: a card met where

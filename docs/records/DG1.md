@@ -92,15 +92,16 @@ thick of a plant counts), unchanged.
   life 45 %, as played 50 %). The owner's choice on a card, 23 November.
 - **The Attack / Defend guard job's limit is 45 min** (was 30): it ran 20 to 28 min on main's runners on 23 November and
   was stopped at 30 on a slow one; unit tests part 1's is 30 (was 20: 13 to 19 min, stopped at 20 on a slow one).
-- **Smokes and flashes fly by the drawn faces too** (`WorldQuery.throw_ray`, the owner's "ricochet only against
-  surfaces"): a thrown bomb's line meets the props' faces and their leaf cards where solid, and, unlike a BB's or the
-  eye's, the railings' boxes and the glass (as before). A bot checks its throw's arc on the same line. The dropped bomb
-  (it must lie where a body can reach it) keeps the boxes. The same line carries where a tossed magazine is drawn
-  landing and what a held replica pulls back from (`ReplicaView`, a figure's raise), so neither meets the air over a
-  trolley's tray; a torch's spot lands where the eye sees a surface (`sight_ray`: through a window it now lights the
-  wall behind, where it sat on the pane before). Those are the look only. A toss's
-  own path (`MagShare`, whether it is clear and where it stops in flight) keeps the level ray: it is a rule the bots
-  play by, and the balance below was measured on it.
+- **Solid things meet the drawn faces too** (`WorldQuery.drawn_ray`, the owner's "ricochet only against surfaces";
+  named for what it meets, since half its callers aren't throws): a thrown bomb's line meets the props' faces and
+  their leaf cards where solid, and, unlike a BB's or the eye's, the railings' boxes and the glass (as before). A bot
+  checks its throw's arc on the same line. The dropped bomb (it must lie where a body can reach it) keeps the boxes.
+  The same line carries where a tossed magazine is drawn landing and what a held replica pulls back from
+  (`ReplicaView`, a figure's raise), so neither meets the air over a trolley's tray; a torch's spot lands where the
+  eye sees a surface (`sight_ray`: through a window it now lights the wall behind, where it sat on the pane before).
+  Those are the look only. A toss's own path (`MagShare`, whether it is clear and where it stops in flight) keeps the
+  level ray: it is a rule the bots play by, and the balance below was measured on it. `test_dg1_views` drives each of
+  the four classes on a level whose box and drawn face differ, so any of them casting `ray` again fails it.
 - **Depot's follow-me guard allows catch_up + 0.5 m** (`test_match_guards.gd`, FOLLOW_SLACK): with smokes flying by
   the drawn faces seed 2 plays differently, and a follower rounding a corner as its leader ran off was 8.05 m behind
   for a few ticks while it sprinted back (8.0 m before: a follower only sprints from catch_up, 8 m). Following itself
@@ -115,8 +116,9 @@ thick of a plant counts), unchanged.
 
 Bots only, 6v6. The other fields' figures and the old waits come from `pipeline/runs/DG1/attempt-1/balance/` in the
 shared files; the final Woodland figures, 32 seeds each, from GitHub's runners on this branch
-(`pipeline/runs/DG1/attempt-2/balance/`). Main's are BP13's on the same seeds (Woodland Plant The Bomb Hard rerun
-here on 32).
+(`pipeline/runs/DG1/attempt-2/balance/`; their headers name `d0c0fe3`, the runner's merge of this branch's `cd11b16`
+into main `3b94f3a`, whose game code is the head's; the 12 s and 8 s Hard runs set the Hard column on the runner).
+Main's are BP13's on the same seeds (Woodland Plant The Bomb Hard rerun here on 32, on main `3b94f3a`).
 
 | Figure (band) | main | DG1, the old waits | DG1, the waits shipped |
 |---|---|---|---|

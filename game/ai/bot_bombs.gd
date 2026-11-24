@@ -193,7 +193,7 @@ static func _clear_pitch(w: BotWorld, eyes: Vector3, yaw: float, aim: Vector3, h
 	var from := eye
 	for i in steps:
 		var to := Grenades.arc_point(eye, yaw, pitch, g, flight * float(i + 1) / float(steps + 1))
-		if w.query.throw_ray(from, to, _hit):
+		if w.query.drawn_ray(from, to, _hit):
 			return NAN
 		from = to
 	return pitch

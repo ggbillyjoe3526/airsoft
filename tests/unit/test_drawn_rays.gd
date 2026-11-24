@@ -74,16 +74,16 @@ func test_a_smoke_thrown_over_the_trolley_flies_on_and_one_into_it_meets_it() ->
 		var box := AABB(lo, b.size).grow(0.01)
 		var a := Vector3(lo.x - 1.0, foot + OVER_TRAY, b.center.z)
 		var c := Vector3(lo.x + b.size.x + 1.0, a.y, b.center.z)
-		assert_false(q.throw_ray(a, c, _hit) and box.has_point(_hit.position),
+		assert_false(q.drawn_ray(a, c, _hit) and box.has_point(_hit.position),
 				"a smoke over %s's top tray flies on (it stopped at %s)" % [b.center, _hit.position])
 		var low := Vector3(a.x, foot + THROUGH_DRAWERS, a.z)
-		assert_true(q.throw_ray(low, Vector3(c.x, low.y, c.z), _hit) and box.has_point(_hit.position),
+		assert_true(q.drawn_ray(low, Vector3(c.x, low.y, c.z), _hit) and box.has_point(_hit.position),
 				"one thrown into %s's drawers meets the trolley" % b.center)
 		assert_eq(_hit.surface, b.surface, "made of its block's stuff")
 
 
 func test_a_replica_held_over_the_trolley_is_not_pulled_back_against_the_air_over_its_tray() -> void:
-	# ReplicaView pulls the replica back along throw_ray from the eye, ViewModelConfig.reach long; standing at the
+	# ReplicaView pulls the replica back along drawn_ray from the eye, ViewModelConfig.reach long; standing at the
 	# trolley's end, eyes at stand_eye_height (under the 1.7 m box's top), looking along it over the trays.
 	var q := _subway.level.query()
 	var reach := ViewModelConfig.new().reach
@@ -95,7 +95,7 @@ func test_a_replica_held_over_the_trolley_is_not_pulled_back_against_the_air_ove
 		var eye := Vector3(lo.x - 0.2, foot + eye_up, b.center.z)
 		var ahead := eye + Vector3(reach, 0.0, 0.0)
 		assert_true(q.ray(eye, ahead, _hit), "the box would pull it back")
-		assert_false(q.throw_ray(eye, ahead, _hit), "nothing drawn within reach over %s: no pull" % b.center)
+		assert_false(q.drawn_ray(eye, ahead, _hit), "nothing drawn within reach over %s: no pull" % b.center)
 
 
 func test_a_body_walking_into_the_trolley_still_meets_its_box() -> void:

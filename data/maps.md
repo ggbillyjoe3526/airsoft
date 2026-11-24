@@ -34,8 +34,8 @@ warning; a map with no row is not listed.
   (`game/config/round_config.gd`). Skirmish and Custom both play it. Each field's is set from bot matches so the
   attackers take about half the rounds (6 seeds, Normal): Depot's is 15 (at 10 s the defenders took 72 %: its poles
   are close to their start), Woodland's 11 (its two poles are 83 m apart and a defender's way back is long; 5 until
-  DG1 let sight through the trees' gaps, where the attackers then took 36.1 %, 32 seeds; 8 s 45.7 %, 11 s 50.8 %, 16
-  seeds), Subway's 7. Against Easy and Hard bots the wait is this times the level's scale (`RoundConfig.defender_respawn_scale`, BP10:
+  DG1 let sight through the trees' gaps, where the attackers then took 36.1 %; 8 s 45.7 %, 16 seeds; 11 s 52.6 %,
+  32 seeds), Subway's 7. Against Easy and Hard bots the wait is this times the level's scale (`RoundConfig.defender_respawn_scale`, BP10:
   0.75 and 1.9, a scaled wait 25 s at most), as bot matches measured them. One that isn't such a number keeps the game's with a warning.
 - **Defender respawn at Hard (s)** is the seconds a defender hit there waits to come back in Attack / Defend against
   Hard bots (BP11): a whole or decimal number from 2 to 30 (the scaled wait's 25 s ceiling doesn't hold it), or blank

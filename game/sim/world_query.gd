@@ -72,12 +72,13 @@ func ray_past_railings(from: Vector3, to: Vector3, hit: RayHit) -> bool:
 	return ray(from, to, hit)
 
 
-## As `ray`, for a thrown smoke or flash (DG1): the level as it is drawn, a prop's faces rather than the box it stands
-## in for, and its leaf cards where their sheet is solid, so a bomb flies on through a prop's gaps (over a trolley's
-## tray, between a tree's boughs) where a BB does. Railings' boxes, glass, doors and lifts stop it as `ray`. Also where
-## a tossed magazine is drawn landing, and what a held replica pulls back from. A level without drawn props
-## answers as `ray`.
-func throw_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+## As `ray`, on the level as it is drawn (DG1), for a solid thing moving through it rather than a BB or a look: a
+## thrown smoke or flash in flight, a bot's check of its throw's arc, a held replica pulling back from what is in front,
+## a figure raising its replica and a tossed magazine drawn landing. A prop's faces stop it rather than the box it
+## stands in for, and its leaf cards where their sheet is solid, so it carries on through a prop's gaps (over a
+## trolley's tray, between a tree's boughs) where a BB does; railings' boxes, glass, doors and lifts stop it as `ray`.
+## A level without drawn props answers as `ray`.
+func drawn_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
 	return ray(from, to, hit)
 
 
