@@ -322,6 +322,8 @@ func _stripped() -> MapData:
 	assert_true(key >= 0 and depth == 0 and JSON.parse_string(json) is Dictionary, "Woodland without its dressing")
 	var m := MapData.parse(json, MapStyle.new(), tuning.rounds.team_size)
 	m.id = "woodland"
+	# its seed lays the field's props too, which BBs and sight meet as drawn (DG1): kept, the woods' look alone goes
+	m.dressing_seed = MapData.load_map("woodland", MapStyle.new(), tuning.rounds.team_size).dressing_seed
 	return m
 
 

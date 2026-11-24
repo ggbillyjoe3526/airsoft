@@ -124,9 +124,12 @@ func test_a_built_woodland_puts_tier_bodies_in_the_tree_and_reports_their_surfac
 	level.build(m, play.map_style, tuning.body)
 	var q := level.query()
 	var tiers: Array[Node] = []
+	var boxes := 0
 	for c: Node in level.get_children():
 		if String(c.name).begins_with("Colliders_Tiers_"):
 			tiers.append(c)
+		elif String(c.name).begins_with("Colliders_Box_"):
+			boxes += 1
 	assert_gt(tiers.size(), 4, "several chunk bodies")
 	for sb: StaticBody3D in tiers:
 		assert_true(sb.is_inside_tree())
@@ -136,7 +139,8 @@ func test_a_built_woodland_puts_tier_bodies_in_the_tree_and_reports_their_surfac
 		enumerated += 1
 		assert_between(q._tier_surfaces[rid], 0, RayHit.Surface.size() - 1, "a real surface")
 		assert_eq(q._surface_of(rid), q._tier_surfaces[rid] as RayHit.Surface)
-	assert_eq(enumerated, tiers.size(), "each body registered once")
+	# The boxes the drawn props stand in for (DG1) are reported with the tiers.
+	assert_eq(enumerated, tiers.size() + boxes, "each body registered once")
 
 
 func test_tier_bodies_are_freed_with_a_level_freed_whole_rebuilt_or_part_built() -> void:
@@ -161,9 +165,13 @@ func test_depot_and_subway_have_no_tier_bodies() -> void:
 		var level := MapLevel.new()
 		add_child_autofree(level)
 		level.build(m, play.map_style, tuning.body)
+		var boxes := 0
 		for c: Node in level.get_children():
 			assert_false(String(c.name).begins_with("Colliders_Tiers_"), "%s has no tier body" % id)
-		assert_eq(level.query()._tier_surfaces.size(), 0)
+			if String(c.name).begins_with("Colliders_Box_"):
+				boxes += 1
+		# Only the boxes its drawn props stand in for (DG1).
+		assert_eq(level.query()._tier_surfaces.size(), boxes)
 
 
 func test_a_tier_key_keeps_its_surface_for_every_chunk_the_field_can_hold() -> void:

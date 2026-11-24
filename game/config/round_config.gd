@@ -35,7 +35,7 @@ enum RespawnRule { BY_MODE, ALWAYS, NEVER }
 @export var respawns: RespawnRule = RespawnRule.BY_MODE
 ## Seconds from a hit to coming back: the attackers' (and either team's in Elimination), and the defenders' in Attack /
 ## Defend, where a field may set its own (data/maps.md Defender respawn: bot matches put the
-## attackers near half the rounds with Depot 15, Woodland 5, Subway 7).
+## attackers near half the rounds with Depot 15, Woodland 11, Subway 7).
 @export var respawn_delay: float = 10.0
 @export var defender_respawn_delay: float = 10.0
 ## ... times the bots' level (MatchOptions.level_tuning, BP10): with respawns Hard defenders held Attack / Defend's

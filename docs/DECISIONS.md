@@ -769,8 +769,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   Custom's Respawns row: by mode, On or Off. Two forward spawns an end on every field (map data `forwardSpawns`), for
   both sides, shut with an enemy in play within 15 m: the panel greys a shut one out and nothing else on it moves
   (owner, 2026-11-17). A team with a respawn coming is not wiped out. Balance (bot matches): the attackers wait 10 s,
-  the defenders a time set per field in Attack / Defend (data/maps.md Defender respawn: Depot 15, Woodland 5, Subway
-  7) and 5 s in Plant The Bomb (against Hard bots 8 s on Depot, data/maps.md Bomb defender respawn at Hard, BP10:
+  the defenders a time set per field in Attack / Defend (data/maps.md Defender respawn: Depot 15, Woodland 11 since
+  DG1, Subway 7) and 5 s in Plant The Bomb (Woodland 9 since DG1) (against Hard bots 8 s on Depot and 12 s on Woodland since DG1, data/maps.md Bomb defender respawn at Hard, BP10:
   a Hard scale on every field put Subway's attackers at 70 %, and 8 s at every level Depot's Normal at 62 %); with
   respawns an untended flag slips back down (15 s top to bottom), a fully raised
   one too (BP10: held up, Depot's attackers took 89 %), and up to six defending bots go to pull a flag down. Against
@@ -1022,6 +1022,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   trunks taper in tiers from the ground under them (`MapStyle.round_trunk_tiers`). The reaches are the 50 % contour
   of the models as drawn, leaf cards cut out of their sheet (`tools/sight_truth.gd profile` and `trunks`); a new or
   rebuilt spruce or tree model re-measures them, and a change to Woodland's plants or colliders re-runs the probe.
+- **BBs and sight meet the props as they are drawn (DG1, from the owner's message 2026-11-23: "ricochet should only
+  happen against surfaces not empty spaces ... a bb should be able to go through it (think firing between branches of
+  a tree). make sure all models in the game are updated").** Every prop PropDress lays (map models, Woodland's trees,
+  thickets and logs, Subway's train fittings) is a ray body of its own faces where it is laid (`DrawnRays`); a leaf
+  card stops a line only where its sheet's alpha passes the shader's cut. A BB's path, sight, a bot's shot check, a
+  torch's spot, a thrown smoke or flash, where a tossed magazine lands and a held replica's pull-back (`bb_ray`, `sight_ray`,
+  `ray_past_railings`, `drawn_ray`) meet those faces; a block its props stand in for keeps its box, on
+  `DrawnRays.BOX_LAYER`, for the movers, the level ray (underfoot, vaults, leans, the dropped bomb, a magazine's toss), the bots' cover,
+  the nav grid and the minimap. A new or rebuilt prop model needs nothing more; `tools/prop_ray_audit.gd`
+  compares the game's rays with the drawn faces on every map. It replaces WH1's tiers and RoundSteps as what BBs and
+  sight meet (they remain the bodies' collision).
 - **Plant The Bomb is the third mode (owner, 2026-11-12, PB1).** His rules: the attackers plant a bomb at Site A or
   Site B on the defenders' side; the defenders keep it from being planted or make it safe. The attackers win when it
   goes off or the defenders are all out; the defenders win by making it safe or by getting every attacker out before

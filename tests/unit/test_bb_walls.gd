@@ -2,8 +2,10 @@ extends GutTest
 ## FB4 (the owner's 0.1 Dev 1 playtest, note 11: "may possibly be going through wall models"): no BB passes a wall. BBs
 ## from the fastest replica, fired through the simulation's own BBStep at the middle and near each edge of every face of
 ## every thin wall on Depot (walls, plywood, barriers, containers) and Woodland (fences, logs), square on and at 40
-## degrees, from point-blank, 5 m and 25 m, never run inside the block they were fired at nor end inside any block (a
-## round prop's block: inside its stepped boxes, BP7). (The full sweep of every block, 54 176 shots, is in
+## degrees, from point-blank, 5 m and 25 m inside the field, never run inside the block they were fired at nor end inside any block (a
+## round prop's block: inside its stepped boxes, BP7). A wall its drawn props stand in for (DG1: Depot's crate and
+## plywood walls, containers, Woodland's palisade and logs) is judged by its model's faces, which a BB meets where they
+## are drawn, inside the box: no tick's path crosses one. (The full sweep of every block, 54 176 shots, is in
 ## docs/records/FB4.md.)
 
 const DT := 1.0 / 60.0
@@ -32,14 +34,24 @@ func test_no_bb_passes_a_thin_wall_on_depot_or_woodland() -> void:
 		level.build(m, style, tuning.body)
 		var lo: Array[Vector3] = []
 		var hi: Array[Vector3] = []
-		# What is solid, for "ends inside a block": each block's box, a round prop's its stepped boxes (BP7), a thicket's its
+		# What is solid, for where a shot may start and "ends inside a block": each block's box, a round prop's its stepped boxes (BP7), a thicket's its
 		# tiers (TV1), a tapered trunk its tiers over the ground under it (WH1).
 		var solid_lo: Array[Vector3] = []
 		var solid_hi: Array[Vector3] = []
+		# ... but a BB may end inside the box of a block its drawn props stand in for (DG1)
+		var open_lo: Array[Vector3] = []
+		var open_hi: Array[Vector3] = []
+		var rays := level.drawn_rays()
+		var faces := RayCast3D.new()
+		faces.top_level = true
+		faces.enabled = false
+		faces.collision_mask = DrawnRays.DRAWN_LAYER
+		level.add_child(faces)
 		var middle := PropLayout.field_middle(m)
 		var steps: Array[AABB] = []
 		var tiered := TierSteps.tiered_blocks(m, style, PropDressConfig.new())
-		for b in m.blocks:
+		for k in m.blocks.size():
+			var b := m.blocks[k]
 			# Ramps are wedges: their boxes hold air above the slope.
 			lo.append(b.center - b.size * 0.5 if b.rise == MapData.Rise.NONE else Vector3.INF)
 			hi.append(b.center + b.size * 0.5 if b.rise == MapData.Rise.NONE else -Vector3.INF)
@@ -50,14 +62,22 @@ func test_no_bb_passes_a_thin_wall_on_depot_or_woodland() -> void:
 			if steps.is_empty():
 				solid_lo.append(lo[-1])
 				solid_hi.append(hi[-1])
+				if not rays.draws(k):
+					open_lo.append(lo[-1])
+					open_hi.append(hi[-1])
 			for box in steps:
 				solid_lo.append(box.position)
 				solid_hi.append(box.end)
+				if not rays.draws(k):
+					open_lo.append(box.position)
+					open_hi.append(box.end)
+		var field := m.footprint()
 		var pool := BBPool.new(1)
 		var events := SimEvents.new()
 		var nobody: Array[Character] = []
 		var ends: Array[MapEnd] = []
 		var shots := 0
+		var drawn_shots := 0
 		var through := 0
 		for i in m.blocks.size():
 			var b := m.blocks[i]
@@ -76,22 +96,29 @@ func test_no_bb_passes_a_thin_wall_on_depot_or_woodland() -> void:
 					for ang: float in [0.0, 40.0]:
 						for dist: float in [0.4, 5.0, 25.0]:
 							var o := p + n.rotated(Vector3.UP, deg_to_rad(ang) * (1.0 if u >= 0.0 else -1.0)) * dist
-							if _inside_any(o, solid_lo, solid_hi, -0.01):
+							# from where a body can stand: inside the field (a drawn wall's end abutting the next wall is
+							# open, met only from outside, DG1)
+							if _inside_any(o, solid_lo, solid_hi, -0.01) or not field.has_point(Vector2(o.x, o.z)):
 								continue
 							shots += 1
+							drawn_shots += 1 if rays.draws(i) else 0
 							var bb := pool.spawn(0, o, (p - o).normalized(), speed, Ballistics.hop_up_lift(fastest, 0.5,
 									rules), Ballistics.bb_mass(fastest), tuning.ballistics.spin_per_hop)
 							var passed := false
 							for tick in MAX_TICKS:
 								events.clear()
 								BBStep.step(pool, nobody, level.query(), tuning, m.kill_y, false, ends, events, DT)
-								passed = passed or _runs_inside(bb.prev_position, bb.position, lo[i], hi[i])
+								if rays.draws(i):
+									passed = passed or _crosses_face(faces, bb.prev_position, bb.position)
+								else:
+									passed = passed or _runs_inside(bb.prev_position, bb.position, lo[i], hi[i])
 								if not bb.active:
 									break
 							bb.active = false
-							if passed or _inside_any(bb.position, solid_lo, solid_hi, IN):
+							if passed or _inside_any(bb.position, open_lo, open_hi, IN):
 								through += 1
 		assert_gt(shots, 500, "control: %s's thin walls were shot at" % map_id)
+		assert_gt(drawn_shots, 100, "control: %s's drawn walls were shot at" % map_id)
 		assert_eq(through, 0, "%s: no BB through a wall (%d shots)" % [map_id, shots])
 		level.free()
 
@@ -102,6 +129,19 @@ static func _inside_any(p: Vector3, lo: Array[Vector3], hi: Array[Vector3], marg
 				and p.z > lo[i].z + margin and p.z < hi[i].z - margin:
 			return true
 	return false
+
+
+## Whether the segment a..b crosses a drawn prop's face (DG1) along `cast`, IN short of either end (a BB that stopped
+## or turned on a face lies on it).
+static func _crosses_face(cast: RayCast3D, a: Vector3, b: Vector3) -> bool:
+	var d := b - a
+	if d.length() <= 2.0 * IN:
+		return false
+	var way := d.normalized()
+	cast.position = a + way * IN
+	cast.target_position = d - way * 2.0 * IN
+	cast.force_raycast_update()
+	return cast.is_colliding()
 
 
 ## Whether the segment a..b runs inside the box lo..hi, IN in from its faces.

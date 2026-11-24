@@ -92,8 +92,10 @@ func test_a_bot_knows_nothing_of_an_unseen_silent_enemy() -> void:
 
 
 func test_the_match_goes_on_with_the_player_idle_and_out() -> void:
-	# Character 0 is the human, here doing nothing: the bots must still finish the match, with no friendly hit.
-	_start(3, 0)
+	# Character 0 is the human, here doing nothing: the bots must still finish the match, with no friendly hit. (Seed 2:
+	# on seed 3 the idle player has lived to every round's end since BBs met the yard's props as drawn, DG1; seeds 1, 2
+	# and 4 to 8 all put them out while the round runs on.)
+	_start(2, 0)
 	var limit := roundi(tuning.rounds.round_time / DT) * 14
 	var finished := false
 	var friendly := 0

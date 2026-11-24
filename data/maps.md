@@ -33,8 +33,9 @@ warning; a map with no row is not listed.
   Bomb's wait is the next column): a whole or decimal number from 2 to 30, or blank for the game's 10
   (`game/config/round_config.gd`). Skirmish and Custom both play it. Each field's is set from bot matches so the
   attackers take about half the rounds (6 seeds, Normal): Depot's is 15 (at 10 s the defenders took 72 %: its poles
-  are close to their start), Woodland's 5 (its two poles are 83 m apart and a defender's way back is long), Subway's
-  7. Against Easy and Hard bots the wait is this times the level's scale (`RoundConfig.defender_respawn_scale`, BP10:
+  are close to their start), Woodland's 11 (its two poles are 83 m apart and a defender's way back is long; 5 until
+  DG1 let sight through the trees' gaps, where the attackers then took 36.1 %; 8 s 45.7 %, 16 seeds; 11 s 52.6 %,
+  32 seeds), Subway's 7. Against Easy and Hard bots the wait is this times the level's scale (`RoundConfig.defender_respawn_scale`, BP10:
   0.75 and 1.9, a scaled wait 25 s at most), as bot matches measured them. One that isn't such a number keeps the game's with a warning.
 - **Defender respawn at Hard (s)** is the seconds a defender hit there waits to come back in Attack / Defend against
   Hard bots (BP11): a whole or decimal number from 2 to 30 (the scaled wait's 25 s ceiling doesn't hold it), or blank
@@ -45,11 +46,14 @@ warning; a map with no row is not listed.
   is armed, at every level (BG1): a whole or decimal number from 2 to 30, or blank for the game's 5
   (`game/config/round_config.gd`). Subway's is 3: once Normal bots locked on more slowly its sites fell too often at 5 s
   (the attackers took 67 %, 32 seeds; 4 s 63.9 %, 16 seeds; 3 s 59.4 %, 32 seeds). Hard plays it too unless the field
-  sets the column at Hard, so Subway's Hard one is 5, the wait Hard was measured at.
+  sets the column at Hard, so Subway's Hard one is 5, the wait Hard was measured at. Woodland's is 9 (DG1: once sight
+  and BBs passed through the trees' gaps the defenders held at 5 s, the attackers taking 43.2 % and 27.4 % of rounds
+  running out the clock; at 9 s Normal 51.8 % and 20.4 %, Easy 56.0 % and 23.9 %, 32 seeds each).
 - **Bomb defender respawn at Hard (s)** is the seconds a defender hit there waits to come back in Plant The Bomb, until
   the bomb is armed, against Hard bots (BP10): a whole or decimal number from 2 to 30, or blank for the column above's
   wait (else the game's 5, `game/config/round_config.gd`). Depot's is 8: its sites are close to the defenders' start, and at 5 s Hard bots
-  held them (the attackers took 35 %, at Normal 52 %). The same wait at every level put Depot's Normal at 62 %, and a
+  held them (the attackers took 35 %, at Normal 52 %). Woodland's is 12 (DG1: at 9 s Hard ran out the clock in 30.4 %
+  of rounds, at 8 s 28.3 %, at 12 s 23.6 % with the attackers taking 58.4 %, 32 seeds each). The same wait at every level put Depot's Normal at 62 %, and a
   longer wait at Hard on every field put Subway's attackers at 70 %. One that isn't such a number keeps the game's with
   a warning.
 - **Start mode** is the most a fire selector starts each round on there: `semi` or `burst` holds every replica that
@@ -73,6 +77,6 @@ warning; a map with no row is not listed.
 | Id | Name | Kind | Tag | Min | Standard | Max | Round | Raise (s) | Fuse (s) | Defender respawn (s) | Defender respawn at Hard (s) | Bomb defender respawn (s) | Bomb defender respawn at Hard (s) | Start mode | Wind (×) | Air (°C) | Blurb |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | depot | Depot | field | public | 5 | 6 | 8 |  |  | 24 | 15 |  |  | 8 | burst | 0 | 20 | An indoor airsoft hall: five lanes, two dark tunnels. |
-| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 26 | 5 |  |  |  |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
+| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | 9 | 26 | 11 |  | 9 | 12 |  | 1 | 16 | A big open wood round a shallow stream, by day or night. |
 | subway | Subway | field | public | 5 | 6 | 8 |  |  | 22 | 7 |  | 3 | 5 | burst | 0 | 14 | A closed metro station on two levels, from the ticket hall and concourse down to the trains. |
 | range | Range | range | public | 1 | 1 | 1 |  |  |  |  |  |  |  |  | 1 | 20 | Targets 10 to 60 m. No bots, no score. |

@@ -271,7 +271,7 @@ func test_a_woodpile_line_is_closed_by_its_end_models_and_its_middle_sections_va
 func test_the_end_models_share_the_sandbag_box_and_load_with_the_range() -> void:
 	for map_id: String in ["range"]:
 		var m := MapData.load_map(map_id, play.map_style, 1)
-		var used := PropDress._models_used(m, play.site_look.props)
+		var used := PropDress.models_used(m, play.site_look.props)
 		assert_true(used.has(&"sandbags_start") and used.has(&"sandbags_end") and used.has(&"sandbags_single"),
 				"%s loads the end models" % map_id)
 		var dress := PropDress.build(m, play.site_look.props)
@@ -361,7 +361,7 @@ func test_a_long_line_mixes_the_sections_between_its_ends() -> void:
 func test_section_variants_load_and_stay_in_their_blocks_on_the_range() -> void:
 	for map_id: String in ["range"]:
 		var m := MapData.load_map(map_id, play.map_style, 1)
-		var used := PropDress._models_used(m, play.site_look.props)
+		var used := PropDress.models_used(m, play.site_look.props)
 		var dress := PropDress.build(m, play.site_look.props)
 		add_child_autofree(dress)
 		var boxes: Array[AABB] = []

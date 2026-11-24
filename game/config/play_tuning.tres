@@ -41,6 +41,7 @@
 [ext_resource type="Script" uid="uid://cc52dhprynifg" path="res://game/config/train_look.gd" id="54_sm1tl"]
 [ext_resource type="Script" uid="uid://botios24ftgv6" path="res://game/config/hands_life_config.gd" id="55_ha1hl"]
 [ext_resource type="Script" uid="uid://dybhd7jeafogs" path="res://game/config/train_announce_config.gd" id="56_ta1an"]
+[ext_resource type="Script" uid="uid://dqdrpiel3netr" path="res://game/config/drawn_ray_config.gd" id="57_dg1rc"]
 
 [sub_resource type="Resource" id="Resource_01h5l"]
 script = ExtResource("1_ermsw")
@@ -68,10 +69,14 @@ script = ExtResource("30_rl1sr")
 [sub_resource type="Resource" id="Resource_rl2lk"]
 script = ExtResource("30_rl2lk")
 
+[sub_resource type="Resource" id="Resource_dg1rc"]
+script = ExtResource("57_dg1rc")
+
 [sub_resource type="Resource" id="Resource_ca7sx"]
 script = ExtResource("5_b3fuu")
 railing = SubResource("Resource_rl1sr")
 railing_look = SubResource("Resource_rl2lk")
+drawn_rays = SubResource("Resource_dg1rc")
 
 [sub_resource type="Resource" id="Resource_3isbp"]
 script = ExtResource("8_q2qxh")

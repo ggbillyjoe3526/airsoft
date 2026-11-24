@@ -75,6 +75,9 @@ its backspin (the **hop-up**), so you can watch it fly and lead a moving target.
   pale wall or the sky.
 - BBs puff on what they hit, in its colour: metal, wood, concrete or earth.
 - A BB stops on a body, a crate or the ground. Off concrete and steel (containers, drums, lockers) it **ricochets**.
+- A BB meets things where they are drawn: one fired over a trolley's tray, under a bench or between a
+  tree's branches flies on, and only a surface it really hits stops or bounces it. A thrown smoke or flash does the
+  same.
 - [Replicas](Replicas) differ in how fast their BBs leave the barrel, how fast they fire and how they handle, never in
   "damage": one hit is one hit.
 

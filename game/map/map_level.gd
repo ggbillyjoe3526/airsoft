@@ -25,13 +25,18 @@ extends Node3D
 ## its colour the bake's light alone. Colliders, the nav and the shadow caster are the greybox's, unchanged.
 
 ## The staged build's pieces (`begin`, `build_some`), in order: the greybox's mesh, sloping ground's lattice
-## (TERRAIN_ROWS a piece), its tiles' plan and its tiles one at a time, the blocks' colliders, the ground's triangles
-## (TERRAIN_ROWS a piece), its colliders a surface at a time, and the rest.
-enum Piece { MESH, LATTICE, TILE_PLAN, TILES, COLLIDERS, FACES, TERRAIN, REST, DONE }
+## (TERRAIN_ROWS a piece), its tiles' plan and its tiles one at a time, the drawn props' ray bodies (DG1), the blocks'
+## colliders, the ground's triangles (TERRAIN_ROWS a piece), its colliders a surface at a time, and the rest.
+enum Piece { MESH, LATTICE, TILE_PLAN, TILES, DRAWN, COLLIDERS, FACES, TERRAIN, REST, DONE }
 
 ## The physics layer the level's colliders are on, and the one the movers' bodies are on (nothing collides with them).
+## A block whose drawn props stand in for it to BBs and sight (DrawnRays) is on DrawnRays.BOX_LAYER instead.
 const WORLD_LAYER := 1
 const CHARACTER_LAYER := 2
+## What the movers and the level ray meet: the level and the dressed blocks' boxes; what BBs and sight meet: the level
+## and the drawn props' faces and leaf cards (each card's cut-out read where a ray meets it, JoltQuery).
+const SOLID_MASK := WORLD_LAYER | DrawnRays.BOX_LAYER
+const DRAWN_MASK := WORLD_LAYER | DrawnRays.DRAWN_LAYER | DrawnRays.LEAF_LAYER
 ## The ground probe's disc (JoltMover): this thick (m).
 const PROBE_THICKNESS := 0.02
 ## What a warning about a bake tells you to do.
@@ -115,6 +120,10 @@ var _railing_bodies: Dictionary[int, StaticBody3D] = {}
 ## The tapering props' tiers (thickets' TierSteps, trunks' RoundSteps tiers; WH1), on a body a surface of their own: a
 ## few thousand boxes to a body beside the ground's faces would overrun Jolt's sub-shape bits on one.
 var _tier_bodies: Dictionary[int, StaticBody3D] = {}
+## The drawn props' ray bodies (DG1), and the boxes of the blocks they stand in for, on a body a surface of their own
+## (DrawnRays.BOX_LAYER: bodies and the level ray only).
+var _drawn: DrawnRays = null
+var _box_bodies: Dictionary[int, StaticBody3D] = {}
 ## The squares (m) the tiers' bodies split the field into, and the stride of their keys (a surface, then each square's
 ## column and row, each under it).
 const TIER_CHUNK := 16.0
@@ -184,7 +193,7 @@ func _build_piece() -> void:
 	match _piece:
 		Piece.MESH:
 			_add_meshes()
-			_piece = Piece.LATTICE if t != null else Piece.COLLIDERS
+			_piece = Piece.LATTICE if t != null else Piece.DRAWN
 		Piece.LATTICE:
 			if _next == 0:
 				_lattice.resize((t.ground_cols + 1) * (t.ground_rows + 1))
@@ -205,6 +214,11 @@ func _build_piece() -> void:
 				_add_ground_tile(t)
 			if _next >= _plan.tiles.size():
 				_plan = null
+				_piece = Piece.DRAWN
+		Piece.DRAWN:
+			if _drawn == null:
+				_drawn = DrawnRays.begin(map, _ray_props(), get_world_3d().space, _style.drawn_rays)
+			elif _drawn.build_step():
 				_piece = Piece.COLLIDERS
 		Piece.COLLIDERS:
 			_add_block_colliders()
@@ -266,19 +280,30 @@ func _add_block_colliders() -> void:
 	# shipped look keeps (test_round_steps), so its BBs meet what the game's do.
 	var props := _props if _props != null else PropDressConfig.new()
 	var tiered := TierSteps.tiered_blocks(map, _style, props)
-	for b in map.blocks:
+	for i in map.blocks.size():
+		var b := map.blocks[i]
+		# A block its drawn props stand in for (DG1) is bodies' alone: BBs and sight meet the props.
+		var boxed := _drawn != null and _drawn.draws(i)
 		RoundSteps.boxes(b, _style, props, middle, steps, PropLayout.ground_under(map, b))
 		# A tapering trunk's tiers (WH1: Woodland, about 9,000 boxes) are shapes of their body's own, as a thicket's.
 		if not steps.is_empty() and _style.round_trunk_tiers.has(props.model_of(b)):
-			_add_owned_boxes(_tier_body(b), steps)
+			_add_owned_boxes(_tier_body(b, boxed), steps)
 			continue
 		if steps.is_empty() and not tiered.is_empty():
 			TierSteps.boxes(b, _style, props, tiered, steps)
 			# A thicket's tiers (Woodland: about 4,000 boxes) go on its surface's body as shapes of their own, not as a
 			# node each (TV1's performance review: the scene's node count).
 			if not steps.is_empty():
-				_add_owned_boxes(_tier_body(b), steps)
+				_add_owned_boxes(_tier_body(b, boxed), steps)
 				continue
+		if boxed:
+			if b.rise != MapData.Rise.NONE:
+				_add_wedge(_box_body(b.surface), b)
+				continue
+			if steps.is_empty():
+				steps.append(AABB(b.center - b.size * 0.5, b.size))
+			_add_owned_boxes(_box_body(b.surface), steps)
+			continue
 		for box in steps:
 			var step := CollisionShape3D.new()
 			step.position = box.get_center()
@@ -337,22 +362,27 @@ func _add_rest() -> void:
 		add_child(sb)
 	for sb: StaticBody3D in _tier_bodies.values():
 		add_child(sb)
-	_cast = _level_ray("LevelRay")
+	for sb: StaticBody3D in _box_bodies.values():
+		add_child(sb)
+	_cast = _level_ray("LevelRay", SOLID_MASK)
 	var surface_rids: Array[RID] = []
 	for sb in _bodies:
 		surface_rids.append(sb.get_rid())
 	_query = JoltQuery.new(_cast, surface_rids, _body)
 	_query.railings = Railings.new(style.railing)
-	if not _tier_bodies.is_empty():
+	if not _tier_bodies.is_empty() or not _box_bodies.is_empty():
 		var tier_rids: Array[RID] = []
 		var tier_surfaces := PackedInt32Array()
 		_body_rids(_tier_bodies, tier_rids, tier_surfaces)
+		_body_rids(_box_bodies, tier_rids, tier_surfaces)
 		_query.set_tier_bodies(tier_rids, tier_surfaces)
 	for b in m.blocks:
 		if style.is_railing(b.kind) and b.rise == MapData.Rise.NONE:
 			_query.railings.add(b.center, b.size, b.surface)
-	if not _clear_bodies.is_empty() or not _railing_bodies.is_empty():
-		var sight := _level_ray("SightRay")
+	var drawn := _drawn != null and _drawn.body_count() > 0
+	if not _clear_bodies.is_empty() or not _railing_bodies.is_empty() or drawn:
+		var sight := _level_ray("SightRay", DRAWN_MASK)
+		var past: RayCast3D = null
 		var rids: Array[RID] = []
 		var surfaces := PackedInt32Array()
 		_body_rids(_clear_bodies, rids, surfaces)
@@ -361,7 +391,8 @@ func _add_rest() -> void:
 			var bar_rids: Array[RID] = []
 			var bar_surfaces := PackedInt32Array()
 			_body_rids(_railing_bodies, bar_rids, bar_surfaces)
-			_query.set_railing_bodies(bar_rids, bar_surfaces, sight, _level_ray("PastRailingsRay"))
+			past = _level_ray("PastRailingsRay", DRAWN_MASK)
+			_query.set_railing_bodies(bar_rids, bar_surfaces, sight, past)
 			_railings = MeshInstance3D.new()
 			_railings.name = "Railings"
 			# The modelled pieces (SM2), or the plain boxes when they can't be read.
@@ -375,9 +406,13 @@ func _add_rest() -> void:
 				_railings.mesh = _railing_mesh(m, style, _query.railings)
 				_railings.material_override = _material
 			add_child(_railings)
+		if drawn:
+			_query.set_drawn(_drawn, past if past != null else _level_ray("PastRailingsRay", DRAWN_MASK),
+					_level_ray("DrawnRay", DRAWN_MASK))
 	_clear_bodies.clear()
 	_railing_bodies.clear()
 	_tier_bodies.clear()
+	_box_bodies.clear()
 	# Bushes are no collider: only leaves the simulation counts along a line (WL5).
 	_query.foliage = m.foliage
 	# Nor is water: only a level over the ground that the simulation wades, splashes and prices routes in (WS1).
@@ -478,6 +513,11 @@ func query() -> JoltQuery:
 	return _query
 
 
+## The drawn props BBs and sight meet (DG1); null until the level's colliders are built.
+func drawn_rays() -> DrawnRays:
+	return _drawn
+
+
 ## The level as the simulation's CharacterMover (a new one each call, sharing the level's bodies).
 func mover(body: BodyConfig) -> JoltMover:
 	return JoltMover.new(_mover_body, _low_mover_body, _probe_body, body)
@@ -492,7 +532,9 @@ func _notification(what: int) -> void:
 		for sb in _bodies:
 			if is_instance_valid(sb) and sb.get_parent() == null:
 				sb.free()
-		for bodies: Dictionary[int, StaticBody3D] in [_clear_bodies, _railing_bodies, _tier_bodies]:
+		if _drawn != null:
+			_drawn.free_bodies()
+		for bodies: Dictionary[int, StaticBody3D] in [_clear_bodies, _railing_bodies, _tier_bodies, _box_bodies]:
 			for sb: StaticBody3D in bodies.values():
 				if is_instance_valid(sb) and sb.get_parent() == null:
 					sb.free()
@@ -633,7 +675,7 @@ func _kinematic(space: RID, shape: RID) -> RID:
 	PhysicsServer3D.body_set_mode(rid, PhysicsServer3D.BODY_MODE_KINEMATIC)
 	PhysicsServer3D.body_add_shape(rid, shape)
 	PhysicsServer3D.body_set_collision_layer(rid, CHARACTER_LAYER)
-	PhysicsServer3D.body_set_collision_mask(rid, WORLD_LAYER)
+	PhysicsServer3D.body_set_collision_mask(rid, SOLID_MASK)
 	PhysicsServer3D.body_set_space(rid, space)
 	return rid
 
@@ -758,17 +800,49 @@ func _own_body(bodies: Dictionary[int, StaticBody3D], surface: int, name_format:
 
 
 ## The tiers' body for block `b` (WH1): one a surface a square of TIER_CHUNK m of the field, so a ray's broad phase
-## passes the squares it doesn't cross; made the first time it is asked for (it joins the tree in `_add_rest`).
-func _tier_body(b: MapData.Block) -> StaticBody3D:
+## passes the squares it doesn't cross; made the first time it is asked for (it joins the tree in `_add_rest`). A
+## `boxed` block's (its drawn props stand in for it, DG1) are on bodies of their own on DrawnRays.BOX_LAYER.
+func _tier_body(b: MapData.Block, boxed: bool) -> StaticBody3D:
 	var cell := Vector2i(floori(b.center.x / TIER_CHUNK), floori(b.center.z / TIER_CHUNK))
 	var key := b.surface + TIER_KEY * ((cell.x + TIER_KEY / 2) * TIER_KEY + cell.y + TIER_KEY / 2)
+	key += TIER_KEY * TIER_KEY * TIER_KEY * (1 if boxed else 0)
 	if not _tier_bodies.has(key):
 		var sb := StaticBody3D.new()
-		sb.name = "Colliders_Tiers_%s_%d_%d" % [RayHit.Surface.keys()[b.surface], cell.x, cell.y]
-		sb.collision_layer = WORLD_LAYER
+		sb.name = "Colliders_Tiers_%s_%d_%d%s" % [RayHit.Surface.keys()[b.surface], cell.x, cell.y,
+				"_Box" if boxed else ""]
+		sb.collision_layer = DrawnRays.BOX_LAYER if boxed else WORLD_LAYER
 		sb.collision_mask = 0
 		_tier_bodies[key] = sb
 	return _tier_bodies[key]
+
+
+## The body of the boxes of `surface`'s blocks whose drawn props stand in for them (DG1, DrawnRays.BOX_LAYER: bodies
+## and the level ray only), made the first time it is asked for (it joins the tree in `_add_rest`).
+func _box_body(surface: int) -> StaticBody3D:
+	if not _box_bodies.has(surface):
+		var sb := StaticBody3D.new()
+		sb.name = "Colliders_Box_%s" % RayHit.Surface.keys()[surface]
+		sb.collision_layer = DrawnRays.BOX_LAYER
+		sb.collision_mask = 0
+		_box_bodies[surface] = sb
+	return _box_bodies[surface]
+
+
+## The props the game draws on the map as it lays them, for its drawn rays (DG1): the site look's, or a level built
+## without one (the tests' and the match guards') the built-in ones, which the shipped look keeps; a station's named
+## props alone, as PlaySession draws them.
+func _ray_props() -> PropDressConfig:
+	var props := _props if _props != null else PropDressConfig.new()
+	return props.named_only() if map.station != null and not props.kind_props.is_empty() else props
+
+
+## Ramp `b`'s wedge as a shape of `body`'s own.
+static func _add_wedge(body: StaticBody3D, b: MapData.Block) -> void:
+	var wedge := ConvexPolygonShape3D.new()
+	wedge.points = GreyboxFaces.wedge_points(b, Vector3.ZERO)
+	var owner_id := body.create_shape_owner(body)
+	body.shape_owner_set_transform(owner_id, Transform3D(Basis.IDENTITY, b.center))
+	body.shape_owner_add_shape(owner_id, wedge)
 
 
 ## Each of `bodies`' RIDs into `rids`, with its surface into `surfaces`.
@@ -778,13 +852,13 @@ static func _body_rids(bodies: Dictionary[int, StaticBody3D], rids: Array[RID], 
 		surfaces.append(key % TIER_KEY)
 
 
-## A ray named `ray_name` on the level's colliders, cast on demand, as a child.
-func _level_ray(ray_name: String) -> RayCast3D:
+## A ray named `ray_name` on the level's colliders of `mask`, cast on demand, as a child.
+func _level_ray(ray_name: String, mask: int) -> RayCast3D:
 	var ray := RayCast3D.new()
 	ray.name = ray_name
 	ray.top_level = true
 	ray.enabled = false
-	ray.collision_mask = WORLD_LAYER
+	ray.collision_mask = mask
 	add_child(ray)
 	return ray
 

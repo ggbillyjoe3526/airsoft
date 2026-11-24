@@ -167,7 +167,7 @@ func landing_height(from: Vector3, velocity: Vector3, ground: float, gravity: fl
 	var fall := maxf(from.y - ground, 0.0)
 	var t := (velocity.y + sqrt(velocity.y * velocity.y + 2.0 * gravity * fall)) / gravity
 	var at := Vector3(from.x + velocity.x * t, ground + _above, from.z + velocity.z * t)
-	if not _world.ray(at, Vector3(at.x, ground - _drop, at.z), _hit):
+	if not _world.drawn_ray(at, Vector3(at.x, ground - _drop, at.z), _hit):
 		return ground
 	return _hit.position.y
 

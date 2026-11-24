@@ -4,6 +4,9 @@ extends WorldQuery
 ## underfoot, through one RayCast3D the level owns, cast on demand (force_raycast_update allocates nothing, where
 ## intersect_ray returns a new Dictionary a call). Each surface's blocks are one static body, so the body a ray meets
 ## says what it is made of; each door's leaf (DO1) is a wooden body of its own, switched on and off with the door.
+## Sight and a BB's path meet the props a map draws as drawn (DG1, DrawnRays): their faces, and their leaf cards where
+## the leaf sheet's cut-out is solid; the level ray (`ray`: what is underfoot, vaults, leans, bombs, magazines) and the
+## movers meet the boxes those props stand in for.
 
 ## What is underfoot is looked for from max_step above the feet down to this far below them (m), so a step's landing
 ## a little above the floor, or a ramp's slope, still counts (the browser game's map/underfoot.ts UNDERFOOT_REACH).
@@ -25,8 +28,13 @@ var _clear_surfaces: PackedInt32Array = PackedInt32Array()
 var _railing_bodies: Array[RID] = []
 var _railing_surfaces: PackedInt32Array = PackedInt32Array()
 var _past_cast: RayCast3D = null
-## The tapering props' tiers' bodies (WH1: thickets and trunks, a body a surface beside the surface's own) and each
-## one's RayHit.Surface: solid to everything, as the surface's own body.
+## The ray a solid thing casts (drawn_ray: a thrown bomb, a held replica), on the drawn props' faces and leaf cards,
+## blind to nothing; null: `_cast`.
+var _drawn_cast: RayCast3D = null
+## The drawn props (DG1; null on a level with none).
+var _drawn: DrawnRays = null
+## The tapering props' tiers' bodies (WH1: thickets and trunks, a body a surface beside the surface's own) and the
+## boxes the drawn props stand in for (DG1), and each one's RayHit.Surface.
 var _tier_surfaces: Dictionary[RID, int] = {}
 var _body: BodyConfig = null
 var _under: RayHit = RayHit.new()
@@ -52,15 +60,19 @@ func ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
 
 
 func sight_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
-	return _cast_on(_sight_cast if _sight_cast != null else _cast, from, to, hit)
+	return _cast_drawn(_sight_cast if _sight_cast != null else _cast, from, to, hit)
 
 
 func ray_past_railings(from: Vector3, to: Vector3, hit: RayHit) -> bool:
-	return _cast_on(_past_cast if _past_cast != null else _cast, from, to, hit)
+	return _cast_drawn(_past_cast if _past_cast != null else _cast, from, to, hit)
+
+
+func drawn_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	return _cast_on(_cast, from, to, hit) if _drawn_cast == null else _cast_drawn(_drawn_cast, from, to, hit)
 
 
 ## The railings' bodies as the level built them (MapLevel), each made of `surfaces`' RayHit.Surface; `sight` (the ray
-## sight casts, as set_clear_bodies) and `past` (the ray past the railings, in the level's tree with the level ray's
+## sight casts, as set_clear_bodies) and `past` (the ray past the railings, in the level's tree with the drawn props'
 ## mask) are made blind to them here.
 func set_railing_bodies(bodies: Array[RID], surfaces: PackedInt32Array, sight: RayCast3D, past: RayCast3D) -> void:
 	_railing_bodies = bodies
@@ -72,7 +84,54 @@ func set_railing_bodies(bodies: Array[RID], surfaces: PackedInt32Array, sight: R
 		past.add_exception_rid(rid)
 
 
-## The tapering props' tiers' bodies as the level built them (MapLevel), each made of `surfaces`' RayHit.Surface.
+## The drawn props (DG1) as the level built them (MapLevel), after set_clear_bodies (and set_railing_bodies on a level
+## with railings): `past` the ray past the railings (in the level's tree with DrawnRays' masks; the one
+## set_railing_bodies took on a level with railings). The sight ray and `past` meet the drawn props' faces and their
+## leaf cards; `whole` (in the level's tree with the same masks, blind to nothing: glass and railings' boxes stop a
+## solid thing) is drawn_ray's.
+func set_drawn(drawn: DrawnRays, past: RayCast3D, whole: RayCast3D) -> void:
+	_drawn = drawn
+	_past_cast = past
+	_drawn_cast = whole
+
+
+## As _cast_on along `cast`, through the drawn props' leaf cards (DG1) where their cut-out is cut away: a card met where
+## its sheet is solid stops the line (LEAVES); one met where it isn't lets the line carry on just past it, up to
+## DrawnRayConfig.leaf_tries cards, past which it counts as stopped in the leaves. Allocates nothing.
+func _cast_drawn(cast: RayCast3D, from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	if _drawn == null:
+		return _cast_on(cast, from, to, hit)
+	var length := from.distance_to(to)
+	if not (length > 0.0):
+		return false
+	var way := (to - from) / length
+	var cfg := _drawn.config()
+	var start := from
+	var tries := maxi(cfg.leaf_tries, 1)
+	for t in tries:
+		cast.position = start
+		cast.target_position = to - start
+		cast.force_raycast_update()
+		if not cast.is_colliding():
+			return false
+		var at := cast.get_collision_point()
+		var rid := cast.get_collider_rid()
+		var past_card := _drawn.is_leaf(rid) and t + 1 < tries \
+				and not _drawn.opaque(rid, cast.get_collider_shape(), cast.get_collision_face_index(), at)
+		if not past_card:
+			hit.position = at
+			hit.normal = cast.get_collision_normal()
+			hit.fraction = clampf(from.distance_to(at) / length, 0.0, 1.0)
+			hit.surface = _surface_of(rid)
+			return true
+		start = at + way * cfg.leaf_step
+		if (to - start).dot(way) <= cfg.leaf_step:
+			return false
+	return false
+
+
+## The tapering props' tiers' bodies and the boxes the drawn props stand in for (DG1) as the level built them
+## (MapLevel), each made of `surfaces`' RayHit.Surface.
 func set_tier_bodies(bodies: Array[RID], surfaces: PackedInt32Array) -> void:
 	_tier_surfaces.clear()
 	for t in bodies.size():
@@ -80,7 +139,7 @@ func set_tier_bodies(bodies: Array[RID], surfaces: PackedInt32Array) -> void:
 
 
 ## The clear bodies as the level built them (MapLevel), each made of `surfaces`' RayHit.Surface, and `sight`: a ray in
-## the level's tree with the level ray's mask that sight casts, made blind to them here.
+## the level's tree with the drawn props' masks that sight casts, made blind to them here.
 func set_clear_bodies(bodies: Array[RID], surfaces: PackedInt32Array, sight: RayCast3D) -> void:
 	_clear_bodies = bodies
 	_clear_surfaces = surfaces
@@ -157,6 +216,8 @@ func _surface_of(rid: RID) -> RayHit.Surface:
 			return s as RayHit.Surface
 	if _tier_surfaces.has(rid):
 		return _tier_surfaces[rid] as RayHit.Surface
+	if _drawn != null and _drawn.surfaces.has(rid):
+		return _drawn.surfaces[rid] as RayHit.Surface
 	for c in _clear_bodies.size():
 		if _clear_bodies[c] == rid:
 			return _clear_surfaces[c] as RayHit.Surface

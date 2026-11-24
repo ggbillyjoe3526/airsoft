@@ -125,10 +125,10 @@ stacks. Bots use all six. Attackers start in the west camp and defenders in the 
   wooden crates, the violet pickup wreck and the trunks of the trees themselves, and the camps and the field's edge are
   walled by a log palisade of sharpened stakes; each stops a BB about where you see it, a round trunk by its bark. The
   woodpiles, split logs of every shape and size stacked by hand, are 1.8 m tall, so they hide you standing; the camps' gate screens stand 2.8 m. The thickets of spruce at
-  the edges and between the lanes can't be entered or seen through; like the bushes, they stop BBs and sight where
-  their boughs are, narrowing as the spruces taper, so a shot past a thicket's end, or through the gap between two
-  spruces' tops, at someone you can see flies on. A tree's trunk stops a BB where its bark is, thick at the foot and
-  thinner as it rises. The west camp's front palisade stands 3.4 m, so nobody on the high ground looks over it.
+  the edges and between the lanes can't be entered. Every tree, thicket, log and stake stops BBs and sight where it is
+  drawn, needles and leaves included, and nowhere else: a shot between two branches, through a gap in a crown or
+  between two spruces' tops, at someone you can see, flies on. The west camp's front palisade stands 3.4 m, so nobody
+  on the high ground looks over it.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and leafy **bushes** stand taller. Only the
   thick of a plant counts, the fronds and leaf clusters you can see, never its wispy tips: nobody sees you through more
   than about half a metre of it, and a BB that pushes 0.6 m into it stops there. Crouch deep in a fern bed to vanish;

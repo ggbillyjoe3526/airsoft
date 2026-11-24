@@ -129,7 +129,7 @@ func test_a_run_of_sections_ends_in_a_mouth_turned_to_its_open_side() -> void:
 
 func test_woodland_loads_its_tunnels_mouths_and_caps() -> void:
 	# a model is drawn only when the dress loads it: the mouths went unloaded once, so every end showed the roof
-	var used := PropDress._models_used(_woodland(), cfg)
+	var used := PropDress.models_used(_woodland(), cfg)
 	for model: StringName in [&"log_tunnel_side", &"log_tunnel_roof", &"log_tunnel_mouth", &"log_tunnel_cap"]:
 		assert_true(used.has(model), "Woodland loads %s" % model)
 	var placed := PropLayout.layout(_woodland(), cfg, _boxes())
