@@ -17,7 +17,7 @@ in `docs/PROCESS.md`.
   respawns in Attack / Defend and Plant The Bomb (RS1, owner's playtest) and Subway made public (SW2), then four full
   passes before the tag (BP10 to BP13; balance all in band). Stockade, the dev-only Plant The Bomb field, was removed
   (owner, 2026-11-15).
-- **Next: the build after 0.1 Beta 2** (the owner names it). Fixing, balance, performance, stability, UX and polish
+- **Next: 0.1 Beta 3** (owner, 2026-11-24). Fixing, balance, performance, stability, UX and polish
   (`docs/PROCESS.md` › Placing work), from the owner's Beta 2 playtest and `docs/KNOWN_ISSUES.md`.
 - **0.1 Dev 2** (owner, 2026-10-30; tagged 2026-11-09): basic smoke and flash bombs, thrown by bots too (done: SF1,
   SF2), a full-screen map and a Go there ping (owner, 2026-10-31; done: FM1), then Depot and Woodland redesigned larger

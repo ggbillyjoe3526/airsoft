@@ -27,7 +27,7 @@ The rest of this wiki describes all of it.
 
 ### Next
 
-- **The next build:** fixes, balance, speed and polish from the playtests of 0.1 Beta 2. The Beta builds add no new
+- **0.1 Beta 3:** fixes, balance, speed and polish from the playtests of 0.1 Beta 2. The Beta builds add no new
   systems; they lead up to 0.1 and Early Access.
 
 ## Early Access: the themed updates

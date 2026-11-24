@@ -5,12 +5,11 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 
 ## Now
 
-- **0.1 Beta 2 is out (2026-11-24)** (tag `0.1-beta.2`), the second Beta build; its notes are `CHANGELOG.md` ›
-  0.1 Beta 2 (RD5). The owner names the next build; until the post-tag pull request sets it, `config/version` reads
-  "0.1 Beta 2". Beta is fixing, balance, performance and polish (`docs/PROCESS.md` › Placing work), from the owner's
-  playtests and `docs/KNOWN_ISSUES.md`.
-  The browser game is frozen at `0.1-beta.1`, removed from the repository on 2026-11-05 (owner) and read from git at
-  the tag `0.1-dev.1`.
+- **0.1 Beta 2 is out (2026-11-24)** (tag `0.1-beta.2`), the second Beta build; its notes are `CHANGELOG.md` › 0.1 Beta
+  2 (RD5). 0.1 Beta 3 is being built (owner, 2026-11-24): `config/version` reads "0.1 Beta 3". Beta is fixing, balance,
+  performance and polish (`docs/PROCESS.md` › Placing work), from the owner's playtests and `docs/KNOWN_ISSUES.md`. The
+  browser game is frozen at `0.1-beta.1`, removed from the repository on 2026-11-05 (owner) and read from git at the tag
+  `0.1-dev.1`.
 - **Fields.** Woodland and the Depot are redesigned (WR1, DR1). The Street was removed (owner, 2026-11-09, SX1).
 - **Replicas.** The Sniper Rifle (bolt-action, Variable Scope) is public since DT1 (SN1 to SN3).
 - **Bombs.** Smoke and flash bombs, thrown by you and by bots (SF1, SF2, GT1 to GT3).
@@ -25,10 +24,11 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 - **UI.** The menus and HUD are redesigned (UR1 to UR7), with fixes after (UF1, UF2).
 - **Bug passes.** BP2 to BP13 are merged; BP8 fixed the owner's thorough Dev 2 playtest, BP9 was the full pass before
   0.1 Beta 1, BP10 to BP13 the four passes before 0.1 Beta 2.
-- **Next.** The build after 0.1 Beta 2, from the owner's Beta 2 playtest. The post-tag pull request runs the archive
-  check (`docs/PROCESS.md` › Releases, step 6): `docs/PLAYTEST.md` (170 KB) and `docs/DECISIONS.md` (183 KB) are over
-  50 KB. His open checks are on his Beta 2 list (`/mnt/project-files/playtest/0.1-beta2-checklist.md`) until that
-  pull request carries them on.
+- **Next.** 0.1 Beta 3, from the owner's Beta 2 playtest. His open checks are carried over to his Beta 3 list
+  (`/mnt/project-files/playtest/0.1-beta3-checklist.md`, new checks from N70). At the Beta 2 tag the archive check moved
+  `docs/PLAYTEST.md`'s pre-Beta 1 task lists to `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` (170 KB to 119 KB);
+  `docs/DECISIONS.md` (183 KB) holds rulings in force, and sorting out the ones later rulings replaced is a task of its
+  own: task DA1 in `docs/TASKS.md` (`docs/PROCESS.md` › Releases, step 6).
 
 ## Where to look
 

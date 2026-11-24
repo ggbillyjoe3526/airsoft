@@ -84,4 +84,5 @@ sight lines don't change; crowns are look only, over head height. 60 FPS on Low 
 
 ## Play this
 
-`docs/PLAYTEST.md` › Woodland's trees (WT1), and the owner's Dev 3 checklist in the project files.
+`docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › Woodland's trees (WT1), and the owner's Dev 3 checklist in the project
+files.
