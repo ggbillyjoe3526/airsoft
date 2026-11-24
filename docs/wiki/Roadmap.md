@@ -13,10 +13,10 @@ then **0.1**, which opens **Early Access**. Each build is posted on the
 
 ### Built
 
-Depot as an indoor airsoft hall and Woodland as an open wood (by day, or at night with the weapon torch and glowing
-BBs), with doors and two flags; the AEG Rifle, the GBB Pistol, the Cyber Pistol, the Sniper Rifle with the 2x and
+Depot as an indoor airsoft hall, Woodland as an open wood (by day, or at night with the weapon torch and glowing
+BBs) and [Subway](Maps#subway), a metro station on two levels, with doors and two flags; the AEG Rifle, the GBB Pistol, the Cyber Pistol, the Sniper Rifle with the 2x and
 Variable Scopes, the Pump Shotgun and the Compact SMG, every part and power source, the Loadout, levels and the Armory; Easy, Normal and Hard bots with
-names, personalities, kits and callouts, playing as a team; Elimination with its overtime flag, Attack / Defend, Plant The Bomb and
+names, personalities, kits and callouts, playing as a team; Elimination with its overtime flag, Attack / Defend and Plant The Bomb with respawns, and
 Custom matches with 5 to 8 a side; the practice range in Depot's site, Practice on any field and the timed challenge;
 squad orders, the order wheel with Spotted and Cover Me, pings, Go there and the magazine hand-off; the minimap, the full-screen map, the hit feed, scoreboard
 and match summary; smoke and flash bombs, thrown by you and the bots; detailed models of every replica, attachment,
@@ -27,8 +27,8 @@ The rest of this wiki describes all of it.
 
 ### Next
 
-- **0.1 Beta 2:** fixes, balance, speed and polish from the playtests of 0.1 Beta 1, and [Subway](Maps#subway), the
-  metro station, open to everyone. The Beta builds add no new systems; they lead up to 0.1 and Early Access.
+- **The next build:** fixes, balance, speed and polish from the playtests of 0.1 Beta 2. The Beta builds add no new
+  systems; they lead up to 0.1 and Early Access.
 
 ## Early Access: the themed updates
 

@@ -9,6 +9,208 @@ Don't edit this file for a change: add a note to `changelog.d/` instead (its `RE
 
 The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 
+## 0.1 Beta 2 (2026-11-24)
+
+### Highlights
+- 0.1 Beta 2 is a fixing and polish build, made from playtesting Beta 1 and four more full passes of the whole game.
+- In Attack / Defend and Plant The Bomb a hit no longer ends your round: walk off, then come back at your start or a forward spawn after a wait set for each field so both sides win about half the rounds.
+- BBs, sight and Spotted pass through the gaps in trees, bushes and props, so Woodland hits and spots land where you see them.
+- Bots spread over their routes instead of bunching up, Normal bots lock on more slowly, and the four personalities take their own jobs in Attack / Defend and Plant The Bomb.
+- Subway is open to everyone, with a street entrance, tunnels that curve away, redrawn trains and station props, and lifts that start the moment you press.
+- Woodland looks better up close and runs faster; the Range gets a firing point and detailed buildings.
+- ALT always sprints, tapping Z spots without stalling your view, prompts read the action then the key, and the HIT! sign is red.
+- Quicker menus, a right-click loadout menu, new defaults, and levels that take 1.5 times the XP.
+- One BB on every magazine, pistols square at the hip, and a steadier GBB Pistol on the move.
+
+### Respawns in Attack / Defend and Plant The Bomb
+- A hit no longer ends your round: you call it and walk off as ever, then come back with full magazines after a wait.
+- Plant The Bomb stops respawns once the bomb is armed.
+- Elimination keeps one life; the Custom rule Respawns (Not in Elimination / On / Off) changes that.
+- The Respawn in panel at the bottom lets you pick your start or a forward spawn with 1, 2, 3 or the mouse wheel.
+- A forward spawn with an enemy within 15 m is greyed out, and you come back at your start instead. So you do when every forward spawn is taken, instead of inside a teammate.
+- Someone on the floor above or below a spawn spot doesn't block it.
+- Coming back, the screen comes up out of dark with "Back in" and the shot timer's beep. You face the way your spawn faces, with toggled aim and crouch let go.
+- Hit players always fade off the field before they come back. While someone can see them they walk on first, up to 3 s more, but thick leaves or a smoke cloud between hides them, so they come back on time.
+- With the respawn wait set to zero, a hit player still waits for the hit call and the fade before coming back.
+- On Subway, hit players at the east end step down from the platform and walk off to the dead zone.
+- Bots respawn and pick spawns too, and more defending bots go to pull a flag down.
+- A flag left alone slides back down, whether it is part-raised or fully raised.
+
+### How long the wait is
+- Attackers wait 10 s.
+- In Attack / Defend, defenders wait 15 s on Depot, 11 s on Woodland and 7 s on Subway against Normal bots. Against Easy bots they wait three quarters of that, against Hard bots 1.9 times as long, 25 s at most.
+- In Plant The Bomb, until the bomb is armed, defenders wait 5 s on Depot, 9 s on Woodland and 3 s on Subway. Against Hard bots it is 8 s on Depot, 12 s on Woodland and 5 s on Subway.
+- Each wait was set from bot matches so attackers and defenders each win about half the rounds.
+
+### Respawn fixes
+- A round your team wins while you wait to come back counts for you: your XP and the scoreboard's rounds won.
+- The "What got you" card and the hit lines from your hit don't show when you come back.
+- While you're out, the view stays on the teammate you were watching when another one comes back.
+- The round table shows "Still in" for a player who was hit and came back, and dims only those still out.
+- Bots don't call "Last one" or "Down, N left" while respawns are on, as anyone hit may come back.
+- A bot coming back under Elimination's overtime flag reacts to it like the others (Custom rules with respawns on).
+- On Subway in Plant The Bomb, a defender guarding the far site keeps guarding it after coming back.
+- A teammate following you with Follow Me or Regroup falls in behind you again after coming back.
+
+### Shots and sight meet what you see
+- BBs fly through the gaps in a prop's drawn shape: between branches and needles, over the cart's tray, under benches and through fence gaps.
+- Your sight, the bots' sight and Spotted follow the same shapes, so hits and spots no longer stop on empty air beside trees.
+- On Woodland, each spruce in a thicket stops BBs and sight round its own shape, so a shot through the gap between two tops flies on.
+- Tree trunks stop BBs at the bark, thick at the foot and thinner as they rise.
+- Ferns and shrubs stop BBs and hide people only where their leaves are. A lone fern no longer hides a crouched player in its middle; a bed of ferns still does, and a bot you can plainly see in a fern can be hit and spotted.
+- The dark boxes at the foot of the spruce thickets are gone.
+- Smoke and flash bombs fly through the same gaps, and bots plan their throws the same way.
+- Your held replica no longer pulls back against empty air in front of a prop, and other players' replicas no longer lift for nothing.
+- A torch's spot lands on the bark and needles, and through a window it lights the wall behind.
+- Bodies, cover and bot paths still use the full shape, so you can't walk through a cart's tray.
+- Spotted (Z) works on every map and mode, and teammates within 30 m are told where the spotted enemy is.
+
+### Bots
+- Bots no longer bunch up on one spot: a noise, a teammate's call or gunfire draws at most two of them, and the rest keep to their own route.
+- Bots hunting you pick different spots, and a whole team pushing down one route together is now rare.
+- Defenders still gather at what they defend, and everyone still gathers at the flag pole and the bomb site.
+- Bots no longer count a teammate on another floor, such as Subway's concourse above the platform, as already in a fight. They still come to a fight on the platform under them.
+- Normal bots take longer to lock on: they react as Easy bots do and their aim settles more slowly, so you have about 1.5 to 2 s in their sights before they hit indoors.
+- Easy bots are unchanged. Hard bots keep their edge on the angles they hold, but are no quicker than Normal when surprised.
+- Bots told to Regroup or Follow Me try again after a blocked route, instead of standing still for good.
+- In Plant The Bomb, attacking bots near a dropped bomb no longer pass the job of fetching it back and forth; the bot sent for it keeps going and picks it up.
+- Two bots crawling side by side through Woodland's Badger run no longer get stuck under its logs.
+
+### Bot personalities take jobs in Attack / Defend and Plant The Bomb
+- When the defenders send one of their own well up a lane, it is a Rusher. Rushers are first back when the flag goes up or the bomb is armed.
+- Rushers leave the bomb to others, and mostly come back at a forward spawn.
+- Anchors defend close to the pole or bomb site, and mostly respawn at their start area.
+- Flankers pick up the bomb and carry it in, unless a teammate is much nearer. They often come back at a forward spawn.
+- Personalities change how bots play, never how well they play.
+
+### Subway for everyone
+- Subway is now a public map, open to everyone.
+- The gap under the spiral stair is closed, and its wall no longer shows a slit.
+- The ticket hall has four more benches.
+- The train tunnels curve away into the distance behind a locked steel grille you can't get past, instead of ending in a flat wall.
+- The north platform is level to its end, and its ramp is gone.
+- The east team climbs out of the tunnels over the platform edge, as everywhere else.
+- The train tunnels are wider, leaving a clear gap beside the trains at the tunnel mouths, and a green-grey tiled band trims each mouth's arch.
+- No lines or cracks show on the tiled wall round the tunnel mouths, the tunnel wall no longer flickers round the trains, and underground there is no blue sky in any gap.
+- On Ultra, the ceilings, shaded corners and escalator shafts are no longer near black, and they no longer brighten only as you walk up to them. Ultra fills the station's shade as High does and keeps its lamp shadows and haze.
+- Subway has a small secret: listen out when you're near the trains.
+
+### Subway station entrance and props
+- The ticket hall has a station entrance right behind the street team's start.
+- A doorway in the west wall shows a stair and an escalator up to a daylit street, with shop fronts, a railing and a lamp post.
+- The station name board and a "Way out" sign hang over the doorway, and printed posters line the stair.
+- A locked folding gate shuts the entrance. You can look, but nobody walks or shoots through it.
+- The ticket gates are brushed stainless up to a dark reader head, with the screen posts standing over the paddles.
+- The help point is a crimson map totem with recessed windows: a network map, a street map, a timetable and a help panel with speaker and buttons.
+- The crowd barriers have bridge feet, interlock hooks and a cover sheet tied on.
+- The benches are perforated steel with arm rests.
+- The staff booths are cream with grey-framed glass and a deep roof edge.
+- The works hoardings and signal and switch cabinets show their posts, braces, doors, hinges and vents.
+- The skip wagon has a deep riveted tub of rubble.
+- The ballast and engineering wagons, the buffer stop, the platelayer's trolleys and the cable drums show their frames, ribs and bolts.
+- The tunnel segment stacks are clearly arched with bolt pockets, and the fan housing and the tunnel grille are more detailed.
+- Up close, the props show what they are made of: satin paint, brushed steel, glass and rubber.
+- The subway's orange is brighter and keeps its full colour, on the rails, the trains' stripe, the seats' rings and the station's name boards.
+- Prop sizes, cover and layout are unchanged.
+
+### Subway trains
+- The cab fronts are remodelled from reference photos: one tall sweep of dark glass, a glass door and long lamp strips, shorter at the edges as on the real trains.
+- Each outer end has wide, rounded rubber bellows round its door.
+- The trains have gloss white paint, orange poles and grab rails, and dark glass far-side windows that catch the lamps.
+- The grab rails are smooth, minimal bent tubes: each seat bay has one rail and two poles standing on the floor, with no brackets.
+- Seats are padded in a grey woven pattern with a few orange rings. The floor is charcoal with faint flecks.
+- The ceiling is smooth, with two light lines along its edges. Glass draft screens stand beside the doors.
+- The panels above the windows show twelve made-up adverts, in a different order in each car, and next-stop screens sit over the doors.
+- Grilles and warning labels show on the outside of the cars.
+- Train sizes, doors, cover and sight lines are unchanged.
+
+### Lifts
+- Pressing a lift button starts the lift's motor at once, on a landing or inside the car, instead of a beep. Pressing again restarts the motor rather than playing two at once.
+- Inside the car, the motor rides with you, and the car makes no separate sound as it sets off.
+- Pressing a button inside the car, even from just inside the doorway, shuts the doors at once, and you ease back from the doors as they shut. They still never shut on someone standing in the doorway.
+- The closing sound plays as you press, starting straight on the doors' slide, a moment before the doors move. The car leaves at the same time as before.
+- An arriving lift is heard opening, with its chime.
+- Pressing another floor while the doors are still opening shuts them again at once, and doors that start shutting from half open close from where they stand.
+- A lift's doors, chime and buzzer are heard only from inside its car. Outside, you hear only the button presses, and the minimap and sound cues show only those. Bots hear lifts as before.
+- A poster that covered a lift door has moved beside it.
+
+### Woodland
+- The lone tyre at the west edge of the Clearing is now a stack of tyres you can stand behind, so the west end wins more Elimination rounds against the east.
+- The west camp's front palisade is taller, so its spawns stay hidden from the high ground.
+- An armed bomb takes 26 s to go off instead of 25, giving defenders a little longer to reach it.
+- Oaks, birches and bushes now carry real leaf sprays, and pines have tufts of long needles.
+- Thicket spruces have drooping sprigs, and the ferns have proper fronds, all over photo bark.
+- The palisade, watch tower, North bridge, Sawmill shed and hut roofs show real timber grain.
+- Crouch tunnels, the culvert, fallen logs, root plates, the saw bench and earth banks look more real.
+- The campfire and lanterns, and the concrete and steel props, have better surfaces.
+- On Low, the fine surface relief on textures is skipped to keep the frame rate up.
+- Woodland runs smoother on every preset with the same look, since the tree leaves waste less drawing work (6 to 18 % less graphics time a frame on Low in a cloud test).
+
+### The Range
+- The practice range has a steel firing point over the line, with numbered lane boards, a chrono table, a red range flag, a rules board and safety signs.
+- Four timber shooting benches sit on the firing point, each with a rest bag, an ammo can and BBs; lean on one and shoot over it.
+- The range walls show weathered boards in three looks, and the targets have painted scoring zones, BB dents and chipped paint.
+- The shelter shades the line and casts shadows, and its four LED battens light the benches under it (with Lamp lights on: High and Ultra). The shelter never stops a BB.
+- The sheds have roller shutters, doors, windows, rooflights and gutters; the jib cranes a hoist, a chain, a hook and a cable.
+- The phone masts have a three-sided antenna head, dishes and floodlights; the water towers lattice legs, a rounded tank and a caged ladder.
+- The silos, the watch tower and the old plane fuselage are rebuilt in more detail, the fuselage with cockpit windows, torn-open ends and a broken tail.
+- The buildings keep their colour in the distance: most sheds are green and the cranes are a brighter yellow.
+
+### Map pictures
+- The Subway picture shows its train beside the north platform.
+- The Depot picture looks into Chrono hall past a pillar.
+- The Woodland picture looks down the sunny Log stacks track toward B.
+- The pictures on the Match page and the loading screen are drawn again to match.
+
+### Replicas
+- Magazines show one BB at the top instead of a row of three, on the AEG Rifle, the Hi-Cap, the Low-Cap, the GBB Pistol, the Extended and the Pump Shotgun's shell. Pistols show one instead of two.
+- At the hip, the GBB Pistol and Cyber Pistol lie at the same angle as the rifles, muzzle toward the crosshair, instead of turned a little to the left.
+- The GBB Pistol is tighter on the move, so hip-fired on the run it is now tighter than the Cyber Pistol (1.19° against 1.26°). The Cyber Pistol stays tighter standing.
+- The Compact SMG and Pump Shotgun no longer swap to a simpler model at distance on Low, and Ultra's lighting treats them like the other replicas.
+
+### Controls
+- ALT sprints whenever you move forward: it stands you up, lowers your sight and lets go of walk and lean. There is no stamina.
+- With crouch on toggle, pressing Alt while standing still no longer stands you up, so Alt+Tab or Alt+Enter behind cover keeps you crouched.
+- Tapping Z to spot no longer stalls your view: it keeps turning while you tap, so you can track and spot smoothly. A tap can last up to 0.3 s.
+- A tap spots the opponent under your crosshair more reliably, and one peeking over a crate or beside a tree is spotted even if your crosshair is on the cover before them. Someone behind a wall still can't be.
+- Holding Z still brings up the wheel; your view stays where it was as the wheel appears, and the mouse then moves only the wheel's pointer.
+- A middle-click ping straight after a Z tap lands instead of being dropped.
+- Enter and keypad Enter can't be bound to an action any more, since Alt+Enter switches fullscreen. A saved binding on Enter goes back to that action's default.
+
+### HUD
+- Prompts read the action, then the key in brackets, in capitals: OPEN DOOR [G], CALL LIFT [G], VAULT [SPACE], RELOAD [R], PLANT BOMB [HOLD G].
+- The HIT! sign over a hit player is red for both teams.
+- When an order ends by itself, no "Back to the team plan" notice shows.
+- The round clock reads 0:00 once a round is over (it could read 0:02).
+- YOU HAVE THE BOMB shows for a moment as you pick the bomb up, then goes, and isn't told again each time you start and let go of a plant.
+
+### Menus and settings
+- The Match, Loadout, Armory and Settings tabs open at once, as their pages are kept ready.
+- A new interface colour shows in about a fifth of a second; it used to take a few seconds.
+- The menus come back a little quicker after a match.
+- The Graphics tab fits on one page, with nothing to scroll.
+- Right-click a loadout, or press Shift+F10, for Rename, Duplicate, Replace and Remove. The menu opens where you clicked; opened with the Menu key, it hangs under its card and keeps the keyboard there.
+- Removing a loadout asks in a small panel beside the menu, with Remove and Keep. Esc or a click elsewhere keeps it.
+- Gauge patterns are off by default, and HUD opacity starts at 60 %. A save on the old defaults moves to the new ones.
+- The frame-rate limit is a slider from 30 to 360, with an Off button beside it. Off is the default.
+- A new Tooltips switch under Display › Interface › Colour, on by default. Off hides the notes that pop up on hover.
+- What got you is On or Off, On by default; Auto is gone. A save set to Off stays Off.
+- Volumetric haze is On or Off: on with the High and Ultra presets, off with Low and Medium. A saved Custom level reads as On.
+- Each level takes 1.5 times as much XP. A match still gives the same XP; your XP and unlocks are kept, but your level number may read lower.
+- Focus rings no longer cut through words, the Armory's level line draws no ring round a clicked level, Customise's 3/4 view has no circle under the replica, and the pause menu's Timed challenge switch no longer overlaps its words.
+- On the Match page, the Your team cards have no colour line down the left; the picked team's card is edged in its colour (blue Alpha, orange Beta).
+- The game window can't be dragged smaller than 960 x 540, and the loading screen's picture shrinks smoothly in a small window.
+
+### Fixes
+- End the round in the Dev tab while the bomb is being armed no longer lets the arming finish and run the fuse.
+- A round that ends while the bomb is being armed no longer leaves the planter frozen through the pause between rounds.
+- The vault prompt shows the new Jump key after a rebind from the pause menu.
+- Pressing Esc or switching away on the last moment of the loading screen no longer leaves it frozen.
+- The Match page remembers a field's mode after a visit to the Range.
+- Skipping rounds no longer makes the screen reader read out every hit.
+- Subway's station announcements are yours only: none play over a bot's train or the match's results, and a new match cuts one still playing.
+- Map data accepts a typed minus sign, such as −5, and level data refuses "50 %" as a multiplier.
+
 ## 0.1 Beta 1 (2026-11-16)
 
 ### Highlights

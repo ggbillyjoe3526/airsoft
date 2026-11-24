@@ -14,18 +14,22 @@ every merge (`docs/wiki/README.md`).
 
 ## Status
 
-**[0.1 Beta 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-beta.1) is out (2026-11-16), the first Beta build; 0.1 Beta 2
-follows from its playtest.** The plan is `docs/ROADMAP.md`; what is happening now is `docs/HANDOFF.md`.
+**[0.1 Beta 2](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-beta.2) is out (2026-11-24), the second Beta
+build.** The plan is `docs/ROADMAP.md`; what is happening now is `docs/HANDOFF.md`.
 
-**What's in 0.1 Beta 1:** no new systems, but a full pass of the whole game: Depot made smaller and busier and
-Woodland's flags moved, with bots taking five or six routes and mixing them up; bots that notice you like a person
-would and flinch at near misses; a Plant The Bomb fuse tuned for each field; a smaller order wheel with Spotted and
-Cover Me; blue menu highlights with an interface colour to pick; burst indoors, a field of view of 87 and new
-volumes; softer shadows, volumetric haze in four levels and no flickering surfaces; pistols low on the right; and
-rounds of bug, balance and speed fixes. Subway is still in the Dev tab's Dev content. Its full notes are
-`CHANGELOG.md` › 0.1 Beta 1.
+**What's in 0.1 Beta 2:** no new systems, but fixes and polish from playtesting Beta 1 and four full passes of the
+whole game: respawns in Attack / Defend and Plant The Bomb, with a wait set for each field; BBs, sight and Spotted
+through the gaps in trees, bushes and props; bots that spread over their routes, Normal bots that lock on more slowly
+and personalities with their own jobs; Subway open to everyone, with a street entrance, curving tunnels, redrawn trains
+and station props and lifts that start as you press; Woodland better up close and faster; a firing point and detailed
+buildings on the Range; ALT always sprints, Z taps spot without a stall and prompts read the action then the key;
+quicker menus, a right-click loadout menu and new defaults; and one BB on every magazine. Its full notes are
+`CHANGELOG.md` › 0.1 Beta 2.
 
-**New since 0.1 Dev 3:** everything above. 0.1 Dev 3 (2026-11-15) brought Plant The Bomb, the Pump Shotgun and the
+**New since 0.1 Beta 1:** everything above. 0.1 Beta 1 (2026-11-16) was the first Beta build: Depot made smaller and
+busier, Woodland's flags moved, bots taking five or six routes and noticing you like a person would, a Plant The Bomb
+fuse for each field, the order wheel with Spotted and Cover Me, softer shadows and volumetric haze.
+0.1 Dev 3 (2026-11-15) brought Plant The Bomb, the Pump Shotgun and the
 Compact SMG, levels up to 15, climbing onto ledges, Blender models for every map and the Sunlit Concrete look.
 0.1 Dev 2 (2026-11-09) rebuilt Depot as an indoor airsoft hall and Woodland as an open wood; brought smoke and flash
 bombs, the Sniper Rifle, detailed models of every replica and bot figures in real gear; and new menus and HUD. 0.1 Dev 1 (2026-10-30) was the first build: Depot, Woodland and a
@@ -35,8 +39,8 @@ walk-off, settings, saves and accessibility.
 ## Run it
 
 - **Players:** download the Windows installer or zip, or the Linux build, from the
-  [0.1 Beta 1 release page](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-beta.1): the Windows
-  installer (`Airsoft-0.1-beta.1-Windows-Setup.exe`), the Windows zip or the Linux zip. The installer is not signed
+  [0.1 Beta 2 release page](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-beta.2): the Windows
+  installer (`Airsoft-0.1-beta.2-Windows-Setup.exe`), the Windows zip or the Linux zip. The installer is not signed
   yet, so Windows warns about it: choose *More info*, then *Run anyway*.
 - **From source:** install Godot **4.7.2** (standard, not .NET), choose *Import*, pick this folder's `project.godot`
   and press F5.
