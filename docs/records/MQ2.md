@@ -87,7 +87,7 @@ Customise turntable:
   surfaced and no stale override. Attempt 3: each magazine part's BBs are whole, apart, finely turned and every
   corner of one on a 6 mm ball.
 - **Docs:** `docs/CC0_ASSETS.md` › Surfaces (the parts' contract), `docs/ART.md`, the vertical grip's ruling in
-  `docs/DECISIONS.md`, the wiki's Replicas › Colours, `docs/PLAYTEST.md` › What the parts are made of (MQ2), the
+  `docs/DECISIONS.md`, the wiki's Replicas › Colours, `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › What the parts are made of (MQ2), the
   grip holds' row in `docs/KNOWN_ISSUES.md`. The owner's own list, `playtest/0.1-dev3-checklist.md`, is in the shared
   project files, not in this repository; it carries the same check.
 - **Pictures:** `art/model-quality/mq2/` in the project files: every part alone before and after in Wolf grey (the

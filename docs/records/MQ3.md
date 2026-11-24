@@ -89,7 +89,7 @@ softened within each chart (ten passes), and a normal map made from the same hei
   (worst 0.825), no UV triangle flipped against its chart, `Kit` within its 10,300 triangles, every gear normal
   of unit length and outward of its face.
 - **Docs:** `docs/ASSETS.md`, `docs/ART.md` › Figures, `assets/models/characters/README.md`,
-  `tools/blender/figures/README.md`, `docs/PLAYTEST.md` › What the figures' gear is made of (MQ3).
+  `tools/blender/figures/README.md`, `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › What the figures' gear is made of (MQ3).
 - **Pictures:** `art/model-quality/mq3/` in the project files: the carrier, the belt and pack, and the whole
   figure, before and after, in Alpha's blue and Beta's orange (`mq3-1` to `mq3-3`); the dump pouch in the first
   and the second pass (`mq3-4`); the chest with and without the studio lamp's shadow (`mq3-5`); the pack on the

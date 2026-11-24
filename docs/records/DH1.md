@@ -104,5 +104,5 @@ build code these models use (`hardsurface.py` is as it was), so the other models
 
 ## Outstanding
 
-- How the floor's texture, the roof's busyness and the frame rate feel in play: `docs/PLAYTEST.md` › Depot's hall
+- How the floor's texture, the roof's busyness and the frame rate feel in play: `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › Depot's hall
   shell (DH1).

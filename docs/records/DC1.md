@@ -80,8 +80,8 @@ On RV1's branch with DC1 (bot route variety, before it merged): Elimination's we
 - The figures were measured before AIM1, AIM2 and RV1 (bot route variety, still open): the Plant The Bomb fuses are
   measured again once the map reworks and RV1 are in (`docs/KNOWN_ISSUES.md` › Modes, PB4's follow-up).
 - How the new west end plays, the re-rendered Match picture and the minimap in a window are play checks
-  (`docs/PLAYTEST.md` › Depot's compact hall; the owner's checklist).
+  (`docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › Depot's compact hall; the owner's checklist).
 - `test_pb4_qa`'s map-switch test needs Woodland's and Depot's fuses to differ; it should pick two fields it sets
   itself (critic; can wait).
 - Each pole now stands west of its MB1 crate stack (flag-raise wins 43 % to 31 %): whether a defender at the pole is
-  too open to the site doors is a play check (`docs/PLAYTEST.md` › Depot's compact hall).
+  too open to the site doors is a play check (`docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › Depot's compact hall).

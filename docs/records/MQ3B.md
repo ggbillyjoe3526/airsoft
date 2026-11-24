@@ -101,7 +101,7 @@ darker than the flat colour it was, which is the ribs' valleys, the grime and th
   under the team paint and the game's team material keeps the map; the band is near white, neutral, ribbed in colour
   and in the normal map; the boots carry relief and more than one roughness; the figure keeps its eight materials.
 - **Docs:** `docs/ASSETS.md`, `docs/ART.md` › Figures, `assets/models/characters/README.md`,
-  `tools/blender/figures/README.md`, `docs/PLAYTEST.md` › Headwear, arm bands and boots up close (MQ3B).
+  `tools/blender/figures/README.md`, `docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › Headwear, arm bands and boots up close (MQ3B).
 - **Pictures:** `art/model-quality/mq3b/` in the project files, the bot figure in the studio, before and after:
   the high-cut helmet (`mq3b-1`), the full-cut helmet and the mesh mask (`mq3b-2`), the cap and the boonie
   (the boonie also close from the side and from above, `mq3b-3`), from the front (`mq3b-4`), the arm band

@@ -65,7 +65,7 @@ of rounds armed stays where it was on every field.
 - **A defender at the far site has a race, not a sure thing.** On Depot the sites are 53 m apart in a straight line:
   a sprint there takes about 9 to 10 s of the 16 s, leaving the 6 s defuse with nothing to spare unless they set off
   while the bomb is being keyed in (3.5 s, heard within the bots' hearing of it). That is the same bargain as a
-  rotate in any bomb game, and it is the first play check (docs/PLAYTEST.md › PB4). Woodland's sites are 77 m apart:
+  rotate in any bomb game, and it is the first play check (docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md › PB4). Woodland's sites are 77 m apart:
   about 13 s of its 23 s.
 - **What moved:** the share of rounds armed barely changed (Depot 70 % to 67 %); the attackers now win more of the
   rounds they arm (Depot 53 % to 76 %, with 46 bombs going off in 239 rounds where 1 did). The balance comes from a

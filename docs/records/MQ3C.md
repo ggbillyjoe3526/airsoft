@@ -145,4 +145,4 @@ files, `mq3c-1-eyes-front.jpg` to `mq3c-5-side-and-far-levels.jpg`.
 
 ## Play checks
 
-`docs/PLAYTEST.md` › Faces up close (MQ3C); the Dev 3 checklist has the same entry.
+`docs/archive/0.1-dev/PLAYTEST-dev3-beta1.md` › Faces up close (MQ3C); the Dev 3 checklist has the same entry.
