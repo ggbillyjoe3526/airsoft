@@ -5,13 +5,15 @@ happen against surfaces not empty spaces. for example, if there is an empty spac
 through it (think firing between branches of a tree). make sure all models in the game are updated especially the
 woodlands map because i feel that might be what is causing hit/spot detection issues which is still present."
 
-**Review:** 1 attempt · critic CRITIC_PENDING · qa Pass · performance Pass
+**Review:** 3 attempts · critic CRITIC_PENDING · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-23 | 1 | Opus 5.5 (build thread) | ✓ (touched tests; CI on the head) | CRITIC_PENDING | – |
+| 2026-11-23 | 1 | Opus 5.5 (build thread) | ✓ (touched tests; CI on the head) | Retry | Balance on 16 seeds and old waits; throws on boxes |
+| 2026-11-23 | 2 | Opus 5.5 (build thread) | ✓ (touched tests; CI 31 of 32) | 4/8 Retry | The held replica and the torch spot on boxes; the waits without final figures; three stale tests; the record |
+| 2026-11-24 | 3 | Opus 5.5 (build thread) | ✓ (touched tests; CI on the head) | CRITIC_PENDING | |
 
 ## How it was measured
 
@@ -111,19 +113,21 @@ thick of a plant counts), unchanged.
 
 ## Balance
 
-Bots only, 6v6 (reports in the shared files, `pipeline/runs/DG1/attempt-1/balance/`). Main's figures are BP13's
-(the same seeds). Normal on 32 seeds unless marked; Easy and Hard on 16.
+Bots only, 6v6. The other fields' figures and the old waits come from `pipeline/runs/DG1/attempt-1/balance/` in the
+shared files; the final Woodland figures, 32 seeds each, from GitHub's runners on this branch
+(`pipeline/runs/DG1/attempt-2/balance/`). Main's are BP13's on the same seeds (Woodland Plant The Bomb Hard rerun
+here on 32).
 
-| Figure (band) | main | DG1, the old waits | DG1, the new waits |
+| Figure (band) | main | DG1, the old waits | DG1, the waits shipped |
 |---|---|---|---|
-| Woodland, Elimination, the west end (45 to 55 %) | 45.1 % ±3.2 | 51.6 % ±3.2 | (no respawns) |
-| Woodland, Attack / Defend, the attackers (40 to 65 %) | 51.4 % ±3.2 | 36.1 % ±3.2 | 50.8 % ±4.5 (16 seeds) |
-| … rounds that run out the clock (at most 62 %) | 48.6 % | 63.9 % | 49.2 % |
-| … at Easy (35 to 65 %) / Hard (40 to 60 %) | 39.8 % / 57.9 % | – | 41.9 % / 55.9 % |
-| Woodland, Plant The Bomb, the attackers (40 to 65 %) | 48.5 % ±3.3 | 43.2 % ±3.2 | 50.0 % ±4.4 (16 seeds) |
-| … rounds that run out the clock (at most 25 %) | 19.6 % | 27.4 % | 25.0 % |
-| … at Easy (35 to 65 %) / Hard (40 to 60 %) | 60.5 % / 44.5 % | – | 54.9 % / 48.7 % |
-| … run out the clock at Easy / Hard | 19.3 % / 25.2 % | – | 27.9 % / 28.6 % (within noise) |
+| Woodland, Elimination, the west end (45 to 55 %) | 45.1 % ±3.2 | 51.6 % ±3.2 | 53.3 % ±3.2 (no respawns; near an edge) |
+| Woodland, Attack / Defend, the attackers (40 to 65 %) | 51.4 % ±3.2 | 36.1 % ±3.2 | 52.6 % ±3.3 |
+| … rounds that run out the clock (at most 62 %) | 48.6 % | 63.9 % | 47.4 % |
+| … at Easy (35 to 65 %) / Hard (40 to 60 %), 16 seeds | 39.8 % / 57.9 % | – | 41.9 % / 55.9 % |
+| Woodland, Plant The Bomb, the attackers (40 to 65 %) | 48.5 % ±3.3 | 43.2 % ±3.2 | 51.8 % ±3.2 |
+| … rounds that run out the clock (at most 25 %) | 19.6 % | 27.4 % | 20.4 % |
+| … at Easy (35 to 65 %) | 60.5 % | – | 56.0 % ±3.2, run-outs 23.9 % (near an edge) |
+| … at Hard (40 to 60 %) | 49.2 % ±3.3, run-outs 22.0 % | – | 58.4 % ±3.1, run-outs 23.6 % (both near an edge) |
 | Subway, Elimination, the west end (45 to 55 %) | 52.7 % ±3.2 | 48.8 % ±3.2 | – |
 | Subway, Attack / Defend, the attackers (40 to 65 %) | 61.2 % ±2.2 (64 seeds) | 57.4 % ±3.3 | – |
 | Subway, Plant The Bomb, the attackers (40 to 65 %) | 61.1 % ±3.2 | 61.4 % ±3.2 | – |
@@ -133,12 +137,19 @@ Bots only, 6v6 (reports in the shared files, `pipeline/runs/DG1/attempt-1/balanc
 
 With sight and BBs passing between the trees, Woodland's defenders, who hold still, see attackers coming between
 the trunks and over the spruces' tops that used to hide them: at the old waits the attackers took 36 % of Attack /
-Defend and 43 % of Plant The Bomb. The fields' own lever, the defenders' wait, puts them back: **Woodland's
-defenders wait 11 s in Attack / Defend** (5 s before; 8 s gave 45.7 %, 16 seeds) and **9 s in Plant The Bomb until it
-is armed** (5 s before; 7 s gave 47.4 % with 34.5 % run out the clock). `data/maps.md`, the wiki's Modes page. The
-first hit comes as soon and as far as before (Woodland Elimination: 17.4 s and 41.9 m, main 16.8 s and 42.2 m;
-Subway 14.8 s and 9.6 m, main 14.7 s and 9.5 m). Plant The Bomb's rounds run out the clock a little more often at Easy
-and Hard (28 to 29 %, within noise of the 25 % line, as main's Hard was): the one to watch.
+Defend and 43 % of Plant The Bomb. The fields' own lever, the defenders' wait, puts them back (`data/maps.md`, the
+wiki's Modes page):
+
+- **Attack / Defend: 11 s** (5 s before; 8 s gave 45.7 %, 16 seeds). Easy and Hard scale it as every field's does.
+- **Plant The Bomb until it is armed: 9 s at Easy and Normal, 12 s at Hard** (5 s before). The bomb wait is not
+  scaled by level, so Hard plays 9 s unless the field sets its Hard column. At 9 s Hard ran out the clock in 30.4 %
+  of rounds (49.0 % to the attackers), at 8 s 28.3 % (46.2 %), at 12 s 23.6 % (58.4 %), 32 seeds each. 10 s at every
+  level (16 seeds, an earlier build) put Normal at 59.5 % to the attackers and Hard's run-outs at 33.9 %, so only
+  Hard gets the longer wait.
+
+The first hit comes as soon and as far as before (Woodland Elimination: 17.3 s and 42.2 m, main 16.8 s and 42.2 m;
+Subway 14.8 s and 9.6 m, main 14.7 s and 9.5 m). To watch: Woodland Plant The Bomb at Hard (58.4 %, run-outs 23.6 %)
+and at Easy (run-outs 23.9 %), and Woodland Elimination's west end (53.3 %), all in band near an edge.
 
 ## Known issues left
 

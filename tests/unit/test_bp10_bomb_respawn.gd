@@ -53,13 +53,30 @@ func test_depot_s_defenders_wait_longer_only_against_hard_bots() -> void:
 	assert_eq(played.rounds.plant_defender_respawn_delay, games, "level_tuning never writes its input")
 
 
+func test_woodland_s_defenders_wait_its_own_and_longer_against_hard_bots() -> void:
+	# DG1: at 9 s Hard ran out the clock in 30.4 % of rounds, at 12 s 23.6 % (32 seeds each)
+	var woodland := MapCatalog.shared().find("woodland")
+	assert_not_null(woodland)
+	var played := MatchOptions.match_tuning(SimTuning.load_default(), woodland, null)
+	assert_gt(woodland.bomb_respawn_hard, woodland.bomb_respawn, "Hard waits longer than Woodland's own")
+	assert_eq(MatchOptions.level_tuning(played, &"hard").rounds.plant_defender_respawn_delay, woodland.bomb_respawn_hard)
+	for level: StringName in [&"easy", &"normal"]:
+		assert_eq(MatchOptions.level_tuning(played, level).rounds.plant_defender_respawn_delay, woodland.bomb_respawn,
+				"%s waits Woodland's own" % level)
+
+
 func test_a_field_without_one_waits_the_game_s_at_hard_too() -> void:
 	var base := SimTuning.load_default()
 	var checked := 0
-	for e in MapCatalog.shared().entries:
-		if e.kind != &"field" or e.bomb_respawn_hard > 0.0:
+	# every field sets one since DG1 (Woodland 12), so each is played with its Hard column cleared
+	for shipped in MapCatalog.shared().entries:
+		if shipped.kind != &"field":
 			continue
 		checked += 1
+		var e := MapCatalog.Entry.new()
+		e.id = shipped.id
+		e.kind = shipped.kind
+		e.bomb_respawn = shipped.bomb_respawn
 		var hard := MatchOptions.level_tuning(MatchOptions.match_tuning(base, e, null), &"hard")
 		# its own wait at every level where it sets one (BG1: Subway 3, Woodland 9 since DG1), else the game's
 		var own := e.bomb_respawn if e.bomb_respawn > 0.0 else base.rounds.plant_defender_respawn_delay

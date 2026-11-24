@@ -111,7 +111,7 @@ from the bots).
   quarters as long (about 11 s, 8 s and 5 s). In Plant
   The Bomb they wait <!-- wiki:config round_config.plant_defender_respawn_delay -->
   seconds, but 3 s on **Subway**, whose sites the attackers reach quickly (5 s there against Hard bots), 9 s on
-  **Woodland**, whose defenders see the attackers coming between the trees, and against
+  **Woodland**, whose defenders see the attackers coming between the trees (12 s there against Hard bots), and against
   **Hard** bots 8 s on **Depot**, whose bomb sites are close to the defenders' start.
 - **Where you come back.** While you wait, a **RESPAWN IN** panel at the bottom of the screen lists your **start
   area** and your end's two **forward spawns**, nearer the fight. Pick one with **1**, **2** or **3** (the first two
